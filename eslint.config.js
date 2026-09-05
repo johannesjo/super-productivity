@@ -412,14 +412,13 @@ module.exports = tseslint.config(
       'src/app/ui/material-icons-loader.service.ts',
       'src/app/ui/task-title/task-title.component.ts',
       // util/ offenders. `app-data-mock.ts` is test-fixture data, the rest are
-      // pure helpers typed against feature models (Task, RoundTimeOption).
-      // Those types belong in the helper or in a shared model, not the other
-      // way round — none of these needs a feature at runtime.
+      // pure helpers typed against feature models (e.g. Task). Those types
+      // belong in the helper or in a shared model, not the other way round —
+      // none of these needs a feature at runtime. (round-duration/round-time
+      // were cleared by moving RoundTimeOption to util/round-time-option.model.)
       'src/app/util/app-data-mock.ts',
       'src/app/util/get-app-version-str.ts',
       'src/app/util/get-time-left-for-task.ts',
-      'src/app/util/round-duration.ts',
-      'src/app/util/round-time.ts',
     ],
     rules: {
       '@typescript-eslint/no-restricted-imports': [

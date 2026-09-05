@@ -23,10 +23,6 @@
     display: none;
   }
 
-  .title-and-tags-wrapper {
-    margin-left: var(--s2);
-  }
-
   // TODO check
   .box {
     @include lightTheme {

@@ -8,6 +8,7 @@ import {
   escapeHtml,
   sanitizeRequestUrlForLog,
   SERVER_HELMET_CONFIG,
+  SERVER_TRUST_PROXY,
 } from '../src/server';
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
@@ -211,6 +212,55 @@ describe('Server Security Configuration', () => {
       expect(escaped).toBe('&quot; onmouseover=&quot;alert(1)&quot;');
       // The key protection is that " is escaped to &quot;
       expect(escaped).not.toContain('"');
+    });
+  });
+
+  // Pins the trustProxy contract: req.ip is the @fastify/rate-limit key, so if a
+  // dependency bump silently changes which peers are trusted, every client either
+  // collapses into one rate-limit bucket or gains the ability to spoof its IP.
+  // fastify 5.12.1 disabled the previous `trustProxy: 1` this way (GHSA-3m5p-2c4r-xxw2).
+  describe('trusted proxy configuration', () => {
+    let app: FastifyInstance;
+
+    beforeEach(async () => {
+      app = Fastify({ trustProxy: SERVER_TRUST_PROXY });
+      app.get('/test', async (req) => ({ ip: req.ip }));
+      await app.ready();
+    });
+
+    afterEach(async () => {
+      if (app) {
+        await app.close();
+      }
+    });
+
+    const getIpForPeer = async (remoteAddress: string): Promise<string> => {
+      const response = await app.inject({
+        method: 'GET',
+        url: '/test',
+        remoteAddress,
+        headers: { 'x-forwarded-for': '203.0.113.9' },
+      });
+      return (JSON.parse(response.body) as { ip: string }).ip;
+    };
+
+    // Every place the reverse proxy can sit: loopback for host networking or a
+    // same-pod sidecar, 172.16/12 for the docker bridge, 10/8 for a k8s pod
+    // network, 192.168/16 for a bare-metal LAN.
+    it.each(['127.0.0.1', '::1', '172.17.0.1', '10.42.0.7', '192.168.1.10'])(
+      'should resolve the forwarded client IP for proxy at %s',
+      async (remoteAddress) => {
+        expect(await getIpForPeer(remoteAddress)).toBe('203.0.113.9');
+      },
+    );
+
+    it('should ignore X-Forwarded-For from a peer outside the trusted ranges', async () => {
+      // A client reaching the origin directly must not be able to spoof its IP.
+      expect(await getIpForPeer('203.0.113.7')).toBe('203.0.113.7');
+    });
+
+    it('should not use the hop-count form disabled by GHSA-3m5p-2c4r-xxw2', () => {
+      expect(typeof SERVER_TRUST_PROXY).not.toBe('number');
     });
   });
 });

@@ -50,6 +50,7 @@ const ALLOWED_IFRAME_API_METHODS = new Set([
   'getAllProjects',
   'addProject',
   'updateProject',
+  'deleteProject',
   'getAllTags',
   'addTag',
   'updateTag',
@@ -422,6 +423,7 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
           getAllProjects: () => callApi('getAllProjects'),
           addProject: (projectData) => callApi('addProject', [projectData]),
           updateProject: (projectId, updates) => callApi('updateProject', [projectId, updates]),
+          deleteProject: (projectId) => callApi('deleteProject', [projectId]),
 
           // Tag methods
           getAllTags: () => callApi('getAllTags'),
@@ -454,6 +456,7 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
           registerMenuEntry: unsupportedIframeRegistration('registerMenuEntry'),
           registerConfigHandler: unsupportedIframeRegistration('registerConfigHandler'),
           registerShortcut: unsupportedIframeRegistration('registerShortcut'),
+          unregisterShortcut: unsupportedIframeRegistration('unregisterShortcut'),
           registerSidePanelButton: unsupportedIframeRegistration('registerSidePanelButton'),
           registerWorkContextHeaderButton: (cfg) => {
             // onClick is not structured-cloneable across postMessage; keep it

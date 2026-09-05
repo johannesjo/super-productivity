@@ -8,6 +8,7 @@ import {
 } from '@playwright/test';
 import { BasePage } from './base.page';
 import { normalizeDialogMessage, translationRegex } from '../utils/i18n-strings';
+import { confirmSyncConflictOverwriteIfShown } from '../utils/sync-helpers';
 
 export interface SuperSyncConfig {
   baseUrl: string;
@@ -38,6 +39,17 @@ export interface SuperSyncConfig {
    * specifically verify the WebSocket push flow.
    */
   enableWebSocket?: boolean;
+  /**
+   * If true, ticks the "Show live tracking on other devices (experimental)"
+   * checkbox in the Advanced section (default-off opt-in). Only meaningful
+   * together with enableWebSocket: true — presence rides the WS connection.
+   */
+  enableTrackingPresence?: boolean;
+  /**
+   * Name this client announces with tracking presence (the "Name of this
+   * device on other devices" input, shown once enableTrackingPresence is on).
+   */
+  presenceDeviceName?: string;
 }
 
 type SyncCompletionSnapshot = {
@@ -104,6 +116,14 @@ const remainingTimeout = (startedAt: number, total: number): number =>
   Math.max(1, total - (Date.now() - startedAt));
 
 /**
+ * How long to give one sync-button click to actually start a cycle before
+ * clicking again. Long enough to cover the op-flush + payload encryption that
+ * precede the first request, short enough to retry several times inside the
+ * caller's timeout.
+ */
+const SYNC_CLICK_RETRY_INTERVAL_MS = 3000;
+
+/**
  * Page object for SuperSync configuration and sync operations.
  * Used for E2E tests that verify multi-client sync via the super-sync-server.
  */
@@ -112,6 +132,7 @@ export class SuperSyncPage extends BasePage {
   readonly providerSelect: Locator;
   readonly baseUrlInput: Locator;
   readonly accessTokenInput: Locator;
+  readonly presenceDeviceNameInput: Locator;
   readonly enableEncryptionBtn: Locator;
   readonly disableEncryptionBtn: Locator;
   readonly encryptionPasswordInput: Locator;
@@ -123,10 +144,15 @@ export class SuperSyncPage extends BasePage {
   /** Fresh client confirmation dialog - appears when a new client first syncs */
   readonly freshClientDialog: Locator;
   readonly freshClientConfirmBtn: Locator;
-  /** Conflict resolution dialog - appears when local and remote have conflicting changes */
+  /**
+   * Local-data conflict dialog (`dialog-sync-conflict`) — appears when a client
+   * that never synced holds meaningful local data and the server already has
+   * ordinary ops (LocalDataConflictError, #9863). "Keep local" force-uploads a
+   * SYNC_IMPORT, "Keep remote" replaces local state with the server's.
+   */
   readonly conflictDialog: Locator;
+  readonly conflictUseLocalBtn: Locator;
   readonly conflictUseRemoteBtn: Locator;
-  readonly conflictApplyBtn: Locator;
   /** Sync import conflict dialog - appears when SYNC_IMPORT filters remote ops */
   readonly syncImportConflictDialog: Locator;
   readonly syncImportUseLocalBtn: Locator;
@@ -144,6 +170,7 @@ export class SuperSyncPage extends BasePage {
     this.providerSelect = page.locator('formly-field-mat-select mat-select');
     this.baseUrlInput = page.locator('.e2e-baseUrl input');
     this.accessTokenInput = page.locator('.e2e-accessToken textarea');
+    this.presenceDeviceNameInput = page.locator('.e2e-presenceDeviceName input');
     this.enableEncryptionBtn = page.locator('.e2e-enable-encryption-btn button');
     this.disableEncryptionBtn = page.locator('.e2e-disable-encryption-btn button');
     this.encryptionPasswordInput = page.locator('.e2e-encryptKey input[type="password"]');
@@ -163,14 +190,14 @@ export class SuperSyncPage extends BasePage {
     this.freshClientConfirmBtn = this.freshClientDialog.locator(
       'button[mat-flat-button]',
     );
-    // Conflict resolution dialog elements
-    this.conflictDialog = page.locator('dialog-conflict-resolution');
-    this.conflictUseRemoteBtn = page.locator(
-      'dialog-conflict-resolution button:has-text("Use All Remote")',
-    );
-    this.conflictApplyBtn = page.locator(
-      'dialog-conflict-resolution button:has-text("Apply")',
-    );
+    // Local-data conflict dialog elements
+    this.conflictDialog = page.locator('dialog-sync-conflict');
+    this.conflictUseLocalBtn = this.conflictDialog.locator('button', {
+      hasText: /Keep local/i,
+    });
+    this.conflictUseRemoteBtn = this.conflictDialog.locator('button', {
+      hasText: /Keep remote/i,
+    });
     // Sync import conflict dialog elements
     this.syncImportConflictDialog = page.locator('dialog-sync-import-conflict');
     this.syncImportUseLocalBtn = page.locator(
@@ -382,6 +409,19 @@ export class SuperSyncPage extends BasePage {
 
     // Fill in base URL
     await this.baseUrlInput.fill(config.baseUrl);
+
+    // Opt into the experimental tracking-presence feature (checkbox lives in
+    // the same Advanced section as baseUrl, which is expanded at this point)
+    if (config.enableTrackingPresence) {
+      const trackingPresenceCheckbox = this.page
+        .locator('dialog-sync-cfg')
+        .getByRole('checkbox', { name: /live tracking/i });
+      await trackingPresenceCheckbox.setChecked(true);
+      await expect(trackingPresenceCheckbox).toBeChecked();
+      if (config.presenceDeviceName) {
+        await this.presenceDeviceNameInput.fill(config.presenceDeviceName);
+      }
+    }
 
     // Fill in access token (this field is NOT in the Advanced section)
     await this.accessTokenInput.fill(config.accessToken);
@@ -792,9 +832,14 @@ export class SuperSyncPage extends BasePage {
             );
           }
         } else {
-          // Unknown state - log and throw
-          throw new Error(
-            'Unable to determine Client A vs B - sync state unclear after timeout',
+          // No dialog, no spinner, no error, no check icon: sync is configured but
+          // idle with pending ops — the check icon only renders once nothing is
+          // pending. Seen when a full-state upload is deferred by a retryable
+          // server error (CI run 32683405598). Nothing to decide here, so fall
+          // through to the sync-completion wait below, which re-triggers sync once
+          // before failing.
+          console.log(
+            '[SuperSyncPage] Idle with pending ops - no dialog needed, waiting for sync to settle',
           );
         }
       }
@@ -1765,6 +1810,20 @@ export class SuperSyncPage extends BasePage {
   }
 
   /**
+   * Answer the local-data conflict dialog, including the conditional overwrite
+   * warning either choice may raise (see confirmSyncConflictOverwriteIfShown).
+   */
+  async resolveConflictDialog(choice: 'local' | 'remote'): Promise<void> {
+    await expect(this.conflictDialog).toBeVisible({ timeout: 5000 });
+    if (choice === 'local') {
+      await this.conflictUseLocalBtn.click();
+    } else {
+      await this.conflictUseRemoteBtn.click();
+    }
+    await confirmSyncConflictOverwriteIfShown(this.page, this.conflictDialog);
+  }
+
+  /**
    * Handle any sync-blocking dialogs (Angular Material or native).
    * Returns true if a dialog was handled, false otherwise.
    * @private
@@ -1778,19 +1837,12 @@ export class SuperSyncPage extends BasePage {
       return true;
     }
 
-    // 2. Conflict resolution dialog
+    // 2. Local-data conflict dialog
     if (await this.conflictDialog.isVisible().catch(() => false)) {
       console.log(
         `[syncAndWait] Conflict dialog detected, using ${useLocal ? 'local' : 'remote'} data...`,
       );
-      if (useLocal) {
-        await this.conflictApplyBtn.click();
-      } else {
-        await this.conflictUseRemoteBtn.click();
-        await this.page.waitForTimeout(200);
-        await this.conflictApplyBtn.click();
-      }
-      await this.conflictDialog.waitFor({ state: 'hidden', timeout: 5000 });
+      await this.resolveConflictDialog(useLocal ? 'local' : 'remote');
       return true;
     }
 
@@ -1916,8 +1968,12 @@ export class SuperSyncPage extends BasePage {
       request.method() !== 'OPTIONS' && isOpsUrl(request.url());
     const isArmedOpsRequest = (request: Request): boolean =>
       requestsStartedAfterArm.has(request) && isOpsRequest(request);
+    let cycleStarted = false;
     const requestHandler = (request: Request): void => {
       requestsStartedAfterArm.add(request);
+      if (isOpsRequest(request)) {
+        cycleStarted = true;
+      }
     };
     const responseHandler = (response: Response): void => {
       if (isArmedOpsRequest(response.request()) && !response.ok()) {
@@ -1935,20 +1991,52 @@ export class SuperSyncPage extends BasePage {
     this.page.on('requestfailed', requestFailedHandler);
 
     try {
-      const [response] = await Promise.all([
-        this.page.waitForResponse(
+      // Settle instead of reject so the waiter can be raced against the
+      // re-click timer below without producing an unhandled rejection.
+      const settled = this.page
+        .waitForResponse(
           (candidate) => isArmedOpsRequest(candidate.request()) && candidate.ok(),
           { timeout },
-        ),
-        this.syncBtn.click(),
-      ]);
+        )
+        .then(
+          (response) => ({ response, error: undefined }),
+          (error: unknown) => ({ response: undefined, error }),
+        );
+
+      // The app silently drops a sync-button click while another cycle is
+      // already running (`SyncWrapperService.sync()` returns HANDLED_ERROR
+      // without issuing a request) — e.g. the auto-sync that the daily-summary
+      // archive kicks off. Re-click until a cycle actually starts instead of
+      // waiting out the whole timeout on a swallowed click.
+      const deadline = Date.now() + timeout;
+      let outcome: Awaited<typeof settled> | null = null;
+      do {
+        await this.syncBtn.click();
+        outcome = await Promise.race([
+          settled,
+          this.page
+            .waitForTimeout(
+              Math.min(SYNC_CLICK_RETRY_INTERVAL_MS, Math.max(1, deadline - Date.now())),
+            )
+            .then(() => null),
+        ]);
+      } while (!outcome && !cycleStarted && Date.now() < deadline);
+
+      const { response, error: waitError } = outcome ?? (await settled);
+      if (!response) {
+        throw waitError;
+      }
       const responseFailure = await response.finished();
       if (responseFailure) {
         throw responseFailure;
       }
     } catch (error) {
       const attemptSummary =
-        failedAttempts.length > 0 ? failedAttempts.join(', ') : 'none observed';
+        failedAttempts.length > 0
+          ? failedAttempts.join(', ')
+          : cycleStarted
+            ? 'none observed'
+            : 'no cycle started — every sync click was swallowed';
       throw new Error(
         `SuperSync did not receive a completed successful /api/sync/ops response within ${timeout}ms. Failed attempts: ${attemptSummary}`,
         { cause: error },

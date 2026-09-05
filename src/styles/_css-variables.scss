@@ -75,10 +75,14 @@
   // SystemBars WebView bands. Caveat: on the narrow API >= 35 / WebView < 140
   // band the shared source can double-count vs SystemBars' native padding (a
   // cosmetic gap, not an overlap — see the device-matrix risks in
-  // docs/plans/2026-06-22-android-systembars-migration-corrected.md).
+  // docs/android-edge-to-edge-keyboard.md).
   --bottom-nav-safe-area: calc(var(--safe-area-bottom) / 2);
 
-  // Keyboard height (set dynamically via JS)
+  // Keyboard geometry. Android / mobile web write `--keyboard-height` here from
+  // JS (GlobalThemeService). On iOS these are fallbacks only: the live values
+  // go on `.cdk-overlay-container` and the global add-task bar's host, never on
+  // :root, where a write restyles the whole task list (#9779) — see
+  // IosKeyboardService, which also hands the app shell its height directly.
   --keyboard-height: 0px;
   --keyboard-overlay-offset: 0px;
   --visual-viewport-height: 100vh;
@@ -754,10 +758,7 @@ body.isDarkTheme {
 }
 
 // -----------------------------
-// State-token demo migrations (this PR — scope per plan §3):
-//   * src/app/features/user-profile/dialog-user-profile-management — `:hover`
-//     overlay + `.active-profile` selected lift now consume `--state-hover` /
-//     `--state-selected`.
+// State-token demo migration (this PR — scope per plan §3):
 //   * src/app/imex/sync/dialog-restore-point — `:hover` overlay + `.selected`
 //     lift now consume `--state-hover` / `--state-selected`.
 // Bulk migration of remaining ~34 ad-hoc rgba state-overlay callsites is a

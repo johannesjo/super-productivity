@@ -1233,6 +1233,7 @@
         "CONTENT_CONFLICT_UNTITLED": "Untitled task"
       },
       "BTN_RESTORE_FROM_HISTORY": "Restore from History",
+      "BTN_SHOW_DEVICES": "Show Connected Devices",
       "BTN_SYNC_NOW": "Sync Now",
       "C": {
         "FORCE_UPLOAD": "This will REPLACE all data on the server and on every other device with this device's local copy. Any unsynced changes on those devices will be permanently lost. Continue?",
@@ -1343,6 +1344,25 @@
         "P3_PW_CHANGED": "If you <strong>changed your password on another device</strong>, enter your new password and click <strong>Overwrite Server & Other Devices</strong>. ⚠️ This is destructive: it replaces ALL data on the server and on your other devices with this device's local copy. Any unsynced changes on those devices will be lost.",
         "PASSWORD": "Password",
         "TITLE": "Decryption Failed"
+      },
+      "D_DEVICES": {
+        "BTN_SIGN_OUT_OTHERS": "Sign out other devices",
+        "ERROR_LOADING": "Failed to load connected devices",
+        "ERROR_SIGN_OUT": "Signing out other devices failed. If the connection dropped mid-request it may still have taken effect — then this device also needs a newly issued token.",
+        "LAST_SEEN": "Last sync: {{date}}",
+        "NO_DEVICES": "No devices have synced with this account yet.",
+        "PLATFORM_ANDROID": "Android",
+        "PLATFORM_BROWSER": "Browser",
+        "PLATFORM_DESKTOP": "Desktop",
+        "PLATFORM_IOS": "iOS",
+        "PLATFORM_UNKNOWN": "Unknown device",
+        "REMOVE_HINT": "Super Sync grants access per account, not per device, so devices cannot be removed individually. To cut off a lost or sold device, sign out all other devices — this device stays signed in.",
+        "SIGN_OUT_CONFIRM_MSG": "Every other device is signed out of Super Sync and stops syncing. This device stays signed in. To reconnect a device, sign in on the server's page and paste the new token into its sync settings — changes made on it while signed out are kept and upload after that.",
+        "SIGN_OUT_CONFIRM_OK": "Sign out",
+        "SIGN_OUT_CONFIRM_TITLE": "Sign out all other devices?",
+        "SIGN_OUT_SUCCESS": "All other devices were signed out",
+        "THIS_DEVICE": "(this device)",
+        "TITLE": "Connected Devices"
       },
       "D_ENTER_PASSWORD": {
         "BTN_FORCE_OVERWRITE": "Use Local Data",
@@ -1547,6 +1567,10 @@
           "L_CHANGE_ENCRYPTION_PASSWORD": "Change Encryption Password",
           "L_CONFIRM_PASSWORD": "Confirm Password",
           "L_ENABLE_E2E_ENCRYPTION": "Enable end-to-end encryption",
+          "L_ENABLE_TRACKING_PRESENCE": "Show live tracking on other devices (experimental)",
+          "TRACKING_PRESENCE_DESCRIPTION": "Mirrors which task this account is currently tracking to your other connected devices and lets you stop it from there. Display only \u2014 never persisted on the server, though it is briefly relayed in server memory (opaque to the server when end-to-end encryption is on).",
+          "L_PRESENCE_DEVICE_NAME": "Name of this device on other devices",
+          "PRESENCE_DEVICE_NAME_DESCRIPTION": "Shown in the live tracking chip on your other devices, e.g. \u201cWork laptop\u201d, so two desktops can be told apart. Sent along with the tracking state (encrypted when sync encryption is on). Leave empty to use the platform name shown as placeholder.",
           "L_NEW_PASSWORD": "New Encryption Password",
           "L_REMOVE_ENCRYPTION": "Or Remove Encryption",
           "L_SERVER_URL": "Server URL",
@@ -1633,6 +1657,7 @@
         "ERROR_REMOTE_FILE_CORRUPTED": "Remote sync data is unreadable (possibly truncated or corrupted). Your local data is safe. You can overwrite the remote with your local data.",
         "ERROR_REMOTE_FILE_EMPTY": "Remote sync file is empty. This can happen after an interrupted sync. Overwrite remote with your local data?",
         "ERROR_REMOTE_FILE_LOCKED": "Remote sync file is locked by the server. This may resolve on the next sync attempt.",
+        "ERROR_REMOTE_RESPONSE_NOT_SYNC_DATA": "The sync server answered with a web page instead of your sync data (e.g. a login, proxy or error page). Your remote data is probably intact — check your server URL, credentials and network, then try again. If the problem persists, you can overwrite the remote via Sync Settings → Force Overwrite.",
         "ERROR_SYNC_VERSION_MISMATCH": "Remote sync data uses an incompatible format version. Ensure all devices run the same version of Super Productivity.",
         "WARN_CLIENT_ID_REGENERATED": "Sync device ID was invalid and has been regenerated. A sync conflict may occur on next sync.",
         "ERROR_UNABLE_TO_READ_REMOTE_DATA": "Error while syncing. Unable to read remote data. Maybe you enabled encryption and your local password does not match the one used to encrypt the remote data?",
@@ -1827,6 +1852,7 @@
         "REPEAT": "Repeat",
         "SCHEDULE_TASK": "Schedule Task",
         "SUB_TASKS": "Subtasks ({{nr}})",
+        "SUB_TASKS_EMPTY": "Subtasks",
         "TIME": "Duration",
         "TITLE_PLACEHOLDER": "Enter a title"
       },
@@ -2246,6 +2272,24 @@
         "UNTRACKED_TIME": "Untracked time:"
       }
     },
+    "TRACKING_PRESENCE": {
+      "CHIP": {
+        "FALLBACK_TASK": "a recently started task",
+        "FOCUS": "Focus session · cycle {{cycle}}",
+        "LAST_SEEN": "last seen {{time}}",
+        "PAUSED_ON": "Paused on {{device}}",
+        "SINCE": "since {{time}}",
+        "STOP": "Stop tracking on {{device}}",
+        "STOPPED_ON": "Stopped on {{device}}",
+        "TRACKING_ON": "Tracking on {{device}}",
+        "WAS_TRACKING_ON": "Was tracking on {{device}}"
+      },
+      "S": {
+        "MOVED_TO": "Tracking moved to {{device}}",
+        "STOPPED_FROM": "Tracking stopped from {{device}}",
+        "TRACK_HERE_AGAIN": "Track here again"
+      }
+    },
     "WORKLOG": {
       "CMP": {
         "DAYS_WORKED": "Days, worked:",
@@ -2402,11 +2446,7 @@
       "SEARCH": "Search",
       "SYNC_BUTTON": "Sync button",
       "TIME_TRACKING": "Stopwatch time tracking",
-      "TITLE": "App Features",
-      "USER_PROFILES": "User profiles (will be removed in the next release)",
-      "USER_PROFILES_HINT": "Allows you to create and switch between different user profiles, each with separate settings, tasks, and sync configurations. The profile management button will appear in the top-right corner when enabled. Note: Disabling this feature will hide the UI but preserve your profile data. (This feature will be removed in the next release. Make sure to export every profile before you update!)",
-      "EXPERIMENTAL_WARNING_TITLE": "Experimental Feature",
-      "EXPERIMENTAL_WARNING_MSG": "This feature is experimental. It may have bugs, change significantly, or be removed in a future update. Make sure to keep backups of your data.<br/><br/>Do you want to enable it?"
+      "TITLE": "App Features"
     },
     "AUTO_BACKUPS": {
       "HELP": "Automatically save all data to your app folder to have it ready if something goes wrong.",
@@ -2543,6 +2583,7 @@
       "TASK_ADD_ATTACHMENT": "Attach file or link",
       "TASK_ADD_SUB_TASK": "Add subtask",
       "TASK_DELETE": "Delete task",
+      "TASK_DUPLICATE": "Duplicate task",
       "TASK_EDIT_TAGS": "Edit tags",
       "TASK_EDIT_TITLE": "Edit title",
       "TASK_MOVE_TO_PROJECT": "Open move task to project menu",
@@ -2893,8 +2934,11 @@
     "DETECTED_LEGACY": "Detected legacy data. We will migrate it for you!",
     "DIALOG_MESSAGE": "We're updating how your data is stored for improved sync reliability. A backup will be downloaded automatically.",
     "DIALOG_TITLE": "Migrating Your Data",
+    "DIALOG_TITLE_ERROR": "Migration Failed",
     "E_MIGRATION_FAILED": "Migration failed with error:",
+    "E_MIGRATION_FAILED_MSG": "Your old data could not be migrated. It is still on this device and has not been changed, and a backup file was offered for download. Restarting will hit the same problem, so you can continue with an empty app instead and import that backup afterwards. The app will then not ask about this old data again.",
     "E_RESTART_FAILED": "Automatic restart failed. Please restart the app manually!",
+    "START_FRESH": "Continue without old data",
     "STATUS_BACKUP": "Creating backup of your data...",
     "STATUS_COMPLETE": "Migration complete!",
     "STATUS_MIGRATING": "Migrating data...",
@@ -3034,6 +3078,7 @@
     "ALLOWED_HOSTS": "Network access",
     "ALREADY_INITIALIZED": "Plugin is already initialized",
     "AUTHORED_BY": "by {{author}}",
+    "CANNOT_DELETE_INBOX": "The Inbox project cannot be deleted",
     "CANNOT_NEST_SUBTASKS": "Cannot nest subtasks: parent task is itself a subtask",
     "CHOOSE_PLUGIN_FILE": "Choose Plugin File",
     "CLEAR_PLUGIN_CACHE": "Clear Plugin Cache",
@@ -3165,7 +3210,7 @@
     "NO_SCHEDULED": "There are currently no scheduled tasks of this type. You can schedule a task by choosing \"Schedule Task\" in the task's context menu. To open it, right-click (long press on mobile) on a task.",
     "NO_SCHEDULED_FOR_DAY": "No tasks planned for specific days yet. Right-click a task and choose \"Schedule\" to plan it for a day.",
     "NO_SCHEDULED_WITH_TIME": "No tasks scheduled with a start time yet. Right-click a task and choose \"Schedule\" to set a specific time.",
-    "NO_SCHEDULED_TITLE": "Scheduled Tasks for Day",
+    "NO_SCHEDULED_TITLE": "Tasks Planned for Specific Days",
     "REPEATED_TASKS": "Recurring Tasks",
     "SCHEDULED_TASKS": "Scheduled Tasks",
     "SCHEDULED_TASKS_WITH_TIME": "Scheduled Tasks with Start Time",
@@ -3190,25 +3235,6 @@
     "SELECT_THEME": "Select Theme",
     "teal": "teal",
     "yellow": "yellow"
-  },
-  "USER_PROFILES": {
-    "ACTIVE": "Active",
-    "CANCEL": "Cancel",
-    "CLOSE": "Close",
-    "CREATE": "Create",
-    "CREATE_NEW_PROFILE": "Create New Profile",
-    "CREATED": "Created:",
-    "DELETE_PROFILE": "Delete Profile",
-    "DIALOG_TITLE": "Manage User Profiles",
-    "EXISTING_PROFILES": "Existing Profiles",
-    "EXPORT_PROFILE": "Export Profile",
-    "MANAGE_PROFILES": "Manage Profiles...",
-    "PROFILE_NAME": "Profile Name",
-    "PROFILE_NAME_PLACEHOLDER": "e.g. Work, Personal",
-    "REMOVAL_WARNING": "<strong>User Profiles will be removed in the next release.</strong> Export every profile via Manage Profiles before you update. Store the exported files securely: they can contain private data and credentials.",
-    "REMOVAL_WARNING_DISABLED": "<strong>User Profiles will be removed in the next release</strong> and you still have data stored in additional profiles. Re-enable User Profiles under Settings → App Features to export it before you update.",
-    "RENAME": "Rename",
-    "SAVE": "Save"
   },
   "V": {
     "E_DATETIME": "The entered value is not a datetime!",

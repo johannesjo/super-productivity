@@ -62,7 +62,6 @@ import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { getDbDateStr } from '../../../../util/get-db-date-str';
 import { PlannerActions } from '../../../planner/store/planner.actions';
-import { addSubTask } from '../../../tasks/store/task.actions';
 import { combineDateAndTime } from '../../../../util/combine-date-and-time';
 import { getNextWeekDayOffset } from '../../../../util/get-next-week-day-offset';
 import { DateAdapter } from '@angular/material/core';
@@ -83,6 +82,7 @@ import { DEFAULT_GLOBAL_CONFIG } from 'src/app/features/config/default-global-co
 import { MenuTreeService } from '../../../menu-tree/menu-tree.service';
 import { SelectOptionRowComponent } from '../../../../ui/select-option-row/select-option-row.component';
 import { AddSubtaskInputService } from '../../add-subtask-input/add-subtask-input.service';
+import { TaskDuplicateService } from '../../task-duplicate.service';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -125,6 +125,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   private readonly _dateService = inject(DateService);
   private readonly _menuTreeService = inject(MenuTreeService);
   private readonly _addSubtaskInputService = inject(AddSubtaskInputService);
+  private readonly _taskDuplicateService = inject(TaskDuplicateService);
 
   protected readonly isTouchActive = isTouchActive;
   protected readonly T = T;
@@ -496,44 +497,10 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   }
 
   async duplicate(): Promise<void> {
-    const taskData = {
-      isDone: false,
-      projectId: this.task.projectId || undefined,
-      tagIds: this.task.tagIds || [],
-      ...(this.task.notes && { notes: this.task.notes }),
-    };
-    const timeData = {
-      ...(this.task.dueDay && { dueDay: this.task.dueDay }),
-      ...(this.task.dueWithTime && { dueWithTime: this.task.dueWithTime }),
-      ...(this.task.timeEstimate && { timeEstimate: this.task.timeEstimate }),
-    };
-    const taskId = this._taskService.add(
-      `${this.task.title} (copy)`,
-      false,
-      { ...taskData, ...timeData },
-      false,
-    );
-    if (this.task.subTaskIds.length) {
-      const taskWithSubtasks = await this._getTaskWithSubtasks();
-      for (const subTask of taskWithSubtasks.subTasks) {
-        const subTaskInfo = {
-          isDone: subTask.isDone,
-          projectId: subTask.projectId,
-          timeEstimate: subTask.timeEstimate,
-          notes: subTask.notes,
-        };
-        const subTaskObj = this._taskService.createNewTaskWithDefaults({
-          title: subTask.title,
-          additional: subTaskInfo,
-        });
-        this._store.dispatch(
-          addSubTask({
-            task: subTaskObj,
-            parentId: taskId,
-          }),
-        );
-      }
-    }
+    const taskWithSubtasks = this.task.subTaskIds.length
+      ? await this._getTaskWithSubtasks()
+      : { ...this.task, subTasks: [] };
+    this._taskDuplicateService.duplicate(taskWithSubtasks);
   }
 
   moveToTop(): void {

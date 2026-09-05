@@ -46,6 +46,15 @@ only sees genuine local user intent.
 wrong; the linter rejects `inject(Actions)` / `Actions` imports in
 `*.effects.ts`.
 
+**The reducer-side mirror: a reducer handling a _non-persistent_ action must
+not write synced entity fields.** Capture builds operations from action
+payloads, not from state diffs, so such a write never becomes an op — the local
+device drifts from every other device with no conflict to detect, and
+`getPhantomChangeRisk()` cannot see it either. Not lint-enforced. If a
+UI-pointer action (`setCurrentTask`, `setSelectedTask`, …) needs to change task
+data, dispatch a persistent action from a `LOCAL_ACTIONS` effect instead
+(`TaskInternalEffects.reopenStartedDoneTask$`, #9904).
+
 ## Boundary 2 — The selector boundary
 
 **Selector-driven mutating effects must guard the sync window. Choose whether
@@ -140,6 +149,46 @@ operations with stale vector clocks that immediately conflict.
 catches the array-literal fan-out shape (`map(() => [a(), b()])`), not every
 multi-entity dispatch (e.g. a `of(a(), b())` varargs fan-out slips past). The
 blessed pattern is a `task-shared-meta-reducers/` reducer.
+
+---
+
+## Clearing a field — `undefined` does not survive the wire (#9776)
+
+**Never rely on `changes: { someField: undefined }` reaching another device.**
+`JSON.stringify` drops undefined-valued keys from the op payload (SuperSync
+HTTP/E2EE, file-based providers, the SQLite op-log — everything except the
+IndexedDB structured clone), so a reducer that applies `changes` verbatim
+replays the clear as a no-op remotely. The local device looks correct, which is
+exactly why this class of bug survives testing.
+
+Safe patterns, in order of preference:
+
+1. **Set the `undefined` inside a reducer/meta-reducer** keyed off a dedicated
+   action whose payload carries only ids (e.g.
+   `TaskSharedActions.dismissReminderOnly` → `remindAt: undefined` in the
+   reducer). Deterministic on replay; nothing to serialize.
+2. **Rebuild `changes` from destructured payload fields** — a dropped key
+   destructures back to `undefined` identically (e.g. `scheduleTaskWithTime`).
+3. For generic `Update<T>` actions, **list cleared keys out-of-band**: the
+   action creator adds `clearedFields` via `clearedFieldsProps()` and the
+   reducer restores them with `applyClearedFields()`
+   (`src/app/util/cleared-update-fields.ts`; used by `updateTaskUi` and
+   `updateTaskRepeatCfg`). Old clients ignore the extra prop, so the clear
+   degrades to a no-op there instead of corrupting state — no schema bump.
+
+On the conflict-resolution side, `createLWWUpdateOp` never lists
+`clearedFields` unless the call site opts in via `listClearedFields` — today
+only the disjoint-merge delta does, re-declaring clears the conflicting ops
+themselves carried. Patch payloads built from **live state** (e.g.
+`taskRelationshipPatch`) materialize accidental `undefined` keys — every root
+task's `parentId` — and must never opt in: listing those would broadcast a
+real clear to receivers (pinned by tests (a0c) in
+`conflict-resolution.disjoint-merge.spec.ts` and the relationship follow-up
+pin in `conflict-resolution.service.spec.ts`).
+
+Do **not** invent in-band sentinels (`null`, `0`, marker strings): remote
+reducers apply payload values verbatim, so released clients would persist the
+sentinel and fail typia state validation.
 
 ---
 

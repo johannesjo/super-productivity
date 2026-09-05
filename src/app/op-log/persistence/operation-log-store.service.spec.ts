@@ -1,4 +1,5 @@
 import { fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
 import { IDBPDatabase, unwrap } from 'idb';
 import { forceCloseDatabase } from 'fake-indexeddb';
 import { OperationLogStoreService } from './operation-log-store.service';
@@ -759,6 +760,26 @@ describe('OperationLogStoreService', () => {
     });
   });
 
+  describe('getFirstOpEntry', () => {
+    it('should return undefined when no operations exist', async () => {
+      expect(await service.getFirstOpEntry()).toBeUndefined();
+    });
+
+    it('should return the lowest-seq entry, decoded', async () => {
+      const first = createTestOperation({ entityId: 'task1' });
+      const second = createTestOperation({ entityId: 'task2' });
+      const firstSeq = await service.append(first, 'local');
+      await service.append(second, 'local');
+
+      const entry = await service.getFirstOpEntry();
+
+      expect(entry?.seq).toBe(firstSeq);
+      expect(entry?.op.id).toBe(first.id);
+      expect(entry?.op.entityId).toBe('task1');
+      expect(entry?.source).toBe('local');
+    });
+  });
+
   describe('getLatestFullStateOpEntry', () => {
     it('should read latest full-state op via metadata without scanning ops', async () => {
       const oldImport = createTestOperation({
@@ -1160,6 +1181,7 @@ describe('OperationLogStoreService', () => {
       const testState = { task: { ids: [], entities: {} } };
 
       await service.saveStateCache({
+        schemaVersion: CURRENT_SCHEMA_VERSION,
         state: testState,
         lastAppliedOpSeq: 10,
         vectorClock: {},
@@ -1182,6 +1204,7 @@ describe('OperationLogStoreService', () => {
 
     it('should increment counter', async () => {
       await service.saveStateCache({
+        schemaVersion: CURRENT_SCHEMA_VERSION,
         state: {},
         lastAppliedOpSeq: 0,
         vectorClock: {},
@@ -1229,6 +1252,7 @@ describe('OperationLogStoreService', () => {
 
     it('should reset counter', async () => {
       await service.saveStateCache({
+        schemaVersion: CURRENT_SCHEMA_VERSION,
         state: {},
         lastAppliedOpSeq: 0,
         vectorClock: {},
@@ -1291,6 +1315,7 @@ describe('OperationLogStoreService', () => {
     it('should merge clocks from snapshot and ops', async () => {
       // Save snapshot with initial clock
       await service.saveStateCache({
+        schemaVersion: CURRENT_SCHEMA_VERSION,
         state: {},
         lastAppliedOpSeq: 0,
         vectorClock: { clientA: 5, clientB: 3 },
@@ -1666,6 +1691,7 @@ describe('OperationLogStoreService', () => {
       const newOp = createTestOperation({ id: 'snapshot-op-new' });
       await service.append(existingOp, 'remote');
       await service.saveStateCache({
+        schemaVersion: CURRENT_SCHEMA_VERSION,
         state: { task: { ids: ['task1'] } },
         lastAppliedOpSeq: 1,
         vectorClock: { testClient: 1 },
@@ -1697,6 +1723,7 @@ describe('OperationLogStoreService', () => {
       const snapshotOp = createTestOperation({ id: 'snapshot-op-after-gap' });
       await service.append(existingOp, 'remote');
       await service.saveStateCache({
+        schemaVersion: CURRENT_SCHEMA_VERSION,
         state: { task: { ids: [] } },
         lastAppliedOpSeq: 0,
         vectorClock: {},
@@ -1763,6 +1790,7 @@ describe('OperationLogStoreService', () => {
       const priorState = { sentinel: 'prior-state' };
       await service.append(priorOp, 'remote');
       await service.saveStateCache({
+        schemaVersion: CURRENT_SCHEMA_VERSION,
         state: priorState,
         lastAppliedOpSeq: 1,
         vectorClock: { testClient: 1 },
@@ -3006,6 +3034,7 @@ describe('OperationLogStoreService', () => {
 
       await service.saveImportBackup(importBackupState);
       await service.saveStateCache({
+        schemaVersion: CURRENT_SCHEMA_VERSION,
         state: stateCacheState,
         lastAppliedOpSeq: 1,
         vectorClock: { client1: 1 } as VectorClock,
@@ -3158,6 +3187,7 @@ describe('OperationLogStoreService', () => {
       const priorArchiveOld = createArchive('prior-old');
       await service.append(priorOp);
       await service.saveStateCache({
+        schemaVersion: CURRENT_SCHEMA_VERSION,
         state: { sentinel: 'prior-state' },
         lastAppliedOpSeq: 1,
         vectorClock: { testClient: 1 },
@@ -3602,6 +3632,7 @@ describe('OperationLogStoreService', () => {
       const priorOld = createArchive('prior-old');
       await service.append(priorOp);
       await service.saveStateCache({
+        schemaVersion: CURRENT_SCHEMA_VERSION,
         state: priorState,
         lastAppliedOpSeq: 1,
         vectorClock: { testClient: 1 },
@@ -3897,6 +3928,7 @@ describe('OperationLogStoreService', () => {
     it('should fall back to snapshot+ops when vector_clock store is empty', async () => {
       // Save snapshot with vector clock (simulating pre-upgrade state)
       await service.saveStateCache({
+        schemaVersion: CURRENT_SCHEMA_VERSION,
         state: {},
         lastAppliedOpSeq: 0,
         vectorClock: { snapshotClient: 50 },
@@ -3919,6 +3951,7 @@ describe('OperationLogStoreService', () => {
       await service.setVectorClock({ storeClient: 200 });
 
       await service.saveStateCache({
+        schemaVersion: CURRENT_SCHEMA_VERSION,
         state: {},
         lastAppliedOpSeq: 0,
         vectorClock: { snapshotClient: 50 },
@@ -4015,6 +4048,7 @@ describe('OperationLogStoreService', () => {
         lastAppliedOpSeq: 5,
         vectorClock: { client1: 5 } as VectorClock,
         compactedAt: Date.now(),
+        schemaVersion: CURRENT_SCHEMA_VERSION,
       };
       await service.saveStateCache(stateCache);
 
@@ -4307,6 +4341,7 @@ describe('OperationLogStoreService', () => {
       await service.append(createImportOp('importAuthor', 1), 'remote');
 
       await service.saveStateCache({
+        schemaVersion: CURRENT_SCHEMA_VERSION,
         state: { some: 'state' },
         lastAppliedOpSeq: 1,
         vectorClock: createBloatedClock({ importAuthor: 1, testClient: 999 }),

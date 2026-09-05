@@ -558,7 +558,7 @@ export class LocalBackupService {
       // restore, mobile auto-restore, Android Settings restore all funnel
       // here), so every draft's baseContent refers to content that no longer
       // exists.
-      this._localDraftService.deleteDraftsForActiveProfile();
+      this._localDraftService.deleteAllDrafts();
       return true;
     } catch (e) {
       this._snackService.open({

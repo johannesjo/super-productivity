@@ -69,9 +69,9 @@ is [`sync.routes.ts`](../src/sync/sync.routes.ts) and
 ## Per-User Ordering and Transaction Invariant
 
 `serverSeq` is a total order within one user's current sync dataset. Accepted
-uploads commit inside a PostgreSQL `RepeatableRead` transaction. In the batch
-path, one atomic update of `user_sync_state.lastSeq` reserves a contiguous
-sequence range and serializes accepted writers for that user. A concurrent
+uploads commit inside a PostgreSQL `RepeatableRead` transaction. One atomic
+update of `user_sync_state.lastSeq` per accepted operation reserves its
+sequence number and serializes accepted writers for that user. A concurrent
 transaction that read the same earlier snapshot must fail and retry rather than
 commit conflicting operations. A causal `REPAIR` additionally locks that row
 and must prove `repairBaseServerSeq === lastSeq`. Incoming vector clocks are
@@ -90,7 +90,7 @@ A clean-slate full-state upload deletes the prior dataset but preserves
 zero.
 
 This serialization mechanism is a load-bearing decision; see
-[ADR #4](../../../ARCHITECTURE-DECISIONS.md#4-batch-uploads-under-repeatableread),
+[ADR #4](../../../ARCHITECTURE-DECISIONS.md#4-upload-conflict-safety-via-the-lastseq-row-lock-under-repeatableread),
 [`sync.service.ts`](../src/sync/sync.service.ts), and
 [`operation-upload.service.ts`](../src/sync/services/operation-upload.service.ts).
 
@@ -115,7 +115,14 @@ This serialization mechanism is a load-bearing decision; see
   or history pruning.
 - Default retention is 45 days. Cleanup removes stale devices and may remove
   only the old operation prefix before a proven causal full-state boundary,
-  while preserving that boundary and its replay tail. Quota recovery uses a
+  while preserving that boundary and its replay tail. The boundary comes from
+  the operation stream itself — no snapshot cursor is required (#9688), so
+  encrypted-only and snapshotless histories are pruned too. While a cached
+  snapshot BLOB exists, the boundary additionally never passes that row's
+  cursor (protects the cached base's replay tail for restore); a cursor left
+  behind without its blob does not cap. A user's aged prefix is pruned whole
+  or not at all, so the lowest surviving op stays a full-state op. Quota
+  recovery uses a
   separate bounded cleanup policy.
 - Server-generated restore is unavailable when the required replay range
   contains encrypted operations.

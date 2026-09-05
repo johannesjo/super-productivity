@@ -1,6 +1,6 @@
 {
   "name": "superProductivity",
-  "version": "18.20.1",
+  "version": "18.21.2",
   "description": "ToDo list and Time Tracking",
   "keywords": [
     "ToDo",
@@ -108,7 +108,7 @@
     "int:watch": "node ./tools/extract-i18n-watch.js",
     "lint": "npm run lint:ts && npm run lint:scss && npm run lint:css-vars && npm run test:lint-rules && npm run test:tools && npm run test:mac-icon",
     "test:lint-rules": "node eslint-local-rules/run-specs.js",
-    "test:tools": "node --test tools/theme-assets.test.js tools/check-css-vars.test.js",
+    "test:tools": "node --test tools/theme-assets.test.js tools/check-css-vars.test.js tools/verify-linux-wm-class.test.js tools/verify-windows-artifact-contract.test.js",
     "test:mac-icon": "node --test tools/verify-mac-icon.test.js",
     "lint:ts": "ng lint",
     "lint:scss": "stylelint \"**/*.scss\" \"src/assets/themes/*.css\" -- --custom-formatter @csstools/stylelint-formatter-github",
@@ -189,7 +189,7 @@
   "dependencies": {
     "@capacitor/browser": "^8.0.3",
     "@capacitor/ios": "^8.4.1",
-    "@capacitor/keyboard": "8.0.5",
+    "@capacitor/keyboard": "^8.0.5",
     "@capacitor/status-bar": "^8.0.2",
     "@material-symbols/font-400": "^0.45.5",
     "@noble/ciphers": "^2.2.0",
@@ -273,7 +273,7 @@
     "cross-env": "^10.1.0",
     "detect-it": "^4.0.1",
     "dotenv": "^17.4.2",
-    "electron": "43.4.0",
+    "electron": "43.5.0",
     "electron-builder": "^26.8.1",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
