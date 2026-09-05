@@ -166,6 +166,15 @@ describe('AndroidBackButtonService (#7972)', () => {
       expect(historyBack).not.toHaveBeenCalled();
       expect(minimizeApp).not.toHaveBeenCalled();
     });
+
+    it('closes an open dialog first and keeps the selection', () => {
+      multiSelect.isBarVisible.set(true);
+      const dialogRef = { disableClose: false, close: jasmine.createSpy('close') };
+      openDialogs.push(dialogRef as never);
+      service.handleBackButton();
+      expect(dialogRef.close).toHaveBeenCalled();
+      expect(multiSelect.clear).not.toHaveBeenCalled();
+    });
   });
 
   describe('overlays', () => {

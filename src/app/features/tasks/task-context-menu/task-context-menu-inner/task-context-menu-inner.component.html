@@ -93,7 +93,7 @@
     }
   </div>
 
-  @if (isTouchActive()) {
+  @if (isTouchActive() && isInTaskRow) {
     <button
       (click)="enterSelectionMode()"
       mat-menu-item

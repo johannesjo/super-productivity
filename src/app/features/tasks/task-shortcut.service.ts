@@ -350,7 +350,7 @@ export class TaskShortcutService {
     keys: KeyboardConfig,
     focusedTaskId: TaskId | null,
   ): boolean {
-    if (ev.key === 'Escape' && this._multiSelect.isActive()) {
+    if (ev.key === 'Escape' && this._multiSelect.isBarVisible()) {
       this._multiSelect.clear();
       ev.preventDefault();
       return true;
@@ -387,7 +387,9 @@ export class TaskShortcutService {
       !ev.shiftKey &&
       !ev.altKey &&
       ev.code === 'KeyA' &&
-      !(ev.target instanceof HTMLElement && isInputElement(ev.target))
+      !(ev.target instanceof HTMLElement && isInputElement(ev.target)) &&
+      // A user who bound a task shortcut to Ctrl/Cmd+A keeps it.
+      !this._isAnyConfiguredTaskCombo(ev, keys)
     ) {
       this._multiSelect.selectAllInListOfFocused();
       ev.preventDefault();
@@ -435,6 +437,12 @@ export class TaskShortcutService {
       return true;
     }
     return false;
+  }
+
+  private _isAnyConfiguredTaskCombo(ev: KeyboardEvent, keys: KeyboardConfig): boolean {
+    return Object.values(keys).some(
+      (combo) => typeof combo === 'string' && !!combo && checkKeyCombo(ev, combo),
+    );
   }
 
   private _isBulkShortcut(ev: KeyboardEvent, keys: KeyboardConfig): boolean {

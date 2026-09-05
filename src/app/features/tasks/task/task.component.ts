@@ -1130,6 +1130,13 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   // the issue-content "mark as checked" button, it does not depend on the issue
   // data (re)loading, so the badge can never get stuck (e.g. removed remote issue).
   onToggleDetailPanelBtnClick(ev?: MouseEvent): void {
+    if (this._multiSelect.isTouchSelectionMode()) {
+      // In selection mode every row control is a toggle for the row.
+      ev?.preventDefault();
+      ev?.stopPropagation();
+      this._multiSelect.toggle(this.task().id);
+      return;
+    }
     const task = this.task();
     if (task.issueWasUpdated) {
       this._taskService.markIssueUpdatesAsRead(task.id);
@@ -1333,6 +1340,10 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   onHostTouchStart(): void {
+    // Drag is disabled in touch selection mode; don't arm the lift visual.
+    if (this._multiSelect.isTouchSelectionMode()) {
+      return;
+    }
     this._dragReadyTimeout = window.setTimeout(() => {
       this.isDragReady.set(true);
     }, DRAG_DELAY_FOR_TOUCH);

@@ -56,13 +56,6 @@ export class AndroidBackButtonService {
       return;
     }
 
-    // 2b. A task multi-selection (or touch selection mode) has no history
-    //     entry either; back leaves it before anything navigates away.
-    if (this._taskMultiSelectService.isBarVisible()) {
-      this._taskMultiSelectService.clear();
-      return;
-    }
-
     // 3. An overlay that pushed a history state is open → let its popstate
     //    listener close it.
     if (this._isHistoryOverlayOpen()) {
@@ -80,6 +73,14 @@ export class AndroidBackButtonService {
       if (!topDialog.disableClose) {
         topDialog.close();
       }
+      return;
+    }
+
+    // 4b. A task multi-selection (or touch selection mode) has no history
+    //     entry and sits below any dialog or overlay; back leaves it before
+    //     anything navigates away.
+    if (this._taskMultiSelectService.isBarVisible()) {
+      this._taskMultiSelectService.clear();
       return;
     }
 

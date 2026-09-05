@@ -24,8 +24,7 @@
           <div
             class="select-ring"
             [class.isOn]="isMultiSelected()"
-            role="checkbox"
-            [attr.aria-checked]="isMultiSelected()"
+            aria-hidden="true"
           ></div>
         } @else {
           <done-toggle
@@ -48,6 +47,7 @@
           <task-title
             [resetToLastExternalValueTrigger]="t"
             [style.pointer-events]="isTouchActive() && t.title.length ? 'none' : 'auto'"
+            [readonly]="isTouchSelectionMode()"
             #taskTitleEditEl
             (valueEdited)="updateTaskTitleIfChanged($event)"
             [value]="t.title"

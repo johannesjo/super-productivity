@@ -129,6 +129,9 @@ export class TaskMultiSelectBarComponent {
     // Lifecycle of the selection: it belongs to one view, so it clears on
     // navigation and on work-context change. Wired here (the one app-shell
     // instance) so the service itself stays a dependency-free state holder.
+    // The bar lives in the non-focus-overlay branch of the shell, so a
+    // selection does not survive the focus overlay: the rebuilt bar's
+    // subscription replays the current context (shareReplay) and clears.
     this._router.events
       .pipe(
         filter((ev) => ev instanceof NavigationEnd),

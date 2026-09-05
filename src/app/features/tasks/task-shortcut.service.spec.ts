@@ -23,6 +23,7 @@ describe('TaskShortcutService', () => {
   };
   let mockMultiSelect: {
     isActive: ReturnType<typeof signal<boolean>>;
+    isBarVisible: ReturnType<typeof signal<boolean>>;
     count: ReturnType<typeof signal<number>>;
     has: jasmine.Spy;
     toggle: jasmine.Spy;
@@ -94,6 +95,7 @@ describe('TaskShortcutService', () => {
 
     mockMultiSelect = {
       isActive: signal(false),
+      isBarVisible: signal(false),
       count: signal(0),
       has: jasmine.createSpy('has').and.returnValue(true),
       toggle: jasmine.createSpy('toggle'),
@@ -862,10 +864,29 @@ describe('TaskShortcutService', () => {
   describe('multi-select shortcuts', () => {
     it('Esc clears an active selection and is consumed', () => {
       mockMultiSelect.isActive.set(true);
+      mockMultiSelect.isBarVisible.set(true);
       const ev = createKeyboardEvent('Escape', 'Escape');
       expect(service.handleTaskShortcuts(ev)).toBeTrue();
       expect(mockMultiSelect.clear).toHaveBeenCalled();
       expect(ev.defaultPrevented).toBeTrue();
+    });
+
+    it('Esc leaves an empty touch selection mode', () => {
+      mockMultiSelect.isBarVisible.set(true);
+      const ev = createKeyboardEvent('Escape', 'Escape');
+      expect(service.handleTaskShortcuts(ev)).toBeTrue();
+      expect(mockMultiSelect.clear).toHaveBeenCalled();
+    });
+
+    it('Ctrl+A yields to a user binding on the same combo', () => {
+      mockConfigService.cfg.set({
+        keyboard: { ...defaultKeyboardConfig, taskAddSubTask: 'Ctrl+A' },
+        appFeatures: { isTimeTrackingEnabled: true },
+      });
+      setFocusedTask('task-1');
+      const ev = createKeyboardEvent('a', 'KeyA', { ctrlKey: true });
+      service.handleTaskShortcuts(ev);
+      expect(mockMultiSelect.selectAllInListOfFocused).not.toHaveBeenCalled();
     });
 
     it('Esc without a selection is not handled', () => {

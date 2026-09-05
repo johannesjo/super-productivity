@@ -157,6 +157,8 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   isCurrent: boolean = false;
   isBacklog: boolean = false;
   isInSubTaskList: boolean = false;
+  /** Multi-select needs a rendered `<task>` row outside the detail panel. */
+  isInTaskRow: boolean = false;
 
   private _task$: ReplaySubject<TaskWithSubTasks | Task> = new ReplaySubject(1);
   issueUrl$: Observable<string | null> = this._task$.pipe(
@@ -208,6 +210,8 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
     // top/bottom is only offered where that order is on screen — a subtask
     // rendered flat in a tag or Today list would reorder invisibly.
     this.isInSubTaskList = !!this._elementRef.nativeElement.closest('.sub-tasks');
+    const host = this._elementRef.nativeElement as HTMLElement;
+    this.isInTaskRow = !!host.closest('task') && !host.closest('task-detail-panel');
 
     setTimeout(() => {
       if (!this._isOpenedFromKeyboard) {
@@ -391,6 +395,10 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
 
   /** Touch entry point into multi-selection (there is no modifier key). */
   enterSelectionMode(): void {
+    // The detail panel is single-task UI (a bottom sheet on touch); close it.
+    if (this._taskService.selectedTaskId()) {
+      this._taskService.setSelectedId(null);
+    }
     this._taskMultiSelectService.enterTouchSelectionMode(this.task.id);
   }
 

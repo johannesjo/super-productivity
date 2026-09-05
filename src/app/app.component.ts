@@ -183,7 +183,8 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   readonly T = T;
   readonly TODAY_TAG_ID = TODAY_TAG.id;
   readonly isShowMobileButtonNav = this.layoutService.isShowMobileBottomNav;
-  readonly isMultiSelecting = inject(TaskMultiSelectService).isBarVisible;
+  private readonly _taskMultiSelectService = inject(TaskMultiSelectService);
+  readonly isMultiSelecting = this._taskMultiSelectService.isBarVisible;
 
   @ViewChild('routeWrapper', { read: ElementRef }) routeWrapper?: ElementRef<HTMLElement>;
   @ViewChild(RouterOutlet) private _routerOutlet?: RouterOutlet;

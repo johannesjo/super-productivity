@@ -119,8 +119,9 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   dropListService = inject(DropListService);
   private _layoutService = inject(LayoutService);
   protected readonly dragDelayForTouch = dragDelayForTouch;
+  private readonly _taskMultiSelectService = inject(TaskMultiSelectService);
   protected readonly isTouchSelectionMode =
-    inject(TaskMultiSelectService).isTouchSelectionMode;
+    this._taskMultiSelectService.isTouchSelectionMode;
   // Lock Y-axis on small screens only — on wider screens the task list may sit
   // beside a side-nav or other drop targets that require horizontal dragging.
   protected readonly isXs = this._layoutService.isXs;
