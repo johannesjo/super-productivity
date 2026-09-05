@@ -4792,7 +4792,7 @@ describe('OperationLogSyncService', () => {
     const makeRemoteOp = (id: string = 'op1'): Operation => ({
       id,
       actionType: 'ACTION' as ActionType,
-      opType: 'UPDATE' as OpType,
+      opType: OpType.Update,
       entityType: 'TASK',
       entityId: 'task1',
       payload: {},
@@ -5415,6 +5415,29 @@ describe('OperationLogSyncService', () => {
       expect(remoteOpsProcessingServiceSpy.processRemoteOps).not.toHaveBeenCalled();
     });
 
+    it('should refuse to rebuild from ops with an unknown opType BEFORE destroying anything (#8764)', async () => {
+      downloadServiceSpy.downloadRemoteOps.and.resolveTo({
+        newOps: [{ ...makeRemoteOp('op-future-vocabulary'), opType: 'FUTURE_OP' as any }],
+        needsFullStateUpload: false,
+        success: true,
+        providerMode: 'superSyncOps',
+        failedFileCount: 0,
+        latestServerSeq: 1,
+      });
+
+      const mockProvider = {
+        supportsOperationSync: true,
+        setLastServerSeq: jasmine.createSpy('setLastServerSeq').and.resolveTo(),
+      } as any;
+
+      await expectAsync(
+        service.forceDownloadRemoteState(mockProvider),
+      ).toBeRejectedWithError(/unknown op type/);
+      expect(opLogStoreSpy.runRemoteStateReplacement).not.toHaveBeenCalled();
+      expect(remoteOpsProcessingServiceSpy.processRemoteOps).not.toHaveBeenCalled();
+      expect(mockProvider.setLastServerSeq).not.toHaveBeenCalled();
+    });
+
     it('should run all operation migrations before backup or replacement', async () => {
       const remoteOp = { ...makeRemoteOp(), schemaVersion: 1 };
       const migratedOp = { ...remoteOp, schemaVersion: 4 };
@@ -5586,7 +5609,7 @@ describe('OperationLogSyncService', () => {
         {
           id: 'op1',
           actionType: 'ACTION' as ActionType,
-          opType: 'UPDATE' as OpType,
+          opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task1',
           payload: {},
@@ -5626,7 +5649,7 @@ describe('OperationLogSyncService', () => {
       const mockOp: Operation = {
         id: 'op1',
         actionType: 'ACTION' as ActionType,
-        opType: 'UPDATE' as OpType,
+        opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task1',
         payload: {},
@@ -5767,7 +5790,7 @@ describe('OperationLogSyncService', () => {
         {
           id: 'op1',
           actionType: 'ACTION' as ActionType,
-          opType: 'UPDATE' as OpType,
+          opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task1',
           payload: {},
