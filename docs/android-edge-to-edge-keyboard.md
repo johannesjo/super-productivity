@@ -329,9 +329,10 @@ SystemBars on `--safe-area-inset-*`:
 
 ## #9316 — API 34 + old WebView: add-task bar behind the keyboard
 
-**Status: gate widened (`NativeInsetShimGate`), PENDING ON-DEVICE VALIDATION by
-the reporters.** Two users on **Android 14 (API 34)** report the add-task bar (and
-the task-detail notes field) sitting behind the keyboard. This is the "known small
+**Status: gate widened (`NativeInsetShimGate`) and VALIDATED IN CI on both inset
+owners** — `ImeInsetShimInstrumentedTest`, see "Validation" below (measured
+2026-09). Two users on **Android 14 (API 34)** reported the add-task bar (and the
+task-detail notes field) sitting behind the keyboard. This is the "known small
 gap" above, realized.
 
 **Root cause — nobody owns the IME inset.** `SystemBars` installs its
@@ -404,16 +405,44 @@ shrank for the IME, the WebView bottom is already at `rect.bottom`, so the
 computed height equals the current one and nothing moves. That property is what
 makes broadening the gate safe; do not replace it with a delta-based inset.
 
-**Still REQUIRED before release:** the widened band (API 30–34) is not covered by
-any device on hand — validate via a test build with the #9316 reporters, plus the
-matrix below to confirm API >= 35 and WebView >= 140 are untouched.
+**Validation — `ImeInsetShimInstrumentedTest` (CI, both inset owners).** No
+device on hand sits in the widened band, and the reporter who offered to test had
+moved to WebView 153 by then, where the shim is a no-op by construction and a test
+build could only confirm the symptom. The band is reachable in CI instead: an API
+34 `google_apis` emulator image ships a bundled WebView that never auto-updates and
+sits below 140. The `android-tests` job boots a second emulator at API 34
+(`android/run-android-ime-check.sh`) after the API 35 suite
+(`android/run-android-checks.sh`), so every PR exercises both owners:
 
-**Validate the mechanism, not just the symptom.** The shim is a strict no-op
-wherever the window already resizes, so "the bar looks fixed" cannot distinguish a
-working shim from one that never ran — and a coincidental fix would send the next
-regression hunt down the wrong path. `logImeGeometryOnTransition` prints the gate
-inputs and geometry once per keyboard transition; it is off unless enabled, so ask
-the reporter for:
+| Emulator                  | Owner per gate         | Measured (2026-09, 640 px root)                                                                       |
+| ------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------- |
+| API 34, WebView 113.0     | native shim (on)       | `paramsHeight` MATCH_PARENT → **405** = `rect.bottom`; WebView bottom 640 → 405; `innerHeight` 640 → 405 |
+| API 35 (bundled WebView)  | SystemBars (shim off)  | layout params untouched; WebView bottom at `rect.bottom`; `innerHeight` shrinks                       |
+
+The test derives the gate's inputs the way the activity does
+(`NativeInsetShimGate.activeProviderMajor(WebViewCompatibilityChecker.evaluate())`)
+and asserts the **mechanism** the gate selects — an explicit WebView height equal
+to `ImeWebViewHeight.targetHeight(rect.bottom, webViewTop)` under the shim,
+untouched layout params where SystemBars owns the inset — plus, on every API
+level, the **symptom**: WebView bottom at or above the keyboard top,
+`window.innerHeight` shrank (what lifts the `position: fixed` bar), the height
+stable across a later layout pass (no feedback loop), and the resting height
+restored on hide. Emulators report a hardware keyboard, so both scripts run
+`settings put secure show_ime_with_hard_keyboard 1` first; without it the IME
+never opens and the test fails on its first wait rather than passing vacuously.
+
+Still open: the API 34 row also settles the "adjustResize does not resize" inference
+above — the window kept its full 640 px until the shim pinned it (had the framework
+resized, `paramsHeight` would have been a no-op write of the height already in
+effect). Not yet observed on a real device in the band; the reporters' A/B with
+WebView 151/153 remains the field evidence.
+
+**On a reporter's device, validate the mechanism, not just the symptom.** The
+shim is a strict no-op wherever the window already resizes, so "the bar looks
+fixed" cannot distinguish a working shim from one that never ran — and a
+coincidental fix would send the next regression hunt down the wrong path.
+`logImeGeometryOnTransition` prints the gate inputs and geometry once per keyboard
+transition; it is off unless enabled, so ask the reporter for:
 
 ```
 adb shell setprop log.tag.SUPKeyboard DEBUG   # then restart the app
