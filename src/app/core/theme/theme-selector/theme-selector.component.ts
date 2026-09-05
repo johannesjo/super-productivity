@@ -77,11 +77,6 @@ const valueToRef = (value: string): CustomThemeRef => {
         >
           <mat-button-toggle value="system">
             <span class="dark-mode-toggle__content">
-              <mat-icon
-                class="dark-mode-toggle__selection"
-                [class.is-selected]="globalThemeService.darkMode() === 'system'"
-                >check</mat-icon
-              >
               <mat-icon>computer</mat-icon>
               <span class="dark-mode-toggle__label">
                 {{ T.GCF.MISC.DARK_MODE_SYSTEM | translate }}
@@ -90,11 +85,6 @@ const valueToRef = (value: string): CustomThemeRef => {
           </mat-button-toggle>
           <mat-button-toggle value="dark">
             <span class="dark-mode-toggle__content">
-              <mat-icon
-                class="dark-mode-toggle__selection"
-                [class.is-selected]="globalThemeService.darkMode() === 'dark'"
-                >check</mat-icon
-              >
               <mat-icon>dark_mode</mat-icon>
               <span class="dark-mode-toggle__label">
                 {{ T.GCF.MISC.DARK_MODE_DARK | translate }}
@@ -103,11 +93,6 @@ const valueToRef = (value: string): CustomThemeRef => {
           </mat-button-toggle>
           <mat-button-toggle value="light">
             <span class="dark-mode-toggle__content">
-              <mat-icon
-                class="dark-mode-toggle__selection"
-                [class.is-selected]="globalThemeService.darkMode() === 'light'"
-                >check</mat-icon
-              >
               <mat-icon>light_mode</mat-icon>
               <span class="dark-mode-toggle__label">
                 {{ T.GCF.MISC.DARK_MODE_LIGHT | translate }}
@@ -245,6 +230,33 @@ const valueToRef = (value: string): CustomThemeRef => {
         --mat-button-toggle-height: var(--bar-height-small);
         --mat-button-toggle-label-text-size: var(--font-size-md);
         --mat-button-toggle-shape: var(--input-border-radius);
+
+        /*
+         * Selection is carried by the fill alone, the same way the settings
+         * tab strip marks its active tab: unselected options sit transparent
+         * on the card so the tint on the selected one actually reads. Against
+         * Material's own group fill (#424242 dark / white light) the same 10%
+         * overlay is barely a shade apart.
+         *
+         * --state-selected rather than Material's defaults for these tokens,
+         * which are hardcoded black/white alphas and so ignore the active
+         * theme; --state-selected is built from --ink-on-channel and tracks
+         * every theme, custom ones included.
+         */
+        --mat-button-toggle-background-color: transparent;
+        --mat-button-toggle-selected-state-background-color: var(--state-selected);
+        --mat-button-toggle-selected-state-text-color: var(--text-color);
+
+        /*
+         * The disabled variants are a separate, more specific rule in Material,
+         * so they need the same treatment or the group flips to an opaque grey
+         * block whenever the active theme forces a mode. Disabled-ness stays
+         * carried by Material's dimmed text colour.
+         */
+        --mat-button-toggle-disabled-state-background-color: transparent;
+        --mat-button-toggle-disabled-selected-state-background-color: var(
+          --state-selected
+        );
       }
 
       .dark-mode-toggle mat-button-toggle {
@@ -270,33 +282,6 @@ const valueToRef = (value: string): CustomThemeRef => {
         max-width: 100%;
         height: var(--bar-height-small);
         vertical-align: top;
-      }
-
-      /*
-       * Kept in flow rather than pulled out of it: every option reserves the
-       * same width, so the content stays centred and nothing shifts as the
-       * selection moves, and the icon cannot escape the overflow: hidden that
-       * .mat-button-toggle-group sets once a toggle gets narrow.
-       *
-       * Sized 18px (Material's own selection-indicator size) with a tighter
-       * gap: at the full 20px + --s-half the reserved width pushes the System
-       * label into the first divider at a 360px viewport.
-       *
-       * Hidden with opacity, not visibility: the global
-       * body.isMaterialSymbolsLoaded mat-icon font-loading guard in
-       * _overwrite-material.scss sets visibility: visible at a higher
-       * specificity, so a visibility: hidden here leaves the icon painted.
-       */
-      .dark-mode-toggle mat-icon.dark-mode-toggle__selection {
-        font-size: 18px;
-        width: 18px;
-        height: 18px;
-        margin-inline-end: 2px;
-        opacity: 0;
-      }
-
-      .dark-mode-toggle mat-icon.dark-mode-toggle__selection.is-selected {
-        opacity: 1;
       }
 
       .dark-mode-toggle__label {
@@ -328,12 +313,13 @@ const valueToRef = (value: string): CustomThemeRef => {
       }
 
       /*
-       * The container is the card's inner width, not the viewport: roughly
-       * viewport minus sidebar minus padding. Below this the label column sits
-       * at its 120px floor and the toggle group can no longer fit three
-       * labelled options, so the rows stack and the controls go full width.
+       * The query measures this container's content box, not the viewport —
+       * roughly viewport minus sidebar minus the card and container padding.
+       * Measured floor is 388px: below that the label column sits at its 120px
+       * minimum and the toggle group can no longer fit three labelled options.
+       * Stack just above it, and give the controls the full width.
        */
-      @container (max-width: 520px) {
+      @container (max-width: 400px) {
         .dark-mode-select,
         .theme-select,
         .wallpaper-select {
