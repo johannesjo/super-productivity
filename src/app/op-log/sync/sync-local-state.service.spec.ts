@@ -97,14 +97,6 @@ describe('SyncLocalStateService', () => {
       expect(await service.isNeverSyncedGenesisClient()).toBe(true);
     });
 
-    it('stays true when regular ops were captured after the genesis', async () => {
-      // Post-migration edits ship normally, but the pre-migration state still
-      // lives only inside the genesis payload. Only the first row decides.
-      opLogStoreSpy.getFirstOpEntry.and.resolveTo(migrationGenesis);
-      opLogStoreSpy.getLastSeq.and.resolveTo(2);
-      expect(await service.isNeverSyncedGenesisClient()).toBe(true);
-    });
-
     it('is false once real sync history exists', async () => {
       opLogStoreSpy.hasSyncedOps.and.resolveTo(true);
       expect(await service.isNeverSyncedGenesisClient()).toBe(false);

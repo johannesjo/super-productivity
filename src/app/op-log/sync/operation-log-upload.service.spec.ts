@@ -419,6 +419,45 @@ describe('OperationLogUploadService', () => {
           expect(result.uploadedCount).toBe(0);
         });
 
+        it('leaves the genesis op pending while the mandatory-encryption guard blocks the upload', async () => {
+          // The pending genesis op is what keeps the incoming-import gate armed
+          // until this client can actually upload; acknowledging it before the
+          // guard would let a later remote SYNC_IMPORT replace local state silently.
+          (mockApiProvider as any).isEncryptionMandatory = true;
+          (mockApiProvider as any).getEncryptKey = jasmine
+            .createSpy('getEncryptKey')
+            .and.resolveTo(undefined);
+          mockOpLogStore.getUnsynced.and.resolveTo([
+            createGenesisEntry(1, 'MIGRATION'),
+            createMockEntry(2, 'op-2', 'client-1'),
+          ]);
+
+          const result = await service.uploadPendingOps(mockApiProvider);
+
+          expect(mockApiProvider.uploadOps).not.toHaveBeenCalled();
+          expect(mockOpLogStore.markSynced).not.toHaveBeenCalled();
+          expect(result.encryptionRequiredKeyMissing).toBe(true);
+        });
+
+        it('keeps uploading genesis ops on file-based providers (the ops upload writes the snapshot)', async () => {
+          mockApiProvider.providerMode = 'fileSnapshotOps';
+          mockOpLogStore.getUnsynced.and.resolveTo([createGenesisEntry(1, 'MIGRATION')]);
+          mockApiProvider.uploadOps.and.resolveTo({
+            results: [{ opId: 'genesis-1', accepted: true }],
+            latestSeq: 1,
+            newOps: [],
+          });
+
+          const result = await service.uploadPendingOps(mockApiProvider);
+
+          const uploadedIds = (
+            mockApiProvider.uploadOps.calls.mostRecent().args[0] as { id: string }[]
+          ).map((op) => op.id);
+          expect(uploadedIds).toEqual(['genesis-1']);
+          expect(mockOpLogStore.markSynced).toHaveBeenCalledWith([1]);
+          expect(result.uploadedCount).toBe(1);
+        });
+
         it('routes the genesis acknowledgement through the deferred-ack path', async () => {
           const genesis = createGenesisEntry(1, 'MIGRATION');
           const regular = createMockEntry(2, 'op-2', 'client-1');
@@ -434,7 +473,9 @@ describe('OperationLogUploadService', () => {
           });
 
           expect(mockOpLogStore.markSynced).not.toHaveBeenCalled();
-          expect(result.selectedPendingOps).toEqual([regular]);
+          // The pre-captured snapshot keeps the genesis op so the piggyback
+          // conflict gate still counts it as pending local work this round.
+          expect(result.selectedPendingOps).toEqual([genesis, regular]);
           expect(result.pendingAcknowledgementSeqs).toEqual([1, 2]);
         });
       });

@@ -272,10 +272,16 @@ export const seedSuperSyncCredentials = async (
   );
 };
 
+/** Full-state op types (mirrors FULL_STATE_OP_TYPES in the app). */
+export const isFullStateOpType = (opType: string): boolean =>
+  ['SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR'].includes(opType);
+
 /**
  * Summary of every entry in this client's local op log (`SUP_OPS`/`ops`).
  * Entries are stored in the compact format, where `o` is the opType and `e`
- * the entityType — the same string values as the full format.
+ * the entityType — the same string values as the full format. Call it only
+ * after the app has booted (the DB is opened without a version and would
+ * otherwise be created empty).
  */
 export const getLocalOpLogSummary = async (
   page: Page,

@@ -9,6 +9,7 @@ import {
   createTestUser,
   getLocalOpLogSummary,
   getSuperSyncConfig,
+  isFullStateOpType,
   seedSuperSyncCredentials,
   type SimulatedE2EClient,
 } from '../../utils/supersync-helpers';
@@ -485,7 +486,7 @@ test.describe('@supersync @migration SuperSync Legacy Migration Sync', () => {
         encryptKey: syncConfig.password!,
       });
     const isFullStateOp = (op: { opType: string }): boolean =>
-      ['SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR'].includes(op.opType);
+      isFullStateOpType(op.opType);
 
     let clientA: SimulatedE2EClient | null = null;
     let clientB: {
@@ -569,7 +570,8 @@ test.describe('@supersync @migration SuperSync Legacy Migration Sync', () => {
       await expect(clientB.page.locator('task', { hasText: 'Task B1' })).toBeVisible();
       await expect(clientB.page.locator('task', { hasText: 'Task B2' })).toBeVisible();
 
-      // The genesis op is settled locally without ever being uploaded (#9921).
+      // B's state now ships as a SYNC_IMPORT, which settles every earlier op
+      // including the genesis (the no-upload rule itself is unit-tested).
       const opsBAfter = await getLocalOpLogSummary(clientB.page);
       expect(opsBAfter.find((op) => op.entityType === 'MIGRATION')?.isSynced).toBe(true);
       expect(opsBAfter.some(isFullStateOp)).toBe(true);
@@ -592,7 +594,7 @@ test.describe('@supersync @migration SuperSync Legacy Migration Sync', () => {
         clientA.page.locator('task', { hasText: 'Task A1 - Fresh' }),
       ).not.toBeVisible();
 
-      // B's genesis op never reached the server, so A never downloaded one.
+      // A adopted B's import and never received a genesis op from B.
       const opsAAfter = await getLocalOpLogSummary(clientA.page);
       expect(opsAAfter.filter((op) => op.entityType === 'MIGRATION')).toEqual([]);
       console.log("[Test] SUCCESS: silent join path prompts and B's state reaches A");

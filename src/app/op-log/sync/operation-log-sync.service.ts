@@ -1068,14 +1068,11 @@ export class OperationLogSyncService {
             syncProvider,
             { syncImportReason: 'SERVER_MIGRATION' },
           );
+          // No SYNC_IMPORT → nothing shipped the state → skip this cycle's upload
+          // (see DownloadOutcome) so the next download re-evaluates. (#9921)
           if (!createdOpId) {
-            // Nothing shipped the local state. Do not persist lastServerSeq and
-            // do not let the wrapper upload: accepted ordinary ops would flip
-            // hasSyncedOps() and this client would never get a full-state
-            // decision again. The next cycle re-downloads from scratch. (#9921)
             OpLog.warn(
-              'OperationLogSyncService: Empty-server seeding created no SYNC_IMPORT. ' +
-                'Skipping upload this cycle; the next sync re-evaluates.',
+              'OperationLogSyncService: Empty-server seeding created no SYNC_IMPORT.',
             );
             return { kind: 'server_migration_skipped' };
           }

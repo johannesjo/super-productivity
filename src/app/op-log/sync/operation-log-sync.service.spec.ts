@@ -54,6 +54,7 @@ import {
   SyncEpochChangedError,
 } from '../core/errors/sync-errors';
 import { SyncProviderManager } from '../sync-providers/provider-manager.service';
+import { DownloadResultForRejection } from '../core/types/sync-results.types';
 import { SyncHydrationService } from '../persistence/sync-hydration.service';
 import { SyncImportConflictDialogService } from './sync-import-conflict-dialog.service';
 import { StateSnapshotService } from '../backup/state-snapshot.service';
@@ -926,6 +927,40 @@ describe('OperationLogSyncService', () => {
           const result = await service.uploadPendingOps(mockProvider);
 
           expect(result.kind).toBe('cancelled');
+        });
+
+        it('should treat a skipped empty-server seeding in a nested download as a completed no-op download (#9921)', async () => {
+          uploadServiceSpy.uploadPendingOps.and.resolveTo({
+            uploadedCount: 0,
+            piggybackedOps: [],
+            rejectedCount: 1,
+            rejectedOps: [
+              {
+                opId: 'local-op-1',
+                error: 'Concurrent',
+                errorCode: 'CONFLICT_CONCURRENT',
+              },
+            ],
+          });
+          spyOn(service, 'downloadRemoteOps').and.resolveTo({
+            kind: 'server_migration_skipped',
+          });
+          let nestedResult: DownloadResultForRejection | undefined;
+          rejectedOpsHandlerServiceSpy.handleRejectedOps.and.callFake(
+            async (_ops, callback) => {
+              nestedResult = await callback?.();
+              return {
+                kind: 'completed',
+                mergedOpsCreated: 0,
+                permanentRejectionCount: 0,
+              };
+            },
+          );
+
+          const result = await service.uploadPendingOps(mockProvider);
+
+          expect(nestedResult).toEqual({ kind: 'completed', newOpsCount: 0 });
+          expect(result.kind).toBe('completed');
         });
 
         it('should add mergedOpsFromRejection to localWinOpsCreated in result', async () => {

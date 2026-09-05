@@ -632,11 +632,17 @@ export class SyncWrapperService {
       this._consecutiveSuperSyncAuthFailures = 0;
       SyncLog.log(`SyncWrapperService: Download complete. kind=${downloadResult.kind}`);
 
-      // If user cancelled the sync import conflict dialog, skip upload entirely.
-      // This keeps the local state unchanged and doesn't push it to the server.
-      // Don't update lastSyncedProvider so the next sync retries with forceFromSeq0.
-      if (downloadResult.kind === 'cancelled') {
-        SyncLog.log('SyncWrapperService: Sync cancelled by user. Skipping upload phase.');
+      // Skip the upload entirely when the user cancelled the sync import conflict
+      // dialog, or when empty-server seeding created no SYNC_IMPORT (#9921, an
+      // upload would strand the pre-op-log / genesis state). Local state stays
+      // unchanged and lastSyncedProvider is not updated, so the next sync retries.
+      if (
+        downloadResult.kind === 'cancelled' ||
+        downloadResult.kind === 'server_migration_skipped'
+      ) {
+        SyncLog.log(
+          `SyncWrapperService: Download ended with ${downloadResult.kind}. Skipping upload phase.`,
+        );
         this._providerManager.setSyncStatus('UNKNOWN_OR_CHANGED');
         return 'HANDLED_ERROR';
       }
@@ -645,16 +651,6 @@ export class SyncWrapperService {
           'SyncWrapperService: Download blocked by an incompatible operation.',
         );
         this._providerManager.setSyncStatus('ERROR');
-        return 'HANDLED_ERROR';
-      }
-      // Empty-server seeding created no SYNC_IMPORT (#9921): uploading now would
-      // accept this client's ordinary ops and silently strand its pre-op-log /
-      // genesis state. Leave everything pending; the next sync re-downloads.
-      if (downloadResult.kind === 'server_migration_skipped') {
-        SyncLog.warn(
-          'SyncWrapperService: Empty-server seeding created no SYNC_IMPORT. Skipping upload phase.',
-        );
-        this._providerManager.setSyncStatus('UNKNOWN_OR_CHANGED');
         return 'HANDLED_ERROR';
       }
 

@@ -125,17 +125,17 @@ export class OperationLogMigrationService {
               return false;
             }
 
-            const opCount = await this.opLogStore.countOps();
             if (hasLegacyData) {
+              const orphanCount = await this.opLogStore.countOps();
               OpLog.warn(
-                `OperationLogMigrationService: Found ${opCount} orphan operations. ` +
+                `OperationLogMigrationService: Found ${orphanCount} orphan operations. ` +
                   `Clearing them before legacy migration.`,
               );
               await this.opLogStore.clearAllOperations();
             } else {
               OpLog.normal(
-                `OperationLogMigrationService: Found ${opCount} operations (fresh install). ` +
-                  `Skipping migration - hydrator will replay them.`,
+                'OperationLogMigrationService: Found existing operations (fresh install). ' +
+                  'Skipping migration - hydrator will replay them.',
               );
               return false;
             }

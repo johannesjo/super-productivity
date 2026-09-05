@@ -156,8 +156,9 @@ export class OperationLogUploadService {
       // Fix the pending-op set and the file snapshot under the same operation-log
       // boundary. A task-time action applied by reducers while waiting for this
       // lock remains visible to snapshot projection as an in-flight delta.
-      const { pendingOps: allPendingOps, localStateSnapshot } =
-        await this.lockService.request(LOCK_NAMES.OPERATION_LOG, async () => {
+      const { pendingOps, localStateSnapshot } = await this.lockService.request(
+        LOCK_NAMES.OPERATION_LOG,
+        async () => {
           const capturedPendingOps = await this.opLogStore.getUnsynced();
           return {
             pendingOps: capturedPendingOps,
@@ -166,28 +167,7 @@ export class OperationLogUploadService {
                 ? this.stateSnapshotService.getStateSnapshotForOperationLog()
                 : undefined,
           };
-        });
-
-      // Genesis ops (MIGRATION / RECOVERY) carry this client's whole pre-op-log
-      // state but replay as a no-op on every other client, so sending them only
-      // costs server storage and download time for every later joiner. Whatever
-      // that state had to contribute was already decided on the download side
-      // of this cycle, where the op is still pending and counts as local work:
-      // it shipped as a SYNC_IMPORT, or the user chose a side. Mark them synced
-      // locally instead of uploading; hasSyncedOps() ignores them either way.
-      // (#9921)
-      const genesisSeqs = allPendingOps
-        .filter((entry) => isGenesisEntityType(entry.op.entityType))
-        .map((entry) => entry.seq);
-      if (genesisSeqs.length > 0) {
-        OpLog.normal(
-          `OperationLogUploadService: Marking ${genesisSeqs.length} genesis op(s) synced ` +
-            'without uploading them (no receiver on any other client).',
-        );
-        await acknowledge(genesisSeqs);
-      }
-      const pendingOps = allPendingOps.filter(
-        (entry) => !isGenesisEntityType(entry.op.entityType),
+        },
       );
       selectedPendingOps = pendingOps;
 
@@ -271,12 +251,38 @@ export class OperationLogUploadService {
         );
       }
 
+      // Genesis ops (MIGRATION / RECOVERY) replay as a no-op on every other
+      // client, so on API-based providers sending them only costs server storage
+      // and download time for every later joiner: mark them synced instead. Done
+      // only here, past every abort above — while the upload is still blocked the
+      // pending genesis op is what keeps the incoming-import gate armed. File-
+      // based providers keep uploading them: there the ops upload is what writes
+      // the state snapshot, which a genesis-only client must still do. (#9921)
+      const isGenesisToSkip = (entry: OperationLogEntry): boolean =>
+        syncProvider.providerMode !== 'fileSnapshotOps' &&
+        isGenesisEntityType(entry.op.entityType);
+      const genesisSeqs = pendingOps.filter(isGenesisToSkip).map((entry) => entry.seq);
+      if (genesisSeqs.length > 0) {
+        OpLog.normal(
+          `OperationLogUploadService: Marking ${genesisSeqs.length} genesis op(s) synced ` +
+            'without uploading them (no receiver on any other client).',
+        );
+        await acknowledge(genesisSeqs);
+      }
+      const uploadableOps = pendingOps.filter((entry) => !isGenesisToSkip(entry));
+      if (uploadableOps.length === 0) {
+        OpLog.normal(
+          'OperationLogUploadService: Only genesis ops were pending; nothing to upload.',
+        );
+        return;
+      }
+
       // Separate full-state operations (backup imports, repairs) from regular ops
       // Full-state ops are uploaded via snapshot endpoint for better efficiency
-      const fullStateOps = pendingOps.filter((entry) =>
+      const fullStateOps = uploadableOps.filter((entry) =>
         FULL_STATE_OP_TYPES.has(entry.op.opType as OpType),
       );
-      let regularOps = pendingOps.filter(
+      let regularOps = uploadableOps.filter(
         (entry) => !FULL_STATE_OP_TYPES.has(entry.op.opType as OpType),
       );
 

@@ -8,6 +8,7 @@ import {
 } from '@playwright/test';
 import { BasePage } from './base.page';
 import { normalizeDialogMessage, translationRegex } from '../utils/i18n-strings';
+import { confirmSyncConflictOverwriteIfShown } from '../utils/sync-helpers';
 
 export interface SuperSyncConfig {
   baseUrl: string;
@@ -1809,10 +1810,8 @@ export class SuperSyncPage extends BasePage {
   }
 
   /**
-   * Answer the local-data conflict dialog. Either choice may raise the
-   * secondary overwrite warning (`dialog-confirm`) depending on the measured
-   * change counts, so wait for that dialog or the parent closing instead of
-   * probing for a fixed delay.
+   * Answer the local-data conflict dialog, including the conditional overwrite
+   * warning either choice may raise (see confirmSyncConflictOverwriteIfShown).
    */
   async resolveConflictDialog(choice: 'local' | 'remote'): Promise<void> {
     await expect(this.conflictDialog).toBeVisible({ timeout: 5000 });
@@ -1821,31 +1820,7 @@ export class SuperSyncPage extends BasePage {
     } else {
       await this.conflictUseRemoteBtn.click();
     }
-
-    const overwriteConfirm = this.page
-      .locator('dialog-confirm')
-      .filter({ hasText: /WARNING:[\s\S]*overwrit/i });
-    await expect
-      .poll(
-        async () => {
-          if (await overwriteConfirm.isVisible().catch(() => false)) {
-            return 'confirm';
-          }
-          if (!(await this.conflictDialog.isVisible().catch(() => false))) {
-            return 'closed';
-          }
-          return 'pending';
-        },
-        {
-          timeout: 5000,
-          message: 'Expected the sync conflict to close or show its overwrite warning',
-        },
-      )
-      .not.toBe('pending');
-    if (await overwriteConfirm.isVisible().catch(() => false)) {
-      await overwriteConfirm.locator('[e2e="confirmBtn"]').click();
-    }
-    await expect(this.conflictDialog).toBeHidden({ timeout: 5000 });
+    await confirmSyncConflictOverwriteIfShown(this.page, this.conflictDialog);
   }
 
   /**
