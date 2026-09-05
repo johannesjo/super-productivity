@@ -52,6 +52,7 @@ import { dragDelayForTouch } from '../../../util/input-intent';
 import { DateService } from '../../../core/date/date.service';
 import { canConvertTaskToSubTask } from '../util/can-convert-task-to-sub-task';
 import { TODAY_TAG } from '../../tag/tag.const';
+import { TaskMultiSelectService } from '../task-multi-select.service';
 
 export type TaskListId = 'PARENT' | 'SUB';
 export type ListModelId = DropListModelSource | string;
@@ -118,6 +119,8 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   dropListService = inject(DropListService);
   private _layoutService = inject(LayoutService);
   protected readonly dragDelayForTouch = dragDelayForTouch;
+  protected readonly isTouchSelectionMode =
+    inject(TaskMultiSelectService).isTouchSelectionMode;
   // Lock Y-axis on small screens only — on wider screens the task list may sit
   // beside a side-nav or other drop targets that require horizontal dragging.
   protected readonly isXs = this._layoutService.isXs;

@@ -80,6 +80,7 @@ import { SelectOptionRowComponent } from '../../../../ui/select-option-row/selec
 import { AddSubtaskInputService } from '../../add-subtask-input/add-subtask-input.service';
 import { TaskDuplicateService } from '../../task-duplicate.service';
 import { TaskMoveToProjectService } from '../../task-move-to-project.service';
+import { TaskMultiSelectService } from '../../task-multi-select.service';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -123,6 +124,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   private readonly _addSubtaskInputService = inject(AddSubtaskInputService);
   private readonly _taskDuplicateService = inject(TaskDuplicateService);
   private readonly _taskMoveToProjectService = inject(TaskMoveToProjectService);
+  private readonly _taskMultiSelectService = inject(TaskMultiSelectService);
 
   protected readonly isTouchActive = isTouchActive;
   protected readonly T = T;
@@ -385,6 +387,11 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
 
   focusFirstSubmenuItem(menu: MatMenu): void {
     menu.focusFirstItem('program');
+  }
+
+  /** Touch entry point into multi-selection (there is no modifier key). */
+  enterSelectionMode(): void {
+    this._taskMultiSelectService.enterTouchSelectionMode(this.task.id);
   }
 
   goToFocusMode(): void {

@@ -25,6 +25,8 @@ describe('TaskShortcutService', () => {
     isActive: ReturnType<typeof signal<boolean>>;
     count: ReturnType<typeof signal<number>>;
     has: jasmine.Spy;
+    toggle: jasmine.Spy;
+    selectAllInListOfFocused: jasmine.Spy;
     clear: jasmine.Spy;
     extendFromFocused: jasmine.Spy;
     requestMenuOpen: jasmine.Spy;
@@ -47,6 +49,7 @@ describe('TaskShortcutService', () => {
     taskDelete: 'Backspace',
     taskMoveToProject: 'P',
     taskEditTags: 'G',
+    taskToggleSelect: 'X',
     taskOpenContextMenu: null,
     moveToBacklog: 'B',
     taskScheduleToday: 'F',
@@ -93,6 +96,8 @@ describe('TaskShortcutService', () => {
       isActive: signal(false),
       count: signal(0),
       has: jasmine.createSpy('has').and.returnValue(true),
+      toggle: jasmine.createSpy('toggle'),
+      selectAllInListOfFocused: jasmine.createSpy('selectAllInListOfFocused'),
       clear: jasmine.createSpy('clear'),
       extendFromFocused: jasmine.createSpy('extendFromFocused').and.returnValue(null),
       requestMenuOpen: jasmine.createSpy('requestMenuOpen'),
@@ -885,6 +890,33 @@ describe('TaskShortcutService', () => {
       const ev = createKeyboardEvent('ArrowUp', 'ArrowUp', { shiftKey: true });
       service.handleTaskShortcuts(ev);
       expect(mockMultiSelect.extendFromFocused).not.toHaveBeenCalled();
+    });
+
+    it('X toggles the focused task in the selection', () => {
+      setFocusedTask('task-1');
+      const ev = createKeyboardEvent('x', 'KeyX');
+      expect(service.handleTaskShortcuts(ev)).toBeTrue();
+      expect(mockMultiSelect.toggle).toHaveBeenCalledWith('task-1');
+    });
+
+    it('Ctrl+A selects the focused list but not while typing', () => {
+      const el = setFocusedTask('task-1');
+      const ev = createKeyboardEvent('a', 'KeyA', { ctrlKey: true });
+      expect(service.handleTaskShortcuts(ev)).toBeTrue();
+      expect(mockMultiSelect.selectAllInListOfFocused).toHaveBeenCalled();
+
+      mockMultiSelect.selectAllInListOfFocused.calls.reset();
+      const input = document.createElement('textarea');
+      el.appendChild(input);
+      const typingEv = new KeyboardEvent('keydown', {
+        code: 'KeyA',
+        key: 'a',
+        ctrlKey: true,
+        bubbles: true,
+      });
+      Object.defineProperty(typingEv, 'target', { value: input });
+      service.handleTaskShortcuts(typingEv);
+      expect(mockMultiSelect.selectAllInListOfFocused).not.toHaveBeenCalled();
     });
 
     it('routes an allowlisted shortcut to the bulk service while a selection exists', () => {

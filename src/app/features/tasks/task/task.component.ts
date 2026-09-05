@@ -216,6 +216,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   // Part of the transient multi-selection (Ctrl/Cmd+click, Shift+click, Shift+Arrow).
   // One O(1) Set lookup per row per selection change; see TaskMultiSelectService.
   isMultiSelected = computed(() => this._multiSelect.selectedIds().has(this.task().id));
+  isTouchSelectionMode = this._multiSelect.isTouchSelectionMode;
   isShowCloseButton = computed(() => {
     // Only show close button when task is selected AND not on mobile (bottom panel)
     return this.isSelected() && !this.layoutService.isXs();
@@ -493,7 +494,11 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     if (ev.shiftKey) {
       ev.preventDefault();
     }
-    if (!isMultiSelectModifierEvent(ev) && this._multiSelect.isActive()) {
+    if (
+      !isMultiSelectModifierEvent(ev) &&
+      this._multiSelect.isActive() &&
+      !this._multiSelect.isTouchSelectionMode()
+    ) {
       this._multiSelect.clear();
     }
   }
@@ -505,7 +510,21 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
    * controls (links, buttons, inputs) keep their own behaviour.
    */
   onHostClick(ev: MouseEvent): void {
-    if (!isMultiSelectModifierEvent(ev) || !this._isInnermostTaskFor(ev.target)) {
+    if (!this._isInnermostTaskFor(ev.target)) {
+      return;
+    }
+    // Touch selection mode: a plain tap anywhere on the row toggles it
+    // (the title has pointer-events off on touch, so taps reach the host).
+    if (this._multiSelect.isTouchSelectionMode() && !isMultiSelectModifierEvent(ev)) {
+      if (isInteractiveTarget(ev.target)) {
+        return;
+      }
+      ev.preventDefault();
+      ev.stopPropagation();
+      this._multiSelect.toggle(this.task().id);
+      return;
+    }
+    if (!isMultiSelectModifierEvent(ev)) {
       return;
     }
     if (isInteractiveTarget(ev.target)) {
@@ -980,7 +999,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   onTimeWrapperClick(ev: MouseEvent): void {
-    if (isMultiSelectModifierEvent(ev)) {
+    if (isMultiSelectModifierEvent(ev) || this._multiSelect.isTouchSelectionMode()) {
       return;
     }
     this.estimateTime();
@@ -1207,7 +1226,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   titleBarClick(event: MouseEvent): void {
-    if (isMultiSelectModifierEvent(event)) {
+    if (isMultiSelectModifierEvent(event) || this._multiSelect.isTouchSelectionMode()) {
       return;
     }
     const targetEl = event.target as HTMLElement;

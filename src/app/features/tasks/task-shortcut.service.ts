@@ -372,6 +372,28 @@ export class TaskShortcutService {
       return true;
     }
 
+    // `X` toggles the focused row in the selection (Linear / Gmail convention).
+    if (focusedTaskId && checkKeyCombo(ev, keys.taskToggleSelect)) {
+      this._multiSelect.toggle(focusedTaskId);
+      ev.preventDefault();
+      return true;
+    }
+
+    // Ctrl/Cmd+A on a focused row selects every row of its list. The global
+    // handler lets Cmd+key through from inputs, so guard against a title edit.
+    if (
+      focusedTaskId &&
+      (ev.ctrlKey || ev.metaKey) &&
+      !ev.shiftKey &&
+      !ev.altKey &&
+      ev.code === 'KeyA' &&
+      !(ev.target instanceof HTMLElement && isInputElement(ev.target))
+    ) {
+      this._multiSelect.selectAllInListOfFocused();
+      ev.preventDefault();
+      return true;
+    }
+
     if (!this._multiSelect.isActive()) {
       return false;
     }

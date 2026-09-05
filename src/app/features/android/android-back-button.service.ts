@@ -12,6 +12,7 @@ import { selectAllProjects } from '../project/store/project.selectors';
 import { hideFocusOverlay } from '../focus-mode/store/focus-mode.actions';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TaskFocusService } from '../tasks/task-focus.service';
+import { TaskMultiSelectService } from '../tasks/task-multi-select.service';
 
 /**
  * Implements Android back-button behavior for top-level (bottom-nav) destinations
@@ -38,6 +39,7 @@ export class AndroidBackButtonService {
   private readonly _matDialog = inject(MatDialog);
   private readonly _layoutService = inject(LayoutService);
   private readonly _taskFocusService = inject(TaskFocusService);
+  private readonly _taskMultiSelectService = inject(TaskMultiSelectService);
 
   private readonly _isFocusOverlayShown = this._store.selectSignal(selectIsOverlayShown);
   private readonly _allProjects = this._store.selectSignal(selectAllProjects);
@@ -51,6 +53,13 @@ export class AndroidBackButtonService {
 
     // 2. Task context menus are CDK overlays without a history entry.
     if (this._closeTaskContextMenu()) {
+      return;
+    }
+
+    // 2b. A task multi-selection (or touch selection mode) has no history
+    //     entry either; back leaves it before anything navigates away.
+    if (this._taskMultiSelectService.isBarVisible()) {
+      this._taskMultiSelectService.clear();
       return;
     }
 

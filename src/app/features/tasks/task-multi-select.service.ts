@@ -1,8 +1,4 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
-import { NavigationEnd, Router } from '@angular/router';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter } from 'rxjs/operators';
-import { WorkContextService } from '../work-context/work-context.service';
+import { computed, Injectable, signal } from '@angular/core';
 
 export type MultiSelectDirection = 'up' | 'down';
 
@@ -11,10 +7,11 @@ export type MultiSelectDirection = 'up' | 'down';
  * once"). Deliberately named *multi-select* so it can never be confused with
  * `TaskState.selectedTaskId`, which is the task whose detail panel is open.
  *
- * - UI-only: not in NgRx state, never persisted, never synced.
+ * - UI-only: not in NgRx state, never persisted, never synced. Pure state with
+ *   no injected dependencies; the app-shell bar component wires the clearing
+ *   on route and work-context change (TaskMultiSelectBarComponent).
  * - Only ever holds ids of tasks currently rendered as a `<task>` row; rows
- *   prune themselves on destroy, and the whole set clears on work-context or
- *   route change.
+ *   prune themselves on destroy.
  * - Ranges and keyboard extension are scoped to the anchor's list, i.e. the
  *   direct `<task>` children of its `.task-list-inner`, so expanded subtasks
  *   of other parents are never swept in.
@@ -23,13 +20,11 @@ export type MultiSelectDirection = 'up' | 'down';
   providedIn: 'root',
 })
 export class TaskMultiSelectService {
-  private readonly _router = inject(Router);
-  private readonly _workContextService = inject(WorkContextService);
-
   private readonly _selectedIds = signal<ReadonlySet<string>>(new Set());
   private readonly _anchorId = signal<string | null>(null);
   private readonly _menuOpenRequest = signal<{ x: number; y: number } | null>(null);
   private readonly _isBulkFeedbackSuppressed = signal(false);
+  private readonly _isTouchSelectionMode = signal(false);
   private readonly _pendingRemovals = new Set<string>();
 
   readonly selectedIds = this._selectedIds.asReadonly();
@@ -45,18 +40,17 @@ export class TaskMultiSelectService {
    * this small service.
    */
   readonly isBulkFeedbackSuppressed = this._isBulkFeedbackSuppressed.asReadonly();
-
-  constructor() {
-    this._router.events
-      .pipe(
-        filter((ev) => ev instanceof NavigationEnd),
-        takeUntilDestroyed(),
-      )
-      .subscribe(() => this.clear());
-    this._workContextService.activeWorkContextTypeAndId$
-      .pipe(takeUntilDestroyed())
-      .subscribe(() => this.clear());
-  }
+  /**
+   * Explicit selection mode for touch, where there is no modifier key: rows
+   * show a selection ring, a tap toggles, swipe / drag / title edit are
+   * suspended. Entered from the task context menu; left via the bar's ✕,
+   * Android back or Esc. Deselecting the last task keeps the mode.
+   */
+  readonly isTouchSelectionMode = this._isTouchSelectionMode.asReadonly();
+  /** The bar shows while something is selected or touch selection mode is on. */
+  readonly isBarVisible = computed(
+    () => this._selectedIds().size > 0 || this._isTouchSelectionMode(),
+  );
 
   has(id: string): boolean {
     return this._selectedIds().has(id);
@@ -145,8 +139,29 @@ export class TaskMultiSelectService {
     return nextEl;
   }
 
+  enterTouchSelectionMode(initialId?: string): void {
+    this._isTouchSelectionMode.set(true);
+    if (initialId && !this._selectedIds().has(initialId)) {
+      this.toggle(initialId);
+    }
+  }
+
   setBulkFeedbackSuppressed(isSuppressed: boolean): void {
     this._isBulkFeedbackSuppressed.set(isSuppressed);
+  }
+
+  /** Ctrl/Cmd+A: select every row of the focused row's list; it becomes the anchor. */
+  selectAllInListOfFocused(): void {
+    const focusedEl = document.activeElement?.closest('task') as HTMLElement | null;
+    const focusedId = focusedEl?.getAttribute('data-task-id');
+    if (!focusedEl || !focusedId) {
+      return;
+    }
+    const ids = this._listRowsFor(focusedEl)
+      .map((el) => el.getAttribute('data-task-id'))
+      .filter((id): id is string => !!id);
+    this._selectedIds.set(new Set(ids));
+    this._anchorId.set(focusedId);
   }
 
   /**
@@ -199,12 +214,14 @@ export class TaskMultiSelectService {
     }
   }
 
+  /** Empties the selection and leaves touch selection mode. */
   clear(): void {
     if (this._selectedIds().size) {
       this._selectedIds.set(new Set());
     }
     this._anchorId.set(null);
     this._menuOpenRequest.set(null);
+    this._isTouchSelectionMode.set(false);
   }
 
   requestMenuOpen(pos: { x: number; y: number }): void {
