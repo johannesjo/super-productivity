@@ -331,6 +331,14 @@ the recovery operation plus snapshot are committed atomically. See
 and
 [`operation-log-recovery.service.ts`](../../src/app/op-log/persistence/operation-log-recovery.service.ts).
 
+A genesis op (`MIGRATION` / `RECOVERY`) is not replayable by other clients — it
+carries this client's whole state as an ordinary Batch op that receivers apply
+as a no-op. A client whose history is still only that genesis op (never synced,
+no full-state op) is therefore treated like a fresh client with local data at
+join time: it gets the local-data conflict dialog on a non-empty server, or
+seeds an empty server with a `SYNC_IMPORT`
+(`SyncLocalStateService.isNeverSyncedGenesisClient`, #9863).
+
 ## A.4 Compaction
 
 ### Purpose
