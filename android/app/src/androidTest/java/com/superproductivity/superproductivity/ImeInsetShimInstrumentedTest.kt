@@ -13,7 +13,6 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.test.core.app.ActivityScenario
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.runner.AndroidJUnit4
-import androidx.webkit.WebViewCompat
 import com.superproductivity.superproductivity.webview.ImeWebViewHeight
 import com.superproductivity.superproductivity.webview.NativeInsetShimGate
 import com.superproductivity.superproductivity.webview.WebViewCompatibilityChecker
@@ -101,7 +100,10 @@ class ImeInsetShimInstrumentedTest {
             val compat = onMainSync { WebViewCompatibilityChecker.evaluate(activity) }
             val activeMajor = NativeInsetShimGate.activeProviderMajor(compat)
             val expectShim = NativeInsetShimGate.shouldRunShim(Build.VERSION.SDK_INT, activeMajor)
-            val current = WebViewCompat.getCurrentWebViewPackage(activity)
+            // Framework API (26+), same source SystemBars reads; androidx.webkit is
+            // not on the app's compile classpath.
+            val current =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) WebView.getCurrentWebViewPackage() else null
             Log.i(
                 TAG,
                 "sdk=${Build.VERSION.SDK_INT} activeMajor=$activeMajor " +
