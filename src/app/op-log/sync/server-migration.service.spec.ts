@@ -24,8 +24,7 @@ import { LockService } from './lock.service';
 import { OperationWriteFlushService } from './operation-write-flush.service';
 import { LOCK_NAMES } from '../core/operation-log.const';
 import { OperationCaptureService } from '../capture/operation-capture.service';
-import { MODEL_CONFIGS } from '../model/model-config';
-import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
+import { AppDataComplete, withDefaultModelSlices } from '../model/model-config';
 
 describe('ServerMigrationService', () => {
   let service: ServerMigrationService;
@@ -829,44 +828,58 @@ describe('ServerMigrationService', () => {
     // (sync.service.ts), so handleServerMigration expects OperationSyncCapable.
   });
   /**
-   * Reproduction specs for the #9256 dead-end (and the #7562 "phone overwrites
-   * laptop" symptom). DOCUMENTS CURRENT BEHAVIOUR — these pass on master.
+   * Reproduction specs for the #9256 recovery dead-end. DOCUMENTS CURRENT
+   * BEHAVIOUR — these pass on master.
    *
    * `handleServerMigration` gates the full-state SYNC_IMPORT on
-   * `hasServerMigrationStateData`, documented as "Skip if local state is
-   * effectively empty". That predicate is `hasMeaningfulStateData` (task /
-   * non-INBOX project / non-system tag / note) OR "any other MODEL_CONFIGS key
-   * differs from its default". The second arm makes `globalConfig` alone
-   * satisfy it — and configuring a sync provider is itself a `globalConfig`
-   * mutation, so the guard is already defeated before the first sync of a
-   * fresh install.
+   * `hasServerMigrationStateData` (server-migration.service.ts:28), whose call
+   * site is commented "Skip if local state is effectively empty". It is
+   * `hasMeaningfulStateData` (a task / non-INBOX project / non-system tag /
+   * note) OR "any other MODEL_CONFIGS key differs from its default".
    *
-   * That is harmless for SERVER_MIGRATION (the server is empty by definition,
-   * so a near-empty import loses nothing) but not for FORCE_UPLOAD, which
-   * passes `skipServerEmptyCheck: true` precisely because the server holds
-   * data that this SYNC_IMPORT will replace. FORCE_UPLOAD is what the
-   * "Overwrite Server & Other Devices" button in the Decryption Failed dialog
-   * (`DialogHandleDecryptErrorComponent.updatePWAndForceUpload`) invokes — the
-   * one dialog a #9256 user is left staring at on a fresh install with no data
-   * of their own.
+   * The second arm can never be false for a real client. Its `deepEqual` is
+   * the sync-core one, whose shared `seen` set misreports a DAG as a circular
+   * reference, and `initialSimpleCounterState` is a DAG: the three
+   * `DEFAULT_SIMPLE_COUNTERS` are built by spreading `EMPTY_SIMPLE_COUNTER`,
+   * and a shallow spread copies the REFERENCE to `streakWeekDays` /
+   * `countOnDay`, so all three share one object. So `simpleCounter` compares
+   * unequal to its own default and the guard reports "has data" for every
+   * snapshot that carries a simpleCounter slice — i.e. every real one. See the
+   * DAG spec in packages/sync-core/tests/conflict-resolution.spec.ts.
+   *
+   * The pre-existing specs above pass only because their fixtures are partial
+   * objects holding task/project/tag alone: the loop skips absent keys via
+   * `hasOwnProperty`, so simpleCounter never gets compared.
+   *
+   * Why that matters for FORCE_UPLOAD specifically: it is the reason
+   * `skipServerEmptyCheck` is set, i.e. the server holds data this SYNC_IMPORT
+   * will replace, and `operation-log-upload.service.ts:290` additionally marks
+   * a FORCE_UPLOAD SYNC_IMPORT `isCleanSlate`, which makes the server
+   * `deleteMany` the user's operations outright rather than supersede them
+   * (super-sync-server sync.service.ts:315-337). It is what the "Overwrite
+   * Server & Other Devices" button of the Decryption Failed dialog invokes
+   * (dialog-handle-decrypt-error.component.ts:50).
+   *
+   * Scope and limits, stated so these are not read as more than they are:
+   * - The overwrite is CONSENTED, not silent: three confirmations precede it
+   *   (the dialog's `DECRYPT_OVERWRITE`, `C.FORCE_UPLOAD` in
+   *   sync-wrapper.service.ts:1337, and the button is disabled without a
+   *   password). The defect is that the one code-level check meant to refuse
+   *   an overwrite from a client with nothing of its own cannot fire.
+   * - SERVER_MIGRATION is not inherently safe either: `checkAndHandleMigration`
+   *   (server-migration.service.ts:117-125) also passes `skipServerEmptyCheck`
+   *   against a NON-empty server after its own confirm dialog. It differs only
+   *   in not setting the clean-slate flag.
+   * - These are unit specs over the guard. `validateAndRepair` is stubbed to a
+   *   pass-through by the harness above and the snapshot is injected, so they
+   *   pin the predicate, not a full end-to-end overwrite.
    */
-  describe('#9256/#7562 reproduction: FORCE_UPLOAD from a data-less client', () => {
-    /**
-     * A fresh install that has done nothing but configure SuperSync: every
-     * model at its shipped default, except `globalConfig`, which cannot still
-     * be at its default once a provider is selected.
-     */
-    const createFreshInstallSnapshot = (): Record<string, unknown> => {
-      const state: Record<string, unknown> = {};
-      for (const [key, config] of Object.entries(MODEL_CONFIGS)) {
-        state[key] = config.defaultData;
-      }
-      state.globalConfig = {
-        ...DEFAULT_GLOBAL_CONFIG,
-        sync: { ...DEFAULT_GLOBAL_CONFIG.sync, syncProvider: 'SuperSync' },
-      };
-      return state;
-    };
+  describe('#9256 reproduction: FORCE_UPLOAD from a client with no data of its own', () => {
+    // withDefaultModelSlices structuredClones every default slice and returns a
+    // real AppDataComplete, so the predicate performs a genuine structural
+    // comparison rather than a reference-identity short-circuit.
+    const freshInstallState = (overrides: object = {}): AppDataComplete =>
+      withDefaultModelSlices(overrides);
 
     const forceUpload = (): Promise<string | undefined> =>
       service.handleServerMigration(defaultProvider, {
@@ -874,48 +887,43 @@ describe('ServerMigrationService', () => {
         syncImportReason: 'FORCE_UPLOAD',
       });
 
-    it('creates a SYNC_IMPORT although the client holds no user data', async () => {
-      stateSnapshotServiceSpy.getStateSnapshotAsync.and.resolveTo(
-        createFreshInstallSnapshot() as any,
-      );
+    it('proceeds for a pristine default state with no user data whatsoever', async () => {
+      stateSnapshotServiceSpy.getStateSnapshotAsync.and.resolveTo(freshInstallState());
 
       await forceUpload();
 
-      // The "effectively empty" guard does not fire.
       expect(opLogStoreSpy.append).toHaveBeenCalled();
       const appendedOp = opLogStoreSpy.append.calls.mostRecent().args[0];
       expect(appendedOp.opType).toBe(OpType.SyncImport);
       expect(appendedOp.syncImportReason).toBe('FORCE_UPLOAD');
-    });
 
-    it('uploads a payload with no tasks, projects, tags or notes', async () => {
-      stateSnapshotServiceSpy.getStateSnapshotAsync.and.resolveTo(
-        createFreshInstallSnapshot() as any,
-      );
-
-      await forceUpload();
-
-      const payload = opLogStoreSpy.append.calls.mostRecent().args[0].payload as Record<
-        string,
-        { ids: string[] }
-      >;
+      // Nothing of the user's is in the payload that replaces the server.
+      const payload = appendedOp.payload as Record<string, { ids: string[] }>;
       expect(payload.task.ids).toEqual([]);
       expect(payload.note.ids).toEqual([]);
-      // Only the INBOX project and the built-in system tags — i.e. exactly what
-      // `hasMeaningfulStateData` classifies as "no user data".
       expect(payload.project.ids.filter((id) => id !== INBOX_PROJECT.id)).toEqual([]);
       expect(payload.tag.ids.filter((id) => !SYSTEM_TAG_IDS.has(id))).toEqual([]);
     });
 
-    it('isolates globalConfig as the reason the guard passes', async () => {
-      const snapshot = createFreshInstallSnapshot();
-      snapshot.globalConfig = MODEL_CONFIGS.globalConfig.defaultData;
-      stateSnapshotServiceSpy.getStateSnapshotAsync.and.resolveTo(snapshot as any);
+    it('isolates simpleCounter as the slice that makes the guard unable to skip', async () => {
+      // Same pristine state minus the simpleCounter key. The MODEL_CONFIGS loop
+      // skips absent keys, so the aliasing-induced false inequality disappears
+      // and the guard finally reports "empty" — which no real snapshot can do,
+      // since StateSnapshotService always emits a simpleCounter slice
+      // (state-snapshot.service.ts:65).
+      const state = freshInstallState() as unknown as Record<string, unknown>;
+      delete state.simpleCounter;
+      stateSnapshotServiceSpy.getStateSnapshotAsync.and.resolveTo(
+        state as unknown as AppDataComplete,
+      );
 
       await forceUpload();
 
-      // Same data-less state, default globalConfig: correctly skipped. The only
-      // difference from the case above is that a sync provider was configured.
+      // Note the skip is not a good outcome either: handleServerMigration
+      // returns undefined, which forceUploadLocalState turns into
+      // ForceUploadFailedError (sync-import-conflict-coordinator.service.ts:81-85)
+      // and a FORCE_UPLOAD_FAILED snack — another dead end, just a
+      // non-destructive one.
       expect(opLogStoreSpy.append).not.toHaveBeenCalled();
     });
   });

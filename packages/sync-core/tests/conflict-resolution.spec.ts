@@ -89,6 +89,41 @@ describe('deepEqual', () => {
     );
   });
 
+  /**
+   * DOCUMENTS CURRENT BEHAVIOUR — passes on master.
+   *
+   * `seen` is one WeakSet shared across the whole traversal and is never
+   * unwound, and every visited object is added from BOTH sides. A DAG — the
+   * same object referenced twice, which is not a cycle — therefore trips the
+   * circular-reference bail on its second visit and the comparison returns
+   * false for two structurally identical values.
+   *
+   * This is reachable from ordinary app data, not just contrived fixtures:
+   * `DEFAULT_SIMPLE_COUNTERS` builds three counters by spreading
+   * `EMPTY_SIMPLE_COUNTER`, and a shallow spread copies the REFERENCE to
+   * `streakWeekDays` / `countOnDay`, so all three share one object. As a
+   * result `deepEqual(structuredClone(initialSimpleCounterState),
+   * initialSimpleCounterState)` is false — see the FORCE_UPLOAD specs in
+   * src/app/op-log/sync/server-migration.service.spec.ts, where this makes the
+   * "is the local state effectively empty?" guard unable to ever skip.
+   */
+  it('returns false for a shared (non-circular) sub-object referenced twice', () => {
+    const shared = { weekDays: { mon: true, sat: false } };
+    const a = { first: { cfg: shared }, second: { cfg: shared } };
+    const b = structuredClone(a);
+
+    // structuredClone preserves the aliasing, so both sides are identical in
+    // shape AND in sharing — yet:
+    expect(deepEqual(a, b)).toBe(false);
+
+    // Breaking the aliasing alone makes the same values compare equal.
+    const unaliased = {
+      first: { cfg: { weekDays: { mon: true, sat: false } } },
+      second: { cfg: { weekDays: { mon: true, sat: false } } },
+    };
+    expect(deepEqual(unaliased, structuredClone(unaliased))).toBe(true);
+  });
+
   it('returns false and logs when max depth is exceeded', () => {
     const logger = createLogger();
     expect(deepEqual({ a: { b: 1 } }, { a: { b: 1 } }, { logger, maxDepth: 1 })).toBe(
