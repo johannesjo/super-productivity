@@ -13,6 +13,7 @@ import {
   extractFullStateFromPayload,
   assertValidFullStatePayload,
   ActionType,
+  isGenesisEntityType,
   isMultiEntityPayload,
 } from '../core/operation.types';
 import { OpLog } from '../../core/log';
@@ -155,9 +156,8 @@ export class OperationLogUploadService {
       // Fix the pending-op set and the file snapshot under the same operation-log
       // boundary. A task-time action applied by reducers while waiting for this
       // lock remains visible to snapshot projection as an in-flight delta.
-      const { pendingOps, localStateSnapshot } = await this.lockService.request(
-        LOCK_NAMES.OPERATION_LOG,
-        async () => {
+      const { pendingOps: allPendingOps, localStateSnapshot } =
+        await this.lockService.request(LOCK_NAMES.OPERATION_LOG, async () => {
           const capturedPendingOps = await this.opLogStore.getUnsynced();
           return {
             pendingOps: capturedPendingOps,
@@ -166,7 +166,28 @@ export class OperationLogUploadService {
                 ? this.stateSnapshotService.getStateSnapshotForOperationLog()
                 : undefined,
           };
-        },
+        });
+
+      // Genesis ops (MIGRATION / RECOVERY) carry this client's whole pre-op-log
+      // state but replay as a no-op on every other client, so sending them only
+      // costs server storage and download time for every later joiner. Whatever
+      // that state had to contribute was already decided on the download side
+      // of this cycle, where the op is still pending and counts as local work:
+      // it shipped as a SYNC_IMPORT, or the user chose a side. Mark them synced
+      // locally instead of uploading; hasSyncedOps() ignores them either way.
+      // (#9921)
+      const genesisSeqs = allPendingOps
+        .filter((entry) => isGenesisEntityType(entry.op.entityType))
+        .map((entry) => entry.seq);
+      if (genesisSeqs.length > 0) {
+        OpLog.normal(
+          `OperationLogUploadService: Marking ${genesisSeqs.length} genesis op(s) synced ` +
+            'without uploading them (no receiver on any other client).',
+        );
+        await acknowledge(genesisSeqs);
+      }
+      const pendingOps = allPendingOps.filter(
+        (entry) => !isGenesisEntityType(entry.op.entityType),
       );
       selectedPendingOps = pendingOps;
 

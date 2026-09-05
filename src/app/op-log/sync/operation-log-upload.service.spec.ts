@@ -370,6 +370,75 @@ describe('OperationLogUploadService', () => {
         expect(mockOpLogStore.markSynced).toHaveBeenCalledWith([1, 2]);
       });
 
+      describe('genesis ops are never uploaded (#9921)', () => {
+        const createGenesisEntry = (
+          seq: number,
+          entityType: 'MIGRATION' | 'RECOVERY',
+        ): OperationLogEntry => {
+          const entry = createMockEntry(seq, `genesis-${seq}`, 'client-1');
+          return {
+            ...entry,
+            op: {
+              ...entry.op,
+              actionType: ActionType.MIGRATION_GENESIS_IMPORT,
+              opType: OpType.Batch,
+              entityType,
+              entityId: '*',
+            },
+          };
+        };
+
+        it('marks genesis ops synced locally and uploads only the ordinary ops', async () => {
+          const genesis = createGenesisEntry(1, 'MIGRATION');
+          const regular = createMockEntry(2, 'op-2', 'client-1');
+          mockOpLogStore.getUnsynced.and.resolveTo([genesis, regular]);
+          mockApiProvider.uploadOps.and.resolveTo({
+            results: [{ opId: 'op-2', accepted: true }],
+            latestSeq: 10,
+            newOps: [],
+          });
+
+          const result = await service.uploadPendingOps(mockApiProvider);
+
+          const uploadedIds = (
+            mockApiProvider.uploadOps.calls.mostRecent().args[0] as { id: string }[]
+          ).map((op) => op.id);
+          expect(uploadedIds).toEqual(['op-2']);
+          expect(mockOpLogStore.markSynced).toHaveBeenCalledWith([1]);
+          expect(mockOpLogStore.markSynced).toHaveBeenCalledWith([2]);
+          expect(result.uploadedCount).toBe(1);
+        });
+
+        it('uploads nothing for a client whose only pending op is a RECOVERY genesis', async () => {
+          mockOpLogStore.getUnsynced.and.resolveTo([createGenesisEntry(1, 'RECOVERY')]);
+
+          const result = await service.uploadPendingOps(mockApiProvider);
+
+          expect(mockApiProvider.uploadOps).not.toHaveBeenCalled();
+          expect(mockOpLogStore.markSynced).toHaveBeenCalledWith([1]);
+          expect(result.uploadedCount).toBe(0);
+        });
+
+        it('routes the genesis acknowledgement through the deferred-ack path', async () => {
+          const genesis = createGenesisEntry(1, 'MIGRATION');
+          const regular = createMockEntry(2, 'op-2', 'client-1');
+          mockOpLogStore.getUnsynced.and.resolveTo([genesis, regular]);
+          mockApiProvider.uploadOps.and.resolveTo({
+            results: [{ opId: 'op-2', accepted: true }],
+            latestSeq: 10,
+            newOps: [],
+          });
+
+          const result = await service.uploadPendingOps(mockApiProvider, {
+            deferAcknowledgement: true,
+          });
+
+          expect(mockOpLogStore.markSynced).not.toHaveBeenCalled();
+          expect(result.selectedPendingOps).toEqual([regular]);
+          expect(result.pendingAcknowledgementSeqs).toEqual([1, 2]);
+        });
+      });
+
       it('should defer acknowledgements and return the exact selected batch for piggyback resolution', async () => {
         const pendingOps = [
           createMockEntry(1, 'op-1', 'client-1'),

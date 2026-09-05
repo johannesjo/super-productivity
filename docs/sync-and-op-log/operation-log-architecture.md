@@ -337,7 +337,12 @@ as a no-op. A client whose history is still only that genesis op (never synced,
 no full-state op) is therefore treated like a fresh client with local data at
 join time: it gets the local-data conflict dialog on a non-empty server, or
 seeds an empty server with a `SYNC_IMPORT`
-(`SyncLocalStateService.isNeverSyncedGenesisClient`, #9863).
+(`SyncLocalStateService.isNeverSyncedGenesisClient`, #9863). Because that
+download-side decision is what actually ships the state, the genesis op itself
+is never uploaded: `OperationLogUploadService` marks it synced locally and
+leaves it out of the pending set (`isGenesisEntityType`, #9921). Servers may
+still hold genesis ops uploaded by older clients; receivers apply them as
+no-ops as before.
 
 ## A.4 Compaction
 

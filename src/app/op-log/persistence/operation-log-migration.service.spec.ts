@@ -31,7 +31,8 @@ describe('OperationLogMigrationService', () => {
   beforeEach(() => {
     mockOpLogStore = jasmine.createSpyObj('OperationLogStoreService', [
       'loadStateCache',
-      'getOpsAfterSeq',
+      'getFirstOpEntry',
+      'countOps',
       'deleteOpsWhere',
       'clearAllOperations',
       'appendOperationAndSnapshot',
@@ -97,7 +98,7 @@ describe('OperationLogMigrationService', () => {
         await service.checkAndMigrate();
 
         expect(mockOpLogStore.loadStateCache).toHaveBeenCalled();
-        expect(mockOpLogStore.getOpsAfterSeq).not.toHaveBeenCalled();
+        expect(mockOpLogStore.getFirstOpEntry).not.toHaveBeenCalled();
       });
     });
 
@@ -107,24 +108,23 @@ describe('OperationLogMigrationService', () => {
       });
 
       it('should skip if Genesis operation exists', async () => {
-        mockOpLogStore.getOpsAfterSeq.and.resolveTo([
-          {
-            seq: 1,
-            op: {
-              id: 'genesis-op',
-              entityType: 'MIGRATION',
-              actionType: '[Migration] Genesis Import' as ActionType,
-              opType: OpType.Batch,
-              clientId: 'client1',
-              vectorClock: { client1: 1 },
-              timestamp: Date.now(),
-              payload: { task: { ids: ['t1'] } },
-              schemaVersion: 1,
-            },
-            appliedAt: Date.now(),
-            source: 'local',
+        mockOpLogStore.getFirstOpEntry.and.resolveTo({
+          seq: 1,
+          op: {
+            id: 'genesis-op',
+            entityType: 'MIGRATION',
+            actionType: '[Migration] Genesis Import' as ActionType,
+            opType: OpType.Batch,
+            clientId: 'client1',
+            vectorClock: { client1: 1 },
+            timestamp: Date.now(),
+            payload: { task: { ids: ['t1'] } },
+            schemaVersion: 1,
           },
-        ]);
+          appliedAt: Date.now(),
+          source: 'local',
+        });
+        mockOpLogStore.countOps.and.resolveTo(1);
 
         await service.checkAndMigrate();
 
@@ -135,24 +135,23 @@ describe('OperationLogMigrationService', () => {
       });
 
       it('should skip if Recovery operation exists', async () => {
-        mockOpLogStore.getOpsAfterSeq.and.resolveTo([
-          {
-            seq: 1,
-            op: {
-              id: 'recovery-op',
-              entityType: 'RECOVERY',
-              actionType: '[Recovery] Data Recovery Import' as ActionType,
-              opType: OpType.Batch,
-              clientId: 'client1',
-              vectorClock: { client1: 1 },
-              timestamp: Date.now(),
-              payload: { task: { ids: ['t1'] } },
-              schemaVersion: 1,
-            },
-            appliedAt: Date.now(),
-            source: 'local',
+        mockOpLogStore.getFirstOpEntry.and.resolveTo({
+          seq: 1,
+          op: {
+            id: 'recovery-op',
+            entityType: 'RECOVERY',
+            actionType: '[Recovery] Data Recovery Import' as ActionType,
+            opType: OpType.Batch,
+            clientId: 'client1',
+            vectorClock: { client1: 1 },
+            timestamp: Date.now(),
+            payload: { task: { ids: ['t1'] } },
+            schemaVersion: 1,
           },
-        ]);
+          appliedAt: Date.now(),
+          source: 'local',
+        });
+        mockOpLogStore.countOps.and.resolveTo(1);
 
         await service.checkAndMigrate();
 
@@ -160,40 +159,23 @@ describe('OperationLogMigrationService', () => {
       });
 
       it('should clear orphan operations when legacy data exists', async () => {
-        mockOpLogStore.getOpsAfterSeq.and.resolveTo([
-          {
-            seq: 1,
-            op: {
-              id: 'orphan-op-1',
-              entityType: 'TASK',
-              actionType: '[Task] Update Task' as ActionType,
-              opType: OpType.Update,
-              clientId: 'client1',
-              vectorClock: { client1: 1 },
-              timestamp: Date.now(),
-              payload: { id: 't1', title: 'Test' },
-              schemaVersion: 1,
-            },
-            appliedAt: Date.now(),
-            source: 'local',
+        mockOpLogStore.getFirstOpEntry.and.resolveTo({
+          seq: 1,
+          op: {
+            id: 'orphan-op-1',
+            entityType: 'TASK',
+            actionType: '[Task] Update Task' as ActionType,
+            opType: OpType.Update,
+            clientId: 'client1',
+            vectorClock: { client1: 1 },
+            timestamp: Date.now(),
+            payload: { id: 't1', title: 'Test' },
+            schemaVersion: 1,
           },
-          {
-            seq: 2,
-            op: {
-              id: 'orphan-op-2',
-              entityType: 'TAG',
-              actionType: '[Tag] Update Tag' as ActionType,
-              opType: OpType.Update,
-              clientId: 'client1',
-              vectorClock: { client1: 2 },
-              timestamp: Date.now(),
-              payload: { id: 'tag1', name: 'Test Tag' },
-              schemaVersion: 1,
-            },
-            appliedAt: Date.now(),
-            source: 'local',
-          },
-        ]);
+          appliedAt: Date.now(),
+          source: 'local',
+        });
+        mockOpLogStore.countOps.and.resolveTo(2);
         mockOpLogStore.clearAllOperations.and.resolveTo();
         // Legacy data exists - orphan ops should be cleared before migration
         mockLegacyPfDb.hasUsableEntityData.and.resolveTo(true);
@@ -211,24 +193,23 @@ describe('OperationLogMigrationService', () => {
       });
 
       it('should NOT clear orphan operations when no legacy data exists (fresh install)', async () => {
-        mockOpLogStore.getOpsAfterSeq.and.resolveTo([
-          {
-            seq: 1,
-            op: {
-              id: 'orphan-op-1',
-              entityType: 'TASK',
-              actionType: '[Task] Update Task' as ActionType,
-              opType: OpType.Update,
-              clientId: 'client1',
-              vectorClock: { client1: 1 },
-              timestamp: Date.now(),
-              payload: { id: 't1', title: 'Test' },
-              schemaVersion: 1,
-            },
-            appliedAt: Date.now(),
-            source: 'local',
+        mockOpLogStore.getFirstOpEntry.and.resolveTo({
+          seq: 1,
+          op: {
+            id: 'orphan-op-1',
+            entityType: 'TASK',
+            actionType: '[Task] Update Task' as ActionType,
+            opType: OpType.Update,
+            clientId: 'client1',
+            vectorClock: { client1: 1 },
+            timestamp: Date.now(),
+            payload: { id: 't1', title: 'Test' },
+            schemaVersion: 1,
           },
-        ]);
+          appliedAt: Date.now(),
+          source: 'local',
+        });
+        mockOpLogStore.countOps.and.resolveTo(1);
         // No legacy data - orphan ops are kept (fresh install scenario)
         mockLegacyPfDb.hasUsableEntityData.and.resolveTo(false);
 
@@ -244,7 +225,7 @@ describe('OperationLogMigrationService', () => {
     describe('when no snapshot and no operations exist (fresh install)', () => {
       beforeEach(() => {
         mockOpLogStore.loadStateCache.and.resolveTo(null);
-        mockOpLogStore.getOpsAfterSeq.and.resolveTo([]);
+        mockOpLogStore.getFirstOpEntry.and.resolveTo(undefined);
         mockLegacyPfDb.hasUsableEntityData.and.resolveTo(false);
       });
 
@@ -252,7 +233,7 @@ describe('OperationLogMigrationService', () => {
         await service.checkAndMigrate();
 
         expect(mockOpLogStore.loadStateCache).toHaveBeenCalled();
-        expect(mockOpLogStore.getOpsAfterSeq).toHaveBeenCalledWith(0);
+        expect(mockOpLogStore.getFirstOpEntry).toHaveBeenCalled();
         expect(mockLegacyPfDb.hasUsableEntityData).toHaveBeenCalled();
         expect(OpLog.normal).toHaveBeenCalledWith(
           jasmine.stringContaining('No legacy data found'),
@@ -263,7 +244,7 @@ describe('OperationLogMigrationService', () => {
     describe('when legacy data exists', () => {
       beforeEach(() => {
         mockOpLogStore.loadStateCache.and.resolveTo(null);
-        mockOpLogStore.getOpsAfterSeq.and.resolveTo([]);
+        mockOpLogStore.getFirstOpEntry.and.resolveTo(undefined);
         mockLegacyPfDb.hasUsableEntityData.and.resolveTo(true);
       });
 
@@ -342,7 +323,7 @@ describe('OperationLogMigrationService', () => {
       beforeEach(() => {
         // Set up pre-conditions: no snapshot, no ops, legacy data exists, lock acquired
         mockOpLogStore.loadStateCache.and.resolveTo(null);
-        mockOpLogStore.getOpsAfterSeq.and.resolveTo([]);
+        mockOpLogStore.getFirstOpEntry.and.resolveTo(undefined);
         mockLegacyPfDb.hasUsableEntityData.and.resolveTo(true);
         mockLegacyPfDb.acquireMigrationLock.and.resolveTo(true);
         mockLegacyPfDb.releaseMigrationLock.and.resolveTo();
@@ -466,7 +447,7 @@ describe('OperationLogMigrationService', () => {
 
       beforeEach(() => {
         mockOpLogStore.loadStateCache.and.resolveTo(null);
-        mockOpLogStore.getOpsAfterSeq.and.resolveTo([]);
+        mockOpLogStore.getFirstOpEntry.and.resolveTo(undefined);
         mockOpLogStore.appendOperationAndSnapshot.and.resolveTo(1);
         mockLegacyPfDb.hasUsableEntityData.and.resolveTo(true);
         mockLegacyPfDb.acquireMigrationLock.and.resolveTo(true);

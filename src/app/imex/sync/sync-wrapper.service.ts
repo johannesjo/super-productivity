@@ -647,6 +647,16 @@ export class SyncWrapperService {
         this._providerManager.setSyncStatus('ERROR');
         return 'HANDLED_ERROR';
       }
+      // Empty-server seeding created no SYNC_IMPORT (#9921): uploading now would
+      // accept this client's ordinary ops and silently strand its pre-op-log /
+      // genesis state. Leave everything pending; the next sync re-downloads.
+      if (downloadResult.kind === 'server_migration_skipped') {
+        SyncLog.warn(
+          'SyncWrapperService: Empty-server seeding created no SYNC_IMPORT. Skipping upload phase.',
+        );
+        this._providerManager.setSyncStatus('UNKNOWN_OR_CHANGED');
+        return 'HANDLED_ERROR';
+      }
 
       // Track the successfully synced provider for switch detection on next sync
       this._providerManager.setLastSyncedProviderId(providerId);
