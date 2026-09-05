@@ -179,6 +179,29 @@ jobs:
             "${zipalign}" -c -P 16 4 "${apk}"
           done
 
+      # The service-worker files are stripped from the web assets in
+      # `sync:android` because nothing on Android registers a service worker and
+      # `ngsw.json` carries a build timestamp, which breaks F-Droid's
+      # reproducible-build verification (#4155). That strip warns rather than
+      # failing, so the build never breaks over a cleanup — this asserts the
+      # outcome on the real artifact instead, covering the whole chain
+      # (build -> cap sync -> strip -> package) rather than any one link.
+      - name: 'Verify no service worker shipped in the APK'
+        run: |
+          set -euo pipefail
+          apks=(android/app/build/outputs/apk/*/release/*.apk)
+          if [ ${#apks[@]} -eq 0 ]; then
+            echo "::error::no release APK found to verify"
+            exit 1
+          fi
+          for apk in "${apks[@]}"; do
+            if unzip -l "${apk}" | grep -qE 'assets/public/(ngsw|safety-worker|worker-basic)'; then
+              echo "::error::${apk} ships service-worker assets; the strip in sync:android did not run (#4155)"
+              unzip -l "${apk}" | grep -E 'assets/public/(ngsw|safety-worker|worker-basic)'
+              exit 1
+            fi
+          done
+
       # APK is now signed automatically by Gradle using signingConfig
 
       - name: 'Upload APK files'

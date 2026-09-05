@@ -134,29 +134,43 @@ None of it is used on Android. `src/main.ts` gates both service-worker
 registration paths on `!IS_NATIVE_PLATFORM && !IS_ELECTRON` and actively
 _unregisters_ any existing worker on those platforms, so the files are dead
 weight. `sync:android` therefore deletes them after `cap sync`, via
-`tools/strip-native-service-worker.js`. That retires the whole class of
-difference rather than pinning the timestamp field of it, and drops the bytes
-from the APK.
+`tools/strip-service-worker-assets.js`. That retires the service worker as a
+source of difference rather than pinning one field of it, and drops the bytes
+from the APK. The Lighthouse CI job uses the same script on `dist/browser`, so
+the file list lives in one place.
 
 The hook point matters: F-Droid's recipe runs `buildFrontend:prodWeb` and
 `sync:android` directly and never invokes `dist:android:prod`, so a step added
 to the latter would not reach their build.
 
-Finding no files to delete warns rather than failing. Breaking the Android build
-over a cleanup would be the worse trade, and the failure is self-correcting — if
-the asset layout moves, the files come back, verification notices, and the path
-gets fixed.
+Finding no files to delete warns rather than failing: breaking the Android build
+over a cleanup would be the worse trade. A warning alone is not a safety net,
+though — it is one line in a very long build log, and it also fires in the
+legitimate case where the service worker is simply disabled for a build. Two
+things make the outcome checkable instead:
+
+- The strip is given the source directory as well, so a target missing
+  `ngsw.json` while `dist/browser` still has one means the copy path moved. That
+  is unambiguous rather than merely quiet, and it is a hard error.
+- `build-android.yml` asserts on the built APK that no `assets/public/ngsw*`
+  entry survived. That covers the whole chain — build, `cap sync`, strip,
+  package — rather than any single link, and it fails where a maintainer will
+  see it, instead of relying on an external F-Droid verification run months
+  later.
 
 Two things this deliberately does not do:
 
 - **The web PWA and iOS are untouched.** The web app genuinely uses the service
-  worker, and while the iOS bundle carries the same dead files, iOS is not a
-  reproducibility target and changing App Store bundle contents is a separate
-  call.
-- **It does not prove the APK reproduces.** Sourcemaps (`sourceMap: true` on
-  `productionWeb`) are also copied into `assets/public/`, and the Gradle layer is
-  untouched. Confirming byte-identity needs a diffoscope run against an F-Droid
-  build; this removes one known blocker, not necessarily the last.
+  worker. The iOS bundle carries the same ~86 KB of dead worker files, but iOS
+  is not a reproducibility target, so there is no benefit to buy by changing
+  App Store bundle contents. If it is ever unified, `sync:ios` needs
+  `ios/App/App/public`.
+- **It does not prove the APK reproduces.** The Gradle/AAPT layer and toolchain
+  pinning are untouched, and confirming byte-identity needs a diffoscope run
+  against an F-Droid build; this removes the one _reported_ blocker, not
+  necessarily the last. (Sourcemaps are copied into `assets/public/` too, by
+  `sourceMap: true` on `productionWeb`, but being content-derived they are
+  deterministic — APK bloat worth its own issue, not a reproducibility risk.)
 
 ## Credentials and signing
 
