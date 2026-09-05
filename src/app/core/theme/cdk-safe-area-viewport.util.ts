@@ -1,8 +1,6 @@
-import {
-  FlexibleConnectedPositionStrategy,
-  OverlayContainer,
-} from '@angular/cdk/overlay';
+import { FlexibleConnectedPositionStrategy } from '@angular/cdk/overlay';
 import { BodyClass } from '../../app.constants';
+import { CSS_VAR_KEYBOARD_OVERLAY_OFFSET } from './keyboard-css-vars.const';
 
 /**
  * Resolved inset tokens from `_css-variables.scss`:
@@ -15,7 +13,6 @@ import { BodyClass } from '../../app.constants';
  */
 const CSS_VAR_RESOLVED_SAFE_AREA_TOP = '--safe-area-top';
 const CSS_VAR_RESOLVED_SAFE_AREA_BOTTOM = '--safe-area-bottom';
-const CSS_VAR_KEYBOARD_OVERLAY_OFFSET = '--keyboard-overlay-offset';
 
 const readPx = (el: Element, name: string): number =>
   parseInt(getComputedStyle(el).getPropertyValue(name), 10) || 0;
@@ -45,20 +42,20 @@ const readPx = (el: Element, name: string): number =>
  * (`(height - top - bottom) - origin.y + top + bottom`), which is why the
  * placement is then correct for any inset combination.
  *
- * The iOS keyboard offset is read off the CDK overlay container, where
- * IosKeyboardService writes it (never on `<html>`, whose custom properties
- * restyle the whole document on every write — #9779); the strategy holds a
- * reference to that container.
+ * `overlayContainerEl` is where IosKeyboardService writes the keyboard offset
+ * (never `<html>`, see there); connected overlays live inside it.
  *
  * Idempotent: patching twice would add the inset twice.
  */
-export const patchCdkViewportForSafeArea = (doc: Document): void => {
+export const patchCdkViewportForSafeArea = (
+  doc: Document,
+  overlayContainerEl: HTMLElement,
+): void => {
   const proto = FlexibleConnectedPositionStrategy.prototype as unknown as {
     _getViewportMarginTop: () => number;
     _getViewportMarginBottom: () => number;
     _spSafeAreaPatched?: boolean;
   };
-  type StrategyInternals = { _overlayContainer?: OverlayContainer };
   if (proto._spSafeAreaPatched) {
     return;
   }
@@ -72,14 +69,11 @@ export const patchCdkViewportForSafeArea = (doc: Document): void => {
       originalTop.call(this) + readPx(doc.documentElement, CSS_VAR_RESOLVED_SAFE_AREA_TOP)
     );
   };
-  proto._getViewportMarginBottom = function (this: StrategyInternals): number {
+  proto._getViewportMarginBottom = function (this: unknown): number {
     const keyboardOverlayOffset =
       doc.body.classList.contains(BodyClass.isIOS) &&
       doc.body.classList.contains(BodyClass.isKeyboardVisible)
-        ? readPx(
-            this._overlayContainer?.getContainerElement() ?? doc.documentElement,
-            CSS_VAR_KEYBOARD_OVERLAY_OFFSET,
-          )
+        ? readPx(overlayContainerEl, CSS_VAR_KEYBOARD_OVERLAY_OFFSET)
         : 0;
     return (
       originalBottom.call(this) +

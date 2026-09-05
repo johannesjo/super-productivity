@@ -62,6 +62,9 @@ describe('patchCdkViewportForSafeArea', () => {
   let originalMarginTop: unknown;
   let originalMarginBottom: unknown;
 
+  const overlayContainerEl = (): HTMLElement =>
+    TestBed.inject(OverlayContainer).getContainerElement();
+
   const openMenuAndMeasure = async (
     itemLabels?: string[],
   ): Promise<{
@@ -93,7 +96,7 @@ describe('patchCdkViewportForSafeArea', () => {
     TestBed.configureTestingModule({ providers: [provideNoopAnimations()] });
     originalMarginTop = proto['_getViewportMarginTop'];
     originalMarginBottom = proto['_getViewportMarginBottom'];
-    patchCdkViewportForSafeArea(document);
+    patchCdkViewportForSafeArea(document, overlayContainerEl());
   });
 
   afterEach(() => {
@@ -158,19 +161,22 @@ describe('patchCdkViewportForSafeArea', () => {
   it('keeps a bottom-anchored menu above the iOS keyboard offset on the overlay container', async () => {
     document.documentElement.style.setProperty('--safe-area-bottom', `${SAFE_BOTTOM}px`);
     document.body.classList.add(BodyClass.isIOS, BodyClass.isKeyboardVisible);
-    TestBed.inject(OverlayContainer)
-      .getContainerElement()
-      .style.setProperty('--keyboard-overlay-offset', `${KEYBOARD_OVERLAY_OFFSET}px`);
+    overlayContainerEl().style.setProperty(
+      '--keyboard-overlay-offset',
+      `${KEYBOARD_OVERLAY_OFFSET}px`,
+    );
 
     const { panelBottom, safeAreaTopEdge } = await openMenuAndMeasure();
 
-    expect(panelBottom).toBeLessThanOrEqual(safeAreaTopEdge - KEYBOARD_OVERLAY_OFFSET);
+    // The menu is pushed to exactly the reserved edge (without the keyboard term
+    // it lands at safeAreaTopEdge - navHeight).
+    expect(panelBottom).toBeCloseTo(safeAreaTopEdge - KEYBOARD_OVERLAY_OFFSET, 0);
   });
 
   it('does not stack insets when applied more than once', async () => {
     document.documentElement.style.setProperty('--safe-area-bottom', `${SAFE_BOTTOM}px`);
-    patchCdkViewportForSafeArea(document);
-    patchCdkViewportForSafeArea(document);
+    patchCdkViewportForSafeArea(document, overlayContainerEl());
+    patchCdkViewportForSafeArea(document, overlayContainerEl());
 
     const { panelBottom, triggerTop } = await openMenuAndMeasure();
 

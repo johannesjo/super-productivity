@@ -106,12 +106,11 @@ export interface TaskAddEvent {
   standalone: true,
   /* eslint-disable @typescript-eslint/naming-convention*/
   host: {
-    // The global bar is a fixed element outside the CDK overlay layer, so it
-    // gets its iOS keyboard offset here rather than inheriting it from <html>
-    // — a custom property on <html> restyles the whole task list on every
-    // write (#9779). Null off-iOS and while the keyboard is hidden, which
-    // leaves the `:root` default in place. See IosKeyboardService.
-    '[style.--keyboard-overlay-offset]': 'iosKeyboardService.keyboardOverlayOffset()',
+    // The global bar is fixed and outside the CDK overlay layer, so it gets its
+    // iOS keyboard offset here rather than from <html> (see IosKeyboardService
+    // for why nothing is written there). Null leaves the `:root` default.
+    '[style.--keyboard-overlay-offset]':
+      'isGlobalBarVariant() ? iosKeyboardService.keyboardOverlayOffset() : null',
   },
   /* eslint-enable @typescript-eslint/naming-convention*/
   imports: [

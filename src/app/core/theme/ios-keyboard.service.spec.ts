@@ -16,6 +16,11 @@ import {
 } from './ios-keyboard.service';
 
 describe('IosKeyboardService sequencing', () => {
+  /**
+   * Mirrors the service's private fields for an Object.create harness (field
+   * initializers do not run there). A field added to the service and not here
+   * is silently `undefined` in these tests.
+   */
   interface IosKeyboardHarness {
     init(keyboard: KeyboardPlugin): void;
     _document: Document;
@@ -296,7 +301,6 @@ describe('IosKeyboardService sequencing', () => {
     willShow();
     didShow();
     tick(RESIZE_GRACE_MS);
-    setWindowHeights(BASE_HEIGHT, BASE_HEIGHT);
 
     willShow(KEYBOARD_HEIGHT + 100);
 
@@ -401,6 +405,19 @@ describe('IosKeyboardService sequencing', () => {
       flushRender();
 
       expect(overlayVar('--keyboard-overlay-offset')).toBe(`${KEYBOARD_HEIGHT}px`);
+      expect(scrollIntoViewSpy).toHaveBeenCalledTimes(1);
+    }));
+
+    // The common `resize: 'native'` case with a flaky didShow: the web view did
+    // shrink, so the fallback must settle on the measurement, without a grace.
+    it('settles on the measured resize without a grace when didShow is dropped', fakeAsync(() => {
+      willShow();
+      shrinkViewport(BASE_HEIGHT - KEYBOARD_HEIGHT);
+      tick(SETTLE_FALLBACK_MS);
+      flushRender();
+
+      expect(harness._isKeyboardSettled).toBe(true);
+      expect(overlayVar('--keyboard-overlay-offset')).toBe('0px');
       expect(scrollIntoViewSpy).toHaveBeenCalledTimes(1);
     }));
 

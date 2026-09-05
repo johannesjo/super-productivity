@@ -31,21 +31,18 @@ export const IOS_KEYBOARD_SETTLE_FALLBACK_MS = 400;
  * How long after the keyboard has finished appearing to keep waiting for the
  * web view to shrink around it before concluding that it never will.
  *
- * Capacitor's `resize: 'native'` (the mode this app configures) applies the
- * frame change on a timer set to the keyboard animation duration *plus 200ms*
- * (`Keyboard.m`, `onKeyboardWillShow`), so the shrink reliably lands about
- * 200ms *after* `keyboardDidShow`. Acting on the reported frame at didShow
- * therefore lifted the fixed add-task bar by a whole keyboard height that the
- * resize took back a moment later — the residual jump of #9779 — and each of
- * the two writes cost a restyle. Twice the plugin's delay, so IPC jitter cannot
- * push the resize past it; a keyboard that truly never resizes the web view
- * (non-resizing iOS modes) gets its frame-derived offset this much later.
+ * Capacitor's `resize: 'native'` applies the frame shrink `animationDuration +
+ * 200ms` after `keyboardWillShow` (`Keyboard.m`, `onKeyboardWillShow`), i.e.
+ * ~200ms *after* `keyboardDidShow`; acting on the reported frame at didShow was
+ * the residual jump of #9779. Twice that delay as margin.
  */
 export const IOS_KEYBOARD_RESIZE_GRACE_MS = 400;
 
-export const CSS_VAR_KEYBOARD_HEIGHT = '--keyboard-height';
-const CSS_VAR_KEYBOARD_OVERLAY_OFFSET = '--keyboard-overlay-offset';
-const CSS_VAR_VISUAL_VIEWPORT_HEIGHT = '--visual-viewport-height';
+import {
+  CSS_VAR_KEYBOARD_HEIGHT,
+  CSS_VAR_KEYBOARD_OVERLAY_OFFSET,
+  CSS_VAR_VISUAL_VIEWPORT_HEIGHT,
+} from './keyboard-css-vars.const';
 
 /**
  * iOS keyboard geometry → layout, for the Capacitor iOS build.
@@ -192,11 +189,7 @@ export class IosKeyboardService {
           this._showSettle.arm(() => this._onKeyboardShown());
         }
         this._document.body.classList.add(BodyClass.isKeyboardVisible);
-        this._setCssVar(
-          this._overlayVarTarget,
-          CSS_VAR_KEYBOARD_HEIGHT,
-          `${keyboardHeight}px`,
-        );
+        this._setCssVar(CSS_VAR_KEYBOARD_HEIGHT, `${keyboardHeight}px`);
         this._updateViewportVars();
       })
       .then((handle) => this._keyboardListenerHandles.push(handle));
@@ -220,8 +213,9 @@ export class IosKeyboardService {
         // view is actually back to full size instead.
         this._hideSettle.arm(() => this._clearBaseline());
         this._document.body.classList.remove(BodyClass.isKeyboardVisible);
-        this._setCssVar(this._overlayVarTarget, CSS_VAR_KEYBOARD_HEIGHT, '0px');
-        this._setCssVar(this._overlayVarTarget, CSS_VAR_KEYBOARD_OVERLAY_OFFSET, '0px');
+        // _updateViewportVars only touches this one when correcting a bogus frame,
+        // so the reset is explicit; the overlay offset it recomputes to 0 itself.
+        this._setCssVar(CSS_VAR_KEYBOARD_HEIGHT, '0px');
         this._updateViewportVars();
       })
       .then((handle) => this._keyboardListenerHandles.push(handle));
@@ -327,25 +321,19 @@ export class IosKeyboardService {
       isKeyboardFrameUnreliable: this._keyboardFrameUnreliable,
     });
 
-    const target = this._overlayVarTarget;
     let hasChanged = this._setCssVar(
-      target,
       CSS_VAR_VISUAL_VIEWPORT_HEIGHT,
       `${vars.visualViewportHeightPx}px`,
     );
     hasChanged =
       this._setCssVar(
-        target,
         CSS_VAR_KEYBOARD_OVERLAY_OFFSET,
         `${vars.keyboardOverlayOffsetPx}px`,
       ) || hasChanged;
     if (vars.correctedKeyboardHeightPx !== null) {
       hasChanged =
-        this._setCssVar(
-          target,
-          CSS_VAR_KEYBOARD_HEIGHT,
-          `${vars.correctedKeyboardHeightPx}px`,
-        ) || hasChanged;
+        this._setCssVar(CSS_VAR_KEYBOARD_HEIGHT, `${vars.correctedKeyboardHeightPx}px`) ||
+        hasChanged;
     }
     const isKeyboardVisible = this._keyboardHeight > 0;
     this.shellHeight.set(
@@ -368,15 +356,15 @@ export class IosKeyboardService {
   }
 
   /**
-   * Writes a CSS variable, deduped; returns whether the value actually changed.
-   * Each variable has exactly one target, so the cache keys on the name alone.
+   * Writes a CSS variable on the overlay container, deduped; returns whether
+   * the value actually changed.
    */
-  private _setCssVar(target: HTMLElement, name: string, value: string): boolean {
+  private _setCssVar(name: string, value: string): boolean {
     if (this._cssVarCache.get(name) === value) {
       return false;
     }
     this._cssVarCache.set(name, value);
-    target.style.setProperty(name, value);
+    this._overlayVarTarget.style.setProperty(name, value);
     return true;
   }
 

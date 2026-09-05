@@ -59,7 +59,9 @@ import { patchCdkViewportForSafeArea } from './cdk-safe-area-viewport.util';
 import { LS } from '../persistence/storage-keys.const';
 import { Log, PluginLog } from '../log';
 import { LayoutService } from '../../core-ui/layout/layout.service';
-import { CSS_VAR_KEYBOARD_HEIGHT, IosKeyboardService } from './ios-keyboard.service';
+import { IosKeyboardService } from './ios-keyboard.service';
+import { CSS_VAR_KEYBOARD_HEIGHT } from './keyboard-css-vars.const';
+import { OverlayContainer } from '@angular/cdk/overlay';
 import { sanitizeSvgIconContent } from '../../util/sanitize-svg-icon.util';
 import { CustomThemeService, getRequiredThemeMode } from './custom-theme.service';
 
@@ -197,6 +199,7 @@ export class GlobalThemeService {
   private _destroyRef = inject(DestroyRef);
   private _inputIntentService = inject(InputIntentService);
   private _iosKeyboardService = inject(IosKeyboardService);
+  private _overlayContainer = inject(OverlayContainer);
   private _hasInitialized = false;
   private _isCustomWindowTitleBarEnabled(): boolean {
     // The main process (main-window.ts) force-disables the custom title bar on
@@ -541,9 +544,7 @@ export class GlobalThemeService {
 
     // VisualViewport keyboard-height tracking covers every non-iOS touch
     // build: Capacitor Android, the legacy F-Droid build, and Android
-    // mobile-web. iOS uses IosKeyboardService above; its Capacitor plugin
-    // drives the same CSS variable (on the overlay container) and the two
-    // would race.
+    // mobile-web. iOS is handled entirely by IosKeyboardService above.
     if (IS_TOUCH_ONLY && !this._platformService.isIOS()) {
       this._initVisualViewportKeyboardTracking();
     }
@@ -769,7 +770,10 @@ export class GlobalThemeService {
       SafeArea.getSafeAreaInsets().then(({ insets }) => applyInsets(insets));
       SafeArea.addListener('safeAreaChanged', ({ insets }) => applyInsets(insets));
     }
-    patchCdkViewportForSafeArea(this.document);
+    patchCdkViewportForSafeArea(
+      this.document,
+      this._overlayContainer.getContainerElement(),
+    );
   }
 
   private _initMobileStatusBar(): void {

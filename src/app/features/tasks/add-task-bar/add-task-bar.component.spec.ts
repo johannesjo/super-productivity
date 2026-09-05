@@ -384,6 +384,7 @@ describe('AddTaskBarComponent', () => {
     // inherited from <html>, where writing it restyles the whole list (#9779).
     it('takes the iOS keyboard offset from IosKeyboardService', () => {
       document.body.classList.add(BodyClass.isIOS);
+      fixture.componentRef.setInput('isGlobalBarVariant', true);
       const iosKeyboardService = TestBed.inject(IosKeyboardService);
 
       iosKeyboardService.keyboardOverlayOffset.set('40px');
@@ -393,6 +394,17 @@ describe('AddTaskBarComponent', () => {
       // Hidden again: the host binding goes away and the :root default applies.
       iosKeyboardService.keyboardOverlayOffset.set(null);
       fixture.detectChanges();
+      expect(getComputedStyle(fixture.nativeElement).bottom).toBe('16px');
+    });
+
+    // Inline bars (planner, plan-tomorrow) never read the offset, so they do
+    // not get the style write either: with the signal set, this host (not
+    // flagged as the global variant) keeps the :root default.
+    it('does not bind the keyboard offset on inline bars', () => {
+      document.body.classList.add(BodyClass.isIOS);
+      TestBed.inject(IosKeyboardService).keyboardOverlayOffset.set('40px');
+      fixture.detectChanges();
+
       expect(getComputedStyle(fixture.nativeElement).bottom).toBe('16px');
     });
 

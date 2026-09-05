@@ -11,6 +11,11 @@ import {
   viewChild,
 } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import {
+  CSS_VAR_KEYBOARD_HEIGHT,
+  CSS_VAR_KEYBOARD_OVERLAY_OFFSET,
+  CSS_VAR_VISUAL_VIEWPORT_HEIGHT,
+} from '../../core/theme/keyboard-css-vars.const';
 import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { TaskDetailPanelComponent } from '../tasks/task-detail-panel/task-detail-panel.component';
 import { NotesComponent } from '../note/notes/notes.component';
@@ -80,9 +85,6 @@ const KEYBOARD_DETECT_THRESHOLD = 100;
 const KEYBOARD_SAFE_HEIGHT_MIN = 200;
 const KEYBOARD_SAFE_HEIGHT_RATIO = 0.85;
 const KEYBOARD_RESIZE_DEBOUNCE_MS = 100;
-const CSS_VAR_KEYBOARD_HEIGHT = '--keyboard-height';
-const CSS_VAR_KEYBOARD_OVERLAY_OFFSET = '--keyboard-overlay-offset';
-const CSS_VAR_VISUAL_VIEWPORT_HEIGHT = '--visual-viewport-height';
 
 @Component({
   selector: 'bottom-panel-container',
