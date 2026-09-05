@@ -47,7 +47,7 @@
 >
   <ng-template matMenuContent>
     <div class="menu-title">
-      {{ T.F.TASK.MULTI_SELECT.TASKS_TITLE | translate: { count: count() } }}
+      {{ tasksTitleKey() | translate: { count: count() } }}
     </div>
 
     <button
@@ -58,7 +58,7 @@
         <mat-icon>today</mat-icon>
         {{ T.F.TASK.CMP.SCHEDULE | translate }}
       </span>
-      <span class="key-i">{{ kb.taskSchedule }}</span>
+      <span class="key-i">{{ kb().taskSchedule }}</span>
     </button>
     @if (bulk.hasScheduled()) {
       <button
@@ -69,7 +69,7 @@
           <mat-icon>event_busy</mat-icon>
           {{ T.F.TASK.CMP.UNSCHEDULE_TASK | translate }}
         </span>
-        <span class="key-i">{{ kb.taskUnschedule }}</span>
+        <span class="key-i">{{ kb().taskUnschedule }}</span>
       </button>
     }
     <button
@@ -80,7 +80,7 @@
         <mat-icon>wb_sunny</mat-icon>
         {{ T.F.TASK.CMP.ADD_TO_MY_DAY | translate }}
       </span>
-      <span class="key-i">{{ kb.taskScheduleToday }}</span>
+      <span class="key-i">{{ kb().taskScheduleToday }}</span>
     </button>
     @if (isTodayList()) {
       <button
@@ -101,8 +101,19 @@
         <mat-icon>flag</mat-icon>
         {{ T.F.TASK.ADDITIONAL_INFO.DEADLINE | translate }}
       </span>
-      <span class="key-i">{{ kb.taskScheduleDeadline }}</span>
+      <span class="key-i">{{ kb().taskScheduleDeadline }}</span>
     </button>
+    @if (bulk.hasDeadline()) {
+      <button
+        (click)="bulk.removeDeadline()"
+        mat-menu-item
+      >
+        <span class="menuItemLeft">
+          <mat-icon>flag</mat-icon>
+          {{ T.F.TASK.CMP.REMOVE_DEADLINE | translate }}
+        </span>
+      </button>
+    }
 
     <mat-divider></mat-divider>
 
@@ -119,7 +130,7 @@
           {{ T.F.TASK.CMP.MARK_UNDONE | translate }}
         }
       </span>
-      <span class="key-i">{{ kb.taskToggleDone }}</span>
+      <span class="key-i">{{ kb().taskToggleDone }}</span>
     </button>
 
     @if (isShowBacklogBtns() && bulk.hasParentTasks()) {
@@ -131,7 +142,7 @@
           <mat-icon>move_down</mat-icon>
           {{ T.F.TASK.CMP.MOVE_TO_BACKLOG | translate }}
         </span>
-        <span class="key-i">{{ kb.moveToBacklog }}</span>
+        <span class="key-i">{{ kb().moveToBacklog }}</span>
       </button>
       <button
         (click)="bulk.moveToRegularList()"
@@ -153,7 +164,7 @@
           <mat-icon>hourglass_empty</mat-icon>
           {{ T.F.TASK.CMP.ESTIMATE | translate }}
         </span>
-        <span class="key-i">{{ kb.taskOpenEstimationDialog }}</span>
+        <span class="key-i">{{ kb().taskOpenEstimationDialog }}</span>
       </button>
     }
 
@@ -165,10 +176,10 @@
         <mat-icon>label</mat-icon>
         {{ T.F.TASK.CMP.TOGGLE_TAGS | translate }}
       </span>
-      <span class="key-i">{{ kb.taskEditTags }}</span>
+      <span class="key-i">{{ kb().taskEditTags }}</span>
     </button>
 
-    @if (bulk.hasParentTasks() && (moveToProjectList$ | async)?.length) {
+    @if (bulk.hasParentTasks() && moveToProjectList().length) {
       <button
         [matMenuTriggerFor]="projectMenu"
         mat-menu-item
@@ -177,7 +188,7 @@
           <mat-icon>forward</mat-icon>
           {{ T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT | translate }}
         </span>
-        <span class="key-i">{{ kb.taskMoveToProject }}</span>
+        <span class="key-i">{{ kb().taskMoveToProject }}</span>
       </button>
     }
 
@@ -192,7 +203,7 @@
         <mat-icon class="color-warn-i">delete_forever</mat-icon>
         {{ T.F.TASK.CMP.DELETE | translate }}
       </span>
-      <span class="key-i">{{ kb.taskDelete }}</span>
+      <span class="key-i">{{ kb().taskDelete }}</span>
     </button>
   </ng-template>
 </mat-menu>
@@ -243,7 +254,7 @@
 
 <mat-menu #projectMenu="matMenu">
   <ng-template matMenuContent>
-    @if (moveToProjectList$ | async; as list) {
+    @if (moveToProjectList(); as list) {
       @for (project of list; track project.id) {
         <button
           (click)="bulk.moveToProject(project.id)"

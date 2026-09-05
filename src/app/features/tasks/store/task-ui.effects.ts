@@ -44,7 +44,7 @@ import { LS } from '../../../core/persistence/storage-keys.const';
 import { skipWhileApplyingRemoteOps } from '../../../util/skip-during-sync.operator';
 import { DateService } from '../../../core/date/date.service';
 import { isBlankTask } from '../util/is-blank-task';
-import { TaskBulkActionService } from '../task-bulk-action.service';
+import { TaskMultiSelectService } from '../task-multi-select.service';
 
 @Injectable()
 export class TaskUiEffects {
@@ -60,7 +60,7 @@ export class TaskUiEffects {
   private _navigateToTaskService = inject(NavigateToTaskService);
   private _layoutService = inject(LayoutService);
   private _dateService = inject(DateService);
-  private _taskBulkActionService = inject(TaskBulkActionService);
+  private _taskMultiSelectService = inject(TaskMultiSelectService);
 
   taskCreatedSnack$ = createEffect(
     () =>
@@ -124,6 +124,8 @@ export class TaskUiEffects {
         ofType(TaskSharedActions.deleteTask),
         // Skip the undo snack for accidentally created blank tasks
         filter(({ task }) => !isBlankTask(task)),
+        // A bulk delete confirms up front and shows no per-task undo.
+        filter(() => !this._taskMultiSelectService.isBulkFeedbackSuppressed()),
         tap(({ task }) => {
           this._snackService.open({
             translateParams: {
@@ -210,7 +212,7 @@ export class TaskUiEffects {
         ofType(TaskSharedActions.updateTask),
         filter(({ task: { changes } }) => !!changes.isDone),
         // A bulk "mark done" plays the sound once itself.
-        filter(() => !this._taskBulkActionService.isFeedbackSuppressed()),
+        filter(() => !this._taskMultiSelectService.isBulkFeedbackSuppressed()),
         withLatestFrom(
           this._workContextService.flatDoneTodayNr$,
           this._globalConfigService.sound$,
@@ -226,7 +228,7 @@ export class TaskUiEffects {
       this._actions$.pipe(
         ofType(TaskSharedActions.moveToOtherProject),
         // A bulk move shows one summary snack instead of one per task.
-        filter(() => !this._taskBulkActionService.isFeedbackSuppressed()),
+        filter(() => !this._taskMultiSelectService.isBulkFeedbackSuppressed()),
         filter(
           ({ task, targetProjectId }) =>
             // Don't announce *filing a project-less task into the Inbox*: that is

@@ -59,8 +59,6 @@
   flex-direction: column;
   min-width: 0; // Prevent flex item from growing beyond container
   overflow: hidden;
-  // Anchors the multi-select bar (task-multi-select-bar) to the content area.
-  position: relative;
 }
 
 // First-run onboarding is a focused full-window takeover, so hide the app

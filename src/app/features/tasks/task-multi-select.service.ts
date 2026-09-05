@@ -29,6 +29,8 @@ export class TaskMultiSelectService {
   private readonly _selectedIds = signal<ReadonlySet<string>>(new Set());
   private readonly _anchorId = signal<string | null>(null);
   private readonly _menuOpenRequest = signal<{ x: number; y: number } | null>(null);
+  private readonly _isBulkFeedbackSuppressed = signal(false);
+  private readonly _pendingRemovals = new Set<string>();
 
   readonly selectedIds = this._selectedIds.asReadonly();
   readonly anchorId = this._anchorId.asReadonly();
@@ -36,6 +38,13 @@ export class TaskMultiSelectService {
   readonly isActive = computed(() => this._selectedIds().size > 0);
   /** Set when a selected row asks for the bulk menu (right-click / Q). */
   readonly menuOpenRequest = this._menuOpenRequest.asReadonly();
+  /**
+   * True while a bulk action dispatches its per-task loop. Per-task snackbars
+   * and the done sound check this so one summary replaces N notifications.
+   * Lives here (not on the bulk action service) so effects only depend on
+   * this small service.
+   */
+  readonly isBulkFeedbackSuppressed = this._isBulkFeedbackSuppressed.asReadonly();
 
   constructor() {
     this._router.events
@@ -136,7 +145,30 @@ export class TaskMultiSelectService {
     return nextEl;
   }
 
-  /** Called by a `<task>` row on destroy: it is no longer rendered. */
+  setBulkFeedbackSuppressed(isSuppressed: boolean): void {
+    this._isBulkFeedbackSuppressed.set(isSuppressed);
+  }
+
+  /**
+   * Called by a `<task>` row on destroy. A row is destroyed when it moves to
+   * another list (done → done list), when a detail-panel copy goes away, or on
+   * a re-render — none of which end the selection. So the id is dropped on the
+   * next macrotask only if no rendered row carries it any more.
+   */
+  removeWhenUnrendered(id: string): void {
+    if (!this._selectedIds().has(id) || this._pendingRemovals.has(id)) {
+      return;
+    }
+    this._pendingRemovals.add(id);
+    setTimeout(() => {
+      this._pendingRemovals.delete(id);
+      if (!this._findRowEl(id)) {
+        this.remove(id);
+      }
+    });
+  }
+
+  /** Drops one id immediately. */
   remove(id: string): void {
     if (!this._selectedIds().has(id)) {
       return;

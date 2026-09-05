@@ -362,7 +362,10 @@ export class TaskShortcutService {
       !ev.ctrlKey &&
       !ev.metaKey &&
       !ev.altKey &&
-      (ev.key === 'ArrowDown' || ev.key === 'ArrowUp')
+      (ev.key === 'ArrowDown' || ev.key === 'ArrowUp') &&
+      // A user who bound a task shortcut to Shift+Arrow keeps it.
+      !checkKeyCombo(ev, keys.moveTaskUp) &&
+      !checkKeyCombo(ev, keys.moveTaskDown)
     ) {
       this._extendSelectionThrottled(ev.key === 'ArrowDown' ? 'down' : 'up');
       ev.preventDefault();
@@ -370,6 +373,15 @@ export class TaskShortcutService {
     }
 
     if (!this._multiSelect.isActive()) {
+      return false;
+    }
+
+    // A shortcut on a focused row that is *not* part of the selection acts on
+    // that row alone (file-manager rule): drop the selection and fall through.
+    if (focusedTaskId && !this._multiSelect.has(focusedTaskId)) {
+      if (this._isBulkShortcut(ev, keys)) {
+        this._multiSelect.clear();
+      }
       return false;
     }
 
@@ -401,6 +413,24 @@ export class TaskShortcutService {
       return true;
     }
     return false;
+  }
+
+  private _isBulkShortcut(ev: KeyboardEvent, keys: KeyboardConfig): boolean {
+    return (
+      [
+        keys.taskToggleDone,
+        keys.taskDelete,
+        keys.taskSchedule,
+        keys.taskScheduleDeadline,
+        keys.taskScheduleToday,
+        keys.taskUnschedule,
+        keys.moveToBacklog,
+        keys.taskMoveToProject,
+        keys.taskEditTags,
+        keys.taskOpenEstimationDialog,
+        keys.taskOpenContextMenu,
+      ].some((combo) => !!combo && checkKeyCombo(ev, combo)) || isNativeContextMenuKey(ev)
+    );
   }
 
   private _lastExtendAt = 0;

@@ -1,15 +1,19 @@
 @use '../../../../styles/_globals.scss' as *;
+@use '../menu-item-styles';
 
 :host {
   display: contents;
 }
 
+// Fixed so it never changes the containing block of its siblings (the global
+// progress bar is anchored to <body>); its own z-index token sits above the
+// right panel's content column and below the add-task bar.
 .bar {
-  position: absolute;
+  position: fixed;
   left: 50%;
   bottom: var(--s2);
   transform: translateX(-50%);
-  z-index: var(--z-is-selected-host);
+  z-index: var(--z-multi-select-bar);
   display: flex;
   align-items: center;
   gap: var(--s-half);
@@ -26,6 +30,13 @@
     transform: none;
     bottom: calc(var(--s) + var(--safe-area-bottom));
   }
+}
+
+:host-context(.has-mobile-bottom-nav) .bar {
+  bottom: calc(
+    var(--bottom-nav-height) + var(--bottom-nav-safe-area) +
+      var(--bottom-nav-extra-offset) + var(--s)
+  );
 }
 
 .count {
@@ -52,33 +63,4 @@
   opacity: 0.7;
   text-transform: uppercase;
   letter-spacing: 0.06em;
-}
-
-.menuItemLeft {
-  text-align: left;
-  display: flex;
-  align-items: center;
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.key-i {
-  opacity: 0.4;
-  font-size: 11px;
-  text-align: center;
-  border-radius: 20px;
-  max-width: 66px;
-  letter-spacing: -1px;
-  @include truncateText();
-  display: none;
-
-  &:not(:empty) {
-    display: block;
-    line-height: 1;
-    min-width: 20px;
-    border: 1px solid;
-    padding: var(--s-half);
-    margin-left: var(--s-half);
-  }
 }

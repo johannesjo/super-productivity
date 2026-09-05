@@ -7,7 +7,6 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { AsyncPipe } from '@angular/common';
 import {
   MatMenu,
   MatMenuContent,
@@ -19,9 +18,12 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatDivider } from '@angular/material/divider';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
-import { Observable, of } from 'rxjs';
+import { of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { toObservable, toSignal } from '@angular/core/rxjs-interop';
+import { MatDialog } from '@angular/material/dialog';
+import { TranslateService, TranslateStore } from '@ngx-translate/core';
+import { getPluralKey } from '../../../util/get-plural-key';
 import { T } from '../../../t.const';
 import { TaskMultiSelectService } from '../task-multi-select.service';
 import { TaskBulkActionService } from '../task-bulk-action.service';
@@ -30,7 +32,6 @@ import { TagService } from '../../tag/tag.service';
 import { MenuTreeService } from '../../menu-tree/menu-tree.service';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { GlobalConfigService } from '../../config/global-config.service';
-import { Project } from '../../project/project.model';
 import { DEFAULT_PROJECT_ICON } from '../../project/project.const';
 import { ESTIMATE_OPTIONS } from '../add-task-bar/add-task-bar.const';
 import { SelectOptionRowComponent } from '../../../ui/select-option-row/select-option-row.component';
@@ -52,7 +53,6 @@ const EMPTY_KB = {} as KeyboardConfig;
   styleUrl: './task-multi-select-bar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
-    AsyncPipe,
     MatMenu,
     MatMenuContent,
     MatMenuItem,
@@ -74,12 +74,26 @@ export class TaskMultiSelectBarComponent {
   private readonly _menuTreeService = inject(MenuTreeService);
   private readonly _workContextService = inject(WorkContextService);
   private readonly _globalConfigService = inject(GlobalConfigService);
+  private readonly _matDialog = inject(MatDialog);
+  private readonly _translateService = inject(TranslateService);
+  private readonly _translateStore = inject(TranslateStore);
 
   readonly T = T;
   readonly ESTIMATE_OPTIONS = ESTIMATE_OPTIONS;
   readonly DEFAULT_PROJECT_ICON = DEFAULT_PROJECT_ICON;
 
   readonly count = this.multiSelect.count;
+  readonly tasksTitleKey = computed(() =>
+    getPluralKey(
+      this._translateService,
+      this._translateStore,
+      this.count(),
+      'F.TASK.MULTI_SELECT.TASKS_TITLE',
+    ),
+  );
+  readonly kb = computed<KeyboardConfig>(() =>
+    isTouchActive() ? EMPTY_KB : (this._globalConfigService.cfg()?.keyboard ?? EMPTY_KB),
+  );
   readonly isTodayList = this._workContextService.isTodayListSignal;
   private readonly _activeWorkContext = toSignal(
     this._workContextService.activeWorkContext$,
@@ -95,14 +109,15 @@ export class TaskMultiSelectBarComponent {
   private readonly _commonProjectId = computed(() =>
     getCommonProjectId(this.bulk.selectedTasks()),
   );
-  readonly moveToProjectList$: Observable<Project[]> = toObservable(
-    this._commonProjectId,
-  ).pipe(
-    switchMap((pid) =>
-      this.multiSelect.isActive()
-        ? this._projectService.getProjectsWithoutIdInTreeOrder$(pid)
-        : of([]),
+  readonly moveToProjectList = toSignal(
+    toObservable(this._commonProjectId).pipe(
+      switchMap((pid) =>
+        this.multiSelect.isActive()
+          ? this._projectService.getProjectsWithoutIdInTreeOrder$(pid)
+          : of([]),
+      ),
     ),
+    { initialValue: [] },
   );
 
   readonly menuPosition = signal<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -116,16 +131,14 @@ export class TaskMultiSelectBarComponent {
       }
       this.menuPosition.set(request);
       this.multiSelect.consumeMenuOpenRequest();
-      // Let the trigger element move to its new position first.
-      setTimeout(() => this.positionedTrigger()?.openMenu());
+      // Let the trigger element move to its new position first; a clear in
+      // between (Esc) must not open an empty menu.
+      setTimeout(() => {
+        if (this.multiSelect.isActive()) {
+          this.positionedTrigger()?.openMenu();
+        }
+      });
     });
-  }
-
-  get kb(): KeyboardConfig {
-    if (isTouchActive()) {
-      return EMPTY_KB;
-    }
-    return this._globalConfigService.cfg()?.keyboard ?? EMPTY_KB;
   }
 
   clear(): void {
@@ -135,7 +148,8 @@ export class TaskMultiSelectBarComponent {
   onMenuClosed(): void {
     // Return keyboard focus to the anchor row so shortcuts keep working.
     const anchorId = this.multiSelect.anchorId();
-    if (!anchorId || isTouchActive()) {
+    // A menu item may have opened a dialog; leave focus inside it.
+    if (!anchorId || isTouchActive() || this._matDialog.openDialogs.length > 0) {
       return;
     }
     const rowEl = Array.from(document.querySelectorAll<HTMLElement>('task')).find(

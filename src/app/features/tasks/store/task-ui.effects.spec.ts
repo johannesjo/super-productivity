@@ -24,7 +24,7 @@ import { DateService } from '../../../core/date/date.service';
 import { HydrationStateService } from '../../../op-log/apply/hydration-state.service';
 import { selectUnplannedDeadlineTasksForToday } from './task.selectors';
 import { Banner } from '../../../core/banner/banner.model';
-import { TaskBulkActionService } from '../task-bulk-action.service';
+import { TaskMultiSelectService } from '../task-multi-select.service';
 
 describe('TaskUiEffects', () => {
   let effects: TaskUiEffects;
@@ -97,8 +97,8 @@ describe('TaskUiEffects', () => {
       TestBed.configureTestingModule({
         providers: [
           {
-            provide: TaskBulkActionService,
-            useValue: { isFeedbackSuppressed: () => false },
+            provide: TaskMultiSelectService,
+            useValue: { isBulkFeedbackSuppressed: () => false },
           },
           TaskUiEffects,
           { provide: LOCAL_ACTIONS, useValue: actions$ },
@@ -160,8 +160,8 @@ describe('TaskUiEffects', () => {
       TestBed.configureTestingModule({
         providers: [
           {
-            provide: TaskBulkActionService,
-            useValue: { isFeedbackSuppressed: () => false },
+            provide: TaskMultiSelectService,
+            useValue: { isBulkFeedbackSuppressed: () => false },
           },
           TaskUiEffects,
           { provide: LOCAL_ACTIONS, useValue: actions$ },
@@ -305,8 +305,8 @@ describe('TaskUiEffects', () => {
       TestBed.configureTestingModule({
         providers: [
           {
-            provide: TaskBulkActionService,
-            useValue: { isFeedbackSuppressed: () => false },
+            provide: TaskMultiSelectService,
+            useValue: { isBulkFeedbackSuppressed: () => false },
           },
           TaskUiEffects,
           { provide: LOCAL_ACTIONS, useValue: actions$ },
@@ -410,8 +410,8 @@ describe('TaskUiEffects', () => {
       TestBed.configureTestingModule({
         providers: [
           {
-            provide: TaskBulkActionService,
-            useValue: { isFeedbackSuppressed: () => false },
+            provide: TaskMultiSelectService,
+            useValue: { isBulkFeedbackSuppressed: () => false },
           },
           TaskUiEffects,
           { provide: LOCAL_ACTIONS, useValue: actions$ },
@@ -522,8 +522,8 @@ describe('TaskUiEffects', () => {
       TestBed.configureTestingModule({
         providers: [
           {
-            provide: TaskBulkActionService,
-            useValue: { isFeedbackSuppressed: () => false },
+            provide: TaskMultiSelectService,
+            useValue: { isBulkFeedbackSuppressed: () => false },
           },
           TaskUiEffects,
           { provide: LOCAL_ACTIONS, useValue: actions$ },

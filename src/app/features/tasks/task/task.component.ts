@@ -64,7 +64,6 @@ import {
 } from '@angular/material/menu';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { throttle } from '../../../util/decorators';
-import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { openFullscreenMarkdownDialog } from '../../../ui/dialog-fullscreen-markdown/open-fullscreen-markdown-dialog';
 import { Location } from '@angular/common';
@@ -125,6 +124,10 @@ import {
 import { AddSubtaskInputService } from '../add-subtask-input/add-subtask-input.service';
 import { getSubTaskTimeLeftForDisplay } from '../util/get-sub-task-time-left-for-display';
 
+const isInteractiveTarget = (target: EventTarget | null): boolean =>
+  target instanceof Element &&
+  !!target.closest('a, button, textarea, input, select, [contenteditable="true"]');
+
 @Component({
   selector: 'task',
   templateUrl: './task.component.html',
@@ -177,7 +180,6 @@ import { getSubTaskTimeLeftForDisplay } from '../util/get-sub-task-time-left-for
 export class TaskComponent implements OnDestroy, AfterViewInit {
   private readonly _taskService = inject(TaskService);
   private readonly _taskDuplicateService = inject(TaskDuplicateService);
-  private readonly _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private readonly _matDialog = inject(MatDialog);
   private readonly _location = inject(Location);
   private readonly _configService = inject(GlobalConfigService);
@@ -484,6 +486,10 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     if (ev.button !== 0 || !this._isInnermostTaskFor(ev.target)) {
       return;
     }
+    if (isInteractiveTarget(ev.target)) {
+      // Text selection / caret placement inside the title or subtask input.
+      return;
+    }
     if (ev.shiftKey) {
       ev.preventDefault();
     }
@@ -502,8 +508,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     if (!isMultiSelectModifierEvent(ev) || !this._isInnermostTaskFor(ev.target)) {
       return;
     }
-    const target = ev.target as HTMLElement | null;
-    if (target?.closest('a, button, textarea, input, select, [contenteditable="true"]')) {
+    if (isInteractiveTarget(ev.target)) {
       return;
     }
     ev.preventDefault();
@@ -608,8 +613,9 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy(): void {
-    // No longer rendered, so it can no longer be part of the multi-selection.
-    this._multiSelect.remove(this.task().id);
+    // Possibly no longer rendered (checked after the DOM settles, since rows
+    // re-mount when they change lists and the detail panel renders copies).
+    this._multiSelect.removeWhenUnrendered(this.task().id);
     window.clearTimeout(this._doubleClickTimeout);
     window.clearTimeout(this._dragReadyTimeout);
     window.clearTimeout(this._doneAnimationTimeout);

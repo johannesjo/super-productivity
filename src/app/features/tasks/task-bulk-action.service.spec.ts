@@ -12,9 +12,11 @@ import { SnackService } from '../../core/snack/snack.service';
 import { DateService } from '../../core/date/date.service';
 import { GlobalConfigService } from '../config/global-config.service';
 import { WorkContextService } from '../work-context/work-context.service';
-import { DEFAULT_TASK, Task } from './task.model';
+import { DEFAULT_TASK, Task, TaskReminderOptionId } from './task.model';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { T } from '../../t.const';
+import { TranslateService, TranslateStore } from '@ngx-translate/core';
+import { PlannerActions } from '../planner/store/planner.actions';
 
 describe('TaskBulkActionService', () => {
   let service: TaskBulkActionService;
@@ -30,8 +32,11 @@ describe('TaskBulkActionService', () => {
     selectedIds: typeof selectedIds;
     selectedIdsInDomOrder: jasmine.Spy;
     clear: jasmine.Spy;
+    isBulkFeedbackSuppressed: ReturnType<typeof signal<boolean>>;
+    setBulkFeedbackSuppressed: (v: boolean) => void;
   };
   let dialogResult: unknown;
+  let isConfirmBeforeDelete: boolean;
 
   const t = (id: string, overrides: Partial<Task> = {}): Task => ({
     ...DEFAULT_TASK,
@@ -56,10 +61,12 @@ describe('TaskBulkActionService', () => {
     entities = signal<Record<string, Task>>({});
     selectedIds = signal<ReadonlySet<string>>(new Set());
     dialogResult = true;
+    isConfirmBeforeDelete = true;
 
     taskService = jasmine.createSpyObj<TaskService>('TaskService', [
       'setDone',
       'setUnDone',
+      'remove',
       'removeMultipleTasks',
       'updateTags',
       'update',
@@ -86,12 +93,15 @@ describe('TaskBulkActionService', () => {
     moveToProjectService = {
       moveToProject: jasmine.createSpy('moveToProject').and.resolveTo(true),
     };
+    const suppressed = signal(false);
     multiSelect = {
       selectedIds,
       selectedIdsInDomOrder: jasmine
         .createSpy('selectedIdsInDomOrder')
         .and.returnValue([]),
       clear: jasmine.createSpy('clear'),
+      isBulkFeedbackSuppressed: suppressed,
+      setBulkFeedbackSuppressed: (v: boolean) => suppressed.set(v),
     };
 
     TestBed.configureTestingModule({
@@ -121,9 +131,17 @@ describe('TaskBulkActionService', () => {
         },
         {
           provide: GlobalConfigService,
-          useValue: { sound: signal({ doneSound: null }), cfg: signal(undefined) },
+          useValue: {
+            sound: signal({ doneSound: null }),
+            cfg: () => ({
+              tasks: { isConfirmBeforeDelete },
+              reminder: { defaultTaskRemindOption: 'DoNotRemind' },
+            }),
+          },
         },
         { provide: WorkContextService, useValue: { flatDoneTodayNr$: of(0) } },
+        { provide: TranslateService, useValue: { currentLang: 'en', defaultLang: 'en' } },
+        { provide: TranslateStore, useValue: { getTranslations: () => ({}) } },
       ],
     });
     service = TestBed.inject(TaskBulkActionService);
@@ -148,7 +166,7 @@ describe('TaskBulkActionService', () => {
       ]);
       expect(snackService.open).toHaveBeenCalledWith(
         jasmine.objectContaining({
-          msg: T.F.TASK.MULTI_SELECT.S.DONE,
+          msg: 'F.TASK.MULTI_SELECT.S.DONE.OTHER',
           translateParams: { count: 3 },
         }),
       );
@@ -187,7 +205,7 @@ describe('TaskBulkActionService', () => {
   });
 
   describe('deleteSelected', () => {
-    it('confirms, dedupes subtasks of selected parents and clears the selection', async () => {
+    it('confirms, dedupes subtasks of selected parents, and splits lone subtasks off', async () => {
       select([
         t('parent', { subTaskIds: ['sub'] }),
         t('sub', { parentId: 'parent' }),
@@ -199,18 +217,50 @@ describe('TaskBulkActionService', () => {
       expect(matDialog.open).toHaveBeenCalledWith(
         jasmine.anything(),
         jasmine.objectContaining({
-          data: jasmine.objectContaining({ translateParams: { count: 2 } }),
+          data: jasmine.objectContaining({
+            message: 'F.TASK.MULTI_SELECT.D_CONFIRM_DELETE.MSG.OTHER',
+            translateParams: { count: 2 },
+          }),
         }),
       );
-      expect(taskService.removeMultipleTasks).toHaveBeenCalledWith(['parent', 'lone']);
+      // top-level ids in one op; the lone subtask via the singular path so
+      // older clients keep a consistent parent (rule 10)
+      expect(taskService.removeMultipleTasks).toHaveBeenCalledWith(['parent']);
+      expect(taskService.remove).toHaveBeenCalledWith(
+        jasmine.objectContaining({ id: 'lone' }),
+      );
       expect(multiSelect.clear).toHaveBeenCalled();
     });
 
     it('does nothing when the confirmation is cancelled', async () => {
       dialogResult = false;
-      select([t('a')]);
+      select([t('a'), t('b')]);
       await service.deleteSelected();
       expect(taskService.removeMultipleTasks).not.toHaveBeenCalled();
+      expect(taskService.remove).not.toHaveBeenCalled();
+    });
+
+    it('deletes a single task through the single-task path, honouring the setting', async () => {
+      isConfirmBeforeDelete = false;
+      select([t('only')]);
+      await service.deleteSelected();
+      expect(matDialog.open).not.toHaveBeenCalled();
+      expect(taskService.remove).toHaveBeenCalledWith(
+        jasmine.objectContaining({ id: 'only' }),
+      );
+      expect(taskService.removeMultipleTasks).not.toHaveBeenCalled();
+    });
+
+    it('confirms a single task with the single-task message when the setting is on', async () => {
+      select([t('only')]);
+      await service.deleteSelected();
+      expect(matDialog.open).toHaveBeenCalledWith(
+        jasmine.anything(),
+        jasmine.objectContaining({
+          data: jasmine.objectContaining({ message: T.F.TASK.D_CONFIRM_DELETE.MSG }),
+        }),
+      );
+      expect(taskService.remove).toHaveBeenCalled();
     });
   });
 
@@ -230,14 +280,12 @@ describe('TaskBulkActionService', () => {
         .allArgs()
         .map(([task]) => (task as Task).id);
       expect(movedIds).toEqual(['plain', 'r1']);
+      expect(snackService.open).toHaveBeenCalledTimes(1);
       expect(snackService.open).toHaveBeenCalledWith(
         jasmine.objectContaining({
-          msg: T.F.TASK.MULTI_SELECT.S.MOVED_TO_PROJECT,
-          translateParams: { count: 2, projectTitle: 'Project 2' },
+          msg: T.F.TASK.MULTI_SELECT.S.APPLIED_PARTIAL,
+          translateParams: { count: 2, total: 4 },
         }),
-      );
-      expect(snackService.open).toHaveBeenCalledWith(
-        jasmine.objectContaining({ msg: T.F.TASK.MULTI_SELECT.S.APPLIED_PARTIAL }),
       );
       expect(service.isFeedbackSuppressed()).toBeFalse();
     });
@@ -305,6 +353,75 @@ describe('TaskBulkActionService', () => {
       await service.setEstimate(5);
       expect(taskService.update).toHaveBeenCalledTimes(1);
       expect(taskService.update).toHaveBeenCalledWith('a', { timeEstimate: 5 });
+    });
+  });
+
+  describe('scheduleFor', () => {
+    it('plans day-only picks per task and routes today to the bulk action', async () => {
+      select([
+        t('a'),
+        t('b', { dueWithTime: 1_000 }),
+        t('same', { dueDay: '2026-09-10' }),
+      ]);
+      await service.scheduleFor({
+        date: new Date(2026, 8, 10),
+        time: null,
+        remindOption: null,
+      });
+      const plan = store.dispatch.calls
+        .allArgs()
+        .map(([a]) => a)
+        .filter((a) => a.type === PlannerActions.planTaskForDay.type);
+      expect(plan.length).toBe(1);
+      expect(plan[0].task.id).toBe('a');
+      expect(plan[0].isShowSnack).toBeFalse();
+      // timed task keeps its time on the new day
+      expect(taskService.scheduleTask).toHaveBeenCalledWith(
+        jasmine.objectContaining({ id: 'b' }),
+        jasmine.any(Number),
+        TaskReminderOptionId.DoNotRemind,
+        false,
+      );
+      expect(snackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({ translateParams: { count: 2 } }),
+      );
+    });
+
+    it('uses planTasksForToday for today without a time', async () => {
+      select([t('a'), t('b')]);
+      await service.scheduleFor({
+        date: new Date(2026, 8, 5),
+        time: null,
+        remindOption: null,
+      });
+      const action = store.dispatch.calls.mostRecent().args[0];
+      expect(action.type).toBe(TaskSharedActions.planTasksForToday.type);
+      expect(action.taskIds).toEqual(['a', 'b']);
+    });
+
+    it('schedules with the picked time for every task', async () => {
+      select([t('a'), t('b')]);
+      await service.scheduleFor({
+        date: new Date(2026, 8, 10),
+        time: '09:30',
+        remindOption: null,
+      });
+      expect(taskService.scheduleTask).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('removeDeadline / removeFromToday', () => {
+    it('removes deadlines only where one exists', async () => {
+      select([t('a', { deadlineDay: '2026-09-10' }), t('b')]);
+      await service.removeDeadline();
+      expect(dispatchedTypes()).toEqual([TaskSharedActions.removeDeadline.type]);
+    });
+
+    it('removes all selected from Today in one action', async () => {
+      select([t('a'), t('b')]);
+      await service.removeFromToday();
+      expect(dispatchedTypes()).toEqual([TaskSharedActions.removeTasksFromTodayTag.type]);
+      expect(store.dispatch.calls.mostRecent().args[0].taskIds).toEqual(['a', 'b']);
     });
   });
 });

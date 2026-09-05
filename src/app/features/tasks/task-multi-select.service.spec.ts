@@ -212,6 +212,27 @@ describe('TaskMultiSelectService', () => {
       expect(service.anchorId()).toBeNull();
     });
 
+    it('removeWhenUnrendered keeps an id whose row is still rendered', async () => {
+      service.toggle('a');
+      service.removeWhenUnrendered('a');
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(selected()).toEqual(['a']);
+    });
+
+    it('removeWhenUnrendered drops an id whose row is gone', async () => {
+      service.toggle('a');
+      root.querySelector('task[data-task-id="a"]')?.remove();
+      service.removeWhenUnrendered('a');
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(selected()).toEqual([]);
+    });
+
+    it('bulk feedback suppression is off by default and settable', () => {
+      expect(service.isBulkFeedbackSuppressed()).toBeFalse();
+      service.setBulkFeedbackSuppressed(true);
+      expect(service.isBulkFeedbackSuppressed()).toBeTrue();
+    });
+
     it('prune keeps only existing ids', () => {
       service.toggle('a');
       service.toggle('b');

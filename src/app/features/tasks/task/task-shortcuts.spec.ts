@@ -134,8 +134,10 @@ describe('TaskComponent shortcut handling', () => {
             toggle: () => {},
             selectRange: () => {},
             remove: () => {},
+            removeWhenUnrendered: () => {},
             clear: () => {},
             requestMenuOpen: () => {},
+            isBulkFeedbackSuppressed: signal(false),
           },
         },
 

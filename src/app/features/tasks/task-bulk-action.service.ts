@@ -1,4 +1,4 @@
-import { computed, inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
 import { firstValueFrom } from 'rxjs';
@@ -26,11 +26,13 @@ import { getDbDateStr } from '../../util/get-db-date-str';
 import { getDateTimeFromClockString } from '../../util/get-date-time-from-clock-string';
 import { isValidSplitTime } from '../../util/is-valid-split-time';
 import { combineDateAndTime } from '../../util/combine-date-and-time';
+import { truncate } from '../../util/truncate';
 import { remindOptionToMilliseconds } from './util/remind-option-to-milliseconds';
 import { getDeadlineAutoPlanFields } from './util/get-deadline-auto-plan-fields';
 import { playDoneSound } from './util/play-done-sound';
-import { millisecondsDiffToRemindOption } from './util/remind-option-to-milliseconds';
 import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
+import { TranslateService, TranslateStore } from '@ngx-translate/core';
+import { getPluralKey } from '../../util/get-plural-key';
 import {
   dedupeByRepeatCfg,
   dedupeSubtasksOfSelectedParents,
@@ -70,15 +72,13 @@ export class TaskBulkActionService {
   private readonly _dateService = inject(DateService);
   private readonly _globalConfigService = inject(GlobalConfigService);
   private readonly _workContextService = inject(WorkContextService);
+  private readonly _translateService = inject(TranslateService);
+  private readonly _translateStore = inject(TranslateStore);
 
   private readonly _taskEntities = this._store.selectSignal(selectTaskEntities);
-  private readonly _isFeedbackSuppressed = signal(false);
 
-  /**
-   * True while a bulk loop dispatches. Per-action snackbars and the done sound
-   * check this so one summary replaces N notifications.
-   */
-  readonly isFeedbackSuppressed = this._isFeedbackSuppressed.asReadonly();
+  /** See TaskMultiSelectService.isBulkFeedbackSuppressed. */
+  readonly isFeedbackSuppressed = this._multiSelect.isBulkFeedbackSuppressed;
 
   /** The selected tasks resolved against the store, in visual order. */
   readonly selectedTasks = computed<Task[]>(() => {
@@ -131,7 +131,7 @@ export class TaskBulkActionService {
     this._snackService.open({
       type: 'SUCCESS',
       ico: 'check',
-      msg: T.F.TASK.MULTI_SELECT.S.DONE,
+      msg: this._plural('F.TASK.MULTI_SELECT.S.DONE', tasks.length),
       translateParams: { count: tasks.length },
     });
     this._restoreFocus(focusEl);
@@ -149,7 +149,7 @@ export class TaskBulkActionService {
     );
     this._snackService.open({
       type: 'SUCCESS',
-      msg: T.F.TASK.MULTI_SELECT.S.UNDONE,
+      msg: this._plural('F.TASK.MULTI_SELECT.S.UNDONE', tasks.length),
       translateParams: { count: tasks.length },
     });
     this._restoreFocus(focusEl);
@@ -158,12 +158,22 @@ export class TaskBulkActionService {
   // ---- DELETE -----------------------------------------------------------
 
   /**
-   * Always confirms for more than one task, regardless of
-   * `isConfirmBeforeDelete`: there is no undo for a bulk delete yet.
+   * More than one task always confirms, regardless of `isConfirmBeforeDelete`:
+   * there is no undo for a bulk delete yet. A single selected task takes the
+   * normal single-task path (setting + undo snack).
+   *
+   * Top-level tasks go through `deleteTasks` in one op. A subtask whose parent
+   * survives goes through the singular `deleteTask` instead: older clients'
+   * `deleteTasks` reducer would keep the dangling id in the parent's
+   * subTaskIds and fail post-sync validation (rule 10 — degrade gracefully).
    */
   async deleteSelected(): Promise<void> {
     const tasks = dedupeSubtasksOfSelectedParents(this._resolveInVisualOrder());
     if (!tasks.length) {
+      return;
+    }
+    if (tasks.length === 1) {
+      await this._deleteSingle(tasks[0]);
       return;
     }
     const isConfirm = await firstValueFrom(
@@ -171,7 +181,10 @@ export class TaskBulkActionService {
         .open(DialogConfirmComponent, {
           data: {
             okTxt: T.F.TASK.MULTI_SELECT.D_CONFIRM_DELETE.OK,
-            message: T.F.TASK.MULTI_SELECT.D_CONFIRM_DELETE.MSG,
+            message: this._plural(
+              'F.TASK.MULTI_SELECT.D_CONFIRM_DELETE.MSG',
+              tasks.length,
+            ),
             translateParams: { count: tasks.length },
           },
         })
@@ -181,7 +194,41 @@ export class TaskBulkActionService {
       return;
     }
     const focusEl = this._getFocusTargetAfterRemoval();
-    this._taskService.removeMultipleTasks(tasks.map((t) => t.id));
+    const { eligible: topLevel, skippedSubtasks: loneSubtasks } = splitParentOnly(tasks);
+    const loneSubtasksWithData = await Promise.all(
+      loneSubtasks.map((t) => this._withSubTasks(t)),
+    );
+    await this._runSuppressed(() => {
+      loneSubtasksWithData.forEach((t) => this._taskService.remove(t));
+      if (topLevel.length) {
+        this._taskService.removeMultipleTasks(topLevel.map((t) => t.id));
+      }
+    });
+    this._multiSelect.clear();
+    this._restoreFocus(focusEl);
+  }
+
+  private async _deleteSingle(task: Task): Promise<void> {
+    const isConfirmBeforeDelete =
+      this._globalConfigService.cfg()?.tasks?.isConfirmBeforeDelete ?? true;
+    if (isConfirmBeforeDelete) {
+      const isConfirm = await firstValueFrom(
+        this._matDialog
+          .open(DialogConfirmComponent, {
+            data: {
+              okTxt: T.F.TASK.D_CONFIRM_DELETE.OK,
+              message: T.F.TASK.D_CONFIRM_DELETE.MSG,
+              translateParams: { title: truncate(task.title) },
+            },
+          })
+          .afterClosed(),
+      );
+      if (!isConfirm) {
+        return;
+      }
+    }
+    const focusEl = this._getFocusTargetAfterRemoval();
+    this._taskService.remove(await this._withSubTasks(task));
     this._multiSelect.clear();
     await this._flush();
     this._restoreFocus(focusEl);
@@ -200,7 +247,7 @@ export class TaskBulkActionService {
     }
     const focusEl = this._getFocusTargetAfterRemoval();
     let movedCount = 0;
-    this._isFeedbackSuppressed.set(true);
+    this._multiSelect.setBulkFeedbackSuppressed(true);
     try {
       // Plain moves first, then one awaited (possibly confirmed) step per config.
       for (const task of tasks.filter((t) => !t.repeatCfgId)) {
@@ -225,23 +272,18 @@ export class TaskBulkActionService {
       }
       await this._flush();
     } finally {
-      this._isFeedbackSuppressed.set(false);
+      this._multiSelect.setBulkFeedbackSuppressed(false);
     }
-    if (movedCount) {
+    if (skippedSubtasks.length) {
+      this._snackPartial(movedCount, tasks.length + skippedSubtasks.length);
+    } else if (movedCount) {
       const project = await firstValueFrom(this._projectService.getByIdOnce$(projectId));
       this._snackService.open({
         type: 'SUCCESS',
         ico: 'forward',
-        msg: T.F.TASK.MULTI_SELECT.S.MOVED_TO_PROJECT,
+        msg: this._plural('F.TASK.MULTI_SELECT.S.MOVED_TO_PROJECT', movedCount),
         translateParams: { count: movedCount, projectTitle: project?.title ?? '' },
       });
-    }
-    if (skippedSubtasks.length) {
-      this._snackPartial(
-        movedCount,
-        movedCount + skippedSubtasks.length,
-        skippedSubtasks.length,
-      );
     }
     this._restoreFocus(focusEl);
   }
@@ -300,9 +342,14 @@ export class TaskBulkActionService {
       return;
     }
     const day = getDbDateStr(pick.date);
+    const todayStr = this._dateService.todayStr();
     const hasTime = !!pick.time && isValidSplitTime(pick.time);
+    const defaultRemindOption =
+      this._globalConfigService.cfg()?.reminder.defaultTaskRemindOption ??
+      DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption!;
     const focusEl = this._getFocusTargetAfterRemoval();
-    const dayOnlyIds: string[] = [];
+    const todayIds: string[] = [];
+    let applied = 0;
     await this._runSuppressed(() => {
       tasks.forEach((task) => {
         if (hasTime) {
@@ -313,38 +360,46 @@ export class TaskBulkActionService {
             pick.remindOption ?? TaskReminderOptionId.DoNotRemind,
             false,
           );
-        } else if (task.dueWithTime) {
-          // Keep the task's own time on the new day, as the context menu does.
+          applied++;
+        } else if (
+          task.dueWithTime &&
+          !(day === todayStr && this._dateService.isToday(task.dueWithTime))
+        ) {
+          // Day-only pick for a timed task: keep its time on the new day, as
+          // the context menu's quick-access buttons do.
           const due = combineDateAndTime(pick.date as Date, new Date(task.dueWithTime));
-          const remindCfg = task.reminderId
-            ? millisecondsDiffToRemindOption(task.dueWithTime, task.remindAt)
-            : (this._globalConfigService.cfg()?.reminder.defaultTaskRemindOption ??
-              DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption!);
-          this._taskService.scheduleTask(task, due.getTime(), remindCfg, false);
-        } else if (day === this._dateService.todayStr()) {
-          dayOnlyIds.push(task.id);
+          this._taskService.scheduleTask(task, due.getTime(), defaultRemindOption, false);
+          applied++;
+        } else if (day === todayStr) {
+          // Already due today with a time → plain "add to today" (clears the
+          // reminder), matching the single-task flow.
+          todayIds.push(task.id);
         } else if (task.dueDay !== day) {
           this._store.dispatch(
             PlannerActions.planTaskForDay({ task, day, isShowSnack: false }),
           );
+          applied++;
         }
       });
-      if (dayOnlyIds.length) {
+      if (todayIds.length) {
         this._store.dispatch(
           TaskSharedActions.planTasksForToday({
-            taskIds: dayOnlyIds,
-            today: this._dateService.todayStr(),
+            taskIds: todayIds,
+            today: todayStr,
             startOfNextDayDiffMs: this._dateService.getStartOfNextDayDiffMs(),
             parentTaskMap: Object.fromEntries(
-              tasks
-                .filter((t) => dayOnlyIds.includes(t.id))
-                .map((t) => [t.id, t.parentId]),
+              tasks.filter((t) => todayIds.includes(t.id)).map((t) => [t.id, t.parentId]),
             ),
           }),
         );
+        applied += todayIds.length;
       }
     });
-    this._snackApplied(tasks.length);
+    if (applied) {
+      this._snackApplied(applied);
+    } else {
+      this._snackNothingToDo();
+    }
     this._restoreFocus(focusEl);
   }
 
@@ -367,7 +422,7 @@ export class TaskBulkActionService {
     this._snackService.open({
       type: 'SUCCESS',
       ico: 'event_busy',
-      msg: T.F.TASK.MULTI_SELECT.S.UNSCHEDULED,
+      msg: this._plural('F.TASK.MULTI_SELECT.S.UNSCHEDULED', tasks.length),
       translateParams: { count: tasks.length },
     });
     this._restoreFocus(focusEl);
@@ -475,6 +530,22 @@ export class TaskBulkActionService {
     this._snackApplied(tasks.length);
   }
 
+  async removeDeadline(): Promise<void> {
+    const tasks = this._resolveInVisualOrder().filter(
+      (t) => !!t.deadlineDay || !!t.deadlineWithTime,
+    );
+    if (!tasks.length) {
+      this._snackNothingToDo();
+      return;
+    }
+    await this._runSuppressed(() =>
+      tasks.forEach((t) =>
+        this._store.dispatch(TaskSharedActions.removeDeadline({ taskId: t.id })),
+      ),
+    );
+    this._snackApplied(tasks.length);
+  }
+
   // ---- ESTIMATE ---------------------------------------------------------
 
   async setEstimate(ms: number): Promise<void> {
@@ -517,11 +588,7 @@ export class TaskBulkActionService {
       ),
     );
     if (skippedSubtasks.length) {
-      this._snackPartial(
-        tasks.length,
-        tasks.length + skippedSubtasks.length,
-        skippedSubtasks.length,
-      );
+      this._snackPartial(tasks.length, tasks.length + skippedSubtasks.length);
     }
     this._restoreFocus(focusEl);
   }
@@ -544,12 +611,12 @@ export class TaskBulkActionService {
 
   /** Runs the dispatch loop with per-action feedback suppressed, then flushes. */
   private async _runSuppressed(loop: () => void): Promise<void> {
-    this._isFeedbackSuppressed.set(true);
+    this._multiSelect.setBulkFeedbackSuppressed(true);
     try {
       loop();
       await this._flush();
     } finally {
-      this._isFeedbackSuppressed.set(false);
+      this._multiSelect.setBulkFeedbackSuppressed(false);
     }
   }
 
@@ -567,20 +634,24 @@ export class TaskBulkActionService {
     void playDoneSound(soundCfg, doneToday);
   }
 
+  private _plural(keyPrefix: string, count: number): string {
+    return getPluralKey(this._translateService, this._translateStore, count, keyPrefix);
+  }
+
   private _snackApplied(count: number): void {
     this._snackService.open({
       type: 'SUCCESS',
-      msg: T.F.TASK.MULTI_SELECT.S.APPLIED,
+      msg: this._plural('F.TASK.MULTI_SELECT.S.APPLIED', count),
       translateParams: { count },
     });
   }
 
-  private _snackPartial(count: number, total: number, skipped: number): void {
+  private _snackPartial(count: number, total: number): void {
     this._snackService.open({
       type: 'CUSTOM',
       ico: 'info',
       msg: T.F.TASK.MULTI_SELECT.S.APPLIED_PARTIAL,
-      translateParams: { count, total, skipped },
+      translateParams: { count, total },
     });
   }
 

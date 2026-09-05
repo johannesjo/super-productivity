@@ -1,6 +1,6 @@
 # Multi-select & bulk actions for tasks — concept
 
-**Status:** Draft concept for discussion (2026-09-04, revision 2 after an adversarial and a normal review). Not implemented.
+**Status:** Revision 2 after an adversarial and a normal review (2026-09-04). Phase 1 implemented on this branch on 2026-09-05; deviations from the plan are listed at the end of §9.
 
 **Closes / consolidates:** #4645 (27 👍, "Select and change multiple tasks"), #7058 (19 👍, "multi-select / batch operations + recurring tasks"), #6352 ("Deleting multiple tasks at once"). Duplicates already closed in favour of #4645: #5685 (11 👍), #9022. Related: #6486 (delete all instances of a recurring task), #8273 (move tasks to backlog from tag view), #6551 (focused vs. selected task, plugin API). Existing attempt: PR #7146 (far behind master, see §10).
 
@@ -221,6 +221,8 @@ Dragging a task that is part of the selection drags the whole selection: the CDK
 - Multi-task variants of the schedule, deadline and estimate dialogs.
 - Unit tests: range/anchor logic, prune rule, bulk semantics (mixed states, dedupe, partial eligibility, resulting order), the reducer fix. One E2E per entry method.
 - Docs: `docs/wiki/3.03-Keyboard-Shortcuts.md`, an "Edit several tasks at once" how-to.
+
+_Phase 1 as implemented (2026-09-05):_ everything above except the multi-task estimate dialog (the menu offers the quick estimate values instead), and "disabled with a tooltip" for inapplicable actions (they are hidden, or answer with a "nothing to change" snack). Shipped early from Phase 2: Ctrl+Shift+click add-range. Deviations from §6 forced by rule 10: a subtask whose parent survives is deleted through the singular `deleteTask` (older clients' `deleteTasks` reducer would leave a dangling `subTaskIds` entry and fail post-sync validation), and a single selected task takes the normal single-task delete path with its setting and undo. The feedback-suppression flag lives on `TaskMultiSelectService`, not on the bulk service, so effects only depend on the small service.
 
 **Phase 1b — touch**
 
