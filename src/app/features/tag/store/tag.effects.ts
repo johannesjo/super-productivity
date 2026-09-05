@@ -135,7 +135,13 @@ export class TagEffects {
           ),
         ),
         filter(({ nullTasks }) => nullTasks.length > 0),
-        tap((arg) => Log.log('Error INFO Today:', arg)),
+        tap(({ allTasks, nullTasks, activeId }) =>
+          Log.log('Error INFO Today:', {
+            activeId,
+            taskCount: allTasks.length,
+            nullTaskCount: nullTasks.length,
+          }),
+        ),
         tap(({ activeId, allTasks }) => {
           const allIds = allTasks.map((t) => t && t.id);
           const r = confirmDialog(
