@@ -215,6 +215,8 @@ const createTaskWidgetWindowForGeneration = async (
     webSecurity: true,
     allowRunningInsecureContent: false,
     backgroundThrottling: false, // Prevent throttling when hidden
+    // No editable field here today, but the guard is fail-closed (#5314).
+    spellcheck: false,
   };
   // Keep the widget renderer's IPC boundary as tight as the main window's.
   assertSecureWebPreferences(webPreferences, 'task-widget');

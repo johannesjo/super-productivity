@@ -16,6 +16,7 @@ const SECURE = Object.freeze({
   contextIsolation: true,
   nodeIntegration: false,
   nodeIntegrationInSubFrames: false,
+  spellcheck: false,
 });
 
 test('accepts a fully specified secure webPreferences object', () => {
@@ -25,10 +26,23 @@ test('accepts a fully specified secure webPreferences object', () => {
 test('accepts extra unrelated keys (preload, webSecurity, etc.)', () => {
   assert.doesNotThrow(() =>
     assertSecureWebPreferences(
-      { ...SECURE, preload: '/x/preload.js', webSecurity: true, spellcheck: false },
+      { ...SECURE, preload: '/x/preload.js', webSecurity: true },
       'test',
     ),
   );
+});
+
+test('rejects spellcheck unless explicitly false (including omitted)', () => {
+  // Fail-closed: Electron defaults spellcheck to true, and an enabled
+  // spellchecker fetches dictionaries from Google (#5314). A window that simply
+  // omits the key would silently reintroduce that connection.
+  for (const bad of [true, undefined]) {
+    assert.throws(
+      () => assertSecureWebPreferences({ ...SECURE, spellcheck: bad }, 'test'),
+      /spellcheck must be explicitly false/,
+      `spellcheck: ${String(bad)} must be rejected`,
+    );
+  }
 });
 
 test('rejects missing webPreferences (relying on Electron defaults)', () => {

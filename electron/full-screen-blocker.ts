@@ -24,6 +24,8 @@ export const initFullScreenBlocker = (IS_DEV: boolean): void => {
         contextIsolation: true,
         nodeIntegration: false,
         nodeIntegrationInSubFrames: false,
+        // No editable field here today, but the guard is fail-closed (#5314).
+        spellcheck: false,
       };
       assertSecureWebPreferences(webPreferences, 'full-screen-blocker');
       const win = new BrowserWindow({

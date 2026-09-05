@@ -26,6 +26,12 @@ type WebPreferences = BrowserWindowConstructorOptions['webPreferences'];
  *   value is rejected too, so the guard never depends on the Electron default
  *   staying safe across upgrades. (Sub-frames are included because that flag
  *   governs whether the preload bridge reaches plugin iframes.)
+ * - `spellcheck` is fail-closed for a different reason: not the IPC boundary but
+ *   the "offline-first with zero data collection" promise. Chromium's spellchecker
+ *   downloads dictionaries from Google (`redirector.gvt1.com`) the first time a
+ *   spellcheck-enabled field is focused, which is what #5314 observed in a
+ *   firewall log. Electron defaults it to `true`, so an omitted value is rejected
+ *   too — otherwise a new window silently reintroduces the connection.
  * - The additional insecure overrides — `sandbox`, `nodeIntegrationInWorker`,
  *   `webviewTag`, `webSecurity` — are checked **directionally**: only an explicit
  *   insecure value is rejected; an omitted key keeps Electron's secure default so
@@ -85,6 +91,15 @@ export const assertSecureWebPreferences = (
   if (webPreferences.webviewTag === true) {
     throw fail(
       'webviewTag must not be true (a <webview> guest needs its own validation)',
+    );
+  }
+  // Privacy rather than security, so it does not use `fail()`: enabling the
+  // spellchecker makes the app contact Google for dictionaries (#5314).
+  if (webPreferences.spellcheck !== false) {
+    throw new Error(
+      `Insecure webPreferences for the "${windowLabel}" window: spellcheck must be ` +
+        `explicitly false (got ${String(webPreferences.spellcheck)}). Chromium's ` +
+        'spellchecker downloads dictionaries from Google — refusing to create the window.',
     );
   }
   // webSecurity is the same-origin policy rather than a node capability, but with the
