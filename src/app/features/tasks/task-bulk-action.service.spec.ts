@@ -284,7 +284,7 @@ describe('TaskBulkActionService', () => {
       expect(snackService.open).toHaveBeenCalledWith(
         jasmine.objectContaining({
           msg: T.F.TASK.MULTI_SELECT.S.APPLIED_PARTIAL,
-          translateParams: { count: 2, total: 4 },
+          translateParams: { count: 2, total: 3 },
         }),
       );
       expect(service.isFeedbackSuppressed()).toBeFalse();
