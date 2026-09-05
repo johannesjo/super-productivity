@@ -159,7 +159,10 @@ export class TaskTitleComponent implements OnDestroy {
 
   cancelEditing(): void {
     const textarea = this.textarea()?.nativeElement;
-    if (textarea) {
+    // A blur only fires when the textarea actually has focus (focusInput()
+    // focuses on a timeout); otherwise end the edit directly so the editing
+    // state can never get stuck.
+    if (textarea && document.activeElement === textarea) {
       textarea.blur();
     } else {
       this._endEditing();

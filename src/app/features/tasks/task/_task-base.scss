@@ -272,11 +272,10 @@
   align-items: center;
   justify-content: center;
 
-  // 22px matches the done-toggle glyph (done-toggle.component.scss).
   &::before {
     content: '';
-    width: 22px;
-    height: 22px;
+    width: var(--done-toggle-glyph-size);
+    height: var(--done-toggle-glyph-size);
     border-radius: 50%;
     border: var(--s-quarter) solid var(--c-accent);
     box-sizing: border-box;

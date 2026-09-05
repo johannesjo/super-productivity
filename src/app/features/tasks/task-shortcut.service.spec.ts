@@ -23,9 +23,10 @@ describe('TaskShortcutService', () => {
   };
   let mockMultiSelect: {
     isActive: ReturnType<typeof signal<boolean>>;
-    isBarVisible: ReturnType<typeof signal<boolean>>;
+    isSelecting: ReturnType<typeof signal<boolean>>;
     count: ReturnType<typeof signal<number>>;
     has: jasmine.Spy;
+    focusedRowId: () => string | null;
     toggle: jasmine.Spy;
     selectAllInListOfFocused: jasmine.Spy;
     clear: jasmine.Spy;
@@ -95,9 +96,16 @@ describe('TaskShortcutService', () => {
 
     mockMultiSelect = {
       isActive: signal(false),
-      isBarVisible: signal(false),
+      isSelecting: signal(false),
       count: signal(0),
       has: jasmine.createSpy('has').and.returnValue(true),
+      // Mirrors the real lookup: the focused <task> outside the detail panel.
+      focusedRowId: () => {
+        const el = document.activeElement?.closest('task');
+        return el && !el.closest('task-detail-panel')
+          ? el.getAttribute('data-task-id')
+          : null;
+      },
       toggle: jasmine.createSpy('toggle'),
       selectAllInListOfFocused: jasmine.createSpy('selectAllInListOfFocused'),
       clear: jasmine.createSpy('clear'),
@@ -867,7 +875,7 @@ describe('TaskShortcutService', () => {
   describe('multi-select shortcuts', () => {
     it('Esc clears an active selection and is consumed', () => {
       mockMultiSelect.isActive.set(true);
-      mockMultiSelect.isBarVisible.set(true);
+      mockMultiSelect.isSelecting.set(true);
       const ev = createKeyboardEvent('Escape', 'Escape');
       expect(service.handleTaskShortcuts(ev)).toBeTrue();
       expect(mockMultiSelect.clear).toHaveBeenCalled();
@@ -875,7 +883,7 @@ describe('TaskShortcutService', () => {
     });
 
     it('Esc leaves an empty touch selection mode', () => {
-      mockMultiSelect.isBarVisible.set(true);
+      mockMultiSelect.isSelecting.set(true);
       const ev = createKeyboardEvent('Escape', 'Escape');
       expect(service.handleTaskShortcuts(ev)).toBeTrue();
       expect(mockMultiSelect.clear).toHaveBeenCalled();

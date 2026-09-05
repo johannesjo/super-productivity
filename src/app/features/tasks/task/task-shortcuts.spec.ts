@@ -138,7 +138,7 @@ describe('TaskComponent shortcut handling', () => {
             clear: () => {},
             requestMenuOpen: () => {},
             isBulkFeedbackSuppressed: signal(false),
-            isBarVisible: signal(false),
+            isSelecting: signal(false),
             isTouchSelectionMode: signal(false),
           },
         },

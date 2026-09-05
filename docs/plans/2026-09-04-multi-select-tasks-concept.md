@@ -219,7 +219,7 @@ Dragging a task that is part of the selection drags the whole selection: the CDK
 - `TaskBulkActionService` and the context menu in selection mode with: schedule, deadline, move to project (recurring dedupe + guard), tags (all-or-nothing toggle), done/undone, backlog/Today, add to/remove from Today, unschedule, estimate, delete with confirmation.
 - Bulk-allowlisted shortcuts routed to the bulk service; snack/sound suppression; `deleteTasks` reducer fix (test first).
 - Multi-task variants of the schedule, deadline and estimate dialogs.
-- Unit tests: range/anchor logic, prune rule, bulk semantics (mixed states, dedupe, partial eligibility, resulting order), the reducer fix. One E2E per entry method.
+- Unit tests: range/anchor logic, prune rule, bulk semantics (mixed states, dedupe, partial eligibility, resulting order), the reducer fix. One E2E per entry method (`e2e/tests/task-multi-select/`).
 - Docs: `docs/wiki/3.03-Keyboard-Shortcuts.md`, an "Edit several tasks at once" how-to.
 
 _Phase 1 as implemented (2026-09-05):_ everything above except the multi-task estimate dialog (the menu offers the quick estimate values instead), and "disabled with a tooltip" for inapplicable actions (they are hidden, or answer with a "nothing to change" snack). Shipped early from Phase 2: Ctrl+Shift+click add-range. Deviations from §6 forced by rule 10: a subtask whose parent survives is deleted through the singular `deleteTask` (older clients' `deleteTasks` reducer would leave a dangling `subTaskIds` entry and fail post-sync validation), and a single selected task takes the normal single-task delete path with its setting and undo. The feedback-suppression flag lives on `TaskMultiSelectService`, not on the bulk service, so effects only depend on the small service.

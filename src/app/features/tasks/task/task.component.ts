@@ -470,7 +470,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     }
     // While a multi-selection exists, focus moves are selection mechanics
     // (Ctrl+click focuses the row); don't re-target an open detail panel.
-    if (this._multiSelect.isBarVisible()) {
+    if (this._multiSelect.isSelecting()) {
       return;
     }
     const selectedTaskId = this._taskService.selectedTaskId();
@@ -507,42 +507,35 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   /**
    * Ctrl/Cmd+click toggles this row in the multi-selection, Shift+click selects
-   * the range from the anchor. Child handlers (title, done toggle, estimate)
-   * bail on modifier clicks so the event reaches the host by bubbling; real
-   * controls (links, buttons, inputs) keep their own behaviour.
+   * the range from the anchor; in touch selection mode a plain tap toggles.
+   * Child handlers (title, done toggle, estimate) bail on modifier clicks so the
+   * event reaches the host by bubbling, and the title has pointer-events off
+   * on touch; real controls (links, buttons, inputs) keep their own behaviour.
    */
   onHostClick(ev: MouseEvent): void {
-    if (!this._isInnermostTaskFor(ev.target)) {
+    if (!this._isInnermostTaskFor(ev.target) || isInteractiveTarget(ev.target)) {
       return;
     }
-    // Touch selection mode: a plain tap anywhere on the row toggles it
-    // (the title has pointer-events off on touch, so taps reach the host).
-    if (this._multiSelect.isTouchSelectionMode() && !isMultiSelectModifierEvent(ev)) {
-      if (
-        isInteractiveTarget(ev.target) ||
-        // Detail-panel copies are never part of the selection.
-        this._elementRef.nativeElement.closest('task-detail-panel')
-      ) {
-        return;
-      }
-      ev.preventDefault();
-      ev.stopPropagation();
-      this._multiSelect.toggle(this.task().id);
-      return;
-    }
-    if (!isMultiSelectModifierEvent(ev)) {
-      return;
-    }
-    if (isInteractiveTarget(ev.target)) {
+    const isModifierClick = isMultiSelectModifierEvent(ev);
+    const isTouchTap = !isModifierClick && this._multiSelect.isTouchSelectionMode();
+    if (
+      (!isModifierClick && !isTouchTap) ||
+      // Detail-panel copies are never part of the selection.
+      this._elementRef.nativeElement.closest('task-detail-panel')
+    ) {
       return;
     }
     ev.preventDefault();
     ev.stopPropagation();
+    const id = this.task().id;
+    if (isTouchTap) {
+      this._multiSelect.toggle(id);
+      return;
+    }
     if (this._taskService.selectedTaskId()) {
       // The detail panel is single-task UI; close it on the first modifier click.
       this._taskService.setSelectedId(null);
     }
-    const id = this.task().id;
     if (ev.shiftKey) {
       this._multiSelect.selectRange(id, ev.ctrlKey || ev.metaKey);
     } else {
@@ -1377,7 +1370,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     // row while a selection exists clears it and acts alone (file-manager rule).
     // In touch selection mode the menu only ever acts on the selection, so an
     // unselected row joins it first instead of silently ending the mode.
-    if (this._multiSelect.isBarVisible()) {
+    if (this._multiSelect.isSelecting()) {
       if (
         this._multiSelect.isTouchSelectionMode() &&
         !this._multiSelect.has(this.task().id)

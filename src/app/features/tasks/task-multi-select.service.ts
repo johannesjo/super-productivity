@@ -47,8 +47,11 @@ export class TaskMultiSelectService {
    * Android back or Esc. Deselecting the last task keeps the mode.
    */
   readonly isTouchSelectionMode = this._isTouchSelectionMode.asReadonly();
-  /** The bar shows while something is selected or touch selection mode is on. */
-  readonly isBarVisible = computed(
+  /**
+   * Something is selected or touch selection mode is on: the bar shows, Esc /
+   * Android back clear, and the app shell carries `.is-multi-selecting`.
+   */
+  readonly isSelecting = computed(
     () => this._selectedIds().size > 0 || this._isTouchSelectionMode(),
   );
 
@@ -77,6 +80,15 @@ export class TaskMultiSelectService {
       }
     });
     return ordered;
+  }
+
+  /**
+   * Id of the focused main-list row, or null when focus is elsewhere or on a
+   * detail-panel copy. The single source for "which row do selection keys act
+   * on" so the shortcut layer and this service can never disagree.
+   */
+  focusedRowId(): string | null {
+    return this._focusedRow()?.id ?? null;
   }
 
   /** Ctrl/Cmd+click and `X`: toggle one task, which becomes the anchor. */

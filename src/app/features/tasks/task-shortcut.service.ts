@@ -350,19 +350,18 @@ export class TaskShortcutService {
     keys: KeyboardConfig,
     focusedTaskId: TaskId | null,
   ): boolean {
-    // Rows inside the detail panel are copies and never part of the selection
-    // (validity rule); selection keys ignore them.
-    const isFocusInDetailPanel = !!document.activeElement?.closest('task-detail-panel');
+    // Selection keys act on the focused main-list row only; detail-panel copies
+    // are never part of the selection (see TaskMultiSelectService.focusedRowId).
+    const selectableRowId = this._multiSelect.focusedRowId();
 
-    if (ev.key === 'Escape' && this._multiSelect.isBarVisible()) {
+    if (ev.key === 'Escape' && this._multiSelect.isSelecting()) {
       this._multiSelect.clear();
       ev.preventDefault();
       return true;
     }
 
     if (
-      focusedTaskId &&
-      !isFocusInDetailPanel &&
+      selectableRowId &&
       ev.shiftKey &&
       !ev.ctrlKey &&
       !ev.metaKey &&
@@ -380,13 +379,12 @@ export class TaskShortcutService {
     // `X` toggles the focused row in the selection (Linear / Gmail convention).
     // A user or plugin binding on the same combo keeps precedence.
     if (
-      focusedTaskId &&
-      !isFocusInDetailPanel &&
+      selectableRowId &&
       !ev.repeat &&
       checkKeyCombo(ev, keys.taskToggleSelect) &&
       !this._isAnyConfiguredCombo(ev, { ...keys, taskToggleSelect: null })
     ) {
-      this._multiSelect.toggle(focusedTaskId);
+      this._multiSelect.toggle(selectableRowId);
       ev.preventDefault();
       return true;
     }
@@ -395,8 +393,7 @@ export class TaskShortcutService {
     // checkKeyCombo so the user's keyboard-layout map applies. The global
     // handler lets Cmd+key through from inputs, so guard against a title edit.
     if (
-      focusedTaskId &&
-      !isFocusInDetailPanel &&
+      selectableRowId &&
       (checkKeyCombo(ev, 'Ctrl+A') || checkKeyCombo(ev, 'Meta+A')) &&
       !(ev.target instanceof HTMLElement && isInputElement(ev.target)) &&
       // A user who bound a shortcut to Ctrl/Cmd+A keeps it.

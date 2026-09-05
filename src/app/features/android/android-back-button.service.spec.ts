@@ -26,7 +26,7 @@ const project = (over: Partial<Project>): Project =>
 
 describe('AndroidBackButtonService (#7972)', () => {
   const multiSelect = {
-    isBarVisible: signal(false),
+    isSelecting: signal(false),
     clear: jasmine.createSpy('clear'),
   };
   let service: AndroidBackButtonService;
@@ -155,12 +155,12 @@ describe('AndroidBackButtonService (#7972)', () => {
 
   describe('multi-selection', () => {
     afterEach(() => {
-      multiSelect.isBarVisible.set(false);
+      multiSelect.isSelecting.set(false);
       multiSelect.clear.calls.reset();
     });
 
     it('clears an active multi-selection instead of navigating', () => {
-      multiSelect.isBarVisible.set(true);
+      multiSelect.isSelecting.set(true);
       service.handleBackButton();
       expect(multiSelect.clear).toHaveBeenCalled();
       expect(historyBack).not.toHaveBeenCalled();
@@ -168,7 +168,7 @@ describe('AndroidBackButtonService (#7972)', () => {
     });
 
     it('closes an open dialog first and keeps the selection', () => {
-      multiSelect.isBarVisible.set(true);
+      multiSelect.isSelecting.set(true);
       const dialogRef = { disableClose: false, close: jasmine.createSpy('close') };
       openDialogs.push(dialogRef as never);
       service.handleBackButton();

@@ -85,7 +85,7 @@ export class AndroidBackButtonService {
     // 5b. A task multi-selection (or touch selection mode) has no history
     //     entry and sits below every dialog, overlay and popup; back leaves
     //     it before anything navigates away.
-    if (this._taskMultiSelectService.isBarVisible()) {
+    if (this._taskMultiSelectService.isSelecting()) {
       this._taskMultiSelectService.clear();
       return;
     }

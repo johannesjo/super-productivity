@@ -216,14 +216,14 @@ describe('TaskMultiSelectService', () => {
       service.toggle('a');
       expect(service.isActive()).toBeFalse();
       expect(service.isTouchSelectionMode()).toBeTrue();
-      expect(service.isBarVisible()).toBeTrue();
+      expect(service.isSelecting()).toBeTrue();
     });
 
     it('clear leaves the mode', () => {
       service.enterTouchSelectionMode();
       service.clear();
       expect(service.isTouchSelectionMode()).toBeFalse();
-      expect(service.isBarVisible()).toBeFalse();
+      expect(service.isSelecting()).toBeFalse();
     });
   });
 
