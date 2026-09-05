@@ -57,6 +57,7 @@ const createMockCallbacks = (): jasmine.SpyObj<CalendarGestureCallbacks> =>
     'getIsExpanded',
     'measure',
     'getExpandedHeight',
+    'getRowHeight',
     'canExpand',
     'onExpandChanged',
     'onVerticalSwipe',
@@ -87,6 +88,7 @@ describe('CalendarGestureHandler', () => {
     cb.getActiveWeekIndex.and.returnValue(0);
     cb.getIsExpanded.and.returnValue(false);
     cb.getExpandedHeight.and.returnValue(MAX_HEIGHT);
+    cb.getRowHeight.and.returnValue(ROW_HEIGHT);
     cb.canExpand.and.returnValue(true);
 
     handler = new CalendarGestureHandler(el, () => weeksEl, cb);
@@ -571,6 +573,35 @@ describe('CalendarGestureHandler', () => {
         // dropped-rows clamp this was -4 rows and weeks 5 and 6 were unreachable.
         const innerEl = weeksEl.firstElementChild as HTMLElement;
         expect(innerEl.style.transform).toBe('translateY(0px)');
+      });
+
+      // The offset counts in whole rows, so the rows on screen have to be the
+      // height that offset assumes for the whole animation, not only after the
+      // flag flips at snapDur + 10. Collapsing from index 2 with 29px rows
+      // travelled to -80px and put week 3 in the window before jumping back.
+      it('should give the rows their post-snap height when the animation starts', () => {
+        cb.getExpandedHeight.and.returnValue(MIN_ROW_HEIGHT * WEEKS_SHOWN);
+        cb.getRowHeight.and.returnValue(MIN_ROW_HEIGHT);
+        cb.getIsExpanded.and.returnValue(true);
+
+        handler.snapTo(false, 2);
+
+        // Before the animation has finished, and before onExpandChanged fires.
+        expect(weeksEl.style.getPropertyValue('--row-height')).toBe(`${ROW_HEIGHT}px`);
+        const innerEl = weeksEl.firstElementChild as HTMLElement;
+        expect(innerEl.style.transform).toBe(`translateY(${-2 * ROW_HEIGHT}px)`);
+        expect(cb.onExpandChanged).not.toHaveBeenCalled();
+      });
+
+      it('should give the rows the shrunken height when expanding', () => {
+        cb.getExpandedHeight.and.returnValue(MIN_ROW_HEIGHT * WEEKS_SHOWN);
+        cb.getRowHeight.and.returnValue(MIN_ROW_HEIGHT);
+
+        handler.snapTo(true, 2);
+
+        expect(weeksEl.style.getPropertyValue('--row-height')).toBe(
+          `${MIN_ROW_HEIGHT}px`,
+        );
       });
 
       it('should collapse to a full-size row, never a shrunken one', () => {

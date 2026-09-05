@@ -211,13 +211,14 @@ export class PlannerCalendarNavComponent {
    * put a fixed 144px grid into whatever space was left, overflowing into the
    * `MIN_PLAN_VIEW_HEIGHT` reserve the clamp exists to protect. A no-op
    * whenever `canExpand()` is true.
+   *
+   * The collapsed branch is deliberately not clamped. `_availableForRows` has
+   * no floor, so at an Electron minimum window it can fall under one row or go
+   * negative, and a negative `max-height` is rejected by CSSOM outright, which
+   * leaves the element on whatever value was last valid rather than failing
+   * visibly. One collapsed row is the floor.
    */
-  maxHeight = computed(() =>
-    Math.min(
-      this.isExpanded() ? this.rowHeight() * WEEKS_SHOWN : ROW_HEIGHT,
-      this._availableForRows(),
-    ),
-  );
+  maxHeight = computed(() => (this.isExpanded() ? this.maxExpandedHeight() : ROW_HEIGHT));
 
   /** What the grid opens to, clamped the same way `maxHeight` is. */
   maxExpandedHeight = computed(() =>
@@ -290,6 +291,7 @@ export class PlannerCalendarNavComponent {
         getIsExpanded: () => this.isExpanded(),
         measure: () => this._measureAvailableForRows(),
         getExpandedHeight: () => this.maxExpandedHeight(),
+        getRowHeight: () => this.rowHeight(),
         canExpand: () => this.canExpand(),
         onExpandChanged: (expanded) => this.isExpanded.set(expanded),
         onVerticalSwipe: (isDown) => this._handleVerticalSwipe(isDown),

@@ -415,6 +415,22 @@ describe('PlannerCalendarNavComponent', () => {
       expect(component.displayRowHeight()).toBeLessThan(ROW_HEIGHT);
     });
 
+    // `_availableForRows` has no floor: it is `clientHeight - top - HANDLE -
+    // MIN_PLAN_VIEW`, so an Electron minimum window (300x240, `minHeight: 240`
+    // in electron/main-window.ts) drives it under one row and it can go
+    // negative. A negative `max-height` is rejected by CSSOM outright, leaving
+    // the element on its last valid value rather than failing visibly.
+    it('should keep a collapsed row at full height when the room runs out', () => {
+      component.isExpanded.set(false);
+
+      setRoom(18);
+      expect(component.maxHeight()).toBe(ROW_HEIGHT);
+
+      setRoom(-32);
+      expect(component.maxHeight()).toBe(ROW_HEIGHT);
+      expect(component.maxHeight()).toBeGreaterThan(0);
+    });
+
     // `canExpand()` gates entering the expanded state and nothing leaves it, so
     // a height-only shrink (a banner above `.route-wrapper`, which fires no
     // resize event) leaves `isExpanded` true with the room gone. Without the

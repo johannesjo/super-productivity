@@ -33,6 +33,8 @@ export interface CalendarGestureCallbacks {
    * in a viewport that has room for one, so it never shrinks with the grid.
    */
   getExpandedHeight(): number;
+  /** Row height the grid renders at once expanded; collapsed is always `ROW_HEIGHT`. */
+  getRowHeight(): number;
   /** False where not even `MIN_ROW_HEIGHT` rows fit, leaving nothing to expand into. */
   canExpand(): boolean;
   onExpandChanged(expanded: boolean): void;
@@ -93,6 +95,16 @@ export class CalendarGestureHandler {
     const targetHeight = expanded ? this._cb.getExpandedHeight() : ROW_HEIGHT;
     const idx = this._dragActiveIdx;
     const targetOffset = expanded ? 0 : -idx * ROW_HEIGHT;
+
+    // Rows take their post-snap height now, not when the flag flips at the end
+    // of the animation. `targetOffset` counts in whole rows, so animating to it
+    // while the rows on screen are still the other height points the window at
+    // the wrong week for the duration: collapsing from index 2 at 29px rows
+    // travelled to -80px and landed on week 3 before jumping back.
+    weeksEl.style.setProperty(
+      '--row-height',
+      `${expanded ? this._cb.getRowHeight() : ROW_HEIGHT}px`,
+    );
 
     if (snapDur === 0) {
       // Apply the target rather than clearing, for the same reason the animated
