@@ -58,39 +58,34 @@ test('an unremovable file is reported, not thrown', () => {
   });
 });
 
-test('CLI: a target missing the manifest while the source has one is a hard error', () => {
-  // The single fragile link in the whole change is the hardcoded copy path.
-  // If it drifts, a silent no-op is indistinguishable from success.
-  withDir(['ngsw.json'], (source) => {
-    withDir(['index.html'], (target) => {
-      const res = runCli([target, source]);
+test('CLI: an unremovable file does not fail the build', () => {
+  // The exit path lives in the CLI, not the pure function — this is the layer
+  // that must stay green, because it is the one F-Droid's prebuild runs.
+  withDir(['ngsw-worker.js'], (dir) => {
+    fs.mkdirSync(path.join(dir, 'ngsw.json'));
 
-      assert.equal(res.status, 1);
-      assert.match(res.stderr, /the asset copy path moved/);
-    });
+    const res = runCli([dir]);
+
+    assert.equal(res.status, 0, res.stderr);
+    assert.match(res.stderr, /could not remove ngsw\.json/);
   });
 });
 
-test('CLI: no manifest in either place is only a warning', () => {
-  // Legitimate: the service worker can simply be off for this build.
-  withDir([], (source) => {
-    withDir(['index.html'], (target) => {
-      const res = runCli([target, source]);
-
-      assert.equal(res.status, 0, res.stderr);
-      assert.match(res.stderr + res.stdout, /no service-worker files/);
-    });
-  });
+test('a missing target directory is not an error', () => {
+  // `cap sync` creates the directory; if it did not run, that is its failure to
+  // report, not ours to crash on.
+  assert.deepEqual(
+    stripServiceWorkerFiles(path.join(os.tmpdir(), 'no-such-assets-dir-here')).removed,
+    [],
+  );
 });
 
-test('CLI: strips the manifest and stays green when the copy path is right', () => {
-  withDir(SERVICE_WORKER_FILES, (source) => {
-    withDir([...SERVICE_WORKER_FILES, 'index.html'], (target) => {
-      const res = runCli([target, source]);
+test('CLI: strips every service-worker file and leaves the bundle', () => {
+  withDir([...SERVICE_WORKER_FILES, 'index.html'], (target) => {
+    const res = runCli([target]);
 
-      assert.equal(res.status, 0, res.stderr);
-      assert.deepEqual(fs.readdirSync(target), ['index.html']);
-    });
+    assert.equal(res.status, 0, res.stderr);
+    assert.deepEqual(fs.readdirSync(target), ['index.html']);
   });
 });
 

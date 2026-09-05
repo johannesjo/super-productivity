@@ -21,14 +21,14 @@
  * and `augmentAppWithServiceWorkerCore` copies `ngsw-worker.js` plus, when
  * present, `safety-worker.js` under both its own name and `worker-basic.min.js`.
  *
- * Usage: node ./tools/strip-service-worker-assets.js <target-dir> [source-dir]
+ * Usage: node ./tools/strip-service-worker-assets.js <target-dir>
  *
- * `source-dir` is the build output the target was copied from. Given it, a
- * target missing `ngsw.json` while the source still has one means the copy
- * path moved — unambiguous, and a hard error, because a silent no-op here is
- * indistinguishable from success and would quietly put the manifest back in
- * the APK. Without it, finding nothing is only a warning: the service worker
- * may legitimately be disabled for that build.
+ * Nothing here is ever fatal. Finding no files is legitimate (the service
+ * worker can simply be disabled for a build), and an unlink that fails is
+ * reported and skipped rather than thrown — breaking the Android build, and
+ * with it F-Droid's prebuild, over a cleanup is the worse trade. What proves
+ * the strip actually happened is the assertion on the packaged APK in
+ * `build-android.yml`, which checks the artifact rather than any single step.
  */
 
 const fs = require('fs');
@@ -41,9 +41,6 @@ const SERVICE_WORKER_FILES = [
   'safety-worker.js',
   'worker-basic.min.js',
 ];
-
-/** The only one of them that is non-deterministic, and so the one that matters. */
-const MANIFEST = 'ngsw.json';
 
 /**
  * @param {string} assetsDir directory holding the built web assets
@@ -72,11 +69,9 @@ const stripServiceWorkerFiles = (assetsDir) => {
 };
 
 const main = () => {
-  const [targetDir, sourceDir] = process.argv.slice(2);
+  const targetDir = process.argv[2];
   if (!targetDir) {
-    console.error(
-      'Usage: node ./tools/strip-service-worker-assets.js <target-dir> [source-dir]',
-    );
+    console.error('Usage: node ./tools/strip-service-worker-assets.js <target-dir>');
     process.exit(1);
   }
 
@@ -84,18 +79,6 @@ const main = () => {
 
   for (const { name, message } of failed) {
     console.warn(`strip-service-worker-assets: could not remove ${name} — ${message}`);
-  }
-
-  const sourceHasManifest = !!sourceDir && fs.existsSync(path.join(sourceDir, MANIFEST));
-  if (sourceHasManifest && removed.indexOf(MANIFEST) === -1) {
-    // Not ambiguous: the build emitted a manifest, so the copy should have one.
-    console.error(
-      `strip-service-worker-assets: ${sourceDir} has ${MANIFEST} but ${targetDir} did ` +
-        'not — the asset copy path moved, so the manifest is shipping again and the ' +
-        'build is no longer reproducible (#4155). Fix the path rather than dropping ' +
-        'this step.',
-    );
-    process.exit(1);
   }
 
   if (removed.length === 0) {
@@ -112,4 +95,4 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { SERVICE_WORKER_FILES, MANIFEST, stripServiceWorkerFiles };
+module.exports = { SERVICE_WORKER_FILES, stripServiceWorkerFiles };

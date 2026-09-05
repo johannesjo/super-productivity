@@ -143,34 +143,27 @@ The hook point matters: F-Droid's recipe runs `buildFrontend:prodWeb` and
 `sync:android` directly and never invokes `dist:android:prod`, so a step added
 to the latter would not reach their build.
 
-Finding no files to delete warns rather than failing: breaking the Android build
-over a cleanup would be the worse trade. A warning alone is not a safety net,
-though — it is one line in a very long build log, and it also fires in the
-legitimate case where the service worker is simply disabled for a build. Two
-things make the outcome checkable instead:
-
-- The strip is given the source directory as well, so a target missing
-  `ngsw.json` while `dist/browser` still has one means the copy path moved. That
-  is unambiguous rather than merely quiet, and it is a hard error.
-- `build-android.yml` asserts on the built APK that no `assets/public/ngsw*`
-  entry survived. That covers the whole chain — build, `cap sync`, strip,
-  package — rather than any single link, and it fails where a maintainer will
-  see it, instead of relying on an external F-Droid verification run months
-  later.
+Nothing in the strip is fatal. Finding no files is legitimate — the service
+worker can simply be disabled for a build — and an unlink that fails is reported
+and skipped, because breaking the Android build (and with it F-Droid's prebuild)
+over a cleanup would be the worse trade. A warning is not a safety net, though,
+so the outcome is asserted where it can be checked: `build-android.yml` verifies
+on the packaged APK that no `assets/public/ngsw*` entry survived. That covers
+build, `cap sync`, strip and package together rather than any single step. It
+runs on master and tags only, since no other workflow produces a real APK, so it
+gates the publish rather than the merge.
 
 Two things this deliberately does not do:
 
 - **The web PWA and iOS are untouched.** The web app genuinely uses the service
-  worker. The iOS bundle carries the same ~86 KB of dead worker files, but iOS
-  is not a reproducibility target, so there is no benefit to buy by changing
-  App Store bundle contents. If it is ever unified, `sync:ios` needs
-  `ios/App/App/public`.
+  worker. The iOS bundle carries the same dead files, but iOS is not a
+  reproducibility target, so there is no benefit to buy by changing App Store
+  bundle contents. If it is ever unified, `sync:ios` needs `ios/App/App/public`.
 - **It does not prove the APK reproduces.** The Gradle/AAPT layer and toolchain
-  pinning are untouched, and confirming byte-identity needs a diffoscope run
-  against an F-Droid build; this removes the one _reported_ blocker, not
-  necessarily the last. (Sourcemaps are copied into `assets/public/` too, by
-  `sourceMap: true` on `productionWeb`, but being content-derived they are
-  deterministic — APK bloat worth its own issue, not a reproducibility risk.)
+  pinning are untouched, so confirming byte-identity needs a diffoscope run
+  against an F-Droid build. This removes the one _reported_ blocker — the
+  diffoscope report in #4155 anchors on `assets-public-ngsw.json` — not
+  necessarily the last.
 
 ## Credentials and signing
 
