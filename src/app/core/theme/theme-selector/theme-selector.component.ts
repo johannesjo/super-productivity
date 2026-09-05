@@ -232,16 +232,17 @@ const valueToRef = (value: string): CustomThemeRef => {
         --mat-button-toggle-shape: var(--input-border-radius);
 
         /*
-         * Selection is carried by the fill alone, the same way the settings
-         * tab strip marks its active tab: unselected options sit transparent
-         * on the card so the tint on the selected one actually reads. Against
-         * Material's own group fill (#424242 dark / white light) the same 10%
-         * overlay is barely a shade apart.
+         * Selection reads the same way the settings tab strip marks its active
+         * tab: the --state-selected fill plus the theme's primary on the icon.
+         * Unselected options sit transparent on the card so the tint actually
+         * shows — against Material's own group fill (#424242 dark, white light)
+         * the same 10% overlay is barely a shade apart.
          *
-         * --state-selected rather than Material's defaults for these tokens,
-         * which are hardcoded black/white alphas and so ignore the active
-         * theme; --state-selected is built from --ink-on-channel and tracks
-         * every theme, custom ones included.
+         * Both values come from the design system rather than Material's
+         * defaults for these tokens, which are hardcoded black/white alphas
+         * and so ignore the active theme. --state-selected is built from
+         * --ink-on-channel and --c-primary from the palette, so the control
+         * tracks every theme, custom ones included.
          */
         --mat-button-toggle-background-color: transparent;
         --mat-button-toggle-selected-state-background-color: var(--state-selected);
@@ -250,8 +251,7 @@ const valueToRef = (value: string): CustomThemeRef => {
         /*
          * The disabled variants are a separate, more specific rule in Material,
          * so they need the same treatment or the group flips to an opaque grey
-         * block whenever the active theme forces a mode. Disabled-ness stays
-         * carried by Material's dimmed text colour.
+         * block whenever the active theme forces a mode.
          */
         --mat-button-toggle-disabled-state-background-color: transparent;
         --mat-button-toggle-disabled-selected-state-background-color: var(
@@ -282,6 +282,19 @@ const valueToRef = (value: string): CustomThemeRef => {
         max-width: 100%;
         height: var(--bar-height-small);
         vertical-align: top;
+      }
+
+      /*
+       * Only the icon takes the accent, not the label. The tab strip this
+       * mirrors is icon-only at the widths where it is the reference, so
+       * tinting its label was never part of the pattern — and the palette blue
+       * lands at 2.4:1 on the light card, well under the 4.5:1 a word like
+       * "Dark" needs to stay readable. The label keeps --text-color (11.2:1)
+       * and the icon reads as an accent on top of the fill, which is what
+       * actually carries the selection.
+       */
+      .dark-mode-toggle .mat-button-toggle-checked mat-icon {
+        color: var(--c-primary);
       }
 
       .dark-mode-toggle__label {
