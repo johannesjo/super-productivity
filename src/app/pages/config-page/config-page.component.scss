@@ -61,11 +61,11 @@
     }
 
     ::ng-deep .mat-mdc-tab-labels {
-      justify-content: flex-start;
+      justify-content: center;
     }
 
     ::ng-deep .mat-mdc-tab {
-      flex-grow: 1 !important;
+      flex-grow: 0 !important;
       min-width: 120px;
       border-radius: var(--card-border-radius) var(--card-border-radius) 0 0;
       transition: background-color var(--transition-fast);
