@@ -47,6 +47,10 @@ test.describe('Task multi-select (desktop)', () => {
     await page.keyboard.press('d');
     await expect(page.locator(DONE_TASKS)).toHaveCount(2);
     await expect(page.locator(DONE_TASKS).filter({ hasText: titles[1] })).toHaveCount(0);
+    // The selection survives the move to the done list (rows re-render there).
+    await expect(bar).toContainText('2 selected');
+    await expect(page.locator(`${DONE_TASKS}.isMultiSelected`)).toHaveCount(2);
+    await bar.getByRole('button', { name: 'Clear selection' }).click();
     await expect(bar).toBeHidden();
   });
 

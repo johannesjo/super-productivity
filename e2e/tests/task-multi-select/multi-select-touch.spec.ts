@@ -30,8 +30,17 @@ test.describe('Task multi-select (touch)', () => {
     const b = taskPage.getTaskByText(second);
     const bar = page.locator(BAR);
 
+    // The shared add-task flow clicks with a mouse, which switches the input
+    // intent to 'mouse' on this hybrid-detected device; a touch pointerdown
+    // (what InputIntentService listens for) switches it back, as a finger would.
+    await page.evaluate(() =>
+      window.dispatchEvent(new PointerEvent('pointerdown', { pointerType: 'touch' })),
+    );
+    await expect(page.locator('body')).toHaveClass(/isTouchPrimary/);
+
     // Open the row's context menu (the keyboard route to the same menu that
-    // swipe-left opens) and pick the touch entry point.
+    // swipe-left opens) and pick the touch entry point. Menu items are inert
+    // for 300ms after a touch open (#4436); tap() waits that out.
     await a.focus();
     await expect(a).toBeFocused();
     await page.keyboard.press('q');
