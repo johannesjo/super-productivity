@@ -75,10 +75,7 @@ const valueToRef = (value: string): CustomThemeRef => {
           [hideSingleSelectionIndicator]="true"
           (change)="updateDarkMode($event)"
         >
-          <mat-button-toggle
-            value="system"
-            [attr.aria-label]="T.GCF.MISC.DARK_MODE_SYSTEM | translate"
-          >
+          <mat-button-toggle value="system">
             <span class="dark-mode-toggle__content">
               <mat-icon
                 class="dark-mode-toggle__selection"
@@ -91,10 +88,7 @@ const valueToRef = (value: string): CustomThemeRef => {
               </span>
             </span>
           </mat-button-toggle>
-          <mat-button-toggle
-            value="dark"
-            [attr.aria-label]="T.GCF.MISC.DARK_MODE_DARK | translate"
-          >
+          <mat-button-toggle value="dark">
             <span class="dark-mode-toggle__content">
               <mat-icon
                 class="dark-mode-toggle__selection"
@@ -107,10 +101,7 @@ const valueToRef = (value: string): CustomThemeRef => {
               </span>
             </span>
           </mat-button-toggle>
-          <mat-button-toggle
-            value="light"
-            [attr.aria-label]="T.GCF.MISC.DARK_MODE_LIGHT | translate"
-          >
+          <mat-button-toggle value="light">
             <span class="dark-mode-toggle__content">
               <mat-icon
                 class="dark-mode-toggle__selection"
@@ -276,22 +267,35 @@ const valueToRef = (value: string): CustomThemeRef => {
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        position: relative;
         max-width: 100%;
         height: var(--bar-height-small);
         vertical-align: top;
       }
 
-      .dark-mode-toggle__selection {
-        position: absolute;
-        inset-inline-start: calc(-20px - var(--s-half));
-        top: 50%;
-        margin-inline-end: 0;
+      /*
+       * Kept in flow rather than pulled out of it: every option reserves the
+       * same width, so the content stays centred and nothing shifts as the
+       * selection moves, and the icon cannot escape the overflow: hidden that
+       * .mat-button-toggle-group sets once a toggle gets narrow.
+       *
+       * Sized 18px (Material's own selection-indicator size) with a tighter
+       * gap: at the full 20px + --s-half the reserved width pushes the System
+       * label into the first divider at a 360px viewport.
+       *
+       * Hidden with opacity, not visibility: the global
+       * body.isMaterialSymbolsLoaded mat-icon font-loading guard in
+       * _overwrite-material.scss sets visibility: visible at a higher
+       * specificity, so a visibility: hidden here leaves the icon painted.
+       */
+      .dark-mode-toggle mat-icon.dark-mode-toggle__selection {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        margin-inline-end: 2px;
         opacity: 0;
-        transform: translateY(-50%);
       }
 
-      .dark-mode-toggle__selection.is-selected {
+      .dark-mode-toggle mat-icon.dark-mode-toggle__selection.is-selected {
         opacity: 1;
       }
 
@@ -323,7 +327,13 @@ const valueToRef = (value: string): CustomThemeRef => {
         flex: 0 0 auto;
       }
 
-      @container (max-width: 600px) {
+      /*
+       * The container is the card's inner width, not the viewport: roughly
+       * viewport minus sidebar minus padding. Below this the label column sits
+       * at its 120px floor and the toggle group can no longer fit three
+       * labelled options, so the rows stack and the controls go full width.
+       */
+      @container (max-width: 520px) {
         .dark-mode-select,
         .theme-select,
         .wallpaper-select {
@@ -333,19 +343,10 @@ const valueToRef = (value: string): CustomThemeRef => {
           gap: var(--s);
         }
 
-        mat-form-field {
-          width: 100%;
-          max-width: none;
-        }
-
         .theme-select__controls {
           display: flex;
           flex-direction: column;
           align-items: stretch;
-          width: 100%;
-        }
-
-        .dark-mode-toggle {
           width: 100%;
         }
 
