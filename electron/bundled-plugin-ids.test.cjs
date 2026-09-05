@@ -30,10 +30,7 @@ const path = require('node:path');
 // and read manifests straight off disk.
 
 const REPO_ROOT = path.resolve(__dirname, '..');
-const PLUGIN_SERVICE_PATH = path.join(
-  REPO_ROOT,
-  'src/app/plugins/plugin.service.ts',
-);
+const PLUGIN_SERVICE_PATH = path.join(REPO_ROOT, 'src/app/plugins/plugin.service.ts');
 const PLUGIN_DEV_DIR = path.join(REPO_ROOT, 'packages/plugin-dev');
 
 /**
@@ -84,11 +81,7 @@ const findManifestPath = (dirName) => {
 test('every BUNDLED_PLUGIN_PATHS plugin has its manifest id reserved in BUNDLED_PLUGIN_IDS', () => {
   const source = fs.readFileSync(PLUGIN_SERVICE_PATH, 'utf8');
 
-  const bundledPaths = extractStringLiteralList(
-    source,
-    'BUNDLED_PLUGIN_PATHS = [',
-    ']',
-  );
+  const bundledPaths = extractStringLiteralList(source, 'BUNDLED_PLUGIN_PATHS = [', ']');
   const bundledIds = new Set(
     extractStringLiteralList(source, 'BUNDLED_PLUGIN_IDS = new Set<string>([', ']'),
   );
@@ -145,5 +138,86 @@ test('every BUNDLED_PLUGIN_PATHS plugin has its manifest id reserved in BUNDLED_
       `BUNDLED_PLUGIN_IDS (src/app/plugins/plugin.service.ts). An uploaded plugin ` +
       `could claim these ids and impersonate a built-in. Add each missing id to ` +
       `BUNDLED_PLUGIN_IDS:\n  ${missingIds.join('\n  ')}`,
+  );
+});
+
+// UI INVARIANT (cross-layer regression guard)
+// -------------------------------------------
+// A bundled issue-provider plugin's chip is rendered by passing
+// `manifest.issueProvider.icon` straight to `<mat-icon svgIcon>` (IssueIconPipe,
+// issue-header, tag-list, issue.service). `MatIconRegistry` treats an unknown
+// name as "nothing to draw" rather than an error, so a name with no registration
+// — or a registration pointing at a file that isn't there — renders a blank box
+// and nothing fails. That is invisible in CI and easy to miss in review.
+//
+// This lives here rather than beside the Angular spec for the same reason the
+// test above does: it needs the filesystem, both to enumerate the real manifests
+// instead of a hand-copied list, and to confirm the SVG actually exists.
+const GLOBAL_THEME_SERVICE_PATH = path.join(
+  REPO_ROOT,
+  'src/app/core/theme/global-theme.service.ts',
+);
+
+test('every bundled issue-provider icon is registered and its svg exists', () => {
+  const pluginSource = fs.readFileSync(PLUGIN_SERVICE_PATH, 'utf8');
+  const themeSource = fs.readFileSync(GLOBAL_THEME_SERVICE_PATH, 'utf8');
+
+  const bundledPaths = extractStringLiteralList(
+    pluginSource,
+    'BUNDLED_PLUGIN_PATHS = [',
+    ']',
+  );
+
+  // `_initIcons()` holds `[name, path]` pairs. Slicing to the closing `];` keeps
+  // the parse anchored to that literal alone.
+  const iconsIdx = themeSource.indexOf('const icons: [string, string][] = [');
+  assert.notEqual(
+    iconsIdx,
+    -1,
+    'Could not find the icons literal in global-theme.service.ts — it may have been renamed; update this test.',
+  );
+  const iconsEnd = themeSource.indexOf('];', iconsIdx);
+  const iconsSlice = themeSource.slice(iconsIdx, iconsEnd);
+  const iconPairs = [...iconsSlice.matchAll(/\[\s*'([^']+)'\s*,\s*'([^']+)'\s*\]/g)];
+  assert.ok(
+    iconPairs.length > 0,
+    'Parsed zero icon registrations from global-theme.service.ts — the source format likely changed; update this test.',
+  );
+  const iconAssetByName = new Map(iconPairs.map(([, name, asset]) => [name, asset]));
+
+  const problems = [];
+
+  for (const assetPath of bundledPaths) {
+    const dirName = assetPath.split('/').pop();
+    const manifestPath = findManifestPath(dirName);
+    if (!manifestPath) {
+      continue; // already reported by the test above
+    }
+    const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
+    const iconName = manifest.issueProvider && manifest.issueProvider.icon;
+    if (!iconName) {
+      continue; // not an issue provider, or intentionally iconless
+    }
+    // The documented placeholder for a provider that ships no brand icon.
+    if (iconName === 'extension') {
+      continue;
+    }
+
+    const asset = iconAssetByName.get(iconName);
+    if (!asset) {
+      problems.push(
+        `${dirName}: issueProvider.icon "${iconName}" is not registered in global-theme.service.ts`,
+      );
+      continue;
+    }
+    if (!fs.existsSync(path.join(REPO_ROOT, 'src', asset))) {
+      problems.push(`${dirName}: icon "${iconName}" points at missing file src/${asset}`);
+    }
+  }
+
+  assert.equal(
+    problems.length,
+    0,
+    `Bundled issue-provider icons that would render as an empty box:\n  ${problems.join('\n  ')}`,
   );
 });
