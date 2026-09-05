@@ -44,7 +44,7 @@ import {
 import { snackCfgToSnackParams } from './plugin-api-mapper';
 import { PluginHooksService } from './plugin-hooks';
 import { TaskService } from '../features/tasks/task.service';
-import { TaskFocusService } from '../features/tasks/task-focus.service';
+import { getDomFocusedTaskId } from '../features/tasks/get-dom-focused-task-id';
 import { addSubTask } from '../features/tasks/store/task.actions';
 import { selectTaskFeatureState } from '../features/tasks/store/task.selectors';
 import { parseTimeSpentChanges } from '../features/tasks/short-syntax';
@@ -55,6 +55,7 @@ import { TaskSharedActions } from '../root-store/meta/task-shared.actions';
 import { nanoid } from 'nanoid';
 import { WorkContextService } from '../features/work-context/work-context.service';
 import { ProjectService } from '../features/project/project.service';
+import { INBOX_PROJECT } from '../features/project/project.const';
 import { TagService } from '../features/tag/tag.service';
 import typia from 'typia';
 import { distinctUntilChanged, first, map, take, timeout } from 'rxjs/operators';
@@ -148,7 +149,6 @@ export class PluginBridgeService implements OnDestroy {
   private _store = inject(Store);
   private _pluginHooksService = inject(PluginHooksService);
   private _taskService = inject(TaskService);
-  private _taskFocusService = inject(TaskFocusService);
   private _workContextService = inject(WorkContextService);
   private _projectService = inject(ProjectService);
   private _tagService = inject(TagService);
@@ -249,6 +249,7 @@ export class PluginBridgeService implements OnDestroy {
       cfg: Omit<PluginWorkContextHeaderBtnCfg, 'pluginId'>,
     ) => void;
     registerShortcut: (cfg: PluginShortcutCfg) => void;
+    unregisterShortcut: (shortcutId: string) => void;
     showIndexHtmlAsView: () => void;
     showInWorkContext: () => void;
     closeWorkContextView: () => void;
@@ -284,6 +285,7 @@ export class PluginBridgeService implements OnDestroy {
     getSecret: (key: string) => Promise<string | null>;
     deleteSecret: (key: string) => Promise<void>;
     request: <T = unknown>(url: string, options?: PluginRequestOptions) => Promise<T>;
+    deleteProject: (projectId: string) => Promise<void>;
     translate: (key: string, params?: Record<string, string | number>) => string;
     formatDate: (date: Date | string | number, format: PluginDateFormat) => string;
     getCurrentLanguage: () => string;
@@ -309,6 +311,8 @@ export class PluginBridgeService implements OnDestroy {
         cfg: Omit<PluginWorkContextHeaderBtnCfg, 'pluginId'>,
       ) => this._registerWorkContextHeaderButton(pluginId, cfg),
       registerShortcut: (cfg: PluginShortcutCfg) => this._registerShortcut(pluginId, cfg),
+      unregisterShortcut: (shortcutId: string) =>
+        this._unregisterShortcut(pluginId, shortcutId),
       registerConfigHandler: (handler: () => void) =>
         this._configHandlers.set(pluginId, handler),
 
@@ -387,6 +391,12 @@ export class PluginBridgeService implements OnDestroy {
         this._pluginSecretService.deleteSecret(pluginId, key),
       request: <T = unknown>(url: string, options?: PluginRequestOptions): Promise<T> =>
         this.request<T>(url, options, manifest?.allowedHosts, manifest?.permissions),
+
+      // Gated here rather than in PluginAPI: iframe plugins reach the bridge through
+      // plugin-iframe.util's boundMethods lookup, and anything without an entry there
+      // falls through to the bridge method with no plugin context at all.
+      deleteProject: (projectId: string): Promise<void> =>
+        this.deleteProject(projectId, manifest?.permissions),
 
       // i18n
       translate: (key: string, params?: Record<string, string | number>): string =>
@@ -1052,6 +1062,47 @@ export class PluginBridgeService implements OnDestroy {
   }
 
   /**
+   * Delete a project and the tasks it contains
+   */
+  async deleteProject(projectId: string, permissions?: string[]): Promise<void> {
+    typia.assert<string>(projectId);
+
+    // Deleting a project is the only irreversible operation in the plugin API — the
+    // cascade takes the backlog, subtasks and notes with it, there is no
+    // restoreDeletedProject counterpart, and PROJECT_DELETE_WINS_MARKER carries it to
+    // every device. Declaring the capability is install-time disclosure, not
+    // containment, but it is worth having on this method.
+    if (!(permissions ?? []).includes('deleteProject')) {
+      throw new Error(
+        '[PluginBridge] PluginAPI.deleteProject is blocked: this plugin does not declare the "deleteProject" permission. Add "deleteProject" to the manifest "permissions".',
+      );
+    }
+
+    // The Inbox is the fallback target for tasks that belong nowhere, so it is not
+    // a project a caller may remove — the UI does not offer it either.
+    if (projectId === INBOX_PROJECT.id) {
+      throw new Error(this._translateService.instant(T.PLUGINS.CANNOT_DELETE_INBOX));
+    }
+
+    const project = await firstValueFrom(this._projectService.getByIdOnce$(projectId));
+
+    if (!project) {
+      throw new Error(
+        this._translateService.instant(T.PLUGINS.PROJECT_NOT_FOUND, {
+          contextId: projectId,
+        }),
+      );
+    }
+
+    // Delegate to ProjectService so the cascade (tasks, backlog, subtasks, their
+    // time-sync entries, note drafts and the defaultProjectId fallback) stays defined
+    // in one place — the same path the UI's "Delete project" takes.
+    await this._projectService.remove(project);
+
+    PluginLog.log('PluginBridge: Project deleted successfully', { projectId });
+  }
+
+  /**
    * Get all tags
    */
   async getAllTags(): Promise<TagCopy[]> {
@@ -1214,7 +1265,10 @@ export class PluginBridgeService implements OnDestroy {
   }
 
   async getFocusedTask(): Promise<TaskCopy | null> {
-    const focusedTaskId = this._taskFocusService.focusedTaskId();
+    // The DOM decides, not the tracked signal: plugins act on this task (a
+    // shortcut-triggered automation rule may delete or re-tag it), so a stale
+    // id left behind by a view change must not resolve to a live task (#8851).
+    const focusedTaskId = getDomFocusedTaskId();
     if (!focusedTaskId) {
       return null;
     }
@@ -1650,13 +1704,42 @@ export class PluginBridgeService implements OnDestroy {
       pluginId,
     };
 
+    // Re-registering an id replaces the previous entry instead of appending:
+    // plugins re-register when a shortcut's label changes, and the keyboard
+    // settings form keys its items by `plugin_<pluginId>:<id>`, so duplicates
+    // would show up twice there and only the first would ever be executed.
+    const isSameShortcut = (shortcut: PluginShortcutCfg): boolean =>
+      shortcut.pluginId === pluginId && shortcut.id === shortcutWithPluginId.id;
     const currentShortcuts = this.shortcuts();
-    this.shortcuts.set([...currentShortcuts, shortcutWithPluginId]);
+    this.shortcuts.set(
+      currentShortcuts.some(isSameShortcut)
+        ? currentShortcuts.map((shortcut) =>
+            isSameShortcut(shortcut) ? shortcutWithPluginId : shortcut,
+          )
+        : [...currentShortcuts, shortcutWithPluginId],
+    );
 
+    // Labels are user content (a plugin may derive them from task or rule
+    // names) and the log is exportable, so only the ids go in.
     PluginLog.log('PluginBridge: Shortcut registered', {
       pluginId,
-      shortcut: shortcutWithPluginId,
+      shortcutId: shortcutWithPluginId.id,
     });
+  }
+
+  /**
+   * Internal method to remove a single shortcut of a plugin
+   */
+  private _unregisterShortcut(pluginId: string, shortcutId: string): void {
+    const currentShortcuts = this.shortcuts();
+    const nextShortcuts = currentShortcuts.filter(
+      (shortcut) => !(shortcut.pluginId === pluginId && shortcut.id === shortcutId),
+    );
+
+    if (nextShortcuts.length !== currentShortcuts.length) {
+      this.shortcuts.set(nextShortcuts);
+      PluginLog.log('PluginBridge: Shortcut unregistered', { pluginId, shortcutId });
+    }
   }
 
   /**
@@ -1669,12 +1752,10 @@ export class PluginBridgeService implements OnDestroy {
     if (shortcut) {
       try {
         await Promise.resolve(shortcut.onExec());
-        PluginLog.log(
-          `Executed shortcut "${shortcut.label}" from plugin ${shortcut.pluginId}`,
-        );
+        PluginLog.log(`Executed shortcut ${shortcutId}`);
         return true;
       } catch (error) {
-        PluginLog.err(`Failed to execute shortcut "${shortcut.label}":`, error);
+        PluginLog.err(`Failed to execute shortcut ${shortcutId}:`, error);
         return false;
       }
     }

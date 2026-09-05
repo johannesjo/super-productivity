@@ -3102,6 +3102,57 @@ describe('ConflictResolutionService', () => {
         ).toBe(VectorClockComparison.GREATER_THAN);
       });
 
+      it('never lists clearedFields on relationship follow-up patches (root-task parentId is not a clear)', async () => {
+        // taskRelationshipPatch materializes `parentId: undefined` for every
+        // root task — an accident of the object literal, not a user intent.
+        // If this call site ever opted into createLWWUpdateOp's
+        // listClearedFields, every relationship follow-up would broadcast an
+        // explicit parentId clear and force-detach concurrently-created
+        // subtask links on receivers (#9776 scoping; see also (a0c) in
+        // conflict-resolution.disjoint-merge.spec.ts for the factory default).
+        const rewrittenRootTask: Operation = {
+          ...createOpWithTimestamp(
+            'rewritten-root-recreation',
+            'client-a',
+            2_000,
+            OpType.Update,
+            'task-1',
+          ),
+          actionType: '[TASK] LWW Update' as ActionType,
+          payload: {
+            actionPayload: {
+              id: 'task-1',
+              title: 'Root task',
+              projectId: 'project-1',
+              subTaskIds: ['sub-1'],
+            },
+            entityChanges: [],
+            lwwUpdateMode: 'replace',
+            recreatesEntityAfterDelete: true,
+          },
+        };
+        // No live state for sub-1 or project-1: only the relationship patch
+        // op for the root task itself is emitted.
+        mockStore.select.and.returnValue(of(undefined));
+
+        const followUpOps =
+          await service.createTaskRecreationFollowUpOps(rewrittenRootTask);
+
+        expect(followUpOps.length).toBe(1);
+        expect(followUpOps[0].entityId).toBe('task-1');
+        const payload = followUpOps[0].payload as {
+          lwwUpdateMode?: string;
+          clearedFields?: string[];
+        };
+        expect(payload.lwwUpdateMode).toBe('patch');
+        // The accidental undefined-valued key IS present locally …
+        expect(Object.keys(extractActionPayload(followUpOps[0].payload))).toContain(
+          'parentId',
+        );
+        // … but must not be declared as an intentional clear.
+        expect(payload.clearedFields).toBeUndefined();
+      });
+
       it('recreates subtasks when every entity of a remote bulk delete loses (#8956)', async () => {
         const remoteMultiOp: Operation = {
           ...createOpWithTimestamp('remote-multi', 'client-b', 1_000),

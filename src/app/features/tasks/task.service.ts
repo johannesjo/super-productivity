@@ -650,21 +650,21 @@ export class TaskService {
         .activeWorkContextType as WorkContextType;
 
       if (isBacklog) {
-        const doneBacklogTaskIds = await this._workContextService.doneBacklogTaskIds$
+        const undoneBacklogTaskIds = await this._workContextService.undoneBacklogTaskIds$
           .pipe(take(1))
           .toPromise();
-        if (!doneBacklogTaskIds) {
-          throw new Error('No doneBacklogTaskIds found');
+        if (!undoneBacklogTaskIds) {
+          throw new Error('No undoneBacklogTaskIds found');
         }
         this._store.dispatch(
           moveProjectTaskUpInBacklogList({
             taskId: id,
             workContextId,
-            doneBacklogTaskIds,
+            doneBacklogTaskIds: undoneBacklogTaskIds,
           }),
         );
       } else {
-        const doneTaskIds = await this._workContextService.doneTaskIds$
+        const undoneTaskIds = await this._workContextService.undoneTaskIds$
           .pipe(take(1))
           .toPromise();
         this._store.dispatch(
@@ -672,7 +672,7 @@ export class TaskService {
             taskId: id,
             workContextType,
             workContextId,
-            doneTaskIds,
+            doneTaskIds: undoneTaskIds,
           }),
         );
       }
@@ -704,21 +704,21 @@ export class TaskService {
 
       // this.
       if (isBacklog) {
-        const doneBacklogTaskIds = await this._workContextService.doneBacklogTaskIds$
+        const undoneBacklogTaskIds = await this._workContextService.undoneBacklogTaskIds$
           .pipe(take(1))
           .toPromise();
-        if (!doneBacklogTaskIds) {
-          throw new Error('No doneBacklogTaskIds found');
+        if (!undoneBacklogTaskIds) {
+          throw new Error('No undoneBacklogTaskIds found');
         }
         this._store.dispatch(
           moveProjectTaskDownInBacklogList({
             taskId: id,
             workContextId,
-            doneBacklogTaskIds,
+            doneBacklogTaskIds: undoneBacklogTaskIds,
           }),
         );
       } else {
-        const doneTaskIds = await this._workContextService.doneTaskIds$
+        const undoneTaskIds = await this._workContextService.undoneTaskIds$
           .pipe(take(1))
           .toPromise();
         this._store.dispatch(
@@ -726,7 +726,7 @@ export class TaskService {
             taskId: id,
             workContextType,
             workContextId,
-            doneTaskIds,
+            doneTaskIds: undoneTaskIds,
           }),
         );
       }
@@ -742,31 +742,33 @@ export class TaskService {
         .activeWorkContextType as WorkContextType;
 
       if (isBacklog) {
-        this._workContextService.doneBacklogTaskIds$
+        this._workContextService.undoneBacklogTaskIds$
           .pipe(take(1))
-          .subscribe((doneBacklogTaskIds) => {
-            if (!doneBacklogTaskIds) {
-              throw new Error('No doneBacklogTaskIds found');
+          .subscribe((undoneBacklogTaskIds) => {
+            if (!undoneBacklogTaskIds) {
+              throw new Error('No undoneBacklogTaskIds found');
             }
             this._store.dispatch(
               moveProjectTaskToTopInBacklogList({
                 taskId: id,
                 workContextId,
-                doneBacklogTaskIds,
+                doneBacklogTaskIds: undoneBacklogTaskIds,
               }),
             );
           });
       } else {
-        this._workContextService.doneTaskIds$.pipe(take(1)).subscribe((doneTaskIds) => {
-          this._store.dispatch(
-            moveTaskToTopInTodayList({
-              taskId: id,
-              workContextType,
-              workContextId,
-              doneTaskIds,
-            }),
-          );
-        });
+        this._workContextService.undoneTaskIds$
+          .pipe(take(1))
+          .subscribe((undoneTaskIds) => {
+            this._store.dispatch(
+              moveTaskToTopInTodayList({
+                taskId: id,
+                workContextType,
+                workContextId,
+                doneTaskIds: undoneTaskIds,
+              }),
+            );
+          });
       }
     }
   }
@@ -780,31 +782,33 @@ export class TaskService {
         .activeWorkContextType as WorkContextType;
 
       if (isBacklog) {
-        this._workContextService.doneBacklogTaskIds$
+        this._workContextService.undoneBacklogTaskIds$
           .pipe(take(1))
-          .subscribe((doneBacklogTaskIds) => {
-            if (!doneBacklogTaskIds) {
-              throw new Error('No doneBacklogTaskIds found');
+          .subscribe((undoneBacklogTaskIds) => {
+            if (!undoneBacklogTaskIds) {
+              throw new Error('No undoneBacklogTaskIds found');
             }
             this._store.dispatch(
               moveProjectTaskToBottomInBacklogList({
                 taskId: id,
                 workContextId,
-                doneBacklogTaskIds,
+                doneBacklogTaskIds: undoneBacklogTaskIds,
               }),
             );
           });
       } else {
-        this._workContextService.doneTaskIds$.pipe(take(1)).subscribe((doneTaskIds) => {
-          this._store.dispatch(
-            moveTaskToBottomInTodayList({
-              taskId: id,
-              workContextType,
-              workContextId,
-              doneTaskIds,
-            }),
-          );
-        });
+        this._workContextService.undoneTaskIds$
+          .pipe(take(1))
+          .subscribe((undoneTaskIds) => {
+            this._store.dispatch(
+              moveTaskToBottomInTodayList({
+                taskId: id,
+                workContextType,
+                workContextId,
+                doneTaskIds: undoneTaskIds,
+              }),
+            );
+          });
       }
     }
   }

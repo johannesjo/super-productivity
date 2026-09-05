@@ -570,9 +570,9 @@ if (IS_IOS_NATIVE) {
 }
 
 // Handle app URL open (for OAuth callbacks, deep links, etc.) on iOS *and*
-// Android: Android declares no task-action host, but its VIEW intent filters
-// do carry plugin OAuth callbacks, so gating this on iOS alone leaves that
-// callback with no listener at all.
+// Android: both declare VIEW intent filters for the task-action hosts
+// (create-task / complete-task) and the plugin OAuth callbacks, so gating
+// this on iOS alone leaves those routes with no listener at all.
 //
 // This must be the ONLY `appUrlOpen` listener in the app. `@capacitor/app`
 // emits a cold-start URL with `retainUntilConsumed: true`, and Capacitor

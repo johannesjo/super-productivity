@@ -8,6 +8,7 @@ import { TaskComponent } from './task/task.component';
 import { TaskContextMenuComponent } from './task-context-menu/task-context-menu.component';
 import { TaskContextMenuInnerComponent } from './task-context-menu/task-context-menu-inner/task-context-menu-inner.component';
 import { isInputElement } from '../../util/dom-element';
+import { getDomFocusedTaskId } from './get-dom-focused-task-id';
 
 type TaskId = string;
 
@@ -61,31 +62,7 @@ export class TaskShortcutService {
     if (!cfg) return false;
 
     const keys = cfg.keyboard;
-    let focusedTaskId: TaskId | null = this._taskFocusService.focusedTaskId();
-
-    // Make the DOM authoritative for task focus (#8851). Two problems this
-    // solves:
-    //  1. Focus-tracking recovery: a `focusout` can clear focusedTaskId without
-    //     a following `focusin` rebinding it (e.g. focus staying on the task
-    //     host after an inline-edit blur, where `.focus()` is a no-op and no new
-    //     focusin fires). If the active element is still inside a <task>, we
-    //     recover the id so shortcuts don't silently drop.
-    //  2. Stale-focus guard: navigating to a view with no live <task> (e.g. the
-    //     Planner overdue list) leaves focusedTaskId pointing at a <task> that
-    //     no longer holds focus. Acting on it would mutate the wrong task. If
-    //     the active element is not inside the <task> matching focusedTaskId,
-    //     drop it.
-    // Only the DOM actively contradicting invalidates focus, so the inline-edit
-    // recovery path above stays intact.
-    const active = document.activeElement as HTMLElement | null;
-    const domFocusedTaskId =
-      (active?.closest('task') as HTMLElement | null)?.getAttribute('data-task-id') ??
-      null;
-    if (domFocusedTaskId) {
-      focusedTaskId = domFocusedTaskId;
-    } else if (focusedTaskId) {
-      focusedTaskId = null;
-    }
+    const focusedTaskId: TaskId | null = getDomFocusedTaskId();
 
     // Schedule for today (Shift+T). This is the one task shortcut wired to work
     // without a live <task> component, so it also fires from views that render
@@ -139,7 +116,7 @@ export class TaskShortcutService {
         !hasTextSelected
       ) {
         const taskComponent = this._taskFocusService.lastFocusedTaskComponent();
-        // Recovery path (above) can derive focusedTaskId from the DOM before
+        // getDomFocusedTaskId() can derive focusedTaskId from the DOM before
         // lastFocusedTaskComponent has caught up — fall through to native copy
         // rather than copying a stale title.
         if (taskComponent?.task().id === focusedTaskId) {
@@ -234,6 +211,11 @@ export class TaskShortcutService {
     }
     if (checkKeyCombo(ev, keys.taskAddSubTask)) {
       this._handleTaskShortcut(focusedTaskId, 'addSubTask');
+      ev.preventDefault();
+      return true;
+    }
+    if (checkKeyCombo(ev, keys.taskDuplicate)) {
+      this._handleTaskShortcut(focusedTaskId, 'duplicateTask');
       ev.preventDefault();
       return true;
     }
@@ -382,15 +364,12 @@ export class TaskShortcutService {
   }
 
   /**
-   * Resolves a task id straight from the focused element by walking up to the
-   * nearest host carrying `data-task-id`. Generic over the host selector (works
-   * for both `<task>` and `<planner-task>`) so the id-based shortcut path can
-   * act on a task without a live `<task>` component. (#8851)
+   * Resolves a task id from the focused element, matching `<planner-task>` as
+   * well as `<task>`, so the id-based shortcut path can act on a task without a
+   * live `<task>` component. (#8851)
    */
   private _resolveTaskIdFromDom(): TaskId | null {
-    const active = document.activeElement as HTMLElement | null;
-    const host = active?.closest('[data-task-id]') as HTMLElement | null;
-    return host?.getAttribute('data-task-id') ?? null;
+    return getDomFocusedTaskId('[data-task-id]');
   }
 
   /**

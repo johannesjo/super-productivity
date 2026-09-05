@@ -35,12 +35,7 @@ import {
   selectPomodoroConfig,
 } from '../../config/store/global-config.reducer';
 import { updateGlobalConfigSection } from '../../config/store/global-config.actions';
-import {
-  FocusModeMode,
-  FocusScreen,
-  getBreakCycle,
-  TimerState,
-} from '../focus-mode.model';
+import { FocusModeMode, FocusScreen, getBreakCycle } from '../focus-mode.model';
 import { MetricService } from '../../metric/metric.service';
 import { FocusModeStorageService } from '../focus-mode-storage.service';
 import { TakeABreakService } from '../../take-a-break/take-a-break.service';
@@ -304,7 +299,7 @@ export class FocusModeEffects {
     () =>
       this.store.select(selectors.selectTimer).pipe(
         skipWhileApplyingRemoteOps(),
-        filter((timer) => this._isBreakTimeUp(timer)),
+        filter((timer) => selectors.selectIsBreakTimeUp.projector(timer)),
         distinctUntilChanged(
           (prev, curr) =>
             prev.elapsed === curr.elapsed && prev.startedAt === curr.startedAt,
@@ -331,7 +326,11 @@ export class FocusModeEffects {
     () =>
       this.store.select(selectors.selectTimer).pipe(
         skipWhileApplyingRemoteOps(),
-        map((timer) => this._isBreakTimeUp(timer) && this._isLoopBreakEndAlarmOn()),
+        map(
+          (timer) =>
+            selectors.selectIsBreakTimeUp.projector(timer) &&
+            this._isLoopBreakEndAlarmOn(),
+        ),
         distinctUntilChanged(),
         tap((shouldAlarm) => {
           if (shouldAlarm) {
@@ -956,15 +955,6 @@ export class FocusModeEffects {
       ),
     { dispatch: false },
   );
-
-  private _isBreakTimeUp(timer: TimerState): boolean {
-    return (
-      timer.purpose === 'break' &&
-      !timer.isRunning &&
-      timer.startedAt !== null &&
-      timer.elapsed >= timer.duration
-    );
-  }
 
   private _isLoopBreakEndAlarmOn(): boolean {
     return (

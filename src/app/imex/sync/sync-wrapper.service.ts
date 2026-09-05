@@ -19,6 +19,7 @@ import {
   MissingRefreshTokenAPIError,
   HttpNotOkAPIError,
   EmptyRemoteBodySPError,
+  InvalidFilePrefixError,
   JsonParseError,
   LegacySyncFormatDetectedError,
   IncompleteRemoteOperationsError,
@@ -74,6 +75,8 @@ import { SYNC_WAIT_TIMEOUT_MS } from './sync.const';
 import { SuperSyncStatusService } from '../../op-log/sync/super-sync-status.service';
 import { SuperSyncWebSocketService } from '../../op-log/sync/super-sync-websocket.service';
 import { WsTriggeredDownloadService } from '../../op-log/sync/ws-triggered-download.service';
+import { TrackingPresenceService } from '../../features/tracking-presence/tracking-presence.service';
+import { RemoteTrackingAndroidNotifierService } from '../../features/tracking-presence/remote-tracking-android-notifier.service';
 import { IS_ELECTRON } from '../../app.constants';
 import { OperationLogStoreService } from '../../op-log/persistence/operation-log-store.service';
 import { OperationLogSyncService } from '../../op-log/sync/operation-log-sync.service';
@@ -94,6 +97,7 @@ type CompletedUploadOutcome = Extract<UploadOutcome, { kind: 'completed' }>;
  */
 export type ForceUploadTriggerSource =
   | 'EmptyRemoteBodySPError'
+  | 'InvalidFilePrefixError'
   | 'JsonParseError'
   | 'LegacySyncFormatDetectedError'
   | 'DecryptError'
@@ -125,6 +129,8 @@ export class SyncWrapperService {
   private _superSyncStatusService = inject(SuperSyncStatusService);
   private _superSyncWsService = inject(SuperSyncWebSocketService);
   private _wsDownloadService = inject(WsTriggeredDownloadService);
+  private _trackingPresenceService = inject(TrackingPresenceService);
+  private _remoteTrackingNotifier = inject(RemoteTrackingAndroidNotifierService);
   private _opLogStore = inject(OperationLogStoreService);
   private _opLogSyncService = inject(OperationLogSyncService);
   private _sessionValidation = inject(SyncSessionValidationService);
@@ -486,11 +492,53 @@ export class SyncWrapperService {
   }
 
   /**
+   * Starts/stops tracking presence per the experimental opt-in. Runs after
+   * EVERY SuperSync sync cycle (not just on connect — the socket stays up for
+   * days), so toggling the setting takes effect on the next sync. Both
+   * start() and stop() are idempotent.
+   *
+   * The opt-in lives in the SuperSync provider's private config (the same
+   * per-device store the checkbox reads/writes, never uploaded), NOT the
+   * global config: it is a per-device choice — a device syncing global config
+   * from a device that opted in must not silently start broadcasting too.
+   */
+  private async _applyTrackingPresenceGate(): Promise<void> {
+    let isEnabled = false;
+    try {
+      const provider = await this._providerManager.getProviderById(
+        SyncProviderId.SuperSync,
+      );
+      const privateCfg = provider ? await provider.privateCfg.load() : null;
+      isEnabled = !!(privateCfg as { isTrackingPresenceEnabled?: boolean } | null)
+        ?.isTrackingPresenceEnabled;
+    } catch (err) {
+      SyncLog.warn('SyncWrapperService: Failed to read presence opt-in', err);
+    }
+    if (isEnabled) {
+      this._trackingPresenceService.start();
+      this._remoteTrackingNotifier.start();
+    } else {
+      this._remoteTrackingNotifier.stop();
+      // Opt-out path: the socket stays up, so the final frame goes out on its
+      // own — nothing to wait for here.
+      void this._trackingPresenceService.stop();
+    }
+  }
+
+  /**
    * Disconnects the WebSocket and stops WS-triggered downloads.
    */
   disconnectWebSocket(): void {
+    this._remoteTrackingNotifier.stop();
+    const presenceFlushed = this._trackingPresenceService.stop();
     this._wsDownloadService.stop();
-    this._superSyncWsService.disconnect();
+    // The producer's final `stopped` frame cannot be sent synchronously (key
+    // resolution + WebCrypto encryption are async) and needs the socket alive
+    // to reach the wire. Closing in the same tick drops it and leaves the
+    // user's other devices on a phantom session for up to 30min, so close only
+    // once the frame has been handed to the WebSocket. The handle always
+    // settles (see TrackingPresenceService.stop).
+    void presenceFlushed.finally(() => this._superSyncWsService.disconnect());
   }
 
   private async _sync(
@@ -584,11 +632,17 @@ export class SyncWrapperService {
       this._consecutiveSuperSyncAuthFailures = 0;
       SyncLog.log(`SyncWrapperService: Download complete. kind=${downloadResult.kind}`);
 
-      // If user cancelled the sync import conflict dialog, skip upload entirely.
-      // This keeps the local state unchanged and doesn't push it to the server.
-      // Don't update lastSyncedProvider so the next sync retries with forceFromSeq0.
-      if (downloadResult.kind === 'cancelled') {
-        SyncLog.log('SyncWrapperService: Sync cancelled by user. Skipping upload phase.');
+      // Skip the upload entirely when the user cancelled the sync import conflict
+      // dialog, or when empty-server seeding created no SYNC_IMPORT (#9921, an
+      // upload would strand the pre-op-log / genesis state). Local state stays
+      // unchanged and lastSyncedProvider is not updated, so the next sync retries.
+      if (
+        downloadResult.kind === 'cancelled' ||
+        downloadResult.kind === 'server_migration_skipped'
+      ) {
+        SyncLog.log(
+          `SyncWrapperService: Download ended with ${downloadResult.kind}. Skipping upload phase.`,
+        );
         this._providerManager.setSyncStatus('UNKNOWN_OR_CHANGED');
         return 'HANDLED_ERROR';
       }
@@ -777,6 +831,22 @@ export class SyncWrapperService {
         return 'HANDLED_ERROR';
       }
 
+      // A full-state op (server migration / backup restore) that hit a retryable
+      // server error leaves the WHOLE local state unsynced with no rejection to
+      // report — the one upload failure that used to fall through to IN_SYNC.
+      // Checked last so ERROR and permanent rejections keep precedence; not an
+      // ERROR itself, because the op is still pending and the next sync retries
+      // it. Mirrors the LWW-exhaustion path above, WebSocket connect included:
+      // that too is retried on the next sync.
+      if (completedUploadResults.some((result) => result.fullStateUploadDeferred)) {
+        SyncLog.warn(
+          'SyncWrapperService: Full-state upload deferred after a retryable server error. ' +
+            'Reporting UNKNOWN_OR_CHANGED (will retry on next sync).',
+        );
+        this._providerManager.setSyncStatus('UNKNOWN_OR_CHANGED');
+        return SyncStatus.UpdateRemote;
+      }
+
       // Mark as in-sync for all providers after successful sync
       this._providerManager.setSyncStatus('IN_SYNC');
       SyncLog.log('SyncWrapperService: Sync complete, status=IN_SYNC');
@@ -805,6 +875,14 @@ export class SyncWrapperService {
             'SyncWrapperService: WebSocket connection failed, will retry on next sync',
             err,
           );
+        });
+      }
+      if (providerId === SyncProviderId.SuperSync) {
+        // Must run every cycle, NOT only inside connectWebSocket(): the socket
+        // stays connected for days, so gating there would make toggling the
+        // presence setting (an opt-OUT too) silently do nothing until reconnect.
+        this._applyTrackingPresenceGate().catch((err) => {
+          SyncLog.warn('SyncWrapperService: Failed to apply presence setting', err);
         });
       }
 
@@ -867,6 +945,17 @@ export class SyncWrapperService {
         let skipClear = false;
         if (error instanceof AuthFailSPError && providerId === SyncProviderId.SuperSync) {
           this._consecutiveSuperSyncAuthFailures++;
+          // The 401 may be another browser tab having rotated the token on
+          // the shared store ("sign out other devices"): this tab's cached
+          // cfg keeps serving the revoked token. Drop the cache so the next
+          // attempt reads the current token from disk — a genuine rotation
+          // then succeeds and resets the counter instead of striking out
+          // and wiping the fresh token via clearAuthCredentials below.
+          try {
+            await this._providerManager.invalidateCredentialCache(providerId);
+          } catch (invalidateError) {
+            SyncLog.err('Failed to invalidate credential cache:', invalidateError);
+          }
           if (this._consecutiveSuperSyncAuthFailures < 3) {
             skipClear = true;
           } else {
@@ -911,16 +1000,51 @@ export class SyncWrapperService {
           actionStr: T.F.SYNC.S.BTN_FORCE_OVERWRITE,
         });
         return 'HANDLED_ERROR';
-      } else if (error instanceof JsonParseError) {
+      } else if (
+        // InvalidFilePrefixError: the remote file's head is not `pf_[C][E]<v>__`,
+        // so it is rejected before the decrypt/decompress/JSON stages — but the
+        // user's situation is identical to JsonParseError's: remote unreadable,
+        // local intact. Without it, that error fell through to the generic
+        // handler and surfaced the raw internal message (verbatim the title of
+        // #9627) with no way forward.
+        //
+        // #9682 initially excluded this branch, arguing that if a server-side
+        // transformation strips the header, force upload just recreates the
+        // broken state. Reversed because the #9627 reporter was in fact
+        // unblocked by force upload. That PR — which would have extended .bak
+        // auto-recovery here — is parked, not declined: a head-strip is not a
+        // shape a torn write produces, so .bak recovery is a poor fit, but it
+        // has explicit merge criteria. Revisit this branch alongside it.
+        error instanceof JsonParseError ||
+        error instanceof InvalidFilePrefixError
+      ) {
+        // A markup head is a bad RESPONSE (WebDAV multistatus, proxy or
+        // captive-portal page), not a bad stored file: the remote file is
+        // likely intact, so offering force-overwrite would invite clobbering
+        // healthy remote data over a transient network/login problem. Surface
+        // the real cause without the overwrite action instead.
+        if (error instanceof InvalidFilePrefixError && error.headShape === 'markup') {
+          this._providerManager.setSyncStatus('ERROR');
+          this._snackService.open({
+            msg: T.F.SYNC.S.ERROR_REMOTE_RESPONSE_NOT_SYNC_DATA,
+            type: 'ERROR',
+            config: { duration: 12000 },
+          });
+          return 'HANDLED_ERROR';
+        }
         // Remote JSON is unparseable (e.g. truncated write, encoding issue).
         // Force overwrite is safe: local data is intact, remote cannot be parsed.
-        // Issues: #5574, #4616.
+        // Issues: #5574, #4616, #9627.
+        const forceUploadSource: ForceUploadTriggerSource =
+          error instanceof InvalidFilePrefixError
+            ? 'InvalidFilePrefixError'
+            : 'JsonParseError';
         this._providerManager.setSyncStatus('ERROR');
         this._snackService.open({
           msg: T.F.SYNC.S.ERROR_REMOTE_FILE_CORRUPTED,
           type: 'ERROR',
           config: { duration: 12000 },
-          actionFn: async () => this.forceUpload('JsonParseError'),
+          actionFn: async () => this.forceUpload(forceUploadSource),
           actionStr: T.F.SYNC.S.BTN_FORCE_OVERWRITE,
         });
         return 'HANDLED_ERROR';
@@ -1192,6 +1316,7 @@ export class SyncWrapperService {
 
     const hasPayloadError = rejectedResult.rejectedOps.some(
       (r) =>
+        r.errorCode === 'PAYLOAD_TOO_LARGE' ||
         r.error?.includes('Payload too complex') ||
         r.error?.includes('Payload too large'),
     );

@@ -28,8 +28,11 @@ The backup script creates two dumps:
 # Run manually
 ./scripts/backup.sh
 
-# Set up daily cron at 3 AM with 3-day retention
-(crontab -l 2>/dev/null; echo "0 3 * * * RETENTION_DAYS=3 /path/to/scripts/backup.sh >> /var/log/supersync-backup.log 2>&1") | crontab -
+# Set up daily cron at 3 AM with 3-day retention. flock keeps a slow dump from
+# overlapping the next night's run. The lock must live in a root-owned dir like /run —
+# in world-writable /tmp any local user could squat the path and silently block every
+# nightly run.
+(crontab -l 2>/dev/null; echo "0 3 * * * RETENTION_DAYS=3 flock -n /run/supersync-backup.lock /path/to/scripts/backup.sh >> /var/log/supersync-backup.log 2>&1") | crontab -
 ```
 
 Backups are saved to `backups/` next to the scripts directory.

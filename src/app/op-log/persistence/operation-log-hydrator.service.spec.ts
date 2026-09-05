@@ -2388,7 +2388,7 @@ describe('OperationLogHydratorService', () => {
       expect(reloadSpy).not.toHaveBeenCalled();
     });
 
-    // #9187: DB_VERSION 8-10 are deliberate downgrade barriers, so a
+    // #9187: DB_VERSION 8-10 and later schema upgrades form downgrade barriers, so a
     // VersionError means an old build is looking at an intact database. The
     // generic dialog's "your browser storage may need to be cleared" would
     // destroy that data and still not let this build open it.

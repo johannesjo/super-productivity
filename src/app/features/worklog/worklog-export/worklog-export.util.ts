@@ -23,9 +23,23 @@ import {
 
 const LINE_SEPARATOR = '\n';
 const EMPTY_VAL = ' - ';
+/**
+ * Leading `= + - @ TAB CR LF` make Excel/LibreOffice evaluate the cell as a
+ * formula, so a task title like `=cmd|' /C calc'!A0` would execute on open
+ * (OWASP CSV injection).
+ */
+const CSV_FORMULA_PREFIX_RE = /^[=+\-@\t\r\n]/;
+const CSV_NEEDS_QUOTING_RE = /[;"\r\n]/;
+
 const escapeCsvField = (value: string | number | undefined): string => {
-  const field = value === undefined ? '' : String(value);
-  return /[;"\r\n]/.test(field) ? `"${field.replace(/"/g, '""')}"` : field;
+  const raw = value === undefined ? '' : String(value);
+  // `-` alone is the zero-duration placeholder of msToString/msToClockString and
+  // not a formula, so it must stay bare — TIME_CLOCK is a default column, and
+  // prefixing would corrupt every zero row of an ordinary export.
+  // The apostrophe makes spreadsheets treat the cell as literal text (they hide
+  // it; plain-text consumers will see it).
+  const field = raw !== '-' && CSV_FORMULA_PREFIX_RE.test(raw) ? `'${raw}` : raw;
+  return CSV_NEEDS_QUOTING_RE.test(field) ? `"${field.replace(/"/g, '""')}"` : field;
 };
 
 /**

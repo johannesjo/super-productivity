@@ -1,4 +1,4 @@
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { Location } from '@angular/common';
 import { MatDialog, MatDialogState } from '@angular/material/dialog';
@@ -16,7 +16,12 @@ import { ProjectService } from '../../project/project.service';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
 import { TaskAttachmentService } from '../task-attachment/task-attachment.service';
 import { TaskFocusService } from '../task-focus.service';
-import { DEFAULT_TASK, HideSubTasksMode, TaskWithSubTasks } from '../task.model';
+import {
+  DEFAULT_TASK,
+  HideSubTasksMode,
+  TaskDetailTargetPanel,
+  TaskWithSubTasks,
+} from '../task.model';
 import { TaskService } from '../task.service';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { TaskComponent } from './task.component';
@@ -25,11 +30,13 @@ import { TranslateService } from '@ngx-translate/core';
 import { LocaleDatePipe } from '../../../ui/pipes/locale-date.pipe';
 import { PlannerService } from '../../planner/planner.service';
 import { AddSubtaskInputService } from '../add-subtask-input/add-subtask-input.service';
+import { TaskDuplicateService } from '../task-duplicate.service';
 
 describe('TaskComponent shortcut handling', () => {
   let fixture: import('@angular/core/testing').ComponentFixture<TaskComponent>;
   let component: TaskComponent;
   let taskServiceSpy: jasmine.SpyObj<TaskService>;
+  let taskDuplicateServiceSpy: jasmine.SpyObj<TaskDuplicateService>;
   let addSubtaskInputServiceSpy: jasmine.SpyObj<AddSubtaskInputService>;
   let storeSpy: jasmine.SpyObj<Store>;
 
@@ -77,6 +84,7 @@ describe('TaskComponent shortcut handling', () => {
         'getByIdWithSubTaskData$',
         'focusTaskById',
         'scheduleTask',
+        'markIssueUpdatesAsRead',
       ],
       {
         currentTaskId: signal<string | null>(null),
@@ -96,6 +104,10 @@ describe('TaskComponent shortcut handling', () => {
         subTaskIds: [],
       } as unknown as TaskWithSubTasks),
     );
+    taskDuplicateServiceSpy = jasmine.createSpyObj<TaskDuplicateService>(
+      'TaskDuplicateService',
+      ['duplicate'],
+    );
     addSubtaskInputServiceSpy = jasmine.createSpyObj<AddSubtaskInputService>(
       'AddSubtaskInputService',
       ['requestOpen', 'consume'],
@@ -110,6 +122,7 @@ describe('TaskComponent shortcut handling', () => {
       imports: [TaskComponent],
       providers: [
         { provide: TaskService, useValue: taskServiceSpy },
+        { provide: TaskDuplicateService, useValue: taskDuplicateServiceSpy },
         {
           provide: TaskRepeatCfgService,
           useValue: jasmine.createSpyObj('TaskRepeatCfgService', [
@@ -212,6 +225,15 @@ describe('TaskComponent shortcut handling', () => {
     fixture.componentRef.setInput('task', createSubTask(''));
     fixture.componentRef.setInput('isInSubTaskList', true);
     fixture.componentRef.setInput('isBacklog', false);
+  });
+
+  it('delegates duplication of the current task', () => {
+    const task = createTopLevelTask('Task to duplicate');
+    fixture.componentRef.setInput('task', task);
+
+    component.duplicateTask();
+
+    expect(taskDuplicateServiceSpy.duplicate).toHaveBeenCalledOnceWith(task);
   });
 
   it('does not delete an empty subtask on Escape', () => {
@@ -770,6 +792,97 @@ describe('TaskComponent shortcut handling', () => {
 
         expectScheduledForToday();
       }));
+    });
+  });
+
+  describe('detail panel toggle button (#9850)', () => {
+    const setTask = (overrides: Partial<TaskWithSubTasks>): void => {
+      fixture.componentRef.setInput('task', {
+        ...createTopLevelTask('Task'),
+        ...overrides,
+      });
+      fixture.componentRef.setInput('isInSubTaskList', false);
+      fixture.detectChanges();
+    };
+    const selectedTaskId = (): WritableSignal<string | null> =>
+      taskServiceSpy.selectedTaskId as unknown as WritableSignal<string | null>;
+    const isXs = (): WritableSignal<boolean> =>
+      TestBed.inject(LayoutService).isXs as unknown as WritableSignal<boolean>;
+
+    it('opens the notes section directly when the task has notes', () => {
+      setTask({ notes: 'some notes' });
+
+      component.onToggleDetailPanelBtnClick();
+
+      expect(taskServiceSpy.setSelectedId).toHaveBeenCalledWith(
+        'top-1',
+        TaskDetailTargetPanel.Notes,
+      );
+    });
+
+    it('opens the notes section on mobile, where the bug was reported', () => {
+      isXs().set(true);
+      setTask({ notes: 'some notes' });
+
+      component.onToggleDetailPanelBtnClick();
+
+      expect(taskServiceSpy.setSelectedId).toHaveBeenCalledWith(
+        'top-1',
+        TaskDetailTargetPanel.Notes,
+      );
+    });
+
+    it('prefers the notes section for an issue-linked task that has notes', () => {
+      setTask({ notes: 'some notes', issueId: 'GH-1', issueType: 'GITHUB' });
+
+      component.onToggleDetailPanelBtnClick();
+
+      expect(taskServiceSpy.setSelectedId).toHaveBeenCalledWith(
+        'top-1',
+        TaskDetailTargetPanel.Notes,
+      );
+    });
+
+    it('opens the default panel for an issue-linked task without notes', () => {
+      setTask({ notes: '', issueId: 'GH-1', issueType: 'GITHUB' });
+
+      component.onToggleDetailPanelBtnClick();
+
+      expect(taskServiceSpy.setSelectedId).toHaveBeenCalledWith(
+        'top-1',
+        TaskDetailTargetPanel.Default,
+      );
+    });
+
+    it('opens the default panel and clears the badge in the issue-updated state', () => {
+      setTask({ notes: 'some notes', issueId: 'GH-1', issueWasUpdated: true });
+
+      component.onToggleDetailPanelBtnClick();
+
+      expect(taskServiceSpy.markIssueUpdatesAsRead).toHaveBeenCalledWith('top-1');
+      expect(taskServiceSpy.setSelectedId).toHaveBeenCalledWith(
+        'top-1',
+        TaskDetailTargetPanel.Default,
+      );
+    });
+
+    it('closes the panel when it is already open for this task', () => {
+      setTask({ notes: 'some notes' });
+      selectedTaskId().set('top-1');
+
+      component.onToggleDetailPanelBtnClick();
+
+      expect(taskServiceSpy.setSelectedId).toHaveBeenCalledWith(null);
+    });
+
+    it('closes the panel on mobile where the icon stays "chat" while open', () => {
+      isXs().set(true);
+      setTask({ notes: 'some notes' });
+      selectedTaskId().set('top-1');
+
+      component.onToggleDetailPanelBtnClick();
+
+      expect(taskServiceSpy.setSelectedId).toHaveBeenCalledWith(null);
     });
   });
 });
