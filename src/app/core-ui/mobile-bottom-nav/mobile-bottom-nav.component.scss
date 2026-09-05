@@ -125,8 +125,7 @@
 // (class set on .app-container by the app shell; CSS only, so this core-ui
 // component stays independent of the tasks feature).
 :host-context(.is-multi-selecting) .add-task-button {
-  opacity: 0;
-  pointer-events: none;
+  visibility: hidden;
 }
 
 // Material Design touch target improvements

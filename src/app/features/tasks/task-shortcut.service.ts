@@ -350,6 +350,10 @@ export class TaskShortcutService {
     keys: KeyboardConfig,
     focusedTaskId: TaskId | null,
   ): boolean {
+    // Rows inside the detail panel are copies and never part of the selection
+    // (validity rule); selection keys ignore them.
+    const isFocusInDetailPanel = !!document.activeElement?.closest('task-detail-panel');
+
     if (ev.key === 'Escape' && this._multiSelect.isBarVisible()) {
       this._multiSelect.clear();
       ev.preventDefault();
@@ -358,6 +362,7 @@ export class TaskShortcutService {
 
     if (
       focusedTaskId &&
+      !isFocusInDetailPanel &&
       ev.shiftKey &&
       !ev.ctrlKey &&
       !ev.metaKey &&
@@ -373,23 +378,28 @@ export class TaskShortcutService {
     }
 
     // `X` toggles the focused row in the selection (Linear / Gmail convention).
-    if (focusedTaskId && checkKeyCombo(ev, keys.taskToggleSelect)) {
+    // A user or plugin binding on the same combo keeps precedence.
+    if (
+      focusedTaskId &&
+      !isFocusInDetailPanel &&
+      checkKeyCombo(ev, keys.taskToggleSelect) &&
+      !this._isAnyConfiguredCombo(ev, { ...keys, taskToggleSelect: null })
+    ) {
       this._multiSelect.toggle(focusedTaskId);
       ev.preventDefault();
       return true;
     }
 
-    // Ctrl/Cmd+A on a focused row selects every row of its list. The global
+    // Ctrl/Cmd+A on a focused row selects every row of its list. Goes through
+    // checkKeyCombo so the user's keyboard-layout map applies. The global
     // handler lets Cmd+key through from inputs, so guard against a title edit.
     if (
       focusedTaskId &&
-      (ev.ctrlKey || ev.metaKey) &&
-      !ev.shiftKey &&
-      !ev.altKey &&
-      ev.code === 'KeyA' &&
+      !isFocusInDetailPanel &&
+      (checkKeyCombo(ev, 'Ctrl+A') || checkKeyCombo(ev, 'Meta+A')) &&
       !(ev.target instanceof HTMLElement && isInputElement(ev.target)) &&
-      // A user who bound a task shortcut to Ctrl/Cmd+A keeps it.
-      !this._isAnyConfiguredTaskCombo(ev, keys)
+      // A user who bound a shortcut to Ctrl/Cmd+A keeps it.
+      !this._isAnyConfiguredCombo(ev, keys)
     ) {
       this._multiSelect.selectAllInListOfFocused();
       ev.preventDefault();
@@ -439,7 +449,8 @@ export class TaskShortcutService {
     return false;
   }
 
-  private _isAnyConfiguredTaskCombo(ev: KeyboardEvent, keys: KeyboardConfig): boolean {
+  /** True when any configured combo (task, global or plugin) matches `ev`. */
+  private _isAnyConfiguredCombo(ev: KeyboardEvent, keys: KeyboardConfig): boolean {
     return Object.values(keys).some(
       (combo) => typeof combo === 'string' && !!combo && checkKeyCombo(ev, combo),
     );

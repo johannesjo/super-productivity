@@ -13,11 +13,13 @@ import { TagService } from '../../tag/tag.service';
 import { MenuTreeService } from '../../menu-tree/menu-tree.service';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { GlobalConfigService } from '../../config/global-config.service';
+import { TaskFocusService } from '../task-focus.service';
 import { WorkContextType } from '../../work-context/work-context.model';
 
 describe('TaskMultiSelectBarComponent', () => {
   let fixture: ComponentFixture<TaskMultiSelectBarComponent>;
   let multiSelect: TaskMultiSelectService;
+  let taskFocusService: TaskFocusService;
   let routerEvents$: Subject<unknown>;
   let workContext$: Subject<{ activeId: string; activeType: WorkContextType }>;
 
@@ -74,6 +76,7 @@ describe('TaskMultiSelectBarComponent', () => {
 
     fixture = TestBed.createComponent(TaskMultiSelectBarComponent);
     multiSelect = TestBed.inject(TaskMultiSelectService);
+    taskFocusService = TestBed.inject(TaskFocusService);
     fixture.detectChanges();
   });
 
@@ -105,7 +108,26 @@ describe('TaskMultiSelectBarComponent', () => {
   it('the ✕ button clears', () => {
     multiSelect.toggle('a');
     fixture.detectChanges();
-    (fixture.nativeElement.querySelector('.bar button') as HTMLButtonElement).click();
+    (
+      fixture.nativeElement.querySelector(
+        '.bar button[mat-icon-button]',
+      ) as HTMLButtonElement
+    ).click();
+    expect(multiSelect.count()).toBe(0);
+  });
+
+  it('registers the open bulk menu as the active closable menu and clears it on close', () => {
+    fixture.componentInstance.onMenuOpened();
+    expect(taskFocusService.isTaskContextMenuOpen()).toBeTrue();
+    expect(taskFocusService.closeActiveTaskContextMenu()).not.toBeNull();
+    fixture.componentInstance.onMenuClosed();
+    expect(taskFocusService.isTaskContextMenuOpen()).toBeFalse();
+    expect(taskFocusService.closeActiveTaskContextMenu()).toBeNull();
+  });
+
+  it('clears the selection when the bar is destroyed', () => {
+    multiSelect.toggle('a');
+    fixture.destroy();
     expect(multiSelect.count()).toBe(0);
   });
 });

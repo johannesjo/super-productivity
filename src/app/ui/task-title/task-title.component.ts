@@ -11,6 +11,7 @@ import {
   output,
   signal,
   viewChild,
+  effect,
 } from '@angular/core';
 import { T } from 'src/app/t.const';
 import { isMultiSelectModifierEvent } from '../../util/is-multi-select-modifier-event';
@@ -98,6 +99,13 @@ export class TaskTitleComponent implements OnDestroy {
 
   private readonly _isFocused = signal(false);
   private readonly _isEditing = signal(false);
+  // Becoming readonly mid-edit removes the textarea without a blur; end the
+  // edit explicitly so the editing state cannot get stuck.
+  private readonly _cancelEditWhenReadonly = effect(() => {
+    if (this.readonly() && this._isEditing()) {
+      this.cancelEditing();
+    }
+  });
   private _focusTimeoutId: number | undefined;
   private _submitTrigger: SubmitTrigger = TaskTitleComponent._DEFAULT_SUBMIT_TRIGGER;
 

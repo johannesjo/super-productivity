@@ -179,6 +179,13 @@ describe('TaskMultiSelectService', () => {
       expect(service.anchorId()).toBe('c');
     });
 
+    it('ignores a focused row inside the detail panel', () => {
+      stubActiveElement(root.querySelector('task-detail-panel task'));
+      service.selectAllInListOfFocused();
+      expect(service.extendFromFocused('down')).toBeNull();
+      expect(service.count()).toBe(0);
+    });
+
     it('selects sibling subtasks when a subtask is focused', () => {
       focusRow('b2');
       service.selectAllInListOfFocused();

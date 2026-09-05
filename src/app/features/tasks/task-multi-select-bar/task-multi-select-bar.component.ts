@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
   effect,
   inject,
   signal,
@@ -28,6 +29,7 @@ import { getPluralKey } from '../../../util/get-plural-key';
 import { T } from '../../../t.const';
 import { TaskMultiSelectService } from '../task-multi-select.service';
 import { TaskBulkActionService } from '../task-bulk-action.service';
+import { TaskFocusService } from '../task-focus.service';
 import { ProjectService } from '../../project/project.service';
 import { TagService } from '../../tag/tag.service';
 import { MenuTreeService } from '../../menu-tree/menu-tree.service';
@@ -79,6 +81,11 @@ export class TaskMultiSelectBarComponent {
   private readonly _translateService = inject(TranslateService);
   private readonly _translateStore = inject(TranslateStore);
   private readonly _router = inject(Router);
+  private readonly _taskFocusService = inject(TaskFocusService);
+  private readonly _closeBulkMenu = (): void => {
+    this.actionsTrigger()?.closeMenu();
+    this.positionedTrigger()?.closeMenu();
+  };
 
   readonly T = T;
   readonly ESTIMATE_OPTIONS = ESTIMATE_OPTIONS;
@@ -124,14 +131,14 @@ export class TaskMultiSelectBarComponent {
 
   readonly menuPosition = signal<{ x: number; y: number }>({ x: 0, y: 0 });
   readonly positionedTrigger = viewChild('positionedTrigger', { read: MatMenuTrigger });
+  readonly actionsTrigger = viewChild('actionsTrigger', { read: MatMenuTrigger });
 
   constructor() {
     // Lifecycle of the selection: it belongs to one view, so it clears on
-    // navigation and on work-context change. Wired here (the one app-shell
-    // instance) so the service itself stays a dependency-free state holder.
-    // The bar lives in the non-focus-overlay branch of the shell, so a
-    // selection does not survive the focus overlay: the rebuilt bar's
-    // subscription replays the current context (shareReplay) and clears.
+    // navigation, on work-context change and when this app-shell instance is
+    // torn down (focus overlay). Wired here so the service itself stays a
+    // dependency-free state holder.
+    inject(DestroyRef).onDestroy(() => this.multiSelect.clear());
     this._router.events
       .pipe(
         filter((ev) => ev instanceof NavigationEnd),
@@ -163,7 +170,21 @@ export class TaskMultiSelectBarComponent {
     this.multiSelect.clear();
   }
 
+  /**
+   * Register the open bulk menu the way the task context menu does, so the
+   * Android back button closes the menu first instead of clearing the
+   * selection underneath it.
+   */
+  onMenuOpened(): void {
+    this._taskFocusService.closeActiveTaskContextMenu.set(this._closeBulkMenu);
+    this._taskFocusService.isTaskContextMenuOpen.set(true);
+  }
+
   onMenuClosed(): void {
+    if (this._taskFocusService.closeActiveTaskContextMenu() === this._closeBulkMenu) {
+      this._taskFocusService.closeActiveTaskContextMenu.set(null);
+      this._taskFocusService.isTaskContextMenuOpen.set(false);
+    }
     // Return keyboard focus to the anchor row so shortcuts keep working.
     const anchorId = this.multiSelect.anchorId();
     // A menu item may have opened a dialog; leave focus inside it.

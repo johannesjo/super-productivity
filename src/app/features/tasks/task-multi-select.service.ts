@@ -118,11 +118,11 @@ export class TaskMultiSelectService {
    * Returns the element that received focus, or null when at the list edge.
    */
   extendFromFocused(direction: MultiSelectDirection): HTMLElement | null {
-    const focusedEl = document.activeElement?.closest('task') as HTMLElement | null;
-    const focusedId = focusedEl?.getAttribute('data-task-id');
-    if (!focusedEl || !focusedId) {
+    const focused = this._focusedRow();
+    if (!focused) {
       return null;
     }
+    const { el: focusedEl, id: focusedId } = focused;
     if (!this._anchorId() || !this._selectedIds().size) {
       this._selectedIds.set(new Set([focusedId]));
       this._anchorId.set(focusedId);
@@ -152,11 +152,11 @@ export class TaskMultiSelectService {
 
   /** Ctrl/Cmd+A: select every row of the focused row's list; it becomes the anchor. */
   selectAllInListOfFocused(): void {
-    const focusedEl = document.activeElement?.closest('task') as HTMLElement | null;
-    const focusedId = focusedEl?.getAttribute('data-task-id');
-    if (!focusedEl || !focusedId) {
+    const focused = this._focusedRow();
+    if (!focused) {
       return;
     }
+    const { el: focusedEl, id: focusedId } = focused;
     const ids = this._listRowsFor(focusedEl)
       .map((el) => el.getAttribute('data-task-id'))
       .filter((id): id is string => !!id);
@@ -253,6 +253,16 @@ export class TaskMultiSelectService {
       .slice(from, to + 1)
       .map((el) => el.getAttribute('data-task-id'))
       .filter((id): id is string => !!id);
+  }
+
+  /** The focused main-list row (detail-panel copies are never selectable). */
+  private _focusedRow(): { el: HTMLElement; id: string } | null {
+    const el = document.activeElement?.closest('task') as HTMLElement | null;
+    const id = el?.getAttribute('data-task-id');
+    if (!el || !id || el.closest('task-detail-panel')) {
+      return null;
+    }
+    return { el, id };
   }
 
   /** Direct `<task>` children of the list that contains `el`. */

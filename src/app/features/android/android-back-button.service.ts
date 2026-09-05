@@ -76,17 +76,17 @@ export class AndroidBackButtonService {
       return;
     }
 
-    // 4b. A task multi-selection (or touch selection mode) has no history
-    //     entry and sits below any dialog or overlay; back leaves it before
-    //     anything navigates away.
-    if (this._taskMultiSelectService.isBarVisible()) {
-      this._taskMultiSelectService.clear();
-      return;
-    }
-
     // 5. Store-backed layout popups do not push history state or open a
     //    MatDialog, so close them before falling through to navigation/exit.
     if (this._closeStoreBackedPopup()) {
+      return;
+    }
+
+    // 5b. A task multi-selection (or touch selection mode) has no history
+    //     entry and sits below every dialog, overlay and popup; back leaves
+    //     it before anything navigates away.
+    if (this._taskMultiSelectService.isBarVisible()) {
+      this._taskMultiSelectService.clear();
       return;
     }
 

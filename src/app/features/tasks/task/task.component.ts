@@ -143,6 +143,7 @@ const isInteractiveTarget = (target: EventTarget | null): boolean =>
     '[class.isCurrent]': 'isCurrent()',
     '[class.isSelected]': 'isSelected()',
     '[class.isMultiSelected]': 'isMultiSelected()',
+    '[class.isTouchSelectionMode]': 'isTouchSelectionMode()',
     '[class.hasNoSubTasks]': 'task().subTaskIds.length === 0',
     '[class.isDragReady]': 'isDragReady()',
     '[class.isOverdue]': 'isOverdue()',
@@ -468,7 +469,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     }
     // While a multi-selection exists, focus moves are selection mechanics
     // (Ctrl+click focuses the row); don't re-target an open detail panel.
-    if (this._multiSelect.isActive()) {
+    if (this._multiSelect.isBarVisible()) {
       return;
     }
     const selectedTaskId = this._taskService.selectedTaskId();
@@ -1131,7 +1132,8 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   // data (re)loading, so the badge can never get stuck (e.g. removed remote issue).
   onToggleDetailPanelBtnClick(ev?: MouseEvent): void {
     if (this._multiSelect.isTouchSelectionMode()) {
-      // In selection mode every row control is a toggle for the row.
+      // Keyboard path; pointer taps on row controls are routed to the host
+      // by CSS (see .isTouchSelectionMode in _task-base.scss).
       ev?.preventDefault();
       ev?.stopPropagation();
       this._multiSelect.toggle(this.task().id);

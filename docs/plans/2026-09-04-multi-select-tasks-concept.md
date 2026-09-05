@@ -111,7 +111,7 @@ Long-press already starts drag, swipe-right completes, swipe-left opens the cont
 | Bar **✕** / Android back / Esc                           | Leave selection mode, clear selection.                                                                       |
 | Later (Phase 2)                                          | "Select tasks…" in the view ⋮ menu; drag a finger down the selection rings to range-select (Things).         |
 
-Selection mode gates the row gestures explicitly: `swipe-block [canSwipe]` off, `cdkDragDisabled` on, `titleBarClick`'s panel toggle off, `done-toggle` inert, host `contextmenu` suppressed. The add-task FAB in the mobile bottom nav protrudes into the bar's space, so the FAB hides while selection mode is active and the bar sits directly above the nav. An open right-panel bottom sheet closes when selection mode starts. Android back is a new step in `AndroidBackButtonService.handleBackButton` after the context-menu step and before the history overlays; selection mode has no history entry.
+Selection mode gates the row gestures explicitly: `swipe-block [canSwipe]` off, `cdkDragDisabled` on, `titleBarClick`'s panel toggle off, `done-toggle` inert, host `contextmenu` suppressed. The add-task FAB in the mobile bottom nav protrudes into the bar's space, so the FAB hides while selection mode is active and the bar sits directly above the nav. An open right-panel bottom sheet closes when selection mode starts. Android back is a new step in `AndroidBackButtonService.handleBackButton` after dialogs, overlays and popups and before navigation (the selection sits below all of them); selection mode has no history entry.
 
 On desktop there is no explicit mode: any Ctrl/Cmd+click _is_ the mode. On touch the mode is explicit because there is no modifier key.
 
@@ -224,7 +224,7 @@ Dragging a task that is part of the selection drags the whole selection: the CDK
 
 _Phase 1 as implemented (2026-09-05):_ everything above except the multi-task estimate dialog (the menu offers the quick estimate values instead), and "disabled with a tooltip" for inapplicable actions (they are hidden, or answer with a "nothing to change" snack). Shipped early from Phase 2: Ctrl+Shift+click add-range. Deviations from §6 forced by rule 10: a subtask whose parent survives is deleted through the singular `deleteTask` (older clients' `deleteTasks` reducer would leave a dangling `subTaskIds` entry and fail post-sync validation), and a single selected task takes the normal single-task delete path with its setting and undo. The feedback-suppression flag lives on `TaskMultiSelectService`, not on the bulk service, so effects only depend on the small service.
 
-_Phase 1b and the keyboard items of Phase 2 were implemented on 2026-09-05 (stacked branch): touch selection mode via the context menu, selection rings, gesture gating, FAB hiding, Android back step, `X` (`taskToggleSelect`) and Ctrl/Cmd+A. "Select tasks…" in the view menu and drag over rings are still open._
+_Phase 1b and part of Phase 2's keyboard items were implemented on 2026-09-05 (stacked branch): touch selection mode via the context menu, selection rings, gesture gating, FAB hiding, Android back step, `X` (`taskToggleSelect`) and Ctrl/Cmd+A. Still open: Shift+J/K, "Select tasks…" in the view menu, drag over rings._
 
 **Phase 1b — touch**
 

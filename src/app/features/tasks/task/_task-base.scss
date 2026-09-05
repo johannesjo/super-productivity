@@ -269,12 +269,14 @@
   align-items: center;
   justify-content: center;
 
+  // 22px / 2px matches the done-toggle glyph (done-toggle.component.scss) so
+  // swapping the two does not shift the row.
   &::before {
     content: '';
     width: 22px;
     height: 22px;
     border-radius: 50%;
-    border: 2px solid var(--c-accent);
+    border: var(--s-quarter) solid var(--c-accent);
     box-sizing: border-box;
     transition: var(--transition-fast);
     transition-property: background-color;
@@ -283,4 +285,12 @@
   &.isOn::before {
     background: var(--c-accent);
   }
+}
+
+// In touch selection mode a tap anywhere on the row toggles it: row controls
+// (schedule / deadline / attachment / checklist / panel buttons) let the tap
+// fall through to the host. The subtask toggle stays live so nested rows can
+// be reached.
+:host.isTouchSelectionMode .all-controls-wrapper .ico-btn {
+  pointer-events: none;
 }

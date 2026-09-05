@@ -878,6 +878,33 @@ describe('TaskShortcutService', () => {
       expect(mockMultiSelect.clear).toHaveBeenCalled();
     });
 
+    it('X yields to a user binding on the same combo', () => {
+      mockConfigService.cfg.set({
+        keyboard: { ...defaultKeyboardConfig, taskAddSubTask: 'X' },
+        appFeatures: { isTimeTrackingEnabled: true },
+      });
+      setFocusedTask('task-1');
+      const ev = createKeyboardEvent('x', 'KeyX');
+      service.handleTaskShortcuts(ev);
+      expect(mockMultiSelect.toggle).not.toHaveBeenCalled();
+    });
+
+    it('ignores selection keys for a row inside the detail panel', () => {
+      const panel = document.createElement('task-detail-panel');
+      document.body.appendChild(panel);
+      const el = setFocusedTask('task-1');
+      panel.appendChild(el);
+      service.handleTaskShortcuts(createKeyboardEvent('x', 'KeyX'));
+      service.handleTaskShortcuts(createKeyboardEvent('a', 'KeyA', { ctrlKey: true }));
+      service.handleTaskShortcuts(
+        createKeyboardEvent('ArrowDown', 'ArrowDown', { shiftKey: true }),
+      );
+      expect(mockMultiSelect.toggle).not.toHaveBeenCalled();
+      expect(mockMultiSelect.selectAllInListOfFocused).not.toHaveBeenCalled();
+      expect(mockMultiSelect.extendFromFocused).not.toHaveBeenCalled();
+      panel.remove();
+    });
+
     it('Ctrl+A yields to a user binding on the same combo', () => {
       mockConfigService.cfg.set({
         keyboard: { ...defaultKeyboardConfig, taskAddSubTask: 'Ctrl+A' },
