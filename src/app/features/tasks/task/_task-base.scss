@@ -265,12 +265,14 @@
   flex: 0 0 var(--task-icon-size);
   width: var(--task-icon-size);
   height: var(--task-icon-size);
+  // Same slot and margin as the done-toggle it replaces (_task-controls.scss)
+  // so the title does not shift when the mode toggles.
+  margin-left: var(--s);
   display: flex;
   align-items: center;
   justify-content: center;
 
-  // 22px / 2px matches the done-toggle glyph (done-toggle.component.scss) so
-  // swapping the two does not shift the row.
+  // 22px matches the done-toggle glyph (done-toggle.component.scss).
   &::before {
     content: '';
     width: 22px;

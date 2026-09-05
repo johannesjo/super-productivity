@@ -214,7 +214,8 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   // Use shared signals from services to avoid creating 600+ subscriptions on initial render
   isCurrent = computed(() => this._taskService.currentTaskId() === this.task().id);
   isSelected = computed(() => this._taskService.selectedTaskId() === this.task().id);
-  // Part of the transient multi-selection (Ctrl/Cmd+click, Shift+click, Shift+Arrow).
+  // Part of the transient multi-selection (modifier click, Shift+Arrow, X,
+  // Ctrl/Cmd+A, touch tap in selection mode).
   // One O(1) Set lookup per row per selection change; see TaskMultiSelectService.
   isMultiSelected = computed(() => this._multiSelect.selectedIds().has(this.task().id));
   isTouchSelectionMode = this._multiSelect.isTouchSelectionMode;
@@ -517,7 +518,11 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     // Touch selection mode: a plain tap anywhere on the row toggles it
     // (the title has pointer-events off on touch, so taps reach the host).
     if (this._multiSelect.isTouchSelectionMode() && !isMultiSelectModifierEvent(ev)) {
-      if (isInteractiveTarget(ev.target)) {
+      if (
+        isInteractiveTarget(ev.target) ||
+        // Detail-panel copies are never part of the selection.
+        this._elementRef.nativeElement.closest('task-detail-panel')
+      ) {
         return;
       }
       ev.preventDefault();
@@ -1131,14 +1136,6 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   // the issue-content "mark as checked" button, it does not depend on the issue
   // data (re)loading, so the badge can never get stuck (e.g. removed remote issue).
   onToggleDetailPanelBtnClick(ev?: MouseEvent): void {
-    if (this._multiSelect.isTouchSelectionMode()) {
-      // Keyboard path; pointer taps on row controls are routed to the host
-      // by CSS (see .isTouchSelectionMode in _task-base.scss).
-      ev?.preventDefault();
-      ev?.stopPropagation();
-      this._multiSelect.toggle(this.task().id);
-      return;
-    }
     const task = this.task();
     if (task.issueWasUpdated) {
       this._taskService.markIssueUpdatesAsRead(task.id);
@@ -1378,7 +1375,15 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     this.taskTitleEditEl()?.cancelEditing();
     // A selected row opens the bulk menu for the whole selection; an unselected
     // row while a selection exists clears it and acts alone (file-manager rule).
-    if (this._multiSelect.isActive()) {
+    // In touch selection mode the menu only ever acts on the selection, so an
+    // unselected row joins it first instead of silently ending the mode.
+    if (this._multiSelect.isBarVisible()) {
+      if (
+        this._multiSelect.isTouchSelectionMode() &&
+        !this._multiSelect.has(this.task().id)
+      ) {
+        this._multiSelect.toggle(this.task().id);
+      }
       if (this._multiSelect.has(this.task().id)) {
         event?.preventDefault();
         event?.stopPropagation();

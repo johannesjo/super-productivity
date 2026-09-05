@@ -144,6 +144,7 @@ describe('TaskShortcutService', () => {
   // el.focus() — headless Chrome only updates activeElement when the test iframe
   // has window focus, which is not guaranteed inside a large suite.
   let focusedTaskEl: HTMLElement | null = null;
+  let detailPanelEl: HTMLElement | null = null;
   let activeElementStubbed = false;
 
   const stubActiveElement = (el: Element | null): void => {
@@ -166,6 +167,8 @@ describe('TaskShortcutService', () => {
   afterEach(() => {
     focusedTaskEl?.remove();
     focusedTaskEl = null;
+    detailPanelEl?.remove();
+    detailPanelEl = null;
     if (activeElementStubbed) {
       delete (document as unknown as { activeElement?: unknown }).activeElement;
       activeElementStubbed = false;
@@ -890,10 +893,10 @@ describe('TaskShortcutService', () => {
     });
 
     it('ignores selection keys for a row inside the detail panel', () => {
-      const panel = document.createElement('task-detail-panel');
-      document.body.appendChild(panel);
+      detailPanelEl = document.createElement('task-detail-panel');
+      document.body.appendChild(detailPanelEl);
       const el = setFocusedTask('task-1');
-      panel.appendChild(el);
+      detailPanelEl.appendChild(el);
       service.handleTaskShortcuts(createKeyboardEvent('x', 'KeyX'));
       service.handleTaskShortcuts(createKeyboardEvent('a', 'KeyA', { ctrlKey: true }));
       service.handleTaskShortcuts(
@@ -902,7 +905,14 @@ describe('TaskShortcutService', () => {
       expect(mockMultiSelect.toggle).not.toHaveBeenCalled();
       expect(mockMultiSelect.selectAllInListOfFocused).not.toHaveBeenCalled();
       expect(mockMultiSelect.extendFromFocused).not.toHaveBeenCalled();
-      panel.remove();
+    });
+
+    it('X ignores key auto-repeat', () => {
+      setFocusedTask('task-1');
+      const ev = createKeyboardEvent('x', 'KeyX');
+      Object.defineProperty(ev, 'repeat', { value: true });
+      service.handleTaskShortcuts(ev);
+      expect(mockMultiSelect.toggle).not.toHaveBeenCalled();
     });
 
     it('Ctrl+A yields to a user binding on the same combo', () => {

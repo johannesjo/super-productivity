@@ -382,6 +382,7 @@ export class TaskShortcutService {
     if (
       focusedTaskId &&
       !isFocusInDetailPanel &&
+      !ev.repeat &&
       checkKeyCombo(ev, keys.taskToggleSelect) &&
       !this._isAnyConfiguredCombo(ev, { ...keys, taskToggleSelect: null })
     ) {
