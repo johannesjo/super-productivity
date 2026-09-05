@@ -84,6 +84,13 @@ export class ServerMigrationService {
   private _matDialog = inject(MatDialog);
   private _userInputWaitState = inject(UserInputWaitStateService);
   private writeFlushService = inject(OperationWriteFlushService);
+  /**
+   * Automatic seeding re-runs on every sync while the local state fails
+   * validation (the client stays blocked rather than stranding its state,
+   * #9921), so the error snack is shown once per session; the not-in-sync
+   * status stays visible. Reset once a SYNC_IMPORT is created again.
+   */
+  private _validationFailureNotified = false;
 
   /**
    * Checks if we're connecting to a new/empty server and handles migration if needed.
@@ -252,10 +259,15 @@ export class ServerMigrationService {
           'ServerMigrationService: Cannot create SYNC_IMPORT - state validation failed.',
           validationResult.error || validationResult.crossModelError,
         );
-        this.snackService.open({
-          type: 'ERROR',
-          msg: T.F.SYNC.S.SERVER_MIGRATION_VALIDATION_FAILED,
-        });
+        // A user-driven force upload always reports; only the automatic path is
+        // throttled (see _validationFailureNotified).
+        if (!isServerMigration || !this._validationFailureNotified) {
+          this.snackService.open({
+            type: 'ERROR',
+            msg: T.F.SYNC.S.SERVER_MIGRATION_VALIDATION_FAILED,
+          });
+        }
+        this._validationFailureNotified = true;
         return;
       }
 
@@ -329,6 +341,7 @@ export class ServerMigrationService {
         'ServerMigrationService: Created SYNC_IMPORT operation for server migration. ' +
           'Will be uploaded immediately via follow-up upload.',
       );
+      this._validationFailureNotified = false;
       return op.id;
     });
   }

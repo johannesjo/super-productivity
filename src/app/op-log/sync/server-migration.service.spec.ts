@@ -419,6 +419,61 @@ describe('ServerMigrationService', () => {
       );
     });
 
+    describe('validation-failed snack throttling (#9921)', () => {
+      const failValidation = (): void => {
+        validateStateServiceSpy.validateAndRepair.and.resolveTo({
+          isValid: false,
+          wasRepaired: false,
+          error: 'Validation failed',
+        } as any);
+      };
+
+      it('shows the snack once per session for the automatic server-migration path', async () => {
+        failValidation();
+
+        await service.handleServerMigration(defaultProvider);
+        await service.handleServerMigration(defaultProvider);
+        await service.handleServerMigration(defaultProvider, {
+          syncImportReason: 'SERVER_MIGRATION',
+        });
+
+        expect(snackServiceSpy.open).toHaveBeenCalledTimes(1);
+        expect(opLogStoreSpy.append).not.toHaveBeenCalled();
+      });
+
+      it('always shows the snack for a user-driven force upload', async () => {
+        failValidation();
+
+        await service.handleServerMigration(defaultProvider, {
+          skipServerEmptyCheck: true,
+          syncImportReason: 'FORCE_UPLOAD',
+        });
+        await service.handleServerMigration(defaultProvider, {
+          skipServerEmptyCheck: true,
+          syncImportReason: 'FORCE_UPLOAD',
+        });
+
+        expect(snackServiceSpy.open).toHaveBeenCalledTimes(2);
+      });
+
+      it('notifies again once a SYNC_IMPORT was created in between', async () => {
+        failValidation();
+        await service.handleServerMigration(defaultProvider);
+
+        validateStateServiceSpy.validateAndRepair.and.resolveTo({
+          isValid: true,
+          wasRepaired: false,
+        } as any);
+        await service.handleServerMigration(defaultProvider);
+        expect(opLogStoreSpy.append).toHaveBeenCalledTimes(1);
+
+        failValidation();
+        await service.handleServerMigration(defaultProvider);
+
+        expect(snackServiceSpy.open).toHaveBeenCalledTimes(2);
+      });
+    });
+
     it('should use repaired state and dispatch to store if repair occurred', async () => {
       const repairedState = {
         task: {
