@@ -256,25 +256,18 @@ describe('IndexedDbOpLogAdapter', () => {
     await adapter.add(STORE_NAMES.OPS, makeOpEntry('a1', 'remote', 'applied'));
     await adapter.add(STORE_NAMES.OPS, makeOpEntry('p2', 'remote', 'pending'));
 
-    // Exact compound-key match expressed as a degenerate [k, k] range.
     const pending = await adapter.getAllFromIndex<{ op: { id: string } }>(
       STORE_NAMES.OPS,
       OPS_INDEXES.BY_SOURCE_AND_STATUS,
-      { lower: ['remote', 'pending'], upper: ['remote', 'pending'] },
+      ['remote', 'pending'],
     );
     expect(pending.map((r) => r.op.id).sort()).toEqual(['p1', 'p2']);
   });
 
-  it('rejects a non-exact compound-index range (port contract, parity with SQLite)', async () => {
-    await adapter.add(STORE_NAMES.OPS, makeOpEntry('p1', 'remote', 'pending'));
-    // IndexedDB would happily answer this with tuple ordering; SQLite cannot
-    // without row-value comparison. The port forbids it on both backends.
+  it('rejects a non-positive iterate limit (parity with SQLite)', async () => {
     await expectAsync(
-      adapter.getAllFromIndex(STORE_NAMES.OPS, OPS_INDEXES.BY_SOURCE_AND_STATUS, {
-        lower: ['local', 'applied'],
-        upper: ['remote', 'applied'],
-      }),
-    ).toBeRejectedWithError(/compound-index ranges must be exact-match/);
+      adapter.iterate(STORE_NAMES.OPS, { limit: 0, mode: 'readonly' }, () => 'stop'),
+    ).toBeRejectedWithError(/limit must be a positive integer/);
   });
 
   it('iterate honors `limit` (visits at most N entries)', async () => {

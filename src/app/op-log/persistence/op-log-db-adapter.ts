@@ -24,49 +24,31 @@
 export type DbKey = string | number;
 
 /**
- * Half-open range query against an index (mirrors IDBKeyRange usage).
- *
- * **Compound-index ranges must be exact-match**: `lower` and `upper` are the
- * same key tuple and neither bound is open. IndexedDB orders compound keys
- * lexicographically as tuples, while the SQLite backend translates a range
- * into per-column comparisons; the two agree only for equality. Both backends
- * reject anything else via {@link assertExactCompoundRange} so a divergent
- * range can never silently return different rows per engine.
+ * Half-open range over a store's primary key or a single-column index (mirrors
+ * IDBKeyRange usage). Bounds are scalar by design: IndexedDB orders compound
+ * keys lexicographically as tuples while SQLite compares per column, so a
+ * genuine compound *range* cannot be answered identically by both backends —
+ * see {@link DbIndexQuery} for the one compound shape that can.
  */
 export interface DbKeyRange {
-  lower?: DbKey | DbKey[];
-  upper?: DbKey | DbKey[];
+  lower?: DbKey;
+  upper?: DbKey;
   lowerOpen?: boolean;
   upperOpen?: boolean;
 }
 
 /**
- * Enforce the compound-range contract on {@link DbKeyRange}: a range whose
- * bounds are key tuples must be a closed equality range. Called by every
- * backend's index-range path (`getAllFromIndex`, `countFromIndex`).
+ * Query for an index read: a {@link DbKeyRange} over a single-column index, or
+ * an exact key tuple for a compound index. The tuple's arity must match the
+ * index (SQLite rejects a mismatch; IndexedDB matches nothing).
  */
-export const assertExactCompoundRange = (range?: DbKeyRange): void => {
-  if (!range) {
-    return;
-  }
-  const lowerIsTuple = Array.isArray(range.lower);
-  const upperIsTuple = Array.isArray(range.upper);
-  if (!lowerIsTuple && !upperIsTuple) {
-    return;
-  }
-  const lower = range.lower as DbKey[] | undefined;
-  const upper = range.upper as DbKey[] | undefined;
-  const isExact =
-    lowerIsTuple &&
-    upperIsTuple &&
-    !range.lowerOpen &&
-    !range.upperOpen &&
-    lower!.length === upper!.length &&
-    lower!.every((k, i) => k === upper![i]);
-  if (!isExact) {
+export type DbIndexQuery = DbKeyRange | DbKey[];
+
+/** `limit` must be a positive integer so both backends bound a walk identically. */
+export const assertIterateLimit = (limit?: number): void => {
+  if (limit !== undefined && (!Number.isInteger(limit) || limit < 1)) {
     throw new Error(
-      'OpLogDbAdapter: compound-index ranges must be exact-match (lower === upper, both closed) — ' +
-        'tuple ordering differs between IndexedDB and SQLite',
+      `OpLogDbAdapter: iterate limit must be a positive integer, got ${limit}`,
     );
   }
 };
@@ -126,11 +108,10 @@ export interface DbIterateOptions {
    */
   mode?: DbTxMode;
   /**
-   * Visit at most this many entries. Lets "first / latest row" scans
-   * (`direction: 'prev'` + `'stop'`, e.g. `getLastSeq`) push the bound down:
-   * IndexedDB stops advancing the cursor, SQLite emits `LIMIT ?` instead of
-   * materializing the whole result set — on native that is the difference
-   * between one row and the entire ops table crossing the Capacitor bridge.
+   * Visit at most this many entries (positive integer). Lets "first / latest
+   * row" scans (`direction: 'prev'` + `'stop'`, e.g. `getLastSeq`) push the
+   * bound down: IndexedDB stops advancing the cursor, SQLite emits `LIMIT ?`
+   * instead of materializing the whole result set.
    */
   limit?: number;
 }
@@ -163,7 +144,7 @@ export interface OpLogTx {
     index: string,
     key: DbKey | DbKey[],
   ): Promise<DbKey | undefined>;
-  getAllFromIndex<T>(store: string, index: string, range?: DbKeyRange): Promise<T[]>;
+  getAllFromIndex<T>(store: string, index: string, query?: DbIndexQuery): Promise<T[]>;
   /**
    * Walk entries in key (or index) order, invoking `visit` per entry. See
    * {@link DbCursorAction} for how to continue / stop / delete and
@@ -241,8 +222,8 @@ export interface OpLogDbAdapter {
     index: string,
     key: DbKey | DbKey[],
   ): Promise<DbKey | undefined>;
-  getAllFromIndex<T>(store: string, index: string, range?: DbKeyRange): Promise<T[]>;
-  countFromIndex(store: string, index: string, range?: DbKeyRange): Promise<number>;
+  getAllFromIndex<T>(store: string, index: string, query?: DbIndexQuery): Promise<T[]>;
+  countFromIndex(store: string, index: string, query?: DbIndexQuery): Promise<number>;
 
   /** See {@link OpLogTx.iterate}. */
   iterate<T>(

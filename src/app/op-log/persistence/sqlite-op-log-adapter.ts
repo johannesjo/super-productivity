@@ -33,9 +33,10 @@
  */
 
 import {
-  assertExactCompoundRange,
+  assertIterateLimit,
   DbCursorAction,
   DbCursorVisitor,
+  DbIndexQuery,
   DbIterateOptions,
   DbKey,
   DbKeyRange,
@@ -282,18 +283,19 @@ const whereExact = (
   key: DbKey | DbKey[],
 ): { clause: string; params: (string | number | null)[] } => {
   const keys = Array.isArray(key) ? key : [key];
+  if (keys.length !== columns.length) {
+    throw new Error(
+      `SqliteOpLogAdapter: key arity ${keys.length} does not match index arity ${columns.length}`,
+    );
+  }
   const clause = columns.map((c) => `${c.column} = ?`).join(' AND ');
   return { clause, params: keys.map(toSqlValue) };
 };
 
 /**
- * WHERE fragment excluding rows absent from an IDB index. IndexedDB only
- * indexes a record when every keyPath component is a valid key — a record
- * without `syncedAt` is simply not in `bySyncedAt`, and a local op (no
- * `applicationStatus`) is not in `bySourceAndStatus`. Here those land as NULL
- * columns, and NULL sorts FIRST under `ORDER BY … ASC`, so an unbounded index
- * scan would visit them before any real entry (#8312: `hasSyncedOps()` true on
- * a never-synced client). Every index read ANDs this in for parity.
+ * WHERE fragment excluding rows an IDB index would not contain: IndexedDB only
+ * indexes a record whose keyPath value(s) exist, whereas here they land as NULL
+ * columns that sort first under `ORDER BY … ASC` (#8312).
  */
 const whereIndexed = (columns: string[]): string =>
   columns.map((c) => `${c} IS NOT NULL`).join(' AND ');
@@ -301,42 +303,46 @@ const whereIndexed = (columns: string[]): string =>
 /** Join non-empty WHERE fragments with AND. */
 const andClauses = (...parts: string[]): string => parts.filter(Boolean).join(' AND ');
 
-/**
- * WHERE fragment for a {@link DbKeyRange} against one or more columns.
- *
- * A compound range is translated column-by-column, which only matches
- * IndexedDB's tuple ordering for an exact-match range — enforced up front by
- * {@link assertExactCompoundRange} (port contract on {@link DbKeyRange}).
- */
+/** WHERE fragment for a scalar {@link DbKeyRange} against one column. */
 const whereRange = (
-  columns: string[],
+  column: string,
   range?: DbKeyRange,
 ): { clause: string; params: (string | number | null)[] } => {
-  assertExactCompoundRange(range);
   if (!range) return { clause: '', params: [] };
-  const lowers = Array.isArray(range.lower)
-    ? range.lower
-    : range.lower != null
-      ? [range.lower]
-      : [];
-  const uppers = Array.isArray(range.upper)
-    ? range.upper
-    : range.upper != null
-      ? [range.upper]
-      : [];
   const parts: string[] = [];
   const params: (string | number | null)[] = [];
-  columns.forEach((col, i) => {
-    if (lowers[i] != null) {
-      parts.push(`${col} ${range.lowerOpen ? '>' : '>='} ?`);
-      params.push(toSqlValue(lowers[i]));
-    }
-    if (uppers[i] != null) {
-      parts.push(`${col} ${range.upperOpen ? '<' : '<='} ?`);
-      params.push(toSqlValue(uppers[i]));
-    }
-  });
+  if (range.lower != null) {
+    parts.push(`${column} ${range.lowerOpen ? '>' : '>='} ?`);
+    params.push(toSqlValue(range.lower));
+  }
+  if (range.upper != null) {
+    parts.push(`${column} ${range.upperOpen ? '<' : '<='} ?`);
+    params.push(toSqlValue(range.upper));
+  }
   return { clause: parts.join(' AND '), params };
+};
+
+/**
+ * WHERE fragment for a {@link DbIndexQuery}: an exact key tuple (compound
+ * index) or a scalar range (single-column index), always excluding NULL-key
+ * rows via {@link whereIndexed}.
+ */
+const whereIndexQuery = (
+  columns: SqlIndexColumn[],
+  query?: DbIndexQuery,
+): { clause: string; params: (string | number | null)[] } => {
+  const names = columns.map((c) => c.column);
+  if (Array.isArray(query)) {
+    const ex = whereExact(columns, query);
+    return { clause: andClauses(whereIndexed(names), ex.clause), params: ex.params };
+  }
+  if (query && columns.length > 1) {
+    throw new Error(
+      'SqliteOpLogAdapter: a compound index takes an exact key tuple, not a range',
+    );
+  }
+  const r = whereRange(names[0], query);
+  return { clause: andClauses(whereIndexed(names), r.clause), params: r.params };
 };
 
 const whereClause = (clause: string): string => (clause ? ` WHERE ${clause}` : '');
@@ -403,7 +409,7 @@ const sqlGetAll = async <T>(
   plan: SqlTablePlan,
   range?: DbKeyRange,
 ): Promise<T[]> => {
-  const { clause, params } = whereRange([plan.pkColumn], range);
+  const { clause, params } = whereRange(plan.pkColumn, range);
   const rows = await db.query(
     `SELECT ${plan.pkColumn} AS __pk, ${VALUE_COLUMN} FROM ${plan.table}${whereClause(clause)} ORDER BY ${plan.pkColumn} ASC`,
     params,
@@ -424,7 +430,7 @@ const sqlCount = async (
   plan: SqlTablePlan,
   range?: DbKeyRange,
 ): Promise<number> => {
-  const { clause, params } = whereRange([plan.pkColumn], range);
+  const { clause, params } = whereRange(plan.pkColumn, range);
   const rows = await db.query(
     `SELECT COUNT(*) AS n FROM ${plan.table}${whereClause(clause)}`,
     params,
@@ -476,15 +482,14 @@ const sqlGetAllFromIndex = async <T>(
   db: SqliteDb,
   plan: SqlTablePlan,
   indexName: string,
-  range?: DbKeyRange,
+  query?: DbIndexQuery,
 ): Promise<T[]> => {
   const idx = indexPlan(plan, indexName);
-  const columns = idx.columns.map((c) => c.column);
-  const { clause, params } = whereRange(columns, range);
-  const order = columns.join(', ');
+  const { clause, params } = whereIndexQuery(idx.columns, query);
+  const order = idx.columns.map((c) => c.column).join(', ');
   const rows = await db.query(
     `SELECT ${plan.pkColumn} AS __pk, ${VALUE_COLUMN} FROM ${plan.table}` +
-      `${whereClause(andClauses(whereIndexed(columns), clause))} ORDER BY ${order} ASC`,
+      `${whereClause(clause)} ORDER BY ${order} ASC`,
     params,
   );
   return rows.map((r) => decodeRow<T>(plan, r));
@@ -520,8 +525,8 @@ const sqlIterate = async <T>(
       clause = whereIndexed(orderCols);
     }
   }
-  // LIMIT pushdown (#8313): a `direction:'prev'` + `'stop'` scan such as
-  // getLastSeq() must not transfer the whole table for one row.
+  // LIMIT pushdown (#8313) so a latest-row scan never transfers the table.
+  assertIterateLimit(options.limit);
   let limitClause = '';
   if (options.limit !== undefined) {
     limitClause = ' LIMIT ?';
@@ -716,21 +721,20 @@ export class SqliteOpLogAdapter implements OpLogDbAdapter {
     return this._serialize(() => sqlGetKeyFromIndex(this._db, plan, index, key));
   }
 
-  getAllFromIndex<T>(store: string, index: string, range?: DbKeyRange): Promise<T[]> {
+  getAllFromIndex<T>(store: string, index: string, query?: DbIndexQuery): Promise<T[]> {
     const plan = this._plan(store);
-    return this._serialize(() => sqlGetAllFromIndex<T>(this._db, plan, index, range));
+    return this._serialize(() => sqlGetAllFromIndex<T>(this._db, plan, index, query));
   }
 
-  countFromIndex(store: string, index: string, range?: DbKeyRange): Promise<number> {
+  countFromIndex(store: string, index: string, query?: DbIndexQuery): Promise<number> {
     const plan = this._plan(store);
     const idx = indexPlan(plan, index);
-    const columns = idx.columns.map((c) => c.column);
     return this._serialize(async () => {
       // Built inside the slot so a contract violation rejects (like every
       // other method) rather than throwing synchronously.
-      const { clause, params } = whereRange(columns, range);
+      const { clause, params } = whereIndexQuery(idx.columns, query);
       const rows = await this._db.query(
-        `SELECT COUNT(*) AS n FROM ${plan.table}${whereClause(andClauses(whereIndexed(columns), clause))}`,
+        `SELECT COUNT(*) AS n FROM ${plan.table}${whereClause(clause)}`,
         params,
       );
       return Number(rows[0]?.['n'] ?? 0);
@@ -860,8 +864,8 @@ class SqliteOpLogTx implements OpLogTx {
     return sqlGetKeyFromIndex(this._db, this._plan(store), index, key);
   }
 
-  getAllFromIndex<T>(store: string, index: string, range?: DbKeyRange): Promise<T[]> {
-    return sqlGetAllFromIndex<T>(this._db, this._plan(store), index, range);
+  getAllFromIndex<T>(store: string, index: string, query?: DbIndexQuery): Promise<T[]> {
+    return sqlGetAllFromIndex<T>(this._db, this._plan(store), index, query);
   }
 
   iterate<T>(

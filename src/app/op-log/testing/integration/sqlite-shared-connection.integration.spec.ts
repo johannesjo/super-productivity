@@ -6,27 +6,20 @@ import { ArchiveStoreService } from '../../persistence/archive-store.service';
 import { CLIENT_ID_PROVIDER, ClientIdProvider } from '../../util/client-id.provider';
 import { OP_LOG_DB_ADAPTER_FACTORY } from '../../persistence/op-log-db-adapter.token';
 import { SqliteDb, SqliteOpLogAdapter } from '../../persistence/sqlite-op-log-adapter';
-import { IndexedDbOpLogAdapter } from '../../persistence/indexed-db-op-log-adapter';
-import { OpLogDbAdapter } from '../../persistence/op-log-db-adapter';
 import { createSqlJsDb } from '../../persistence/sql-js-db.test-helper';
-import { STORE_NAMES, OPS_INDEXES } from '../../persistence/db-keys.const';
 import { ArchiveModel } from '../../../features/archive/archive.model';
 
 /**
- * Reproductions for #8746 (SQLite adapter on a shared connection — Android
- * rollout gate) and the gaps cross-linked from it (#8312, #8313, compound-range
- * semantics). Every scenario runs against BOTH backends so a divergence shows
- * up as "passes on IndexedDB, fails on sql.js".
- *
- * Scenario 1 is the issue's headline failure and is now guarded (the adapter
- * serializes every operation on a per-connection FIFO queue). It is exercised
- * here at the STORE level — the exact B3 topology, two services holding two
- * adapters over one physical connection, with the archive writer bypassing the
- * OPERATION_LOG web lock — not just at the adapter level as in
- * `sqlite-op-log-adapter.spec.ts`.
- *
- * Scenarios 2–4 were the gaps cross-linked from the issue (#8312, #8313, and
- * compound-range semantics); all are now guarded on both backends.
+ * Store-level guards for the native SQLite topology (#8746): the op-log store
+ * and the archive store each hold their own adapter over ONE physical
+ * connection, and the archive writer does not take the OPERATION_LOG web lock.
+ * Every case runs against both backends so a divergence shows up as "passes on
+ * IndexedDB, fails on sql.js":
+ * - concurrent op-log appends and archive flushes all land, and a failing
+ *   archive transaction cannot take a concurrent append down with it;
+ * - `hasSyncedOps()` ignores rows an IndexedDB index would not contain
+ *   (NULL `syncedAt`, #8312);
+ * - `getLastSeq()` transfers one row, not the ops table (#8313, sql.js only).
  */
 
 const mockClientIdProvider: ClientIdProvider = {
@@ -61,6 +54,16 @@ const archiveModel = (taskIds: string[]): ArchiveModel =>
     lastTimeTrackingFlush: 0,
   }) as unknown as ArchiveModel;
 
+/**
+ * A payload that neither backend can persist: JSON.stringify rejects the cycle
+ * (SQLite value column) and structured clone rejects the function (IndexedDB).
+ */
+const unstorableArchive = (): ArchiveModel => {
+  const poison: Record<string, unknown> = { fn: () => undefined };
+  poison['self'] = poison;
+  return poison as unknown as ArchiveModel;
+};
+
 /** A SqliteDb that counts the rows every `query` hands back over the "bridge". */
 const withRowCounter = (db: SqliteDb): SqliteDb & { rowsReturned: number } => {
   const counting = {
@@ -78,14 +81,12 @@ const withRowCounter = (db: SqliteDb): SqliteDb & { rowsReturned: number } => {
 interface Backend {
   label: string;
   providers: () => Promise<Provider[]>;
-  /** A standalone adapter over a fresh/cleared store, for adapter-level checks. */
-  adapter: () => Promise<OpLogDbAdapter>;
-  /** Row counter for the sql.js backend; undefined on IndexedDB. */
-  counter?: () => (SqliteDb & { rowsReturned: number }) | undefined;
+  /** Row counter for the sql.js backend; absent on IndexedDB. */
+  counter?: () => SqliteDb & { rowsReturned: number };
 }
 
-const defineRepro = (backend: Backend): void => {
-  describe(`SQLite shared-connection reproductions (${backend.label})`, () => {
+const defineSharedConnectionContract = (backend: Backend): void => {
+  describe(`Op-log + archive stores over one connection (${backend.label})`, () => {
     let opLogStore: OperationLogStoreService;
     let archiveStore: ArchiveStoreService;
 
@@ -104,8 +105,6 @@ const defineRepro = (backend: Backend): void => {
       await opLogStore._clearAllDataForTesting();
       await archiveStore._clearAllDataForTesting();
     });
-
-    // ── 1. #8746 headline: op-write tx racing an archive flush ─────────────────
 
     it('op-log appends racing archive flushes on one connection all land (no lost ops)', async () => {
       // Fire everything WITHOUT awaiting in between — on a single SQLite
@@ -130,26 +129,26 @@ const defineRepro = (backend: Backend): void => {
       expect(young?.task.ids).toEqual(['y9']);
     });
 
-    it('a failing archive transaction does not roll back a concurrent op append', async () => {
-      // A cyclic archiveOld makes the SECOND tx.put throw mid-transaction on the
-      // sql.js backend (JSON.stringify rejects cycles), forcing a ROLLBACK while
-      // the append below is in flight. Structured clone accepts cycles, so on
-      // IndexedDB the save simply succeeds — either way only 'survivor' may be
-      // in the ops store afterwards.
-      const cyclic: Record<string, unknown> = {};
-      cyclic['self'] = cyclic;
+    it('a failing archive transaction rolls back alone, not a concurrent op append', async () => {
+      // The archive tx writes ARCHIVE_YOUNG, then fails on ARCHIVE_OLD → ROLLBACK
+      // while the append below is in flight on the same connection.
       const failing = archiveStore
-        .saveArchivesAtomic(archiveModel(['y']), cyclic as unknown as ArchiveModel)
-        .catch(() => 'rolled-back' as const);
+        .saveArchivesAtomic(archiveModel(['y']), unstorableArchive())
+        .then(
+          () => 'committed' as const,
+          () => 'rolled-back' as const,
+        );
       const append = opLogStore.append(makeOp('survivor'));
       const [outcome] = await Promise.all([failing, append]);
-      expect(outcome === 'rolled-back' || outcome === undefined).toBeTrue();
+
+      expect(outcome).toBe('rolled-back');
+      // The archive's own first write was rolled back with it…
+      expect(await archiveStore.loadArchiveYoung()).toBeUndefined();
+      // …and the concurrent append was not.
       expect((await opLogStore.getOpsAfterSeq(0)).map((e) => e.op.id)).toEqual([
         'survivor',
       ]);
     });
-
-    // ── 2. #8312: NULL-key rows leak into index scans ──────────────────────────
 
     it('hasSyncedOps() is false on a never-synced client with only local ops (#8312)', async () => {
       await opLogStore.append(makeOp('local-only'), 'local');
@@ -157,106 +156,36 @@ const defineRepro = (backend: Backend): void => {
       // index. SQLite stores NULL `synced_at`, which sorts first in an
       // unbounded `ORDER BY synced_at ASC` scan — the adapter must exclude it.
       expect(await opLogStore.hasSyncedOps()).toBeFalse();
-      // …and still true once a real remote op has been synced.
       await opLogStore.append(makeOp('remote-op', { clientId: 'other' }), 'remote');
       expect(await opLogStore.hasSyncedOps()).toBeTrue();
     });
 
-    // ── 3. #8313: getLastSeq() is a full-table transfer ────────────────────────
-
-    it('getLastSeq() does not transfer the whole ops table (#8313)', async () => {
-      const counter = backend.counter?.();
-      if (!counter) {
-        pending('row-transfer accounting only applies to the SQLite backend');
-        return;
-      }
-      await opLogStore.appendBatch(
-        Array.from({ length: 50 }, (_, i) => makeOp(`op-${i}`)),
-      );
-      counter.rowsReturned = 0;
-      expect(await opLogStore.getLastSeq()).toBe(50);
-      // One row is all the visitor ever looks at (`direction: 'prev'` + 'stop').
-      expect(counter.rowsReturned).toBeLessThanOrEqual(1);
-    });
-  });
-
-  // ── 4. Compound-index range semantics ────────────────────────────────────────
-
-  describe(`compound index ranges (${backend.label})`, () => {
-    let adapter: OpLogDbAdapter;
-
-    beforeEach(async () => {
-      adapter = await backend.adapter();
-      await adapter.clear(STORE_NAMES.OPS);
-    });
-
-    afterEach(() => adapter.close());
-
-    const entry = (
-      id: string,
-      source: 'local' | 'remote',
-      applicationStatus: 'pending' | 'applied',
-    ): Record<string, unknown> => ({
-      op: { id },
-      appliedAt: 1,
-      source,
-      applicationStatus,
-    });
-
-    it('degenerate (equality) compound ranges agree — the only shape the store uses today', async () => {
-      await adapter.add(STORE_NAMES.OPS, entry('lp', 'local', 'pending'));
-      await adapter.add(STORE_NAMES.OPS, entry('rp', 'remote', 'pending'));
-      await adapter.add(STORE_NAMES.OPS, entry('ra', 'remote', 'applied'));
-      const rows = await adapter.getAllFromIndex<{ op: { id: string } }>(
-        STORE_NAMES.OPS,
-        OPS_INDEXES.BY_SOURCE_AND_STATUS,
-        { lower: ['remote', 'pending'], upper: ['remote', 'pending'] },
-      );
-      expect(rows.map((r) => r.op.id)).toEqual(['rp']);
-    });
-
-    it('a genuine (non-exact) compound range is rejected on both backends', async () => {
-      await adapter.add(STORE_NAMES.OPS, entry('la', 'local', 'applied'));
-      await adapter.add(STORE_NAMES.OPS, entry('lp', 'local', 'pending'));
-      await adapter.add(STORE_NAMES.OPS, entry('ra', 'remote', 'applied'));
-      // Tuple order would include [local,pending]; per-column AND (the SQLite
-      // translation) would not. Rather than diverge silently, the port
-      // contract forbids non-exact compound ranges and both adapters enforce it.
-      await expectAsync(
-        adapter.getAllFromIndex(STORE_NAMES.OPS, OPS_INDEXES.BY_SOURCE_AND_STATUS, {
-          lower: ['local', 'applied'],
-          upper: ['remote', 'applied'],
-        }),
-      ).toBeRejectedWithError(/compound-index ranges must be exact-match/);
-    });
+    if (backend.counter) {
+      const counter = backend.counter;
+      it('getLastSeq() transfers one row, not the whole ops table (#8313)', async () => {
+        await opLogStore.appendBatch(
+          Array.from({ length: 50 }, (_, i) => makeOp(`op-${i}`)),
+        );
+        counter().rowsReturned = 0;
+        expect(await opLogStore.getLastSeq()).toBe(50);
+        expect(counter().rowsReturned).toBe(1);
+      });
+    }
   });
 };
 
-defineRepro({
-  label: 'IndexedDB',
-  providers: async () => [],
-  adapter: async () => {
-    const a = new IndexedDbOpLogAdapter();
-    await a.init();
-    return a;
-  },
-});
+defineSharedConnectionContract({ label: 'IndexedDB', providers: async () => [] });
 
-let sqlCounter: (SqliteDb & { rowsReturned: number }) | undefined;
-defineRepro({
+let sqlCounter: SqliteDb & { rowsReturned: number };
+defineSharedConnectionContract({
   label: 'sql.js (real SQLite)',
   providers: async () => {
-    // ONE physical connection, TWO adapters (one per service) — the B3 topology.
+    // ONE physical connection, TWO adapters (one per service) — the native topology.
     sqlCounter = withRowCounter(await createSqlJsDb());
     const db = sqlCounter;
     return [
       { provide: OP_LOG_DB_ADAPTER_FACTORY, useValue: () => new SqliteOpLogAdapter(db) },
     ];
-  },
-  adapter: async () => {
-    const a = new SqliteOpLogAdapter(await createSqlJsDb());
-    await a.init();
-    return a;
   },
   counter: () => sqlCounter,
 });

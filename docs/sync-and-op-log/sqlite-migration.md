@@ -46,12 +46,14 @@ reduce the blast radius but do not replace durable app-private storage.
   op-log appends against lock-free archive flushes over one connection — is
   covered on both backends by
   `src/app/op-log/testing/integration/sqlite-shared-connection.integration.spec.ts`.
-- Index-scan parity with IndexedDB: rows whose index column is NULL (a local op
-  in `bySyncedAt` / `bySourceAndStatus`) are excluded from every index read
-  (#8312), compound-index ranges must be exact-match and both backends reject
-  anything else (`assertExactCompoundRange`), and `DbIterateOptions.limit`
-  pushes "first / latest row" scans down to `LIMIT ?` so `getLastSeq()` never
-  transfers the whole ops table (#8313).
+- Index reads exclude rows whose index column is NULL (a local op in
+  `bySyncedAt` / `bySourceAndStatus`), matching IndexedDB, which does not index
+  a record lacking the keyPath value (#8312).
+- Ranges are scalar-only; a compound index is queried by an exact key tuple
+  (`DbIndexQuery`). A genuine compound range has no meaning both backends
+  agree on, so the port cannot express one.
+- `DbIterateOptions.limit` pushes "first / latest row" scans down to `LIMIT ?`
+  so `getLastSeq()` never transfers the whole ops table (#8313).
 - `migrateOpLogBackend()` copies all op-log stores into an empty destination
   transaction and verifies operation count, last sequence, and vector clock
   before commit. It is validated in CI for real IndexedDB to `sql.js`.
@@ -130,10 +132,9 @@ Complete these in order:
 2. Validate insert IDs, transaction/error mapping, app pause/resume, abrupt
    termination, and representative bulk writes on Android and iOS.
 3. Provide the two persistence services separate adapters over the same
-   physical connection.
-   Before this step, parameterize the composed integration specs that exercise
-   multi-store transactions (`multi-entity-atomicity`, `race-conditions`,
-   `clean-slate-interrupt`) to dual-run against `SqliteOpLogAdapter`, as
+   physical connection, after dual-running the store-level integration specs
+   that compose multi-store transactions (`race-conditions`,
+   `clean-slate-interrupt`) against `SqliteOpLogAdapter`, as
    `remote-apply-store-port` and `sqlite-shared-connection` already do.
 4. Add the native-only, default-off provider selection.
 5. Wire startup detection, quiescence, `migrateOpLogBackend()`, the completion

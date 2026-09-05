@@ -373,7 +373,7 @@ const defineBehavioralContract = (
       const pending = await adapter.getAllFromIndex<{ op: { id: string } }>(
         STORE_NAMES.OPS,
         OPS_INDEXES.BY_SOURCE_AND_STATUS,
-        { lower: ['remote', 'pending'], upper: ['remote', 'pending'] },
+        ['remote', 'pending'],
       );
       expect(pending.map((r) => r.op.id).sort()).toEqual(['p1', 'p2']);
     });
@@ -388,10 +388,10 @@ const defineBehavioralContract = (
       expect(await adapter.count(STORE_NAMES.OPS)).toBe(3);
       expect(await adapter.count(STORE_NAMES.OPS, { lower: s2 })).toBe(2);
       expect(
-        await adapter.countFromIndex(STORE_NAMES.OPS, OPS_INDEXES.BY_SOURCE_AND_STATUS, {
-          lower: ['remote', 'pending'],
-          upper: ['remote', 'pending'],
-        }),
+        await adapter.countFromIndex(STORE_NAMES.OPS, OPS_INDEXES.BY_SOURCE_AND_STATUS, [
+          'remote',
+          'pending',
+        ]),
       ).toBe(2);
     });
 
@@ -638,21 +638,27 @@ const defineBehavioralContract = (
       ).toBe(1);
     });
 
-    it('rejects a non-exact compound-index range (port contract)', async () => {
+    it('rejects a compound-index query that is not a full-arity key tuple', async () => {
       await adapter.add(STORE_NAMES.OPS, makeOpEntry('a', 'remote', 'pending'));
+      // Prefix tuple: per-column translation would silently match every
+      // remote row where IndexedDB matches nothing.
       await expectAsync(
-        adapter.getAllFromIndex(STORE_NAMES.OPS, OPS_INDEXES.BY_SOURCE_AND_STATUS, {
-          lower: ['local', 'applied'],
-          upper: ['remote', 'applied'],
-        }),
-      ).toBeRejectedWithError(/compound-index ranges must be exact-match/);
+        adapter.getAllFromIndex(STORE_NAMES.OPS, OPS_INDEXES.BY_SOURCE_AND_STATUS, [
+          'remote',
+        ]),
+      ).toBeRejectedWithError(/arity 1 does not match index arity 2/);
+      // A range over a compound index has no engine-agnostic meaning.
       await expectAsync(
         adapter.countFromIndex(STORE_NAMES.OPS, OPS_INDEXES.BY_SOURCE_AND_STATUS, {
-          lower: ['remote', 'pending'],
-          upper: ['remote', 'pending'],
-          upperOpen: true,
+          lower: 'local',
         }),
-      ).toBeRejectedWithError(/compound-index ranges must be exact-match/);
+      ).toBeRejectedWithError(/takes an exact key tuple, not a range/);
+    });
+
+    it('rejects a non-positive iterate limit', async () => {
+      await expectAsync(
+        adapter.iterate(STORE_NAMES.OPS, { limit: 0, mode: 'readonly' }, () => 'stop'),
+      ).toBeRejectedWithError(/limit must be a positive integer/);
     });
 
     it('iterate honors `limit` (visits at most N entries, in the requested direction)', async () => {
