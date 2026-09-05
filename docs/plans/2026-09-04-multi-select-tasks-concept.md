@@ -224,6 +224,8 @@ Dragging a task that is part of the selection drags the whole selection: the CDK
 
 _Phase 1 as implemented (2026-09-05):_ everything above except the multi-task estimate dialog (the menu offers the quick estimate values instead), and "disabled with a tooltip" for inapplicable actions (they are hidden, or answer with a "nothing to change" snack). Shipped early from Phase 2: Ctrl+Shift+click add-range. Deviations from §6 forced by rule 10: a subtask whose parent survives is deleted through the singular `deleteTask` (older clients' `deleteTasks` reducer would leave a dangling `subTaskIds` entry and fail post-sync validation), and a single selected task takes the normal single-task delete path with its setting and undo. The feedback-suppression flag lives on `TaskMultiSelectService`, not on the bulk service, so effects only depend on the small service.
 
+_Phase 1b and the keyboard items of Phase 2 were implemented on 2026-09-05 (stacked branch): touch selection mode via the context menu, selection rings, gesture gating, FAB hiding, Android back step, `X` (`taskToggleSelect`) and Ctrl/Cmd+A. "Select tasks…" in the view menu and drag over rings are still open._
+
 **Phase 1b — touch**
 
 - "Select…" in the task context menu, selection rings, gesture gating (§4.3), FAB hiding, Android back step. #5685 asked for Android explicitly, so this follows Phase 1 directly rather than waiting for Phase 3.
