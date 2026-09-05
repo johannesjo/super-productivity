@@ -122,6 +122,42 @@ Center.
   App Review. See [the TestFlight plan](plans/2026-07-14-ios-testflight-master-builds.md)
   for proposed additional branch behavior; it is not current behavior.
 
+## Reproducible Android builds
+
+The Angular service-worker builder emits `ngsw.json` (stamped with `Date.now()`,
+plus a `hashTable` of per-file content hashes) and its worker scripts, and
+`npx cap sync` copies them into the APK at `assets/public/`. That made the
+Android build unverifiable against
+[F-Droid's reproducible-build checks](https://verification.f-droid.org/) (#4155).
+
+None of it is used on Android. `src/main.ts` gates both service-worker
+registration paths on `!IS_NATIVE_PLATFORM && !IS_ELECTRON` and actively
+_unregisters_ any existing worker on those platforms, so the files are dead
+weight. `sync:android` therefore deletes them after `cap sync`, via
+`tools/strip-native-service-worker.js`. That retires the whole class of
+difference rather than pinning the timestamp field of it, and drops the bytes
+from the APK.
+
+The hook point matters: F-Droid's recipe runs `buildFrontend:prodWeb` and
+`sync:android` directly and never invokes `dist:android:prod`, so a step added
+to the latter would not reach their build.
+
+Finding no files to delete warns rather than failing. Breaking the Android build
+over a cleanup would be the worse trade, and the failure is self-correcting — if
+the asset layout moves, the files come back, verification notices, and the path
+gets fixed.
+
+Two things this deliberately does not do:
+
+- **The web PWA and iOS are untouched.** The web app genuinely uses the service
+  worker, and while the iOS bundle carries the same dead files, iOS is not a
+  reproducibility target and changing App Store bundle contents is a separate
+  call.
+- **It does not prove the APK reproduces.** Sourcemaps (`sourceMap: true` on
+  `productionWeb`) are also copied into `assets/public/`, and the Gradle layer is
+  untouched. Confirming byte-identity needs a diffoscope run against an F-Droid
+  build; this removes one known blocker, not necessarily the last.
+
 ## Credentials and signing
 
 Never put secret values in documentation. The workflow reference is authoritative
