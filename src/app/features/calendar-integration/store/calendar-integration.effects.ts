@@ -197,7 +197,6 @@ export class CalendarIntegrationEffects {
             ),
           );
         }),
-        tap(() => Log.log('Calendar poll complete')),
       ),
     { dispatch: false },
   );

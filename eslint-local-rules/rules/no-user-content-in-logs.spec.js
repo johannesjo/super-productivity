@@ -45,6 +45,10 @@ ruleTester.run('no-user-content-in-logs', rule, {
     // Non-payload methods on the logger are untouched.
     { code: `Log.setContext(ctx);` },
     { code: `Log.setLevel(level);` },
+    // Explicit fields at any depth stay fine.
+    { code: `Log.log({ ctx: { taskId: t.id, count: xs.length } });` },
+    { code: `Log.log('x', [a.id, b.id]);` },
+    { code: `Log.log('x', hasData ? 'y' : 'n');` },
     // Not a logger.
     { code: `analytics.log(task);` },
     { code: `console.log(task);` },
@@ -55,58 +59,103 @@ ruleTester.run('no-user-content-in-logs', rule, {
     {
       code: `Log.log('addEvToShow', curVal, calEv);`,
       errors: [
-        { messageId: 'bareIdentifier', data: { name: 'curVal' } },
-        { messageId: 'bareIdentifier', data: { name: 'calEv' } },
+        { messageId: 'bareValue', data: { name: 'curVal' } },
+        { messageId: 'bareValue', data: { name: 'calEv' } },
       ],
     },
     // Shorthand hands over whole entities.
     {
       code: `Log.log({ taskForEvent, allEvsToShow });`,
       errors: [
-        { messageId: 'shorthandProperty', data: { name: 'taskForEvent' } },
-        { messageId: 'shorthandProperty', data: { name: 'allEvsToShow' } },
+        { messageId: 'bareValue', data: { name: 'taskForEvent' } },
+        { messageId: 'bareValue', data: { name: 'allEvsToShow' } },
       ],
     },
     {
       code: `TaskLog.log({ reminderCfg, nonArchiveInstancesWithSubTasks, archiveInstances });`,
       errors: [
-        { messageId: 'shorthandProperty' },
-        { messageId: 'shorthandProperty' },
-        { messageId: 'shorthandProperty' },
+        { messageId: 'bareValue' },
+        { messageId: 'bareValue' },
+        { messageId: 'bareValue' },
       ],
     },
     // A bare arg that is not obviously an id/count (#9112).
     {
       code: `Log.log('Updated reminders in worker', reminders);`,
-      errors: [{ messageId: 'bareIdentifier', data: { name: 'reminders' } }],
+      errors: [{ messageId: 'bareValue', data: { name: 'reminders' } }],
     },
     {
       code: `Log.log('Error INFO Today:', arg);`,
-      errors: [{ messageId: 'bareIdentifier', data: { name: 'arg' } }],
+      errors: [{ messageId: 'bareValue', data: { name: 'arg' } }],
     },
     // A bare first argument is a payload too.
     {
       code: `TaskLog.log(taskTitleEditEl);`,
-      errors: [{ messageId: 'bareIdentifier', data: { name: 'taskTitleEditEl' } }],
+      errors: [{ messageId: 'bareValue', data: { name: 'taskTitleEditEl' } }],
     },
     // Spreading is opaque — every own property lands in the export.
     {
       code: `Log.log('ctx', { ...task });`,
-      errors: [{ messageId: 'spreadProperty', data: { name: 'task' } }],
+      errors: [{ messageId: 'spreadValue', data: { name: 'task' } }],
     },
     // Mixed: the explicit half is fine, the shorthand half is not.
     {
       code: `Log.log({ taskId: task.id, calEv });`,
-      errors: [{ messageId: 'shorthandProperty', data: { name: 'calEv' } }],
+      errors: [{ messageId: 'bareValue', data: { name: 'calEv' } }],
+    },
+    // Longhand must not be an escape hatch: `object-shorthand` is not enforced,
+    // so `: calEv` would otherwise be a shorter fix than naming the field.
+    {
+      code: `Log.log({ calEv: calEv });`,
+      errors: [{ messageId: 'bareValue', data: { name: 'calEv' } }],
+    },
+    // Nesting must not smuggle a whole value past the check.
+    {
+      code: `Log.log({ ctx: { task } });`,
+      errors: [{ messageId: 'bareValue', data: { name: 'task' } }],
+    },
+    {
+      code: `Log.log('x', [task]);`,
+      errors: [{ messageId: 'bareValue', data: { name: 'task' } }],
+    },
+    // A spread argument is a payload too — opaque, so reported as a spread.
+    {
+      code: `Log.log('x', ...[task]);`,
+      errors: [{ messageId: 'spreadValue' }],
+    },
+    {
+      code: `Log.log('x', ...rest);`,
+      errors: [{ messageId: 'spreadValue', data: { name: 'rest' } }],
+    },
+    // Names that a lowercase-tail regex would have wrongly allowed.
+    {
+      code: `Log.log('reducer', state);`,
+      errors: [{ messageId: 'bareValue', data: { name: 'state' } }],
+    },
+    {
+      code: `Log.log('cfg', apiKey);`,
+      errors: [{ messageId: 'bareValue', data: { name: 'apiKey' } }],
+    },
+    {
+      code: `Log.log('req', { params });`,
+      errors: [{ messageId: 'bareValue', data: { name: 'params' } }],
+    },
+    {
+      code: `Log.log('acct', account);`,
+      errors: [{ messageId: 'bareValue', data: { name: 'account' } }],
+    },
+    {
+      code: `Log.log('dnd', doNotDisturbList);`,
+      errors: [{ messageId: 'bareValue', data: { name: 'doNotDisturbList' } }],
     },
     // Every context logger is covered, not just `Log`.
     {
       code: `PluginLog.warn('plugin cfg', cfg);`,
-      errors: [{ messageId: 'bareIdentifier', data: { name: 'cfg' } }],
+      errors: [{ messageId: 'bareValue', data: { name: 'cfg' } }],
     },
     {
       code: `IssueLog.log('issue', issue);`,
-      errors: [{ messageId: 'bareIdentifier', data: { name: 'issue' } }],
+      errors: [{ messageId: 'bareValue', data: { name: 'issue' } }],
     },
   ],
 });

@@ -138,8 +138,11 @@ export class TagEffects {
         tap(({ allTasks, nullTasks, activeId }) =>
           Log.log('Error INFO Today:', {
             activeId,
-            taskCount: allTasks.length,
             nullTaskCount: nullTasks.length,
+            // Ids (null for the corrupt entries) rather than a bare count, so a
+            // bug report still shows WHICH positions are being offered for
+            // deletion. Ids carry no user content.
+            taskIds: allTasks.map((t) => t?.id ?? null),
           }),
         ),
         tap(({ activeId, allTasks }) => {

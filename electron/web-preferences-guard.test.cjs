@@ -178,3 +178,49 @@ test('every renderer-window constructor site has a matching assertSecureWebPrefe
       'webPreferences through assertSecureWebPreferences() before creating the window.',
   );
 });
+
+// The runtime assertion is fail-closed, but the two lazily-created windows
+// (full-screen blocker, task widget) are built inside an IPC handler and an
+// async function, where a throw becomes an uncaught exception / unhandled
+// rejection and start-app.ts exits the process. Killing the app is a
+// disproportionate response to a privacy flag whose worst case is one
+// dictionary download, so catch an omission HERE, statically, in CI —
+// before it can ever reach that runtime path.
+test('every webPreferences literal in electron/ sets spellcheck: false', () => {
+  const electronDir = __dirname;
+  const tsFiles = [];
+  const walk = (dir) => {
+    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) {
+        if (entry.name === 'node_modules') continue;
+        walk(full);
+      } else if (entry.name.endsWith('.ts') && !entry.name.endsWith('.d.ts')) {
+        tsFiles.push(full);
+      }
+    }
+  };
+  walk(electronDir);
+
+  // A file that declares a webPreferences object must also pin spellcheck in
+  // it. Deliberately coarse (same spirit as the wiring guard above): it cannot
+  // parse, so it asserts co-occurrence per file, which is enough to catch the
+  // realistic regression — a new window, or a dropped line during a refactor.
+  const DECLARES_WEB_PREFS_RE =
+    /webPreferences\s*:\s*(?:BrowserWindowConstructorOptions|\{)/;
+  const offenders = tsFiles
+    .filter((file) => {
+      const src = fs.readFileSync(file, 'utf8');
+      if (!DECLARES_WEB_PREFS_RE.test(src)) return false;
+      return !/spellcheck\s*:\s*false/.test(src);
+    })
+    .map((file) => path.relative(electronDir, file));
+
+  assert.deepEqual(
+    offenders,
+    [],
+    'These files declare webPreferences without `spellcheck: false`. Chromium ' +
+      'downloads spellcheck dictionaries from Google, which breaks the ' +
+      "app's zero-data-collection promise (#5314). Set it explicitly.",
+  );
+});

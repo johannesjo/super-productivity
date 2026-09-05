@@ -53,10 +53,13 @@ export const assertSecureWebPreferences = (
   // is defined once — mirroring the `throw fail(...)` shape of the sibling guard
   // `file-path-guard.ts` (that one also hardens the error for the renderer; here the
   // error only ever surfaces in the main process, so it needs no such hardening).
-  const fail = (detail: string): Error =>
+  const fail = (
+    detail: string,
+    why = 'This would collapse the renderer IPC trust boundary',
+  ): Error =>
     new Error(
       `Insecure webPreferences for the "${windowLabel}" window: ${detail}. ` +
-        'This would collapse the renderer IPC trust boundary — refusing to create the window.',
+        `${why} — refusing to create the window.`,
     );
 
   if (!webPreferences) {
@@ -96,10 +99,9 @@ export const assertSecureWebPreferences = (
   // Privacy rather than security, so it does not use `fail()`: enabling the
   // spellchecker makes the app contact Google for dictionaries (#5314).
   if (webPreferences.spellcheck !== false) {
-    throw new Error(
-      `Insecure webPreferences for the "${windowLabel}" window: spellcheck must be ` +
-        `explicitly false (got ${String(webPreferences.spellcheck)}). Chromium's ` +
-        'spellchecker downloads dictionaries from Google — refusing to create the window.',
+    throw fail(
+      `spellcheck must be explicitly false (got ${String(webPreferences.spellcheck)})`,
+      "Chromium's spellchecker downloads dictionaries from Google",
     );
   }
   // webSecurity is the same-origin policy rather than a node capability, but with the
