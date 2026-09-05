@@ -34,3 +34,18 @@ export const getUnknownOpVocabulary = (
 
 const isPresentUnknown = (value: unknown, known: ReadonlySet<string>): boolean =>
   typeof value === 'string' && !known.has(value);
+
+/**
+ * The prefix of a remote batch this client can actually process this cycle:
+ * everything before the first op with unknown vocabulary. `processRemoteOps`
+ * blocks at that op, so pre-processing steps (e.g. the full-state conflict
+ * gate) must not act on — or prompt the user about — anything after it.
+ */
+export const takeInterpretableOpPrefix = <
+  T extends Pick<Operation, 'opType' | 'syncImportReason'>,
+>(
+  ops: readonly T[],
+): T[] => {
+  const blockedIndex = ops.findIndex((op) => getUnknownOpVocabulary(op) !== null);
+  return blockedIndex === -1 ? [...ops] : ops.slice(0, blockedIndex);
+};

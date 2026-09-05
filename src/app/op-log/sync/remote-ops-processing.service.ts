@@ -32,7 +32,7 @@ import { SyncImportFilterService } from './sync-import-filter.service';
 import { OperationWriteFlushService } from './operation-write-flush.service';
 import { processDeferredActionsAfterRemoteApply } from './process-deferred-actions-flush.util';
 import { IncompleteRemoteOperationsError } from '../core/errors/sync-errors';
-import { getUnknownOpVocabulary } from './is-known-op-vocabulary.util';
+import { getUnknownOpVocabulary } from './get-unknown-op-vocabulary.util';
 import { selectSyncConfig } from '../../features/config/store/global-config.reducer';
 import {
   applyLocalOnlySyncSettingsToAppData,
@@ -40,6 +40,17 @@ import {
 } from '../../features/config/local-only-sync-settings.util';
 import { HydrationStateService } from '../apply/hydration-state.service';
 import { SyncProviderManager } from '../sync-providers/provider-manager.service';
+
+/**
+ * Why a remote batch stopped at an op it cannot terminally process. Every
+ * reason freezes the server cursor at the blocked op (see processRemoteOps).
+ */
+type RemoteOpBlockReason =
+  | 'VERSION_UNSUPPORTED'
+  | 'VERSION_TOO_NEW'
+  | 'UNKNOWN_OP_VOCABULARY'
+  | 'INVALID_SCHEMA_VERSION'
+  | 'MIGRATION_FAILED';
 
 /**
  * Handles the core pipeline for processing remote operations.
@@ -54,17 +65,6 @@ import { SyncProviderManager } from '../sync-providers/provider-manager.service'
  * This service is used by OperationLogSyncService after downloading
  * remote operations or receiving piggybacked operations from upload.
  */
-/**
- * Why a remote batch stopped at an op it cannot terminally process. Every
- * reason freezes the server cursor at the blocked op (see processRemoteOps).
- */
-type RemoteOpBlockReason =
-  | 'VERSION_UNSUPPORTED'
-  | 'VERSION_TOO_NEW'
-  | 'UNKNOWN_OP_VOCABULARY'
-  | 'INVALID_SCHEMA_VERSION'
-  | 'MIGRATION_FAILED';
-
 @Injectable({
   providedIn: 'root',
 })

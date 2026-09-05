@@ -7,7 +7,6 @@ import {
   SuperSyncRestoreSnapshotResponseSchema,
   SuperSyncSnapshotUploadResponseSchema,
   SuperSyncUploadOpsResponseSchema,
-  SUPER_SYNC_SNAPSHOT_OP_TYPES,
 } from '@sp/shared-schema';
 import type {
   SuperSyncDeviceListResponse,
@@ -21,7 +20,6 @@ import {
   RestoreSnapshotResponse,
 } from '../provider.interface';
 import { InvalidDataSPError } from '../../core/errors/sync-errors';
-import { OpLog } from '../../../core/log';
 
 type ValidationIssue = {
   path: readonly PropertyKey[];
@@ -42,10 +40,6 @@ type ParsedSuperSyncOpDownloadResponse = Omit<
 > & {
   snapshotState?: unknown;
 };
-
-const KNOWN_RESTORE_POINT_TYPES: ReadonlySet<string> = new Set<string>(
-  SUPER_SYNC_SNAPSHOT_OP_TYPES,
-);
 
 const formatIssuePath = (path: readonly PropertyKey[]): string =>
   path.length > 0 ? `.${path.map((segment) => String(segment)).join('.')}` : '';
@@ -115,26 +109,18 @@ export const validateSnapshotUploadResponse = (data: unknown): SnapshotUploadRes
 /**
  * Validates RestorePointsResponse from server.
  * Throws InvalidDataSPError if the response structure is invalid.
+ *
+ * `type` is a loose string on the wire (#8764): a restore point of a kind this
+ * client does not know is kept — the dialog renders unknown types with a
+ * generic icon/label and restoring works by serverSeq — so a newer client's
+ * snapshot never hides the list, and never fails it.
  */
-export const validateRestorePointsResponse = (data: unknown): RestorePointsResponse => {
-  const response = parseResponse(
+export const validateRestorePointsResponse = (data: unknown): RestorePointsResponse =>
+  parseResponse(
     SuperSyncRestorePointsResponseSchema,
     data,
     'RestorePointsResponse',
-  );
-  // `type` is a loose string on the wire (#8764). A restore point of a kind
-  // this client does not know is dropped from the list rather than failing
-  // the whole response; restoring works by serverSeq, so nothing else needs it.
-  const restorePoints = response.restorePoints.filter((restorePoint) =>
-    KNOWN_RESTORE_POINT_TYPES.has(restorePoint.type),
-  );
-  if (restorePoints.length !== response.restorePoints.length) {
-    OpLog.warn(
-      `RestorePointsResponse: dropped ${response.restorePoints.length - restorePoints.length} restore point(s) of an unknown type`,
-    );
-  }
-  return { ...response, restorePoints } as RestorePointsResponse;
-};
+  ) as RestorePointsResponse;
 
 /**
  * Validates RestoreSnapshotResponse from server.

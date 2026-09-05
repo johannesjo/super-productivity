@@ -285,21 +285,15 @@ describe('response-validators', () => {
       expect(() => validateRestorePointsResponse(response)).not.toThrow();
     });
 
-    it('should drop restore points of an unknown type instead of failing the list (#8764)', () => {
-      const known = {
-        serverSeq: 100,
-        timestamp: 1,
-        type: 'SYNC_IMPORT',
-        clientId: 'client-1',
-      };
+    it('should keep restore points of an unknown type instead of failing the list (#8764)', () => {
       const validated = validateRestorePointsResponse({
         restorePoints: [
-          known,
+          { serverSeq: 100, timestamp: 1, type: 'SYNC_IMPORT', clientId: 'client-1' },
           { serverSeq: 200, timestamp: 2, type: 'FUTURE_SNAPSHOT', clientId: 'client-1' },
         ],
       });
 
-      expect(validated.restorePoints).toEqual([jasmine.objectContaining(known)]);
+      expect(validated.restorePoints.map((point) => point.serverSeq)).toEqual([100, 200]);
     });
 
     it('should throw if not an object', () => {

@@ -661,7 +661,8 @@ Therefore:
 `opType`, `syncImportReason`, and restore-point `type` are strict enums only on
 the REQUEST side of the SuperSync contract, where the server validates per op.
 On the RESPONSE side they are loose strings, and the receiver decides per op
-(`getUnknownOpVocabulary` in `remote-ops-processing.service.ts`): an unknown
+(`get-unknown-op-vocabulary.util.ts`, called from `remote-ops-processing.service.ts`
+and the USE_REMOTE preflight): an unknown
 value blocks the batch at that op exactly like `VERSION_TOO_NEW` — prefix
 applied, cursor frozen, "update your app" snack — never a skip, which would
 advance the cursor past data the client never understood. Before this the
@@ -671,7 +672,9 @@ not-yet-updated device (#8764). Two consequences:
 - Adding a value to one of these unions does not require a schema bump; per
   rule 0 above, don't add one for it.
 - Clients released before this receiver change still wedge on any widening,
-  so a widening must wait for a release-lag window after it shipped.
+  so a widening must wait for a release-lag window after it shipped. The
+  window covers servers too: `validation.service.ts` rejects unknown op types
+  on upload, so self-hosted servers must carry the new value first.
 
 A type-level assertion in `super-sync.ts` keeps the sync-core `OpType` enum
 and `SUPER_SYNC_OP_TYPES` identical, so a value added to one side fails the
