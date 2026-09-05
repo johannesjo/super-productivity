@@ -402,6 +402,94 @@ describe('OperationLogDownloadService', () => {
         );
       });
 
+      /**
+       * Reproduction spec for the #9256 recovery dead-end. DOCUMENTS CURRENT
+       * BEHAVIOUR — this passes on master.
+       *
+       * The reporter's log shows ~61 pages (≈30,500 operations) decrypting with
+       * the entered password and only the final page failing. Every op the run
+       * already decrypted is accumulated in `allNewOps`, but the throw unwinds
+       * `downloadRemoteOps` entirely, so the caller receives nothing: the whole
+       * history is discarded because of the newest page. `passwordEvidence:
+       * 'confirmed-for-some-operations'` is recorded in the log at the same
+       * moment, so the run KNOWS the key is right and the failure is localised.
+       *
+       * The user-visible consequence is that the only remaining offer is the
+       * Decryption Failed dialog, whose non-retry option force-uploads the local
+       * (here: empty) state over the server copy — see the FORCE_UPLOAD specs in
+       * server-migration.service.spec.ts.
+       */
+      it('#9256: discards every op decrypted from earlier pages when the last page fails', async () => {
+        spyOn(OpLog, 'error');
+        const makeEncryptedServerOp = (
+          serverSeq: number,
+          id: string,
+        ): { serverSeq: number; receivedAt: number; op: SyncOperation } => ({
+          serverSeq,
+          receivedAt: Date.now(),
+          op: {
+            id,
+            clientId: 'c1',
+            actionType: '[Task] Add' as ActionType,
+            opType: OpType.Create,
+            entityType: 'TASK',
+            payload: `ciphertext-${id}`,
+            isPayloadEncrypted: true,
+            vectorClock: {},
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          },
+        });
+        mockApiProvider.getEncryptKey = jasmine
+          .createSpy('getEncryptKey')
+          .and.returnValue(Promise.resolve('private-encryption-key'));
+        mockApiProvider.getLastServerSeq.and.returnValue(Promise.resolve(0));
+        mockApiProvider.downloadOps.and.returnValues(
+          Promise.resolve({
+            ops: [
+              makeEncryptedServerOp(1, 'op-good-1'),
+              makeEncryptedServerOp(2, 'op-good-2'),
+              makeEncryptedServerOp(3, 'op-good-3'),
+            ],
+            hasMore: true,
+            latestSeq: 4,
+          }),
+          Promise.resolve({
+            ops: [makeEncryptedServerOp(4, 'op-undecryptable')],
+            hasMore: false,
+            latestSeq: 4,
+          }),
+        );
+        const decryptedIds: string[] = [];
+        mockEncryptionService.decryptOperations.and.callFake(async (ops) => {
+          if (ops.some((op) => op.id === 'op-undecryptable')) {
+            throw new OperationDecryptionError({
+              encryptedOperationCount: 1,
+              decryptedCount: 0,
+              parsedCount: 0,
+              passwordEvidence: 'no-operation-decrypted',
+              failures: [
+                {
+                  operationId: 'op-undecryptable',
+                  encryptedBatchIndex: 0,
+                  stage: 'decrypt',
+                },
+              ],
+            });
+          }
+          decryptedIds.push(...ops.map((op) => op.id));
+          return ops.map((op) => ({ ...op, payload: {}, isPayloadEncrypted: false }));
+        });
+
+        await expectAsync(service.downloadRemoteOps(mockApiProvider)).toBeRejected();
+
+        // The run proved the password works for these three ops...
+        expect(decryptedIds).toEqual(['op-good-1', 'op-good-2', 'op-good-3']);
+        // ...and still returns none of them to the caller. There is no partial
+        // result and no cursor at the last good page: nothing is recoverable.
+        expect(mockApiProvider.setLastServerSeq).not.toHaveBeenCalled();
+      });
+
       it('resets the earlier-batches evidence on gap reset because the key may change', async () => {
         const errorSpy = spyOn(OpLog, 'error');
         const makeEncryptedServerOp = (

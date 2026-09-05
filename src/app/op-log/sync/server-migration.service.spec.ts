@@ -24,6 +24,8 @@ import { LockService } from './lock.service';
 import { OperationWriteFlushService } from './operation-write-flush.service';
 import { LOCK_NAMES } from '../core/operation-log.const';
 import { OperationCaptureService } from '../capture/operation-capture.service';
+import { MODEL_CONFIGS } from '../model/model-config';
+import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
 
 describe('ServerMigrationService', () => {
   let service: ServerMigrationService;
@@ -825,5 +827,96 @@ describe('ServerMigrationService', () => {
     // Note: Test for non-operation-sync-capable providers removed.
     // The check for operation-sync capability is now done at a higher level
     // (sync.service.ts), so handleServerMigration expects OperationSyncCapable.
+  });
+  /**
+   * Reproduction specs for the #9256 dead-end (and the #7562 "phone overwrites
+   * laptop" symptom). DOCUMENTS CURRENT BEHAVIOUR — these pass on master.
+   *
+   * `handleServerMigration` gates the full-state SYNC_IMPORT on
+   * `hasServerMigrationStateData`, documented as "Skip if local state is
+   * effectively empty". That predicate is `hasMeaningfulStateData` (task /
+   * non-INBOX project / non-system tag / note) OR "any other MODEL_CONFIGS key
+   * differs from its default". The second arm makes `globalConfig` alone
+   * satisfy it — and configuring a sync provider is itself a `globalConfig`
+   * mutation, so the guard is already defeated before the first sync of a
+   * fresh install.
+   *
+   * That is harmless for SERVER_MIGRATION (the server is empty by definition,
+   * so a near-empty import loses nothing) but not for FORCE_UPLOAD, which
+   * passes `skipServerEmptyCheck: true` precisely because the server holds
+   * data that this SYNC_IMPORT will replace. FORCE_UPLOAD is what the
+   * "Overwrite Server & Other Devices" button in the Decryption Failed dialog
+   * (`DialogHandleDecryptErrorComponent.updatePWAndForceUpload`) invokes — the
+   * one dialog a #9256 user is left staring at on a fresh install with no data
+   * of their own.
+   */
+  describe('#9256/#7562 reproduction: FORCE_UPLOAD from a data-less client', () => {
+    /**
+     * A fresh install that has done nothing but configure SuperSync: every
+     * model at its shipped default, except `globalConfig`, which cannot still
+     * be at its default once a provider is selected.
+     */
+    const createFreshInstallSnapshot = (): Record<string, unknown> => {
+      const state: Record<string, unknown> = {};
+      for (const [key, config] of Object.entries(MODEL_CONFIGS)) {
+        state[key] = config.defaultData;
+      }
+      state.globalConfig = {
+        ...DEFAULT_GLOBAL_CONFIG,
+        sync: { ...DEFAULT_GLOBAL_CONFIG.sync, syncProvider: 'SuperSync' },
+      };
+      return state;
+    };
+
+    const forceUpload = (): Promise<string | undefined> =>
+      service.handleServerMigration(defaultProvider, {
+        skipServerEmptyCheck: true,
+        syncImportReason: 'FORCE_UPLOAD',
+      });
+
+    it('creates a SYNC_IMPORT although the client holds no user data', async () => {
+      stateSnapshotServiceSpy.getStateSnapshotAsync.and.resolveTo(
+        createFreshInstallSnapshot() as any,
+      );
+
+      await forceUpload();
+
+      // The "effectively empty" guard does not fire.
+      expect(opLogStoreSpy.append).toHaveBeenCalled();
+      const appendedOp = opLogStoreSpy.append.calls.mostRecent().args[0];
+      expect(appendedOp.opType).toBe(OpType.SyncImport);
+      expect(appendedOp.syncImportReason).toBe('FORCE_UPLOAD');
+    });
+
+    it('uploads a payload with no tasks, projects, tags or notes', async () => {
+      stateSnapshotServiceSpy.getStateSnapshotAsync.and.resolveTo(
+        createFreshInstallSnapshot() as any,
+      );
+
+      await forceUpload();
+
+      const payload = opLogStoreSpy.append.calls.mostRecent().args[0].payload as Record<
+        string,
+        { ids: string[] }
+      >;
+      expect(payload.task.ids).toEqual([]);
+      expect(payload.note.ids).toEqual([]);
+      // Only the INBOX project and the built-in system tags — i.e. exactly what
+      // `hasMeaningfulStateData` classifies as "no user data".
+      expect(payload.project.ids.filter((id) => id !== INBOX_PROJECT.id)).toEqual([]);
+      expect(payload.tag.ids.filter((id) => !SYSTEM_TAG_IDS.has(id))).toEqual([]);
+    });
+
+    it('isolates globalConfig as the reason the guard passes', async () => {
+      const snapshot = createFreshInstallSnapshot();
+      snapshot.globalConfig = MODEL_CONFIGS.globalConfig.defaultData;
+      stateSnapshotServiceSpy.getStateSnapshotAsync.and.resolveTo(snapshot as any);
+
+      await forceUpload();
+
+      // Same data-less state, default globalConfig: correctly skipped. The only
+      // difference from the case above is that a sync provider was configured.
+      expect(opLogStoreSpy.append).not.toHaveBeenCalled();
+    });
   });
 });
