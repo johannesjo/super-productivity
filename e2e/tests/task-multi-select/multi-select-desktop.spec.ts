@@ -39,7 +39,10 @@ test.describe('Task multi-select (desktop)', () => {
     await expect(bar).toContainText('2 selected');
     await expect(b).not.toHaveClass(/isMultiSelected/);
 
-    // The bulk shortcut acts on the whole selection.
+    // A bulk shortcut on a focused *selected* row acts on the whole selection
+    // (a focused unselected row would act alone, so refocus a selected one).
+    await expect(b).toBeFocused();
+    await c.focus();
     await expect(c).toBeFocused();
     await page.keyboard.press('d');
     await expect(page.locator(DONE_TASKS)).toHaveCount(2);
