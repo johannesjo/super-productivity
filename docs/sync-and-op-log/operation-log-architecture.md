@@ -665,7 +665,8 @@ On the RESPONSE side they are loose strings, and the receiver decides per op
 and the USE_REMOTE preflight): an unknown
 value blocks the batch at that op exactly like `VERSION_TOO_NEW` — prefix
 applied, cursor frozen, "update your app" snack — never a skip, which would
-advance the cursor past data the client never understood. Before this the
+advance the cursor past data the client never understood. (Restore points of
+an unknown type are simply kept in the list and rendered generically.) Before this the
 transport parser rejected the whole page with a generic error and wedged every
 not-yet-updated device (#8764). Two consequences:
 

@@ -2451,8 +2451,6 @@ export class OperationLogSyncService {
           'USE_REMOTE aborted: remote history contains an unsupported schema version.',
         );
       }
-      // An unknown opType / syncImportReason is the same situation as a newer
-      // schema version: this client cannot replay the op (#8764).
       if (version > CURRENT_SCHEMA_VERSION || getUnknownOpVocabulary(op) !== null) {
         if (
           !this._hasWarnedRebuildVersionBlockThisSession &&

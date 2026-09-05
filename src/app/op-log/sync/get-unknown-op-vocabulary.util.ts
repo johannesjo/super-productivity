@@ -36,10 +36,10 @@ const isPresentUnknown = (value: unknown, known: ReadonlySet<string>): boolean =
   typeof value === 'string' && !known.has(value);
 
 /**
- * The prefix of a remote batch this client can actually process this cycle:
- * everything before the first op with unknown vocabulary. `processRemoteOps`
+ * Everything before the first op with unknown vocabulary. `processRemoteOps`
  * blocks at that op, so pre-processing steps (e.g. the full-state conflict
  * gate) must not act on — or prompt the user about — anything after it.
+ * Schema-version blocks are NOT covered here; they are a separate axis.
  */
 export const takeInterpretableOpPrefix = <
   T extends Pick<Operation, 'opType' | 'syncImportReason'>,

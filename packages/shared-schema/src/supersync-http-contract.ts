@@ -315,7 +315,8 @@ export const SuperSyncRestorePointSchema = z
     serverSeq: z.number(),
     timestamp: z.number(),
     // Loose on purpose (see SuperSyncOperationResponseSchema); the client
-    // filters unknown types out of the list after parsing.
+    // keeps unknown types — the dialog renders them generically and restore
+    // works by serverSeq.
     type: z.string().max(SUPER_SYNC_MAX_VOCABULARY_TRANSPORT_LENGTH),
     clientId: z.string(),
     description: z.string().optional(),
