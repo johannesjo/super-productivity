@@ -17,7 +17,7 @@ import { BackupService } from '../backup/backup.service';
 import { OpLog } from '../../core/log';
 import { OperationSyncCapable } from '../sync-providers/provider.interface';
 import { OperationLogUploadService } from './operation-log-upload.service';
-import { getUnknownOpVocabulary } from './get-unknown-op-vocabulary.util';
+import { getUnknownOpVocabulary } from './remote-op-block.util';
 import { DownloadOutcome, UploadOutcome } from '../core/types/sync-results.types';
 import { OperationLogDownloadService } from './operation-log-download.service';
 import { SnackService } from '../../core/snack/snack.service';

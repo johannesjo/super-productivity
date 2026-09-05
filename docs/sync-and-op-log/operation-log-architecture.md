@@ -661,7 +661,8 @@ Therefore:
 `opType`, `syncImportReason`, and restore-point `type` are strict enums only on
 the REQUEST side of the SuperSync contract, where the server validates per op.
 On the RESPONSE side they are loose strings, and the receiver decides per op
-(`get-unknown-op-vocabulary.util.ts`, called from `remote-ops-processing.service.ts`
+(`remote-op-block.util.ts`, the one block predicate shared by
+`remote-ops-processing.service.ts`, the full-state conflict gate's prefix cut,
 and the USE_REMOTE preflight): an unknown
 value blocks the batch at that op exactly like `VERSION_TOO_NEW` — prefix
 applied, cursor frozen, "update your app" snack — never a skip, which would

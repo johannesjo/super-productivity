@@ -130,6 +130,15 @@ describe('SyncImportConflictGateService', () => {
         .fullStateOp,
     ).toBeUndefined();
 
+    const importFromNewerSchema = createOperation({
+      id: 'import-newer-schema',
+      syncImportReason: 'SERVER_MIGRATION',
+      schemaVersion: 99,
+    });
+    expect(
+      (await service.checkIncomingFullStateConflict([importFromNewerSchema])).fullStateOp,
+    ).toBeUndefined();
+
     // The prefix before the block is still gated normally.
     const result = await service.checkIncomingFullStateConflict([
       importAfterBlock,

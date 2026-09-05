@@ -38,6 +38,7 @@ import { SyncProviderId } from '../sync-providers/provider.const';
 import { LOCAL_ONLY_SYNC_KEYS } from '../../features/config/local-only-sync-settings.util';
 import { IncompleteRemoteOperationsError } from '../core/errors/sync-errors';
 import { HydrationStateService } from '../apply/hydration-state.service';
+import { RepairSyncContextService } from '../validation/repair-sync-context.service';
 import { LOCK_NAMES } from '../core/operation-log.const';
 
 describe('RemoteOpsProcessingService', () => {
@@ -713,6 +714,43 @@ describe('RemoteOpsProcessingService', () => {
           actionStr: T.PS.UPDATE_APP,
         }),
       );
+    });
+
+    it('should withdraw the causal repair base for the rest of a blocked run', async () => {
+      const repairSyncContext = TestBed.inject(RepairSyncContextService);
+      const remoteOps: Operation[] = [
+        { id: 'op1', schemaVersion: 1, opType: OpType.Update } as Operation,
+        {
+          id: 'future',
+          schemaVersion: 1,
+          opType: 'FUTURE_OP' as unknown as OpType,
+        } as Operation,
+      ];
+      opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
+      opLogStoreSpy.getUnsyncedByEntity.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getEntityFrontier.and.returnValue(Promise.resolve(new Map()));
+      vectorClockServiceSpy.getSnapshotVectorClock.and.returnValue(Promise.resolve({}));
+      opLogStoreSpy.hasOp.and.returnValue(Promise.resolve(false));
+
+      let baseDuringApply: number | undefined = -1;
+      operationApplierServiceSpy.applyOperations.and.callFake(async (ops, options) => {
+        baseDuringApply = repairSyncContext.baseServerSeq;
+        return applyAllWithReducerCommit(ops, options);
+      });
+
+      await repairSyncContext.runWithBaseServerSeq(12, async () => {
+        const result = await service.processRemoteOps(remoteOps);
+        expect(result.blockedByIncompatibleOp).toBeTrue();
+        expect(repairSyncContext.baseServerSeq).toBeUndefined();
+      });
+
+      expect(operationApplierServiceSpy.applyOperations).toHaveBeenCalled();
+      expect(baseDuringApply).toBeUndefined();
+      // An unblocked run keeps its base.
+      await repairSyncContext.runWithBaseServerSeq(13, async () => {
+        await service.processRemoteOps([remoteOps[0]]);
+        expect(repairSyncContext.baseServerSeq).toBe(13);
+      });
     });
 
     it('should block at a full-state op with an unknown syncImportReason (#8764)', async () => {

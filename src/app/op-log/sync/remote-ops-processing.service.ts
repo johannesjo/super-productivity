@@ -18,11 +18,7 @@ import { ConflictResolutionService } from './conflict-resolution.service';
 import { ValidateStateService } from '../validation/validate-state.service';
 import { SyncSessionValidationService } from './sync-session-validation.service';
 import { VectorClockService } from './vector-clock.service';
-import {
-  MIN_SUPPORTED_SCHEMA_VERSION,
-  SchemaMigrationService,
-  getOperationSchemaVersion,
-} from '../persistence/schema-migration.service';
+import { SchemaMigrationService } from '../persistence/schema-migration.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { LOCK_NAMES } from '../core/operation-log.const';
@@ -32,7 +28,8 @@ import { SyncImportFilterService } from './sync-import-filter.service';
 import { OperationWriteFlushService } from './operation-write-flush.service';
 import { processDeferredActionsAfterRemoteApply } from './process-deferred-actions-flush.util';
 import { IncompleteRemoteOperationsError } from '../core/errors/sync-errors';
-import { getUnknownOpVocabulary } from './get-unknown-op-vocabulary.util';
+import { getRemoteOpBlockReason, RemoteOpBlockReason } from './remote-op-block.util';
+import { RepairSyncContextService } from '../validation/repair-sync-context.service';
 import { selectSyncConfig } from '../../features/config/store/global-config.reducer';
 import {
   applyLocalOnlySyncSettingsToAppData,
@@ -40,17 +37,6 @@ import {
 } from '../../features/config/local-only-sync-settings.util';
 import { HydrationStateService } from '../apply/hydration-state.service';
 import { SyncProviderManager } from '../sync-providers/provider-manager.service';
-
-/**
- * Why a remote batch stopped at an op it cannot terminally process. Every
- * reason freezes the server cursor at the blocked op (see processRemoteOps).
- */
-type RemoteOpBlockReason =
-  | 'VERSION_UNSUPPORTED'
-  | 'VERSION_TOO_NEW'
-  | 'UNKNOWN_OP_VOCABULARY'
-  | 'INVALID_SCHEMA_VERSION'
-  | 'MIGRATION_FAILED';
 
 /**
  * Handles the core pipeline for processing remote operations.
@@ -69,6 +55,7 @@ type RemoteOpBlockReason =
   providedIn: 'root',
 })
 export class RemoteOpsProcessingService {
+  private repairSyncContext = inject(RepairSyncContextService);
   private store = inject(Store);
   private opLogStore = inject(OperationLogStoreService);
   private operationApplier = inject(OperationApplierService);
@@ -172,41 +159,12 @@ export class RemoteOpsProcessingService {
     let blockedOp: Operation | null = null;
 
     for (const op of remoteOps) {
-      let opVersion: number;
-      try {
-        opVersion = getOperationSchemaVersion(op as { schemaVersion?: unknown });
-      } catch {
+      // Shared with the pre-processing prefix cut (conflict gate) so nothing
+      // acts on an op this loop will refuse. Reasons are documented there.
+      const preMigrationBlockReason = getRemoteOpBlockReason(op, currentVersion);
+      if (preMigrationBlockReason !== null) {
         blockedOp = op;
-        blockReason = 'INVALID_SCHEMA_VERSION';
-        break;
-      }
-
-      // Op below minimum supported version: no migration path exists.
-      if (opVersion < MIN_SUPPORTED_SCHEMA_VERSION) {
-        blockedOp = op;
-        blockReason = 'VERSION_UNSUPPORTED';
-        break;
-      }
-
-      // Op from a newer schema version: this client cannot interpret it safely.
-      if (opVersion > currentVersion) {
-        blockedOp = op;
-        blockReason = 'VERSION_TOO_NEW';
-        break;
-      }
-
-      // Op whose type / import reason this client does not know: a newer
-      // client widened the wire vocabulary without a schema bump (the default
-      // per the bump policy). Same treatment as VERSION_TOO_NEW — block here,
-      // lossless, and surface the update-app UX — never skip: advancing the
-      // cursor past an op this client never understood is silent data loss.
-      const unknownVocabulary = getUnknownOpVocabulary(op);
-      if (unknownVocabulary !== null) {
-        OpLog.err(
-          `RemoteOpsProcessingService: Op ${op.id} carries an unknown ${unknownVocabulary}`,
-        );
-        blockedOp = op;
-        blockReason = 'UNKNOWN_OP_VOCABULARY';
+        blockReason = preMigrationBlockReason;
         break;
       }
 
@@ -244,6 +202,12 @@ export class RemoteOpsProcessingService {
           'Processing the batch prefix only; cursor must not advance past this op.',
       );
       this._notifyBlockedOp(blockReason);
+      // A REPAIR minted while applying/validating the prefix must not claim
+      // the downloaded cursor as its causal base: that cursor covers the
+      // blocked suffix, which this client never applied. A falsely causal
+      // REPAIR would be auto-accepted by other devices and would let the
+      // upload path advance this client's cursor past the blocked op.
+      this.repairSyncContext.dropBaseServerSeqForCurrentRun();
     }
 
     if (migratedOps.length === 0) {

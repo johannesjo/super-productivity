@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { takeInterpretableOpPrefix } from './get-unknown-op-vocabulary.util';
+import { takeInterpretableOpPrefix } from './remote-op-block.util';
 import { OperationLogStoreService } from '../persistence/operation-log-store.service';
 import {
   ActionType,
