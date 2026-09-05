@@ -46,6 +46,7 @@ import {
   withLatestFrom,
 } from 'rxjs/operators';
 import { IS_ANDROID_WEB_VIEW_TOKEN } from '../../../util/is-android-web-view';
+import { IosKeyboardService } from '../../../core/theme/ios-keyboard.service';
 import { BehaviorSubject, combineLatest, from, Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
@@ -103,6 +104,16 @@ export interface TaskAddEvent {
   changeDetection: ChangeDetectionStrategy.OnPush,
   animations: [blendInOutAnimation, expandFadeAnimation],
   standalone: true,
+  /* eslint-disable @typescript-eslint/naming-convention*/
+  host: {
+    // The global bar is a fixed element outside the CDK overlay layer, so it
+    // gets its iOS keyboard offset here rather than inheriting it from <html>
+    // — a custom property on <html> restyles the whole task list on every
+    // write (#9779). Null off-iOS and while the keyboard is hidden, which
+    // leaves the `:root` default in place. See IosKeyboardService.
+    '[style.--keyboard-overlay-offset]': 'iosKeyboardService.keyboardOverlayOffset()',
+  },
+  /* eslint-enable @typescript-eslint/naming-convention*/
   imports: [
     FormsModule,
     CdkTextareaAutosize,
@@ -142,6 +153,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private readonly _dateService = inject(DateService);
   private readonly _menuTreeService = inject(MenuTreeService);
   readonly stateService = inject(AddTaskBarStateService);
+  readonly iosKeyboardService = inject(IosKeyboardService);
 
   T = T;
 

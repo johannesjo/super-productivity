@@ -231,7 +231,8 @@ device, or the squashed sliver on the buggy v18.11.0 WebView.
 resize-detecting `--keyboard-height` the add-task bar uses for the
 Android / mobile-web case; keep the iOS `--keyboard-overlay-offset` path in a
 separate rule. iOS carries **both** `isNativeMobile` and `isIOS` (and sets
-`--keyboard-height` non-zero), so the Android rule excludes iOS with
+`--keyboard-height` non-zero on the CDK overlay container this dialog lives in —
+never on `<html>`, see `IosKeyboardService`), so the Android rule excludes iOS with
 `:not(.isIOS)` — the two rules are mutually exclusive and order-independent
 (rather than relying on equal-specificity source order):
 
@@ -266,8 +267,9 @@ controls and the keyboard. It was invisible while `--safe-area-top` was 0 on
 API < 30, then surfaced the moment the status-bar fix above made it non-zero
 (also latent on API >= 30, where env() already gave a non-zero `--safe-area-top`).
 The iOS rule keeps its `- --safe-area-top` term for now — its keyboard runtime
-differs (the WebView does not resize) and it is unverified on an iOS device; if
-an iOS bottom gap appears, drop the term there too.
+differs (the WebView resizes only after the keyboard animation, and
+`--keyboard-overlay-offset` covers the case where it never does) and it is
+unverified on an iOS device; if an iOS bottom gap appears, drop the term there too.
 
 ## #8508 follow-up — SDK 28 (Android 9): header draws BEHIND the status bar
 

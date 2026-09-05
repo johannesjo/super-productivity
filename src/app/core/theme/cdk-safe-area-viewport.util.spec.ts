@@ -1,13 +1,18 @@
 import { Component, viewChild } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
-import { FlexibleConnectedPositionStrategy } from '@angular/cdk/overlay';
+import {
+  FlexibleConnectedPositionStrategy,
+  OverlayContainer,
+} from '@angular/cdk/overlay';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { provideNoopAnimations } from '@angular/platform-browser/animations';
 import { patchCdkViewportForSafeArea } from './cdk-safe-area-viewport.util';
+import { BodyClass } from '../../app.constants';
 
 const SAFE_BOTTOM = 48;
 const SAFE_TOP = 48;
 const NAV_HEIGHT = 56;
+const KEYBOARD_OVERLAY_OFFSET = 200;
 
 /**
  * Mirrors the mobile bottom nav (#8792): a bar pinned to the viewport bottom
@@ -99,6 +104,7 @@ describe('patchCdkViewportForSafeArea', () => {
     document.documentElement.style.removeProperty('--safe-area-bottom');
     document.documentElement.style.removeProperty('--safe-area-top');
     document.documentElement.style.removeProperty('--safe-area-inset-bottom');
+    document.body.classList.remove(BodyClass.isIOS, BodyClass.isKeyboardVisible);
     document.querySelectorAll('.cdk-overlay-container').forEach((el) => el.remove());
   });
 
@@ -144,6 +150,21 @@ describe('patchCdkViewportForSafeArea', () => {
     expect(twoItems.panelBottom).toBeCloseTo(twoItems.triggerTop, 0);
     // Same bottom edge for both: the placement must not depend on panel height.
     expect(twoItems.panelBottom).toBeCloseTo(oneItem.panelBottom, 0);
+  });
+
+  // iOS with a keyboard that overlays the viewport: IosKeyboardService writes
+  // the offset on the overlay container, never on <html> (#9779), and the
+  // strategy has to read it from there.
+  it('keeps a bottom-anchored menu above the iOS keyboard offset on the overlay container', async () => {
+    document.documentElement.style.setProperty('--safe-area-bottom', `${SAFE_BOTTOM}px`);
+    document.body.classList.add(BodyClass.isIOS, BodyClass.isKeyboardVisible);
+    TestBed.inject(OverlayContainer)
+      .getContainerElement()
+      .style.setProperty('--keyboard-overlay-offset', `${KEYBOARD_OVERLAY_OFFSET}px`);
+
+    const { panelBottom, safeAreaTopEdge } = await openMenuAndMeasure();
+
+    expect(panelBottom).toBeLessThanOrEqual(safeAreaTopEdge - KEYBOARD_OVERLAY_OFFSET);
   });
 
   it('does not stack insets when applied more than once', async () => {
