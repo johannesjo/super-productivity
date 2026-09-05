@@ -542,6 +542,7 @@ export class OperationLogSyncService {
             latestServerSeq,
           };
         case 'server_migration_handled':
+        case 'server_migration_skipped':
           return { kind: 'completed', newOpsCount: 0 };
         case 'cancelled':
           return { kind: 'cancelled' };
@@ -1064,9 +1065,18 @@ export class OperationLogSyncService {
             options?.fenceEpoch,
             'empty-server migration',
           );
-          await this.serverMigrationService.handleServerMigration(syncProvider, {
-            syncImportReason: 'SERVER_MIGRATION',
-          });
+          const createdOpId = await this.serverMigrationService.handleServerMigration(
+            syncProvider,
+            { syncImportReason: 'SERVER_MIGRATION' },
+          );
+          // No SYNC_IMPORT → nothing shipped the state → skip this cycle's upload
+          // (see DownloadOutcome) so the next download re-evaluates. (#9921)
+          if (!createdOpId) {
+            OpLog.warn(
+              'OperationLogSyncService: Empty-server seeding created no SYNC_IMPORT.',
+            );
+            return { kind: 'server_migration_skipped' };
+          }
           // The SYNC_IMPORT makes the client non-fresh; upload proceeds normally.
           return { kind: 'server_migration_handled' };
         }
