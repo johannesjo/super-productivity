@@ -44,6 +44,7 @@ import { LS } from '../../../core/persistence/storage-keys.const';
 import { skipWhileApplyingRemoteOps } from '../../../util/skip-during-sync.operator';
 import { DateService } from '../../../core/date/date.service';
 import { isBlankTask } from '../util/is-blank-task';
+import { TaskBulkActionService } from '../task-bulk-action.service';
 
 @Injectable()
 export class TaskUiEffects {
@@ -59,6 +60,7 @@ export class TaskUiEffects {
   private _navigateToTaskService = inject(NavigateToTaskService);
   private _layoutService = inject(LayoutService);
   private _dateService = inject(DateService);
+  private _taskBulkActionService = inject(TaskBulkActionService);
 
   taskCreatedSnack$ = createEffect(
     () =>
@@ -207,6 +209,8 @@ export class TaskUiEffects {
       this._actions$.pipe(
         ofType(TaskSharedActions.updateTask),
         filter(({ task: { changes } }) => !!changes.isDone),
+        // A bulk "mark done" plays the sound once itself.
+        filter(() => !this._taskBulkActionService.isFeedbackSuppressed()),
         withLatestFrom(
           this._workContextService.flatDoneTodayNr$,
           this._globalConfigService.sound$,
@@ -221,6 +225,8 @@ export class TaskUiEffects {
     () =>
       this._actions$.pipe(
         ofType(TaskSharedActions.moveToOtherProject),
+        // A bulk move shows one summary snack instead of one per task.
+        filter(() => !this._taskBulkActionService.isFeedbackSuppressed()),
         filter(
           ({ task, targetProjectId }) =>
             // Don't announce *filing a project-less task into the Inbox*: that is

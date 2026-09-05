@@ -4,6 +4,8 @@ import { TaskFocusService } from './task-focus.service';
 import { TaskService } from './task.service';
 import { GlobalConfigService } from '../config/global-config.service';
 import { signal } from '@angular/core';
+import { TaskMultiSelectService } from './task-multi-select.service';
+import { TaskBulkActionService } from './task-bulk-action.service';
 
 describe('TaskShortcutService', () => {
   let service: TaskShortcutService;
@@ -96,6 +98,17 @@ describe('TaskShortcutService', () => {
         { provide: TaskFocusService, useValue: mockTaskFocusService },
         { provide: TaskService, useValue: mockTaskService },
         { provide: GlobalConfigService, useValue: mockConfigService },
+        {
+          provide: TaskMultiSelectService,
+          useValue: {
+            isActive: signal(false),
+            count: signal(0),
+            clear: () => {},
+            extendFromFocused: () => null,
+            requestMenuOpen: () => {},
+          },
+        },
+        { provide: TaskBulkActionService, useValue: {} },
       ],
     });
 

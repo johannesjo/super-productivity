@@ -2005,6 +2005,25 @@
         "TINE_SPENT": "Time Spent",
         "TITLE": "Add for Day"
       },
+      "MULTI_SELECT": {
+        "ACTIONS": "Actions",
+        "CLEAR": "Clear selection",
+        "D_CONFIRM_DELETE": {
+          "MSG": "Delete <strong>{{count}}</strong> tasks? Subtasks are deleted too.",
+          "OK": "Delete"
+        },
+        "S": {
+          "APPLIED": "Applied to {{count}} tasks",
+          "APPLIED_PARTIAL": "Applied to {{count}} of {{total}} tasks ({{skipped}} subtasks follow their parent)",
+          "DONE": "Marked {{count}} tasks as done",
+          "MOVED_TO_PROJECT": "Moved {{count}} tasks to \"{{projectTitle}}\"",
+          "NOTHING_TO_DO": "Nothing to change for the selected tasks",
+          "UNDONE": "Marked {{count}} tasks as not done",
+          "UNSCHEDULED": "Unscheduled {{count}} tasks"
+        },
+        "SELECTED_COUNT": "{{count}} selected",
+        "TASKS_TITLE": "{{count}} tasks"
+      },
       "N": {
         "ESTIMATE_EXCEEDED": "Time estimate exceeded!",
         "ESTIMATE_EXCEEDED_BODY": "You exceeded your estimated time for \"{{title}}\"."

@@ -18,6 +18,7 @@ import { androidInterface } from '../../android/android-interface';
 import { generateNotificationId } from '../../android/android-notification-id.util';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { TaskLog } from '../../../core/log';
+import { TaskBulkActionService } from '../task-bulk-action.service';
 
 @Injectable()
 export class TaskReminderEffects {
@@ -27,11 +28,14 @@ export class TaskReminderEffects {
   private _store = inject(Store);
   private _datePipe = inject(LocaleDatePipe);
   private _isAndroidWebView = inject(IS_ANDROID_WEB_VIEW_TOKEN);
+  private _taskBulkActionService = inject(TaskBulkActionService);
 
   snack$ = createEffect(
     () =>
       this._localActions$.pipe(
         ofType(TaskSharedActions.scheduleTaskWithTime),
+        // A bulk action shows one summary snack instead of one per task.
+        filter(() => !this._taskBulkActionService.isFeedbackSuppressed()),
         tap(({ task, remindAt, dueWithTime }) => {
           if (!Number.isFinite(dueWithTime)) {
             devError(
@@ -149,6 +153,8 @@ export class TaskReminderEffects {
     () =>
       this._localActions$.pipe(
         ofType(TaskSharedActions.setDeadline),
+        // A bulk action shows one summary snack instead of one per task.
+        filter(() => !this._taskBulkActionService.isFeedbackSuppressed()),
         tap(({ deadlineDay, deadlineWithTime }) => {
           const formattedDate = deadlineWithTime
             ? this._datePipe.transform(deadlineWithTime, 'short')
@@ -170,6 +176,8 @@ export class TaskReminderEffects {
     () =>
       this._localActions$.pipe(
         ofType(TaskSharedActions.removeDeadline),
+        // A bulk action shows one summary snack instead of one per task.
+        filter(() => !this._taskBulkActionService.isFeedbackSuppressed()),
         tap(() => {
           this._snackService.open({
             type: 'SUCCESS',

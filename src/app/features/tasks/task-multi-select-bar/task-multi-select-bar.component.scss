@@ -1,0 +1,84 @@
+@use '../../../../styles/_globals.scss' as *;
+
+:host {
+  display: contents;
+}
+
+.bar {
+  position: absolute;
+  left: 50%;
+  bottom: var(--s2);
+  transform: translateX(-50%);
+  z-index: var(--z-is-selected-host);
+  display: flex;
+  align-items: center;
+  gap: var(--s-half);
+  max-width: calc(100% - var(--s2));
+  padding: var(--s-half) var(--s);
+  border-radius: var(--card-border-radius);
+  background: var(--card-bg);
+  border: 1px solid var(--extra-border-color);
+  color: var(--text-color);
+
+  @include mq(xs, max) {
+    left: var(--s);
+    right: var(--s);
+    transform: none;
+    bottom: calc(var(--s) + var(--safe-area-bottom));
+  }
+}
+
+.count {
+  font-weight: 600;
+  white-space: nowrap;
+  padding-right: var(--s);
+}
+
+.spacer {
+  flex: 1;
+}
+
+.positioned-trigger {
+  position: fixed;
+  width: 0;
+  height: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.menu-title {
+  padding: var(--s-half) var(--s2);
+  font-size: 12px;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.menuItemLeft {
+  text-align: left;
+  display: flex;
+  align-items: center;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.key-i {
+  opacity: 0.4;
+  font-size: 11px;
+  text-align: center;
+  border-radius: 20px;
+  max-width: 66px;
+  letter-spacing: -1px;
+  @include truncateText();
+  display: none;
+
+  &:not(:empty) {
+    display: block;
+    line-height: 1;
+    min-width: 20px;
+    border: 1px solid;
+    padding: var(--s-half);
+    margin-left: var(--s-half);
+  }
+}
