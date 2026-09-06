@@ -1212,7 +1212,11 @@ export class PluginBridgeService implements OnDestroy {
       );
     }
 
-    const repeatCycle = cfg.repeatCycle ?? DEFAULT_TASK_REPEAT_CFG.repeatCycle;
+    // Not DEFAULT_TASK_REPEAT_CFG.repeatCycle ('WEEKLY'): that default only
+    // makes sense together with the Mon-Fri mask dropped below, so a call
+    // without `cfg` would be rejected for naming no weekday. 'DAILY' every 1 is
+    // what the dialog's own default preset expands to.
+    const repeatCycle = cfg.repeatCycle ?? 'DAILY';
     if (
       (cfg.repeatEvery !== undefined && cfg.repeatEvery < 1) ||
       (cfg.repeatEvery ?? 1) > MAX_PLUGIN_REPEAT_EVERY

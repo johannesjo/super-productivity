@@ -687,7 +687,8 @@ export interface PluginAPI {
    * Make an existing task repeat. Returns the id of the created config.
    *
    * The config inherits the task's project, and its title defaults to the
-   * task's title. Reading configs back is done via `getAppState().taskRepeatCfgs`.
+   * task's title. Without `cfg` the task repeats every day. Reading configs
+   * back is done via `getAppState().taskRepeatCfgs`.
    */
   addTaskRepeatCfg(taskId: string, cfg?: PluginTaskRepeatCfgData): Promise<string>;
 
@@ -847,6 +848,7 @@ export interface PluginTaskRepeatCfgData {
   tagIds?: string[];
   defaultEstimate?: number;
   isPaused?: boolean;
+  /** Defaults to `DAILY`. */
   repeatCycle?: 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
   /** 1..1000. Every nth day/week/month/year. */
   repeatEvery?: number;

@@ -328,6 +328,8 @@ Describe the schedule with the pattern fields of `PluginTaskRepeatCfgData`
 presets are not part of the payload: they are defined against the day the user opens
 the dialog, so a config created here is stored as `CUSTOM`. A `WEEKLY` cycle needs at
 least one weekday, and the flags you leave out are false rather than inherited.
+`repeatCycle` defaults to `DAILY`, so `addTaskRepeatCfg(taskId)` with no config makes
+the task repeat every day.
 
 New configs take `projectId`, `title`, `notes`, `tagIds` and `defaultEstimate` from
 the source task unless you pass your own, `startDate` from the task's due day, and

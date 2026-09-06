@@ -1147,6 +1147,18 @@ describe('PluginBridgeService - Task Repeat Cfg Methods', () => {
   });
 
   describe('addTaskRepeatCfg', () => {
+    it('repeats daily when the caller passes no cfg', async () => {
+      const id = await service.addTaskRepeatCfg('task-1');
+
+      expect(id).toBe('repeat-cfg-1');
+      const cfg = lastCfg();
+      expect(cfg.repeatCycle).toBe('DAILY');
+      expect(cfg.repeatEvery).toBe(1);
+      expect(cfg.quickSetting).toBe('CUSTOM');
+      // Same seed the dialog's Daily preset gets.
+      expect(cfg.skipOverdue).toBeTrue();
+    });
+
     it('inherits project, title, tags, notes and estimate from the task', async () => {
       const id = await service.addTaskRepeatCfg('task-1', {
         repeatCycle: 'WEEKLY',
