@@ -1110,6 +1110,7 @@ describe('PluginBridgeService - Task Repeat Cfg Methods', () => {
     taskRepeatCfgServiceSpy = jasmine.createSpyObj('TaskRepeatCfgService', [
       'addTaskRepeatCfgToTask',
       'updateTaskRepeatCfg',
+      'deleteTaskRepeatCfg',
       'getTaskRepeatCfgByIdAllowUndefined$',
     ]);
     taskRepeatCfgServiceSpy.addTaskRepeatCfgToTask.and.returnValue('repeat-cfg-1');
@@ -1513,6 +1514,61 @@ describe('PluginBridgeService - Task Repeat Cfg Methods', () => {
         service.updateTaskRepeatCfg('nope', { isPaused: true }),
       ).toBeRejectedWithError(T.PLUGINS.TASK_REPEAT_CFG_NOT_FOUND);
       expect(taskRepeatCfgServiceSpy.updateTaskRepeatCfg).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('deleteTaskRepeatCfg', () => {
+    beforeEach(() => {
+      taskRepeatCfgServiceSpy.getTaskRepeatCfgByIdAllowUndefined$.and.returnValue(
+        of({ id: 'repeat-cfg-1' } as unknown as TaskRepeatCfg),
+      );
+    });
+
+    it('deletes via the shared action, which also detaches the tasks it created', async () => {
+      await service.deleteTaskRepeatCfg('repeat-cfg-1', ['deleteTaskRepeatCfg']);
+
+      expect(taskRepeatCfgServiceSpy.deleteTaskRepeatCfg).toHaveBeenCalledOnceWith(
+        'repeat-cfg-1',
+      );
+    });
+
+    it('rejects an unknown config instead of dispatching a no-op delete', async () => {
+      taskRepeatCfgServiceSpy.getTaskRepeatCfgByIdAllowUndefined$.and.returnValue(
+        of(undefined),
+      );
+
+      await expectAsync(
+        service.deleteTaskRepeatCfg('nope', ['deleteTaskRepeatCfg']),
+      ).toBeRejectedWithError(T.PLUGINS.TASK_REPEAT_CFG_NOT_FOUND);
+      expect(taskRepeatCfgServiceSpy.deleteTaskRepeatCfg).not.toHaveBeenCalled();
+    });
+
+    it('rejects a plugin that does not declare the deleteTaskRepeatCfg permission', async () => {
+      await expectAsync(
+        service.deleteTaskRepeatCfg('repeat-cfg-1'),
+      ).toBeRejectedWithError(/does not declare the "deleteTaskRepeatCfg" permission/);
+      expect(taskRepeatCfgServiceSpy.deleteTaskRepeatCfg).not.toHaveBeenCalled();
+    });
+
+    it('passes the manifest permissions through the bound method', async () => {
+      const granted = service.createBoundMethods('plugin-a', {
+        permissions: ['deleteTaskRepeatCfg'],
+      } as PluginManifest);
+      await granted.deleteTaskRepeatCfg('repeat-cfg-1');
+
+      expect(taskRepeatCfgServiceSpy.deleteTaskRepeatCfg).toHaveBeenCalledOnceWith(
+        'repeat-cfg-1',
+      );
+
+      // Same call shape, manifest without the capability: the bridge must still
+      // refuse, which is what keeps iframe plugins (routed through boundMethods) gated.
+      const ungranted = service.createBoundMethods('plugin-b', {
+        permissions: [],
+      } as unknown as PluginManifest);
+
+      await expectAsync(
+        ungranted.deleteTaskRepeatCfg('repeat-cfg-1'),
+      ).toBeRejectedWithError(/does not declare the "deleteTaskRepeatCfg" permission/);
     });
   });
 });

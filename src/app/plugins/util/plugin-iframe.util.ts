@@ -56,6 +56,7 @@ const ALLOWED_IFRAME_API_METHODS = new Set([
   'updateTag',
   'addTaskRepeatCfg',
   'updateTaskRepeatCfg',
+  'deleteTaskRepeatCfg',
   'showSnack',
   'notify',
   'request',
@@ -435,6 +436,7 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
           // Recurring task methods
           addTaskRepeatCfg: (taskId, cfg) => callApi('addTaskRepeatCfg', [taskId, cfg]),
           updateTaskRepeatCfg: (taskRepeatCfgId, updates) => callApi('updateTaskRepeatCfg', [taskRepeatCfgId, updates]),
+          deleteTaskRepeatCfg: (taskRepeatCfgId) => callApi('deleteTaskRepeatCfg', [taskRepeatCfgId]),
 
           // Task ordering
           reorderTasks: (taskIds, contextId, contextType) => callApi('reorderTasks', [taskIds, contextId, contextType]),

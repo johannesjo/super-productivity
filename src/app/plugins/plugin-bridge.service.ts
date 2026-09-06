@@ -342,6 +342,7 @@ export class PluginBridgeService implements OnDestroy {
     deleteSecret: (key: string) => Promise<void>;
     request: <T = unknown>(url: string, options?: PluginRequestOptions) => Promise<T>;
     deleteProject: (projectId: string) => Promise<void>;
+    deleteTaskRepeatCfg: (taskRepeatCfgId: string) => Promise<void>;
     translate: (key: string, params?: Record<string, string | number>) => string;
     formatDate: (date: Date | string | number, format: PluginDateFormat) => string;
     getCurrentLanguage: () => string;
@@ -453,6 +454,8 @@ export class PluginBridgeService implements OnDestroy {
       // falls through to the bridge method with no plugin context at all.
       deleteProject: (projectId: string): Promise<void> =>
         this.deleteProject(projectId, manifest?.permissions),
+      deleteTaskRepeatCfg: (taskRepeatCfgId: string): Promise<void> =>
+        this.deleteTaskRepeatCfg(taskRepeatCfgId, manifest?.permissions),
 
       // i18n
       translate: (key: string, params?: Record<string, string | number>): string =>
@@ -1382,6 +1385,44 @@ export class PluginBridgeService implements OnDestroy {
     this._taskRepeatCfgService.updateTaskRepeatCfg(taskRepeatCfgId, changes, false);
 
     PluginLog.log('PluginBridge: Task repeat cfg updated successfully', {
+      taskRepeatCfgId,
+    });
+  }
+
+  /**
+   * Delete a recurring task config
+   */
+  async deleteTaskRepeatCfg(
+    taskRepeatCfgId: string,
+    permissions?: string[],
+  ): Promise<void> {
+    typia.assert<string>(taskRepeatCfgId);
+
+    // Same reasoning as deleteProject: irreversible, and it reaches every task the
+    // config produced. Declaring the capability is install-time disclosure.
+    if (!(permissions ?? []).includes('deleteTaskRepeatCfg')) {
+      throw new Error(
+        '[PluginBridge] PluginAPI.deleteTaskRepeatCfg is blocked: this plugin does not declare the "deleteTaskRepeatCfg" permission. Add "deleteTaskRepeatCfg" to the manifest "permissions".',
+      );
+    }
+
+    const existing = await firstValueFrom(
+      this._taskRepeatCfgService.getTaskRepeatCfgByIdAllowUndefined$(taskRepeatCfgId),
+    );
+    if (!existing) {
+      throw new Error(
+        this._translateService.instant(T.PLUGINS.TASK_REPEAT_CFG_NOT_FOUND, {
+          taskRepeatCfgId,
+        }),
+      );
+    }
+
+    // TaskSharedActions.deleteTaskRepeatCfg is the path that also clears repeatCfgId
+    // on the tasks the config created; deleteTaskRepeatCfgsNoTaskCleanup would leave
+    // them pointing at a config that is gone.
+    this._taskRepeatCfgService.deleteTaskRepeatCfg(taskRepeatCfgId);
+
+    PluginLog.log('PluginBridge: Task repeat cfg deleted successfully', {
       taskRepeatCfgId,
     });
   }

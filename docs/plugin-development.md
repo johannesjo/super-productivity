@@ -318,6 +318,7 @@ Iframe plugins automatically receive:
 
 - `addTaskRepeatCfg(taskId, cfg?)` - Make an existing task repeat; returns the new config id
 - `updateTaskRepeatCfg(taskRepeatCfgId, updates)` - Change an existing repeat config
+- `deleteTaskRepeatCfg(taskRepeatCfgId)` - Delete a repeat config; the tasks it already created stay but stop repeating. Requires the `deleteTaskRepeatCfg` permission.
 
 Read configs back via `getAppState().taskRepeatCfgs`. Only top-level, non-issue tasks
 can repeat, and a task that already has a config must be updated rather than given a

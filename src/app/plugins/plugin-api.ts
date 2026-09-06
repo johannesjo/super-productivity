@@ -310,6 +310,13 @@ export class PluginAPI implements PluginAPIInterface {
     return this.#pluginBridge.updateTaskRepeatCfg(taskRepeatCfgId, updates);
   }
 
+  async deleteTaskRepeatCfg(taskRepeatCfgId: string): Promise<void> {
+    PluginLog.log(
+      `Plugin ${this.#pluginId} requested to delete repeat cfg ${taskRepeatCfgId}`,
+    );
+    return this.#boundMethods.deleteTaskRepeatCfg(taskRepeatCfgId);
+  }
+
   async reorderTasks(
     taskIds: string[],
     contextId: string,
