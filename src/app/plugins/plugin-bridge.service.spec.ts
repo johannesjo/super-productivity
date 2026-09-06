@@ -1329,6 +1329,64 @@ describe('PluginBridgeService - Task Repeat Cfg Methods', () => {
       expect(taskRepeatCfgServiceSpy.updateTaskRepeatCfg).not.toHaveBeenCalled();
     });
 
+    it('rejects a switch to weekly on a config that has no weekday', async () => {
+      taskRepeatCfgServiceSpy.getTaskRepeatCfgByIdAllowUndefined$.and.returnValue(
+        of({
+          id: 'repeat-cfg-1',
+          quickSetting: 'CUSTOM',
+          repeatCycle: 'DAILY',
+          monday: false,
+          tuesday: false,
+          wednesday: false,
+          thursday: false,
+          friday: false,
+          saturday: false,
+          sunday: false,
+        } as unknown as TaskRepeatCfg),
+      );
+
+      await expectAsync(
+        service.updateTaskRepeatCfg('repeat-cfg-1', { repeatCycle: 'WEEKLY' }),
+      ).toBeRejectedWithError(T.PLUGINS.TASK_REPEAT_CFG_INVALID);
+      expect(taskRepeatCfgServiceSpy.updateTaskRepeatCfg).not.toHaveBeenCalled();
+    });
+
+    it('rejects clearing the last remaining weekday of a weekly config', async () => {
+      taskRepeatCfgServiceSpy.getTaskRepeatCfgByIdAllowUndefined$.and.returnValue(
+        of({
+          id: 'repeat-cfg-1',
+          quickSetting: 'CUSTOM',
+          repeatCycle: 'WEEKLY',
+          monday: true,
+        } as unknown as TaskRepeatCfg),
+      );
+
+      await expectAsync(
+        service.updateTaskRepeatCfg('repeat-cfg-1', { monday: false }),
+      ).toBeRejectedWithError(T.PLUGINS.TASK_REPEAT_CFG_INVALID);
+      expect(taskRepeatCfgServiceSpy.updateTaskRepeatCfg).not.toHaveBeenCalled();
+    });
+
+    it('accepts clearing a weekday while another one remains', async () => {
+      taskRepeatCfgServiceSpy.getTaskRepeatCfgByIdAllowUndefined$.and.returnValue(
+        of({
+          id: 'repeat-cfg-1',
+          quickSetting: 'CUSTOM',
+          repeatCycle: 'WEEKLY',
+          monday: true,
+          friday: true,
+        } as unknown as TaskRepeatCfg),
+      );
+
+      await service.updateTaskRepeatCfg('repeat-cfg-1', { monday: false });
+
+      expect(taskRepeatCfgServiceSpy.updateTaskRepeatCfg).toHaveBeenCalledOnceWith(
+        'repeat-cfg-1',
+        { monday: false },
+        false,
+      );
+    });
+
     it('rejects an unknown config', async () => {
       taskRepeatCfgServiceSpy.getTaskRepeatCfgByIdAllowUndefined$.and.returnValue(
         of(undefined),

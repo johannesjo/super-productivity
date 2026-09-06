@@ -178,6 +178,13 @@ const PLUGIN_REPEAT_CFG_FIELDS = [
   'monthlyLastDay',
 ] as const;
 
+// A weekly config with no weekday set is accepted by the store and then never
+// produces an occurrence: the WEEKLY branch of getNewestPossibleDueDate only
+// returns a date for a day flagged true. The dialog refuses it too (#8025).
+const isWeeklyWithoutWeekday = (cfg: Partial<TaskRepeatCfgCopy>): boolean =>
+  cfg.repeatCycle === 'WEEKLY' &&
+  !PLUGIN_REPEAT_WEEKDAYS.some((day) => cfg[day] === true);
+
 @Injectable({
   providedIn: 'root',
 })
@@ -1234,9 +1241,7 @@ export class PluginBridgeService implements OnDestroy {
       (acc, day) => ({ ...acc, [day]: cfg[day] ?? false }),
       {} as Record<(typeof PLUGIN_REPEAT_WEEKDAYS)[number], boolean>,
     );
-    // A weekly config with no day selected is accepted by the store and then
-    // never produces an occurrence. The dialog refuses it outright.
-    if (repeatCycle === 'WEEKLY' && !Object.values(weekdays).some(Boolean)) {
+    if (isWeeklyWithoutWeekday({ repeatCycle, ...weekdays })) {
       throw new Error(
         this._translateService.instant(T.PLUGINS.TASK_REPEAT_CFG_INVALID, {
           reason: 'weekday',
@@ -1331,6 +1336,17 @@ export class PluginBridgeService implements OnDestroy {
       if (field in updates) {
         Object.assign(changes, { [field]: updates[field] });
       }
+    }
+
+    // Validate the resulting config, not the patch: switching the cycle to
+    // WEEKLY, or clearing the last remaining weekday, kills the recurrence
+    // with nothing to show for it.
+    if (isWeeklyWithoutWeekday({ ...existing, ...changes })) {
+      throw new Error(
+        this._translateService.instant(T.PLUGINS.TASK_REPEAT_CFG_INVALID, {
+          reason: 'weekday',
+        }),
+      );
     }
 
     // isAskToUpdateAllTaskInstances stays false: the dialog it opens is a UI
