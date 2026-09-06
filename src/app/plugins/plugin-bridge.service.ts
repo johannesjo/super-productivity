@@ -160,22 +160,31 @@ const PLUGIN_REPEAT_WEEKDAYS = [
   'sunday',
 ] as const;
 
-// Fields a plugin may change on an existing config. Everything outside this
-// list, id and projectId included, is app-owned.
-const PLUGIN_REPEAT_CFG_FIELDS = [
-  'title',
+// Fields a plugin may change on an existing config. Everything outside these
+// two lists, id and projectId included, is app-owned.
+// Optional on TaskRepeatCfgCopy, so an explicit `undefined` is a value the
+// model can hold and is copied through as a deliberate clear.
+const PLUGIN_REPEAT_CFG_CLEARABLE_FIELDS = [
   'notes',
-  'tagIds',
   'defaultEstimate',
-  'isPaused',
-  'repeatCycle',
-  'repeatEvery',
   'startDate',
   'startTime',
   ...PLUGIN_REPEAT_WEEKDAYS,
   'monthlyWeekOfMonth',
   'monthlyWeekday',
   'monthlyLastDay',
+] as const;
+
+// Required on TaskRepeatCfgCopy: an explicit `undefined` here is absence, not
+// a clear. Writing it through would persist an invalid model - an undefined
+// repeatEvery makes getNewestPossibleDueDate return null on every device.
+// These are cleared by value instead: `title: null`, `tagIds: []`.
+const PLUGIN_REPEAT_CFG_REQUIRED_FIELDS = [
+  'title',
+  'tagIds',
+  'isPaused',
+  'repeatCycle',
+  'repeatEvery',
 ] as const;
 
 // A weekly config with no weekday set is accepted by the store and then never
@@ -1255,6 +1264,11 @@ export class PluginBridgeService implements OnDestroy {
       ...cfg,
       ...weekdays,
       repeatCycle,
+      // `...cfg` spreads an explicit undefined over the defaults, and both are
+      // required on the model - the other required fields are re-set with `??`
+      // below, these two were not.
+      repeatEvery: cfg.repeatEvery ?? DEFAULT_TASK_REPEAT_CFG.repeatEvery,
+      isPaused: cfg.isPaused ?? DEFAULT_TASK_REPEAT_CFG.isPaused,
       // Presets are anchored to the day the dialog is opened, which no plugin
       // call has. The schedule here is fully described by the pattern fields,
       // and CUSTOM is how the app labels exactly that.
@@ -1332,8 +1346,13 @@ export class PluginBridgeService implements OnDestroy {
     // would reach adapter.updateOne and re-key the entity, leaving the task's
     // repeatCfgId dangling. Pick the fields instead of forwarding the object.
     const changes: Partial<TaskRepeatCfgCopy> = {};
-    for (const field of PLUGIN_REPEAT_CFG_FIELDS) {
+    for (const field of PLUGIN_REPEAT_CFG_CLEARABLE_FIELDS) {
       if (field in updates) {
+        Object.assign(changes, { [field]: updates[field] });
+      }
+    }
+    for (const field of PLUGIN_REPEAT_CFG_REQUIRED_FIELDS) {
+      if (updates[field] !== undefined) {
         Object.assign(changes, { [field]: updates[field] });
       }
     }

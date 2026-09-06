@@ -1239,6 +1239,17 @@ describe('PluginBridgeService - Task Repeat Cfg Methods', () => {
       expect(lastCfg().skipOverdue).toBeFalse();
     });
 
+    it('ignores an undefined required field instead of storing it', async () => {
+      await service.addTaskRepeatCfg('task-1', {
+        repeatCycle: 'DAILY',
+        repeatEvery: undefined,
+        isPaused: undefined,
+      });
+
+      expect(lastCfg().repeatEvery).toBe(1);
+      expect(lastCfg().isPaused).toBeFalse();
+    });
+
     it('rejects a weekly config with no weekday, which would never fire', async () => {
       await expectAsync(
         service.addTaskRepeatCfg('task-1', { repeatCycle: 'WEEKLY' }),
@@ -1318,6 +1329,61 @@ describe('PluginBridgeService - Task Repeat Cfg Methods', () => {
       expect(taskRepeatCfgServiceSpy.updateTaskRepeatCfg).toHaveBeenCalledOnceWith(
         'repeat-cfg-1',
         { isPaused: true },
+        false,
+      );
+    });
+
+    it('treats an undefined required field as absent, not as a clear', async () => {
+      await service.updateTaskRepeatCfg('repeat-cfg-1', {
+        isPaused: true,
+        repeatEvery: undefined,
+        repeatCycle: undefined,
+        title: undefined,
+        tagIds: undefined,
+      });
+
+      const changes = taskRepeatCfgServiceSpy.updateTaskRepeatCfg.calls.mostRecent()
+        .args[1] as Record<string, unknown>;
+      expect(changes.isPaused).toBeTrue();
+      expect('repeatEvery' in changes).toBeFalse();
+      expect('repeatCycle' in changes).toBeFalse();
+      expect('title' in changes).toBeFalse();
+      expect('tagIds' in changes).toBeFalse();
+    });
+
+    it('still clears the optional fields a plugin may legitimately drop', async () => {
+      await service.updateTaskRepeatCfg('repeat-cfg-1', {
+        notes: undefined,
+        defaultEstimate: undefined,
+        startDate: undefined,
+        startTime: undefined,
+        monthlyWeekOfMonth: undefined,
+        monthlyWeekday: undefined,
+        monthlyLastDay: undefined,
+      });
+
+      const changes = taskRepeatCfgServiceSpy.updateTaskRepeatCfg.calls.mostRecent()
+        .args[1] as Record<string, unknown>;
+      for (const field of [
+        'notes',
+        'defaultEstimate',
+        'startDate',
+        'startTime',
+        'monthlyWeekOfMonth',
+        'monthlyWeekday',
+        'monthlyLastDay',
+      ]) {
+        expect(field in changes).toBeTrue();
+        expect(changes[field]).toBeUndefined();
+      }
+    });
+
+    it('clears a title through null, the value the model allows', async () => {
+      await service.updateTaskRepeatCfg('repeat-cfg-1', { title: null });
+
+      expect(taskRepeatCfgServiceSpy.updateTaskRepeatCfg).toHaveBeenCalledOnceWith(
+        'repeat-cfg-1',
+        { title: null },
         false,
       );
     });
