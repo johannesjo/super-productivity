@@ -20,7 +20,11 @@ import { NotifyService } from '../core/notify/notify.service';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { PluginHooksService } from './plugin-hooks';
 import { TaskService } from '../features/tasks/task.service';
-import { DEFAULT_TASK, TaskWithSubTasks } from '../features/tasks/task.model';
+import {
+  DEFAULT_TASK,
+  TaskReminderOptionId,
+  TaskWithSubTasks,
+} from '../features/tasks/task.model';
 import { WorkContextService } from '../features/work-context/work-context.service';
 import { ProjectService } from '../features/project/project.service';
 import { TagService } from '../features/tag/tag.service';
@@ -1329,6 +1333,53 @@ describe('PluginBridgeService - Task Repeat Cfg Methods', () => {
       expect(taskRepeatCfgServiceSpy.updateTaskRepeatCfg).toHaveBeenCalledOnceWith(
         'repeat-cfg-1',
         { isPaused: true },
+        false,
+      );
+    });
+
+    it('seeds remindAt when a startTime lands on a config that has none', async () => {
+      await service.updateTaskRepeatCfg('repeat-cfg-1', { startTime: '09:00' });
+
+      expect(taskRepeatCfgServiceSpy.updateTaskRepeatCfg).toHaveBeenCalledOnceWith(
+        'repeat-cfg-1',
+        {
+          startTime: '09:00',
+          remindAt: DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption,
+        },
+        false,
+      );
+    });
+
+    it('leaves an existing remindAt alone when the startTime changes', async () => {
+      taskRepeatCfgServiceSpy.getTaskRepeatCfgByIdAllowUndefined$.and.returnValue(
+        of({
+          id: 'repeat-cfg-1',
+          remindAt: TaskReminderOptionId.m15,
+        } as unknown as TaskRepeatCfg),
+      );
+
+      await service.updateTaskRepeatCfg('repeat-cfg-1', { startTime: '10:00' });
+
+      expect(taskRepeatCfgServiceSpy.updateTaskRepeatCfg).toHaveBeenCalledOnceWith(
+        'repeat-cfg-1',
+        { startTime: '10:00' },
+        false,
+      );
+    });
+
+    it('does not touch remindAt for an update that sets no startTime', async () => {
+      await service.updateTaskRepeatCfg('repeat-cfg-1', { repeatEvery: 3 });
+      expect(taskRepeatCfgServiceSpy.updateTaskRepeatCfg).toHaveBeenCalledOnceWith(
+        'repeat-cfg-1',
+        { repeatEvery: 3 },
+        false,
+      );
+
+      taskRepeatCfgServiceSpy.updateTaskRepeatCfg.calls.reset();
+      await service.updateTaskRepeatCfg('repeat-cfg-1', { startTime: undefined });
+      expect(taskRepeatCfgServiceSpy.updateTaskRepeatCfg).toHaveBeenCalledOnceWith(
+        'repeat-cfg-1',
+        { startTime: undefined },
         false,
       );
     });

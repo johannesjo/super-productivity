@@ -1368,6 +1368,15 @@ export class PluginBridgeService implements OnDestroy {
       );
     }
 
+    // Same seeding as the dialog's edit path: remindAt is app-owned and has no
+    // plugin field, so a startTime arriving on a config without one would stay
+    // inert - rendered in the detail panel, never scheduled on an instance.
+    if (changes.startTime && existing.remindAt === undefined) {
+      changes.remindAt =
+        this._globalConfigService.cfg()?.reminder.defaultTaskRemindOption ??
+        DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption;
+    }
+
     // isAskToUpdateAllTaskInstances stays false: the dialog it opens is a UI
     // side effect a plugin call must not trigger.
     this._taskRepeatCfgService.updateTaskRepeatCfg(taskRepeatCfgId, changes, false);
