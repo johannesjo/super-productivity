@@ -47,6 +47,50 @@ So the bar floats above the keyboard if **either** the window/WebView shrinks
 window **does** shrink (the system resizes for the IME), so `--keyboard-height`
 stays `0` and the bar sits correctly at `bottom: var(--s2)`.
 
+## What a `--keyboard-height` write on `<html>` costs (#9779, measured 2026-09)
+
+**Before porting any iOS keyboard fix to the Android path, read this section.**
+The Android/web tracker above writes `--keyboard-height` on `document.documentElement`.
+That write is not free — a custom property on the root is re-resolved per element
+by the style engine, so its cost scales with the number of rendered task rows.
+This is what #9779 was ("opening the add-task bar on iOS is laggy, and it gets
+worse the more task rows are on screen").
+
+Median ms per write, 201 task rows, iPhone 13 viewport, `ng serve` build,
+WebKit 26.5 / Chromium 149:
+
+| write                                 | WebKit | Blink |
+| ------------------------------------- | ------ | ----- |
+| root **custom** property              | ~180   | 12.8  |
+| root **inherited standard** (`color`) | 0.1    | 0.3   |
+| custom property on a leaf element     | 0.1    | 0.1   |
+| root custom, rows `display: none`     | 8      | 1.6   |
+| empty list                            | ~9     | 0.7   |
+
+Three things follow, and the third is the decision:
+
+1. **It is custom properties specifically, not inherited properties.** A `color`
+   write on `<html>` invalidates exactly the same set of elements and stays at the
+   floor. "Don't write inherited things on the root" is the wrong lesson.
+2. **Only the root custom-property write scales with row count.** The shell-height
+   write and everything else measured flat from 0 to 201 rows.
+3. **Blink charges the same mechanism roughly an order of magnitude less.** iOS was
+   fixed in [#9926](https://github.com/super-productivity/super-productivity/pull/9926)
+   by moving the vars onto the CDK overlay container (`IosKeyboardService`). That
+   fix was **deliberately not ported to the Android path**: 12.8ms per write, at a
+   write frequency of about one per keyboard open rather than one per animation
+   frame, does not justify the added indirection. Revisit if the Android tracker
+   ever starts writing per frame, or if row counts grow far beyond 200.
+
+Caveats before quoting these: run-to-run spread on the WebKit figure is ~16%
+(samples: 180.4, 193.4, 194.0, 166.9, 174.3), so treat anything under ~1.2x as
+unresolved — `content-visibility`, for one, is a real ~3.7x cut in Blink but does
+nothing legible in WebKit. Headless engines on a desktop are not an A15; read the
+ratios, not the milliseconds.
+
+Re-measure with `e2e/measure/ios-keyboard-relayout.measure.ts` (hand-run, not part
+of `npm run e2e` — see its header for how and for the methodology caveats).
+
 ## #8508 — reversed / invisible characters (the actual root cause)
 
 **Symptom.** On Android, the add-task bar (and search) showed reversed or
@@ -439,10 +483,10 @@ sits below 140. The `android-tests` job boots a second emulator at API 34
 (`android/run-android-ime-check.sh`) after the API 35 suite
 (`android/run-android-checks.sh`), so every PR exercises both owners:
 
-| Emulator                  | Owner per gate         | Measured (2026-09, 640 px root)                                                                       |
-| ------------------------- | ---------------------- | ----------------------------------------------------------------------------------------------------- |
-| API 34, WebView 113.0     | native shim (on)       | `paramsHeight` MATCH_PARENT → **405** = `rect.bottom`; WebView bottom 640 → 405; `innerHeight` 640 → 405 |
-| API 35 (bundled WebView)  | SystemBars (shim off)  | layout params untouched; WebView bottom at `rect.bottom`; `innerHeight` shrinks                       |
+| Emulator                 | Owner per gate        | Measured (2026-09, 640 px root)                                                                          |
+| ------------------------ | --------------------- | -------------------------------------------------------------------------------------------------------- |
+| API 34, WebView 113.0    | native shim (on)      | `paramsHeight` MATCH_PARENT → **405** = `rect.bottom`; WebView bottom 640 → 405; `innerHeight` 640 → 405 |
+| API 35 (bundled WebView) | SystemBars (shim off) | layout params untouched; WebView bottom at `rect.bottom`; `innerHeight` shrinks                          |
 
 The test derives the gate's inputs the way the activity does
 (`NativeInsetShimGate.activeProviderMajor(WebViewCompatibilityChecker.evaluate())`)
