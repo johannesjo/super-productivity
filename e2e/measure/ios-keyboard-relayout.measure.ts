@@ -33,8 +33,10 @@
  * - `shell-height-write` — the `height` + `min-height` that `IosKeyboardService`
  *   drives onto `.app-container` while the keyboard animates.
  *
- * Findings, measured 2026-09 (WebKit 26 / Chromium 151, iPhone 13 viewport
- * 390x664, `ng serve` build, median ms per write over 5 runs of 20):
+ * Findings, measured 2026-09 (WebKit 26.5 / Chromium 149, iPhone 13 viewport
+ * 390x664, `ng serve` build, median ms per write over 5 runs of 20). The engine
+ * build is printed by the harness, so check it against your own run rather than
+ * trusting this line:
  *
  *   WebKit                       0 rows   201    201 c-v   201 d:none   128 collapsed
  *   root-custom-property           8.0   180.4     171.8          8.2         117.2
@@ -50,28 +52,43 @@
  *   plain-property                 0.3     0.3       0.4          0.2
  *   shell-height-write x30         0.5     0.6       0.6          0.5
  *
- * Drift check (the `[rows: none, repeat]` line, measured last): WebKit 193.4 vs
- * an opening 180.4, Blink 12.6 vs 12.8. So in WebKit anything inside ±10% is
- * noise; Blink is stable enough to read directly.
+ * HOW MUCH OF THIS IS NOISE. Two clean WebKit runs gave four samples of the
+ * same unmodified 201-row root write (opening and `[rows: none, repeat]`):
+ * 180.4, 193.4, 194.0, 166.9 — a spread of ~16%. So read the WebKit column as
+ * "about 180", never to the decimal, and treat anything under ~1.2x as
+ * unresolved. Blink is far steadier (12.8 opening vs 12.6 repeat) and can be
+ * read directly. Both engines were measured with nothing else running; a
+ * concurrent second run inflates every figure by ~30% and is easy to do by
+ * accident.
  *
  * WHAT THE NUMBERS SAY.
  *
  * 1. It is custom properties specifically, not inherited properties. A `color`
- *    write on `<html>` invalidates exactly the same set of elements and costs
- *    0.1ms against the custom property's 180.4ms — a ratio of ~1800x in WebKit,
- *    ~40x in Blink. "Don't write inherited things on the root" would be the wrong
- *    lesson; "WebKit resolves custom properties per element on every root write"
- *    is the right one, and it is what the #9926 fix is built on.
+ *    write on `<html>` invalidates exactly the same set of elements and stays at
+ *    the 0.1ms floor while the custom property costs ~180ms — three orders of
+ *    magnitude in WebKit, ~40x in Blink. "Don't write inherited things on the
+ *    root" would be the wrong lesson; "WebKit resolves custom properties per
+ *    element on every root write" is the right one, and it is what the #9926 fix
+ *    is built on. This is the single most useful line in the file: without the
+ *    `root-inherited-standard` control the root-vs-leaf gap reads as the wrong
+ *    conclusion, and it read that way here until 2026-09.
  * 2. Only the root custom-property write scales with row count. Everything else
  *    in both tables is flat from 0 to 201 rows.
- * 3. Blink charges the same mechanism ~14x less (180.4 vs 12.8 at 201 rows).
- *    That is why the iOS fix was not ported to the Android path.
- * 4. Rows that are not rendered are not charged. `display: none` takes WebKit's
- *    180.4ms down to 8.2ms — the empty-list floor (8.0ms) — so the cost tracks
- *    rendered rows, not DOM nodes. Collapsing Completed Tasks, the reporter's own
- *    workaround, gets 117.2ms by removing rows from the DOM outright
- *    (`collapsible.component.html` wraps its panel in a structural `@if`).
- *    `content-visibility` cuts Blink 3.7x but lands inside WebKit's drift band.
+ * 3. Blink charges the same mechanism roughly an order of magnitude less (~180ms
+ *    vs 12.8ms at 201 rows). That is why the iOS fix was not ported to the
+ *    Android path — see `docs/android-edge-to-edge-keyboard.md` for that call.
+ * 4. Rows that are not rendered are barely charged. `display: none` takes
+ *    WebKit's ~180ms to 8.2 and 7.6ms across the two runs — the empty-list floor
+ *    (8.0-10.3ms) — so in WebKit the cost tracks rendered rows, not DOM nodes.
+ *    Blink also drops hard but not to its floor (1.6ms against 0.7ms), so state
+ *    this one per engine. Collapsing Completed Tasks, the reporter's own
+ *    workaround, removes the rows from the DOM outright
+ *    (`collapsible.component.html` wraps its panel in a structural `@if`) and
+ *    lands between the two, as it should at 128 rows instead of 201.
+ * 5. `content-visibility` is a real ~3.7x cut in Blink and does nothing legible
+ *    in WebKit: 171.8 and 169.8 across two runs, against unmodified samples
+ *    spanning 166.9-194.0. That is not "no effect" — it is below what this setup
+ *    can resolve, and a small real win is not excluded.
  *
  * KNOWN BLIND SPOTS. These are hand-simulated writes, not the real event
  * sequence: `IosKeyboardService` is gated on native iOS and never runs here.
@@ -427,11 +444,13 @@ test.describe('#9779 root custom-property write cost', () => {
       // eslint-disable-next-line no-console
       console.log(`[measure] ${line}`);
     };
-    // browserName, not a user-agent sniff: the shared fixture overrides the UA
-    // with "PLAYWRIGHT", so sniffing for "Chrome" reported webkit under both
-    // projects and silently mislabelled every Chromium run.
+    // browserName + browser.version(), never a user-agent sniff: the shared
+    // fixture overwrites the UA with "PLAYWRIGHT", which already made one
+    // generation of this harness report webkit under both projects. The build is
+    // printed rather than hand-written into the header above — a version nobody
+    // re-checked is the kind of claim this file exists to stop making.
     record(
-      `engine=${browserName} ` +
+      `engine=${browserName} build=${page.context().browser()?.version() ?? 'unknown'} ` +
         (await page.evaluate(
           () => `viewport=${window.innerWidth}x${window.innerHeight}`,
         )),
