@@ -51,9 +51,10 @@ import {
  * keyboard — and never onto `<html>`. WebKit re-resolves custom properties per
  * element on every root write, so one write restyles the whole task list: on a
  * 200-task list that is three orders of magnitude more than an ordinary
- * inherited property (`color`) with the identical invalidation set. It is custom properties specifically,
- * not inheritance, and it is the "insane lag" of #9779. Numbers, both engines,
- * and how to re-measure: `e2e/measure/ios-keyboard-relayout.measure.ts`. So:
+ * inherited property (`color`) with the identical invalidation set. It is custom
+ * properties specifically, not inheritance, and it is the "insane lag" of #9779.
+ * Numbers and the cross-engine comparison: `docs/android-edge-to-edge-keyboard.md`,
+ * "What a `--keyboard-height` write on `<html>` costs". So:
  *
  * - the CDK overlay container carries `--visual-viewport-height`,
  *   `--keyboard-height` and `--keyboard-overlay-offset` for dialogs, bottom

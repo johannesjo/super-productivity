@@ -18,8 +18,8 @@
  * publishes them on the CDK overlay container. The root write survives on the
  * NON-iOS path — `GlobalThemeService._initVisualViewportKeyboardTracking()`
  * (`global-theme.service.ts`) sets `--keyboard-height` on `document.documentElement`
- * for Android and mobile web — so the Blink column below is the live consumer of
- * this measurement, and the WebKit column is the record of what was fixed.
+ * for Android and mobile web — so the Blink numbers are the live consumer of this
+ * measurement, and the WebKit ones are the record of what was fixed.
  *
  * The measurements:
  *
@@ -33,62 +33,21 @@
  * - `shell-height-write` — the `height` + `min-height` that `IosKeyboardService`
  *   drives onto `.app-container` while the keyboard animates.
  *
- * Findings, measured 2026-09 (WebKit 26.5 / Chromium 149, iPhone 13 viewport
- * 390x664, `ng serve` build, median ms per write over 5 runs of 20). The engine
- * build is printed by the harness, so check it against your own run rather than
- * trusting this line:
- *
- *   WebKit                       0 rows   201    201 c-v   201 d:none   128 collapsed
- *   root-custom-property             ~9   ~180      ~170            8          ~125
- *   root-inherited-standard         0.1    0.1       0.1          0.1
- *   leaf-custom-property            0.1    0.1       0.1          0.1
- *   plain-property                  0.0    0.0       0.1          0.0
- *   shell-height-write x30            5      5         5            5
- *
- *   Blink                        0 rows   201    201 c-v   201 d:none   128 collapsed
- *   root-custom-property           0.7    12.8       3.5          1.6           8.7
- *   root-inherited-standard        0.3     0.3       0.3          0.3
- *   leaf-custom-property           0.1     0.1       0.1          0.0
- *   plain-property                 0.3     0.3       0.4          0.2
- *   shell-height-write x30         0.5     0.6       0.6          0.5
+ * THE FINDINGS LIVE IN `docs/android-edge-to-edge-keyboard.md`, under "What a
+ * `--keyboard-height` write on `<html>` costs". Numbers, the cross-engine
+ * comparison and the decision not to port the iOS fix to Android are all there,
+ * because that is the file someone reads before making an Android keyboard
+ * change — nobody greps `e2e/measure/`. What stays here is how to run the thing
+ * and how to read what it prints.
  *
  * HOW MUCH OF THIS IS NOISE. Clean WebKit runs gave these samples of the same
  * unmodified 201-row root write (opening and `[rows: none, repeat]`): 180.4,
- * 193.4, 194.0, 166.9, 174.3 — a spread of ~16%, which is why the WebKit column
- * above is rounded. Treat anything under ~1.2x there as unresolved. Blink held
+ * 193.4, 194.0, 166.9, 174.3 — a spread of ~16%, which is why the published
+ * WebKit figures are rounded. Treat anything under ~1.2x there as unresolved. Blink held
  * 12.8 opening against 12.6 repeat, but that is one pair, so its variant cells
  * are single samples too. Measure with nothing else running: one contaminated
  * run here inflated cells by a third to double, and stacking two runs is easy to
  * do by accident.
- *
- * WHAT THE NUMBERS SAY.
- *
- * 1. It is custom properties specifically, not inherited properties. A `color`
- *    write on `<html>` invalidates exactly the same set of elements and stays at
- *    the 0.1ms floor while the custom property costs ~180ms — three orders of
- *    magnitude in WebKit, ~40x in Blink. "Don't write inherited things on the
- *    root" would be the wrong lesson; "WebKit resolves custom properties per
- *    element on every root write" is the right one, and it is what the #9926 fix
- *    is built on. Without the `root-inherited-standard` control the root-vs-leaf
- *    gap reads as the wrong conclusion, and it read that way here until 2026-09.
- * 2. Only the root custom-property write scales with row count. Everything else
- *    in both tables is flat from 0 to 201 rows.
- * 3. Blink charges the same mechanism roughly an order of magnitude less (~180ms
- *    vs 12.8ms at 201 rows). That is why the iOS fix was not ported to the
- *    Android path — see `docs/android-edge-to-edge-keyboard.md` for that call.
- * 4. Rows that are not rendered are barely charged. `display: none` takes
- *    WebKit's ~180ms to 8.2 and 7.6ms across the two runs — the empty-list floor
- *    (8.0-10.3ms) — so in WebKit the cost tracks rendered rows, not DOM nodes.
- *    Blink also drops hard but not to its floor (1.6ms against 0.7ms), so state
- *    this one per engine. Collapsing Completed Tasks, the reporter's own
- *    workaround, removes the rows from the DOM outright
- *    (`collapsible.component.html` wraps its panel in a structural `@if`) and
- *    lands between the two, as it should at 128 rows instead of 201.
- * 5. `content-visibility` is a ~3.7x cut in Blink (one run, so treat the factor
- *    as approximate) and does nothing legible in WebKit: 171.8, 169.8 and 177.1
- *    across three runs, against unmodified samples spanning 166.9-194.0 — and in
- *    the third run it came in ABOVE its own baseline (177.1 vs 174.3). Below what
- *    this setup resolves, so a small real win is not excluded either way.
  *
  * KNOWN BLIND SPOTS. These are hand-simulated writes, not the real event
  * sequence: `IosKeyboardService` is gated on native iOS and never runs here.
