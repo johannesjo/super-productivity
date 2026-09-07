@@ -84,13 +84,18 @@
  * These per-write figures do NOT extrapolate to a run of writes. The write
  * measurements force a layout read after every write, which is what isolates one
  * write's cost — but it also defeats the coalescing a real caller gets for free.
- * Measured against 201 rows in WebKit: one write with a forced read 388ms, four
- * writes each followed by a forced read 1647ms (~4x, as expected), four writes
- * with a single forced read at the end 249ms. So consecutive writes with no
- * layout read between them cost about ONE recalc, not N. Before citing these
- * numbers against code that writes several properties in a row — the four
- * `--safe-area-inset-*` writes in `_initSafeAreaInsets`, say — check whether it
- * reads layout in between. Usually it does not.
+ * Measured against 201 rows in WebKit, relative to one write with a forced read:
+ * four writes each followed by a forced read cost ~4x; four writes with a single
+ * forced read at the end cost ~1x. So consecutive writes with no layout read
+ * between them are about ONE recalc, not N. Ratios, not absolutes — each case
+ * ran once in a fixed order, so the millisecond figures carry ordering noise
+ * (creating a custom property is not the same work as updating one) and are
+ * deliberately not quoted here; a 4x spread survives that, a 20% one would not.
+ * The batched case also wrote dummy properties nothing consumes, so vars that
+ * feed a `calc()` in the SCSS may cost more. Before citing these numbers against
+ * code that writes several properties in a row — the four `--safe-area-inset-*`
+ * writes in `_initSafeAreaInsets`, say — check whether it reads layout in
+ * between. Usually it does not.
  */
 import { expect, test } from '../fixtures/test.fixture';
 import type { Page } from '@playwright/test';
