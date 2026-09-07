@@ -39,6 +39,19 @@
  *   resize-dispatch x30               0.0ms      0.0ms                          -
  *   add-task-bar-open                49.0ms     37.0ms                     41.0ms
  *
+ * The same run under `--project=measure-chromium` (Blink, 2026-09):
+ *
+ *                                   0 rows   201 rows   201 rows, content-vis
+ *   root-custom-property write        1.0ms     14.1ms                 1.9-4.0ms
+ *   leaf-custom-property write        0.1ms      0.0ms                     0.1ms
+ *   plain-property write              0.3ms      0.3ms                     0.3ms
+ *
+ * Blink charges the same mechanism roughly an order of magnitude less: still 14x
+ * the leaf write and still scaling with row count, but ~14ms rather than
+ * hundreds. Worth knowing before porting an iOS fix to the Android path on the
+ * strength of the WebKit number alone — and note `content-visibility` cuts it
+ * severalfold here while doing nothing at all in WebKit.
+ *
  * Only the root custom-property write scales, and it scales hard. The identical
  * write on a leaf stays at 0.1ms with 201 rows on screen, so the cost is style
  * invalidation across everything that could inherit the property — not the write,
@@ -403,14 +416,17 @@ test.describe('#9779 iOS add-task-bar open cost', () => {
     page,
     workViewPage,
     testPrefix,
+    browserName,
   }) => {
     const lines: string[] = [];
+    // browserName, not a user-agent sniff: the shared fixture overrides the UA
+    // with "PLAYWRIGHT", so sniffing for "Chrome" reported webkit under both
+    // projects and silently mislabelled every Chromium run.
     lines.push(
-      await page.evaluate(
-        () =>
-          `engine=${navigator.userAgent.includes('Chrome') ? 'chromium' : 'webkit'} ` +
-          `viewport=${window.innerWidth}x${window.innerHeight}`,
-      ),
+      `engine=${browserName} ` +
+        (await page.evaluate(
+          () => `viewport=${window.innerWidth}x${window.innerHeight}`,
+        )),
     );
 
     // Seed straight into the built-in Inbox project: creating one through the UI
