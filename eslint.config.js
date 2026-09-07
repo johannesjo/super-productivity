@@ -295,7 +295,7 @@ module.exports = tseslint.config(
     },
   },
   // Grandfathered offenders: files that already hand whole values to a Log
-  // method (137 hits across these 66 files, measured 2026-09), downgraded to a
+  // method (132 hits across these 64 files, measured 2026-09), downgraded to a
   // non-failing warning so they don't red-CI while they are cleaned up. They
   // still warn, so the debt stays visible in lint output.
   // This list may only ever SHRINK — a new entry means a leak was introduced.
@@ -329,7 +329,6 @@ module.exports = tseslint.config(
       'src/app/features/reminder/reminder.module.ts',
       'src/app/features/reminder/reminder.service.ts',
       'src/app/features/right-panel/right-panel-content.component.ts',
-      'src/app/features/schedule/map-schedule-data/create-schedule-days.ts',
       'src/app/features/schedule/schedule-day-panel/schedule-day-panel.component.ts',
       'src/app/features/shepherd/shepherd-helper.ts',
       'src/app/features/tasks/add-task-bar/short-syntax-to-tags.ts',
@@ -370,7 +369,6 @@ module.exports = tseslint.config(
       'src/app/util/is-same-day.ts',
       'src/app/util/search-nav-debug.ts',
       'src/app/util/skip-during-sync-window.operator.ts',
-      'src/app/util/wait-for-sync-window.operator.ts',
     ],
     plugins: {
       'local-rules': localRules,
