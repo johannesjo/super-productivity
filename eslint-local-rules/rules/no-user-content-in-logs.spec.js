@@ -11,6 +11,16 @@ const ruleTester = new RuleTester({
   },
 });
 
+// TS-only syntax needs the TS parser; kept as a second tester so the plain
+// cases above still prove the rule works on the default parser.
+const tsRuleTester = new RuleTester({
+  languageOptions: {
+    parser: require('@typescript-eslint/parser'),
+    ecmaVersion: 2022,
+    sourceType: 'module',
+  },
+});
+
 ruleTester.run('no-user-content-in-logs', rule, {
   valid: [
     // A plain message.
@@ -49,6 +59,14 @@ ruleTester.run('no-user-content-in-logs', rule, {
     { code: `Log.log({ ctx: { taskId: t.id, count: xs.length } });` },
     { code: `Log.log('x', [a.id, b.id]);` },
     { code: `Log.log('x', hasData ? 'y' : 'n');` },
+    // Judged on key OR value: a labelled id is already the discipline we want,
+    // so it must not be reported and told to log an id.
+    { code: `Log.log({ task: taskId });` },
+    { code: `Log.log({ parent: parentId });` },
+    { code: `Log.log({ result: hasData });` },
+    // A named helper is the author choosing what to expose, like any call arg.
+    { code: `Log.log('x', ...getSafeErrorLogMeta(e));` },
+    { code: `Log.log('x', ...[taskId]);` },
     // Not a logger.
     { code: `analytics.log(task);` },
     { code: `console.log(task);` },
@@ -118,10 +136,10 @@ ruleTester.run('no-user-content-in-logs', rule, {
       code: `Log.log('x', [task]);`,
       errors: [{ messageId: 'bareValue', data: { name: 'task' } }],
     },
-    // A spread argument is a payload too — opaque, so reported as a spread.
+    // A spread of a literal is traversed, so the contents are judged.
     {
       code: `Log.log('x', ...[task]);`,
-      errors: [{ messageId: 'spreadValue' }],
+      errors: [{ messageId: 'bareValue', data: { name: 'task' } }],
     },
     {
       code: `Log.log('x', ...rest);`,
@@ -148,6 +166,15 @@ ruleTester.run('no-user-content-in-logs', rule, {
       code: `Log.log('dnd', doNotDisturbList);`,
       errors: [{ messageId: 'bareValue', data: { name: 'doNotDisturbList' } }],
     },
+    // `…ById` is an entity dictionary keyed by id, not an id.
+    {
+      code: `Log.log('x', tasksById);`,
+      errors: [{ messageId: 'bareValue', data: { name: 'tasksById' } }],
+    },
+    {
+      code: `Log.log('x', byId);`,
+      errors: [{ messageId: 'bareValue', data: { name: 'byId' } }],
+    },
     // Every context logger is covered, not just `Log`.
     {
       code: `PluginLog.warn('plugin cfg', cfg);`,
@@ -156,6 +183,45 @@ ruleTester.run('no-user-content-in-logs', rule, {
     {
       code: `IssueLog.log('issue', issue);`,
       errors: [{ messageId: 'bareValue', data: { name: 'issue' } }],
+    },
+  ],
+});
+
+// Wrappers that carry a value through unchanged. Without these the rule is
+// `error` and `task!` is a one-keystroke way to make CI green while still
+// exporting the whole object.
+tsRuleTester.run('no-user-content-in-logs (typescript)', rule, {
+  valid: [
+    { code: `Log.err('x', e as Error);` },
+    { code: `Log.log('x', t.id as string);` },
+    { code: `Log.log('x', { taskId: task!.id });` },
+  ],
+  invalid: [
+    {
+      code: `Log.log('x', task!);`,
+      errors: [{ messageId: 'bareValue', data: { name: 'task' } }],
+    },
+    {
+      code: `Log.log('x', task as any);`,
+      errors: [{ messageId: 'bareValue', data: { name: 'task' } }],
+    },
+    {
+      code: `Log.log('x', task satisfies Task);`,
+      errors: [{ messageId: 'bareValue', data: { name: 'task' } }],
+    },
+    {
+      code: `Log.log('x', await task);`,
+      errors: [{ messageId: 'bareValue', data: { name: 'task' } }],
+    },
+    {
+      code: `Log.log('x', (0, task));`,
+      errors: [{ messageId: 'bareValue', data: { name: 'task' } }],
+    },
+    // An `as *Response` asserts the value is NOT an Error, so the error-name
+    // allowlist must not cover it — log.ts only narrows a real Error.
+    {
+      code: `Log.log('http', e as HttpErrorResponse);`,
+      errors: [{ messageId: 'bareValue', data: { name: 'e' } }],
     },
   ],
 });

@@ -96,8 +96,9 @@ export const assertSecureWebPreferences = (
       'webviewTag must not be true (a <webview> guest needs its own validation)',
     );
   }
-  // Privacy rather than security, so it does not use `fail()`: enabling the
-  // spellchecker makes the app contact Google for dictionaries (#5314).
+  // Privacy rather than the IPC trust boundary, so it passes its own `why`:
+  // enabling the spellchecker makes the app contact Google for dictionaries
+  // (#5314).
   if (webPreferences.spellcheck !== false) {
     throw fail(
       `spellcheck must be explicitly false (got ${String(webPreferences.spellcheck)})`,

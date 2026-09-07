@@ -295,7 +295,7 @@ module.exports = tseslint.config(
     },
   },
   // Grandfathered offenders: files that already hand whole values to a Log
-  // method (132 hits across these 64 files, measured 2026-09), downgraded to a
+  // method (121 hits across these 62 files, measured 2026-09), downgraded to a
   // non-failing warning so they don't red-CI while they are cleaned up. They
   // still warn, so the debt stays visible in lint output.
   // This list may only ever SHRINK — a new entry means a leak was introduced.
@@ -306,7 +306,6 @@ module.exports = tseslint.config(
   {
     files: [
       'src/app/core/language/language.service.ts',
-      'src/app/core/persistence/legacy-pf-db.service.ts',
       'src/app/core/share/share.service.ts',
       'src/app/core/startup/startup.service.ts',
       'src/app/core/theme/global-theme.service.ts',
@@ -319,7 +318,6 @@ module.exports = tseslint.config(
       'src/app/features/archive/archive.service.ts',
       'src/app/features/idle/store/idle.effects.ts',
       'src/app/features/issue-panel/issue-panel-calendar-agenda/issue-panel-calendar-agenda.component.ts',
-      'src/app/features/issue/dialog-edit-issue-provider/dialog-edit-issue-provider.component.ts',
       'src/app/features/issue/handle-issue-provider-http-error.ts',
       'src/app/features/issue/issue.service.ts',
       'src/app/features/issue/providers/jira/jira-api.service.ts',

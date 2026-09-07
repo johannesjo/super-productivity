@@ -101,6 +101,9 @@ const SAFE_WORDS = [
   'enabled',
 ];
 const SAFE_WHOLE = new Set(SAFE_WORDS);
+// `…ById` is an entity dictionary keyed by id, not an id — `entitiesById` from
+// an NgRx adapter is every title and note. It must not ride the `Id` suffix.
+const BY_ID_RE = /[Bb]y(?:Id|Ids)$/;
 const SAFE_SUFFIX_RE = new RegExp(
   `(?:${SAFE_WORDS.map((w) => w[0].toUpperCase() + w.slice(1)).join('|')})$`,
 );
@@ -120,6 +123,7 @@ const CONST_NAME_RE = /^[A-Z][A-Z0-9_]*$/;
 
 const isSafeName = (name) => {
   if (typeof name !== 'string') return false;
+  if (BY_ID_RE.test(name)) return false;
   const lower = name.toLowerCase();
   return (
     SAFE_WHOLE.has(lower) ||
@@ -168,9 +172,67 @@ module.exports = {
     // reported; a member access, call or literal is the author having already
     // chosen what to expose. Object/array literals are traversed so nesting
     // cannot be used to smuggle a whole value past the check.
+    // Wrappers that carry the value through unchanged. Without this, `error`
+    // turns `task!` or `task as any` into a one-keystroke way to make CI green
+    // while still exporting the whole object — and `e as HttpErrorResponse` is
+    // that bypass arriving by accident, on exactly the value the docstring
+    // above warns is NOT narrowed by the logger.
+    const UNWRAP = {
+      TSNonNullExpression: 'expression',
+      TSAsExpression: 'expression',
+      TSTypeAssertion: 'expression',
+      TSSatisfiesExpression: 'expression',
+      TSInstantiationExpression: 'expression',
+      ChainExpression: 'expression',
+      AwaitExpression: 'argument',
+    };
+
+    // An `as X` where X is a *Response type: Angular's HttpErrorResponse
+    // extends HttpResponseBase, not Error, so `log.ts` JSON-stringifies it
+    // whole — exporting `.url` (which for an iCal feed carries a secret token)
+    // and the response body.
+    const assertsNonErrorResponse = (node) => {
+      const ann = node.typeAnnotation;
+      const name =
+        ann &&
+        ann.type === 'TSTypeReference' &&
+        ann.typeName &&
+        ann.typeName.type === 'Identifier'
+          ? ann.typeName.name
+          : null;
+      return !!name && /Response$/.test(name);
+    };
+
     const checkValue = (node, seen) => {
       if (!node || seen.has(node)) return;
       seen.add(node);
+
+      // `e as HttpErrorResponse` asserts the value is NOT an Error, so the
+      // error-name allowlist must not cover it — that is precisely the value
+      // the logger does not narrow (see docstring). Reported on the name the
+      // author used, since the assertion is the evidence.
+      if (node.type === 'TSAsExpression' && assertsNonErrorResponse(node)) {
+        const inner = node.expression;
+        context.report({
+          node,
+          messageId: 'bareValue',
+          data: {
+            name: inner && inner.type === 'Identifier' ? inner.name : 'this value',
+          },
+        });
+        return;
+      }
+
+      const unwrapKey = UNWRAP[node.type];
+      if (unwrapKey) {
+        checkValue(node[unwrapKey], seen);
+        return;
+      }
+      // `(0, task)` — only the last operand is the value.
+      if (node.type === 'SequenceExpression') {
+        checkValue(node.expressions[node.expressions.length - 1], seen);
+        return;
+      }
 
       switch (node.type) {
         case 'Identifier':
@@ -179,23 +241,30 @@ module.exports = {
           }
           return;
         case 'SpreadElement':
-        case 'RestElement':
-          if (node.argument && node.argument.type === 'Identifier') {
-            if (!isSafeName(node.argument.name)) {
+        case 'RestElement': {
+          const arg = node.argument;
+          if (arg && arg.type === 'Identifier') {
+            if (!isSafeName(arg.name)) {
               context.report({
                 node,
                 messageId: 'spreadValue',
-                data: { name: node.argument.name },
+                data: { name: arg.name },
               });
             }
             return;
           }
-          context.report({
-            node,
-            messageId: 'spreadValue',
-            data: { name: nameOf(node.argument) },
-          });
+          // `...{ a: b }` / `...[x]` — traversable, so judge the contents.
+          if (
+            arg &&
+            (arg.type === 'ObjectExpression' || arg.type === 'ArrayExpression')
+          ) {
+            checkValue(arg, seen);
+            return;
+          }
+          // `...getSafeErrorLogMeta(e)` — a named helper is the author having
+          // chosen what to expose, exactly like a plain call argument.
           return;
+        }
         case 'ObjectExpression':
           for (const prop of node.properties) {
             if (
@@ -205,7 +274,9 @@ module.exports = {
               checkValue(prop, seen);
               continue;
             }
-            // Getters/setters/methods carry no value to disclose here.
+            // Getters are skipped as a known gap, not because they are safe:
+            // `JSON.stringify` invokes them, so `{ get a() { return task; } }`
+            // would export. Not a shape anyone writes at a log call.
             if (prop.type !== 'Property' || prop.kind !== 'init' || prop.method) continue;
             // For a bare identifier value, the name the AUTHOR CHOSE is the
             // signal. Shorthand has only one name to go on; longhand means they
@@ -213,11 +284,15 @@ module.exports = {
             // discipline we want and passes, while `{ calEv: calEv }` — the
             // one-keystroke evasion of the shorthand check — does not.
             if (prop.value && prop.value.type === 'Identifier') {
-              const judged =
-                !prop.shorthand && prop.key && prop.key.type === 'Identifier'
-                  ? prop.key.name
-                  : prop.value.name;
-              if (!isSafeName(judged)) {
+              const keyName =
+                prop.key && prop.key.type === 'Identifier' ? prop.key.name : null;
+              // Safe if EITHER side says so. Value-safe keeps `{ task: taskId }`
+              // from being reported (and told to log an id it already logs);
+              // key-safe keeps `{ bannerCount: nrOfAllBanners }`. Both unsafe —
+              // `{ calEv: calEv }` — is still the evasion this rule closes.
+              const isSafe =
+                isSafeName(prop.value.name) || (!prop.shorthand && isSafeName(keyName));
+              if (!isSafe) {
                 context.report({
                   node: prop,
                   messageId: 'bareValue',

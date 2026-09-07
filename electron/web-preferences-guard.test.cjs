@@ -202,16 +202,30 @@ test('every webPreferences literal in electron/ sets spellcheck: false', () => {
   };
   walk(electronDir);
 
-  // A file that declares a webPreferences object must also pin spellcheck in
-  // it. Deliberately coarse (same spirit as the wiring guard above): it cannot
-  // parse, so it asserts co-occurrence per file, which is enough to catch the
-  // realistic regression — a new window, or a dropped line during a refactor.
-  const DECLARES_WEB_PREFS_RE =
-    /webPreferences\s*:\s*(?:BrowserWindowConstructorOptions|\{)/;
+  // Key off the window constructors themselves, not the shape of the
+  // webPreferences declaration: `const webPreferences: WebPreferences = {…}`
+  // (the alias this very module exports) and `webPreferences: wp` indirection
+  // both evade a declaration-shaped regex, and the alias is the obvious
+  // spelling for the next window someone adds.
+  //
+  // Comments are stripped first, so a file cannot be excused by the string
+  // `spellcheck: false` appearing in prose.
+  //
+  // Deliberately coarse (same spirit as the wiring guard above): it cannot
+  // parse, so it asserts co-occurrence per file. A file holding one guarded and
+  // one unguarded window would pass — accepted, as for the wiring guard.
+  const stripComments = (src) =>
+    src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
+  const HAS_NEW_WINDOW_RE = /new\s+(?:BrowserWindow|BrowserView|WebContentsView)\s*\(/;
+  const DECLARES_WEB_PREFS_RE = /\bwebPreferences\b\s*[:=]/;
+  // The guard module names `webPreferences` as a parameter and type but
+  // creates no window — it is the definition site, not a call site.
+  const NOT_A_CALL_SITE = new Set(['web-preferences-guard.ts']);
   const offenders = tsFiles
     .filter((file) => {
-      const src = fs.readFileSync(file, 'utf8');
-      if (!DECLARES_WEB_PREFS_RE.test(src)) return false;
+      if (NOT_A_CALL_SITE.has(path.basename(file))) return false;
+      const src = stripComments(fs.readFileSync(file, 'utf8'));
+      if (!HAS_NEW_WINDOW_RE.test(src) && !DECLARES_WEB_PREFS_RE.test(src)) return false;
       return !/spellcheck\s*:\s*false/.test(src);
     })
     .map((file) => path.relative(electronDir, file));
