@@ -295,7 +295,7 @@ module.exports = tseslint.config(
     },
   },
   // Grandfathered offenders: files that already hand whole values to a Log
-  // method (119 hits across these 62 files, measured 2026-09), downgraded to a
+  // method (121 hits across these 61 files, measured 2026-09), downgraded to a
   // non-failing warning so they don't red-CI while they are cleaned up. They
   // still warn, so the debt stays visible in lint output.
   // This list may only ever SHRINK — a new entry means a leak was introduced.
@@ -335,7 +335,6 @@ module.exports = tseslint.config(
       'src/app/features/tasks/task.service.ts',
       'src/app/features/tasks/util/play-done-sound.ts',
       'src/app/features/ui-helper/ui-helper.service.ts',
-      'src/app/imex/sync/import-encryption-handler.service.ts',
       'src/app/imex/sync/oauth-callback-handler.service.ts',
       'src/app/imex/sync/sync-trigger.service.ts',
       'src/app/imex/sync/sync-wrapper.service.ts',

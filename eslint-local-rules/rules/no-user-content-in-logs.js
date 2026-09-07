@@ -44,8 +44,11 @@
  * a call result (`JSON.stringify(task)`, `ev.getFirstPropertyValue('summary')`),
  * an interpolation, a named member access (`task.title`), a variable assigned
  * user content earlier, or a logger reached through a member chain
- * (`api.log.err(...)` in bundled plugins) all pass. A reviewer still has to
- * think.
+ * (`api.log.err(...)` in bundled plugins) all pass. Two shapes were considered
+ * and left out on evidence — neither occurs in src/app today, and guarding
+ * them cost more than it bought: an entity dictionary riding the id suffix
+ * (`tasksById`), and an `as HttpErrorResponse` assertion, which the paragraph
+ * above explains is not narrowed by log.ts. A reviewer still has to think.
  *
  * Scoped to src/app (excluding specs) via eslint.config.js.
  */
@@ -82,7 +85,17 @@ const QUANTITY_WORDS = [
   'num',
 ];
 // Everything a VALUE's own name may vouch for.
-const SAFE_WORDS = [...QUANTITY_WORDS, 'id', 'ids', 'type', 'kind', 'status', 'version'];
+const SAFE_WORDS = [
+  ...QUANTITY_WORDS,
+  'id',
+  'ids',
+  'type',
+  'kind',
+  'status',
+  'version',
+  'flag',
+  'enabled',
+];
 
 const QUANTITY_WHOLE = new Set(QUANTITY_WORDS);
 const QUANTITY_SUFFIX_RE = suffixRe(QUANTITY_WORDS);
@@ -102,12 +115,27 @@ const BOOLEAN_PREFIX_RE =
 // SCREAMING_SNAKE_CASE is a module constant, not a runtime payload.
 const CONST_NAME_RE = /^[A-Z][A-Z0-9_]*$/;
 
-const isQuantityName = (name) =>
-  typeof name === 'string' &&
-  (QUANTITY_WHOLE.has(name.toLowerCase()) || QUANTITY_SUFFIX_RE.test(name));
+// These parse as Identifiers, not Literals, so they reach the name check —
+// `c ? task : undefined` must report `task` only.
+const LITERAL_GLOBALS = new Set(['undefined', 'NaN', 'Infinity']);
+
+// What a KEY may vouch for: a quantity or an error. Deliberately NOT an entity
+// label — `{ taskId: task }` is the likeliest typo of the fix this rule asks
+// for, so it has to stay reported.
+const isVouchingKey = (name) => {
+  if (typeof name !== 'string') return false;
+  const lower = name.toLowerCase();
+  return (
+    QUANTITY_WHOLE.has(lower) ||
+    QUANTITY_SUFFIX_RE.test(name) ||
+    ERROR_WHOLE.has(lower) ||
+    ERROR_SUFFIX_RE.test(name)
+  );
+};
 
 const isSafeName = (name) => {
   if (typeof name !== 'string') return false;
+  if (LITERAL_GLOBALS.has(name)) return true;
   const lower = name.toLowerCase();
   return (
     SAFE_WHOLE.has(lower) ||
@@ -161,7 +189,11 @@ module.exports = {
     const readableName = (node) => {
       if (!node) return 'this value';
       if (node.type === 'Identifier') return node.name;
-      if (node.type === 'MemberExpression' && node.property.type === 'Identifier') {
+      if (
+        node.type === 'MemberExpression' &&
+        !node.computed &&
+        node.property.type === 'Identifier'
+      ) {
         return node.property.name;
       }
       return 'this value';
@@ -218,7 +250,7 @@ module.exports = {
                 ? String(prop.key.value)
                 : null;
           const isSafe =
-            isSafeName(value.name) || (!prop.shorthand && isQuantityName(keyName));
+            isSafeName(value.name) || (!prop.shorthand && isVouchingKey(keyName));
           if (!isSafe) {
             context.report({
               node: prop,
@@ -255,6 +287,16 @@ module.exports = {
           for (const el of v.elements) {
             if (el) checkValue(el);
           }
+          return;
+        case 'ConditionalExpression':
+          checkValue(v.consequent);
+          checkValue(v.alternate);
+          return;
+        case 'LogicalExpression':
+          // `a && b` yields `b` when it yields anything worth logging; `a` is a
+          // guard. `a ?? b` / `a || b` yield `a` whenever it is present.
+          if (v.operator !== '&&') checkValue(v.left);
+          checkValue(v.right);
           return;
         default:
           return;

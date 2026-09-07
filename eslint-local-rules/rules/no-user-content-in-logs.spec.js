@@ -69,6 +69,16 @@ ruleTester.run('no-user-content-in-logs', rule, {
     // A named helper is the author choosing what to expose, like any call arg.
     { code: `Log.log('x', ...getSafeErrorLogMeta(e));` },
     { code: `Log.log('x', ...[taskId]);` },
+    // An error key vouches for its value: `{ error: <scrubbed string> }` is the
+    // canonical safe idiom, and "log the fields you need" is impossible advice
+    // for a string.
+    { code: `Log.err('x', { error: errorMessage });` },
+    { code: `Log.err('x', { reason: failureReason });` },
+    // `a && b` yields `b`; `a` is a guard, not the logged value.
+    { code: `Log.log('x', res && res.requestId);` },
+    // Booleans and enum-ish values on the VALUE-name path.
+    { code: `Log.log('x', { a: isDone, b: enabled, c: someFlag });` },
+    { code: `Log.log('x', { a: opType, b: syncStatus, c: schemaVersion });` },
     // Not a logger.
     { code: `analytics.log(task);` },
     { code: `console.log(task);` },
@@ -187,6 +197,25 @@ ruleTester.run('no-user-content-in-logs', rule, {
     {
       code: `Log.log('c', { ...this.task });`,
       errors: [{ messageId: 'spreadValue', data: { name: 'task' } }],
+    },
+    // `??` / `||` / `?:` carry the value through, so leaving them unchecked
+    // would be a cheaper bypass than the `!` this rule unwraps.
+    {
+      code: `Log.log('x', task ?? null);`,
+      errors: [{ messageId: 'bareValue', data: { name: 'task' } }],
+    },
+    {
+      code: `Log.log('x', task || {});`,
+      errors: [{ messageId: 'bareValue', data: { name: 'task' } }],
+    },
+    {
+      code: `Log.log('x', c ? task : undefined);`,
+      errors: [{ messageId: 'bareValue', data: { name: 'task' } }],
+    },
+    // A computed key is logged content in its own right.
+    {
+      code: `Log.log({ [taskTitle]: 1 });`,
+      errors: [{ messageId: 'bareValue', data: { name: 'taskTitle' } }],
     },
     // Every context logger is covered, not just `Log`.
     {
