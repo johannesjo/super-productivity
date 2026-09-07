@@ -627,9 +627,9 @@ describe('GlobalThemeService iOS keyboard sequencing', () => {
     willShow(BASE_HEIGHT - 10);
     shrinkViewport(BASE_HEIGHT - KEYBOARD_HEIGHT);
 
-    // Mid-shrink the clamped frame stands. --keyboard-height has non-overlay
-    // consumers so it has to live on <html>, and the obscured area moves every
-    // frame — correcting here would be a root write per frame (#9779).
+    // Mid-shrink the clamped frame stands: the obscured area moves every frame,
+    // so correcting here would be a write per animation frame (#9779). The
+    // corrected value lands once, on didShow.
     expect(overlayVar('--keyboard-height')).toBe(`${BASE_HEIGHT * 0.6}px`);
 
     didShow();
@@ -918,4 +918,123 @@ describe('GlobalThemeService scroll-into-view guard', () => {
       expect(spy).toHaveBeenCalledWith(true);
     });
   });
+});
+
+// The non-iOS tracker covers Capacitor Android, the legacy F-Droid build and
+// Android mobile web — and, unlike `_initIOSKeyboardHandling`, it is the branch
+// that runs in a plain browser. It writes the same variable through the same
+// helper, so it is the other way `--keyboard-height` could drift back onto
+// <html> (#9779).
+describe('GlobalThemeService non-iOS keyboard tracking', () => {
+  interface VisualViewportHarness {
+    _initVisualViewportKeyboardTracking(): void;
+    document: Document;
+    _destroyRef: { onDestroy(cb: () => void): void };
+    _cssVarCache: Map<string, string>;
+    _overlayContainer: { getContainerElement(): HTMLElement };
+    _keyboardVarTargetEl: HTMLElement | null;
+    _keyboardGeometry: {
+      keyboardHeightPx: WritableSignal<number>;
+      keyboardOverlayOffsetPx: WritableSignal<number>;
+    };
+  }
+
+  const BASE_HEIGHT = 800;
+  const KEYBOARD_HEIGHT = 336;
+  /** Mirrors KEYBOARD_RESIZE_DEBOUNCE_MS in the service. */
+  const OPEN_DEBOUNCE_MS = 200;
+
+  let harness: VisualViewportHarness;
+  let root: HTMLElement;
+  let overlayContainer: HTMLElement;
+  let rootSetPropertySpy: jasmine.Spy;
+  let viewportListener: (() => void) | null;
+  let visualViewport: {
+    height: number;
+    addEventListener: jasmine.Spy;
+    removeEventListener: jasmine.Spy;
+  };
+  let originalInnerHeight: PropertyDescriptor | undefined;
+  let originalVisualViewport: PropertyDescriptor | undefined;
+
+  const resizeTo = (height: number): void => {
+    visualViewport.height = height;
+    viewportListener?.();
+  };
+
+  beforeEach(() => {
+    root = document.createElement('div');
+    overlayContainer = document.createElement('div');
+    rootSetPropertySpy = spyOn(root.style, 'setProperty').and.callThrough();
+    viewportListener = null;
+
+    visualViewport = {
+      height: BASE_HEIGHT,
+      addEventListener: jasmine
+        .createSpy('addEventListener')
+        .and.callFake((_name: string, cb: () => void) => {
+          viewportListener = cb;
+        }),
+      removeEventListener: jasmine.createSpy('removeEventListener'),
+    };
+    originalInnerHeight = Object.getOwnPropertyDescriptor(window, 'innerHeight');
+    originalVisualViewport = Object.getOwnPropertyDescriptor(window, 'visualViewport');
+    Object.defineProperty(window, 'innerHeight', {
+      configurable: true,
+      get: () => BASE_HEIGHT,
+    });
+    Object.defineProperty(window, 'visualViewport', {
+      configurable: true,
+      get: () => visualViewport,
+    });
+
+    harness = Object.create(GlobalThemeService.prototype) as VisualViewportHarness;
+    // documentElement is wired to the spied element on purpose: the pre-#9779
+    // code reached <html> through it, so the guard below can actually fail.
+    harness.document = { documentElement: root } as unknown as Document;
+    harness._overlayContainer = { getContainerElement: () => overlayContainer };
+    harness._keyboardVarTargetEl = null;
+    harness._cssVarCache = new Map<string, string>();
+    harness._keyboardGeometry = {
+      keyboardHeightPx: signal(0),
+      keyboardOverlayOffsetPx: signal(0),
+    };
+    harness._destroyRef = { onDestroy: () => undefined };
+  });
+
+  afterEach(() => {
+    const restore = (name: string, descriptor?: PropertyDescriptor): void => {
+      if (descriptor) {
+        Object.defineProperty(window, name, descriptor);
+      } else {
+        delete (window as unknown as Record<string, unknown>)[name];
+      }
+    };
+    restore('innerHeight', originalInnerHeight);
+    restore('visualViewport', originalVisualViewport);
+  });
+
+  it('publishes the keyboard height on the overlay container, never on <html>', fakeAsync(() => {
+    harness._initVisualViewportKeyboardTracking();
+
+    // The open path is debounced so the bar does not park at intermediate
+    // partial-keyboard heights while the IME animates.
+    resizeTo(BASE_HEIGHT - KEYBOARD_HEIGHT);
+    tick(OPEN_DEBOUNCE_MS);
+
+    expect(overlayContainer.style.getPropertyValue('--keyboard-height')).toBe(
+      `${KEYBOARD_HEIGHT}px`,
+    );
+    expect(harness._keyboardGeometry.keyboardHeightPx()).toBe(KEYBOARD_HEIGHT);
+
+    // Close commits synchronously, so the bar drops with the IME rather than
+    // parking at the old height for the debounce window.
+    resizeTo(BASE_HEIGHT);
+
+    expect(overlayContainer.style.getPropertyValue('--keyboard-height')).toBe('0px');
+    expect(harness._keyboardGeometry.keyboardHeightPx()).toBe(0);
+    expect(rootSetPropertySpy.calls.allArgs().map(([name]) => name as string)).toEqual(
+      [],
+    );
+  }));
 });
