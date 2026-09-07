@@ -4,7 +4,7 @@ import { OperationLogStoreService } from '../persistence/operation-log-store.ser
 import { StateSnapshotService } from '../backup/state-snapshot.service';
 import { OpLog } from '../../core/log';
 import { T } from '../../t.const';
-import { confirmDialog } from '../../util/native-dialogs';
+import { alertDialog, confirmDialog } from '../../util/native-dialogs';
 import { hasMeaningfulStateData } from '../validation/has-meaningful-state-data.util';
 import { isExampleTaskCreateOp } from '../validation/is-example-task-op.util';
 import {
@@ -139,6 +139,29 @@ export class SyncLocalStateService {
     );
 
     return !this.hasMeaningfulStoreData(exampleTaskIds);
+  }
+
+  /**
+   * Shows the refusal for `hasNothingWorthUploading()` and records that it
+   * fired. The log line is the only evidence channel this class of bug has —
+   * a #9256-shaped report cannot otherwise be confirmed from an exported log —
+   * and carries no user content (rule 9).
+   *
+   * `messageKey` lets each entry point supply its own "what to do next": the
+   * recovery dialogs tell the user to retry the password, which would be
+   * nonsense in the change-password dialog.
+   */
+  warnNothingWorthUploading(
+    messageKey: string = T.F.SYNC.D_NOTHING_TO_UPLOAD.MESSAGE,
+  ): void {
+    OpLog.warn(
+      'SyncLocalStateService: refused a destructive server overwrite - this device has nothing worth uploading',
+    );
+    alertDialog(
+      this.translateService.instant(T.F.SYNC.D_NOTHING_TO_UPLOAD.TITLE) +
+        '\n\n' +
+        this.translateService.instant(messageKey),
+    );
   }
 
   confirmFreshClientSync(opCount: number): boolean {

@@ -200,10 +200,9 @@ describe('SyncLocalStateService', () => {
       // make the device look like it holds the user's work.
       stateSnapshotSpy.getStateSnapshot.and.returnValue({
         ...emptyStore,
-        task: {
-          ids: ['ex-1', 'ex-2'],
-          entities: { ex_1: { id: 'ex-1' }, ex_2: { id: 'ex-2' } },
-        },
+        // Only `ids` is read by hasMeaningfulStateData; an entity map here
+        // would just be a second place for the ids to drift out of sync.
+        task: { ids: ['ex-1', 'ex-2'], entities: {} },
       } as never);
       opLogStoreSpy.getUnsynced.and.resolveTo([
         exampleTaskOp('ex-1'),
@@ -216,10 +215,7 @@ describe('SyncLocalStateService', () => {
     it('is false as soon as one real task exists alongside the example tasks', async () => {
       stateSnapshotSpy.getStateSnapshot.and.returnValue({
         ...emptyStore,
-        task: {
-          ids: ['ex-1', 'real-1'],
-          entities: { ex_1: { id: 'ex-1' }, real_1: { id: 'real-1' } },
-        },
+        task: { ids: ['ex-1', 'real-1'], entities: {} },
       } as never);
       opLogStoreSpy.getUnsynced.and.resolveTo([exampleTaskOp('ex-1')]);
 
@@ -236,9 +232,22 @@ describe('SyncLocalStateService', () => {
       expect(stateSnapshotSpy.getStateSnapshot).not.toHaveBeenCalled();
     });
 
-    it('is false when the snapshot is unavailable rather than guessing', async () => {
-      // hasMeaningfulStoreData returns false for a missing snapshot; that must
-      // not be read as "nothing to upload" and block a legitimate overwrite.
+    it('refuses when the store is present but still at its initial values', async () => {
+      // The reachable degraded shape: hydration failed or has not run, so the
+      // slices exist but are empty. This is the case the guard has to catch,
+      // and it is distinct from the unreachable undefined-snapshot one below.
+      stateSnapshotSpy.getStateSnapshot.and.returnValue(emptyStore as never);
+      opLogStoreSpy.getUnsynced.and.resolveTo([]);
+
+      expect(await service.hasNothingWorthUploading()).toBe(true);
+    });
+
+    it('fails closed when the snapshot cannot be read at all', async () => {
+      // DELIBERATE fail-closed direction: hasMeaningfulStoreData returns false
+      // for an unreadable snapshot, so the guard reports "nothing to upload"
+      // and REFUSES. Refusing can never destroy data; guessing "has data" and
+      // letting the clean slate through can. Note getStateSnapshot() is typed
+      // non-nullable, so this shape is defensive rather than reachable today.
       stateSnapshotSpy.getStateSnapshot.and.returnValue(undefined as never);
 
       expect(await service.hasNothingWorthUploading()).toBe(true);

@@ -951,21 +951,26 @@ describe('ServerMigrationService', () => {
    *
    * Why that matters for FORCE_UPLOAD specifically: it is the reason
    * `skipServerEmptyCheck` is set, i.e. the server holds data this SYNC_IMPORT
-   * will replace, and `operation-log-upload.service.ts:290` additionally marks
+   * will replace, and `operation-log-upload.service.ts:302` additionally marks
    * a FORCE_UPLOAD SYNC_IMPORT `isCleanSlate`, which makes the server
    * `deleteMany` the user's operations outright rather than supersede them
    * (super-sync-server sync.service.ts:315-337). It is what the "Overwrite
    * Server & Other Devices" button of the Decryption Failed dialog invokes
-   * (dialog-handle-decrypt-error.component.ts:50).
+   * (dialog-handle-decrypt-error.component.ts:53).
    *
    * Scope and limits, stated so these are not read as more than they are:
    * - The overwrite is CONSENTED, not silent: three confirmations precede it
    *   (the dialog's `DECRYPT_OVERWRITE`, `C.FORCE_UPLOAD` in
-   *   sync-wrapper.service.ts:1337, and the button is disabled without a
+   *   sync-wrapper.service.ts:1343, and the button is disabled without a
    *   password). The defect is that the one code-level check meant to refuse
    *   an overwrite from a client with nothing of its own cannot fire.
+   *   NOTE: since e83c1213f the two recovery dialogs refuse such a client at
+   *   the dialog layer (SyncLocalStateService.hasNothingWorthUploading), so
+   *   that button is no longer an unguarded entry point. The
+   *   hasServerMigrationStateData arm described here is still unable to skip;
+   *   these specs pin that predicate, not the dialog guard.
    * - SERVER_MIGRATION is not inherently safe either: `checkAndHandleMigration`
-   *   (server-migration.service.ts:117-125) also passes `skipServerEmptyCheck`
+   *   (server-migration.service.ts:125-137) also passes `skipServerEmptyCheck`
    *   against a NON-empty server after its own confirm dialog. It does require
    *   `hasSyncedOps()`, which a never-synced client fails, and it does not set
    *   the clean-slate flag.

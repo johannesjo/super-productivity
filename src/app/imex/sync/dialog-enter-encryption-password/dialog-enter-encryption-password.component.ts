@@ -12,7 +12,7 @@ import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { firstValueFrom } from 'rxjs';
 import { SyncConfigService } from '../sync-config.service';
 import { EncryptionPasswordChangeService } from '../encryption-password-change.service';
@@ -21,7 +21,6 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
 import { SyncProviderManager } from '../../../op-log/sync-providers/provider-manager.service';
 import { SyncProviderId } from '../../../op-log/sync-providers/provider.const';
 import { SyncLog } from '../../../core/log';
-import { alertDialog } from '../../../util/native-dialogs';
 import { SyncLocalStateService } from '../../../op-log/sync/sync-local-state.service';
 
 export interface EnterEncryptionPasswordResult {
@@ -53,7 +52,6 @@ export class DialogEnterEncryptionPasswordComponent {
   private _snackService = inject(SnackService);
   private _matDialog = inject(MatDialog);
   private _providerManager = inject(SyncProviderManager);
-  private _translateService = inject(TranslateService);
   private _syncLocalStateService = inject(SyncLocalStateService);
   private _matDialogRef =
     inject<
@@ -102,13 +100,16 @@ export class DialogEnterEncryptionPasswordComponent {
     // has never synced and holds only onboarding tasks has nothing to replace
     // them with, and this dialog is one button from where a user is told to try
     // an older password.
-    if (await this._syncLocalStateService.hasNothingWorthUploading()) {
-      alertDialog(
-        this._translateService.instant(T.F.SYNC.D_NOTHING_TO_UPLOAD.TITLE) +
-          '\n\n' +
-          this._translateService.instant(T.F.SYNC.D_NOTHING_TO_UPLOAD.MSG),
-      );
-      return;
+    // Claim the loading flag before the first await: the guard and the confirm
+    // both await, so a second click could otherwise run the whole flow twice.
+    this.isLoading.set(true);
+    try {
+      if (await this._syncLocalStateService.hasNothingWorthUploading()) {
+        this._syncLocalStateService.warnNothingWorthUploading();
+        return;
+      }
+    } finally {
+      this.isLoading.set(false);
     }
 
     const confirmed = await firstValueFrom(

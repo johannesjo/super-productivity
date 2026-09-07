@@ -38,6 +38,7 @@ describe('DialogEnterEncryptionPasswordComponent', () => {
     ]);
     mockSyncLocalStateService = jasmine.createSpyObj('SyncLocalStateService', [
       'hasNothingWorthUploading',
+      'warnNothingWorthUploading',
     ]);
     mockSyncLocalStateService.hasNothingWorthUploading.and.resolveTo(false);
     mockProviderManager.getActiveProvider.and.returnValue({
@@ -174,12 +175,17 @@ describe('DialogEnterEncryptionPasswordComponent', () => {
       // "Use Local Data" runs a clean slate, which makes the server DELETE its
       // operations. This dialog sits one button from where a user is asked to
       // try an older password, so the refusal has to happen before the confirm.
+      // Without a return value the spec would fail on a TypeError instead of
+      // on its own assertions if the guard were removed.
+      mockMatDialog.open.and.returnValue({
+        afterClosed: () => of(true),
+      } as MatDialogRef<unknown>);
       mockSyncLocalStateService.hasNothingWorthUploading.and.resolveTo(true);
       component.passwordVal = 'some-password';
 
       await component.forceOverwrite();
 
-      expect(window.alert as jasmine.Spy).toHaveBeenCalled();
+      expect(mockSyncLocalStateService.warnNothingWorthUploading).toHaveBeenCalled();
       expect(mockMatDialog.open).not.toHaveBeenCalled();
       expect(mockEncryptionPasswordChangeService.changePassword).not.toHaveBeenCalled();
       expect(mockDialogRef.close).not.toHaveBeenCalled();

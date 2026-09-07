@@ -16,7 +16,7 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { SyncConfigService } from '../sync-config.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { SyncLog } from '../../../core/log';
-import { alertDialog, confirmDialog } from '../../../util/native-dialogs';
+import { confirmDialog } from '../../../util/native-dialogs';
 import { SyncLocalStateService } from '../../../op-log/sync/sync-local-state.service';
 
 @Component({
@@ -48,18 +48,29 @@ export class DialogHandleDecryptErrorComponent {
 
   T: typeof T = T;
   passwordVal: string = '';
+  isForceUploadPending = false;
 
   async updatePWAndForceUpload(): Promise<void> {
+    // The guard below awaits, so a second click could otherwise start a second
+    // pass and open two confirms — i.e. two clean slates.
+    if (this.isForceUploadPending) {
+      return;
+    }
+    this.isForceUploadPending = true;
+    try {
+      await this._forceUploadFlow();
+    } finally {
+      this.isForceUploadPending = false;
+    }
+  }
+
+  private async _forceUploadFlow(): Promise<void> {
     // #9256: this dialog is shown to a client that failed to DOWNLOAD, so the
     // one offered alternative to retrying the password destroys the server copy
     // via a clean-slate SYNC_IMPORT. Refuse when there is nothing here to put
     // in its place — the user is trying to recover data, not discard it.
     if (await this._syncLocalStateService.hasNothingWorthUploading()) {
-      alertDialog(
-        this._translateService.instant(T.F.SYNC.D_NOTHING_TO_UPLOAD.TITLE) +
-          '\n\n' +
-          this._translateService.instant(T.F.SYNC.D_NOTHING_TO_UPLOAD.MSG),
-      );
+      this._syncLocalStateService.warnNothingWorthUploading();
       return;
     }
     if (!confirmDialog(this._translateService.instant(T.F.SYNC.C.DECRYPT_OVERWRITE))) {

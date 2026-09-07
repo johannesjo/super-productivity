@@ -23,6 +23,7 @@ describe('DialogHandleDecryptErrorComponent', () => {
     mockSnackService = jasmine.createSpyObj('SnackService', ['open']);
     mockSyncLocalStateService = jasmine.createSpyObj('SyncLocalStateService', [
       'hasNothingWorthUploading',
+      'warnNothingWorthUploading',
     ]);
     mockSyncLocalStateService.hasNothingWorthUploading.and.resolveTo(false);
 
@@ -155,9 +156,7 @@ describe('DialogHandleDecryptErrorComponent', () => {
       // The destructive path runs a clean-slate SYNC_IMPORT, which makes the
       // server DELETE its operations. From a device with nothing on it that
       // destroys the user's only copy.
-      // alertDialog/confirmDialog wrap these; src/test.ts already installs
-      // global spies for them, so reuse rather than re-spy.
-      const alertSpy = window.alert as jasmine.Spy;
+      // src/test.ts installs a global confirm spy; reuse rather than re-spy.
       const confirmSpy = window.confirm as jasmine.Spy;
       confirmSpy.and.returnValue(true);
       mockSyncLocalStateService.hasNothingWorthUploading.and.resolveTo(true);
@@ -165,7 +164,7 @@ describe('DialogHandleDecryptErrorComponent', () => {
 
       await component.updatePWAndForceUpload();
 
-      expect(alertSpy).toHaveBeenCalled();
+      expect(mockSyncLocalStateService.warnNothingWorthUploading).toHaveBeenCalled();
       // Never reaches the confirm, never persists, never closes destructively.
       expect(confirmSpy).not.toHaveBeenCalled();
       expect(mockSyncConfigService.updateEncryptionPassword).not.toHaveBeenCalled();
