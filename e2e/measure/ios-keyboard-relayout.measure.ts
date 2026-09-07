@@ -39,11 +39,11 @@
  * trusting this line:
  *
  *   WebKit                       0 rows   201    201 c-v   201 d:none   128 collapsed
- *   root-custom-property           8.0   180.4     171.8          8.2         117.2
- *   root-inherited-standard        0.1     0.1       0.1          0.1
- *   leaf-custom-property           0.1     0.1       0.1          0.1
- *   plain-property                 0.0     0.0       0.1          0.0
- *   shell-height-write x30         5.0     5.0       5.0          5.0
+ *   root-custom-property             ~9   ~180      ~170            8          ~125
+ *   root-inherited-standard         0.1    0.1       0.1          0.1
+ *   leaf-custom-property            0.1    0.1       0.1          0.1
+ *   plain-property                  0.0    0.0       0.1          0.0
+ *   shell-height-write x30            5      5         5            5
  *
  *   Blink                        0 rows   201    201 c-v   201 d:none   128 collapsed
  *   root-custom-property           0.7    12.8       3.5          1.6           8.7
@@ -54,12 +54,12 @@
  *
  * HOW MUCH OF THIS IS NOISE. Two clean WebKit runs gave four samples of the
  * same unmodified 201-row root write (opening and `[rows: none, repeat]`):
- * 180.4, 193.4, 194.0, 166.9 — a spread of ~16%. So read the WebKit column as
- * "about 180", never to the decimal, and treat anything under ~1.2x as
- * unresolved. Blink is far steadier (12.8 opening vs 12.6 repeat) and can be
- * read directly. Both engines were measured with nothing else running; a
- * concurrent second run inflates every figure by ~30% and is easy to do by
- * accident.
+ * 180.4, 193.4, 194.0, 166.9 — a spread of ~16%, which is why the WebKit column
+ * above is rounded. Treat anything under ~1.2x there as unresolved. Blink held
+ * 12.8 opening against 12.6 repeat, but that is one pair, so its variant cells
+ * are single samples too. Measure with nothing else running: one contaminated
+ * run here inflated cells by a third to double, and stacking two runs is easy to
+ * do by accident.
  *
  * WHAT THE NUMBERS SAY.
  *
@@ -69,9 +69,8 @@
  *    magnitude in WebKit, ~40x in Blink. "Don't write inherited things on the
  *    root" would be the wrong lesson; "WebKit resolves custom properties per
  *    element on every root write" is the right one, and it is what the #9926 fix
- *    is built on. This is the single most useful line in the file: without the
- *    `root-inherited-standard` control the root-vs-leaf gap reads as the wrong
- *    conclusion, and it read that way here until 2026-09.
+ *    is built on. Without the `root-inherited-standard` control the root-vs-leaf
+ *    gap reads as the wrong conclusion, and it read that way here until 2026-09.
  * 2. Only the root custom-property write scales with row count. Everything else
  *    in both tables is flat from 0 to 201 rows.
  * 3. Blink charges the same mechanism roughly an order of magnitude less (~180ms
@@ -85,10 +84,11 @@
  *    workaround, removes the rows from the DOM outright
  *    (`collapsible.component.html` wraps its panel in a structural `@if`) and
  *    lands between the two, as it should at 128 rows instead of 201.
- * 5. `content-visibility` is a real ~3.7x cut in Blink and does nothing legible
- *    in WebKit: 171.8 and 169.8 across two runs, against unmodified samples
- *    spanning 166.9-194.0. That is not "no effect" — it is below what this setup
- *    can resolve, and a small real win is not excluded.
+ * 5. `content-visibility` is a ~3.7x cut in Blink (one run, so treat the factor
+ *    as approximate) and does nothing legible in WebKit: 171.8 and 169.8 across
+ *    two runs, against unmodified samples spanning 166.9-194.0. That is not "no
+ *    effect" — it is below what this setup can resolve, and a small real win is
+ *    not excluded.
  *
  * KNOWN BLIND SPOTS. These are hand-simulated writes, not the real event
  * sequence: `IosKeyboardService` is gated on native iOS and never runs here.
