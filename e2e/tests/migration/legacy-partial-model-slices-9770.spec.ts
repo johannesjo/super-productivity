@@ -187,9 +187,13 @@ test.describe('@migration #9770 legacy data missing newer model slices', () => {
       await expect(page.locator('dialog-legacy-migration')).toHaveCount(0);
 
       // The load-bearing half: the legacy data is still on disk, untouched.
-      const remaining = await readLegacyKeys(page);
-      expect(remaining).toContain('globalConfig');
-      expect(remaining).toContain('_migration_skipped');
+      // Polled, not read once: neither wait above is a settle point for the
+      // marker. The dialog is closed in the `finally` BEFORE _skipLegacyData()
+      // writes it, and the app shell renders behind the dialog anyway — so a
+      // single read here loses the race on a loaded machine.
+      await expect
+        .poll(() => readLegacyKeys(page), { timeout: 10000 })
+        .toEqual(expect.arrayContaining(['globalConfig', '_migration_skipped']));
 
       // ...and the next boot does NOT walk back into the failed migration.
       await page.reload({ waitUntil: 'domcontentloaded' });
