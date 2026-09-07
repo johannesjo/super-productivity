@@ -23,8 +23,9 @@
  *
  * Usage: node ./tools/strip-service-worker-assets.js <target-dir>
  *
- * Nothing here is ever fatal. Finding no files is legitimate (the service
- * worker can simply be disabled for a build), and an unlink that fails is
+ * No failure to delete is fatal (the usage error below is the one exit path,
+ * and callers hardcode the path). Finding no files is legitimate — the service
+ * worker can simply be disabled for a build — and an unlink that fails is
  * reported and skipped rather than thrown — breaking the Android build, and
  * with it F-Droid's prebuild, over a cleanup is the worse trade. What proves
  * the strip actually happened is the assertion on the packaged APK in
@@ -81,11 +82,16 @@ const main = () => {
     console.warn(`strip-service-worker-assets: could not remove ${name} — ${message}`);
   }
 
-  if (removed.length === 0) {
+  if (removed.length === 0 && failed.length === 0) {
     console.warn(
       `strip-service-worker-assets: no service-worker files in ${targetDir} ` +
         '(expected if the service worker is disabled for this build).',
     );
+    return;
+  }
+  if (removed.length === 0) {
+    // Something was there and could not be removed — saying "expected" here
+    // would tell an operator scanning the log that the miss was benign.
     return;
   }
   console.log(`strip-service-worker-assets: removed ${removed.join(', ')}`);

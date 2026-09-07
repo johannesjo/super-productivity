@@ -30,6 +30,18 @@ const runCli = (args) =>
     { encoding: 'utf8' },
   );
 
+test('the file list is exactly what the Angular v21 builder emits', () => {
+  // Hardcoded on purpose. Every other test seeds its fixture FROM this constant,
+  // so a name silently dropped from it would shrink the fixture too and every
+  // assertion would still hold — a regression this PR exists to prevent.
+  assert.deepEqual(SERVICE_WORKER_FILES, [
+    'ngsw.json',
+    'ngsw-worker.js',
+    'safety-worker.js',
+    'worker-basic.min.js',
+  ]);
+});
+
 test('leaves every other asset alone', () => {
   // The whole web bundle lives in this directory; only the four are ours.
   withDir(['ngsw.json', 'index.html', 'main-ABC123.js', 'styles-DEF456.css'], (dir) => {
@@ -44,7 +56,8 @@ test('leaves every other asset alone', () => {
 
 test('an unremovable file is reported, not thrown', () => {
   // A hard failure here would take down F-Droid's prebuild over a cleanup.
-  // EISDIR stands in for the realistic cases: EPERM from a Windows file
+  // EISDIR stands in for the plausible ones (neither observed here): EPERM
+  // from a Windows file
   // watcher holding a file `cap copy` wrote milliseconds earlier, EACCES on a
   // differently-owned CI tree.
   withDir(['ngsw-worker.js'], (dir) => {

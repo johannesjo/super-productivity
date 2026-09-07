@@ -183,8 +183,9 @@ jobs:
       # registers a service worker, and ngsw.json carries a build timestamp that
       # breaks F-Droid's reproducible-build verification, #4155). That strip
       # never fails the build, so assert the outcome on the packaged artifact
-      # instead. Master/tag only — no PR runs this, because no other workflow
-      # builds a real APK.
+      # instead. No PR triggers this workflow, and no PR workflow could host the
+      # check: android-tests.yml assembles an APK but substitutes a stand-in
+      # smoke page for the Angular bundle, so the assertion would be vacuous.
       - name: 'Verify no service worker shipped in the APK'
         run: |
           set -euo pipefail
