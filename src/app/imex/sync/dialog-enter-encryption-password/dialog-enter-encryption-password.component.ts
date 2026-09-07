@@ -95,41 +95,38 @@ export class DialogEnterEncryptionPasswordComponent {
       return;
     }
 
-    // #9256: same trap as the Decryption Failed dialog — "Use Local Data" runs a
-    // clean slate, which makes the server DELETE its operations. A device that
-    // has never synced and holds only onboarding tasks has nothing to replace
-    // them with, and this dialog is one button from where a user is told to try
-    // an older password.
-    // Claim the loading flag before the first await: the guard and the confirm
-    // both await, so a second click could otherwise run the whole flow twice.
+    // Hold the loading flag across the WHOLE flow, not just the first await:
+    // the guard, the confirm and the password change all await, and the button
+    // is only disabled while isLoading(), so releasing it early would let a
+    // second click open a second confirm — i.e. two clean slates.
     this.isLoading.set(true);
     try {
+      // #9256: same trap as the Decryption Failed dialog — "Use Local Data"
+      // runs a clean slate, which makes the server DELETE its operations. A
+      // device that has never synced and holds nothing has nothing to replace
+      // them with, and this dialog is one button from where a user stuck on a
+      // failed decrypt is told to try an older password.
       if (await this._syncLocalStateService.hasNothingWorthUploading()) {
         this._syncLocalStateService.warnNothingWorthUploading();
         return;
       }
-    } finally {
-      this.isLoading.set(false);
-    }
 
-    const confirmed = await firstValueFrom(
-      this._matDialog
-        .open(DialogConfirmComponent, {
-          data: {
-            title: T.F.SYNC.D_ENTER_PASSWORD.FORCE_OVERWRITE_TITLE,
-            message: T.F.SYNC.D_ENTER_PASSWORD.FORCE_OVERWRITE_CONFIRM,
-            okTxt: T.F.SYNC.D_ENTER_PASSWORD.BTN_FORCE_OVERWRITE,
-          },
-        })
-        .afterClosed(),
-    );
+      const confirmed = await firstValueFrom(
+        this._matDialog
+          .open(DialogConfirmComponent, {
+            data: {
+              title: T.F.SYNC.D_ENTER_PASSWORD.FORCE_OVERWRITE_TITLE,
+              message: T.F.SYNC.D_ENTER_PASSWORD.FORCE_OVERWRITE_CONFIRM,
+              okTxt: T.F.SYNC.D_ENTER_PASSWORD.BTN_FORCE_OVERWRITE,
+            },
+          })
+          .afterClosed(),
+      );
 
-    if (!confirmed) {
-      return;
-    }
+      if (!confirmed) {
+        return;
+      }
 
-    this.isLoading.set(true);
-    try {
       await this._encryptionPasswordChangeService.changePassword(this.passwordVal, {
         allowUnsyncedOps: true,
       });

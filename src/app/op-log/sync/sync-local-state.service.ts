@@ -24,6 +24,18 @@ import {
 const isOwnGenesisOp = (entry: OperationLogEntry): boolean =>
   entry.source === 'local' && isGenesisEntityType(entry.op.entityType);
 
+/**
+ * Archived tasks are the user's work even though `hasMeaningfulStateData` does
+ * not look at them (#9256). Both buckets are read: archiveOld holds anything
+ * aged out of archiveYoung.
+ */
+const hasArchivedTasks = (snapshot: {
+  archiveYoung?: { task?: { ids?: readonly string[] } };
+  archiveOld?: { task?: { ids?: readonly string[] } };
+}): boolean =>
+  (snapshot.archiveYoung?.task?.ids?.length ?? 0) > 0 ||
+  (snapshot.archiveOld?.task?.ids?.length ?? 0) > 0;
+
 @Injectable({
   providedIn: 'root',
 })
@@ -124,6 +136,18 @@ export class SyncLocalStateService {
    *   locally on first run and are not the user's work, so they must not make
    *   an empty device look non-empty — `afterInitialSyncDoneStrict$` fails open
    *   on a timer, so they are created even when the initial sync failed.
+   *
+   * Archives are checked explicitly rather than through `hasMeaningfulStateData`.
+   * That util's scope is deliberately narrow (task / project / tag / note) and
+   * its doc states it is only ever consumed in the "safe" direction, where a
+   * false negative merely skips work. This caller is the first to consume it in
+   * the REFUSING direction, where a false negative blocks a legitimate
+   * overwrite — so a device whose work is entirely archived must not be
+   * reported as holding nothing. The synchronous snapshot substitutes
+   * DEFAULT_ARCHIVE, hence the async read here.
+   *
+   * Fails closed: an unreadable snapshot counts as "nothing to upload" and
+   * refuses. Refusing can never destroy data; guessing "has data" can.
    */
   async hasNothingWorthUploading(): Promise<boolean> {
     if (await this.opLogStore.hasSyncedOps()) {
@@ -138,7 +162,19 @@ export class SyncLocalStateService {
         .filter((id): id is string => typeof id === 'string' && id.length > 0),
     );
 
-    return !this.hasMeaningfulStoreData(exampleTaskIds);
+    const snapshot = await this.stateSnapshotService.getStateSnapshotAsync();
+    if (!snapshot) {
+      OpLog.warn(
+        'SyncLocalStateService.hasNothingWorthUploading: no state snapshot - refusing',
+      );
+      return true;
+    }
+
+    if (hasMeaningfulStateData(snapshot, exampleTaskIds)) {
+      return false;
+    }
+
+    return !hasArchivedTasks(snapshot);
   }
 
   /**

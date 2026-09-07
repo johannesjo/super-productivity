@@ -56,7 +56,10 @@ describe('SyncLocalStateService', () => {
   const syncImport = entry('ALL', ActionType.LOAD_ALL_DATA, OpType.SyncImport);
 
   beforeEach(() => {
-    stateSnapshotSpy = jasmine.createSpyObj('StateSnapshotService', ['getStateSnapshot']);
+    stateSnapshotSpy = jasmine.createSpyObj('StateSnapshotService', [
+      'getStateSnapshot',
+      'getStateSnapshotAsync',
+    ]);
     opLogStoreSpy = jasmine.createSpyObj('OperationLogStoreService', [
       'loadStateCache',
       'getLastSeq',
@@ -189,7 +192,7 @@ describe('SyncLocalStateService', () => {
     });
 
     it('is true for a never-synced client with an empty store', async () => {
-      stateSnapshotSpy.getStateSnapshot.and.returnValue(emptyStore as never);
+      stateSnapshotSpy.getStateSnapshotAsync.and.resolveTo(emptyStore as never);
 
       expect(await service.hasNothingWorthUploading()).toBe(true);
     });
@@ -198,7 +201,7 @@ describe('SyncLocalStateService', () => {
       // The #9256 shape: the initial sync failed, but afterInitialSyncDoneStrict$
       // fails open on a timer, so the example tasks exist anyway. They must not
       // make the device look like it holds the user's work.
-      stateSnapshotSpy.getStateSnapshot.and.returnValue({
+      stateSnapshotSpy.getStateSnapshotAsync.and.resolveTo({
         ...emptyStore,
         // Only `ids` is read by hasMeaningfulStateData; an entity map here
         // would just be a second place for the ids to drift out of sync.
@@ -213,7 +216,7 @@ describe('SyncLocalStateService', () => {
     });
 
     it('is false as soon as one real task exists alongside the example tasks', async () => {
-      stateSnapshotSpy.getStateSnapshot.and.returnValue({
+      stateSnapshotSpy.getStateSnapshotAsync.and.resolveTo({
         ...emptyStore,
         task: { ids: ['ex-1', 'real-1'], entities: {} },
       } as never);
@@ -226,17 +229,38 @@ describe('SyncLocalStateService', () => {
       // Such a device may legitimately hold real data, and a deliberate reset
       // from the sync settings must keep working.
       opLogStoreSpy.hasSyncedOps.and.resolveTo(true);
-      stateSnapshotSpy.getStateSnapshot.and.returnValue(emptyStore as never);
+      stateSnapshotSpy.getStateSnapshotAsync.and.resolveTo(emptyStore as never);
 
       expect(await service.hasNothingWorthUploading()).toBe(false);
-      expect(stateSnapshotSpy.getStateSnapshot).not.toHaveBeenCalled();
+      expect(stateSnapshotSpy.getStateSnapshotAsync).not.toHaveBeenCalled();
+    });
+
+    it('is false for a device whose work is entirely archived', async () => {
+      // hasMeaningfulStateData does not look at archives, and its doc says it is
+      // only safe where a false negative skips work. Here a false negative would
+      // REFUSE a legitimate overwrite, so archived tasks have to count.
+      stateSnapshotSpy.getStateSnapshotAsync.and.resolveTo({
+        ...emptyStore,
+        archiveYoung: { task: { ids: ['archived-1'], entities: {} } },
+      } as never);
+
+      expect(await service.hasNothingWorthUploading()).toBe(false);
+    });
+
+    it('is false for work that has aged out into the old archive', async () => {
+      stateSnapshotSpy.getStateSnapshotAsync.and.resolveTo({
+        ...emptyStore,
+        archiveOld: { task: { ids: ['archived-2'], entities: {} } },
+      } as never);
+
+      expect(await service.hasNothingWorthUploading()).toBe(false);
     });
 
     it('refuses when the store is present but still at its initial values', async () => {
       // The reachable degraded shape: hydration failed or has not run, so the
       // slices exist but are empty. This is the case the guard has to catch,
       // and it is distinct from the unreachable undefined-snapshot one below.
-      stateSnapshotSpy.getStateSnapshot.and.returnValue(emptyStore as never);
+      stateSnapshotSpy.getStateSnapshotAsync.and.resolveTo(emptyStore as never);
       opLogStoreSpy.getUnsynced.and.resolveTo([]);
 
       expect(await service.hasNothingWorthUploading()).toBe(true);
@@ -248,7 +272,7 @@ describe('SyncLocalStateService', () => {
       // and REFUSES. Refusing can never destroy data; guessing "has data" and
       // letting the clean slate through can. Note getStateSnapshot() is typed
       // non-nullable, so this shape is defensive rather than reachable today.
-      stateSnapshotSpy.getStateSnapshot.and.returnValue(undefined as never);
+      stateSnapshotSpy.getStateSnapshotAsync.and.resolveTo(undefined as never);
 
       expect(await service.hasNothingWorthUploading()).toBe(true);
     });
