@@ -6,6 +6,7 @@ import {
   OperationLogEntry,
   VectorClock,
   isFullStateOpType,
+  isGenesisEntityType,
   FULL_STATE_OP_TYPES,
 } from '../core/operation.types';
 import { StorageQuotaExceededError } from '../core/errors/sync-errors';
@@ -2078,6 +2079,21 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
     return lastSeq;
   }
 
+  /** First (lowest-seq) entry, or undefined when empty. Decodes one row (#9921). */
+  async getFirstOpEntry(): Promise<OperationLogEntry | undefined> {
+    await this._ensureInit();
+    let firstEntry: OperationLogEntry | undefined;
+    await this._adapter.iterate<StoredOperationLogEntry>(
+      STORE_NAMES.OPS,
+      { mode: 'readonly' },
+      (value) => {
+        firstEntry = decodeStoredEntry(value);
+        return 'stop';
+      },
+    );
+    return firstEntry;
+  }
+
   /**
    * Returns the total number of operations currently in the op-log store.
    * Backed by the adapter's `count()` — a single native count query (an engine-side
@@ -2091,20 +2107,14 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
   }
 
   /**
-   * Checks if there are any operations that have been synced to the server.
-   * Used to distinguish between:
-   * - Fresh client (only local ops, never synced) → NOT a server migration
-   * - Client that previously synced (has synced ops) → Server migration scenario
-   *
-   * NOTE: Excludes MIGRATION and RECOVERY entity types from the check.
-   * These are special ops created during local migration from legacy data and
-   * don't represent real sync history with a remote server. Including them
-   * would incorrectly trigger server migration when multiple clients with
-   * legacy data join a new sync group.
+   * Whether any op was ever synced with a server: false for a fresh client
+   * (local ops only), true for one that synced before (server-migration case).
+   * Genesis ops (isGenesisEntityType) don't count — they come from the local
+   * legacy migration, and counting them would trigger server migration when
+   * several legacy clients join a new sync group.
    */
   async hasSyncedOps(): Promise<boolean> {
     await this._ensureInit();
-    // Use the bySyncedAt index to find synced ops, but exclude MIGRATION/RECOVERY
     let foundRealSyncedOp = false;
     await this._adapter.iterate<StoredOperationLogEntry>(
       STORE_NAMES.OPS,
@@ -2114,8 +2124,7 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
         const op = value.op;
         // Handle both compact format ('e') and full format ('entityType')
         const entityType = isCompactOperation(op) ? op.e : (op as Operation).entityType;
-        // Skip MIGRATION and RECOVERY entity types - they're not real sync history
-        if (entityType !== 'MIGRATION' && entityType !== 'RECOVERY') {
+        if (!isGenesisEntityType(entityType)) {
           foundRealSyncedOp = true;
           return 'stop';
         }

@@ -7,18 +7,22 @@ import { T } from '../../t.const';
 import { confirmDialog } from '../../util/native-dialogs';
 import { hasMeaningfulStateData } from '../validation/has-meaningful-state-data.util';
 import { isExampleTaskCreateOp } from '../validation/is-example-task-op.util';
-import { isFullStateOpType, Operation, OperationLogEntry } from '../core/operation.types';
+import {
+  isFullStateOpType,
+  isGenesisEntityType,
+  Operation,
+  OperationLogEntry,
+} from '../core/operation.types';
 
 /**
  * Legacy-migration and crash-recovery genesis ops carry this client's entire
- * state as an ordinary Batch op. They upload like any other op but replay as a
- * no-op on every other client, so the state they carry never reaches the server
- * in a form another device can apply. Only this client's own genesis counts: a
- * raw rebuild from server history can start with another device's genesis op.
+ * state as an ordinary Batch op that replays as a no-op on every other client,
+ * so the state they carry never reaches the server in a form another device
+ * can apply. Only this client's own genesis counts: a raw rebuild from server
+ * history (pre-#9921 uploads) can start with another device's genesis op.
  */
 const isOwnGenesisOp = (entry: OperationLogEntry): boolean =>
-  entry.source === 'local' &&
-  (entry.op.entityType === 'MIGRATION' || entry.op.entityType === 'RECOVERY');
+  entry.source === 'local' && isGenesisEntityType(entry.op.entityType);
 
 @Injectable({
   providedIn: 'root',
@@ -57,7 +61,7 @@ export class SyncLocalStateService {
     if (await this.opLogStore.getLatestFullStateOpEntry()) {
       return false;
     }
-    const [firstEntry] = await this.opLogStore.getOpsAfterSeq(0);
+    const firstEntry = await this.opLogStore.getFirstOpEntry();
     return !!firstEntry && isOwnGenesisOp(firstEntry);
   }
 
