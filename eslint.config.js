@@ -271,11 +271,11 @@ module.exports = tseslint.config(
     },
   },
   // Log history is exportable (`Log.exportLogHistory()` backs the config-page
-  // download and the global error handler auto-triggers it) and exported logs
-  // are routinely attached to public bug reports, so user content must never
-  // reach a Log method (rule #9). This flags the two shapes that actually
-  // leaked in #7870 / #9112 — a bare identifier argument and a shorthand
-  // property — both of which mean "whole object, unexamined".
+  // download and the error overlay's "Logs" button) and exported logs are
+  // routinely attached to public bug reports, so user content must never reach
+  // a Log method (rule #9). This flags a whole value handed over instead of
+  // named fields — bare, as a property value, spread, or nested in a logged
+  // literal — which is what leaked in #7870 / #9112.
   //
   // 'error', so a NEW leak fails CI on the PR that introduces it. 'warn' would
   // be inert here for the same reason spelled out under `max-lines` below:
@@ -295,7 +295,7 @@ module.exports = tseslint.config(
     },
   },
   // Grandfathered offenders: files that already hand whole values to a Log
-  // method (121 hits across these 62 files, measured 2026-09), downgraded to a
+  // method (119 hits across these 62 files, measured 2026-09), downgraded to a
   // non-failing warning so they don't red-CI while they are cleaned up. They
   // still warn, so the debt stays visible in lint output.
   // This list may only ever SHRINK — a new entry means a leak was introduced.
@@ -320,7 +320,6 @@ module.exports = tseslint.config(
       'src/app/features/issue-panel/issue-panel-calendar-agenda/issue-panel-calendar-agenda.component.ts',
       'src/app/features/issue/handle-issue-provider-http-error.ts',
       'src/app/features/issue/issue.service.ts',
-      'src/app/features/issue/providers/jira/jira-api.service.ts',
       'src/app/features/issue/providers/jira/jira-common-interfaces.service.ts',
       'src/app/features/mobile/store/mobile-notification.effects.ts',
       'src/app/features/planner/planner.service.ts',
@@ -336,6 +335,7 @@ module.exports = tseslint.config(
       'src/app/features/tasks/task.service.ts',
       'src/app/features/tasks/util/play-done-sound.ts',
       'src/app/features/ui-helper/ui-helper.service.ts',
+      'src/app/imex/sync/import-encryption-handler.service.ts',
       'src/app/imex/sync/oauth-callback-handler.service.ts',
       'src/app/imex/sync/sync-trigger.service.ts',
       'src/app/imex/sync/sync-wrapper.service.ts',

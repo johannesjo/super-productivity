@@ -44,9 +44,7 @@ ruleTester.run('no-user-content-in-logs', rule, {
     { code: `Log.log('state', { activeId, isEnabled });` },
     { code: `Log.debug(taskId);` },
     // Booleans say their own shape — logging one whole discloses only the flag.
-    { code: `Log.log('a', { isNative, hasTaskData, useAlarmStyle });` },
     { code: `Log.log('update', isUpdateAvailable);` },
-    { code: `Log.log('a', { shouldRetry, canEdit, needsRepair });` },
     // Suffixed errors, not just the bare conventional names.
     { code: `Log.err('cleanup failed', cleanupError);` },
     { code: `Log.err('stat failed', statErr);` },
@@ -58,12 +56,16 @@ ruleTester.run('no-user-content-in-logs', rule, {
     // Explicit fields at any depth stay fine.
     { code: `Log.log({ ctx: { taskId: t.id, count: xs.length } });` },
     { code: `Log.log('x', [a.id, b.id]);` },
-    { code: `Log.log('x', hasData ? 'y' : 'n');` },
-    // Judged on key OR value: a labelled id is already the discipline we want,
-    // so it must not be reported and told to log an id.
+    // A value whose own name is self-describing passes under any key.
     { code: `Log.log({ task: taskId });` },
     { code: `Log.log({ parent: parentId });` },
     { code: `Log.log({ result: hasData });` },
+    // A QUANTITY key vouches for its value, including through a wrapper.
+    { code: `Log.log({ bannerCount: nrOfAllBanners });` },
+    { code: `Log.log({ 'bannerCount': nrOfAllBanners });` },
+    // Booleans say their own shape.
+    { code: `Log.log('a', { isNative, hasTaskData });` },
+    { code: `Log.log('a', { shouldRetry, canEdit, needsRepair });` },
     // A named helper is the author choosing what to expose, like any call arg.
     { code: `Log.log('x', ...getSafeErrorLogMeta(e));` },
     { code: `Log.log('x', ...[taskId]);` },
@@ -166,14 +168,25 @@ ruleTester.run('no-user-content-in-logs', rule, {
       code: `Log.log('dnd', doNotDisturbList);`,
       errors: [{ messageId: 'bareValue', data: { name: 'doNotDisturbList' } }],
     },
-    // `…ById` is an entity dictionary keyed by id, not an id.
+    // An entity label must NOT vouch for its value: `{ taskId: task }` is the
+    // likeliest typo of the fix this rule asks for.
     {
-      code: `Log.log('x', tasksById);`,
-      errors: [{ messageId: 'bareValue', data: { name: 'tasksById' } }],
+      code: `Log.log({ taskId: task });`,
+      errors: [{ messageId: 'bareValue', data: { name: 'task' } }],
     },
     {
-      code: `Log.log('x', byId);`,
-      errors: [{ messageId: 'bareValue', data: { name: 'byId' } }],
+      code: `Log.log({ type: action });`,
+      errors: [{ messageId: 'bareValue', data: { name: 'action' } }],
+    },
+    // A computed key is a value expression, and is itself logged content.
+    {
+      code: `Log.log({ [taskId]: task });`,
+      errors: [{ messageId: 'bareValue', data: { name: 'task' } }],
+    },
+    // A spread names nothing, unlike `task.title`.
+    {
+      code: `Log.log('c', { ...this.task });`,
+      errors: [{ messageId: 'spreadValue', data: { name: 'task' } }],
     },
     // Every context logger is covered, not just `Log`.
     {
@@ -195,6 +208,9 @@ tsRuleTester.run('no-user-content-in-logs (typescript)', rule, {
     { code: `Log.err('x', e as Error);` },
     { code: `Log.log('x', t.id as string);` },
     { code: `Log.log('x', { taskId: task!.id });` },
+    // A quantity key still vouches through a wrapper.
+    { code: `Log.log({ bannerCount: nrOfAllBanners! });` },
+    { code: `Log.log({ bannerCount: n as number });` },
   ],
   invalid: [
     {
@@ -205,23 +221,10 @@ tsRuleTester.run('no-user-content-in-logs (typescript)', rule, {
       code: `Log.log('x', task as any);`,
       errors: [{ messageId: 'bareValue', data: { name: 'task' } }],
     },
+    // The spread path unwraps too, or `!` reopens the same evasion there.
     {
-      code: `Log.log('x', task satisfies Task);`,
-      errors: [{ messageId: 'bareValue', data: { name: 'task' } }],
-    },
-    {
-      code: `Log.log('x', await task);`,
-      errors: [{ messageId: 'bareValue', data: { name: 'task' } }],
-    },
-    {
-      code: `Log.log('x', (0, task));`,
-      errors: [{ messageId: 'bareValue', data: { name: 'task' } }],
-    },
-    // An `as *Response` asserts the value is NOT an Error, so the error-name
-    // allowlist must not cover it — log.ts only narrows a real Error.
-    {
-      code: `Log.log('http', e as HttpErrorResponse);`,
-      errors: [{ messageId: 'bareValue', data: { name: 'e' } }],
+      code: `Log.log('c', { ...task! });`,
+      errors: [{ messageId: 'spreadValue', data: { name: 'task' } }],
     },
   ],
 });

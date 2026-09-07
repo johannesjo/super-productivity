@@ -1,7 +1,15 @@
 import { initIpcInterfaces } from './ipc-handler';
 import { initPluginOAuth } from './plugin-oauth';
 import electronLog, { info, log, warn } from 'electron-log/main';
-import { App, app, BrowserWindow, globalShortcut, ipcMain, powerMonitor } from 'electron';
+import {
+  App,
+  app,
+  BrowserWindow,
+  globalShortcut,
+  ipcMain,
+  powerMonitor,
+  session,
+} from 'electron';
 import { join } from 'path';
 import { initDebug } from './debug';
 import electronDl from 'electron-dl';
@@ -298,6 +306,14 @@ export const startApp = (): void => {
     }
   });
 
+  // Chromium's spellchecker downloads dictionaries from Google
+  // (redirector.gvt1.com), which is what #5314 observed in a firewall log and
+  // what the "offline-first with zero data collection" promise rules out.
+  // Disabling it on the default session covers every window — no window in
+  // electron/ uses a custom `partition` — including any added later, so this
+  // needs no per-window flag and nothing to keep them in sync. Must run before
+  // the first window is created.
+  appIN.on('ready', () => session.defaultSession.setSpellCheckerEnabled(false));
   appIN.on('ready', () => createMainWin());
   appIN.on('ready', () => initBackupAdapter());
   appIN.on('ready', () => initLocalFileSyncAdapter());

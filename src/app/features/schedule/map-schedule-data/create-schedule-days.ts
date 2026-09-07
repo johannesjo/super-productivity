@@ -270,8 +270,9 @@ export const createScheduleDays = (
         ) {
           viewEntriesPushedToNextDay.push(entry);
         } else {
-          // `entry.data` is a TaskCopy (title, notes) — ids and the timing
-          // fields this branch is actually about, never the entry itself.
+          // `entry.data` carries content for most SVE variants (a TaskCopy, a
+          // TaskRepeatCfg, a calendar event) — log ids and the timing fields
+          // this branch is actually about, never the entry itself.
           Log.err('Entry start time after next day start', {
             entryId: entry.id,
             entryType: entry.type,

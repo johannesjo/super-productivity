@@ -16,7 +16,6 @@ const SECURE = Object.freeze({
   contextIsolation: true,
   nodeIntegration: false,
   nodeIntegrationInSubFrames: false,
-  spellcheck: false,
 });
 
 test('accepts a fully specified secure webPreferences object', () => {
@@ -30,19 +29,6 @@ test('accepts extra unrelated keys (preload, webSecurity, etc.)', () => {
       'test',
     ),
   );
-});
-
-test('rejects spellcheck unless explicitly false (including omitted)', () => {
-  // Fail-closed: Electron defaults spellcheck to true, and an enabled
-  // spellchecker fetches dictionaries from Google (#5314). A window that simply
-  // omits the key would silently reintroduce that connection.
-  for (const bad of [true, undefined]) {
-    assert.throws(
-      () => assertSecureWebPreferences({ ...SECURE, spellcheck: bad }, 'test'),
-      /spellcheck must be explicitly false/,
-      `spellcheck: ${String(bad)} must be rejected`,
-    );
-  }
 });
 
 test('rejects missing webPreferences (relying on Electron defaults)', () => {
@@ -176,65 +162,5 @@ test('every renderer-window constructor site has a matching assertSecureWebPrefe
     [],
     'These files create more BrowserWindows than they guard. Route each ' +
       'webPreferences through assertSecureWebPreferences() before creating the window.',
-  );
-});
-
-// The runtime assertion is fail-closed, but the two lazily-created windows
-// (full-screen blocker, task widget) are built inside an IPC handler and an
-// async function, where a throw becomes an uncaught exception / unhandled
-// rejection and start-app.ts exits the process. Killing the app is a
-// disproportionate response to a privacy flag whose worst case is one
-// dictionary download, so catch an omission HERE, statically, in CI —
-// before it can ever reach that runtime path.
-test('every webPreferences literal in electron/ sets spellcheck: false', () => {
-  const electronDir = __dirname;
-  const tsFiles = [];
-  const walk = (dir) => {
-    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-      const full = path.join(dir, entry.name);
-      if (entry.isDirectory()) {
-        if (entry.name === 'node_modules') continue;
-        walk(full);
-      } else if (entry.name.endsWith('.ts') && !entry.name.endsWith('.d.ts')) {
-        tsFiles.push(full);
-      }
-    }
-  };
-  walk(electronDir);
-
-  // Key off the window constructors themselves, not the shape of the
-  // webPreferences declaration: `const webPreferences: WebPreferences = {…}`
-  // (the alias this very module exports) and `webPreferences: wp` indirection
-  // both evade a declaration-shaped regex, and the alias is the obvious
-  // spelling for the next window someone adds.
-  //
-  // Comments are stripped first, so a file cannot be excused by the string
-  // `spellcheck: false` appearing in prose.
-  //
-  // Deliberately coarse (same spirit as the wiring guard above): it cannot
-  // parse, so it asserts co-occurrence per file. A file holding one guarded and
-  // one unguarded window would pass — accepted, as for the wiring guard.
-  const stripComments = (src) =>
-    src.replace(/\/\*[\s\S]*?\*\//g, '').replace(/(^|[^:])\/\/.*$/gm, '$1');
-  const HAS_NEW_WINDOW_RE = /new\s+(?:BrowserWindow|BrowserView|WebContentsView)\s*\(/;
-  const DECLARES_WEB_PREFS_RE = /\bwebPreferences\b\s*[:=]/;
-  // The guard module names `webPreferences` as a parameter and type but
-  // creates no window — it is the definition site, not a call site.
-  const NOT_A_CALL_SITE = new Set(['web-preferences-guard.ts']);
-  const offenders = tsFiles
-    .filter((file) => {
-      if (NOT_A_CALL_SITE.has(path.basename(file))) return false;
-      const src = stripComments(fs.readFileSync(file, 'utf8'));
-      if (!HAS_NEW_WINDOW_RE.test(src) && !DECLARES_WEB_PREFS_RE.test(src)) return false;
-      return !/spellcheck\s*:\s*false/.test(src);
-    })
-    .map((file) => path.relative(electronDir, file));
-
-  assert.deepEqual(
-    offenders,
-    [],
-    'These files declare webPreferences without `spellcheck: false`. Chromium ' +
-      'downloads spellcheck dictionaries from Google, which breaks the ' +
-      "app's zero-data-collection promise (#5314). Set it explicitly.",
   );
 });

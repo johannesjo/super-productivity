@@ -135,14 +135,18 @@ export class TagEffects {
           ),
         ),
         filter(({ nullTasks }) => nullTasks.length > 0),
-        tap(({ allTasks, nullTasks, activeId }) =>
+        tap(({ allTasks, activeId }) =>
           Log.log('Error INFO Today:', {
             activeId,
-            nullTaskCount: nullTasks.length,
-            // Ids (null for the corrupt entries) rather than a bare count, so a
-            // bug report still shows WHICH positions are being offered for
-            // deletion. Ids carry no user content.
-            taskIds: allTasks.map((t) => t?.id ?? null),
+            taskCount: allTasks.length,
+            // Positions, not ids: a bug report needs to show WHICH entries the
+            // dialog is about to delete, and `exportLogHistory` caps each arg at
+            // 400 chars — an id list truncates at ~15 tasks, losing the tail
+            // where the corrupt entries accumulate.
+            nullIndices: allTasks.reduce<number[]>(
+              (acc, t, i) => (t ? acc : [...acc, i]),
+              [],
+            ),
           }),
         ),
         tap(({ activeId, allTasks }) => {
