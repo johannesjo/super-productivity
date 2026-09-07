@@ -80,6 +80,17 @@
  * back down to a per-write figure, which is only meaningful because each write
  * is far above the clamp. `add-task-bar-open` polls with requestAnimationFrame,
  * so it is quantised to ~16.7ms — differences under one frame are not real.
+ *
+ * These per-write figures do NOT extrapolate to a run of writes. The write
+ * measurements force a layout read after every write, which is what isolates one
+ * write's cost — but it also defeats the coalescing a real caller gets for free.
+ * Measured against 201 rows in WebKit: one write with a forced read 388ms, four
+ * writes each followed by a forced read 1647ms (~4x, as expected), four writes
+ * with a single forced read at the end 249ms. So consecutive writes with no
+ * layout read between them cost about ONE recalc, not N. Before citing these
+ * numbers against code that writes several properties in a row — the four
+ * `--safe-area-inset-*` writes in `_initSafeAreaInsets`, say — check whether it
+ * reads layout in between. Usually it does not.
  */
 import { expect, test } from '../fixtures/test.fixture';
 import type { Page } from '@playwright/test';
