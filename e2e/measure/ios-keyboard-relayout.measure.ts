@@ -52,9 +52,9 @@
  *   plain-property                 0.3     0.3       0.4          0.2
  *   shell-height-write x30         0.5     0.6       0.6          0.5
  *
- * HOW MUCH OF THIS IS NOISE. Two clean WebKit runs gave four samples of the
- * same unmodified 201-row root write (opening and `[rows: none, repeat]`):
- * 180.4, 193.4, 194.0, 166.9 — a spread of ~16%, which is why the WebKit column
+ * HOW MUCH OF THIS IS NOISE. Clean WebKit runs gave these samples of the same
+ * unmodified 201-row root write (opening and `[rows: none, repeat]`): 180.4,
+ * 193.4, 194.0, 166.9, 174.3 — a spread of ~16%, which is why the WebKit column
  * above is rounded. Treat anything under ~1.2x there as unresolved. Blink held
  * 12.8 opening against 12.6 repeat, but that is one pair, so its variant cells
  * are single samples too. Measure with nothing else running: one contaminated
@@ -85,10 +85,10 @@
  *    (`collapsible.component.html` wraps its panel in a structural `@if`) and
  *    lands between the two, as it should at 128 rows instead of 201.
  * 5. `content-visibility` is a ~3.7x cut in Blink (one run, so treat the factor
- *    as approximate) and does nothing legible in WebKit: 171.8 and 169.8 across
- *    two runs, against unmodified samples spanning 166.9-194.0. That is not "no
- *    effect" — it is below what this setup can resolve, and a small real win is
- *    not excluded.
+ *    as approximate) and does nothing legible in WebKit: 171.8, 169.8 and 177.1
+ *    across three runs, against unmodified samples spanning 166.9-194.0 — and in
+ *    the third run it came in ABOVE its own baseline (177.1 vs 174.3). Below what
+ *    this setup resolves, so a small real win is not excluded either way.
  *
  * KNOWN BLIND SPOTS. These are hand-simulated writes, not the real event
  * sequence: `IosKeyboardService` is gated on native iOS and never runs here.
@@ -122,6 +122,11 @@
  */
 import { expect, test } from '../fixtures/test.fixture';
 import type { Page } from '@playwright/test';
+// Imported rather than hardcoded so a rename in the app breaks a grep here.
+// Nothing typechecks `e2e/`, so this is a discoverability guard, not a build
+// one — but the two symbols this header used to name went stale silently, and
+// this is the cheapest thing that would have made that visible.
+import { CSS_VAR_KEYBOARD_HEIGHT } from '../../src/app/core/theme/keyboard-css-vars.const';
 
 /**
  * `??` does not catch an empty string and `Number('x')` is NaN; both used to
@@ -376,7 +381,7 @@ const measureCssVarWrites = async (
   writes: number,
 ): Promise<Sample> =>
   page.evaluate(
-    ({ propertyKind, writeCount }) => {
+    ({ keyboardHeightVar, propertyKind, writeCount }) => {
       const root = document.documentElement;
       const leaf = document.querySelector('.add-task-button') as HTMLElement | null;
       if (propertyKind === 'leaf-custom-property' && !leaf) {
@@ -388,9 +393,9 @@ const measureCssVarWrites = async (
       };
       const write = (i: number): void => {
         if (propertyKind === 'root-custom-property') {
-          root.style.setProperty('--keyboard-height', `${300 + (i % 7)}px`);
+          root.style.setProperty(keyboardHeightVar, `${300 + (i % 7)}px`);
         } else if (propertyKind === 'leaf-custom-property') {
-          leaf!.style.setProperty('--keyboard-height', `${300 + (i % 7)}px`);
+          leaf!.style.setProperty(keyboardHeightVar, `${300 + (i % 7)}px`);
         } else if (propertyKind === 'root-inherited-standard') {
           // Same inheritance scope as the root custom property, different
           // property kind. This is the pair that isolates "custom property",
@@ -417,10 +422,10 @@ const measureCssVarWrites = async (
         }
         runs.push((performance.now() - started) / writeCount);
       }
-      root.style.removeProperty('--keyboard-height');
+      root.style.removeProperty(keyboardHeightVar);
       root.style.removeProperty('color');
       root.style.removeProperty('padding-top');
-      leaf?.style.removeProperty('--keyboard-height');
+      leaf?.style.removeProperty(keyboardHeightVar);
       document.body.getBoundingClientRect();
       return {
         label: `${propertyKind} write (moves rows: ${movesRows})`,
@@ -428,7 +433,11 @@ const measureCssVarWrites = async (
         values: runs,
       };
     },
-    { propertyKind: kind, writeCount: writes },
+    {
+      keyboardHeightVar: CSS_VAR_KEYBOARD_HEIGHT,
+      propertyKind: kind,
+      writeCount: writes,
+    },
   );
 
 test.describe('#9779 root custom-property write cost', () => {
