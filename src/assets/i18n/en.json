@@ -2419,7 +2419,7 @@
       "MAX_BACKUP_FILES_DESCRIPTION": "Desktop only. Older automatic backup files are deleted once this limit is exceeded.",
       "RESTORE_LATEST": "Restore latest automatic backup",
       "S_AUTO_RESTORED": "Restored {{tasks}} tasks and {{projects}} projects from an on-device backup.",
-      "S_FOLDER_NOT_USABLE": "Couldn't use that folder for backups. Please pick a folder outside the app's data folder that the app is allowed to write to.",
+      "S_FOLDER_NOT_USABLE": "Couldn't change the backup folder. Please pick a folder outside the app's data folder that the app is allowed to write to.",
       "S_NO_BACKUP_AVAILABLE": "No automatic backup available.",
       "S_RESTORE_SUCCESS": "Backup restored successfully.",
       "TITLE": "Automatic Backups"

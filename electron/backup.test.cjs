@@ -229,6 +229,9 @@ test('Store builds fall back to the real backup dir when LocalCache is absent', 
 });
 
 const pickFolder = async (folderPath) => {
+  // Only an existing folder can come back from the native picker, so a test
+  // that means "the folder is gone" has to remove it explicitly.
+  existingPaths.add(folderPath);
   openDialogResult = { canceled: false, filePaths: [folderPath] };
   const picked = await handleHandlers.get('PICK_BACKUP_FOLDER')();
   // The pick-time write probe removes its own temp file, so it leaves the
@@ -397,7 +400,7 @@ test('the picker opens in the folder backups currently go to', async () => {
 
   await pickFolder(PICKED_DIR);
   assert.equal(openDialogOptions.defaultPath, BACKUP_DIR);
-  assert.equal(openDialogOptions.properties.includes('promptToCreate'), true);
+  assert.equal(openDialogOptions.properties.includes('promptToCreate'), false);
 
   openDialogResult = { canceled: true, filePaths: [] };
   await handleHandlers.get('PICK_BACKUP_FOLDER')();
@@ -443,6 +446,74 @@ test('a picked folder whose parent has gone away is not re-created', async () =>
 
   assert.deepEqual([...writtenFiles.keys()], []);
   assert.equal(existingPaths.has(picked), false);
+});
+
+// Regression for #7054: the existsSync/mkdirSync pair also re-created a picked
+// folder whose own parent outlived it — the shape you get whenever the volume
+// root is the backup folder (`/Volumes/Backup`, `/media/me/USB`) or the share
+// is mounted below a directory that stays behind. Backups would then land on
+// the internal disk, invisible to the user and shadowed the moment the real
+// location is back, while every write reports success and the last-backup time
+// keeps claiming the user is protected.
+test('a picked folder that has gone away is not re-created', async () => {
+  const { initBackupAdapter } = loadBackupModule();
+  initBackupAdapter();
+  await pickFolder(PICKED_DIR);
+
+  // The volume is ejected: the folder is gone, its parent is not.
+  existingPaths.delete(PICKED_DIR);
+
+  await assert.rejects(
+    () => handleHandlers.get('BACKUP')(null, { data: {}, maxBackupFiles: 30 }),
+    { name: 'BackupFolderGoneError' },
+  );
+  assert.deepEqual([...writtenFiles.keys()], []);
+  assert.equal(existingPaths.has(PICKED_DIR), false);
+});
+
+// The refusal above is only for a folder the user picked and that has since
+// disappeared. The default one lives inside userData and is legitimately absent
+// until the first backup runs, so it must still be created.
+test('the default backup folder is still created when missing', async () => {
+  const { initBackupAdapter } = loadBackupModule();
+  initBackupAdapter();
+
+  await handleHandlers.get('BACKUP')(null, { data: {}, maxBackupFiles: 30 });
+
+  assert.equal(existingPaths.has(BACKUP_DIR), true);
+  assert.deepEqual(
+    [...writtenFiles.keys()].map((p) => path.dirname(p)),
+    [BACKUP_DIR],
+  );
+});
+
+// A crash between the write and the rename, or a probe file whose unlink
+// failed, leaves a file that is deliberately not backup-shaped — so retention
+// ignores it and, in a folder the user picked for their own files, nothing
+// would ever remove it. Only this app's own names, and only once they are too
+// old to belong to an instance still writing.
+test('cleanup removes stale temp files this app left behind', async () => {
+  const { initBackupAdapter } = loadBackupModule();
+  initBackupAdapter();
+  await pickFolder(PICKED_DIR);
+
+  const orphanTmp = '2026-07-01_090000.json.4242.tmp';
+  const orphanProbe = '.sp-backup-probe.4242.0123456789abcdef.tmp';
+  const inFlightTmp = '2026-07-02_090000.json.4243.tmp';
+  const foreignTmp = 'family-budget.tmp';
+  dirFiles[PICKED_DIR] = [orphanTmp, orphanProbe, inFlightTmp, foreignTmp];
+  const anHourAndAHalfAgo = new Date(Date.now() - 90 * 60 * 1000);
+  fileMtimes[path.join(PICKED_DIR, orphanTmp)] = anHourAndAHalfAgo;
+  fileMtimes[path.join(PICKED_DIR, orphanProbe)] = anHourAndAHalfAgo;
+  fileMtimes[path.join(PICKED_DIR, foreignTmp)] = anHourAndAHalfAgo;
+  fileMtimes[path.join(PICKED_DIR, inFlightTmp)] = new Date();
+
+  await handleHandlers.get('BACKUP')(null, { data: {}, maxBackupFiles: 30 });
+
+  assert.deepEqual(
+    deletedFiles.sort(),
+    [path.join(PICKED_DIR, orphanProbe), path.join(PICKED_DIR, orphanTmp)].sort(),
+  );
 });
 
 // The read allow-list must follow the live backup folder, not accumulate every

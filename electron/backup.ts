@@ -99,6 +99,15 @@ const folderNotWritable = (): Error => {
   return e;
 };
 
+// Same shape as folderNotWritable: path-free, distinct only in name so the
+// "your backup location went away" case stays tellable apart in logs.
+const backupFolderGone = (): Error => {
+  const e = new Error('Backup folder no longer exists');
+  e.name = 'BackupFolderGoneError';
+  delete (e as { stack?: string }).stack;
+  return e;
+};
+
 /**
  * Prove the folder can actually be written to, at pick time, before it becomes
  * the backup folder.
@@ -124,6 +133,37 @@ const assertFolderWritable = (folder: string): void => {
     // only ever touches backup-shaped filenames, so this is worth a log and
     // nothing more.
     error(e);
+  }
+};
+
+// Long enough that a temp file still in flight in another instance is never a
+// candidate; short enough that leftovers do not sit in the user's folder.
+const STALE_TMP_MAX_AGE_MS = 60 * 60 * 1000;
+
+/**
+ * Leftovers from this app's own interrupted writes: the `.tmp` a crash between
+ * writeFileSync and renameSync leaves behind, and a probe file whose unlink
+ * failed. Both are deliberately not backup-shaped, which keeps retention away
+ * from them — and would also mean nothing ever removes them from a folder the
+ * user picked for their own files. Matched on the exact names this file
+ * produces, never a bare `.tmp`.
+ */
+const isOwnTmpFilename = (fileName: string): boolean =>
+  /^\d{4}-\d{2}-\d{2}_\d{6}\.json\.\d+\.tmp$/.test(fileName) ||
+  /^\.sp-backup-probe\.\d+\.[0-9a-f]{16}\.tmp$/.test(fileName);
+
+const removeStaleTmpFiles = (backupDir: string, entries: string[]): void => {
+  const tooOldBefore = Date.now() - STALE_TMP_MAX_AGE_MS;
+  for (const fileName of entries.filter(isOwnTmpFilename)) {
+    const filePath = path.join(backupDir, fileName);
+    try {
+      if (statSync(filePath).mtime.getTime() < tooOldBefore) {
+        unlinkSync(filePath);
+      }
+    } catch (e) {
+      log(`Error deleting stale temp file ${fileName}`);
+      error(e);
+    }
   }
 };
 
@@ -213,12 +253,12 @@ export function initBackupAdapter(): void {
         // "put it back to the default" are both reachable without hunting down a
         // hidden path inside userData.
         defaultPath: await getBackupDirForDisplay(),
-        properties: [
-          'openDirectory',
-          'createDirectory',
-          'promptToCreate',
-          'dontAddToRecent',
-        ],
+        // No `promptToCreate`: on Windows it hands back a path the dialog did
+        // not create, which assertFolderWritable then refuses — offering to
+        // create a folder and calling it unusable a moment later. Both native
+        // dialogs can create a folder on their own (`createDirectory` on macOS,
+        // the New folder button on Windows), so nothing is lost.
+        properties: ['openDirectory', 'createDirectory', 'dontAddToRecent'],
       });
       if (canceled || !filePaths[0]) {
         return undefined;
@@ -275,8 +315,18 @@ async function backupData(
     : DEFAULT_MAX_BACKUP_FILES;
 
   try {
-    // Do not recreate a missing parent such as an unmounted drive.
     if (!existsSync(backupDir)) {
+      // A picked folder existed and was write-probed at pick time, so its
+      // absence now means the location went away: a volume ejected, a share
+      // unmounted, the folder deleted. Re-creating it would write backups onto
+      // whatever filesystem sits under the mount point, where the user cannot
+      // find them and where they are shadowed the moment the real location is
+      // back — while every write "succeeds", so the last-backup time keeps
+      // claiming they are protected. Only the default dir is created; it lives
+      // in userData and is legitimately absent before the first backup.
+      if (backupDir !== BACKUP_DIR) {
+        throw backupFolderGone();
+      }
       mkdirSync(backupDir);
     }
     const backup = JSON.stringify(data);
@@ -298,7 +348,8 @@ function cleanupOldBackups(backupDir: string, maxBackupFiles?: number | null): v
   }
 
   try {
-    const files = readdirSync(backupDir).filter(isAutoBackupFilename);
+    const entries = readdirSync(backupDir);
+    const files = entries.filter(isAutoBackupFilename);
     const filesWithMtime = files.map((fileName) => {
       const filePath = path.join(backupDir, fileName);
       return { fileName, filePath, mtime: statSync(filePath).mtime.getTime() };
@@ -312,6 +363,8 @@ function cleanupOldBackups(backupDir: string, maxBackupFiles?: number | null): v
         error(e);
       }
     }
+
+    removeStaleTmpFiles(backupDir, entries);
   } catch (e) {
     log('Error during backup cleanup');
     error(e);
