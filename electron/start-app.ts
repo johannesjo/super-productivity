@@ -313,7 +313,19 @@ export const startApp = (): void => {
   // electron/ uses a custom `partition` — including any added later, so this
   // needs no per-window flag and nothing to keep them in sync. Must run before
   // the first window is created.
-  appIN.on('ready', () => session.defaultSession.setSpellCheckerEnabled(false));
+  appIN.on('ready', () => {
+    try {
+      // Guarded like the macOS-only calls above: Electron builds the session
+      // spellchecker behind ENABLE_BUILTIN_SPELLCHECKER, so some distro-packaged
+      // rebuilds omit the method. Unguarded, a TypeError here escapes
+      // `emit('ready')`, the window-creating listeners registered after it never
+      // run, and `uncaughtException` exits 333 — no window at all, which is a far
+      // worse outcome than the dictionary fetch this prevents.
+      session.defaultSession.setSpellCheckerEnabled?.(false);
+    } catch {
+      /* no builtin spellchecker in this build — nothing to disable */
+    }
+  });
   appIN.on('ready', () => createMainWin());
   appIN.on('ready', () => initBackupAdapter());
   appIN.on('ready', () => initLocalFileSyncAdapter());

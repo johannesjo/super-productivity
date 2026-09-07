@@ -64,7 +64,7 @@ ruleTester.run('no-user-content-in-logs', rule, {
     { code: `Log.log({ bannerCount: nrOfAllBanners });` },
     { code: `Log.log({ 'bannerCount': nrOfAllBanners });` },
     // Booleans say their own shape.
-    { code: `Log.log('a', { isNative, hasTaskData });` },
+    { code: `Log.log('a', { isNative, hasTaskData, useAlarmStyle });` },
     { code: `Log.log('a', { shouldRetry, canEdit, needsRepair });` },
     // A named helper is the author choosing what to expose, like any call arg.
     { code: `Log.log('x', ...getSafeErrorLogMeta(e));` },
