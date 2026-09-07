@@ -26,8 +26,9 @@ const MOBILE_CONTEXT = {
 
 export default defineConfig({
   testDir: __dirname,
-  // `*.measure.ts`, deliberately not `*.spec.ts`: the default Playwright pattern
-  // is what keeps `npm run e2e` from ever collecting these.
+  // What actually keeps `npm run e2e` off these is `e2e/playwright.config.ts`
+  // setting `testDir: e2e/tests` — this folder is outside its collected tree
+  // entirely. The `*.measure.ts` suffix is a second, independent barrier.
   testMatch: /.*\.measure\.ts$/,
   // No globalSetup: the harnesses need no bundled plugins and no SuperSync server.
   fullyParallel: false,
@@ -48,7 +49,11 @@ export default defineConfig({
         browserName: 'webkit' as const,
         // The isolated-context fixture consumes contextOptions, so the mobile
         // descriptor has to be nested here rather than spread at use level.
-        contextOptions: { ...MOBILE_CONTEXT, userAgent: IPHONE_13.userAgent },
+        // No userAgent here on purpose: `test.fixture.ts` reads
+        // `userAgent ?? contextOptions.userAgent`, and `use.userAgent` below is
+        // always set, so a nested one would be dead. Both engines therefore run
+        // as PLAYWRIGHT, which is what makes the two columns comparable.
+        contextOptions: MOBILE_CONTEXT,
       },
     },
     {
@@ -64,7 +69,10 @@ export default defineConfig({
     : {
         command: 'npm run startFrontend:e2e',
         url: 'http://localhost:4242',
-        reuseExistingServer: true,
+        // Never reuse: attaching to a stray server on :4242 would file the
+        // numbers under the wrong build, which is the one thing a measurement
+        // harness must not do.
+        reuseExistingServer: false,
         timeout: 4 * 60 * 1000,
         stdout: 'ignore',
         stderr: 'pipe',

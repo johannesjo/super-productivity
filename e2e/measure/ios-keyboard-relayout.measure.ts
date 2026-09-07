@@ -2,8 +2,10 @@
  * Manual measurement harness for #9779 — "opening the add-task bar on iOS is
  * laggy, and it gets worse the more task rows are on screen".
  *
- * Not a test: it asserts only that its own setup worked, prints numbers, and
- * always passes. Run it by hand:
+ * Not a performance assertion: it prints numbers and asserts only that its own
+ * setup worked. It can still fail — the shared fixture throws on any uncaught
+ * browser error — but it will never fail because a number got worse. Run it by
+ * hand:
  *
  *   npx playwright test --config e2e/measure/playwright.measure.config.ts \
  *     --project=measure-webkit
@@ -11,131 +13,171 @@
  * MEASURE_OPEN_TASK_COUNT / MEASURE_DONE_TASK_COUNT override the seeded list
  * (default 128 open + 73 done — the reporter's own Inbox).
  *
- * What it measures, and why each one is here:
+ * WHAT THIS STILL PRICES, now that #9779 is fixed. The iOS path no longer writes
+ * these variables on the root: `IosKeyboardService` (`ios-keyboard.service.ts`)
+ * publishes them on the CDK overlay container. The root write survives on the
+ * NON-iOS path — `GlobalThemeService._initVisualViewportKeyboardTracking()`
+ * (`global-theme.service.ts`) sets `--keyboard-height` on `document.documentElement`
+ * for Android and mobile web — so the Blink column below is the live consumer of
+ * this measurement, and the WebKit column is the record of what was fixed.
  *
- * - `root-custom-property write` — `keyboardWillShow` sets `--keyboard-height`
- *   on `document.documentElement`, and `keyboardWillHide` resets it along with
- *   `--keyboard-overlay-offset` (`global-theme.service.ts`).
- * - `leaf-custom-property write` — the same write aimed at an element nothing
- *   inherits from. The pair is the measurement: it prices the #9809 treatment of
- *   `--visual-viewport-height` if applied to these two as well.
- * - `plain-property write` — a non-inherited property on the root. Weaker: it
- *   does NOT move the rows (the label says so), so it prices the write plus the
- *   forced rect read, not layout.
- * - `shell-height-write` — `iosShellHeight` writes a height on `.app-container`
- *   once per visualViewport resize while the keyboard animates.
- * - `resize-dispatch` — `_notifyIOSViewportChange` fires a synthetic window
- *   resize per animation frame, waking CdkTextareaAutosize and every connected
- *   CDK overlay's ViewportRuler.
- * - `add-task-bar-open` — tap on the mobile FAB to the input holding focus.
+ * The measurements:
  *
- * Findings as of 2026-09 (WebKit 26, iPhone 13 viewport, `ng serve` build):
+ * - `root-custom-property` — a custom property on `document.documentElement`.
+ * - `root-inherited-standard` — an ordinary *inherited* property (`color`) on the
+ *   same element. Identical invalidation scope, so this is the pair that isolates
+ *   "custom property"; root-vs-leaf alone only isolates "inheritance scope".
+ * - `leaf-custom-property` — the same custom-property write aimed at a small
+ *   subtree (the FAB, ~6 elements) instead of the root.
+ * - `plain-property` — a non-inherited property (`padding-top`) on the root.
+ * - `shell-height-write` — the `height` + `min-height` that `IosKeyboardService`
+ *   drives onto `.app-container` while the keyboard animates.
  *
- *                                   0 rows   201 rows   128 rows, done collapsed
- *   root-custom-property write        9.2ms    219.5ms                    121.9ms
- *   leaf-custom-property write        0.1ms      0.1ms                          -
- *   plain-property write              0.1ms      0.1ms                          -
- *   shell-height-write x30            5.0ms      5.0ms                          -
- *   resize-dispatch x30               0.0ms      0.0ms                          -
- *   add-task-bar-open                49.0ms     37.0ms                     41.0ms
+ * Findings, measured 2026-09 (WebKit 26 / Chromium 151, iPhone 13 viewport
+ * 390x664, `ng serve` build, median ms per write over 5 runs of 20):
  *
- * The same run under `--project=measure-chromium` (Blink, 2026-09):
+ *   WebKit                       0 rows   201    201 c-v   201 d:none   128 collapsed
+ *   root-custom-property           8.0   180.4     171.8          8.2         117.2
+ *   root-inherited-standard        0.1     0.1       0.1          0.1
+ *   leaf-custom-property           0.1     0.1       0.1          0.1
+ *   plain-property                 0.0     0.0       0.1          0.0
+ *   shell-height-write x30         5.0     5.0       5.0          5.0
  *
- *                                   0 rows   201 rows   201 rows, content-vis
- *   root-custom-property write        1.0ms     14.1ms                 1.9-4.0ms
- *   leaf-custom-property write        0.1ms      0.0ms                     0.1ms
- *   plain-property write              0.3ms      0.3ms                     0.3ms
+ *   Blink                        0 rows   201    201 c-v   201 d:none   128 collapsed
+ *   root-custom-property           0.7    12.8       3.5          1.6           8.7
+ *   root-inherited-standard        0.3     0.3       0.3          0.3
+ *   leaf-custom-property           0.1     0.1       0.1          0.0
+ *   plain-property                 0.3     0.3       0.4          0.2
+ *   shell-height-write x30         0.5     0.6       0.6          0.5
  *
- * Blink charges the same mechanism roughly an order of magnitude less: still 14x
- * the leaf write and still scaling with row count, but ~14ms rather than
- * hundreds. Worth knowing before porting an iOS fix to the Android path on the
- * strength of the WebKit number alone — and note `content-visibility` cuts it
- * severalfold here while doing nothing at all in WebKit.
+ * Drift check (the `[rows: none, repeat]` line, measured last): WebKit 193.4 vs
+ * an opening 180.4, Blink 12.6 vs 12.8. So in WebKit anything inside ±10% is
+ * noise; Blink is stable enough to read directly.
  *
- * Only the root custom-property write scales, and it scales hard. The identical
- * write on a leaf stays at 0.1ms with 201 rows on screen, so the cost is style
- * invalidation across everything that could inherit the property — not the write,
- * and not layout. Collapsing the Completed Tasks section, the reporter's own
- * workaround, drops it to 121.9ms because `collapsible.component.html` wraps its
- * panel in a structural `@if`: those rows leave the DOM. `display: none` does NOT
- * help, because WebKit still computes style for display-none subtrees, and
- * neither does `content-visibility` — both land inside the run-to-run drift that
- * the repeated `[rows: none, repeat]` baseline exists to expose.
+ * WHAT THE NUMBERS SAY.
  *
- * The shell-height write and the synthetic resize are genuinely flat. The resize
- * costs nothing here partly because the app is zoneless
- * (`provideZonelessChangeDetection`), and partly because this harness runs it
- * with no overlay open, which is not the state the real keyboard opens in.
+ * 1. It is custom properties specifically, not inherited properties. A `color`
+ *    write on `<html>` invalidates exactly the same set of elements and costs
+ *    0.1ms against the custom property's 180.4ms — a ratio of ~1800x in WebKit,
+ *    ~40x in Blink. "Don't write inherited things on the root" would be the wrong
+ *    lesson; "WebKit resolves custom properties per element on every root write"
+ *    is the right one, and it is what the #9926 fix is built on.
+ * 2. Only the root custom-property write scales with row count. Everything else
+ *    in both tables is flat from 0 to 201 rows.
+ * 3. Blink charges the same mechanism ~14x less (180.4 vs 12.8 at 201 rows).
+ *    That is why the iOS fix was not ported to the Android path.
+ * 4. Rows that are not rendered are not charged. `display: none` takes WebKit's
+ *    180.4ms down to 8.2ms — the empty-list floor (8.0ms) — so the cost tracks
+ *    rendered rows, not DOM nodes. Collapsing Completed Tasks, the reporter's own
+ *    workaround, gets 117.2ms by removing rows from the DOM outright
+ *    (`collapsible.component.html` wraps its panel in a structural `@if`).
+ *    `content-visibility` cuts Blink 3.7x but lands inside WebKit's drift band.
  *
- * KNOWN BLIND SPOTS. `_initIOSKeyboardHandling` is gated on native iOS, so it
- * never runs here: these are hand-simulated writes, not the real event sequence.
- * Headless WebKit also does no real tile rasterization and has no soft keyboard,
- * so the cost of Capacitor `resize: 'native'` animating the WKWebView frame is
- * out of reach at any list size. Absolute numbers are relative indicators only —
- * an A15 is not this machine.
+ * KNOWN BLIND SPOTS. These are hand-simulated writes, not the real event
+ * sequence: `IosKeyboardService` is gated on native iOS and never runs here.
+ * Headless WebKit does no real tile rasterization and has no soft keyboard, so
+ * the cost of Capacitor `resize: 'native'` animating the WKWebView frame is out
+ * of reach at any list size. `ng serve` is an unoptimized build. An A15 is not
+ * this machine — read the ratios, not the milliseconds. `ios-keyboard.service.ts`
+ * quotes ~390ms for this write from the original #9779 investigation; that was a
+ * single write on a different machine, where this table divides a 20-write total.
+ * Same phenomenon, don't try to reconcile the absolute values.
  *
- * Timing note: WebKit clamps `performance.now()` to 1ms, so nothing below times
- * a single operation directly. `shell-height-write` and `resize-dispatch` report
- * the total across N iterations; `root ... write` divides its N-iteration total
- * back down to a per-write figure, which is only meaningful because each write
- * is far above the clamp. `add-task-bar-open` polls with requestAnimationFrame,
- * so it is quantised to ~16.7ms — differences under one frame are not real.
+ * TIMING. WebKit clamps `performance.now()` to 1ms, so no single operation is
+ * timed directly: every figure is an N-iteration total divided by N. The rule
+ * that follows is that the TOTAL must clear the clamp, and each per-write figure
+ * then carries ±(clamp/N) — ±0.05ms at N=20. That band is nothing against the
+ * root write's 180ms and is the whole value of every 0.0-0.1ms cell, so treat
+ * those as "below resolution", not as measured differences.
  *
- * These per-write figures do NOT extrapolate to a run of writes. The write
- * measurements force a layout read after every write, which is what isolates one
- * write's cost — but it also defeats the coalescing a real caller gets for free.
- * Measured against 201 rows in WebKit, relative to one write with a forced read:
+ * COALESCING — a scratch measurement, not reproduced by this file. Every write
+ * kind here forces a layout read after every write, which isolates one write's
+ * cost but defeats the coalescing a real caller gets for free. Measured
+ * separately in WebKit at 201 rows, relative to one write with a forced read:
  * four writes each followed by a forced read cost ~4x; four writes with a single
- * forced read at the end cost ~1x. So consecutive writes with no layout read
- * between them are about ONE recalc, not N. Ratios, not absolutes — each case
- * ran once in a fixed order, so the millisecond figures carry ordering noise
- * (creating a custom property is not the same work as updating one) and are
- * deliberately not quoted here; a 4x spread survives that, a 20% one would not.
- * The batched case also wrote dummy properties nothing consumes, so vars that
- * feed a `calc()` in the SCSS may cost more. Before citing these numbers against
- * code that writes several properties in a row — the four `--safe-area-inset-*`
- * writes in `_initSafeAreaInsets`, say — check whether it reads layout in
- * between. Usually it does not.
+ * forced read at the end cost ~1x. Consecutive writes with no layout read
+ * between them are about ONE recalc, not N. Ratios only — the cases ran once
+ * each in fixed order, and the batched case wrote dummy properties nothing
+ * consumes, so vars feeding a `calc()` may cost more. Before citing this table
+ * against code that writes several properties in a row — the four
+ * `--safe-area-inset-*` writes in `_initSafeAreaInsets`, say — check whether it
+ * reads layout in between. Usually it does not.
  */
 import { expect, test } from '../fixtures/test.fixture';
 import type { Page } from '@playwright/test';
 
+/**
+ * `??` does not catch an empty string and `Number('x')` is NaN; both used to
+ * seed zero tasks and then fail 30s later inside `toHaveCount(NaN)`.
+ */
+const readCount = (name: string, fallback: number): number => {
+  const raw = process.env[name];
+  if (raw === undefined || raw === '') {
+    return fallback;
+  }
+  const value = Number(raw);
+  if (!Number.isInteger(value) || value < 0) {
+    throw new Error(`${name} must be a non-negative integer, got "${raw}"`);
+  }
+  return value;
+};
+
 /** The reporter's Inbox: 128 open + 73 done. */
-const OPEN_TASK_COUNT = Number(process.env.MEASURE_OPEN_TASK_COUNT ?? 128);
-const DONE_TASK_COUNT = Number(process.env.MEASURE_DONE_TASK_COUNT ?? 73);
+const OPEN_TASK_COUNT = readCount('MEASURE_OPEN_TASK_COUNT', 128);
+const DONE_TASK_COUNT = readCount('MEASURE_DONE_TASK_COUNT', 73);
 const TASK_COUNT = OPEN_TASK_COUNT + DONE_TASK_COUNT;
 /** Mirrors the op-log batch cap; only affects how the seed is chunked. */
 const MAX_BATCH_OPERATIONS_SIZE = 50;
 const SHELL_WRITE_FRAMES = 30;
-const RESIZE_DISPATCHES = 30;
 const ROOT_WRITES = 20;
 const WRITE_KINDS = [
   'root-custom-property',
   'leaf-custom-property',
+  'root-inherited-standard',
   'plain-property',
 ] as const;
-const OPEN_REPS = 11;
-/** The first open of each variant pays for lazy work that never repeats. */
-const OPEN_WARMUP_REPS = 2;
 const INBOX_PROJECT_ID = 'INBOX_PROJECT';
 
-/** Row-level CSS whose effect on each measurement is worth knowing. */
-const ROW_VARIANTS: readonly { label: string; css: string }[] = [
+/**
+ * Row-level CSS whose effect on each measurement is worth knowing.
+ *
+ * `verify` is not optional decoration. `task { display: none }` (specificity
+ * 0,0,1) silently lost to the `:host { display: block }` in `_task-base.scss`,
+ * which Angular's emulated encapsulation compiles to `[_nghost-*]` (0,1,0) — so
+ * for one whole generation of this harness the `display:none` rows were plain
+ * baselines printed under a different label, and nothing could tell. Every
+ * variant now states the computed value it must produce, and `applyRowVariant`
+ * throws if the cascade did not go its way.
+ */
+const ROW_VARIANTS: readonly {
+  label: string;
+  css: string;
+  verify?: { property: string; expected: string };
+}[] = [
   { label: 'none', css: '' },
   {
     label: 'content-visibility',
     css: 'task { content-visibility: auto; contain-intrinsic-size: auto 52px; }',
+    verify: { property: 'content-visibility', expected: 'auto' },
   },
-  // The discriminator: `display: none` removes the rows from layout but not from
-  // style computation, so a cost that survives it is style invalidation.
-  { label: 'display:none', css: 'task { display: none; }' },
+  // `!important` beats the host rule's higher specificity. Rows leave layout but
+  // stay in the DOM, so this is the closest thing here to a style-vs-layout split.
+  {
+    label: 'display:none',
+    css: 'task { display: none !important; }',
+    verify: { property: 'display', expected: 'none' },
+  },
 ];
 
 const STYLE_ID = 'measure-variant-style';
 
-const applyRowVariant = async (page: Page, css: string): Promise<void> => {
+const applyRowVariant = async (
+  page: Page,
+  css: string,
+  verify?: { property: string; expected: string },
+): Promise<void> => {
   await page.evaluate(
-    ({ id, variantCss }) => {
+    ({ id, variantCss, check }) => {
       document.getElementById(id)?.remove();
       if (variantCss) {
         const style = document.createElement('style');
@@ -145,8 +187,23 @@ const applyRowVariant = async (page: Page, css: string): Promise<void> => {
       }
       // Settle the new styles so they are not charged to the next measurement.
       document.body.getBoundingClientRect();
+      if (!check) {
+        return;
+      }
+      const row = document.querySelector('task');
+      if (!row) {
+        throw new Error('no task row to verify the variant against');
+      }
+      const actual = getComputedStyle(row).getPropertyValue(check.property).trim();
+      if (actual !== check.expected) {
+        throw new Error(
+          `row variant did not apply: ${check.property} is "${actual}", ` +
+            `expected "${check.expected}" — the cascade lost, so this run would ` +
+            `have printed a baseline under the wrong label`,
+        );
+      }
     },
-    { id: STYLE_ID, variantCss: css },
+    { id: STYLE_ID, variantCss: css, check: verify ?? null },
   );
 };
 
@@ -245,6 +302,16 @@ const measureShellHeightWrites = async (page: Page, frames: number): Promise<Sam
       shell.style.minHeight = `${height}px`;
       shell.getBoundingClientRect();
     };
+    // A flat reading is only meaningful if the write moved something; without
+    // this probe an inert write and a cheap one print the same number.
+    const lastRow = document.querySelectorAll('task');
+    const rowTopBefore = lastRow[lastRow.length - 1]?.getBoundingClientRect().top;
+    const shellHeightBefore = shell.getBoundingClientRect().height;
+    writeFrame(0);
+    const hasEffect =
+      shell.getBoundingClientRect().height !== shellHeightBefore ||
+      lastRow[lastRow.length - 1]?.getBoundingClientRect().top !== rowTopBefore;
+
     const runs: number[] = [];
     for (let run = 0; run < 5; run++) {
       for (let i = 0; i < 5; i++) {
@@ -260,29 +327,31 @@ const measureShellHeightWrites = async (page: Page, frames: number): Promise<Sam
     shell.style.minHeight = '';
     shell.getBoundingClientRect();
     return {
-      label: `shell-height-write x${frameCount}`,
+      label: `shell-height-write x${frameCount} (has effect: ${hasEffect})`,
       rowCount: document.querySelectorAll('task').length,
       values: runs,
     };
   }, frames);
 
 /**
- * The write `keyboardWillShow`/`keyboardWillHide` still make on the root
- * (`global-theme.service.ts`: `--keyboard-height`, `--keyboard-overlay-offset`),
- * against the same write aimed at a leaf element.
+ * The root custom-property write — still live on the non-iOS path
+ * (`GlobalThemeService._initVisualViewportKeyboardTracking`) — against three
+ * controls that each hold one variable steady:
  *
- * A custom property invalidates the computed style of everything that could
- * inherit it, so on `document.documentElement` its cost scales with the whole
- * rendered tree, and on a leaf it does not. That pair is the measurement: it is
- * the difference the #9809 treatment of `--visual-viewport-height` would make if
- * applied to these two as well.
+ * - `root-inherited-standard` keeps the element and the inheritance scope and
+ *   changes only the kind of property. This is the load-bearing control: without
+ *   it the root-vs-leaf gap reads as "inherited properties are expensive", which
+ *   the numbers say is false.
+ * - `leaf-custom-property` keeps the property kind and shrinks the scope.
+ * - `plain-property` keeps the element and drops inheritance.
  *
- * `plain-property` is a third, weaker reading: a non-inherited property on the
- * root. It reports whether the write plus the forced rect read is itself free —
- * NOT whether layout is free, since it does not move the rows (the returned
- * label says which, so a 0ms reading is never mistaken for the latter).
+ * Every timed write is followed by a forced layout read, which is what makes the
+ * per-write division legitimate — the N iterations are homogeneous. `movesRows`
+ * is probed separately and folded into the label, so a 0ms reading is never
+ * mistaken for "layout is free". Note it reads `false` vacuously when there are
+ * no rows, and under `display: none` where every rect is zero.
  */
-type WriteKind = 'root-custom-property' | 'leaf-custom-property' | 'plain-property';
+type WriteKind = (typeof WRITE_KINDS)[number];
 
 const measureCssVarWrites = async (
   page: Page,
@@ -296,12 +365,20 @@ const measureCssVarWrites = async (
       if (propertyKind === 'leaf-custom-property' && !leaf) {
         throw new Error('.add-task-button missing — no leaf to write to');
       }
-      const lastRow = (): Element | null => document.querySelector('task:last-of-type');
+      const lastRow = (): Element | null => {
+        const rows = document.querySelectorAll('task');
+        return rows[rows.length - 1] ?? null;
+      };
       const write = (i: number): void => {
         if (propertyKind === 'root-custom-property') {
           root.style.setProperty('--keyboard-height', `${300 + (i % 7)}px`);
         } else if (propertyKind === 'leaf-custom-property') {
           leaf!.style.setProperty('--keyboard-height', `${300 + (i % 7)}px`);
+        } else if (propertyKind === 'root-inherited-standard') {
+          // Same inheritance scope as the root custom property, different
+          // property kind. This is the pair that isolates "custom property",
+          // where root-vs-leaf only isolates "inheritance scope".
+          root.style.setProperty('color', `rgb(${i % 7}, 0, 0)`);
         } else {
           root.style.setProperty('padding-top', `${i % 7}px`);
         }
@@ -324,6 +401,7 @@ const measureCssVarWrites = async (
         runs.push((performance.now() - started) / writeCount);
       }
       root.style.removeProperty('--keyboard-height');
+      root.style.removeProperty('color');
       root.style.removeProperty('padding-top');
       leaf?.style.removeProperty('--keyboard-height');
       document.body.getBoundingClientRect();
@@ -336,109 +414,23 @@ const measureCssVarWrites = async (
     { propertyKind: kind, writeCount: writes },
   );
 
-/** The synthetic window resize `_notifyIOSViewportChange` fires per frame. */
-const measureResizeDispatch = async (page: Page, dispatches: number): Promise<Sample> =>
-  page.evaluate((count) => {
-    const burst = (): void => {
-      for (let i = 0; i < count; i++) {
-        window.dispatchEvent(new Event('resize'));
-      }
-      // Charge the layout the app would be forced into before the next paint.
-      document.body.getBoundingClientRect();
-    };
-    burst();
-    const runs: number[] = [];
-    for (let run = 0; run < 5; run++) {
-      const started = performance.now();
-      burst();
-      runs.push(performance.now() - started);
-    }
-    return {
-      label: `resize-dispatch x${count}`,
-      rowCount: document.querySelectorAll('task').length,
-      values: runs,
-    };
-  }, dispatches);
-
-/**
- * The reported interaction, timed in-page so Playwright IPC and actionability
- * checks stay out of the number.
- */
-const measureAddTaskBarOpen = async (
-  page: Page,
-  label: string,
-  reps: number,
-): Promise<Sample> => {
-  const values: number[] = [];
-  for (let rep = 0; rep < reps + OPEN_WARMUP_REPS; rep++) {
-    const elapsed = await page.evaluate(async () => {
-      const button = document.querySelector('.add-task-button') as HTMLElement | null;
-      if (!button) {
-        throw new Error('.add-task-button missing — is the mobile bottom nav shown?');
-      }
-      if (document.querySelector('add-task-bar.global')) {
-        throw new Error('add-task-bar already open — the previous rep did not close');
-      }
-      const until = (predicate: () => boolean): Promise<number> =>
-        new Promise((resolve, reject) => {
-          const deadline = performance.now() + 20000;
-          const check = (): void => {
-            if (predicate()) {
-              resolve(performance.now());
-            } else if (performance.now() > deadline) {
-              reject(new Error('timed out waiting for the add-task bar'));
-            } else {
-              requestAnimationFrame(check);
-            }
-          };
-          check();
-        });
-
-      const started = performance.now();
-      button.click();
-      // Focus, not mere presence: the reporter's complaint is the delay before
-      // they can type, which is what the keyboard hangs off.
-      const focusedAt = await until(
-        () => !!document.activeElement?.closest('add-task-bar.global'),
-      );
-      return focusedAt - started;
-    });
-    if (rep >= OPEN_WARMUP_REPS) {
-      values.push(elapsed);
-    }
-
-    // Closed through the store, not Escape: a keypress that lands a frame before
-    // the input takes focus is silently dropped, and the next rep then aborts on
-    // an already-open bar.
-    await page.evaluate(() => {
-      const store = (
-        window as unknown as {
-          __e2eTestHelpers?: { store?: { dispatch: (action: unknown) => void } };
-        }
-      ).__e2eTestHelpers?.store;
-      store?.dispatch({ type: '[Layout] Hide AddTaskBar' });
-    });
-    await page.locator('add-task-bar.global').waitFor({ state: 'detached' });
-  }
-  return {
-    label: `add-task-bar-open [rows: ${label}]`,
-    rowCount: await page.locator('task').count(),
-    values,
-  };
-};
-
-test.describe('#9779 iOS add-task-bar open cost', () => {
+test.describe('#9779 root custom-property write cost', () => {
   test('what scales with the number of rendered task rows', async ({
     page,
     workViewPage,
     testPrefix,
     browserName,
   }) => {
-    const lines: string[] = [];
+    // Streamed, not buffered to the end: the run is minutes long, and a timeout
+    // or a mid-run throw used to discard every number already measured.
+    const record = (line: string): void => {
+      // eslint-disable-next-line no-console
+      console.log(`[measure] ${line}`);
+    };
     // browserName, not a user-agent sniff: the shared fixture overrides the UA
     // with "PLAYWRIGHT", so sniffing for "Chrome" reported webkit under both
     // projects and silently mislabelled every Chromium run.
-    lines.push(
+    record(
       `engine=${browserName} ` +
         (await page.evaluate(
           () => `viewport=${window.innerWidth}x${window.innerHeight}`,
@@ -451,27 +443,20 @@ test.describe('#9779 iOS add-task-bar open cost', () => {
       window.location.hash = `#/project/${projectId}/tasks`;
     }, INBOX_PROJECT_ID);
     await workViewPage.waitForTaskList();
-    // The FAB is the entry point every open measurement uses; without it the
-    // harness would silently measure nothing.
-    await expect(page.locator('.add-task-button')).toBeVisible();
 
     // Boot work (lazy chunks, first render, initial sync) keeps running for a
     // while after the list appears, and it lands squarely on whatever is measured
-    // first. Burn it off, otherwise the empty-list baseline reads slower than the
-    // 200-row case and the comparison inverts.
+    // first.
     // `waitForTimeout` is banned in e2e/tests for good reason; here there is no
     // event to wait for — the point is to let unrelated boot work drain.
     await page.waitForTimeout(2000);
     await measureShellHeightWrites(page, SHELL_WRITE_FRAMES);
-    await measureAddTaskBarOpen(page, 'warmup', 1);
 
-    lines.push('--- empty list ---');
+    record('--- empty list ---');
     for (const kind of WRITE_KINDS) {
-      lines.push(summarize(await measureCssVarWrites(page, kind, ROOT_WRITES), 'ms'));
+      record(summarize(await measureCssVarWrites(page, kind, ROOT_WRITES), 'ms'));
     }
-    lines.push(summarize(await measureShellHeightWrites(page, SHELL_WRITE_FRAMES), 'ms'));
-    lines.push(summarize(await measureResizeDispatch(page, RESIZE_DISPATCHES), 'ms'));
-    lines.push(summarize(await measureAddTaskBarOpen(page, 'none', OPEN_REPS), 'ms'));
+    record(summarize(await measureShellHeightWrites(page, SHELL_WRITE_FRAMES), 'ms'));
 
     const taskIdPrefix = `${testPrefix}-measure-`;
     await seedProjectTasks(page, taskIdPrefix, OPEN_TASK_COUNT, DONE_TASK_COUNT);
@@ -483,23 +468,19 @@ test.describe('#9779 iOS add-task-bar open cost', () => {
     );
     await page.waitForTimeout(1500);
 
-    lines.push(
+    record(
       `--- ${TASK_COUNT} tasks (${OPEN_TASK_COUNT} open + ${DONE_TASK_COUNT} done) ---`,
     );
-    for (const { label, css } of ROW_VARIANTS) {
-      await applyRowVariant(page, css);
+    for (const { label, css, verify } of ROW_VARIANTS) {
+      await applyRowVariant(page, css, verify);
       for (const kind of WRITE_KINDS) {
-        lines.push(
+        record(
           summarize(await measureCssVarWrites(page, kind, ROOT_WRITES), 'ms') +
             `  [rows: ${label}]`,
         );
       }
-      lines.push(
+      record(
         summarize(await measureShellHeightWrites(page, SHELL_WRITE_FRAMES), 'ms') +
-          `  [rows: ${label}]`,
-      );
-      lines.push(
-        summarize(await measureResizeDispatch(page, RESIZE_DISPATCHES), 'ms') +
           `  [rows: ${label}]`,
       );
       await clearRowVariant(page);
@@ -507,17 +488,12 @@ test.describe('#9779 iOS add-task-bar open cost', () => {
     // Variants run in fixed order, and these numbers drift upward over a run.
     // Repeating the unmodified baseline last is what tells a real variant effect
     // apart from that drift — compare each variant to BOTH baselines.
-    lines.push(
+    record(
       summarize(
         await measureCssVarWrites(page, 'root-custom-property', ROOT_WRITES),
         'ms',
       ) + '  [rows: none, repeat]',
     );
-    for (const { label, css } of ROW_VARIANTS) {
-      await applyRowVariant(page, css);
-      lines.push(summarize(await measureAddTaskBarOpen(page, label, OPEN_REPS), 'ms'));
-      await clearRowVariant(page);
-    }
 
     // The reporter's own workaround, run as an A/B. Collapsing is not hiding:
     // `collapsible.component.html` wraps its panel in a structural `@if`, so the
@@ -528,15 +504,12 @@ test.describe('#9779 iOS add-task-bar open cost', () => {
       .first();
     await doneHeader.click();
     await expect(page.locator('task')).toHaveCount(OPEN_TASK_COUNT);
-    lines.push(`--- ${OPEN_TASK_COUNT} tasks, Completed Tasks collapsed ---`);
-    lines.push(
+    record(`--- ${OPEN_TASK_COUNT} tasks, Completed Tasks collapsed ---`);
+    record(
       summarize(
         await measureCssVarWrites(page, 'root-custom-property', ROOT_WRITES),
         'ms',
       ),
     );
-    lines.push(summarize(await measureAddTaskBarOpen(page, 'none', OPEN_REPS), 'ms'));
-
-    console.log(`\n===== #9779 MEASUREMENT =====\n${lines.join('\n')}\n`);
   });
 });
