@@ -1387,6 +1387,10 @@
         "MESSAGE": "You have {{count}} unsynced local changes that will be replaced by remote data. Do you want to continue?",
         "TITLE": "Replace Local Data?"
       },
+      "D_NOTHING_TO_UPLOAD": {
+        "MSG": "This device has no data of its own yet: it has never completed a sync, and holds only the example tasks created on first run.\n\nOverwriting would permanently delete the data on the server, with nothing to put in its place. Your server data has been left untouched.\n\nTo get your data back, enter your encryption password and retry decrypting. If you meant to reset your sync data deliberately, use the force overwrite option in the sync settings.",
+        "TITLE": "Nothing to upload from this device"
+      },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Disable sync",
         "PERM_FILE": "Give permission",

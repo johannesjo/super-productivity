@@ -17,6 +17,7 @@ type StateCache = NonNullable<
 describe('SyncLocalStateService', () => {
   let service: SyncLocalStateService;
   let opLogStoreSpy: jasmine.SpyObj<OperationLogStoreService>;
+  let stateSnapshotSpy: jasmine.SpyObj<StateSnapshotService>;
 
   const entry = (
     entityType: EntityType,
@@ -55,12 +56,14 @@ describe('SyncLocalStateService', () => {
   const syncImport = entry('ALL', ActionType.LOAD_ALL_DATA, OpType.SyncImport);
 
   beforeEach(() => {
+    stateSnapshotSpy = jasmine.createSpyObj('StateSnapshotService', ['getStateSnapshot']);
     opLogStoreSpy = jasmine.createSpyObj('OperationLogStoreService', [
       'loadStateCache',
       'getLastSeq',
       'hasSyncedOps',
       'getLatestFullStateOpEntry',
       'getOpsAfterSeq',
+      'getUnsynced',
     ]);
     // Defaults describe a legacy-migrated client that has never synced: the
     // genesis wrote a state cache and one op, nothing else happened since.
@@ -69,15 +72,13 @@ describe('SyncLocalStateService', () => {
     opLogStoreSpy.hasSyncedOps.and.resolveTo(false);
     opLogStoreSpy.getLatestFullStateOpEntry.and.resolveTo(undefined);
     opLogStoreSpy.getOpsAfterSeq.and.resolveTo([migrationGenesis]);
+    opLogStoreSpy.getUnsynced.and.resolveTo([]);
 
     TestBed.configureTestingModule({
       providers: [
         SyncLocalStateService,
         { provide: OperationLogStoreService, useValue: opLogStoreSpy },
-        {
-          provide: StateSnapshotService,
-          useValue: jasmine.createSpyObj('StateSnapshotService', ['getStateSnapshot']),
-        },
+        { provide: StateSnapshotService, useValue: stateSnapshotSpy },
         {
           provide: TranslateService,
           useValue: jasmine.createSpyObj('TranslateService', ['instant']),
@@ -162,6 +163,92 @@ describe('SyncLocalStateService', () => {
     it('is false for a client with ordinary history', async () => {
       opLogStoreSpy.getOpsAfterSeq.and.resolveTo([regularOp]);
       expect(await service.isFreshOrNeverSyncedGenesisClient([regularOp.op])).toBe(false);
+    });
+  });
+
+  describe('hasNothingWorthUploading (#9256)', () => {
+    const emptyStore = {
+      task: { ids: [], entities: {} },
+      project: { ids: [], entities: {} },
+      tag: { ids: [], entities: {} },
+      note: { ids: [], entities: {} },
+    };
+
+    const exampleTaskOp = (taskId: string): OperationLogEntry => ({
+      seq: 2,
+      op: {
+        id: `op-${taskId}`,
+        clientId: 'client-A',
+        actionType: ActionType.TASK_SHARED_ADD,
+        opType: OpType.Create,
+        entityType: 'TASK',
+        entityId: taskId,
+        payload: {
+          actionPayload: { task: { id: taskId }, isExampleTask: true },
+          entityChanges: [],
+        },
+        vectorClock: { clientA: 2 },
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      },
+      appliedAt: Date.now(),
+      source: 'local',
+    });
+
+    it('is true for a never-synced client with an empty store', async () => {
+      stateSnapshotSpy.getStateSnapshot.and.returnValue(emptyStore as never);
+
+      expect(await service.hasNothingWorthUploading()).toBe(true);
+    });
+
+    it('is true when the only tasks are onboarding example tasks', async () => {
+      // The #9256 shape: the initial sync failed, but afterInitialSyncDoneStrict$
+      // fails open on a timer, so the example tasks exist anyway. They must not
+      // make the device look like it holds the user's work.
+      stateSnapshotSpy.getStateSnapshot.and.returnValue({
+        ...emptyStore,
+        task: {
+          ids: ['ex-1', 'ex-2'],
+          entities: { ex_1: { id: 'ex-1' }, ex_2: { id: 'ex-2' } },
+        },
+      } as never);
+      opLogStoreSpy.getUnsynced.and.resolveTo([
+        exampleTaskOp('ex-1'),
+        exampleTaskOp('ex-2'),
+      ]);
+
+      expect(await service.hasNothingWorthUploading()).toBe(true);
+    });
+
+    it('is false as soon as one real task exists alongside the example tasks', async () => {
+      stateSnapshotSpy.getStateSnapshot.and.returnValue({
+        ...emptyStore,
+        task: {
+          ids: ['ex-1', 'real-1'],
+          entities: { ex_1: { id: 'ex-1' }, real_1: { id: 'real-1' } },
+        },
+      } as never);
+      opLogStoreSpy.getUnsynced.and.resolveTo([exampleTaskOp('ex-1')]);
+
+      expect(await service.hasNothingWorthUploading()).toBe(false);
+    });
+
+    it('is false for a client that has synced before, even with an empty store', async () => {
+      // Such a device may legitimately hold real data, and a deliberate reset
+      // from the sync settings must keep working.
+      opLogStoreSpy.hasSyncedOps.and.resolveTo(true);
+      stateSnapshotSpy.getStateSnapshot.and.returnValue(emptyStore as never);
+
+      expect(await service.hasNothingWorthUploading()).toBe(false);
+      expect(stateSnapshotSpy.getStateSnapshot).not.toHaveBeenCalled();
+    });
+
+    it('is false when the snapshot is unavailable rather than guessing', async () => {
+      // hasMeaningfulStoreData returns false for a missing snapshot; that must
+      // not be read as "nothing to upload" and block a legitimate overwrite.
+      stateSnapshotSpy.getStateSnapshot.and.returnValue(undefined as never);
+
+      expect(await service.hasNothingWorthUploading()).toBe(true);
     });
   });
 });

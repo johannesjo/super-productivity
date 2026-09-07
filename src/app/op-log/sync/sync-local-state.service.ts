@@ -6,6 +6,7 @@ import { OpLog } from '../../core/log';
 import { T } from '../../t.const';
 import { confirmDialog } from '../../util/native-dialogs';
 import { hasMeaningfulStateData } from '../validation/has-meaningful-state-data.util';
+import { isExampleTaskCreateOp } from '../validation/is-example-task-op.util';
 import { isFullStateOpType, Operation, OperationLogEntry } from '../core/operation.types';
 
 /**
@@ -99,6 +100,41 @@ export class SyncLocalStateService {
     }
 
     return hasMeaningfulStateData(snapshot, ignoreTaskIds);
+  }
+
+  /**
+   * True when this device has nothing of its own to put on the server (#9256).
+   *
+   * The destructive recovery actions ("Overwrite Server & Other Devices",
+   * "Use Local Data") replace the remote copy with this device's state via a
+   * clean-slate SYNC_IMPORT, which makes the server DELETE its stored
+   * operations rather than supersede them. Running one from a device that
+   * holds nothing therefore destroys the user's only copy, irreversibly — the
+   * exact trap a client stuck on a failed initial download is offered.
+   *
+   * Two signals, both required:
+   * - never completed a sync, so this device cannot be holding anything it
+   *   received. A device that HAS synced may legitimately hold real data, so
+   *   this keeps deliberate resets (Settings -> Sync) working.
+   * - no user data beyond the onboarding example tasks. Those are generated
+   *   locally on first run and are not the user's work, so they must not make
+   *   an empty device look non-empty — `afterInitialSyncDoneStrict$` fails open
+   *   on a timer, so they are created even when the initial sync failed.
+   */
+  async hasNothingWorthUploading(): Promise<boolean> {
+    if (await this.opLogStore.hasSyncedOps()) {
+      return false;
+    }
+
+    const pendingOps = await this.opLogStore.getUnsynced();
+    const exampleTaskIds = new Set(
+      pendingOps
+        .filter(isExampleTaskCreateOp)
+        .map((entry) => entry.op.entityId)
+        .filter((id): id is string => typeof id === 'string' && id.length > 0),
+    );
+
+    return !this.hasMeaningfulStoreData(exampleTaskIds);
   }
 
   confirmFreshClientSync(opCount: number): boolean {

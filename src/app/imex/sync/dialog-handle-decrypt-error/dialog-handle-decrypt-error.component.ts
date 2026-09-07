@@ -16,7 +16,8 @@ import { TranslatePipe } from '@ngx-translate/core';
 import { SyncConfigService } from '../sync-config.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { SyncLog } from '../../../core/log';
-import { confirmDialog } from '../../../util/native-dialogs';
+import { alertDialog, confirmDialog } from '../../../util/native-dialogs';
+import { SyncLocalStateService } from '../../../op-log/sync/sync-local-state.service';
 
 @Component({
   selector: 'dialog-handle-decrypt-error',
@@ -40,6 +41,7 @@ export class DialogHandleDecryptErrorComponent {
   private _syncConfigService = inject(SyncConfigService);
   private _snackService = inject(SnackService);
   private _translateService = inject(TranslateService);
+  private _syncLocalStateService = inject(SyncLocalStateService);
 
   private _matDialogRef =
     inject<MatDialogRef<DialogHandleDecryptErrorComponent>>(MatDialogRef);
@@ -48,6 +50,18 @@ export class DialogHandleDecryptErrorComponent {
   passwordVal: string = '';
 
   async updatePWAndForceUpload(): Promise<void> {
+    // #9256: this dialog is shown to a client that failed to DOWNLOAD, so the
+    // one offered alternative to retrying the password destroys the server copy
+    // via a clean-slate SYNC_IMPORT. Refuse when there is nothing here to put
+    // in its place — the user is trying to recover data, not discard it.
+    if (await this._syncLocalStateService.hasNothingWorthUploading()) {
+      alertDialog(
+        this._translateService.instant(T.F.SYNC.D_NOTHING_TO_UPLOAD.TITLE) +
+          '\n\n' +
+          this._translateService.instant(T.F.SYNC.D_NOTHING_TO_UPLOAD.MSG),
+      );
+      return;
+    }
     if (!confirmDialog(this._translateService.instant(T.F.SYNC.C.DECRYPT_OVERWRITE))) {
       return;
     }
