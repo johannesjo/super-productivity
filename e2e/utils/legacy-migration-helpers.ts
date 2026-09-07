@@ -111,12 +111,16 @@ export const seedLegacyDatabase = async (
  * @param baseURL - App base URL (e.g., http://localhost:4242)
  * @param legacyData - Legacy data to seed (the 'data' property from backup JSON)
  * @param clientName - Human-readable name for debugging (e.g., "A", "B")
+ * @param options.seedBeforeBoot - Extra seeding that runs in the same JS-blocked
+ *   phase as the legacy database (e.g. `seedSuperSyncCredentials`), before the
+ *   reload that triggers the migration.
  */
 export const createLegacyMigratedClient = async (
   browser: Browser,
   baseURL: string,
   legacyData: Record<string, unknown>,
   clientName: string,
+  options: { seedBeforeBoot?: (page: Page) => Promise<void> } = {},
 ): Promise<{ context: BrowserContext; page: Page }> => {
   const effectiveBaseURL = baseURL || 'http://localhost:4242';
 
@@ -150,6 +154,10 @@ export const createLegacyMigratedClient = async (
   // Seed the legacy 'pf' database
   await seedLegacyDatabase(page, legacyData);
   console.log(`[Legacy Client ${clientName}] Legacy database seeded`);
+  if (options.seedBeforeBoot) {
+    await options.seedBeforeBoot(page);
+    console.log(`[Legacy Client ${clientName}] Extra pre-boot seed applied`);
+  }
 
   // Unblock JS so app can load
   await page.unroute('**/*.js');

@@ -289,6 +289,17 @@ export type DownloadOutcome =
       kind: 'server_migration_handled';
     }
   | {
+      /**
+       * Empty-server seeding of a fresh / never-synced genesis client ran but
+       * created no SYNC_IMPORT (server no longer empty, state judged empty,
+       * validation failed, no client id). Nothing shipped the local state, so
+       * the caller must skip this cycle's upload — accepting the client's
+       * ordinary ops would flip hasSyncedOps() and strand that state for good.
+       * The next cycle re-downloads and reaches the conflict branch. (#9921)
+       */
+      kind: 'server_migration_skipped';
+    }
+  | {
       /** No new operations on server. */
       kind: 'no_new_ops';
       allOpClocks?: VectorClock[];
