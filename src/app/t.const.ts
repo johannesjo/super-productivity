@@ -1004,6 +1004,10 @@ const T = {
       D_DELETE: {
         MSG: 'F.PROJECT.D_DELETE.MSG',
       },
+      D_RENAME: {
+        LABEL: 'F.PROJECT.D_RENAME.LABEL',
+        PLACEHOLDER: 'F.PROJECT.D_RENAME.PLACEHOLDER',
+      },
       COMPLETE: {
         COMPLETED_ON: 'F.PROJECT.COMPLETE.COMPLETED_ON',
         REOPEN: 'F.PROJECT.COMPLETE.REOPEN',
@@ -1803,6 +1807,10 @@ const T = {
       },
       D_DELETE: {
         CONFIRM_MSG: 'F.TAG.D_DELETE.CONFIRM_MSG',
+      },
+      D_RENAME: {
+        LABEL: 'F.TAG.D_RENAME.LABEL',
+        PLACEHOLDER: 'F.TAG.D_RENAME.PLACEHOLDER',
       },
       D_EDIT: {
         ADD: 'F.TAG.D_EDIT.ADD',

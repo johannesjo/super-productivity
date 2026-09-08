@@ -12,6 +12,7 @@
     [class.has-tasks]="nrOfOpenTasks() > 0"
     mat-menu-item
     (click)="clicked.emit()"
+    (dblclick)="onDblClickRename($event)"
   >
     <mat-icon
       class="nav-icon"
@@ -62,7 +63,8 @@
     mat-menu-item
     [attr.aria-expanded]="expanded()"
     [attr.aria-controls]="ariaControls()"
-    (click)="clicked.emit()"
+    (click)="onFolderClick($event)"
+    (dblclick)="onDblClickRename($event)"
   >
     <mat-icon class="nav-icon expand-icon drag-handle folder-icon">
       {{ expanded() ? 'folder_open' : 'folder' }}
