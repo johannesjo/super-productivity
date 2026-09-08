@@ -6,7 +6,7 @@ import {
 } from '@sp/sync-core';
 import { OperationLogStoreService } from '../persistence/operation-log-store.service';
 import { LockService } from './lock.service';
-import { Operation } from '../core/operation.types';
+import { Operation, VectorClock } from '../core/operation.types';
 import { OpLog } from '../../core/log';
 import {
   OperationSyncCapable,
@@ -32,6 +32,28 @@ import { assertOpsEncryptedWhenExpected } from './assert-ops-encryption-expected
 import { SuperSyncStatusService } from './super-sync-status.service';
 import { DownloadResult } from '../core/types/sync-results.types';
 import { CLIENT_ID_PROVIDER } from '../util/client-id.provider';
+
+/**
+ * True when this client's vector clock already accounts for `op`: an author's
+ * counter is monotonic, so a counter at or below our entry for that author was
+ * processed here before. Missing entries (pruned or import-reset clock) yield
+ * false so the op falls through to the regular filters.
+ */
+const isOpCoveredByLocalClock = (
+  op: Pick<SyncOperation, 'clientId' | 'vectorClock'>,
+  localClock: VectorClock | null,
+): boolean => {
+  if (!localClock || !op.clientId) {
+    return false;
+  }
+  const authorCounter = op.vectorClock?.[op.clientId];
+  const knownCounter = localClock[op.clientId];
+  return (
+    authorCounter !== undefined &&
+    knownCounter !== undefined &&
+    authorCounter <= knownCounter
+  );
+};
 
 // Re-export for consumers that import from this service
 export type { DownloadResult } from '../core/types/sync-results.types';
@@ -153,6 +175,33 @@ export class OperationLogDownloadService implements OnDestroy {
       const clientId = options?.includeOwnAndAppliedOps
         ? null
         : await this.clientIdProvider.loadClientId();
+      // A forced seq-0 download re-fetches everything after the server's latest
+      // full-state op, including ops compaction already pruned from the local
+      // log. Those are invisible to the applied-id filter. Without a second
+      // filter an already-applied SYNC_IMPORT resurfaces as a new incoming
+      // import on every concurrent-rejection retry and raises the conflict
+      // dialog (or, with nothing pending, replaces state wholesale).
+      // An op is treated as re-delivered only when BOTH hold: the persisted
+      // cursor is past it (it was processed here — a schema-version block keeps
+      // the cursor behind the blocked op) AND the local vector clock covers it
+      // (it is reflected in local state — a rebuilt log can sit behind a stale
+      // cursor; and the rejection resolver merges server clocks into the local
+      // clock, so the clock alone could cover a blocked op).
+      // Raw rebuild wants every op, so it keeps this filter off. File-based
+      // providers hand out synthetic per-download `serverSeq` values while
+      // their cursor is the file's sync version, so the `<=` check is
+      // meaningless there; the reproduced bug is SuperSync-only anyway.
+      const isReDeliveryFilterActive =
+        forceFromSeq0 &&
+        !options?.includeOwnAndAppliedOps &&
+        syncProvider.providerMode !== 'fileSnapshotOps';
+      const deliveredUpToSeq = isReDeliveryFilterActive
+        ? await syncProvider.getLastServerSeq()
+        : 0;
+      const localClock = isReDeliveryFilterActive
+        ? await this.opLogStore.getVectorClock()
+        : null;
+      let reDeliveredCount = 0;
       OpLog.verbose(
         `OperationLogDownloadService: [DEBUG] Starting download. ` +
           `lastServerSeq=${lastServerSeq}, appliedOpIds.size=${appliedOpIds.size}, clientId=${clientId}`,
@@ -307,9 +356,19 @@ export class OperationLogDownloadService implements OnDestroy {
         }
 
         // Filter already applied ops
-        const newServerOps = response.ops.filter(
-          (serverOp) => !appliedOpIds.has(serverOp.op.id),
-        );
+        const newServerOps = response.ops.filter((serverOp) => {
+          if (appliedOpIds.has(serverOp.op.id)) {
+            return false;
+          }
+          if (
+            serverOp.serverSeq <= deliveredUpToSeq &&
+            isOpCoveredByLocalClock(serverOp.op, localClock)
+          ) {
+            reDeliveredCount++;
+            return false;
+          }
+          return true;
+        });
         let syncOps: SyncOperation[] = newServerOps.map((serverOp) => serverOp.op);
 
         // Fail closed on a plaintext op when SuperSync encryption is enabled: the
@@ -416,6 +475,14 @@ export class OperationLogDownloadService implements OnDestroy {
       // cleans up stale devices after 50 days (STALE_DEVICE_THRESHOLD_MS).
       // Removing ACK simplifies the flow and avoids issues with fresh clients
       // (device not registered until first upload would cause 403 errors).
+
+      if (reDeliveredCount > 0) {
+        OpLog.normal(
+          `OperationLogDownloadService: Skipped ${reDeliveredCount} re-delivered op(s) ` +
+            `behind cursor ${deliveredUpToSeq} and covered by the local vector clock ` +
+            '(compacted out of the local log).',
+        );
+      }
 
       // Server migration detection:
       // If we detected a gap AND the server is empty (no ops to download),
