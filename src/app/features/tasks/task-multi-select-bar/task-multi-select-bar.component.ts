@@ -103,7 +103,6 @@ export class TaskMultiSelectBarComponent {
   readonly kb = computed<KeyboardConfig>(() =>
     isTouchActive() ? EMPTY_KB : (this._globalConfigService.cfg()?.keyboard ?? EMPTY_KB),
   );
-  readonly isTodayList = this._workContextService.isTodayListSignal;
   private readonly _activeWorkContext = toSignal(
     this._workContextService.activeWorkContext$,
   );

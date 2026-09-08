@@ -85,17 +85,6 @@
       </span>
       <span class="key-i">{{ kb().taskScheduleToday }}</span>
     </button>
-    @if (!isTodayList() && bulk.hasDueToday()) {
-      <button
-        (click)="bulk.removeFromToday()"
-        mat-menu-item
-      >
-        <span class="menuItemLeft">
-          <mat-icon>timer_off</mat-icon>
-          {{ T.F.TASK.CMP.REMOVE_FROM_MY_DAY | translate }}
-        </span>
-      </button>
-    }
     <button
       (click)="bulk.openDeadlineDialog()"
       mat-menu-item

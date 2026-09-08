@@ -110,44 +110,6 @@ test.describe('Task multi-select (desktop)', () => {
     await page.keyboard.press('Escape');
   });
 
-  test('Remove from Today (from the project view) takes the selection off the Today list', async ({
-    page,
-    workViewPage,
-    taskPage,
-    testPrefix,
-  }) => {
-    await page.goto('/#/tag/TODAY/tasks');
-    await workViewPage.waitForTaskList();
-    const titles = ['Today One', 'Today Two'].map((t) => `${testPrefix}-${t}`);
-    for (const title of titles) {
-      await workViewPage.addTask(title);
-    }
-    const bar = page.locator(BAR);
-
-    // Like the row's own button, the entry is offered outside the Today list.
-    await page.goto('/#/project/INBOX_PROJECT/tasks');
-    await workViewPage.waitForTaskList();
-    for (const title of titles) {
-      await expect(taskPage.getTaskByText(title)).toHaveCount(1);
-      await taskPage.getTaskByText(title).click({ modifiers: ['Control'] });
-    }
-    await expect(bar).toContainText('2 selected');
-
-    await bar.getByRole('button', { name: 'Actions' }).click();
-    await waitForMenuSettled(page);
-    await page
-      .locator('.mat-mdc-menu-content button', { hasText: 'Remove from Today' })
-      .click();
-    // The rows stay in the project list, so the selection stays too.
-    await expect(bar).toContainText('2 selected');
-
-    await page.goto('/#/tag/TODAY/tasks');
-    await workViewPage.waitForTaskList();
-    for (const title of titles) {
-      await expect(taskPage.getTaskByText(title)).toHaveCount(0);
-    }
-  });
-
   test('the Actions menu deletes the selection after one confirmation', async ({
     page,
     workViewPage,

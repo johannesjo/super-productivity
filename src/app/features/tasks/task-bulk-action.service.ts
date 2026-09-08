@@ -99,10 +99,6 @@ export class TaskBulkActionService {
   readonly hasScheduled = computed(() =>
     this.selectedTasks().some((t) => !!t.dueDay || !!t.dueWithTime),
   );
-  /** Undone tasks due today, i.e. what "Remove from Today" acts on. */
-  readonly hasDueToday = computed(() =>
-    this.selectedTasks().some((t) => !t.isDone && this._isDueToday(t)),
-  );
   readonly hasDeadline = computed(() =>
     this.selectedTasks().some((t) => !!t.deadlineDay || !!t.deadlineWithTime),
   );
@@ -460,37 +456,6 @@ export class TaskBulkActionService {
     this._restoreFocus(focusTargetId);
   }
 
-  /**
-   * "Remove from Today", the bulk form of the row's own button: Today
-   * membership is the task's due date (TODAY_TAG is virtual), so every
-   * selected task due today is unscheduled. Offered outside the Today list
-   * only, like the single button; inside it "Unschedule" is the same thing.
-   */
-  async removeFromToday(): Promise<void> {
-    const tasks = this._resolveInVisualOrder().filter(
-      (t) => !t.isDone && this._isDueToday(t),
-    );
-    if (!tasks.length) {
-      this._snackNothingToDo();
-      return;
-    }
-    const focusTargetId = this._getFocusTargetAfterRemoval();
-    await this._runSuppressed(() =>
-      tasks.forEach((t) =>
-        this._store.dispatch(
-          TaskSharedActions.unscheduleTask({ id: t.id, isSkipToast: true }),
-        ),
-      ),
-    );
-    this._snackService.open({
-      type: 'SUCCESS',
-      ico: 'timer_off',
-      msg: this._plural('F.TASK.MULTI_SELECT.S.REMOVED_FROM_TODAY', tasks.length),
-      translateParams: { count: tasks.length },
-    });
-    this._restoreFocus(focusTargetId);
-  }
-
   // ---- DEADLINE ---------------------------------------------------------
 
   async openDeadlineDialog(): Promise<void> {
@@ -618,13 +583,6 @@ export class TaskBulkActionService {
   }
 
   // ---- helpers ----------------------------------------------------------
-
-  private _isDueToday(t: Task): boolean {
-    return (
-      t.dueDay === this._dateService.todayStr() ||
-      (!!t.dueWithTime && this._dateService.isToday(t.dueWithTime))
-    );
-  }
 
   private _resolveInVisualOrder(): Task[] {
     const entities = this._taskEntities();

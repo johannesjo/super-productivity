@@ -434,39 +434,11 @@ describe('TaskBulkActionService', () => {
     });
   });
 
-  describe('removeDeadline / removeFromToday', () => {
+  describe('removeDeadline', () => {
     it('removes deadlines only where one exists', async () => {
       select([t('a', { deadlineDay: '2026-09-10' }), t('b')]);
       await service.removeDeadline();
       expect(dispatchedTypes()).toEqual([TaskSharedActions.removeDeadline.type]);
-    });
-
-    it('removes from Today by unscheduling the undone tasks due today', async () => {
-      select([
-        t('a', { dueDay: '2026-09-05' }),
-        t('b', { dueDay: '2026-09-10' }),
-        t('c', { dueDay: '2026-09-05', isDone: true }),
-        t('d'),
-      ]);
-      await service.removeFromToday();
-      const actions = store.dispatch.calls.allArgs().map(([a]) => a);
-      expect(actions.map((a) => a.type)).toEqual([TaskSharedActions.unscheduleTask.type]);
-      expect(actions[0].id).toBe('a');
-      expect(actions[0].isSkipToast).toBeTrue();
-      expect(snackService.open).toHaveBeenCalledWith(
-        jasmine.objectContaining({ translateParams: { count: 1 } }),
-      );
-      expect(service.hasDueToday()).toBeTrue();
-    });
-
-    it('reports nothing to do when no selected task is due today', async () => {
-      select([t('a', { dueDay: '2026-09-10' }), t('b')]);
-      await service.removeFromToday();
-      expect(dispatchedTypes()).toEqual([]);
-      expect(snackService.open).toHaveBeenCalledWith(
-        jasmine.objectContaining({ msg: T.F.TASK.MULTI_SELECT.S.NOTHING_TO_DO }),
-      );
-      expect(service.hasDueToday()).toBeFalse();
     });
   });
 });
