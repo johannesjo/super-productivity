@@ -226,6 +226,98 @@ export const getSuperSyncConfig = (user: TestUser): SuperSyncConfig => {
 };
 
 /**
+ * Seed the SuperSync provider's private config straight into the `sup-sync`
+ * credentials database, the way `seedLegacyDatabase` seeds `pf`.
+ *
+ * Must run BEFORE the app boots (JS blocked): the credential store caches the
+ * config in memory once loaded. With `encryptKey` already present, the config
+ * dialog's Save keeps it (SuperSync never takes the key from the form) and the
+ * post-setup encryption modal is skipped — so the setup sync uploads plain
+ * ordinary ops and no snapshot is deleted and re-uploaded as a SYNC_IMPORT.
+ * That is the only way the harness can leave a server holding ordinary ops and
+ * no full-state op (#9921).
+ */
+export const seedSuperSyncCredentials = async (
+  page: Page,
+  cfg: { baseUrl: string; accessToken: string; encryptKey: string },
+): Promise<void> => {
+  await page.evaluate(
+    async (privateCfg) =>
+      new Promise<void>((resolve, reject) => {
+        // Mirrors SyncCredentialStore: db 'sup-sync' v1, out-of-line-key store
+        // 'credentials', key PRIVATE_CFG_PREFIX + providerId.
+        const request = indexedDB.open('sup-sync', 1);
+        request.onupgradeneeded = (event) => {
+          const db = (event.target as IDBOpenDBRequest).result;
+          if (!db.objectStoreNames.contains('credentials')) {
+            db.createObjectStore('credentials');
+          }
+        };
+        request.onsuccess = (event) => {
+          const db = (event.target as IDBOpenDBRequest).result;
+          const tx = db.transaction('credentials', 'readwrite');
+          tx.objectStore('credentials').put(privateCfg, '__sp_cred_SuperSync');
+          tx.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+          tx.onerror = () => {
+            db.close();
+            reject(tx.error);
+          };
+        };
+        request.onerror = () => reject(request.error);
+      }),
+    { ...cfg, isEncryptionEnabled: true },
+  );
+};
+
+/** Full-state op types (mirrors FULL_STATE_OP_TYPES in the app). */
+export const isFullStateOpType = (opType: string): boolean =>
+  ['SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR'].includes(opType);
+
+/**
+ * Summary of every entry in this client's local op log (`SUP_OPS`/`ops`).
+ * Entries are stored in the compact format, where `o` is the opType and `e`
+ * the entityType — the same string values as the full format. Call it only
+ * after the app has booted (the DB is opened without a version and would
+ * otherwise be created empty).
+ */
+export const getLocalOpLogSummary = async (
+  page: Page,
+): Promise<{ opType: string; entityType: string; isSynced: boolean }[]> =>
+  page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('SUP_OPS');
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    try {
+      if (!db.objectStoreNames.contains('ops')) {
+        return [];
+      }
+      const entries = await new Promise<
+        {
+          op: { o?: string; e?: string; opType?: string; entityType?: string };
+          syncedAt?: number;
+        }[]
+      >((resolve, reject) => {
+        const tx = db.transaction('ops', 'readonly');
+        const request = tx.objectStore('ops').getAll();
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      return entries.map((entry) => ({
+        opType: entry.op.o ?? entry.op.opType ?? '',
+        entityType: entry.op.e ?? entry.op.entityType ?? '',
+        isSynced: !!entry.syncedAt,
+      }));
+    } finally {
+      db.close();
+    }
+  });
+
+/**
  * Create a simulated E2E client with its own isolated browser context.
  *
  * Each client has:
@@ -244,9 +336,16 @@ export const createSimulatedClient = async (
   baseURL: string,
   clientName: string,
   testPrefix: string,
-  options: { allowExampleTasks?: boolean } = {},
+  options: {
+    allowExampleTasks?: boolean;
+    /**
+     * Runs on the app origin with all JavaScript blocked, before the app boots
+     * for the first time — for seeding IndexedDB (e.g. seedSuperSyncCredentials).
+     */
+    seedBeforeBoot?: (page: Page) => Promise<void>;
+  } = {},
 ): Promise<SimulatedE2EClient> => {
-  const { allowExampleTasks = false } = options;
+  const { allowExampleTasks = false, seedBeforeBoot } = options;
   // Use provided baseURL or fall back to localhost:4242 (Playwright fixture may be undefined)
   const effectiveBaseURL = baseURL || 'http://localhost:4242';
 
@@ -292,6 +391,15 @@ export const createSimulatedClient = async (
     }
   });
 
+  if (seedBeforeBoot) {
+    // Block JS so the seed lands before the app initializes (the aborted
+    // *.js loads only surface as console noise; the error collector above
+    // listens to pageerror only).
+    await page.route('**/*.js', async (route) => {
+      await route.abort();
+    });
+  }
+
   // Navigate to app with retry for transient ERR_CONNECTION_REFUSED.
   // Under parallel load (many workers × 2-3 browser contexts each), the Angular
   // dev server can temporarily refuse connections. Retrying recovers from this
@@ -319,6 +427,13 @@ export const createSimulatedClient = async (
     }
   }
   if (lastGotoError) throw lastGotoError;
+
+  if (seedBeforeBoot) {
+    console.log(`[Client ${clientName}] Seeding before first boot...`);
+    await seedBeforeBoot(page);
+    await page.unroute('**/*.js');
+    await page.reload({ waitUntil: 'domcontentloaded' });
+  }
 
   await waitForAppReady(page);
 

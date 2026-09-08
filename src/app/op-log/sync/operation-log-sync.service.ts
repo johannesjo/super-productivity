@@ -17,6 +17,7 @@ import { BackupService } from '../backup/backup.service';
 import { OpLog } from '../../core/log';
 import { OperationSyncCapable } from '../sync-providers/provider.interface';
 import { OperationLogUploadService } from './operation-log-upload.service';
+import { getUnknownOpVocabulary } from './remote-op-block.util';
 import { DownloadOutcome, UploadOutcome } from '../core/types/sync-results.types';
 import { OperationLogDownloadService } from './operation-log-download.service';
 import { SnackService } from '../../core/snack/snack.service';
@@ -541,6 +542,7 @@ export class OperationLogSyncService {
             latestServerSeq,
           };
         case 'server_migration_handled':
+        case 'server_migration_skipped':
           return { kind: 'completed', newOpsCount: 0 };
         case 'cancelled':
           return { kind: 'cancelled' };
@@ -1044,15 +1046,16 @@ export class OperationLogSyncService {
     }
 
     if (result.newOps.length === 0) {
-      // FIX I.2: Pre-op-log client with meaningful data on empty server.
-      // A client that has tasks/projects in NgRx but no op-log history can't upload
-      // (isWhollyFreshClient blocks upload) and server migration won't trigger
-      // (hasSyncedOps=false). With an empty server, there are no remote ops to
-      // trigger a conflict dialog. Detect this case and create a SYNC_IMPORT
-      // via the migration service so the client is no longer "fresh".
+      // FIX I.2: Pre-op-log client with meaningful data on empty server. It can't
+      // upload (isWhollyFreshClient blocks it), server migration won't trigger
+      // (hasSyncedOps=false), and no remote ops exist to raise a conflict dialog.
+      // Seed via SYNC_IMPORT. Same for a never-synced genesis client (#9863).
       const isEmptyServer = result.latestServerSeq === 0;
       if (isEmptyServer) {
-        const isFresh = await this.isWhollyFreshClient();
+        const isFresh =
+          await this.syncLocalStateService.isFreshOrNeverSyncedGenesisClient(
+            result.newOps,
+          );
         if (isFresh && this.syncLocalStateService.hasMeaningfulStoreData()) {
           OpLog.warn(
             'OperationLogSyncService: Pre-op-log client with meaningful local data on empty server. ' +
@@ -1062,11 +1065,19 @@ export class OperationLogSyncService {
             options?.fenceEpoch,
             'empty-server migration',
           );
-          await this.serverMigrationService.handleServerMigration(syncProvider, {
-            syncImportReason: 'SERVER_MIGRATION',
-          });
-          // After SYNC_IMPORT is created, isWhollyFreshClient() returns false
-          // and upload phase will proceed normally.
+          const createdOpId = await this.serverMigrationService.handleServerMigration(
+            syncProvider,
+            { syncImportReason: 'SERVER_MIGRATION' },
+          );
+          // No SYNC_IMPORT → nothing shipped the state → skip this cycle's upload
+          // (see DownloadOutcome) so the next download re-evaluates. (#9921)
+          if (!createdOpId) {
+            OpLog.warn(
+              'OperationLogSyncService: Empty-server seeding created no SYNC_IMPORT.',
+            );
+            return { kind: 'server_migration_skipped' };
+          }
+          // The SYNC_IMPORT makes the client non-fresh; upload proceeds normally.
           return { kind: 'server_migration_handled' };
         }
       }
@@ -1087,19 +1098,19 @@ export class OperationLogSyncService {
       };
     }
 
-    // SAFETY: Fresh client conflict detection
-    // If this is a wholly fresh client receiving remote data for the first time,
-    // check if there's meaningful local data that would be overwritten.
-    const isFreshClient = await this.isWhollyFreshClient();
+    // SAFETY: a wholly fresh client — or a never-synced genesis client on the
+    // otherwise silent path (#9863) — receiving remote data for the first time.
+    const isFreshClient =
+      await this.syncLocalStateService.isFreshOrNeverSyncedGenesisClient(result.newOps);
     if (isFreshClient && result.newOps.length > 0) {
       if (this.syncLocalStateService.hasMeaningfulStoreData()) {
-        // Local data exists — throw conflict error so the full conflict dialog is shown,
-        // letting the user choose between keeping local data or using remote data.
         OpLog.warn(
           `OperationLogSyncService: Fresh client has local data and ${result.newOps.length} remote ops. Showing conflict dialog.`,
         );
-        // Wholly fresh client — no prior sync, so no last-synced clock (SPAP-7).
-        throw new LocalDataConflictError(0, {}, undefined, null);
+        // No prior sync, so no last-synced clock (SPAP-7). Pending count: 0 when
+        // wholly fresh, >= 1 (the genesis op) for a genesis client.
+        const unsyncedCount = (await this.opLogStore.getUnsynced()).length;
+        throw new LocalDataConflictError(unsyncedCount, {}, undefined, null);
       }
 
       OpLog.warn(
@@ -2450,7 +2461,7 @@ export class OperationLogSyncService {
           'USE_REMOTE aborted: remote history contains an unsupported schema version.',
         );
       }
-      if (version > CURRENT_SCHEMA_VERSION) {
+      if (version > CURRENT_SCHEMA_VERSION || getUnknownOpVocabulary(op) !== null) {
         if (
           !this._hasWarnedRebuildVersionBlockThisSession &&
           !this.snackService.hasPendingPersistentAction()
@@ -2465,7 +2476,7 @@ export class OperationLogSyncService {
           });
         }
         throw new Error(
-          'USE_REMOTE aborted: remote history contains ops from a newer schema version — update the app first.',
+          'USE_REMOTE aborted: remote history contains ops from a newer schema version or with an unknown op type — update the app first.',
         );
       }
     }

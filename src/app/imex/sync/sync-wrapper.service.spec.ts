@@ -935,6 +935,22 @@ describe('SyncWrapperService', () => {
       expect(mockProviderManager.setLastSyncedProviderId).not.toHaveBeenCalled();
       expect(mockSyncService.uploadPendingOps).not.toHaveBeenCalled();
     });
+
+    it('should skip the upload phase when empty-server seeding created no SYNC_IMPORT (#9921)', async () => {
+      mockSyncService.downloadRemoteOps.and.resolveTo({
+        kind: 'server_migration_skipped',
+      });
+
+      const result = await service.sync();
+
+      expect(result).toBe('HANDLED_ERROR');
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith(
+        'UNKNOWN_OR_CHANGED',
+      );
+      expect(mockProviderManager.setSyncStatus).not.toHaveBeenCalledWith('IN_SYNC');
+      expect(mockProviderManager.setLastSyncedProviderId).not.toHaveBeenCalled();
+      expect(mockSyncService.uploadPendingOps).not.toHaveBeenCalled();
+    });
   });
 
   describe('_sync() - Sync flow', () => {
