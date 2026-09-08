@@ -143,10 +143,7 @@ export class TagEffects {
             // dialog is about to delete, and `exportLogHistory` caps each arg at
             // 400 chars — an id list truncates at ~15 tasks, losing the tail
             // where the corrupt entries accumulate.
-            nullIndices: allTasks.reduce<number[]>(
-              (acc, t, i) => (t ? acc : [...acc, i]),
-              [],
-            ),
+            nullIndices: allTasks.flatMap((t, i) => (t ? [] : [i])),
           }),
         ),
         tap(({ activeId, allTasks }) => {

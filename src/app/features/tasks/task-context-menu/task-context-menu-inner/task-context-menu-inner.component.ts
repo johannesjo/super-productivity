@@ -610,9 +610,9 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
               targetProject,
             ]) => {
               TaskLog.log({
-                reminderCfg,
-                nonArchiveInstancesWithSubTasks,
-                archiveInstances,
+                hasReminderCfg: !!reminderCfg,
+                nonArchiveInstanceCount: nonArchiveInstancesWithSubTasks.length,
+                archiveInstanceCount: archiveInstances.length,
               });
 
               // Repeat config was deleted (e.g. via cross-client sync) but the task

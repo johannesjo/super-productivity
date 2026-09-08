@@ -406,7 +406,7 @@ export class TaskShortcutService {
       (taskComponent[method] as (...args: unknown[]) => unknown)(...args);
       return true;
     } else {
-      Log.warn(`Method ${method} not found on task component`, taskComponent);
+      Log.warn(`Method ${method} not found on task component`);
       return false;
     }
   }
