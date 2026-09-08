@@ -171,6 +171,22 @@ describe('DialogHandleDecryptErrorComponent', () => {
       expect(mockDialogRef.close).not.toHaveBeenCalled();
     });
 
+    it('surfaces an error instead of failing silently when the guard cannot be read', async () => {
+      // The guard reads the archive DB; that read can reject. Without a catch the
+      // rejection dies in the click handler and the button just does nothing.
+      mockSyncLocalStateService.hasNothingWorthUploading.and.rejectWith(
+        new Error('archive db unavailable'),
+      );
+      component.passwordVal = 'some-password';
+
+      await component.updatePWAndForceUpload();
+
+      expect(mockSnackService.open).toHaveBeenCalled();
+      expect(mockDialogRef.close).not.toHaveBeenCalled();
+      // The re-entrancy latch must clear, or the button stays dead forever.
+      expect(component.isForceUploadPending()).toBe(false);
+    });
+
     it('still allows the overwrite from a device that holds data', async () => {
       (window.confirm as jasmine.Spy).and.returnValue(true);
       mockSyncLocalStateService.hasNothingWorthUploading.and.resolveTo(false);

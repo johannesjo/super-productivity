@@ -106,8 +106,11 @@ describe('deepEqual', () => {
    *
    * A true cycle must keep returning false — that contract is pinned by the
    * spec above, and any fix here has to preserve it.
+   *
+   * When deepEqual is fixed, DELETE this spec rather than flipping its
+   * assertions: the `false` below is the bug, not the contract.
    */
-  it('returns false for a shared (non-circular) sub-object referenced twice', () => {
+  it('known defect (delete when deepEqual is fixed): returns false for a shared (non-circular) sub-object referenced twice', () => {
     const logger = createLogger();
     const shared = { weekDays: { mon: true, sat: false } };
     const a = { first: { cfg: shared }, second: { cfg: shared } };

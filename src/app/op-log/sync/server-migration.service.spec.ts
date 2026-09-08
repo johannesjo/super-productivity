@@ -914,6 +914,10 @@ describe('ServerMigrationService', () => {
    * Reproduction specs for the #9256 recovery dead-end. DOCUMENTS CURRENT
    * BEHAVIOUR — these pass on master.
    *
+   * Every spec below whose name starts with "known defect" asserts the broken
+   * outcome. When the corresponding fix lands they go RED by design: DELETE
+   * them, do not repair their assertions.
+   *
    * `handleServerMigration` gates the full-state SYNC_IMPORT on
    * `hasServerMigrationStateData` (server-migration.service.ts:28), whose call
    * site is commented "Skip if local state is effectively empty". It is
@@ -998,7 +1002,7 @@ describe('ServerMigrationService', () => {
         syncImportReason: 'FORCE_UPLOAD',
       });
 
-    it('pins the deepEqual DAG defect on the real simpleCounter default', () => {
+    it('known defect (delete when deepEqual is fixed): pins the DAG defect on the real simpleCounter default', () => {
       const counters = initialSimpleCounterState.entities;
       // The aliasing: a shallow spread of EMPTY_SIMPLE_COUNTER shares these.
       expect(counters['STANDING_DESK_ID']!.streakWeekDays).toBe(
@@ -1013,7 +1017,7 @@ describe('ServerMigrationService', () => {
       ).toBe(false);
     });
 
-    it('proceeds for a fresh install whose only divergence is the sync config', async () => {
+    it('known defect (delete when the empty-state guard is fixed): proceeds for a fresh install whose only divergence is the sync config', async () => {
       stateSnapshotServiceSpy.getStateSnapshotAsync.and.resolveTo(
         snapshot({
           ...freshInstallSlices,
@@ -1049,7 +1053,7 @@ describe('ServerMigrationService', () => {
       expect(opLogStoreSpy.append).not.toHaveBeenCalled();
     });
 
-    it('proceeds for a hydrated client with default config and no user data', async () => {
+    it('known defect (delete when deepEqual is fixed): proceeds for a hydrated client with default config and no user data', async () => {
       // Isolates cause 2: every slice is a clone (as after any loadAllData) and
       // globalConfig is at its default, so simpleCounter alone carries the guard.
       stateSnapshotServiceSpy.getStateSnapshotAsync.and.resolveTo(snapshot());
