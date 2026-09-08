@@ -34,6 +34,8 @@ describe('TaskBulkActionService', () => {
     clear: jasmine.Spy;
     isBulkFeedbackSuppressed: ReturnType<typeof signal<boolean>>;
     setBulkFeedbackSuppressed: (v: boolean) => void;
+    isDestroyedHost: () => boolean;
+    findLiveRowEl: () => HTMLElement | null;
   };
   let dialogResult: unknown;
   let isConfirmBeforeDelete: boolean;
@@ -102,6 +104,8 @@ describe('TaskBulkActionService', () => {
       clear: jasmine.createSpy('clear'),
       isBulkFeedbackSuppressed: suppressed,
       setBulkFeedbackSuppressed: (v: boolean) => suppressed.set(v),
+      isDestroyedHost: () => false,
+      findLiveRowEl: () => null,
     };
 
     TestBed.configureTestingModule({
@@ -249,6 +253,26 @@ describe('TaskBulkActionService', () => {
         jasmine.objectContaining({ id: 'only' }),
       );
       expect(taskService.removeMultipleTasks).not.toHaveBeenCalled();
+    });
+
+    it('confirms as a bulk delete when a parent and its subtasks are selected', async () => {
+      isConfirmBeforeDelete = false;
+      select([
+        t('parent', { subTaskIds: ['s1', 's2'] }),
+        t('s1', { parentId: 'parent' }),
+        t('s2', { parentId: 'parent' }),
+      ]);
+      await service.deleteSelected();
+      expect(matDialog.open).toHaveBeenCalledWith(
+        jasmine.anything(),
+        jasmine.objectContaining({
+          data: jasmine.objectContaining({
+            okTxt: T.F.TASK.MULTI_SELECT.D_CONFIRM_DELETE.OK,
+            translateParams: { count: 1 },
+          }),
+        }),
+      );
+      expect(taskService.removeMultipleTasks).toHaveBeenCalledWith(['parent']);
     });
 
     it('confirms a single task with the single-task message when the setting is on', async () => {
@@ -410,18 +434,11 @@ describe('TaskBulkActionService', () => {
     });
   });
 
-  describe('removeDeadline / removeFromToday', () => {
+  describe('removeDeadline', () => {
     it('removes deadlines only where one exists', async () => {
       select([t('a', { deadlineDay: '2026-09-10' }), t('b')]);
       await service.removeDeadline();
       expect(dispatchedTypes()).toEqual([TaskSharedActions.removeDeadline.type]);
-    });
-
-    it('removes all selected from Today in one action', async () => {
-      select([t('a'), t('b')]);
-      await service.removeFromToday();
-      expect(dispatchedTypes()).toEqual([TaskSharedActions.removeTasksFromTodayTag.type]);
-      expect(store.dispatch.calls.mostRecent().args[0].taskIds).toEqual(['a', 'b']);
     });
   });
 });

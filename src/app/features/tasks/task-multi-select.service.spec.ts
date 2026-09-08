@@ -1,14 +1,8 @@
 import { TestBed } from '@angular/core/testing';
-import { NavigationEnd, Router } from '@angular/router';
-import { Subject } from 'rxjs';
 import { TaskMultiSelectService } from './task-multi-select.service';
-import { WorkContextService } from '../work-context/work-context.service';
-import { WorkContextType } from '../work-context/work-context.model';
 
 describe('TaskMultiSelectService', () => {
   let service: TaskMultiSelectService;
-  let routerEvents$: Subject<unknown>;
-  let workContext$: Subject<{ activeId: string; activeType: WorkContextType }>;
   let root: HTMLElement;
 
   const buildDom = (): void => {
@@ -65,18 +59,7 @@ describe('TaskMultiSelectService', () => {
   const selected = (): string[] => Array.from(service.selectedIds()).sort();
 
   beforeEach(() => {
-    routerEvents$ = new Subject();
-    workContext$ = new Subject();
-    TestBed.configureTestingModule({
-      providers: [
-        TaskMultiSelectService,
-        { provide: Router, useValue: { events: routerEvents$.asObservable() } },
-        {
-          provide: WorkContextService,
-          useValue: { activeWorkContextTypeAndId$: workContext$.asObservable() },
-        },
-      ],
-    });
+    TestBed.configureTestingModule({ providers: [TaskMultiSelectService] });
     service = TestBed.inject(TaskMultiSelectService);
     buildDom();
   });
@@ -104,10 +87,16 @@ describe('TaskMultiSelectService', () => {
 
       service.toggle('c');
       expect(selected()).toEqual(['a']);
-      // anchor stays where it was when removing another row
+      // a deselected row is no anchor for the next Shift+click
+      expect(service.anchorId()).toBeNull();
+
+      service.toggle('c');
+      service.toggle('a');
+      expect(selected()).toEqual(['c']);
+      // deselecting another row keeps the anchor
       expect(service.anchorId()).toBe('c');
 
-      service.toggle('a');
+      service.toggle('c');
       expect(selected()).toEqual([]);
       expect(service.anchorId()).toBeNull();
     });
@@ -188,6 +177,28 @@ describe('TaskMultiSelectService', () => {
     });
   });
 
+  describe('selectAllInListOfFocused', () => {
+    it('selects the direct rows of the focused list only', () => {
+      focusRow('c');
+      service.selectAllInListOfFocused();
+      expect(selected()).toEqual(['a', 'b', 'c', 'd']);
+      expect(service.anchorId()).toBe('c');
+    });
+
+    it('ignores a focused row inside the detail panel', () => {
+      stubActiveElement(root.querySelector('task-detail-panel task'));
+      service.selectAllInListOfFocused();
+      expect(service.extendFromFocused('down')).toBeNull();
+      expect(service.count()).toBe(0);
+    });
+
+    it('selects sibling subtasks when a subtask is focused', () => {
+      focusRow('b2');
+      service.selectAllInListOfFocused();
+      expect(selected()).toEqual(['b1', 'b2']);
+    });
+  });
+
   describe('selectedIdsInDomOrder', () => {
     it('returns visual order, ignoring detail-panel copies', () => {
       service.toggle('d');
@@ -203,6 +214,25 @@ describe('TaskMultiSelectService', () => {
     });
   });
 
+  describe('touch selection mode', () => {
+    it('enters with an initial task and shows the bar even when empty', () => {
+      service.enterTouchSelectionMode('a');
+      expect(service.isTouchSelectionMode()).toBeTrue();
+      expect(selected()).toEqual(['a']);
+      service.toggle('a');
+      expect(service.isActive()).toBeFalse();
+      expect(service.isTouchSelectionMode()).toBeTrue();
+      expect(service.isSelecting()).toBeTrue();
+    });
+
+    it('clear leaves the mode', () => {
+      service.enterTouchSelectionMode();
+      service.clear();
+      expect(service.isTouchSelectionMode()).toBeFalse();
+      expect(service.isSelecting()).toBeFalse();
+    });
+  });
+
   describe('remove / prune / clear', () => {
     it('remove drops one id and resets a removed anchor', () => {
       service.toggle('a');
@@ -212,19 +242,43 @@ describe('TaskMultiSelectService', () => {
       expect(service.anchorId()).toBeNull();
     });
 
-    it('removeWhenUnrendered keeps an id whose row is still rendered', async () => {
-      service.toggle('a');
-      service.removeWhenUnrendered('a');
+    const rowEl = (id: string): HTMLElement =>
+      root.querySelector(`task[data-task-id="${id}"]`) as HTMLElement;
+
+    it('removeWhenUnrendered keeps an id when another row still renders it', async () => {
+      // A detail-panel copy of b1 is destroyed; the main-list row stays.
+      service.toggle('b1');
+      service.removeWhenUnrendered(
+        'b1',
+        root.querySelector('task-detail-panel task') as HTMLElement,
+      );
       await new Promise((resolve) => setTimeout(resolve));
-      expect(selected()).toEqual(['a']);
+      expect(selected()).toEqual(['b1']);
     });
 
     it('removeWhenUnrendered drops an id whose row is gone', async () => {
       service.toggle('a');
-      root.querySelector('task[data-task-id="a"]')?.remove();
-      service.removeWhenUnrendered('a');
+      const el = rowEl('a');
+      el.remove();
+      service.removeWhenUnrendered('a', el);
       await new Promise((resolve) => setTimeout(resolve));
       expect(selected()).toEqual([]);
+    });
+
+    it('removeWhenUnrendered ignores the destroyed host still in the DOM (leave animation)', async () => {
+      service.toggle('a');
+      service.removeWhenUnrendered('a', rowEl('a'));
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(selected()).toEqual([]);
+    });
+
+    it('a destroyed host is no live row, even when not selected', () => {
+      const el = rowEl('c');
+      expect(service.findLiveRowEl('c')).toBe(el);
+      service.removeWhenUnrendered('c', el);
+      expect(service.isDestroyedHost(el)).toBeTrue();
+      expect(service.findLiveRowEl('c')).toBeNull();
+      expect(service.selectedIdsInDomOrder()).toEqual([]);
     });
 
     it('bulk feedback suppression is off by default and settable', () => {
@@ -248,18 +302,6 @@ describe('TaskMultiSelectService', () => {
       service.clear();
       expect(service.count()).toBe(0);
       expect(service.menuOpenRequest()).toBeNull();
-    });
-
-    it('clears on navigation', () => {
-      service.toggle('a');
-      routerEvents$.next(new NavigationEnd(1, '/x', '/x'));
-      expect(service.count()).toBe(0);
-    });
-
-    it('clears on work context change', () => {
-      service.toggle('a');
-      workContext$.next({ activeId: 'p2', activeType: WorkContextType.PROJECT });
-      expect(service.count()).toBe(0);
     });
   });
 });

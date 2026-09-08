@@ -123,7 +123,7 @@ export class TaskBulkActionService {
       this._snackNothingToDo();
       return;
     }
-    const focusEl = this._getFocusTargetAfterRemoval();
+    const focusTargetId = this._getFocusTargetAfterRemoval();
     await this._runSuppressed(() =>
       tasks.forEach((t) => this._taskService.setDone(t.id)),
     );
@@ -134,7 +134,7 @@ export class TaskBulkActionService {
       msg: this._plural('F.TASK.MULTI_SELECT.S.DONE', tasks.length),
       translateParams: { count: tasks.length },
     });
-    this._restoreFocus(focusEl);
+    this._restoreFocus(focusTargetId);
   }
 
   async markUndone(): Promise<void> {
@@ -143,7 +143,7 @@ export class TaskBulkActionService {
       this._snackNothingToDo();
       return;
     }
-    const focusEl = this._getFocusTargetAfterRemoval();
+    const focusTargetId = this._getFocusTargetAfterRemoval();
     await this._runSuppressed(() =>
       tasks.forEach((t) => this._taskService.setUnDone(t.id)),
     );
@@ -152,7 +152,7 @@ export class TaskBulkActionService {
       msg: this._plural('F.TASK.MULTI_SELECT.S.UNDONE', tasks.length),
       translateParams: { count: tasks.length },
     });
-    this._restoreFocus(focusEl);
+    this._restoreFocus(focusTargetId);
   }
 
   // ---- DELETE -----------------------------------------------------------
@@ -172,7 +172,9 @@ export class TaskBulkActionService {
     if (!tasks.length) {
       return;
     }
-    if (tasks.length === 1) {
+    // Judge by what the user selected, not by the deduped result: a parent
+    // with its subtasks reads "3 selected" and must confirm like a bulk delete.
+    if (tasks.length === 1 && this._multiSelect.selectedIds().size === 1) {
       await this._deleteSingle(tasks[0]);
       return;
     }
@@ -193,7 +195,7 @@ export class TaskBulkActionService {
     if (!isConfirm) {
       return;
     }
-    const focusEl = this._getFocusTargetAfterRemoval();
+    const focusTargetId = this._getFocusTargetAfterRemoval();
     const { eligible: topLevel, skippedSubtasks: loneSubtasks } = splitParentOnly(tasks);
     const loneSubtasksWithData = await Promise.all(
       loneSubtasks.map((t) => this._withSubTasks(t)),
@@ -205,7 +207,7 @@ export class TaskBulkActionService {
       }
     });
     this._multiSelect.clear();
-    this._restoreFocus(focusEl);
+    this._restoreFocus(focusTargetId);
   }
 
   private async _deleteSingle(task: Task): Promise<void> {
@@ -227,11 +229,11 @@ export class TaskBulkActionService {
         return;
       }
     }
-    const focusEl = this._getFocusTargetAfterRemoval();
+    const focusTargetId = this._getFocusTargetAfterRemoval();
     this._taskService.remove(await this._withSubTasks(task));
     this._multiSelect.clear();
     await this._flush();
-    this._restoreFocus(focusEl);
+    this._restoreFocus(focusTargetId);
   }
 
   // ---- PROJECT ----------------------------------------------------------
@@ -245,7 +247,7 @@ export class TaskBulkActionService {
       this._snackNothingToDo();
       return;
     }
-    const focusEl = this._getFocusTargetAfterRemoval();
+    const focusTargetId = this._getFocusTargetAfterRemoval();
     let movedCount = 0;
     this._multiSelect.setBulkFeedbackSuppressed(true);
     try {
@@ -285,7 +287,7 @@ export class TaskBulkActionService {
         translateParams: { count: movedCount, projectTitle: project?.title ?? '' },
       });
     }
-    this._restoreFocus(focusEl);
+    this._restoreFocus(focusTargetId);
   }
 
   // ---- TAGS -------------------------------------------------------------
@@ -347,7 +349,7 @@ export class TaskBulkActionService {
     const defaultRemindOption =
       this._globalConfigService.cfg()?.reminder.defaultTaskRemindOption ??
       DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption!;
-    const focusEl = this._getFocusTargetAfterRemoval();
+    const focusTargetId = this._getFocusTargetAfterRemoval();
     const todayIds: string[] = [];
     let applied = 0;
     await this._runSuppressed(() => {
@@ -400,7 +402,7 @@ export class TaskBulkActionService {
     } else {
       this._snackNothingToDo();
     }
-    this._restoreFocus(focusEl);
+    this._restoreFocus(focusTargetId);
   }
 
   async unschedule(): Promise<void> {
@@ -411,7 +413,7 @@ export class TaskBulkActionService {
       this._snackNothingToDo();
       return;
     }
-    const focusEl = this._getFocusTargetAfterRemoval();
+    const focusTargetId = this._getFocusTargetAfterRemoval();
     await this._runSuppressed(() =>
       tasks.forEach((t) =>
         this._store.dispatch(
@@ -425,7 +427,7 @@ export class TaskBulkActionService {
       msg: this._plural('F.TASK.MULTI_SELECT.S.UNSCHEDULED', tasks.length),
       translateParams: { count: tasks.length },
     });
-    this._restoreFocus(focusEl);
+    this._restoreFocus(focusTargetId);
   }
 
   async addToToday(): Promise<void> {
@@ -440,7 +442,7 @@ export class TaskBulkActionService {
       this._snackNothingToDo();
       return;
     }
-    const focusEl = this._getFocusTargetAfterRemoval();
+    const focusTargetId = this._getFocusTargetAfterRemoval();
     this._store.dispatch(
       TaskSharedActions.planTasksForToday({
         taskIds: tasks.map((t) => t.id),
@@ -451,20 +453,7 @@ export class TaskBulkActionService {
       }),
     );
     await this._flush();
-    this._restoreFocus(focusEl);
-  }
-
-  async removeFromToday(): Promise<void> {
-    const tasks = this._resolveInVisualOrder();
-    if (!tasks.length) {
-      return;
-    }
-    const focusEl = this._getFocusTargetAfterRemoval();
-    this._store.dispatch(
-      TaskSharedActions.removeTasksFromTodayTag({ taskIds: tasks.map((t) => t.id) }),
-    );
-    await this._flush();
-    this._restoreFocus(focusEl);
+    this._restoreFocus(focusTargetId);
   }
 
   // ---- DEADLINE ---------------------------------------------------------
@@ -579,7 +568,7 @@ export class TaskBulkActionService {
       this._snackNothingToDo();
       return;
     }
-    const focusEl = this._getFocusTargetAfterRemoval();
+    const focusTargetId = this._getFocusTargetAfterRemoval();
     await this._runSuppressed(() =>
       tasks.forEach((t) =>
         target === 'backlog'
@@ -590,7 +579,7 @@ export class TaskBulkActionService {
     if (skippedSubtasks.length) {
       this._snackPartial(tasks.length, tasks.length + skippedSubtasks.length);
     }
-    this._restoreFocus(focusEl);
+    this._restoreFocus(focusTargetId);
   }
 
   // ---- helpers ----------------------------------------------------------
@@ -668,41 +657,71 @@ export class TaskBulkActionService {
    * else the last unselected one before it — captured *before* the action so
    * keyboard focus has somewhere to land once the selected rows leave the view.
    */
-  private _getFocusTargetAfterRemoval(): HTMLElement | null {
+  /**
+   * Id of the row keyboard focus should land on if the selected rows leave the
+   * list: the next unselected row after the selection, else the previous one.
+   * Like the single-task path, subtask rows of a selected parent do not count
+   * (they leave together with it). Resolved to an element only afterwards,
+   * since rows may re-mount.
+   */
+  private _getFocusTargetAfterRemoval(): string | null {
     if (isTouchActive()) {
       return null;
     }
     const selected = this._multiSelect.selectedIds();
     const rows = Array.from(document.querySelectorAll<HTMLElement>('task')).filter(
-      (el) => !el.closest('task-detail-panel'),
+      (el) => !el.closest('task-detail-panel') && !this._multiSelect.isDestroyedHost(el),
     );
+    const idOf = (el: HTMLElement): string => el.getAttribute('data-task-id') ?? '';
+    const isInSelectedParent = (el: HTMLElement): boolean => {
+      for (
+        let parent = el.parentElement?.closest<HTMLElement>('task');
+        parent;
+        parent = parent.parentElement?.closest<HTMLElement>('task')
+      ) {
+        if (selected.has(idOf(parent))) {
+          return true;
+        }
+      }
+      return false;
+    };
     let lastSelectedIndex = -1;
     rows.forEach((el, i) => {
-      if (selected.has(el.getAttribute('data-task-id') ?? '')) {
+      if (selected.has(idOf(el))) {
         lastSelectedIndex = i;
       }
     });
     if (lastSelectedIndex === -1) {
       return null;
     }
-    const isUnselected = (el: HTMLElement): boolean =>
-      !selected.has(el.getAttribute('data-task-id') ?? '');
-    return (
-      rows.slice(lastSelectedIndex + 1).find(isUnselected) ??
-      rows.slice(0, lastSelectedIndex).reverse().find(isUnselected) ??
-      null
-    );
+    const isCandidate = (el: HTMLElement): boolean =>
+      !selected.has(idOf(el)) && !isInSelectedParent(el);
+    const target =
+      rows.slice(lastSelectedIndex + 1).find(isCandidate) ??
+      rows.slice(0, lastSelectedIndex).reverse().find(isCandidate);
+    return target ? idOf(target) : null;
   }
 
-  private _restoreFocus(el: HTMLElement | null): void {
-    if (!el || !el.isConnected) {
+  /**
+   * Moves keyboard focus to the target row when the action left focus on
+   * nothing or on a row that is gone. A row that left the list is still in the
+   * DOM while its leave animation runs, so "gone" is asked from the selection
+   * service, which knows the destroyed hosts.
+   */
+  private _restoreFocus(targetId: string | null): void {
+    if (!targetId) {
       return;
     }
     const active = document.activeElement;
-    // Only move focus when it was lost (a removed row) or sits on a removed row.
-    if (active && active !== document.body && active.isConnected) {
+    const activeRow = active?.closest('task');
+    const isFocusIntact =
+      !!active &&
+      active !== document.body &&
+      active.isConnected &&
+      !(activeRow && this._multiSelect.isDestroyedHost(activeRow));
+    if (isFocusIntact) {
       return;
     }
-    el.focus({ preventScroll: true });
+    this._multiSelect.findLiveRowEl(targetId)?.focus({ preventScroll: true });
   }
 }
