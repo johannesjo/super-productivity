@@ -33,6 +33,28 @@ Seven of the additions had **zero instances** anywhere in the codebase. One
 (`ChainExpression` unwrapping) was provably dead code: its child node type can
 never be reportable, so unwrapping it could not change any verdict.
 
+## What review found afterwards
+
+The measurement above attributes each report to the rule branch that produced
+it. It says nothing about whether a report is a *leak*, and that turned out to
+be the number that mattered: sampling the 121 showed roughly two thirds are
+scalars the naming heuristics could not classify (`dateStr`, `evName`,
+`handlerMap`, `initialSyncDone`, `date1`, `providerRaw`, `zoomFactor`). Framing
+that list as "debt to pay down" would have sent contributors renaming benign
+variables.
+
+Two corrections followed. Widening the heuristics for the largest benign
+cluster — timestamps, durations and `err*` strings, each with an observed
+instance — removed 27 reports. Fixing the sites that were *actually* leaking
+(three `TaskCopy[]` arrays in `data-repair.ts`, a `Project` in
+`undo-task-delete.meta-reducer.ts`, a notification event, an issue search
+result, and the `task-context-menu-inner` copy of the very block this branch
+had already fixed in `task.component.ts`) removed 13 more and 20 files. The
+baseline settled at 81 hits across 41 files.
+
+The general lesson: **a precision number is the only one that justifies an
+allowlist.** Coverage attribution measures the rule against itself.
+
 The rule would not have caught the branch's own most severe leak. The iCal
 `SUMMARY` calls that exported private calendar event titles are
 `CallExpression`s — a shape the rule documents as a known gap.
@@ -70,7 +92,9 @@ for the flag. The assertion could `process.exit(333)` mid-session, because two
 of the three windows are built lazily inside an IPC handler and an async
 function.
 
-All of it collapsed into one call at app-ready:
+Two of the three collapsed into one call at app-ready (`main-window.ts` keeps
+its per-window `spellcheck: false`; the session call makes it redundant rather
+than wrong, and removing a shipped flag buys nothing):
 
 ```ts
 session.defaultSession.setSpellCheckerEnabled?.(false);
