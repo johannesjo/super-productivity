@@ -185,6 +185,7 @@ When the server rejects an operation:
 1. Client receives rejection with `existingClock`
 2. `SupersededOperationResolverService.resolveSupersededLocalOps()`:
    - Merges the global clock + all superseded ops' clocks + snapshot clock + extra clocks from force download
+     (the forced seq-0 download collects clocks from every re-fetched op, but does not _deliver_ ops that sit behind the persisted cursor AND are covered by the local clock — compaction may have pruned them from the local log, and re-applying a pruned `SYNC_IMPORT` would otherwise resurface it as a new incoming import; the cursor half keeps ops blocked on a newer schema version retryable, since this merge can cover them before they were ever applied)
    - Calls `mergeAndIncrementClocks()` — **no client-side pruning!**
    - Creates new LWW Update ops with the merged clock
 3. Re-uploads → server compares the full merged clock (which now has MAX+1 entries or more) → `GREATER_THAN` → accept

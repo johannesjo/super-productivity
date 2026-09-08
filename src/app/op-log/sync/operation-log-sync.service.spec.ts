@@ -54,6 +54,7 @@ import {
   SyncEpochChangedError,
 } from '../core/errors/sync-errors';
 import { SyncProviderManager } from '../sync-providers/provider-manager.service';
+import { DownloadResultForRejection } from '../core/types/sync-results.types';
 import { SyncHydrationService } from '../persistence/sync-hydration.service';
 import { SyncImportConflictDialogService } from './sync-import-conflict-dialog.service';
 import { StateSnapshotService } from '../backup/state-snapshot.service';
@@ -134,6 +135,9 @@ describe('OperationLogSyncService', () => {
       'appendBatchSkipDuplicates',
       'appendSnapshotIncludedOps',
       'hasSyncedOps',
+      'getLatestFullStateOpEntry',
+      'getOpsAfterSeq',
+      'getFirstOpEntry',
       'runRemoteStateReplacement',
       'isRawRebuildIncomplete',
       'loadRawRebuildIncomplete',
@@ -144,6 +148,9 @@ describe('OperationLogSyncService', () => {
       'loadImportBackup',
     ]);
     opLogStoreSpy.hasSyncedOps.and.resolveTo(true);
+    opLogStoreSpy.getLatestFullStateOpEntry.and.resolveTo(undefined);
+    opLogStoreSpy.getOpsAfterSeq.and.resolveTo([]);
+    opLogStoreSpy.getFirstOpEntry.and.resolveTo(undefined);
     // 0 = empty store; establishFrontier(0) resets to default-open (#9438).
     opLogStoreSpy.getLastSeq.and.resolveTo(0);
     opLogStoreSpy.getUnsynced.and.resolveTo([]);
@@ -920,6 +927,40 @@ describe('OperationLogSyncService', () => {
           const result = await service.uploadPendingOps(mockProvider);
 
           expect(result.kind).toBe('cancelled');
+        });
+
+        it('should treat a skipped empty-server seeding in a nested download as a completed no-op download (#9921)', async () => {
+          uploadServiceSpy.uploadPendingOps.and.resolveTo({
+            uploadedCount: 0,
+            piggybackedOps: [],
+            rejectedCount: 1,
+            rejectedOps: [
+              {
+                opId: 'local-op-1',
+                error: 'Concurrent',
+                errorCode: 'CONFLICT_CONCURRENT',
+              },
+            ],
+          });
+          spyOn(service, 'downloadRemoteOps').and.resolveTo({
+            kind: 'server_migration_skipped',
+          });
+          let nestedResult: DownloadResultForRejection | undefined;
+          rejectedOpsHandlerServiceSpy.handleRejectedOps.and.callFake(
+            async (_ops, callback) => {
+              nestedResult = await callback?.();
+              return {
+                kind: 'completed',
+                mergedOpsCreated: 0,
+                permanentRejectionCount: 0,
+              };
+            },
+          );
+
+          const result = await service.uploadPendingOps(mockProvider);
+
+          expect(nestedResult).toEqual({ kind: 'completed', newOpsCount: 0 });
+          expect(result.kind).toBe('completed');
         });
 
         it('should add mergedOpsFromRejection to localWinOpsCreated in result', async () => {
@@ -4788,7 +4829,7 @@ describe('OperationLogSyncService', () => {
     const makeRemoteOp = (id: string = 'op1'): Operation => ({
       id,
       actionType: 'ACTION' as ActionType,
-      opType: 'UPDATE' as OpType,
+      opType: OpType.Update,
       entityType: 'TASK',
       entityId: 'task1',
       payload: {},
@@ -5411,6 +5452,29 @@ describe('OperationLogSyncService', () => {
       expect(remoteOpsProcessingServiceSpy.processRemoteOps).not.toHaveBeenCalled();
     });
 
+    it('should refuse to rebuild from ops with an unknown opType BEFORE destroying anything (#8764)', async () => {
+      downloadServiceSpy.downloadRemoteOps.and.resolveTo({
+        newOps: [{ ...makeRemoteOp('op-future-vocabulary'), opType: 'FUTURE_OP' as any }],
+        needsFullStateUpload: false,
+        success: true,
+        providerMode: 'superSyncOps',
+        failedFileCount: 0,
+        latestServerSeq: 1,
+      });
+
+      const mockProvider = {
+        supportsOperationSync: true,
+        setLastServerSeq: jasmine.createSpy('setLastServerSeq').and.resolveTo(),
+      } as any;
+
+      await expectAsync(
+        service.forceDownloadRemoteState(mockProvider),
+      ).toBeRejectedWithError(/unknown op type/);
+      expect(opLogStoreSpy.runRemoteStateReplacement).not.toHaveBeenCalled();
+      expect(remoteOpsProcessingServiceSpy.processRemoteOps).not.toHaveBeenCalled();
+      expect(mockProvider.setLastServerSeq).not.toHaveBeenCalled();
+    });
+
     it('should run all operation migrations before backup or replacement', async () => {
       const remoteOp = { ...makeRemoteOp(), schemaVersion: 1 };
       const migratedOp = { ...remoteOp, schemaVersion: 4 };
@@ -5582,7 +5646,7 @@ describe('OperationLogSyncService', () => {
         {
           id: 'op1',
           actionType: 'ACTION' as ActionType,
-          opType: 'UPDATE' as OpType,
+          opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task1',
           payload: {},
@@ -5622,7 +5686,7 @@ describe('OperationLogSyncService', () => {
       const mockOp: Operation = {
         id: 'op1',
         actionType: 'ACTION' as ActionType,
-        opType: 'UPDATE' as OpType,
+        opType: OpType.Update,
         entityType: 'TASK',
         entityId: 'task1',
         payload: {},
@@ -5763,7 +5827,7 @@ describe('OperationLogSyncService', () => {
         {
           id: 'op1',
           actionType: 'ACTION' as ActionType,
-          opType: 'UPDATE' as OpType,
+          opType: OpType.Update,
           entityType: 'TASK',
           entityId: 'task1',
           payload: {},
@@ -6210,6 +6274,7 @@ describe('OperationLogSyncService', () => {
         failedFileCount: 0,
         latestServerSeq: 0, // Empty server
       });
+      serverMigrationServiceSpy.handleServerMigration.and.resolveTo('sync-import-1');
 
       const mockProvider = {
         supportsOperationSync: true,
@@ -6223,6 +6288,37 @@ describe('OperationLogSyncService', () => {
         { syncImportReason: 'SERVER_MIGRATION' },
       );
       expect(result.kind).toBe('server_migration_handled');
+    });
+
+    it('reports server_migration_skipped and leaves lastServerSeq alone when seeding created no SYNC_IMPORT (#9921)', async () => {
+      stateSnapshotServiceSpy.getStateSnapshot.and.returnValue({
+        task: { ids: ['task-1'] },
+        project: { ids: [INBOX_PROJECT.id] },
+        tag: { ids: [TODAY_TAG.id] },
+        note: { ids: [] },
+      } as any);
+
+      downloadServiceSpy.downloadRemoteOps.and.resolveTo({
+        newOps: [],
+        needsFullStateUpload: false,
+        success: true,
+        providerMode: 'superSyncOps',
+        failedFileCount: 0,
+        latestServerSeq: 0,
+      });
+      // Server no longer empty on the fresh check / validation failed / no client id
+      serverMigrationServiceSpy.handleServerMigration.and.resolveTo(undefined);
+
+      const mockProvider = {
+        supportsOperationSync: true,
+        setLastServerSeq: jasmine.createSpy('setLastServerSeq').and.resolveTo(),
+      } as any;
+
+      const result = await service.downloadRemoteOps(mockProvider);
+
+      expect(serverMigrationServiceSpy.handleServerMigration).toHaveBeenCalled();
+      expect(result.kind).toBe('server_migration_skipped');
+      expect(mockProvider.setLastServerSeq).not.toHaveBeenCalled();
     });
 
     it('should NOT create SYNC_IMPORT when fresh client has no meaningful data on empty server', async () => {
@@ -6320,6 +6416,194 @@ describe('OperationLogSyncService', () => {
       // Should NOT call handleServerMigration - client is not fresh
       expect(serverMigrationServiceSpy.handleServerMigration).not.toHaveBeenCalled();
       expect(result.kind).not.toBe('server_migration_handled');
+    });
+  });
+
+  describe('never-synced genesis client (#9863)', () => {
+    let downloadServiceSpy: jasmine.SpyObj<OperationLogDownloadService>;
+
+    const genesisEntry: OperationLogEntry = {
+      seq: 1,
+      op: {
+        id: 'genesis-op',
+        clientId: 'client-A',
+        actionType: ActionType.MIGRATION_GENESIS_IMPORT,
+        opType: OpType.Batch,
+        entityType: 'MIGRATION',
+        entityId: 'SINGLETON',
+        payload: {},
+        vectorClock: { clientA: 1 },
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      },
+      appliedAt: Date.now(),
+      source: 'local',
+    };
+
+    const remoteTaskOp: Operation = {
+      id: 'remote-op-1',
+      clientId: 'clientB',
+      actionType: 'test' as ActionType,
+      opType: OpType.Update,
+      entityType: 'TASK',
+      entityId: 'task-1',
+      payload: {},
+      vectorClock: { clientB: 1 },
+      timestamp: Date.now(),
+      schemaVersion: 1,
+    };
+
+    const mockProvider = (): any => ({
+      supportsOperationSync: true,
+      setLastServerSeq: jasmine.createSpy('setLastServerSeq').and.resolveTo(),
+    });
+
+    beforeEach(() => {
+      downloadServiceSpy = TestBed.inject(
+        OperationLogDownloadService,
+      ) as jasmine.SpyObj<OperationLogDownloadService>;
+
+      // Legacy-migrated client: state cache + one MIGRATION genesis op, never
+      // synced. NOT wholly fresh, so the plain fresh-client checks skip it.
+      opLogStoreSpy.loadStateCache.and.resolveTo({
+        state: {},
+        lastAppliedOpSeq: 1,
+        vectorClock: { clientA: 1 },
+        compactedAt: Date.now(),
+      });
+      opLogStoreSpy.getLastSeq.and.resolveTo(1);
+      opLogStoreSpy.hasSyncedOps.and.resolveTo(false);
+      opLogStoreSpy.getLatestFullStateOpEntry.and.resolveTo(undefined);
+      opLogStoreSpy.getFirstOpEntry.and.resolveTo(genesisEntry);
+
+      // The migrated tasks exist in the store (they live only in the genesis payload)
+      stateSnapshotServiceSpy.getStateSnapshot.and.returnValue({
+        task: { ids: ['legacy-task-1'] },
+        project: { ids: [INBOX_PROJECT.id] },
+        tag: { ids: [TODAY_TAG.id] },
+        note: { ids: [] },
+      } as any);
+    });
+
+    it('throws LocalDataConflictError when joining a non-empty server without a full-state op', async () => {
+      downloadServiceSpy.downloadRemoteOps.and.resolveTo({
+        newOps: [remoteTaskOp],
+        needsFullStateUpload: false,
+        success: true,
+        providerMode: 'superSyncOps',
+        failedFileCount: 0,
+        latestServerSeq: 5,
+      });
+
+      await expectAsync(service.downloadRemoteOps(mockProvider())).toBeRejectedWithError(
+        LocalDataConflictError,
+      );
+    });
+
+    it('creates a SYNC_IMPORT via server migration on an empty server', async () => {
+      downloadServiceSpy.downloadRemoteOps.and.resolveTo({
+        newOps: [],
+        needsFullStateUpload: false,
+        success: true,
+        providerMode: 'superSyncOps',
+        failedFileCount: 0,
+        latestServerSeq: 0,
+      });
+      serverMigrationServiceSpy.handleServerMigration.and.resolveTo('sync-import-1');
+      const provider = mockProvider();
+
+      const result = await service.downloadRemoteOps(provider);
+
+      expect(serverMigrationServiceSpy.handleServerMigration).toHaveBeenCalledWith(
+        provider,
+        { syncImportReason: 'SERVER_MIGRATION' },
+      );
+      expect(result.kind).toBe('server_migration_handled');
+    });
+
+    it('does not report the seeding as handled when no SYNC_IMPORT was created (#9921)', async () => {
+      downloadServiceSpy.downloadRemoteOps.and.resolveTo({
+        newOps: [],
+        needsFullStateUpload: false,
+        success: true,
+        providerMode: 'superSyncOps',
+        failedFileCount: 0,
+        latestServerSeq: 0,
+      });
+      serverMigrationServiceSpy.handleServerMigration.and.resolveTo(undefined);
+      const provider = mockProvider();
+
+      const result = await service.downloadRemoteOps(provider);
+
+      expect(result.kind).toBe('server_migration_skipped');
+      expect(provider.setLastServerSeq).not.toHaveBeenCalled();
+    });
+
+    it('does not loop once a local full-state op exists', async () => {
+      opLogStoreSpy.getLatestFullStateOpEntry.and.resolveTo({
+        ...genesisEntry,
+        seq: 2,
+        op: { ...genesisEntry.op, id: 'sync-import', opType: OpType.SyncImport },
+      });
+      downloadServiceSpy.downloadRemoteOps.and.resolveTo({
+        newOps: [],
+        needsFullStateUpload: false,
+        success: true,
+        providerMode: 'superSyncOps',
+        failedFileCount: 0,
+        latestServerSeq: 0,
+      });
+
+      const result = await service.downloadRemoteOps(mockProvider());
+
+      expect(serverMigrationServiceSpy.handleServerMigration).not.toHaveBeenCalled();
+      expect(result.kind).toBe('no_new_ops');
+    });
+
+    it('defers to the incoming-import gate when the download carries a full-state op', async () => {
+      const remoteSyncImport: Operation = {
+        ...remoteTaskOp,
+        id: 'remote-sync-import',
+        actionType: ActionType.LOAD_ALL_DATA,
+        opType: OpType.SyncImport,
+        entityType: 'ALL',
+        entityId: undefined,
+        payload: { task: { ids: [], entities: {} } },
+      };
+      downloadServiceSpy.downloadRemoteOps.and.resolveTo({
+        newOps: [remoteSyncImport, remoteTaskOp],
+        needsFullStateUpload: false,
+        success: true,
+        providerMode: 'superSyncOps',
+        failedFileCount: 0,
+        latestServerSeq: 5,
+      });
+
+      // The gate owns this case (the pending genesis op counts as meaningful
+      // work there), so the fresh-client conflict must not pre-empt it.
+      await expectAsync(
+        service.downloadRemoteOps(mockProvider()),
+      ).not.toBeRejectedWithError(LocalDataConflictError);
+      expect(opLogStoreSpy.getFirstOpEntry).not.toHaveBeenCalled();
+    });
+
+    it('does not prompt a client whose log starts with an ordinary op', async () => {
+      opLogStoreSpy.getFirstOpEntry.and.resolveTo({
+        ...genesisEntry,
+        op: { ...remoteTaskOp, clientId: 'client-A' },
+      });
+      downloadServiceSpy.downloadRemoteOps.and.resolveTo({
+        newOps: [remoteTaskOp],
+        needsFullStateUpload: false,
+        success: true,
+        providerMode: 'superSyncOps',
+        failedFileCount: 0,
+        latestServerSeq: 5,
+      });
+
+      const result = await service.downloadRemoteOps(mockProvider());
+
+      expect(result.kind).toBe('ops_processed');
     });
   });
 

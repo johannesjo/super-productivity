@@ -6,8 +6,10 @@ import {
   type SuperSyncOperation,
 } from '@sp/shared-schema';
 import { encrypt } from '@sp/sync-core';
+import type { Dialog } from '@playwright/test';
 import { test, expect } from '../../fixtures/supersync.fixture';
 import { SettingsPage } from '../../pages/settings.page';
+import { normalizeDialogMessage, translationRegex } from '../../utils/i18n-strings';
 import {
   SUPERSYNC_BASE_URL,
   closeClient,
@@ -360,6 +362,107 @@ test.describe('@supersync @encryption #9256 final-page decrypt failure', () => {
         await unrouteSuperSyncOps(clientB.page).catch(() => {});
         await closeClient(clientB);
       }
+    }
+  });
+
+  test('refuses the destructive overwrite from the stuck client and leaves the server copy intact', async ({
+    browser,
+    baseURL,
+    testRunId,
+  }) => {
+    test.setTimeout(150000);
+    let clientA: SimulatedE2EClient | null = null;
+    let clientB: SimulatedE2EClient | null = null;
+
+    try {
+      const user = await createTestUser(testRunId);
+      const encryptionPassword = `issue-9256-refusal-${testRunId}`;
+      const syncConfig = {
+        ...getSuperSyncConfig(user),
+        isEncryptionEnabled: true,
+        password: encryptionPassword,
+      };
+      const taskName = `Server-only-task-${testRunId}`;
+
+      clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
+      await clientA.workView.waitForTaskList();
+      await clientA.workView.addTask(taskName);
+      await clientA.sync.setupSuperSync(syncConfig);
+      await clientA.sync.syncAndWait();
+
+      const validHistory = await downloadServerHistory(user.token);
+      expect(validHistory.ops.length).toBeGreaterThan(0);
+      const opIdsBefore = validHistory.ops.map(({ op }) => op.id).sort();
+      const corruptSuffix = await uploadCorruptSuffix(
+        user.token,
+        testRunId,
+        encryptionPassword,
+        validHistory,
+      );
+      await closeClient(clientA);
+      clientA = null;
+
+      clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
+      await clientB.sync.setupSuperSync({
+        ...syncConfig,
+        waitForInitialSync: false,
+      });
+
+      const decryptErrorDialog = clientB.page.locator('dialog-handle-decrypt-error');
+      await expect(decryptErrorDialog).toBeVisible({ timeout: 30000 });
+
+      // The download never committed, so this client holds nothing of the
+      // user's — the state in which overwriting destroys their only copy.
+      await expect(
+        clientB.page.locator(`task:has-text("${taskName}")`),
+      ).not.toBeVisible();
+
+      const nativeMessages: string[] = [];
+      const dialogHandler = async (dialog: Dialog): Promise<void> => {
+        nativeMessages.push(normalizeDialogMessage(dialog.message()));
+        await dialog.accept();
+      };
+      clientB.page.on('dialog', dialogHandler);
+      try {
+        await decryptErrorDialog
+          .locator('input[type="password"]')
+          .fill(encryptionPassword);
+        await decryptErrorDialog
+          .locator('button')
+          .filter({ hasText: /overwrite server/i })
+          .click();
+        await expect.poll(() => nativeMessages.length, { timeout: 30000 }).toBe(1);
+      } finally {
+        clientB.page.off('dialog', dialogHandler);
+      }
+
+      // The refusal fires INSTEAD of the destructive confirmation. Asserting the
+      // absence of DECRYPT_OVERWRITE is the point: reaching that prompt would
+      // mean the guard let an empty device through to the clean slate.
+      expect(nativeMessages[0]).toMatch(
+        translationRegex(
+          'F.SYNC.D_NOTHING_TO_UPLOAD.TITLE',
+          'F.SYNC.D_NOTHING_TO_UPLOAD.MESSAGE',
+        ),
+      );
+      expect(nativeMessages[0]).not.toMatch(
+        translationRegex('F.SYNC.C.DECRYPT_OVERWRITE'),
+      );
+
+      // Onboarding example tasks are created on a timer even though the initial
+      // sync failed, so this also proves they are excluded from the "does this
+      // device hold anything?" test — the unit specs cover the predicate, this
+      // covers the real store the predicate reads.
+      await expect(decryptErrorDialog).toBeVisible();
+
+      // The strongest assertion: FORCE_UPLOAD would have made the server delete
+      // its operations. Every one is still there, corrupt suffix included.
+      const historyAfter = await downloadServerHistory(user.token);
+      const opIdsAfter = historyAfter.ops.map(({ op }) => op.id).sort();
+      expect(opIdsAfter).toEqual([...opIdsBefore, corruptSuffix.opId].sort());
+    } finally {
+      if (clientA) await closeClient(clientA);
+      if (clientB) await closeClient(clientB);
     }
   });
 });

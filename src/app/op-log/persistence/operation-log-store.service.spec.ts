@@ -760,6 +760,26 @@ describe('OperationLogStoreService', () => {
     });
   });
 
+  describe('getFirstOpEntry', () => {
+    it('should return undefined when no operations exist', async () => {
+      expect(await service.getFirstOpEntry()).toBeUndefined();
+    });
+
+    it('should return the lowest-seq entry, decoded', async () => {
+      const first = createTestOperation({ entityId: 'task1' });
+      const second = createTestOperation({ entityId: 'task2' });
+      const firstSeq = await service.append(first, 'local');
+      await service.append(second, 'local');
+
+      const entry = await service.getFirstOpEntry();
+
+      expect(entry?.seq).toBe(firstSeq);
+      expect(entry?.op.id).toBe(first.id);
+      expect(entry?.op.entityId).toBe('task1');
+      expect(entry?.source).toBe('local');
+    });
+  });
+
   describe('getLatestFullStateOpEntry', () => {
     it('should read latest full-state op via metadata without scanning ops', async () => {
       const oldImport = createTestOperation({

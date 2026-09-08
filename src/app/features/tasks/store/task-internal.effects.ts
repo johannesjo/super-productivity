@@ -161,6 +161,34 @@ export class TaskInternalEffects {
     ),
   );
 
+  /**
+   * Starting a done task re-opens it. The `setCurrentTask` reducer only moves
+   * the unsynced `currentTaskId` pointer (it may resolve a parent to one of its
+   * subtasks), so the completion flip has to be its own persistent op or other
+   * devices never learn about it (#9904). Reads `currentTaskId` after the
+   * reducer ran so the op targets the task that was actually started.
+   */
+  reopenStartedDoneTask$ = createEffect(() =>
+    this._actions$.pipe(
+      ofType(setCurrentTask),
+      withLatestFrom(this._store$.pipe(select(selectTaskFeatureState))),
+      mergeMap(([, state]) => {
+        const currentTaskId = state.currentTaskId;
+        const currentTask = currentTaskId
+          ? (state.entities[currentTaskId] as Task | undefined)
+          : undefined;
+        if (!currentTask || !currentTask.isDone) {
+          return EMPTY;
+        }
+        return of(
+          TaskSharedActions.updateTask({
+            task: { id: currentTask.id, changes: { isDone: false } },
+          }),
+        );
+      }),
+    ),
+  );
+
   planStartedTaskForToday$ = createEffect(() =>
     this._actions$.pipe(
       ofType(setCurrentTask),
