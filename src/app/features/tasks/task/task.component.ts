@@ -21,6 +21,7 @@ import { TaskMultiSelectService } from '../task-multi-select.service';
 import { TaskMoveToProjectService } from '../task-move-to-project.service';
 import { isMultiSelectModifierEvent } from '../../../util/is-multi-select-modifier-event';
 import { Subscription } from 'rxjs';
+import { first } from 'rxjs/operators';
 import {
   HideSubTasksMode,
   SubmitTrigger,
