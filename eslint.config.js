@@ -294,12 +294,21 @@ module.exports = tseslint.config(
       'local-rules/no-user-content-in-logs': 'error',
     },
   },
-  // Grandfathered offenders: files that already hand whole values to a Log
-  // method (121 hits across these 61 files, measured 2026-09), downgraded to a
-  // non-failing warning so they don't red-CI while they are cleaned up. They
-  // still warn, so the debt stays visible in lint output.
-  // This list may only ever SHRINK — a new entry means a leak was introduced.
-  // Delete the block once every file below is clean.
+  // Measured baseline: the call sites that already existed when the rule landed
+  // (81 hits across these 41 files, measured 2026-09), downgraded to a
+  // non-failing warning so the rule can be an error everywhere else.
+  //
+  // Not all of these are leaks. The rule judges shape, never content, so a
+  // scalar the naming heuristics cannot classify (`v`, `x`, `date1`, `evName`,
+  // `handlerMap`) sits here next to a real one. Treat an entry as "not yet
+  // triaged", not as "known privacy debt" — the count is a tripwire baseline,
+  // not a backlog estimate.
+  //
+  // This list may only ever SHRINK. A false positive in NEW code is not a
+  // reason to add a file here: fix the heuristics in the rule, or scope a
+  // `// eslint-disable-next-line local-rules/no-user-content-in-logs -- <why
+  // this value holds no user content>` to that one line. Adding the file
+  // silently exempts every future log call in it.
   //
   // Caveat, same as `max-lines`: a new violation inside an already-listed file
   // only warns. Removing a file from the list is what locks its cleanup in.
@@ -308,7 +317,6 @@ module.exports = tseslint.config(
       'src/app/core/language/language.service.ts',
       'src/app/core/share/share.service.ts',
       'src/app/core/startup/startup.service.ts',
-      'src/app/core/theme/global-theme.service.ts',
       'src/app/core/util/vector-clock.ts',
       'src/app/features/add-tasks-for-tomorrow/add-tasks-for-tomorrow.service.ts',
       'src/app/features/android/android-interface.ts',
@@ -316,22 +324,13 @@ module.exports = tseslint.config(
       'src/app/features/android/store/android-foreground-tracking.effects.ts',
       'src/app/features/android/store/android.effects.ts',
       'src/app/features/archive/archive.service.ts',
-      'src/app/features/idle/store/idle.effects.ts',
-      'src/app/features/issue-panel/issue-panel-calendar-agenda/issue-panel-calendar-agenda.component.ts',
       'src/app/features/issue/handle-issue-provider-http-error.ts',
-      'src/app/features/issue/issue.service.ts',
       'src/app/features/issue/providers/jira/jira-common-interfaces.service.ts',
       'src/app/features/mobile/store/mobile-notification.effects.ts',
       'src/app/features/planner/planner.service.ts',
-      'src/app/features/reminder/reminder.module.ts',
-      'src/app/features/reminder/reminder.service.ts',
       'src/app/features/right-panel/right-panel-content.component.ts',
-      'src/app/features/schedule/schedule-day-panel/schedule-day-panel.component.ts',
       'src/app/features/shepherd/shepherd-helper.ts',
-      'src/app/features/tasks/add-task-bar/short-syntax-to-tags.ts',
       'src/app/features/tasks/store/task-due.effects.ts',
-      'src/app/features/tasks/task-context-menu/task-context-menu-inner/task-context-menu-inner.component.ts',
-      'src/app/features/tasks/task-shortcut.service.ts',
       'src/app/features/tasks/task.service.ts',
       'src/app/features/tasks/util/play-done-sound.ts',
       'src/app/features/ui-helper/ui-helper.service.ts',
@@ -339,17 +338,10 @@ module.exports = tseslint.config(
       'src/app/imex/sync/sync-trigger.service.ts',
       'src/app/imex/sync/sync-wrapper.service.ts',
       'src/app/imex/sync/sync.effects.ts',
-      'src/app/op-log/capture/operation-log.effects.ts',
       'src/app/op-log/clean-slate/clean-slate.service.ts',
       'src/app/op-log/model/model-config.ts',
-      'src/app/op-log/persistence/operation-log-compaction.service.ts',
       'src/app/op-log/persistence/operation-log-hydrator.service.ts',
-      'src/app/op-log/persistence/operation-log-snapshot.service.ts',
-      'src/app/op-log/persistence/tab-seq-frontier.service.ts',
-      'src/app/op-log/sync/operation-log-download.service.ts',
       'src/app/op-log/sync/remote-ops-processing.service.ts',
-      'src/app/op-log/validation/data-repair.ts',
-      'src/app/op-log/validation/is-related-model-data-valid.ts',
       'src/app/op-log/validation/repair-operation.service.ts',
       'src/app/op-log/validation/validate-state.service.ts',
       'src/app/pages/config-page/config-page.component.ts',
@@ -357,11 +349,8 @@ module.exports = tseslint.config(
       'src/app/plugins/plugin-bridge.service.ts',
       'src/app/plugins/util/plugin-iframe.util.ts',
       'src/app/root-store/meta/task-shared-meta-reducers/tag-shared.reducer.ts',
-      'src/app/root-store/meta/task-shared-meta-reducers/task-shared-deadline.reducer.ts',
-      'src/app/root-store/meta/undo-task-delete.meta-reducer.ts',
       'src/app/ui/formly-button/formly-btn.component.ts',
       'src/app/util/action-logger.ts',
-      'src/app/util/dev-error.ts',
       'src/app/util/ipc-event.ts',
       'src/app/util/is-same-day.ts',
       'src/app/util/search-nav-debug.ts',

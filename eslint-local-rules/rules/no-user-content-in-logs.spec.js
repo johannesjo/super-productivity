@@ -79,6 +79,19 @@ ruleTester.run('no-user-content-in-logs', rule, {
     // Booleans and enum-ish values on the VALUE-name path.
     { code: `Log.log('x', { a: isDone, b: enabled, c: someFlag });` },
     { code: `Log.log('x', { a: opType, b: syncStatus, c: schemaVersion });` },
+    // Timestamps, durations and log strings state their own shape as surely as
+    // a count does — the largest benign cluster in src/app.
+    { code: `Log.log('x', { lastSeq, dropTime, targetDate, deadlineDay });` },
+    { code: `Log.log('x', { newRemindAt, minIdleTime, deadlineWithTime });` },
+    { code: `Log.log('x', { seq, delay, duration, msg, time });` },
+    { code: `Log.log('x', currentZoom);` },
+    { code: `Log.log('x', zoomFactor);` },
+    // An `err*` name gets the same allowance as the bare conventional ones.
+    { code: `Log.err('x', errStr);` },
+    { code: `Log.err('x', errTxt);` },
+    { code: `Log.err('x', errorMsg);` },
+    { code: `Log.err('x', errorMessage);` },
+    { code: `Log.err('x', rollbackErrors);` },
     // Not a logger.
     { code: `analytics.log(task);` },
     { code: `console.log(task);` },
@@ -216,6 +229,26 @@ ruleTester.run('no-user-content-in-logs', rule, {
     {
       code: `Log.log({ [taskTitle]: 1 });`,
       errors: [{ messageId: 'bareValue', data: { name: 'taskTitle' } }],
+    },
+    // The scalar allowance is whole-word for `msg`/`str`-ish names on purpose:
+    // a suffix would wave through the strings that carry a task title.
+    {
+      code: `Log.log('x', snackMsg);`,
+      errors: [{ messageId: 'bareValue', data: { name: 'snackMsg' } }],
+    },
+    {
+      code: `Log.log('x', titleStr);`,
+      errors: [{ messageId: 'bareValue', data: { name: 'titleStr' } }],
+    },
+    // A scalar name vouches for a VALUE only — never as a key, same as an
+    // entity label.
+    {
+      code: `Log.log({ time: task });`,
+      errors: [{ messageId: 'bareValue', data: { name: 'task' } }],
+    },
+    {
+      code: `Log.log({ duration: taskWithSubTasks });`,
+      errors: [{ messageId: 'bareValue', data: { name: 'taskWithSubTasks' } }],
     },
     // Every context logger is covered, not just `Log`.
     {

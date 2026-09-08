@@ -102,8 +102,31 @@ const QUANTITY_SUFFIX_RE = suffixRe(QUANTITY_WORDS);
 const SAFE_WHOLE = new Set(SAFE_WORDS);
 const SAFE_SUFFIX_RE = suffixRe(SAFE_WORDS);
 
+// Timestamps, durations and log strings state their own shape as surely as a
+// count does, and they are the largest benign cluster in this codebase (~24 of
+// the 121 pre-existing hits, measured 2026-09). Kept separate from
+// QUANTITY_WORDS so they vouch for a VALUE's own name only, never as a key:
+// `{ time: task }` must stay reported for the same reason `{ taskId: task }`
+// does. Whole-word and suffix are separate lists on purpose — a `Msg` suffix
+// would allow `snackMsg`, which routinely interpolates a task title.
+const SCALAR_WHOLE = new Set([
+  'msg',
+  'seq',
+  'time',
+  'date',
+  'day',
+  'delay',
+  'duration',
+]);
+const SCALAR_SUFFIX_RE = /(?:Seq|Time|Date|Day|At|Delay|Duration|Zoom|Factor)$/;
+
 const ERROR_WHOLE = new Set(['e', 'ex', 'err', 'error', 'exception', 'reason']);
-const ERROR_SUFFIX_RE = /(?:Error|Err|Exception)$/;
+const ERROR_SUFFIX_RE = /(?:Error|Errors|Err|Errs|Exception)$/;
+// `errStr`, `errTxt`, `errorMsg`, `errorMessage` — the same allowance as the
+// conventional bare names, which `log.ts` narrows for a real `Error`. As with
+// ERROR_WHOLE this does not certify the value; see the HttpErrorResponse note
+// in the docstring.
+const ERROR_PREFIX_RE = /^(?:err|error)[A-Z0-9]/;
 
 // A boolean says its own shape. `do`/`did`/`does` are absent — they would allow
 // `doNotDisturbList`. `use` is kept: it reads ambiguously in the abstract, but
@@ -129,7 +152,8 @@ const isVouchingKey = (name) => {
     QUANTITY_WHOLE.has(lower) ||
     QUANTITY_SUFFIX_RE.test(name) ||
     ERROR_WHOLE.has(lower) ||
-    ERROR_SUFFIX_RE.test(name)
+    ERROR_SUFFIX_RE.test(name) ||
+    ERROR_PREFIX_RE.test(name)
   );
 };
 
@@ -140,8 +164,11 @@ const isSafeName = (name) => {
   return (
     SAFE_WHOLE.has(lower) ||
     SAFE_SUFFIX_RE.test(name) ||
+    SCALAR_WHOLE.has(lower) ||
+    SCALAR_SUFFIX_RE.test(name) ||
     ERROR_WHOLE.has(lower) ||
     ERROR_SUFFIX_RE.test(name) ||
+    ERROR_PREFIX_RE.test(name) ||
     BOOLEAN_PREFIX_RE.test(name) ||
     CONST_NAME_RE.test(name)
   );

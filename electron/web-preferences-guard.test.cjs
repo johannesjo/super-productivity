@@ -169,6 +169,11 @@ test('every renderer-window constructor site has a matching assertSecureWebPrefe
 // every renderer only while every window uses the default session. A window
 // opting into `partition:` would get its own session with the spellchecker back
 // on (#5314), and nothing else would catch it.
+//
+// Deliberately coarse: it matches any key named `partition`, not only one
+// inside `webPreferences`, and the comment stripping is regex-based. A tripwire
+// that over-reports is the right failure direction here — a false hit costs one
+// line of triage, a miss costs the fix.
 test('no renderer window opts into a custom session partition', () => {
   const offenders = [];
   const walk = (dir) => {
