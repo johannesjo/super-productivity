@@ -44,7 +44,9 @@ describe('DialogEditIssueProviderComponent', () => {
           provide: PluginBridgeService,
           useValue: jasmine.createSpyObj('PluginBridgeService', [
             'restoreAndCheckOAuthTokens',
+            'migrateLegacyOAuthTokenToScopedKey',
             'clearOAuthTokens',
+            'clearOAuthToken',
             'startOAuthFlow',
           ]),
         },
