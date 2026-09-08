@@ -57,12 +57,16 @@
   // Fixed 32px rounded chip, matching the row's hover radius and the
   // additional-btn used inside nav-list-tree — otherwise :host's
   // align-items:stretch stretches this to the full (square) row height.
+  // Without a gap, this button's rounded corners sit flush against
+  // .nav-link's, and two same-color rounded boxes touching at zero gap
+  // pinch into a visible notch.
   .additional-btn {
     flex-shrink: 0;
     align-self: center;
     width: 32px !important;
     height: 32px !important;
     min-width: 32px !important;
+    margin-left: var(--s-half);
     border-radius: 6px !important;
 
     &.mat-mdc-icon-button {
