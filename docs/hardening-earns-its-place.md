@@ -10,8 +10,8 @@ calendar event titles — from the app's exportable log history, and disabled
 Chromium's spellchecker so the app stops contacting Google for dictionaries.
 
 The privacy fixes themselves were about 40 lines across five files. They were
-correct in the first commit and survived nine rounds of adversarial review
-untouched.
+correct in the first commit and survived nine independent reviews, across four
+rounds, untouched.
 
 Around them grew roughly 700 lines of enforcement machinery: a custom ESLint
 rule, a grandfathered exception list, a fail-closed Electron `webPreferences`
@@ -22,12 +22,19 @@ individually cheap and jointly unjustifiable.
 ## What the measurements showed
 
 Attributing every report the rule produced to the code path that produced it
-(measured 2026-09, over all 1,681 `*Log.*()` call sites in `src/app`):
+(measured 2026-09, over the 1,714 `*Log.<method>()` call sites in `src/app`
+outside specs):
 
-| Added in                                                       | Reports produced                   |
-| -------------------------------------------------------------- | ---------------------------------- |
-| The rule's first version (bare identifier, shorthand property) | 110 of 121 (91%)                   |
-| Everything added across two subsequent review rounds           | 5, of which 4 were false positives |
+| Code path                                                      | Reports produced |
+| -------------------------------------------------------------- | ---------------- |
+| The rule's first version (bare identifier, shorthand property) | 110 of 121 (91%) |
+| Everything added afterwards, in review                         | 11               |
+
+Four of those 11 were false positives. Two independent measurements disagreed
+on how to attribute the rest — the disagreement was over whether one shape
+counted as an "addition" — which is itself the point: a number nobody can
+reproduce is not evidence. The 110/121 split and the zero-instance count below
+were both reproduced independently.
 
 Seven of the additions had **zero instances** anywhere in the codebase. One
 (`ChainExpression` unwrapping) was provably dead code: its child node type can
