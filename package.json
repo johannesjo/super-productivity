@@ -205,27 +205,27 @@
     "uuidv7": "^1.2.1"
   },
   "devDependencies": {
-    "@angular-devkit/build-angular": "^21.2.17",
+    "@angular-devkit/build-angular": "^21.2.22",
     "@angular-eslint/builder": "^21.3.1",
     "@angular-eslint/eslint-plugin": "^21.3.1",
     "@angular-eslint/eslint-plugin-template": "^21.3.1",
     "@angular-eslint/schematics": "^21.3.1",
     "@angular-eslint/template-parser": "^21.3.1",
-    "@angular/animations": "^21.2.17",
+    "@angular/animations": "^21.2.22",
     "@angular/cdk": "^21.2.9",
-    "@angular/cli": "^21.2.17",
-    "@angular/common": "^21.2.17",
-    "@angular/compiler": "^21.2.17",
-    "@angular/compiler-cli": "^21.2.17",
-    "@angular/core": "^21.2.17",
-    "@angular/forms": "^21.2.17",
-    "@angular/language-service": "^21.2.17",
+    "@angular/cli": "^21.2.22",
+    "@angular/common": "^21.2.22",
+    "@angular/compiler": "^21.2.22",
+    "@angular/compiler-cli": "^21.2.22",
+    "@angular/core": "^21.2.22",
+    "@angular/forms": "^21.2.22",
+    "@angular/language-service": "^21.2.22",
     "@angular/material": "^21.2.9",
-    "@angular/platform-browser": "^21.2.17",
-    "@angular/platform-browser-dynamic": "^21.2.17",
-    "@angular/platform-server": "^21.2.17",
-    "@angular/router": "^21.2.17",
-    "@angular/service-worker": "^21.2.17",
+    "@angular/platform-browser": "^21.2.22",
+    "@angular/platform-browser-dynamic": "^21.2.22",
+    "@angular/platform-server": "^21.2.22",
+    "@angular/router": "^21.2.22",
+    "@angular/service-worker": "^21.2.22",
     "@capacitor/android": "^8.4.1",
     "@capacitor/app": "^8.1.0",
     "@capacitor/cli": "^8.4.1",
@@ -275,7 +275,7 @@
     "detect-it": "^4.0.1",
     "dotenv": "^17.4.2",
     "electron": "43.5.0",
-    "electron-builder": "^26.8.1",
+    "electron-builder": "^26.15.3",
     "eslint": "^9.39.2",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-import": "^2.32.0",
@@ -340,7 +340,7 @@
       "http-proxy-middleware": "2.0.10"
     },
     "@angular/build": {
-      "undici": "7.28.0"
+      "undici": "7.29.1"
     },
     "node-gyp": {
       "undici": "6.27.0"
@@ -349,7 +349,8 @@
       "uuid": "11.1.1"
     },
     "@babel/core": "7.29.7",
-    "ws": "8.21.0"
+    "ws": "8.21.0",
+    "esbuild": "0.28.2"
   },
   "optionalDependencies": {
     "@lmdb/lmdb-darwin-x64": "^3.5.4",
