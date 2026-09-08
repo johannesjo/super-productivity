@@ -267,11 +267,11 @@ describe('SyncLocalStateService', () => {
     });
 
     it('fails closed when the snapshot cannot be read at all', async () => {
-      // DELIBERATE fail-closed direction: hasMeaningfulStoreData returns false
-      // for an unreadable snapshot, so the guard reports "nothing to upload"
-      // and REFUSES. Refusing can never destroy data; guessing "has data" and
-      // letting the clean slate through can. Note getStateSnapshot() is typed
-      // non-nullable, so this shape is defensive rather than reachable today.
+      // DELIBERATE fail-closed direction: the guard reads the snapshot itself
+      // and treats an absent one as "nothing to upload", so it REFUSES.
+      // Refusing can never destroy data; guessing "has data" and letting the
+      // clean slate through can. getStateSnapshotAsync() is typed non-nullable,
+      // so this shape is defensive rather than reachable today.
       stateSnapshotSpy.getStateSnapshotAsync.and.resolveTo(undefined as never);
 
       expect(await service.hasNothingWorthUploading()).toBe(true);
