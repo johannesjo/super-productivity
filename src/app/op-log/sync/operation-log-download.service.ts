@@ -187,10 +187,13 @@ export class OperationLogDownloadService implements OnDestroy {
       // (it is reflected in local state — a rebuilt log can sit behind a stale
       // cursor; and the rejection resolver merges server clocks into the local
       // clock, so the clock alone could cover a blocked op).
-      // Raw rebuild wants every op, so it keeps this filter off. File-based
-      // providers hand out synthetic per-download `serverSeq` values while
-      // their cursor is the file's sync version, so the `<=` check is
-      // meaningless there; the reproduced bug is SuperSync-only anyway.
+      // Raw rebuild wants every op, so it keeps this filter off. The provider
+      // gate is an allowlist: only SuperSync hands out a real monotonic server
+      // seq to compare against. File-based providers use synthetic per-download
+      // `serverSeq` values while their cursor is the file's sync version, so the
+      // `<=` check is meaningless there — and the reproduced bug is
+      // SuperSync-only anyway, so a future provider mode must opt in explicitly
+      // rather than inherit a filter nobody reasoned about for it.
       const isReDeliveryFilterActive =
         forceFromSeq0 &&
         !options?.includeOwnAndAppliedOps &&
