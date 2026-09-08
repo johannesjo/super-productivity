@@ -89,6 +89,16 @@
     padding: var(--s-half) !important;
   }
 
+  // The button itself is squared off above, but Material's ripple/state-layer
+  // defaults to a circle unless told otherwise — match it so hover/focus/ripple
+  // don't show a circle inside a square.
+  ::ng-deep {
+    .mat-mdc-button-persistent-ripple,
+    .mat-ripple-element {
+      border-radius: 0 !important;
+    }
+  }
+
   &:focus,
   &:hover {
     background-color: var(--sidenav-hover-bg);
