@@ -1,3 +1,4 @@
+import { escapeHtml } from '../../../util/escape-html';
 import {
   ConfigFormSection,
   ConfigSectionAction,
@@ -20,11 +21,7 @@ export const getAutomaticBackUpFormCfg = (
 ): ConfigFormSection<LocalBackupConfig> => ({
   title: T.GCF.AUTO_BACKUPS.TITLE,
   key: 'localBackup',
-  // The location caveats only apply where the folder can be changed at all,
-  // which is the same platform that gets a backupPath (Electron). Carried in
-  // the section help rather than as a body line, so the overwhelming majority
-  // who never change the folder do not read a permanent caveat about it.
-  help: backupPath ? T.GCF.AUTO_BACKUPS.HELP_DESKTOP : T.GCF.AUTO_BACKUPS.HELP,
+  help: T.GCF.AUTO_BACKUPS.HELP,
   actions,
   items: [
     ...(lastBackupInfo
@@ -46,6 +43,14 @@ export const getAutomaticBackUpFormCfg = (
             className: `tpl`,
             templateOptions: {
               tag: 'p',
+              text: T.GCF.AUTO_BACKUPS.HELP_DESKTOP,
+            },
+          },
+          {
+            type: 'tpl',
+            className: `tpl`,
+            templateOptions: {
+              tag: 'p',
               text: T.GCF.AUTO_BACKUPS.LOCATION_INFO,
             },
           },
@@ -54,7 +59,7 @@ export const getAutomaticBackUpFormCfg = (
             className: `tpl`,
             templateOptions: {
               tag: 'p',
-              text: `<a href="file://${backupPath}" target="_blank">${backupPath}</a>`,
+              text: `<a href="file://${escapeHtml(backupPath)}" target="_blank">${escapeHtml(backupPath)}</a>`,
             },
           },
         ]

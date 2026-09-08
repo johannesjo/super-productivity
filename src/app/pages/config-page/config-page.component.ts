@@ -248,32 +248,36 @@ export class ConfigPageComponent implements OnInit {
     window.ea.getBackupPath().then((backupPath) => {
       this.globalImexFormCfg = [
         ...GLOBAL_IMEX_FORM_CONFIG,
-        getAutomaticBackUpFormCfg(backupPath, [
-          {
-            label: T.GCF.AUTO_BACKUPS.CHANGE_LOCATION,
-            icon: 'folder_open',
-            onClick: async () => {
-              try {
-                if (await window.ea.pickBackupFolder()) {
-                  this._updateAutomaticBackUpCfg();
+        getAutomaticBackUpFormCfg(
+          backupPath,
+          [
+            {
+              label: T.GCF.AUTO_BACKUPS.CHANGE_LOCATION,
+              icon: 'folder_open',
+              onClick: async () => {
+                try {
+                  if (await window.ea.pickBackupFolder()) {
+                    this._updateAutomaticBackUpCfg();
+                  }
+                } catch (err) {
+                  Log.err(err);
+                  this._snackService.open({
+                    type: 'ERROR',
+                    msg: T.GCF.AUTO_BACKUPS.S_FOLDER_NOT_USABLE,
+                  });
                 }
-              } catch (err) {
-                Log.err(err);
-                this._snackService.open({
-                  type: 'ERROR',
-                  msg: T.GCF.AUTO_BACKUPS.S_FOLDER_NOT_USABLE,
-                });
-              }
+              },
             },
-          },
-        ]),
+          ],
+          this._lastBackupInfo(),
+        ),
       ];
       this._cd.detectChanges();
     });
   }
 
   /**
-   * Pre-formatted "Last backup: <date>" line for the mobile auto-backups section
+   * Pre-formatted "Last backup: <date>" line for the auto-backups section
    * (#7901), or undefined when no local backup has run yet. Reflects the time as
    * of opening Settings — good enough for a "you're protected" indicator without
    * wiring a live subscription. Uses toLocaleString() to match the Electron

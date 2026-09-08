@@ -32,6 +32,10 @@ let openDialogOptions;
 let deletedFiles;
 let fileMtimes;
 let unwritableDirs;
+let canonicalPaths;
+let storeError;
+let renameError;
+let renamedFiles;
 
 const resetModule = () => {
   delete require.cache[backupModulePath];
@@ -72,7 +76,20 @@ const installMocks = () => {
       return {
         loadSimpleStoreAll: async () => ({ ...simpleStore }),
         saveSimpleStore: async (dataKey, data) => {
+          if (storeError) {
+            throw storeError;
+          }
           simpleStore[dataKey] = data;
+        },
+      };
+    }
+
+    if (request === 'fs' && parent?.filename.endsWith('file-path-guard.ts')) {
+      const realFs = originalModuleLoad.call(this, request, parent, isMain);
+      return {
+        ...realFs,
+        realpathSync: {
+          native: (p) => canonicalPaths.get(p) ?? realFs.realpathSync.native(p),
         },
       };
     }
@@ -101,6 +118,16 @@ const installMocks = () => {
             throw e;
           }
           writtenFiles.set(p, data);
+        },
+        renameSync: (from, to) => {
+          if (renameError) {
+            throw renameError;
+          }
+          assert.equal(from.endsWith('.tmp'), true);
+          assert.equal(path.dirname(from), path.dirname(to));
+          renamedFiles.push([from, to]);
+          writtenFiles.set(to, writtenFiles.get(from));
+          writtenFiles.delete(from);
         },
         readdirSync: (p) => [...(dirFiles[p] ?? [])],
         readFileSync: (p) => writtenFiles.get(p),
@@ -140,6 +167,10 @@ test.beforeEach(() => {
   deletedFiles = [];
   fileMtimes = {};
   unwritableDirs = new Set();
+  canonicalPaths = new Map();
+  storeError = undefined;
+  renameError = undefined;
+  renamedFiles = [];
   installMocks();
 });
 
@@ -331,7 +362,7 @@ test('a cancelled pick keeps the current backup folder', async () => {
 // A folder the app cannot write to (Snap/Flatpak confinement, a macOS TCC
 // prompt dismissed minutes later, a read-only or disconnected location) would
 // otherwise be accepted, shown in the UI as the backup folder, and then fail
-// every backup silently: backupData catches and logs, so nothing surfaces.
+// every backup would fail.
 test('refuses a folder that cannot be written to', async () => {
   const { initBackupAdapter, getBackupDirForDisplay } = loadBackupModule();
   initBackupAdapter();
@@ -366,6 +397,7 @@ test('the picker opens in the folder backups currently go to', async () => {
 
   await pickFolder(PICKED_DIR);
   assert.equal(openDialogOptions.defaultPath, BACKUP_DIR);
+  assert.equal(openDialogOptions.properties.includes('promptToCreate'), true);
 
   openDialogResult = { canceled: true, filePaths: [] };
   await handleHandlers.get('PICK_BACKUP_FOLDER')();
@@ -405,7 +437,9 @@ test('a picked folder whose parent has gone away is not re-created', async () =>
   // Dropbox is uninstalled: both the backup folder and its parent are gone.
   existingPaths.delete(dropbox);
   existingPaths.delete(picked);
-  await handleHandlers.get('BACKUP')(null, { data: {}, maxBackupFiles: 30 });
+  await assert.rejects(() =>
+    handleHandlers.get('BACKUP')(null, { data: {}, maxBackupFiles: 30 }),
+  );
 
   assert.deepEqual([...writtenFiles.keys()], []);
   assert.equal(existingPaths.has(picked), false);
@@ -424,4 +458,134 @@ test('refuses a default-dir path once a custom folder is in use', async () => {
   writtenFiles.set(stalePath, '{"stub":true}');
 
   await assert.rejects(() => handleHandlers.get('BACKUP_LOAD_DATA')(null, stalePath));
+});
+
+for (const folder of [BACKUP_DIR, BACKUP_DIR_WINSTORE]) {
+  test(`restores legacy daily backups from ${folder}`, async () => {
+    const { initBackupAdapter } = loadBackupModule();
+    initBackupAdapter();
+    existingPaths.add(BACKUP_DIR);
+    const fileName = '2025-03-14.json';
+    dirFiles[BACKUP_DIR] = [fileName];
+    const filePath = path.join(folder, fileName);
+    writtenFiles.set(path.resolve(filePath), '{"legacy":true}');
+
+    const meta = await handleHandlers.get('BACKUP_IS_AVAILABLE')();
+    assert.equal(meta.name, fileName);
+    assert.equal(
+      await handleHandlers.get('BACKUP_LOAD_DATA')(null, filePath),
+      '{"legacy":true}',
+    );
+  });
+}
+
+test('a picked folder excludes daily filenames from discovery and reads', async () => {
+  const { initBackupAdapter } = loadBackupModule();
+  initBackupAdapter();
+  await pickFolder(PICKED_DIR);
+  existingPaths.add(PICKED_DIR);
+  dirFiles[PICKED_DIR] = ['2025-03-14.json'];
+
+  assert.equal(await handleHandlers.get('BACKUP_IS_AVAILABLE')(), false);
+  await assert.rejects(() =>
+    handleHandlers.get('BACKUP_LOAD_DATA')(
+      null,
+      path.join(PICKED_DIR, '2025-03-14.json'),
+    ),
+  );
+});
+
+for (const folder of [BACKUP_DIR, PICKED_DIR]) {
+  test(`cleanup preserves daily filenames in ${folder}`, async () => {
+    const { initBackupAdapter } = loadBackupModule();
+    initBackupAdapter();
+    if (folder === PICKED_DIR) {
+      await pickFolder(folder);
+    }
+    existingPaths.add(folder);
+    dirFiles[folder] = [
+      '2025-03-14.json',
+      '2026-07-01_090000.json',
+      '2026-07-02_090000.json',
+    ];
+
+    await handleHandlers.get('BACKUP')(null, { data: {}, maxBackupFiles: 1 });
+
+    assert.equal(deletedFiles.includes(path.join(folder, '2025-03-14.json')), false);
+    assert.equal(deletedFiles.length, 1);
+  });
+}
+
+test('rejects backup writes when the picked folder becomes unwritable', async () => {
+  const { initBackupAdapter } = loadBackupModule();
+  initBackupAdapter();
+  await pickFolder(PICKED_DIR);
+  unwritableDirs.add(PICKED_DIR);
+
+  await assert.rejects(() => handleHandlers.get('BACKUP')(null, { data: {} }), {
+    code: 'EACCES',
+  });
+  assert.equal(renamedFiles.length, 0);
+  assert.equal(writtenFiles.size, 0);
+
+  unwritableDirs.clear();
+  await handleHandlers.get('BACKUP')(null, { data: {} });
+  assert.equal(renamedFiles.length, 1);
+  assert.equal(writtenFiles.get(renamedFiles[0][1]), '{}');
+});
+
+test('rejects a failed rename without publishing a partial backup or pruning', async () => {
+  const { initBackupAdapter } = loadBackupModule();
+  initBackupAdapter();
+  renameError = new Error('rename failed');
+
+  await assert.rejects(() => handleHandlers.get('BACKUP')(null, { data: {} }));
+
+  assert.equal(
+    [...writtenFiles.keys()].every((p) => p.endsWith('.tmp')),
+    true,
+  );
+  assert.deepEqual(deletedFiles, []);
+});
+
+test('stores the canonical picked path', async () => {
+  const { initBackupAdapter } = loadBackupModule();
+  initBackupAdapter();
+  const alias = path.resolve('/tmp/sp-backups-alias');
+  canonicalPaths.set(alias, PICKED_DIR);
+
+  assert.equal(await pickFolder(alias), PICKED_DIR);
+  assert.equal(simpleStore.backupFolderPath, PICKED_DIR);
+});
+
+for (const folder of [BACKUP_DIR, BACKUP_DIR_WINSTORE]) {
+  test(`resets to default when ${folder} has an alias`, async () => {
+    process.windowsStore = true;
+    const { initBackupAdapter } = loadBackupModule();
+    initBackupAdapter();
+    await pickFolder(PICKED_DIR);
+    const canonical = path.resolve('/tmp/canonical-user-data/backups');
+    canonicalPaths.set(path.resolve(folder), canonical);
+
+    await pickFolder(canonical);
+
+    assert.equal(simpleStore.backupFolderPath, null);
+  });
+}
+
+test('sanitizes errors when persisting the picked folder fails', async () => {
+  const { initBackupAdapter } = loadBackupModule();
+  initBackupAdapter();
+  storeError = Object.assign(new Error('private filesystem path'), { code: 'EIO' });
+
+  await assert.rejects(
+    () => pickFolder(PICKED_DIR),
+    (e) => {
+      assert.equal(e.code, 'EIO');
+      assert.equal(e.message.includes('private filesystem path'), false);
+      assert.equal(e.stack, undefined);
+      return true;
+    },
+  );
+  assert.equal(simpleStore.backupFolderPath, undefined);
 });

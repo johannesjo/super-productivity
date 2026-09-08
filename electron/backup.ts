@@ -1,3 +1,4 @@
+import { createSafeIpcError, getSafeErrorMeta } from './safe-ipc-error';
 import { app, dialog, ipcMain } from 'electron';
 import type { IpcMainInvokeEvent } from 'electron';
 import { randomBytes } from 'crypto';
@@ -6,6 +7,7 @@ import {
   mkdirSync,
   readdirSync,
   readFileSync,
+  renameSync,
   statSync,
   unlinkSync,
   writeFileSync,
@@ -20,7 +22,7 @@ import {
   getBackupTimestamp,
   isAutoBackupFilename,
 } from './shared-with-frontend/get-backup-timestamp';
-import { assertPathOutside, isPathInsideDir } from './file-path-guard';
+import { assertPathOutside, canonicalize, isPathInsideDir } from './file-path-guard';
 import {
   DEFAULT_MAX_BACKUP_FILES,
   selectBackupFilesToDelete,
@@ -101,15 +103,6 @@ const folderNotWritable = (): Error => {
  * Prove the folder can actually be written to, at pick time, before it becomes
  * the backup folder.
  *
- * Nothing downstream can report this: `backupData` catches every write error and
- * only logs, so the pick would succeed, the UI would show the new path, and
- * automatic backups would stop with nothing the user could ever see. Ordinary
- * picks land there. Snap is `confinement: strict` with `home` + `removable-media`
- * and `home` excludes dot-directories; Flatpak has `--filesystem=home` only;
- * macOS prompts for Documents/Desktop/Downloads on first access, which is the
- * backup timer minutes later rather than the pick, and a dismissal is permanent;
- * read-only folders and disconnected network shares exist everywhere.
- *
  * A probe write is what proves it: the folder can be listable and still refuse
  * writes, and `access()` answers a different question than "did a write work".
  */
@@ -134,6 +127,10 @@ const assertFolderWritable = (folder: string): void => {
   }
 };
 
+const isRestorableBackupFilename = (backupDir: string, fileName: string): boolean =>
+  isAutoBackupFilename(fileName) ||
+  (backupDir === BACKUP_DIR && /^\d{4}-\d{2}-\d{2}\.json$/.test(fileName));
+
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
 export function initBackupAdapter(): void {
   void getBackupDir().then((backupDir) => {
@@ -151,7 +148,9 @@ export function initBackupAdapter(): void {
       return false;
     }
 
-    const files = readdirSync(backupDir).filter(isAutoBackupFilename);
+    const files = readdirSync(backupDir).filter((fileName) =>
+      isRestorableBackupFilename(backupDir, fileName),
+    );
     if (!files.length) {
       return false;
     }
@@ -195,7 +194,7 @@ export function initBackupAdapter(): void {
       if (!isAllowedRoot) {
         throw new Error('BACKUP_LOAD_DATA: refused path outside backup directory');
       }
-      if (!isAutoBackupFilename(path.basename(backupPath))) {
+      if (!isRestorableBackupFilename(backupDir, path.basename(backupPath))) {
         throw new Error('BACKUP_LOAD_DATA: refused non-backup filename');
       }
       const resolved = path.resolve(backupPath);
@@ -206,40 +205,50 @@ export function initBackupAdapter(): void {
 
   // PICK_BACKUP_FOLDER
   ipcMain.handle(IPC.PICK_BACKUP_FOLDER, async (): Promise<string | undefined> => {
-    const { canceled, filePaths } = await dialog.showOpenDialog(getWin(), {
-      title: 'Select backup folder',
-      buttonLabel: 'Select Folder',
-      // Open where the backups currently are, so "which folder am I on now" and
-      // "put it back to the default" are both reachable without hunting down a
-      // hidden path inside userData.
-      defaultPath: await getBackupDirForDisplay(),
-      properties: ['openDirectory', 'createDirectory', 'dontAddToRecent'],
-    });
-    if (canceled || !filePaths[0]) {
-      return undefined;
-    }
-    const picked = path.resolve(filePaths[0]);
-    // Picking the default folder means "use the default again": it lives inside
-    // userData, which the guard below refuses. On a virtualized Store package
-    // the folder the user sees (and that getBackupDirForDisplay hands to the
-    // picker above) is the LocalCache one, so that has to count as the default
-    // too, or picking back the very path we displayed either gets refused or
-    // pins a "custom" folder to LocalCache.
-    if (
-      picked === path.resolve(BACKUP_DIR) ||
-      (process.windowsStore && picked === path.resolve(BACKUP_DIR_WINSTORE))
-    ) {
-      await saveSimpleStore(SimpleStoreKey.BACKUP_FOLDER_PATH, null);
+    try {
+      const { canceled, filePaths } = await dialog.showOpenDialog(getWin(), {
+        title: 'Select backup folder',
+        buttonLabel: 'Select Folder',
+        // Open where the backups currently are, so "which folder am I on now" and
+        // "put it back to the default" are both reachable without hunting down a
+        // hidden path inside userData.
+        defaultPath: await getBackupDirForDisplay(),
+        properties: [
+          'openDirectory',
+          'createDirectory',
+          'promptToCreate',
+          'dontAddToRecent',
+        ],
+      });
+      if (canceled || !filePaths[0]) {
+        return undefined;
+      }
+      const picked = canonicalize(filePaths[0]);
+      // Picking the default folder means "use the default again": it lives inside
+      // userData, which the guard below refuses. On a virtualized Store package
+      // the folder the user sees (and that getBackupDirForDisplay hands to the
+      // picker above) is the LocalCache one, so that has to count as the default
+      // too, or picking back the very path we displayed either gets refused or
+      // pins a "custom" folder to LocalCache.
+      if (
+        picked === canonicalize(BACKUP_DIR) ||
+        (process.windowsStore && picked === canonicalize(BACKUP_DIR_WINSTORE))
+      ) {
+        await saveSimpleStore(SimpleStoreKey.BACKUP_FOLDER_PATH, null);
+        return picked;
+      }
+      // Keep the folder out of the app's private dir: it is written to on a timer
+      // and, more importantly, whitelisted for reads by BACKUP_LOAD_DATA above,
+      // which the renderer can call. Throws a path-free PathNotAllowedError.
+      assertPathOutside(app.getPath('userData'), picked);
+      assertFolderWritable(picked);
+      await saveSimpleStore(SimpleStoreKey.BACKUP_FOLDER_PATH, picked);
+      log('New backup folder picked');
       return picked;
+    } catch (e) {
+      error('PICK_BACKUP_FOLDER failed to validate picked folder', getSafeErrorMeta(e));
+      throw createSafeIpcError(IPC.PICK_BACKUP_FOLDER, e);
     }
-    // Keep the folder out of the app's private dir: it is written to on a timer
-    // and, more importantly, whitelisted for reads by BACKUP_LOAD_DATA above,
-    // which the renderer can call. Throws a path-free PathNotAllowedError.
-    assertPathOutside(app.getPath('userData'), picked);
-    assertFolderWritable(picked);
-    await saveSimpleStore(SimpleStoreKey.BACKUP_FOLDER_PATH, picked);
-    log('New backup folder picked');
-    return picked;
   });
 }
 
@@ -266,23 +275,19 @@ async function backupData(
     : DEFAULT_MAX_BACKUP_FILES;
 
   try {
-    // Inside the try because a picked folder can be gone by now (removed drive,
-    // deleted folder), and that must be logged like a failed write rather than
-    // rejected back into the renderer's backup interval. Deliberately not
-    // recursive: the only case a missing parent can mean is that the folder the
-    // user picked has gone away, and re-creating it (an uninstalled Dropbox, an
-    // ejected volume) would fill a resurrected directory with backups nothing
-    // syncs, or leave a phantom dir sitting on a mount point. userData always
-    // exists for the default dir, and a picked folder exists at pick time.
+    // Do not recreate a missing parent such as an unmounted drive.
     if (!existsSync(backupDir)) {
       mkdirSync(backupDir);
     }
     const backup = JSON.stringify(data);
-    writeFileSync(path.join(backupDir, `${getBackupTimestamp()}.json`), backup);
+    const backupPath = path.join(backupDir, `${getBackupTimestamp()}.json`);
+    const tmpPath = `${backupPath}.${process.pid}.tmp`;
+    writeFileSync(tmpPath, backup);
+    renameSync(tmpPath, backupPath);
     cleanupOldBackups(backupDir, maxBackupFiles);
   } catch (e) {
-    log('Error while backing up');
-    error(e);
+    error('Error while backing up', getSafeErrorMeta(e));
+    throw createSafeIpcError(IPC.BACKUP, e);
   }
 }
 
