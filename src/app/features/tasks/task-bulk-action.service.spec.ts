@@ -417,11 +417,28 @@ describe('TaskBulkActionService', () => {
       expect(dispatchedTypes()).toEqual([TaskSharedActions.removeDeadline.type]);
     });
 
-    it('removes all selected from Today in one action', async () => {
-      select([t('a'), t('b')]);
+    it('removes from Today by unscheduling due tasks and cleaning up leftovers', async () => {
+      select([t('a', { dueDay: '2026-09-10' }), t('b', { dueWithTime: 123 }), t('c')]);
       await service.removeFromToday();
-      expect(dispatchedTypes()).toEqual([TaskSharedActions.removeTasksFromTodayTag.type]);
-      expect(store.dispatch.calls.mostRecent().args[0].taskIds).toEqual(['a', 'b']);
+      const actions = store.dispatch.calls.allArgs().map(([a]) => a);
+      expect(actions.map((a) => a.type)).toEqual([
+        TaskSharedActions.unscheduleTask.type,
+        TaskSharedActions.unscheduleTask.type,
+        TaskSharedActions.removeTasksFromTodayTag.type,
+      ]);
+      expect(actions[0].id).toBe('a');
+      expect(actions[0].isSkipToast).toBeTrue();
+      expect(actions[1].id).toBe('b');
+      expect(actions[2].taskIds).toEqual(['c']);
+      expect(snackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({ translateParams: { count: 3 } }),
+      );
+    });
+
+    it('does not touch the Today order list when every task is due', async () => {
+      select([t('a', { dueDay: '2026-09-10' })]);
+      await service.removeFromToday();
+      expect(dispatchedTypes()).toEqual([TaskSharedActions.unscheduleTask.type]);
     });
   });
 });

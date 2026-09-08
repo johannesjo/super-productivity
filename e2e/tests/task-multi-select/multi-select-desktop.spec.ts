@@ -110,6 +110,36 @@ test.describe('Task multi-select (desktop)', () => {
     await page.keyboard.press('Escape');
   });
 
+  test('Remove from Today takes the whole selection out of the Today list', async ({
+    page,
+    workViewPage,
+    taskPage,
+    testPrefix,
+  }) => {
+    await page.goto('/#/tag/TODAY/tasks');
+    await workViewPage.waitForTaskList();
+    const titles = ['Today One', 'Today Two'].map((t) => `${testPrefix}-${t}`);
+    for (const title of titles) {
+      await workViewPage.addTask(title);
+    }
+    const bar = page.locator(BAR);
+
+    await taskPage.getTaskByText(titles[0]).click({ modifiers: ['Control'] });
+    await taskPage.getTaskByText(titles[1]).click({ modifiers: ['Control'] });
+    await expect(bar).toContainText('2 selected');
+
+    await bar.getByRole('button', { name: 'Actions' }).click();
+    await waitForMenuSettled(page);
+    await page
+      .locator('.mat-mdc-menu-content button', { hasText: 'Remove from Today' })
+      .click();
+
+    await expect(taskPage.getTaskByText(titles[0])).toHaveCount(0);
+    await expect(taskPage.getTaskByText(titles[1])).toHaveCount(0);
+    // Rows that left the list drop out of the selection.
+    await expect(bar).toBeHidden();
+  });
+
   test('the Actions menu deletes the selection after one confirmation', async ({
     page,
     workViewPage,

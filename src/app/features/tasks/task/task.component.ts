@@ -633,7 +633,10 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   ngOnDestroy(): void {
     // Possibly no longer rendered (checked after the DOM settles, since rows
     // re-mount when they change lists and the detail panel renders copies).
-    this._multiSelect.removeWhenUnrendered(this.task().id);
+    this._multiSelect.removeWhenUnrendered(
+      this.task().id,
+      this._elementRef.nativeElement,
+    );
     window.clearTimeout(this._doubleClickTimeout);
     window.clearTimeout(this._dragReadyTimeout);
     window.clearTimeout(this._doneAnimationTimeout);

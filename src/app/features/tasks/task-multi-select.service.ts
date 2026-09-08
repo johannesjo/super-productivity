@@ -180,16 +180,21 @@ export class TaskMultiSelectService {
    * Called by a `<task>` row on destroy. A row is destroyed when it moves to
    * another list (done → done list), when a detail-panel copy goes away, or on
    * a re-render — none of which end the selection. So the id is dropped on the
-   * next macrotask only if no rendered row carries it any more.
+   * next macrotask only if no *other* rendered row carries it: the destroyed
+   * host itself stays in the DOM while the list's leave animation runs, so it
+   * must not count as rendered.
    */
-  removeWhenUnrendered(id: string): void {
+  removeWhenUnrendered(id: string, destroyedEl: HTMLElement): void {
     if (!this._selectedIds().has(id) || this._pendingRemovals.has(id)) {
       return;
     }
     this._pendingRemovals.add(id);
     setTimeout(() => {
       this._pendingRemovals.delete(id);
-      if (!this._findRowEl(id)) {
+      const liveRow = this._getAllTaskEls().find(
+        (el) => el !== destroyedEl && el.getAttribute('data-task-id') === id,
+      );
+      if (!liveRow) {
         this.remove(id);
       }
     });

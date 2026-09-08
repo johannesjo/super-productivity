@@ -236,17 +236,32 @@ describe('TaskMultiSelectService', () => {
       expect(service.anchorId()).toBeNull();
     });
 
-    it('removeWhenUnrendered keeps an id whose row is still rendered', async () => {
-      service.toggle('a');
-      service.removeWhenUnrendered('a');
+    const rowEl = (id: string): HTMLElement =>
+      root.querySelector(`task[data-task-id="${id}"]`) as HTMLElement;
+
+    it('removeWhenUnrendered keeps an id when another row still renders it', async () => {
+      // A detail-panel copy of b1 is destroyed; the main-list row stays.
+      service.toggle('b1');
+      service.removeWhenUnrendered(
+        'b1',
+        root.querySelector('task-detail-panel task') as HTMLElement,
+      );
       await new Promise((resolve) => setTimeout(resolve));
-      expect(selected()).toEqual(['a']);
+      expect(selected()).toEqual(['b1']);
     });
 
     it('removeWhenUnrendered drops an id whose row is gone', async () => {
       service.toggle('a');
-      root.querySelector('task[data-task-id="a"]')?.remove();
-      service.removeWhenUnrendered('a');
+      const el = rowEl('a');
+      el.remove();
+      service.removeWhenUnrendered('a', el);
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(selected()).toEqual([]);
+    });
+
+    it('removeWhenUnrendered ignores the destroyed host still in the DOM (leave animation)', async () => {
+      service.toggle('a');
+      service.removeWhenUnrendered('a', rowEl('a'));
       await new Promise((resolve) => setTimeout(resolve));
       expect(selected()).toEqual([]);
     });

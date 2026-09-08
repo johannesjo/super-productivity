@@ -454,16 +454,38 @@ export class TaskBulkActionService {
     this._restoreFocus(focusEl);
   }
 
+  /**
+   * "Remove from My Day". Today membership is the task's due date (TODAY_TAG
+   * is virtual), so a due task is unscheduled like the single-task button
+   * does; the tag's order list is only cleaned up for leftovers without a
+   * due date, the way the work-context "unplan all" does it.
+   */
   async removeFromToday(): Promise<void> {
     const tasks = this._resolveInVisualOrder();
     if (!tasks.length) {
       return;
     }
     const focusEl = this._getFocusTargetAfterRemoval();
-    this._store.dispatch(
-      TaskSharedActions.removeTasksFromTodayTag({ taskIds: tasks.map((t) => t.id) }),
-    );
-    await this._flush();
+    const scheduled = tasks.filter((t) => !!t.dueDay || !!t.dueWithTime);
+    const leftoverIds = tasks.filter((t) => !t.dueDay && !t.dueWithTime).map((t) => t.id);
+    await this._runSuppressed(() => {
+      scheduled.forEach((t) =>
+        this._store.dispatch(
+          TaskSharedActions.unscheduleTask({ id: t.id, isSkipToast: true }),
+        ),
+      );
+      if (leftoverIds.length) {
+        this._store.dispatch(
+          TaskSharedActions.removeTasksFromTodayTag({ taskIds: leftoverIds }),
+        );
+      }
+    });
+    this._snackService.open({
+      type: 'SUCCESS',
+      ico: 'timer_off',
+      msg: this._plural('F.TASK.MULTI_SELECT.S.REMOVED_FROM_TODAY', tasks.length),
+      translateParams: { count: tasks.length },
+    });
     this._restoreFocus(focusEl);
   }
 

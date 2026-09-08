@@ -2030,6 +2030,10 @@
             "OTHER": "Moved {{count}} tasks to \"{{projectTitle}}\""
           },
           "NOTHING_TO_DO": "Nothing to change for the selected tasks",
+          "REMOVED_FROM_TODAY": {
+            "ONE": "Removed {{count}} task from Today",
+            "OTHER": "Removed {{count}} tasks from Today"
+          },
           "UNDONE": {
             "ONE": "Marked {{count}} task as not done",
             "OTHER": "Marked {{count}} tasks as not done"
