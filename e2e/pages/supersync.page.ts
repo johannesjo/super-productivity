@@ -8,6 +8,7 @@ import {
 } from '@playwright/test';
 import { BasePage } from './base.page';
 import { normalizeDialogMessage, translationRegex } from '../utils/i18n-strings';
+import { confirmSyncConflictOverwriteIfShown } from '../utils/sync-helpers';
 
 export interface SuperSyncConfig {
   baseUrl: string;
@@ -143,10 +144,15 @@ export class SuperSyncPage extends BasePage {
   /** Fresh client confirmation dialog - appears when a new client first syncs */
   readonly freshClientDialog: Locator;
   readonly freshClientConfirmBtn: Locator;
-  /** Conflict resolution dialog - appears when local and remote have conflicting changes */
+  /**
+   * Local-data conflict dialog (`dialog-sync-conflict`) — appears when a client
+   * that never synced holds meaningful local data and the server already has
+   * ordinary ops (LocalDataConflictError, #9863). "Keep local" force-uploads a
+   * SYNC_IMPORT, "Keep remote" replaces local state with the server's.
+   */
   readonly conflictDialog: Locator;
+  readonly conflictUseLocalBtn: Locator;
   readonly conflictUseRemoteBtn: Locator;
-  readonly conflictApplyBtn: Locator;
   /** Sync import conflict dialog - appears when SYNC_IMPORT filters remote ops */
   readonly syncImportConflictDialog: Locator;
   readonly syncImportUseLocalBtn: Locator;
@@ -184,14 +190,14 @@ export class SuperSyncPage extends BasePage {
     this.freshClientConfirmBtn = this.freshClientDialog.locator(
       'button[mat-flat-button]',
     );
-    // Conflict resolution dialog elements
-    this.conflictDialog = page.locator('dialog-conflict-resolution');
-    this.conflictUseRemoteBtn = page.locator(
-      'dialog-conflict-resolution button:has-text("Use All Remote")',
-    );
-    this.conflictApplyBtn = page.locator(
-      'dialog-conflict-resolution button:has-text("Apply")',
-    );
+    // Local-data conflict dialog elements
+    this.conflictDialog = page.locator('dialog-sync-conflict');
+    this.conflictUseLocalBtn = this.conflictDialog.locator('button', {
+      hasText: /Keep local/i,
+    });
+    this.conflictUseRemoteBtn = this.conflictDialog.locator('button', {
+      hasText: /Keep remote/i,
+    });
     // Sync import conflict dialog elements
     this.syncImportConflictDialog = page.locator('dialog-sync-import-conflict');
     this.syncImportUseLocalBtn = page.locator(
@@ -1804,6 +1810,20 @@ export class SuperSyncPage extends BasePage {
   }
 
   /**
+   * Answer the local-data conflict dialog, including the conditional overwrite
+   * warning either choice may raise (see confirmSyncConflictOverwriteIfShown).
+   */
+  async resolveConflictDialog(choice: 'local' | 'remote'): Promise<void> {
+    await expect(this.conflictDialog).toBeVisible({ timeout: 5000 });
+    if (choice === 'local') {
+      await this.conflictUseLocalBtn.click();
+    } else {
+      await this.conflictUseRemoteBtn.click();
+    }
+    await confirmSyncConflictOverwriteIfShown(this.page, this.conflictDialog);
+  }
+
+  /**
    * Handle any sync-blocking dialogs (Angular Material or native).
    * Returns true if a dialog was handled, false otherwise.
    * @private
@@ -1817,19 +1837,12 @@ export class SuperSyncPage extends BasePage {
       return true;
     }
 
-    // 2. Conflict resolution dialog
+    // 2. Local-data conflict dialog
     if (await this.conflictDialog.isVisible().catch(() => false)) {
       console.log(
         `[syncAndWait] Conflict dialog detected, using ${useLocal ? 'local' : 'remote'} data...`,
       );
-      if (useLocal) {
-        await this.conflictApplyBtn.click();
-      } else {
-        await this.conflictUseRemoteBtn.click();
-        await this.page.waitForTimeout(200);
-        await this.conflictApplyBtn.click();
-      }
-      await this.conflictDialog.waitFor({ state: 'hidden', timeout: 5000 });
+      await this.resolveConflictDialog(useLocal ? 'local' : 'remote');
       return true;
     }
 

@@ -48,7 +48,7 @@
 
 // iOS keeps 100vh tied to the layout viewport while the soft keyboard is open,
 // so the shell has to be sized from the visualViewport height. That height now
-// arrives as a plain `height` bound from GlobalThemeService.iosShellHeight
+// arrives as a plain `height` bound from IosKeyboardService.shellHeight
 // rather than a `--visual-viewport-height` rule here: this element wraps the
 // task list, and a custom property it inherits makes WebKit restyle the whole
 // list on every frame of the keyboard animation (#9779).
@@ -122,7 +122,10 @@
 .route-wrapper {
   flex-grow: 1;
   position: relative;
-  overflow: hidden;
+  // `clip` rather than `hidden`: `hidden` makes this a scroll container, so a route's
+  // scaled enter animation paints outside the box and the browser corrects by scrolling
+  // the wrapper — a transient nudge on route enter. See #9873, #9837.
+  overflow: clip;
   -webkit-app-region: no-drag !important;
   height: 100%;
   container-type: inline-size;

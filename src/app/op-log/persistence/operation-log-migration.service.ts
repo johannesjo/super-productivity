@@ -18,7 +18,12 @@ import { download } from '../../util/download';
 import { isDataRepairPossible } from '../validation/is-data-repair-possible.util';
 import { recordCriticalErrorTime } from '../../util/critical-error-signal';
 import { uuidv7 } from '../../util/uuid-v7';
-import { ActionType, Operation, OpType } from '../core/operation.types';
+import {
+  ActionType,
+  isGenesisEntityType,
+  Operation,
+  OpType,
+} from '../core/operation.types';
 import { SINGLETON_ENTITY_ID } from '../core/entity-registry';
 import { CURRENT_SCHEMA_VERSION } from './schema-migration.service';
 import { AppDataComplete, withDefaultModelSlices } from '../model/model-config';
@@ -109,10 +114,11 @@ export class OperationLogMigrationService {
             return false;
           }
 
-          const allOps = await this.opLogStore.getOpsAfterSeq(0);
-          if (allOps.length > 0) {
-            const firstOp = allOps[0].op;
-            if (firstOp.entityType === 'MIGRATION' || firstOp.entityType === 'RECOVERY') {
+          // Only the first row decides; a full-log read here would decode
+          // every op on every boot (#9921).
+          const firstEntry = await this.opLogStore.getFirstOpEntry();
+          if (firstEntry) {
+            if (isGenesisEntityType(firstEntry.op.entityType)) {
               OpLog.normal(
                 'OperationLogMigrationService: Genesis operation found. Skipping migration.',
               );
@@ -120,15 +126,16 @@ export class OperationLogMigrationService {
             }
 
             if (hasLegacyData) {
+              const orphanCount = await this.opLogStore.countOps();
               OpLog.warn(
-                `OperationLogMigrationService: Found ${allOps.length} orphan operations. ` +
+                `OperationLogMigrationService: Found ${orphanCount} orphan operations. ` +
                   `Clearing them before legacy migration.`,
               );
               await this.opLogStore.clearAllOperations();
             } else {
               OpLog.normal(
-                `OperationLogMigrationService: Found ${allOps.length} operations (fresh install). ` +
-                  `Skipping migration - hydrator will replay them.`,
+                'OperationLogMigrationService: Found existing operations (fresh install). ' +
+                  'Skipping migration - hydrator will replay them.',
               );
               return false;
             }
