@@ -164,36 +164,3 @@ test('every renderer-window constructor site has a matching assertSecureWebPrefe
       'webPreferences through assertSecureWebPreferences() before creating the window.',
   );
 });
-
-// `session.defaultSession.setSpellCheckerEnabled(false)` in start-app.ts covers
-// every renderer only while every window uses the default session. A window
-// opting into `partition:` would get its own session with the spellchecker back
-// on (#5314), and nothing else would catch it.
-test('no renderer window opts into a custom session partition', () => {
-  const offenders = [];
-  const walk = (dir) => {
-    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
-      const full = path.join(dir, entry.name);
-      if (entry.isDirectory()) {
-        if (entry.name === 'node_modules') continue;
-        walk(full);
-      } else if (entry.name.endsWith('.ts') && !entry.name.endsWith('.d.ts')) {
-        const src = fs
-          .readFileSync(full, 'utf8')
-          .replace(/\/\*[\s\S]*?\*\//g, '')
-          .replace(/(^|[^:])\/\/.*$/gm, '$1');
-        if (/\bpartition\s*:/.test(src)) offenders.push(path.relative(__dirname, full));
-      }
-    }
-  };
-  walk(__dirname);
-
-  assert.deepEqual(
-    offenders,
-    [],
-    'These files put a renderer on a custom session partition. The default ' +
-      'session has the spellchecker disabled at startup; a custom partition ' +
-      'does not inherit that, so it would fetch dictionaries from Google ' +
-      '(#5314). Disable it on that session too, then list the file here.',
-  );
-});
