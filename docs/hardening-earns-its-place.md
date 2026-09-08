@@ -49,7 +49,7 @@ instance — removed 27 reports. Fixing the sites that were *actually* leaking
 (three `TaskCopy[]` arrays in `data-repair.ts`, a `Project` in
 `undo-task-delete.meta-reducer.ts`, a notification event, an issue search
 result, and the `task-context-menu-inner` copy of the very block this branch
-had already fixed in `task.component.ts`) removed 13 more and 20 files. The
+had already fixed in `task.component.ts`) removed 13 more hits and 9 files. The
 baseline settled at 81 hits across 41 files.
 
 The general lesson: **a precision number is the only one that justifies an
