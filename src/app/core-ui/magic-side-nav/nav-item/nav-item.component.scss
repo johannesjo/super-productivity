@@ -54,10 +54,28 @@
     }
   }
 
+  // Fixed 32px rounded chip, matching the row's hover radius and the
+  // additional-btn used inside nav-list-tree — otherwise :host's
+  // align-items:stretch stretches this to the full (square) row height.
   .additional-btn {
     flex-shrink: 0;
-    width: 40px !important;
-    min-width: 40px !important;
+    align-self: center;
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    border-radius: 6px !important;
+
+    &.mat-mdc-icon-button {
+      --mdc-icon-button-state-layer-size: 32px;
+      border-radius: 6px !important;
+    }
+
+    ::ng-deep {
+      .mat-mdc-button-persistent-ripple,
+      .mat-ripple-element {
+        border-radius: 6px !important;
+      }
+    }
   }
 
   &.isHidden {

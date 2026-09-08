@@ -76,26 +76,27 @@
   color: var(--sidenav-text-secondary);
   background: transparent;
   border: none;
-  border-radius: 0 !important; // Override Material Design rounded corners
+  // Match .nav-link's rounded hover shape (6px) instead of Material's default
+  // circle, so the row and its buttons read as one consistent hover language.
+  border-radius: 6px !important;
   cursor: pointer;
 
   // Override Material Design button styles
   &.mat-mdc-icon-button {
     --mdc-icon-button-state-layer-size: 32px;
     --mdc-icon-button-icon-size: 18px;
-    border-radius: 0 !important;
+    border-radius: 6px !important;
     width: 32px !important;
     height: 32px !important;
     padding: var(--s-half) !important;
   }
 
-  // The button itself is squared off above, but Material's ripple/state-layer
-  // defaults to a circle unless told otherwise — match it so hover/focus/ripple
-  // don't show a circle inside a square.
+  // Material's ripple/state-layer defaults to a circle regardless of the
+  // button's own border-radius — match it to the button above.
   ::ng-deep {
     .mat-mdc-button-persistent-ripple,
     .mat-ripple-element {
-      border-radius: 0 !important;
+      border-radius: 6px !important;
     }
   }
 
