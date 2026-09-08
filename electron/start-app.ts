@@ -309,21 +309,25 @@ export const startApp = (): void => {
   // Chromium's spellchecker downloads dictionaries from Google
   // (redirector.gvt1.com), which is what #5314 observed in a firewall log and
   // what the "offline-first with zero data collection" promise rules out.
-  // Disabling it on the default session covers every window — no window in
-  // electron/ uses a custom `partition` — including any added later, so this
-  // needs no per-window flag and nothing to keep them in sync. Must run before
-  // the first window is created.
+  //
+  // Two layers, because they fail differently. This one covers every window on
+  // the default session — which is all of them — including any added later, so
+  // a new window is safe by default. Each window ALSO sets `spellcheck: false`,
+  // which is what still holds if this call is skipped, or if a future window
+  // opts into its own session. Must run before the first window is created.
   appIN.on('ready', () => {
     try {
-      // Guarded like the macOS-only calls above: Electron builds the session
-      // spellchecker behind ENABLE_BUILTIN_SPELLCHECKER, so some distro-packaged
-      // rebuilds omit the method. Unguarded, a TypeError here escapes
-      // `emit('ready')`, the window-creating listeners registered after it never
-      // run, and `uncaughtException` exits 333 — no window at all, which is a far
-      // worse outcome than the dictionary fetch this prevents.
+      // `?.` keeps the benign case quiet: a build without Electron's builtin
+      // spellchecker has no method and nothing to disable.
       session.defaultSession.setSpellCheckerEnabled?.(false);
-    } catch {
-      /* no builtin spellchecker in this build — nothing to disable */
+    } catch (e) {
+      // Anything else reaching here means the call was available and failed, so
+      // this layer is off and only the per-window flags are holding — say so
+      // rather than swallowing it. Never rethrow: an exception escaping
+      // `emit('ready')` skips every window-creating listener registered after
+      // this one and `uncaughtException` exits 333, i.e. no app at all over a
+      // dictionary fetch.
+      warn('Could not disable the session spellchecker (#5314)', e);
     }
   });
   appIN.on('ready', () => createMainWin());
