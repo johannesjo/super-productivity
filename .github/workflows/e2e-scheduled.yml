@@ -16,6 +16,11 @@ on:
         required: false
         type: string
         default: '@webdav'
+      run_webdav:
+        description: 'Run the WebDAV job (uncheck to skip it instead of passing a no-match grep)'
+        required: false
+        type: boolean
+        default: true
 
   push:
     branches: [master, release/*]
@@ -122,6 +127,10 @@ jobs:
   e2e-webdav:
     name: E2E Tests (WebDAV)
     needs: [build]
+    # Skip the job outright rather than handing it a no-match grep: Playwright
+    # exits 1 on "No tests found", which reds the whole run. `inputs` is empty
+    # for schedule/push, so gate on the event first.
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.run_webdav }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
