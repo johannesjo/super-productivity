@@ -4,8 +4,9 @@ import { OperationLogStoreService } from '../persistence/operation-log-store.ser
 import { StateSnapshotService } from '../backup/state-snapshot.service';
 import { OpLog } from '../../core/log';
 import { T } from '../../t.const';
-import { confirmDialog } from '../../util/native-dialogs';
+import { alertDialog, confirmDialog } from '../../util/native-dialogs';
 import { hasMeaningfulStateData } from '../validation/has-meaningful-state-data.util';
+import { isExampleTaskCreateOp } from '../validation/is-example-task-op.util';
 import {
   isFullStateOpType,
   isGenesisEntityType,
@@ -22,6 +23,18 @@ import {
  */
 const isOwnGenesisOp = (entry: OperationLogEntry): boolean =>
   entry.source === 'local' && isGenesisEntityType(entry.op.entityType);
+
+/**
+ * Archived tasks are the user's work even though `hasMeaningfulStateData` does
+ * not look at them (#9256). Both buckets are read: archiveOld holds anything
+ * aged out of archiveYoung.
+ */
+const hasArchivedTasks = (snapshot: {
+  archiveYoung?: { task?: { ids?: readonly string[] } };
+  archiveOld?: { task?: { ids?: readonly string[] } };
+}): boolean =>
+  (snapshot.archiveYoung?.task?.ids?.length ?? 0) > 0 ||
+  (snapshot.archiveOld?.task?.ids?.length ?? 0) > 0;
 
 @Injectable({
   providedIn: 'root',
@@ -103,6 +116,88 @@ export class SyncLocalStateService {
     }
 
     return hasMeaningfulStateData(snapshot, ignoreTaskIds);
+  }
+
+  /**
+   * True when this device has nothing of its own to put on the server (#9256).
+   *
+   * The destructive recovery actions ("Overwrite Server & Other Devices",
+   * "Use Local Data") replace the remote copy with this device's state via a
+   * clean-slate SYNC_IMPORT, which makes the server DELETE its stored
+   * operations rather than supersede them. Running one from a device that
+   * holds nothing therefore destroys the user's only copy, irreversibly — the
+   * exact trap a client stuck on a failed initial download is offered.
+   *
+   * Two signals, both required:
+   * - never completed a sync, so this device cannot be holding anything it
+   *   received. A device that HAS synced may legitimately hold real data, so
+   *   this keeps deliberate resets (Settings -> Sync) working.
+   * - no user data beyond the onboarding example tasks. Those are generated
+   *   locally on first run and are not the user's work, so they must not make
+   *   an empty device look non-empty — `afterInitialSyncDoneStrict$` fails open
+   *   on a timer, so they are created even when the initial sync failed.
+   *
+   * Archives are checked explicitly rather than through `hasMeaningfulStateData`.
+   * That util's scope is deliberately narrow (task / project / tag / note) and
+   * its doc states it is only ever consumed in the "safe" direction, where a
+   * false negative merely skips work. This caller is the first to consume it in
+   * the REFUSING direction, where a false negative blocks a legitimate
+   * overwrite — so a device whose work is entirely archived must not be
+   * reported as holding nothing. The synchronous snapshot substitutes
+   * DEFAULT_ARCHIVE, hence the async read here.
+   *
+   * Fails closed: an unreadable snapshot counts as "nothing to upload" and
+   * refuses. Refusing can never destroy data; guessing "has data" can.
+   */
+  async hasNothingWorthUploading(): Promise<boolean> {
+    if (await this.opLogStore.hasSyncedOps()) {
+      return false;
+    }
+
+    const pendingOps = await this.opLogStore.getUnsynced();
+    const exampleTaskIds = new Set(
+      pendingOps
+        .filter(isExampleTaskCreateOp)
+        .map((entry) => entry.op.entityId)
+        .filter((id): id is string => typeof id === 'string' && id.length > 0),
+    );
+
+    const snapshot = await this.stateSnapshotService.getStateSnapshotAsync();
+    if (!snapshot) {
+      OpLog.warn(
+        'SyncLocalStateService.hasNothingWorthUploading: no state snapshot - refusing',
+      );
+      return true;
+    }
+
+    if (hasMeaningfulStateData(snapshot, exampleTaskIds)) {
+      return false;
+    }
+
+    return !hasArchivedTasks(snapshot);
+  }
+
+  /**
+   * Shows the refusal for `hasNothingWorthUploading()` and records that it
+   * fired. The log line is the only evidence channel this class of bug has —
+   * a #9256-shaped report cannot otherwise be confirmed from an exported log —
+   * and carries no user content (rule 9).
+   *
+   * `messageKey` lets each entry point supply its own "what to do next": the
+   * recovery dialogs tell the user to retry the password, which would be
+   * nonsense in the change-password dialog.
+   */
+  warnNothingWorthUploading(
+    messageKey: string = T.F.SYNC.D_NOTHING_TO_UPLOAD.MESSAGE,
+  ): void {
+    OpLog.warn(
+      'SyncLocalStateService: refused a destructive server overwrite - this device has nothing worth uploading',
+    );
+    alertDialog(
+      this.translateService.instant(T.F.SYNC.D_NOTHING_TO_UPLOAD.TITLE) +
+        '\n\n' +
+        this.translateService.instant(messageKey),
+    );
   }
 
   confirmFreshClientSync(opCount: number): boolean {

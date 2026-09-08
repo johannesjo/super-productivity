@@ -17,6 +17,7 @@ type StateCache = NonNullable<
 describe('SyncLocalStateService', () => {
   let service: SyncLocalStateService;
   let opLogStoreSpy: jasmine.SpyObj<OperationLogStoreService>;
+  let stateSnapshotSpy: jasmine.SpyObj<StateSnapshotService>;
 
   const entry = (
     entityType: EntityType,
@@ -55,12 +56,17 @@ describe('SyncLocalStateService', () => {
   const syncImport = entry('ALL', ActionType.LOAD_ALL_DATA, OpType.SyncImport);
 
   beforeEach(() => {
+    stateSnapshotSpy = jasmine.createSpyObj('StateSnapshotService', [
+      'getStateSnapshot',
+      'getStateSnapshotAsync',
+    ]);
     opLogStoreSpy = jasmine.createSpyObj('OperationLogStoreService', [
       'loadStateCache',
       'getLastSeq',
       'hasSyncedOps',
       'getLatestFullStateOpEntry',
       'getFirstOpEntry',
+      'getUnsynced',
     ]);
     // Defaults describe a legacy-migrated client that has never synced: the
     // genesis wrote a state cache and one op, nothing else happened since.
@@ -69,15 +75,13 @@ describe('SyncLocalStateService', () => {
     opLogStoreSpy.hasSyncedOps.and.resolveTo(false);
     opLogStoreSpy.getLatestFullStateOpEntry.and.resolveTo(undefined);
     opLogStoreSpy.getFirstOpEntry.and.resolveTo(migrationGenesis);
+    opLogStoreSpy.getUnsynced.and.resolveTo([]);
 
     TestBed.configureTestingModule({
       providers: [
         SyncLocalStateService,
         { provide: OperationLogStoreService, useValue: opLogStoreSpy },
-        {
-          provide: StateSnapshotService,
-          useValue: jasmine.createSpyObj('StateSnapshotService', ['getStateSnapshot']),
-        },
+        { provide: StateSnapshotService, useValue: stateSnapshotSpy },
         {
           provide: TranslateService,
           useValue: jasmine.createSpyObj('TranslateService', ['instant']),
@@ -155,6 +159,122 @@ describe('SyncLocalStateService', () => {
     it('is false for a client with ordinary history', async () => {
       opLogStoreSpy.getFirstOpEntry.and.resolveTo(regularOp);
       expect(await service.isFreshOrNeverSyncedGenesisClient([regularOp.op])).toBe(false);
+    });
+  });
+
+  describe('hasNothingWorthUploading (#9256)', () => {
+    const emptyStore = {
+      task: { ids: [], entities: {} },
+      project: { ids: [], entities: {} },
+      tag: { ids: [], entities: {} },
+      note: { ids: [], entities: {} },
+    };
+
+    const exampleTaskOp = (taskId: string): OperationLogEntry => ({
+      seq: 2,
+      op: {
+        id: `op-${taskId}`,
+        clientId: 'client-A',
+        actionType: ActionType.TASK_SHARED_ADD,
+        opType: OpType.Create,
+        entityType: 'TASK',
+        entityId: taskId,
+        payload: {
+          actionPayload: { task: { id: taskId }, isExampleTask: true },
+          entityChanges: [],
+        },
+        vectorClock: { clientA: 2 },
+        timestamp: Date.now(),
+        schemaVersion: 1,
+      },
+      appliedAt: Date.now(),
+      source: 'local',
+    });
+
+    it('is true for a never-synced client with an empty store', async () => {
+      stateSnapshotSpy.getStateSnapshotAsync.and.resolveTo(emptyStore as never);
+
+      expect(await service.hasNothingWorthUploading()).toBe(true);
+    });
+
+    it('is true when the only tasks are onboarding example tasks', async () => {
+      // The #9256 shape: the initial sync failed, but afterInitialSyncDoneStrict$
+      // fails open on a timer, so the example tasks exist anyway. They must not
+      // make the device look like it holds the user's work.
+      stateSnapshotSpy.getStateSnapshotAsync.and.resolveTo({
+        ...emptyStore,
+        // Only `ids` is read by hasMeaningfulStateData; an entity map here
+        // would just be a second place for the ids to drift out of sync.
+        task: { ids: ['ex-1', 'ex-2'], entities: {} },
+      } as never);
+      opLogStoreSpy.getUnsynced.and.resolveTo([
+        exampleTaskOp('ex-1'),
+        exampleTaskOp('ex-2'),
+      ]);
+
+      expect(await service.hasNothingWorthUploading()).toBe(true);
+    });
+
+    it('is false as soon as one real task exists alongside the example tasks', async () => {
+      stateSnapshotSpy.getStateSnapshotAsync.and.resolveTo({
+        ...emptyStore,
+        task: { ids: ['ex-1', 'real-1'], entities: {} },
+      } as never);
+      opLogStoreSpy.getUnsynced.and.resolveTo([exampleTaskOp('ex-1')]);
+
+      expect(await service.hasNothingWorthUploading()).toBe(false);
+    });
+
+    it('is false for a client that has synced before, even with an empty store', async () => {
+      // Such a device may legitimately hold real data, and a deliberate reset
+      // from the sync settings must keep working.
+      opLogStoreSpy.hasSyncedOps.and.resolveTo(true);
+      stateSnapshotSpy.getStateSnapshotAsync.and.resolveTo(emptyStore as never);
+
+      expect(await service.hasNothingWorthUploading()).toBe(false);
+      expect(stateSnapshotSpy.getStateSnapshotAsync).not.toHaveBeenCalled();
+    });
+
+    it('is false for a device whose work is entirely archived', async () => {
+      // hasMeaningfulStateData does not look at archives, and its doc says it is
+      // only safe where a false negative skips work. Here a false negative would
+      // REFUSE a legitimate overwrite, so archived tasks have to count.
+      stateSnapshotSpy.getStateSnapshotAsync.and.resolveTo({
+        ...emptyStore,
+        archiveYoung: { task: { ids: ['archived-1'], entities: {} } },
+      } as never);
+
+      expect(await service.hasNothingWorthUploading()).toBe(false);
+    });
+
+    it('is false for work that has aged out into the old archive', async () => {
+      stateSnapshotSpy.getStateSnapshotAsync.and.resolveTo({
+        ...emptyStore,
+        archiveOld: { task: { ids: ['archived-2'], entities: {} } },
+      } as never);
+
+      expect(await service.hasNothingWorthUploading()).toBe(false);
+    });
+
+    it('refuses when the store is present but still at its initial values', async () => {
+      // The reachable degraded shape: hydration failed or has not run, so the
+      // slices exist but are empty. This is the case the guard has to catch,
+      // and it is distinct from the unreachable undefined-snapshot one below.
+      stateSnapshotSpy.getStateSnapshotAsync.and.resolveTo(emptyStore as never);
+      opLogStoreSpy.getUnsynced.and.resolveTo([]);
+
+      expect(await service.hasNothingWorthUploading()).toBe(true);
+    });
+
+    it('fails closed when the snapshot cannot be read at all', async () => {
+      // DELIBERATE fail-closed direction: the guard reads the snapshot itself
+      // and treats an absent one as "nothing to upload", so it REFUSES.
+      // Refusing can never destroy data; guessing "has data" and letting the
+      // clean slate through can. getStateSnapshotAsync() is typed non-nullable,
+      // so this shape is defensive rather than reachable today.
+      stateSnapshotSpy.getStateSnapshotAsync.and.resolveTo(undefined as never);
+
+      expect(await service.hasNothingWorthUploading()).toBe(true);
     });
   });
 });

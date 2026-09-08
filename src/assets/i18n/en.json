@@ -1388,6 +1388,11 @@
         "MESSAGE": "You have {{count}} unsynced local changes that will be replaced by remote data. Do you want to continue?",
         "TITLE": "Replace Local Data?"
       },
+      "D_NOTHING_TO_UPLOAD": {
+        "MESSAGE": "Nothing was changed \u2014 the data on your sync server is still there.\n\nThis device has never finished a sync, so it holds no copy of your data that the app can see. Overwriting would have replaced everything on the server with an empty device, and that cannot be undone.\n\nTry your encryption password here again \u2014 an older password often works. If you cannot remember it, leave this device and the server exactly as they are and report the problem rather than overwriting; your history is still on the server.\n\nIf you do want to erase the sync server and start over, close this window and use Force Overwrite in Settings \u2192 Sync & Backup \u2192 Sync.",
+        "MESSAGE_CHANGE_PW": "Nothing was changed \u2014 the data on your sync server is still there.\n\nChanging the encryption password re-uploads this device's data and replaces what is on the server. This device has never finished a sync, so it holds no copy of your data that the app can see, and the server copy would be lost.\n\nChange the password from a device that already has your data and has synced successfully.",
+        "TITLE": "Your synced data was not touched"
+      },
       "D_PERMISSION": {
         "DISABLE_SYNC": "Disable sync",
         "PERM_FILE": "Give permission",
