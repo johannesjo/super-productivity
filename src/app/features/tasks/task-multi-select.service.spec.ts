@@ -87,10 +87,16 @@ describe('TaskMultiSelectService', () => {
 
       service.toggle('c');
       expect(selected()).toEqual(['a']);
-      // anchor stays where it was when removing another row
+      // a deselected row is no anchor for the next Shift+click
+      expect(service.anchorId()).toBeNull();
+
+      service.toggle('c');
+      service.toggle('a');
+      expect(selected()).toEqual(['c']);
+      // deselecting another row keeps the anchor
       expect(service.anchorId()).toBe('c');
 
-      service.toggle('a');
+      service.toggle('c');
       expect(selected()).toEqual([]);
       expect(service.anchorId()).toBeNull();
     });
@@ -264,6 +270,15 @@ describe('TaskMultiSelectService', () => {
       service.removeWhenUnrendered('a', rowEl('a'));
       await new Promise((resolve) => setTimeout(resolve));
       expect(selected()).toEqual([]);
+    });
+
+    it('a destroyed host is no live row, even when not selected', () => {
+      const el = rowEl('c');
+      expect(service.findLiveRowEl('c')).toBe(el);
+      service.removeWhenUnrendered('c', el);
+      expect(service.isDestroyedHost(el)).toBeTrue();
+      expect(service.findLiveRowEl('c')).toBeNull();
+      expect(service.selectedIdsInDomOrder()).toEqual([]);
     });
 
     it('bulk feedback suppression is off by default and settable', () => {

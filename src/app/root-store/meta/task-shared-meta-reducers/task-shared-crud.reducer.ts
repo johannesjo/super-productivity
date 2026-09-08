@@ -491,6 +491,10 @@ const handleDeleteTasks = (
   });
   if (parentUpdates.length) {
     newTaskState = taskAdapter.updateMany(parentUpdates, newTaskState);
+    // Parent totals are derived from the subtasks (singular path does the same).
+    parentIdsHandled.forEach((parentId) => {
+      newTaskState = reCalcTimesForParentIfParent(parentId, newTaskState);
+    });
   }
 
   newTaskState = {

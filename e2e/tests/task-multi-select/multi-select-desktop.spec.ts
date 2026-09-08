@@ -110,7 +110,7 @@ test.describe('Task multi-select (desktop)', () => {
     await page.keyboard.press('Escape');
   });
 
-  test('Remove from Today takes the whole selection out of the Today list', async ({
+  test('Remove from Today (from the project view) takes the selection off the Today list', async ({
     page,
     workViewPage,
     taskPage,
@@ -124,8 +124,13 @@ test.describe('Task multi-select (desktop)', () => {
     }
     const bar = page.locator(BAR);
 
-    await taskPage.getTaskByText(titles[0]).click({ modifiers: ['Control'] });
-    await taskPage.getTaskByText(titles[1]).click({ modifiers: ['Control'] });
+    // Like the row's own button, the entry is offered outside the Today list.
+    await page.goto('/#/project/INBOX_PROJECT/tasks');
+    await workViewPage.waitForTaskList();
+    for (const title of titles) {
+      await expect(taskPage.getTaskByText(title)).toHaveCount(1);
+      await taskPage.getTaskByText(title).click({ modifiers: ['Control'] });
+    }
     await expect(bar).toContainText('2 selected');
 
     await bar.getByRole('button', { name: 'Actions' }).click();
@@ -133,11 +138,14 @@ test.describe('Task multi-select (desktop)', () => {
     await page
       .locator('.mat-mdc-menu-content button', { hasText: 'Remove from Today' })
       .click();
+    // The rows stay in the project list, so the selection stays too.
+    await expect(bar).toContainText('2 selected');
 
-    await expect(taskPage.getTaskByText(titles[0])).toHaveCount(0);
-    await expect(taskPage.getTaskByText(titles[1])).toHaveCount(0);
-    // Rows that left the list drop out of the selection.
-    await expect(bar).toBeHidden();
+    await page.goto('/#/tag/TODAY/tasks');
+    await workViewPage.waitForTaskList();
+    for (const title of titles) {
+      await expect(taskPage.getTaskByText(title)).toHaveCount(0);
+    }
   });
 
   test('the Actions menu deletes the selection after one confirmation', async ({

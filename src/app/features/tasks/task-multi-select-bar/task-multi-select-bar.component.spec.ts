@@ -52,6 +52,7 @@ describe('TaskMultiSelectBarComponent', () => {
             hasScheduled: signal(false),
             hasDeadline: signal(false),
             hasEstimatable: signal(false),
+            hasDueToday: signal(false),
           },
         },
         {

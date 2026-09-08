@@ -26,6 +26,12 @@ export class TaskMultiSelectService {
   private readonly _isBulkFeedbackSuppressed = signal(false);
   private readonly _isTouchSelectionMode = signal(false);
   private readonly _pendingRemovals = new Set<string>();
+  /**
+   * Hosts of destroyed `<task>` components. The list's leave animation keeps
+   * a destroyed host in the DOM for a moment, so "is there a row?" must never
+   * count these (they cannot be focused or acted on).
+   */
+  private readonly _destroyedHosts = new WeakSet<Element>();
 
   readonly selectedIds = this._selectedIds.asReadonly();
   readonly anchorId = this._anchorId.asReadonly();
@@ -100,8 +106,10 @@ export class TaskMultiSelectService {
       next.add(id);
     }
     this._selectedIds.set(next);
-    this._anchorId.set(next.has(id) ? id : this._anchorId());
-    if (!next.size) {
+    if (next.has(id)) {
+      this._anchorId.set(id);
+    } else if (!next.size || this._anchorId() === id) {
+      // A deselected row must not stay the anchor of the next Shift+click.
       this._anchorId.set(null);
     }
   }
@@ -185,19 +193,27 @@ export class TaskMultiSelectService {
    * must not count as rendered.
    */
   removeWhenUnrendered(id: string, destroyedEl: HTMLElement): void {
+    this._destroyedHosts.add(destroyedEl);
     if (!this._selectedIds().has(id) || this._pendingRemovals.has(id)) {
       return;
     }
     this._pendingRemovals.add(id);
     setTimeout(() => {
       this._pendingRemovals.delete(id);
-      const liveRow = this._getAllTaskEls().find(
-        (el) => el !== destroyedEl && el.getAttribute('data-task-id') === id,
-      );
-      if (!liveRow) {
+      if (!this._findRowEl(id)) {
         this.remove(id);
       }
     });
+  }
+
+  /** The live main-list row for a task id (destroyed hosts and detail-panel copies excluded). */
+  findLiveRowEl(id: string): HTMLElement | null {
+    return this._findRowEl(id);
+  }
+
+  /** True for a `<task>` host whose component is already destroyed (animating out). */
+  isDestroyedHost(el: Element): boolean {
+    return this._destroyedHosts.has(el);
   }
 
   /** Drops one id immediately. */
@@ -303,7 +319,7 @@ export class TaskMultiSelectService {
 
   private _getAllTaskEls(): HTMLElement[] {
     return Array.from(document.querySelectorAll<HTMLElement>('task')).filter(
-      (el) => !el.closest('task-detail-panel'),
+      (el) => !this._destroyedHosts.has(el) && !el.closest('task-detail-panel'),
     );
   }
 }

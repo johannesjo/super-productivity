@@ -416,6 +416,29 @@ test.describe('Task multi-select bulk actions', () => {
     await expect(page.locator(BAR)).toContainText('2 selected');
   });
 
+  test('keyboard focus lands on the next row after the selection leaves the list', async ({
+    page,
+    workViewPage,
+    taskPage,
+    testPrefix,
+  }) => {
+    await workViewPage.waitForTaskList();
+    const titles = await addTasks(workViewPage, testPrefix, [
+      'Focus A',
+      'Focus B',
+      'Focus C',
+    ]);
+    // Newest first: C, B, A. Select C and B; the last click leaves focus on B.
+    await ctrlSelect(taskPage, [titles[2], titles[1]]);
+    await expect(taskPage.getTaskByText(titles[1])).toBeFocused();
+
+    await page.keyboard.press('d');
+    await expect(page.locator(DONE_TASKS)).toHaveCount(2);
+    // Focus must not fall to <body> once the rows' leave animation ends.
+    await expect(taskPage.getTaskByText(titles[0])).toBeFocused();
+    await expect(page.locator('body')).not.toBeFocused();
+  });
+
   test('a bulk key on a focused unselected row acts on that row alone', async ({
     page,
     workViewPage,

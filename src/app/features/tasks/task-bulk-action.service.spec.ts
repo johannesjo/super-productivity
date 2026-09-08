@@ -34,6 +34,8 @@ describe('TaskBulkActionService', () => {
     clear: jasmine.Spy;
     isBulkFeedbackSuppressed: ReturnType<typeof signal<boolean>>;
     setBulkFeedbackSuppressed: (v: boolean) => void;
+    isDestroyedHost: () => boolean;
+    findLiveRowEl: () => HTMLElement | null;
   };
   let dialogResult: unknown;
   let isConfirmBeforeDelete: boolean;
@@ -102,6 +104,8 @@ describe('TaskBulkActionService', () => {
       clear: jasmine.createSpy('clear'),
       isBulkFeedbackSuppressed: suppressed,
       setBulkFeedbackSuppressed: (v: boolean) => suppressed.set(v),
+      isDestroyedHost: () => false,
+      findLiveRowEl: () => null,
     };
 
     TestBed.configureTestingModule({
@@ -249,6 +253,26 @@ describe('TaskBulkActionService', () => {
         jasmine.objectContaining({ id: 'only' }),
       );
       expect(taskService.removeMultipleTasks).not.toHaveBeenCalled();
+    });
+
+    it('confirms as a bulk delete when a parent and its subtasks are selected', async () => {
+      isConfirmBeforeDelete = false;
+      select([
+        t('parent', { subTaskIds: ['s1', 's2'] }),
+        t('s1', { parentId: 'parent' }),
+        t('s2', { parentId: 'parent' }),
+      ]);
+      await service.deleteSelected();
+      expect(matDialog.open).toHaveBeenCalledWith(
+        jasmine.anything(),
+        jasmine.objectContaining({
+          data: jasmine.objectContaining({
+            okTxt: T.F.TASK.MULTI_SELECT.D_CONFIRM_DELETE.OK,
+            translateParams: { count: 1 },
+          }),
+        }),
+      );
+      expect(taskService.removeMultipleTasks).toHaveBeenCalledWith(['parent']);
     });
 
     it('confirms a single task with the single-task message when the setting is on', async () => {
@@ -417,28 +441,32 @@ describe('TaskBulkActionService', () => {
       expect(dispatchedTypes()).toEqual([TaskSharedActions.removeDeadline.type]);
     });
 
-    it('removes from Today by unscheduling due tasks and cleaning up leftovers', async () => {
-      select([t('a', { dueDay: '2026-09-10' }), t('b', { dueWithTime: 123 }), t('c')]);
+    it('removes from Today by unscheduling the undone tasks due today', async () => {
+      select([
+        t('a', { dueDay: '2026-09-05' }),
+        t('b', { dueDay: '2026-09-10' }),
+        t('c', { dueDay: '2026-09-05', isDone: true }),
+        t('d'),
+      ]);
       await service.removeFromToday();
       const actions = store.dispatch.calls.allArgs().map(([a]) => a);
-      expect(actions.map((a) => a.type)).toEqual([
-        TaskSharedActions.unscheduleTask.type,
-        TaskSharedActions.unscheduleTask.type,
-        TaskSharedActions.removeTasksFromTodayTag.type,
-      ]);
+      expect(actions.map((a) => a.type)).toEqual([TaskSharedActions.unscheduleTask.type]);
       expect(actions[0].id).toBe('a');
       expect(actions[0].isSkipToast).toBeTrue();
-      expect(actions[1].id).toBe('b');
-      expect(actions[2].taskIds).toEqual(['c']);
       expect(snackService.open).toHaveBeenCalledWith(
-        jasmine.objectContaining({ translateParams: { count: 3 } }),
+        jasmine.objectContaining({ translateParams: { count: 1 } }),
       );
+      expect(service.hasDueToday()).toBeTrue();
     });
 
-    it('does not touch the Today order list when every task is due', async () => {
-      select([t('a', { dueDay: '2026-09-10' })]);
+    it('reports nothing to do when no selected task is due today', async () => {
+      select([t('a', { dueDay: '2026-09-10' }), t('b')]);
       await service.removeFromToday();
-      expect(dispatchedTypes()).toEqual([TaskSharedActions.unscheduleTask.type]);
+      expect(dispatchedTypes()).toEqual([]);
+      expect(snackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({ msg: T.F.TASK.MULTI_SELECT.S.NOTHING_TO_DO }),
+      );
+      expect(service.hasDueToday()).toBeFalse();
     });
   });
 });

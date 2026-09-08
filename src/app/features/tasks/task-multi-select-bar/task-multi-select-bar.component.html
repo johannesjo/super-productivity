@@ -85,7 +85,7 @@
       </span>
       <span class="key-i">{{ kb().taskScheduleToday }}</span>
     </button>
-    @if (isTodayList()) {
+    @if (!isTodayList() && bulk.hasDueToday()) {
       <button
         (click)="bulk.removeFromToday()"
         mat-menu-item
