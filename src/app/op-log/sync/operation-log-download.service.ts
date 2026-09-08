@@ -194,8 +194,10 @@ export class OperationLogDownloadService implements OnDestroy {
       const isReDeliveryFilterActive =
         forceFromSeq0 &&
         !options?.includeOwnAndAppliedOps &&
-        syncProvider.providerMode !== 'fileSnapshotOps';
-      const deliveredUpToSeq = isReDeliveryFilterActive
+        syncProvider.providerMode === 'superSyncOps';
+      // Not const: a gap reset below switches to a new server epoch whose seq
+      // space is unrelated to this cursor, so the filter must be disabled.
+      let deliveredUpToSeq = isReDeliveryFilterActive
         ? await syncProvider.getLastServerSeq()
         : 0;
       const localClock = isReDeliveryFilterActive
@@ -294,6 +296,13 @@ export class OperationLogDownloadService implements OnDestroy {
           hasResetForGap = true;
           allNewOps.length = 0; // Clear any ops we may have accumulated
           allOpClocks.length = 0; // Clear clocks too
+          // The re-delivery filter compares against the OLD server's cursor. A
+          // gap means a reset/replaced server, so the re-fetched ops carry seqs
+          // from a fresh epoch that the old cursor would wrongly cover — and
+          // dropping them here would lose them silently. 0 disables the filter
+          // for the rest of this download (every real serverSeq is >= 1).
+          deliveredUpToSeq = 0;
+          reDeliveredCount = 0; // pre-reset skips belong to the discarded epoch
           snapshotVectorClock = undefined; // Clear snapshot clock to capture fresh one after reset
           snapshotState = undefined; // Clear snapshot state to capture fresh one after reset
           snapshotAppliedOpIds = undefined; // Clear snapshot boundary with the stale state

@@ -1449,6 +1449,37 @@ describe('OperationLogDownloadService', () => {
             expect(result.newOps.length).toBe(6);
             expect(mockOpLogStore.getVectorClock).not.toHaveBeenCalled();
           });
+
+          it('should stop filtering after a gap reset (new server epoch, stale cursor)', async () => {
+            // A gap means the server was reset or replaced, so the re-fetched ops
+            // carry seqs from a fresh epoch. The old cursor (14) would wrongly
+            // cover them and the clock check passes for the same authors, so
+            // without disabling the filter these are dropped and lost silently.
+            mockApiProvider.downloadOps.and.returnValues(
+              Promise.resolve({
+                ops: [],
+                hasMore: false,
+                latestSeq: 2,
+                gapDetected: true,
+              }),
+              Promise.resolve({
+                ops: [
+                  makeServerOp(1, 'fresh-a', 'importClient', { importClient: 3 }),
+                  makeServerOp(2, 'fresh-b', 'importClient', { importClient: 4 }),
+                ],
+                hasMore: false,
+                latestSeq: 2,
+                gapDetected: false,
+              }),
+            );
+
+            const result = await service.downloadRemoteOps(mockApiProvider, {
+              forceFromSeq0: true,
+            });
+
+            expect(mockApiProvider.downloadOps).toHaveBeenCalledTimes(2);
+            expect(result.newOps.map((op) => op.id)).toEqual(['fresh-a', 'fresh-b']);
+          });
         });
       });
 
