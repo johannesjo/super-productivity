@@ -247,7 +247,7 @@ module.exports = {
 
     const checkObject = (node) => {
       for (const prop of node.properties) {
-        if (prop.type === 'SpreadElement' || prop.type === 'ExperimentalSpreadProperty') {
+        if (prop.type === 'SpreadElement') {
           checkSpread(prop);
           continue;
         }
@@ -296,7 +296,6 @@ module.exports = {
           }
           return;
         case 'SpreadElement':
-        case 'RestElement':
           checkSpread(v);
           return;
         case 'ObjectExpression':

@@ -25,7 +25,7 @@ test('accepts a fully specified secure webPreferences object', () => {
 test('accepts extra unrelated keys (preload, webSecurity, etc.)', () => {
   assert.doesNotThrow(() =>
     assertSecureWebPreferences(
-      { ...SECURE, preload: '/x/preload.js', webSecurity: true },
+      { ...SECURE, preload: '/x/preload.js', webSecurity: true, spellcheck: false },
       'test',
     ),
   );

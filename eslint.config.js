@@ -295,7 +295,7 @@ module.exports = tseslint.config(
     },
   },
   // Measured baseline: the call sites that already existed when the rule landed
-  // (81 hits across these 41 files, measured 2026-09), downgraded to a
+  // (80 hits across these 40 files, measured 2026-09), downgraded to a
   // non-failing warning so the rule can be an error everywhere else.
   //
   // Not all of these are leaks. The rule judges shape, never content, so a
@@ -325,7 +325,6 @@ module.exports = tseslint.config(
       'src/app/features/android/store/android.effects.ts',
       'src/app/features/archive/archive.service.ts',
       'src/app/features/issue/handle-issue-provider-http-error.ts',
-      'src/app/features/issue/providers/jira/jira-common-interfaces.service.ts',
       'src/app/features/mobile/store/mobile-notification.effects.ts',
       'src/app/features/planner/planner.service.ts',
       'src/app/features/right-panel/right-panel-content.component.ts',
