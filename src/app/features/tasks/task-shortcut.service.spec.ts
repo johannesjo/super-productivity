@@ -606,8 +606,11 @@ describe('TaskShortcutService', () => {
       expect(event.preventDefault).toHaveBeenCalled();
     });
 
-    it('should swallow the key without copying when the task has no store data', () => {
-      stubFocusedTaskData(null);
+    it('should swallow the key without copying when the task is missing from the store', () => {
+      // The exact stub selectTaskByIdWithSubTaskData returns for an unknown id:
+      // no title, no id. In a production build devError only logs, so this
+      // shape really does reach the caller.
+      stubFocusedTaskData({ subTasks: [] });
       const event = createKeyboardEvent('c', 'KeyC', { ctrlKey: true });
 
       const result = service.handleTaskShortcuts(event);
