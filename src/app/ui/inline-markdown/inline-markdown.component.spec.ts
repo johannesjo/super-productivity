@@ -1678,6 +1678,172 @@ describe('InlineMarkdownComponent', () => {
       // Assert — new item inserted between A and B
       expect(component.modelCopy()).toBe('- [ ] A\n- [ ] \n- [ ] B');
     });
+
+    it('should convert selected text to checklist items and preserve selection range', fakeAsync(() => {
+      // Arrange
+      const text = 'Folge 1: 17. Dezember\nFolge 2: 24. Dezember\nFolge 3: 31. Dezember';
+      component.model = text;
+      fixture.detectChanges();
+
+      component['isShowEdit'].set(true);
+
+      const mockTextareaEl = {
+        nativeElement: {
+          value: text,
+          selectionStart: 0,
+          selectionEnd: text.length, // all text selected
+          focus: jasmine.createSpy('focus'),
+          setSelectionRange: jasmine.createSpy('setSelectionRange'),
+          style: {},
+          scrollHeight: 100,
+          offsetHeight: 100,
+        },
+      };
+      spyOn(component, 'textareaEl').and.returnValue(mockTextareaEl as any);
+      spyOn(component, 'wrapperEl').and.returnValue({
+        nativeElement: { style: {} },
+      } as any);
+
+      const mockEvent = { preventDefault: () => {}, stopPropagation: () => {} } as any;
+
+      // Act
+      component.toggleChecklistMode(mockEvent);
+      tick();
+
+      // Assert — selected text converted to checklist items and selection range preserved
+      const expectedText =
+        '- [ ] Folge 1: 17. Dezember\n- [ ] Folge 2: 24. Dezember\n- [ ] Folge 3: 31. Dezember';
+      expect(component.modelCopy()).toBe(expectedText);
+      expect(mockTextareaEl.nativeElement.setSelectionRange).toHaveBeenCalledWith(
+        0,
+        expectedText.length,
+      );
+    }));
+
+    it('should convert partially selected text to checklist items and preserve selection range', fakeAsync(() => {
+      // Arrange
+      const text = 'Line 1\nLine 2\nLine 3\nLine 4';
+      component.model = text;
+      fixture.detectChanges();
+
+      component['isShowEdit'].set(true);
+
+      // Select "Line 2\nLine 3"
+      const selectionStart = 7; // after "Line 1\n"
+      const selectionEnd = 20; // before "\nLine 4"
+
+      const mockTextareaEl = {
+        nativeElement: {
+          value: text,
+          selectionStart,
+          selectionEnd,
+          focus: jasmine.createSpy('focus'),
+          setSelectionRange: jasmine.createSpy('setSelectionRange'),
+          style: {},
+          scrollHeight: 100,
+          offsetHeight: 100,
+        },
+      };
+      spyOn(component, 'textareaEl').and.returnValue(mockTextareaEl as any);
+      spyOn(component, 'wrapperEl').and.returnValue({
+        nativeElement: { style: {} },
+      } as any);
+
+      const mockEvent = { preventDefault: () => {}, stopPropagation: () => {} } as any;
+
+      // Act
+      component.toggleChecklistMode(mockEvent);
+      tick();
+
+      // Assert — only selected lines converted and selection range covers converted block
+      const expectedText = 'Line 1\n- [ ] Line 2\n- [ ] Line 3\nLine 4';
+      expect(component.modelCopy()).toBe(expectedText);
+      expect(mockTextareaEl.nativeElement.setSelectionRange).toHaveBeenCalledWith(7, 32);
+    }));
+
+    it('should toggle checklist prefix when selected text already has checklist items and preserve selection range', fakeAsync(() => {
+      // Arrange
+      const text = '- [ ] Item 1\n- [ ] Item 2\n- [ ] Item 3';
+      component.model = text;
+      fixture.detectChanges();
+
+      component['isShowEdit'].set(true);
+
+      const mockTextareaEl = {
+        nativeElement: {
+          value: text,
+          selectionStart: 0,
+          selectionEnd: text.length,
+          focus: jasmine.createSpy('focus'),
+          setSelectionRange: jasmine.createSpy('setSelectionRange'),
+          style: {},
+          scrollHeight: 100,
+          offsetHeight: 100,
+        },
+      };
+      spyOn(component, 'textareaEl').and.returnValue(mockTextareaEl as any);
+      spyOn(component, 'wrapperEl').and.returnValue({
+        nativeElement: { style: {} },
+      } as any);
+
+      const mockEvent = { preventDefault: () => {}, stopPropagation: () => {} } as any;
+
+      // Act
+      component.toggleChecklistMode(mockEvent);
+      tick();
+
+      // Assert — checklist items toggled to plain bullets and selection preserved
+      const expectedText = '- Item 1\n- Item 2\n- Item 3';
+      expect(component.modelCopy()).toBe(expectedText);
+      expect(mockTextareaEl.nativeElement.setSelectionRange).toHaveBeenCalledWith(
+        0,
+        expectedText.length,
+      );
+    }));
+
+    it('should convert selected text when isDefaultText is true and textarea has non-empty text (issue #6015 regression)', fakeAsync(() => {
+      // Arrange — task with no saved notes (isDefaultText = true), user pasted text in textarea without blurring
+      const text = 'Pasted task 1\nPasted task 2';
+      component.model = '';
+      fixture.detectChanges();
+
+      component['isShowEdit'].set(true);
+      spyOn(component, 'isDefaultText').and.returnValue(true);
+      spyOn(component, 'defaultText').and.returnValue('');
+      spyOn(component.changed, 'emit');
+
+      const mockTextareaEl = {
+        nativeElement: {
+          value: text,
+          selectionStart: 0,
+          selectionEnd: text.length,
+          focus: jasmine.createSpy('focus'),
+          setSelectionRange: jasmine.createSpy('setSelectionRange'),
+          style: {},
+          scrollHeight: 100,
+          offsetHeight: 100,
+        },
+      };
+      spyOn(component, 'textareaEl').and.returnValue(mockTextareaEl as any);
+      spyOn(component, 'wrapperEl').and.returnValue({
+        nativeElement: { style: {} },
+      } as any);
+
+      const mockEvent = { preventDefault: () => {}, stopPropagation: () => {} } as any;
+
+      // Act
+      component.toggleChecklistMode(mockEvent);
+      tick();
+
+      // Assert — converts the pasted selection rather than replacing everything with "- [ ] "
+      const expectedText = '- [ ] Pasted task 1\n- [ ] Pasted task 2';
+      expect(component.modelCopy()).toBe(expectedText);
+      expect(component.changed.emit).toHaveBeenCalledWith(expectedText);
+      expect(mockTextareaEl.nativeElement.setSelectionRange).toHaveBeenCalledWith(
+        0,
+        expectedText.length,
+      );
+    }));
   });
 
   describe('model setter race condition', () => {

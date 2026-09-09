@@ -42,7 +42,7 @@ import { Store } from '@ngrx/store';
 import { Location } from '@angular/common';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { Log } from '../../core/log';
-import { handleListKeydown } from './markdown-toolbar.util';
+import { handleListKeydown, applyTaskList } from './markdown-toolbar.util';
 import { DateService } from '../../core/date/date.service';
 
 const HIDE_OVERFLOW_TIMEOUT_DURATION = 300;
@@ -523,6 +523,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
 
     const textareaEl = this.textareaEl();
     let cursorPos: number | undefined;
+    let selectionEnd: number | undefined;
     let currentText: string;
 
     // Read current content from textarea if available, otherwise from modelCopy.
@@ -531,6 +532,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     if (textareaEl) {
       currentText = textareaEl.nativeElement.value;
       cursorPos = textareaEl.nativeElement.selectionStart;
+      selectionEnd = textareaEl.nativeElement.selectionEnd;
     } else {
       currentText = this.modelCopy() || '';
     }
@@ -561,9 +563,20 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     }
 
     let cleaned: string;
-    let adjustedCursorPos: number | undefined;
+    let adjustedSelectionStart: number | undefined;
+    let adjustedSelectionEnd: number | undefined;
 
-    if (cursorPos !== undefined) {
+    if (
+      cursorPos !== undefined &&
+      selectionEnd !== undefined &&
+      cursorPos !== selectionEnd
+    ) {
+      // Convert selected text to checklist items
+      const result = applyTaskList(currentText, cursorPos, selectionEnd);
+      cleaned = result.text;
+      adjustedSelectionStart = result.selectionStart;
+      adjustedSelectionEnd = result.selectionEnd;
+    } else if (cursorPos !== undefined) {
       // Path A: Textarea visible — insert after cursor's current line
       let lineEnd = cursorPos;
       while (lineEnd < currentText.length && currentText[lineEnd] !== '\n') {
@@ -578,7 +591,8 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
       const cleanedBeforeCursor = beforeCursor
         .replace(/\n\n- \[/g, '\n- [')
         .replace(/^\n/g, '');
-      adjustedCursorPos = Math.min(cleanedBeforeCursor.length, cleaned.length);
+      adjustedSelectionStart = Math.min(cleanedBeforeCursor.length, cleaned.length);
+      adjustedSelectionEnd = adjustedSelectionStart;
     } else {
       // Path B: Preview mode — append to end
       const appended = currentText + INSERT_TEXT;
@@ -594,7 +608,7 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     if (cursorPos !== undefined) {
       // Ensure editor stays open (blur may have set isShowEdit=false)
       this.isShowEdit.set(true);
-      this._setTextareaState(adjustedCursorPos!);
+      this._setTextareaState(adjustedSelectionStart!, adjustedSelectionEnd);
     } else {
       this._toggleShowEdit(cleaned.length);
       this.modelCopy.set(cleaned);
@@ -618,13 +632,16 @@ export class InlineMarkdownComponent implements OnInit, OnDestroy {
     });
   }
 
-  private _setTextareaState(cursorPos: number): void {
+  private _setTextareaState(selectionStart: number, selectionEnd?: number): void {
     setTimeout(() => {
       const textareaEl = this.textareaEl();
       if (textareaEl) {
         textareaEl.nativeElement.value = this.modelCopy();
         textareaEl.nativeElement.focus();
-        textareaEl.nativeElement.setSelectionRange(cursorPos, cursorPos);
+        textareaEl.nativeElement.setSelectionRange(
+          selectionStart,
+          selectionEnd ?? selectionStart,
+        );
         this.resizeTextareaToFit();
       }
     });
