@@ -45,6 +45,8 @@ tests, or a focused contract.
 | Change SECTION conflict/recovery behavior              | [section-conflict-replay.md](./section-conflict-replay.md) — narrow commutativity, state-projected replay, and released-client compatibility contract |
 | Find executable coverage for a SuperSync scenario      | [supersync-scenarios.md](./supersync-scenarios.md) — scenario-to-test index, not a prose specification                                                |
 | Research rejected alternatives or cross-version policy | [operation-log-architecture.md](./operation-log-architecture.md) — deep rationale and history plus the **normative A.7.11 schema-bump policy**        |
+| Decode an `InvalidFilePrefixError` from a log export   | [diagnosing-invalid-file-prefix.md](./diagnosing-invalid-file-prefix.md) — `headShape`/`prefixAt` decode table (#9627)                                |
+| Judge whether a sync bug is real and how severe        | [sync-severity-triage.md](./sync-severity-triage.md) — triage rules: what ships from master, proving a commit is released, verifying audit findings   |
 
 ## Reference docs
 
@@ -59,6 +61,8 @@ tests, or a focused contract.
 | Contract | [vector-clocks.md](./vector-clocks.md)                                         | Vector-clock implementation, storage/pruning ownership, and history                                                                               |
 | Contract | [supersync-encryption-architecture.md](./supersync-encryption-architecture.md) | End-to-end encryption wire format, key lifecycle, integrity boundary, and known limitations                                                       |
 | Mixed    | [operation-log-architecture.md](./operation-log-architecture.md)               | Deep rationale and implementation history plus the normative A.7.11 cross-version/schema-bump contract; use executable owners for volatile detail |
+| Triage   | [diagnosing-invalid-file-prefix.md](./diagnosing-invalid-file-prefix.md)       | Decode table for the `InvalidFilePrefixError` log diagnostics (`headShape`, `prefixAt`)                                                           |
+| Triage   | [sync-severity-triage.md](./sync-severity-triage.md)                           | Severity triage for sync/data-loss reports: release-channel reality, shipped-or-not proof, user vocabulary, audit-finding handling                |
 
 ## Executable scenario index
 
@@ -81,6 +85,5 @@ tests, or a focused contract.
 | [ARCHITECTURE-DECISIONS.md](../../ARCHITECTURE-DECISIONS.md)                                             | Load-bearing product/data decisions          |
 
 Retired diagram filenames remain as small forwarding stubs so historical links
-continue to resolve. `operation-rules.md` and `sqlite-migration-followup.md` are
-also compatibility pointers; they are not independent sources of current
-behavior or status.
+continue to resolve. `operation-rules.md` is also a compatibility pointer; it is
+not an independent source of current behavior or status.

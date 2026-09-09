@@ -279,6 +279,25 @@ describe('BackupService', () => {
     });
   });
 
+  // Regression guard for the #9770 slice fill. That fill runs before validation,
+  // so it must not be allowed to manufacture the very `task`/`project` keys the
+  // isDataRepairPossible() refusal below is looking for — otherwise a truncated
+  // backup stops being refused and instead REPLACES the user's data with an
+  // all-defaults empty store, on every import path (JSON import, local-backup
+  // restore, SuperSync "Use Server Data").
+  it('refuses a backup with no task or project state instead of importing an empty store', async () => {
+    const truncated = createMinimalValidBackup() as any;
+    delete truncated.task;
+    delete truncated.project;
+
+    await expectAsync(
+      service.importCompleteBackup(truncated, true, true),
+    ).toBeRejectedWithError(/repair not possible/);
+
+    expect(mockOpLogStore.runDestructiveStateReplacement).not.toHaveBeenCalled();
+    expect(mockStore.dispatch).not.toHaveBeenCalled();
+  });
+
   describe('importCompleteBackup', () => {
     it('should reject inconsistent skip-backup provenance arguments', async () => {
       const backup = createMinimalValidBackup() as any;
@@ -311,7 +330,7 @@ describe('BackupService', () => {
 
     it('should clear the conflict journal (full dataset replacement)', async () => {
       // Journal entries reference entities of the REPLACED dataset. Every
-      // import path (profile switch, JSON import, local-backup restore,
+      // import path (JSON import, local-backup restore,
       // SuperSync restore) funnels through here — without the clear, the badge
       // keeps its pre-restore count and the review page lists conflicts from
       // the old dataset.
@@ -368,8 +387,8 @@ describe('BackupService', () => {
         .args[0] as Parameters<typeof mockOpLogStore.runDestructiveStateReplacement>[0];
 
       const appendedPayload = args.syncImportOp.payload as any;
-      expect(appendedPayload.globalConfig.misc.startOfNextDay).toBe(4);
-      expect(appendedPayload.globalConfig.misc.startOfNextDayTime).toBe('04:00');
+      expect(appendedPayload.globalConfig.misc.startOfNextDay).toBe(0);
+      expect(appendedPayload.globalConfig.misc.startOfNextDayTime).toBe('00:00');
     });
 
     it('should pass archiveYoung to the atomic replacement when present in backup', async () => {

@@ -34,6 +34,7 @@ describe('OperationLogDownloadService', () => {
     mockOpLogStore = jasmine.createSpyObj('OperationLogStoreService', [
       'getAppliedOpIds',
       'hasSyncedOps',
+      'getVectorClock',
     ]);
     mockLockService = jasmine.createSpyObj('LockService', ['request']);
     mockSnackService = jasmine.createSpyObj('SnackService', ['open']);
@@ -60,6 +61,7 @@ describe('OperationLogDownloadService', () => {
     });
     mockOpLogStore.getAppliedOpIds.and.returnValue(Promise.resolve(new Set<string>()));
     mockOpLogStore.hasSyncedOps.and.returnValue(Promise.resolve(false));
+    mockOpLogStore.getVectorClock.and.returnValue(Promise.resolve(null));
 
     TestBed.configureTestingModule({
       providers: [
@@ -115,6 +117,40 @@ describe('OperationLogDownloadService', () => {
         await service.downloadRemoteOps(mockApiProvider);
 
         expect(mockApiProvider.downloadOps).toHaveBeenCalled();
+      });
+
+      it('should hand an op with an unknown opType to the receiver instead of failing the page (#8764)', async () => {
+        const op = (id: string, opType: string): SyncOperation => ({
+          id,
+          clientId: 'other-client',
+          actionType: '[Task] Add' as ActionType,
+          opType: opType as OpType,
+          entityType: 'TASK',
+          entityId: 'task-1',
+          payload: {},
+          vectorClock: { otherClient: 1 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+        });
+        mockApiProvider.downloadOps.and.returnValue(
+          Promise.resolve({
+            ops: [
+              { serverSeq: 1, receivedAt: Date.now(), op: op('op-known', OpType.Create) },
+              { serverSeq: 2, receivedAt: Date.now(), op: op('op-future', 'FUTURE_OP') },
+            ],
+            hasMore: false,
+            latestSeq: 2,
+          }),
+        );
+
+        const result = await service.downloadRemoteOps(mockApiProvider);
+
+        expect(result.success).toBeTrue();
+        expect(result.newOps.map((o) => o.id)).toEqual(['op-known', 'op-future']);
+        expect(result.newOps[1].opType as string).toBe('FUTURE_OP');
+        // The download layer never advances the cursor; that decision belongs
+        // to the caller after RemoteOpsProcessingService reports the block.
+        expect(mockApiProvider.setLastServerSeq).not.toHaveBeenCalled();
       });
 
       describe('encrypted ops with no key — log severity (Fix B)', () => {
@@ -1348,6 +1384,136 @@ describe('OperationLogDownloadService', () => {
 
           // No ops means no clocks to collect
           expect(result.allOpClocks).toBeUndefined();
+        });
+
+        describe('re-delivered ops already covered by the local vector clock', () => {
+          // A forced seq-0 download re-fetches everything after the server's latest
+          // full-state op. Ops that compaction already pruned from the local log are
+          // invisible to the applied-id filter, so without the clock filter an old
+          // SYNC_IMPORT resurfaces as a "new incoming import" on every
+          // concurrent-rejection retry and raises the conflict dialog.
+          const makeServerOp = (
+            serverSeq: number,
+            id: string,
+            clientId: string,
+            vectorClock: Record<string, number>,
+            opType: OpType = OpType.Update,
+          ): { serverSeq: number; receivedAt: number; op: SyncOperation } => ({
+            serverSeq,
+            receivedAt: Date.now(),
+            op: {
+              id,
+              clientId,
+              actionType: '[Task] Update' as ActionType,
+              opType,
+              entityType: 'TASK',
+              payload: {},
+              vectorClock,
+              timestamp: Date.now(),
+              schemaVersion: 1,
+            },
+          });
+          const serverOps = [
+            makeServerOp(
+              10,
+              'old-import',
+              'importClient',
+              { importClient: 3 },
+              OpType.SyncImport,
+            ),
+            makeServerOp(11, 'old-update', 'importClient', {
+              importClient: 40,
+              other: 2,
+            }),
+            makeServerOp(12, 'boundary-update', 'importClient', { importClient: 50 }),
+            makeServerOp(13, 'newer-update', 'importClient', { importClient: 51 }),
+            makeServerOp(14, 'unknown-client', 'clientX', { clientX: 1 }),
+            // Past the persisted cursor, so never processed here (e.g. blocked on a
+            // newer schema version) even though a resolver-merged clock covers it.
+            makeServerOp(15, 'beyond-cursor', 'importClient', { importClient: 45 }),
+          ];
+
+          beforeEach(() => {
+            mockOpLogStore.getVectorClock.and.returnValue(
+              Promise.resolve({ importClient: 50, ownClient: 10 }),
+            );
+            mockApiProvider.getLastServerSeq.and.returnValue(Promise.resolve(14));
+            mockApiProvider.downloadOps.and.returnValue(
+              Promise.resolve({ ops: serverOps, hasMore: false, latestSeq: 15 }),
+            );
+          });
+
+          it('should skip ops behind the cursor whose author counter the local clock covers, but keep their clocks', async () => {
+            const result = await service.downloadRemoteOps(mockApiProvider, {
+              forceFromSeq0: true,
+            });
+
+            expect(result.newOps.map((op) => op.id)).toEqual([
+              'newer-update',
+              'unknown-client',
+              'beyond-cursor',
+            ]);
+            // Rebuilding clock state is the point of the forced download
+            expect(result.allOpClocks!.length).toBe(6);
+          });
+
+          it('should deliver everything in raw-rebuild mode (includeOwnAndAppliedOps)', async () => {
+            const result = await service.downloadRemoteOps(mockApiProvider, {
+              forceFromSeq0: true,
+              includeOwnAndAppliedOps: true,
+            });
+
+            expect(result.newOps.length).toBe(6);
+          });
+
+          it('should leave the normal (non-forced) download untouched', async () => {
+            const result = await service.downloadRemoteOps(mockApiProvider);
+
+            expect(result.newOps.length).toBe(6);
+            expect(mockOpLogStore.getVectorClock).not.toHaveBeenCalled();
+          });
+
+          it('should deliver everything for file-based providers (synthetic serverSeq)', async () => {
+            mockApiProvider.providerMode = 'fileSnapshotOps';
+
+            const result = await service.downloadRemoteOps(mockApiProvider, {
+              forceFromSeq0: true,
+            });
+
+            expect(result.newOps.length).toBe(6);
+            expect(mockOpLogStore.getVectorClock).not.toHaveBeenCalled();
+          });
+
+          it('should stop filtering after a gap reset (new server epoch, stale cursor)', async () => {
+            // A gap means the server was reset or replaced, so the re-fetched ops
+            // carry seqs from a fresh epoch. The old cursor (14) would wrongly
+            // cover them and the clock check passes for the same authors, so
+            // without disabling the filter these are dropped and lost silently.
+            mockApiProvider.downloadOps.and.returnValues(
+              Promise.resolve({
+                ops: [],
+                hasMore: false,
+                latestSeq: 2,
+                gapDetected: true,
+              }),
+              Promise.resolve({
+                ops: [
+                  makeServerOp(1, 'fresh-a', 'importClient', { importClient: 3 }),
+                  makeServerOp(2, 'fresh-b', 'importClient', { importClient: 4 }),
+                ],
+                hasMore: false,
+                latestSeq: 2,
+                gapDetected: false,
+              }),
+            );
+
+            const result = await service.downloadRemoteOps(mockApiProvider, {
+              forceFromSeq0: true,
+            });
+
+            expect(mockApiProvider.downloadOps).toHaveBeenCalledTimes(2);
+            expect(result.newOps.map((op) => op.id)).toEqual(['fresh-a', 'fresh-b']);
+          });
         });
       });
 

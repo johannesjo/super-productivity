@@ -1,4 +1,5 @@
 import { test, expect } from '../../fixtures/supersync.fixture';
+import type { Page } from '@playwright/test';
 import { SuperSyncPage } from '../../pages/supersync.page';
 import { WorkViewPage } from '../../pages/work-view.page';
 import { waitForStatePersistence } from '../../utils/waits';
@@ -6,7 +7,10 @@ import {
   closeClient,
   createSimulatedClient,
   createTestUser,
+  getLocalOpLogSummary,
   getSuperSyncConfig,
+  isFullStateOpType,
+  seedSuperSyncCredentials,
   type SimulatedE2EClient,
 } from '../../utils/supersync-helpers';
 import {
@@ -247,51 +251,34 @@ test.describe('@supersync @migration SuperSync Legacy Migration Sync', () => {
       await waitForStatePersistence(clientB.page);
       console.log('[Test] Client B added task after migration');
 
-      // Setup sync - may trigger conflict dialog or auto-resolve
+      // A's setup uploaded a full-state import, so B's pending ops trigger the
+      // sync-import conflict dialog; answer it with "Use Server Data".
       console.log('[Test] Client B setting up sync...');
-
-      // Use syncImportChoice 'remote' so B adopts A's data
       await syncPageB.setupSuperSync({ ...syncConfig, syncImportChoice: 'remote' });
       console.log('[Test] Client B sync completed');
 
-      // Check which data Client B has - may have A's data or B's data depending on resolution
-      const hasAProject = await sidenavB
-        .locator('nav-item', { hasText: 'Client A Project' })
-        .isVisible()
-        .catch(() => false);
-      const hasBProject = await sidenavB
-        .locator('nav-item', { hasText: 'Client B Project' })
-        .isVisible()
-        .catch(() => false);
+      // "Use Server Data" is a full replace, not a merge: B adopts A's data and
+      // its own migrated project plus the post-migration task are gone. The
+      // previous either/or check here could not catch a regression (#9863).
+      await expect(
+        sidenavB.locator('nav-item', { hasText: 'Client A Project' }),
+      ).toBeVisible({ timeout: 10000 });
+      await expect(
+        sidenavB.locator('nav-item', { hasText: 'Client B Project' }),
+      ).not.toBeVisible();
 
-      if (hasAProject) {
-        // Client B adopted A's data (expected for "Keep remote")
-        await sidenavB.locator('nav-item', { hasText: 'Client A Project' }).click();
-        await clientB.page.waitForLoadState('networkidle').catch(() => {});
-        await workViewB.waitForTaskList();
+      await sidenavB.locator('nav-item', { hasText: 'Client A Project' }).click();
+      await clientB.page.waitForLoadState('networkidle').catch(() => {});
+      await workViewB.waitForTaskList();
 
-        await expect(clientB.page.locator('task', { hasText: 'Task A1' })).toBeVisible({
-          timeout: 10000,
-        });
-        await expect(clientB.page.locator('task', { hasText: 'Task A2' })).toBeVisible();
-        console.log('[Test] SUCCESS: Client B adopted remote (A) data');
-      } else if (hasBProject) {
-        // Client B kept its own data - this can happen if native confirm was auto-accepted
-        console.log(
-          '[Test] Client B kept local data (native confirm may have been auto-accepted)',
-        );
-        await sidenavB.locator('nav-item', { hasText: 'Client B Project' }).click();
-        await clientB.page.waitForLoadState('networkidle').catch(() => {});
-        await workViewB.waitForTaskList();
-        await expect(clientB.page.locator('task', { hasText: 'Task B1' })).toBeVisible({
-          timeout: 10000,
-        });
-        console.log(
-          '[Test] SUCCESS: Sync completed (B kept local data due to auto-resolution)',
-        );
-      } else {
-        throw new Error('Neither Client A nor Client B project found after sync');
-      }
+      await expect(clientB.page.locator('task', { hasText: 'Task A1' })).toBeVisible({
+        timeout: 10000,
+      });
+      await expect(clientB.page.locator('task', { hasText: 'Task A2' })).toBeVisible();
+      await expect(
+        clientB.page.locator('task', { hasText: 'Task B3 - After Migration' }),
+      ).not.toBeVisible();
+      console.log('[Test] SUCCESS: Client B adopted remote (A) data');
     } finally {
       if (clientA) await closeLegacyClient(clientA).catch(() => {});
       if (clientB) await closeLegacyClient(clientB).catch(() => {});
@@ -464,6 +451,155 @@ test.describe('@supersync @migration SuperSync Legacy Migration Sync', () => {
       }
     } finally {
       if (clientA) await closeLegacyClient(clientA).catch(() => {});
+      if (clientB) await closeLegacyClient(clientB).catch(() => {});
+    }
+  });
+
+  /**
+   * Test: genesis-only client joins a server that holds ordinary ops only (#9863)
+   *
+   * The silent join path: Client B holds nothing but its MIGRATION genesis op
+   * (no post-migration edits), the server holds Client A's ordinary ops and no
+   * full-state op. Before #9863 both sides reported IN_SYNC and B's migrated
+   * tasks stayed stranded on B. Expected now: B gets the local-data conflict
+   * dialog; "Keep local" ships B's state as a SYNC_IMPORT that A then adopts.
+   *
+   * The server state is only reachable by pre-seeding both clients' encryption
+   * key before the app boots: the post-setup encryption modal that the normal
+   * setup flow goes through deletes and re-uploads a snapshot (a SYNC_IMPORT),
+   * which would route B through the incoming-import gate instead (#9921).
+   */
+  test('genesis-only client joining a server with ordinary ops gets the conflict dialog', async ({
+    browser,
+    baseURL,
+    testRunId,
+  }) => {
+    test.slow();
+    const url = baseURL || 'http://localhost:4242';
+
+    const user = await createTestUser(testRunId);
+    const syncConfig = getSuperSyncConfig(user);
+    const seedCredentials = (page: Page): Promise<void> =>
+      seedSuperSyncCredentials(page, {
+        baseUrl: syncConfig.baseUrl,
+        accessToken: syncConfig.accessToken,
+        encryptKey: syncConfig.password!,
+      });
+    const isFullStateOp = (op: { opType: string }): boolean =>
+      isFullStateOpType(op.opType);
+
+    let clientA: SimulatedE2EClient | null = null;
+    let clientB: {
+      context: Awaited<ReturnType<typeof browser.newContext>>;
+      page: Awaited<ReturnType<typeof browser.newPage>>;
+    } | null = null;
+
+    try {
+      // === Client A: fresh client, key pre-seeded, uploads ordinary ops only ===
+      console.log('[Test] Creating fresh Client A with pre-seeded encryption key...');
+      clientA = await createSimulatedClient(browser, url, 'A', testRunId, {
+        seedBeforeBoot: seedCredentials,
+      });
+      await clientA.workView.waitForTaskList();
+      await clientA.workView.addTask('Task A1 - Fresh');
+      await clientA.workView.addTask('Task A2 - Fresh');
+      await waitForStatePersistence(clientA.page);
+
+      await clientA.sync.setupSuperSync({ ...syncConfig, waitForInitialSync: false });
+      await clientA.sync.syncAndWait();
+      console.log('[Test] Client A: ordinary ops uploaded');
+
+      // Precondition of the silent path: A left no full-state op behind. If the
+      // harness ever re-introduces the snapshot re-upload, fail here rather than
+      // silently testing the incoming-import gate instead.
+      const opsA = await getLocalOpLogSummary(clientA.page);
+      expect(opsA.some((op) => op.entityType === 'TASK' && op.isSynced)).toBe(true);
+      expect(opsA.filter(isFullStateOp)).toEqual([]);
+
+      // === Client B: legacy migration, genesis op only ===
+      console.log(
+        '[Test] Creating Client B with legacy data (no post-migration edits)...',
+      );
+      clientB = await createLegacyMigratedClient(
+        browser,
+        url,
+        legacyDataClientB.data,
+        'B',
+        { seedBeforeBoot: seedCredentials },
+      );
+      const syncPageB = new SuperSyncPage(clientB.page);
+      const workViewB = new WorkViewPage(clientB.page);
+
+      const sidenavB = clientB.page.locator('magic-side-nav');
+      await sidenavB.locator('nav-item', { hasText: 'Client B Project' }).click();
+      await clientB.page.waitForLoadState('networkidle').catch(() => {});
+      await workViewB.waitForTaskList();
+      await expect(clientB.page.locator('task', { hasText: 'Task B1' })).toBeVisible({
+        timeout: 10000,
+      });
+
+      // Precondition: B's history starts with its own genesis op and holds no
+      // full-state op — the shape the #9863 fix keys on.
+      const opsB = await getLocalOpLogSummary(clientB.page);
+      expect(opsB[0]?.entityType).toBe('MIGRATION');
+      expect(opsB.filter(isFullStateOp)).toEqual([]);
+
+      // Deliberately NO task added after migration (unlike the other flows).
+      // The key is already seeded, so hand the page object no password: that
+      // keeps its encryption-setup handling (which re-triggers sync) out of the
+      // way while the conflict dialog is up.
+      console.log(
+        '[Test] Client B setting up sync — expecting the local-data conflict dialog',
+      );
+      await syncPageB.setupSuperSync({
+        baseUrl: syncConfig.baseUrl,
+        accessToken: syncConfig.accessToken,
+        waitForInitialSync: false,
+      });
+
+      // The regression pin: the setup sync must prompt instead of silently
+      // reporting IN_SYNC with B's migrated tasks stranded.
+      await expect(syncPageB.conflictDialog).toBeVisible({ timeout: 30000 });
+      await syncPageB.resolveConflictDialog('local');
+      await syncPageB.syncAndWait({ useLocal: true });
+      console.log('[Test] Client B: kept local data via SYNC_IMPORT');
+
+      await sidenavB.locator('nav-item', { hasText: 'Client B Project' }).click();
+      await clientB.page.waitForLoadState('networkidle').catch(() => {});
+      await workViewB.waitForTaskList();
+      await expect(clientB.page.locator('task', { hasText: 'Task B1' })).toBeVisible();
+      await expect(clientB.page.locator('task', { hasText: 'Task B2' })).toBeVisible();
+
+      // B's state now ships as a SYNC_IMPORT; the genesis op is settled locally
+      // once that upload succeeded (the no-upload rule itself is unit-tested).
+      const opsBAfter = await getLocalOpLogSummary(clientB.page);
+      expect(opsBAfter.find((op) => op.entityType === 'MIGRATION')?.isSynced).toBe(true);
+      expect(opsBAfter.some(isFullStateOp)).toBe(true);
+
+      // === Client A syncs and adopts B's full state ===
+      console.log('[Test] Client A syncing...');
+      await clientA.sync.syncAndWait();
+
+      const sidenavA = clientA.page.locator('magic-side-nav');
+      await expect(
+        sidenavA.locator('nav-item', { hasText: 'Client B Project' }),
+      ).toBeVisible({ timeout: 10000 });
+      await sidenavA.locator('nav-item', { hasText: 'Client B Project' }).click();
+      await clientA.page.waitForLoadState('networkidle').catch(() => {});
+      await clientA.workView.waitForTaskList();
+      await expect(clientA.page.locator('task', { hasText: 'Task B1' })).toBeVisible({
+        timeout: 10000,
+      });
+      await expect(
+        clientA.page.locator('task', { hasText: 'Task A1 - Fresh' }),
+      ).not.toBeVisible();
+
+      // A adopted B's import and never received a genesis op from B.
+      const opsAAfter = await getLocalOpLogSummary(clientA.page);
+      expect(opsAAfter.filter((op) => op.entityType === 'MIGRATION')).toEqual([]);
+      console.log("[Test] SUCCESS: silent join path prompts and B's state reaches A");
+    } finally {
+      if (clientA) await closeClient(clientA).catch(() => {});
       if (clientB) await closeLegacyClient(clientB).catch(() => {});
     }
   });

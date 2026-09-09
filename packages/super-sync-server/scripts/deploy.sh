@@ -536,6 +536,26 @@ report_monitoring_status() {
     else
         echo "    alert email: no recorded failure (verified only when mail is attempted)"
     fi
+
+    # Deliberately NOT an alert-mail problem: a blind OOM check is a broken capability, not
+    # an unhealthy service. health-alert.sh keeps it out of PROBLEMS so the dedupe hash and
+    # the recovery mail keep working; this is where the operator finds out instead.
+    if [ -f "$state_dir/oom-check-blind" ]; then
+        # Line 1 timestamp, line 2 reason -- same shape as mail-failed, same sanitize on read.
+        local oom_ts oom_reason
+        oom_ts=$(head -1 "$state_dir/oom-check-blind" 2>/dev/null | sanitize_untrusted 40) || true
+        oom_reason=$(sed -n '2p' "$state_dir/oom-check-blind" 2>/dev/null | sanitize_untrusted 40) || true
+        if [ "$oom_reason" = "no-journalctl" ]; then
+            # Not the operator's to fix: no systemd, so no journal and no group to join.
+            printf '    NOTE: no journalctl on this host, so the OOM check is unavailable (since %s).\n' "$oom_ts"
+            echo "          Not a misconfiguration — every other check is unaffected."
+        else
+            printf '    WARNING: OOM detection is BLIND (kernel log unreadable, since %s).\n' "$oom_ts"
+            echo "             Container OOM kills will not be alerted on. Add the cron user to"
+            echo "             group 'systemd-journal' (narrower than 'adm', which also opens /var/log):"
+            echo "               sudo usermod -aG systemd-journal \$USER   # then re-login"
+        fi
+    fi
 }
 
 echo "==> Verifying HTTPS health check..."

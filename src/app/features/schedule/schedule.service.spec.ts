@@ -306,6 +306,46 @@ describe('ScheduleService', () => {
     });
   });
 
+  describe('createScheduleDaysComputed', () => {
+    it('anchors now into the displayed day when the wall clock has passed it', () => {
+      // The day panel shows logical today, which respects the start-of-next-day
+      // offset. Between midnight and that offset the wall clock is already past
+      // that day's end, and an unanchored now pushes every entry out of the only
+      // rendered day.
+      const dayStr = '2026-01-20';
+      const clock = new Date(2026, 0, 21, 3, 0).getTime();
+      spyOn(Date, 'now').and.callFake(() => clock);
+      const buildSpy = spyOn(service, 'buildScheduleDays').and.returnValue([]);
+
+      service.createScheduleDaysComputed(signal([dayStr]))();
+
+      const params = buildSpy.calls.mostRecent().args[0];
+      expect(params.now).toBe(new Date(2026, 0, 20, 0, 0, 0, 0).getTime());
+      expect(params.realNow).toBe(clock);
+    });
+
+    it('keeps the live clock while it still sits inside the displayed day', () => {
+      const dayStr = '2026-01-20';
+      const clock = new Date(2026, 0, 20, 9, 30).getTime();
+      spyOn(Date, 'now').and.callFake(() => clock);
+      const buildSpy = spyOn(service, 'buildScheduleDays').and.returnValue([]);
+
+      service.createScheduleDaysComputed(signal([dayStr]))();
+
+      expect(buildSpy.calls.mostRecent().args[0].now).toBe(clock);
+    });
+
+    it('falls back to the wall clock when no day is displayed', () => {
+      const clock = new Date(2026, 0, 20, 9, 30).getTime();
+      spyOn(Date, 'now').and.callFake(() => clock);
+      const buildSpy = spyOn(service, 'buildScheduleDays').and.returnValue([]);
+
+      service.createScheduleDaysComputed(signal([]))();
+
+      expect(buildSpy.calls.mostRecent().args[0].now).toBe(clock);
+    });
+  });
+
   describe('buildScheduleDays', () => {
     it('should return empty array when timelineTasks is null', () => {
       // Arrange

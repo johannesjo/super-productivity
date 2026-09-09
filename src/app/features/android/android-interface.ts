@@ -58,6 +58,16 @@ export interface AndroidInterface {
   getTrackingElapsed?(): string;
   openAppNotificationSettings?(): void;
 
+  // Silent notification mirroring tracking on ANOTHER device (SuperSync
+  // tracking presence). Strings arrive pre-translated; same id updates in
+  // place. Self-destructs natively when updates stop (dead WS honesty).
+  updateRemoteTrackingNotification?(
+    title: string,
+    text: string,
+    showStopAction: boolean,
+  ): void;
+  cancelRemoteTrackingNotification?(): void;
+
   // Foreground service methods for focus mode timer
   startFocusModeService?(
     title: string,
@@ -127,6 +137,7 @@ export interface AndroidInterface {
   // Notification action callbacks
   onPauseTracking$: Subject<void>;
   onMarkTaskDone$: Subject<void>;
+  onRemoteTrackingStop$: Subject<void>;
 
   // Focus mode notification action callbacks
   onFocusPause$: Subject<void>;
@@ -177,6 +188,7 @@ if (IS_ANDROID_WEB_VIEW) {
   androidInterface.onPause$ = new Subject();
   androidInterface.onPauseTracking$ = new Subject();
   androidInterface.onMarkTaskDone$ = new Subject();
+  androidInterface.onRemoteTrackingStop$ = new Subject();
   androidInterface.onFocusPause$ = new Subject();
   androidInterface.onFocusResume$ = new Subject();
   androidInterface.onFocusSkip$ = new Subject();

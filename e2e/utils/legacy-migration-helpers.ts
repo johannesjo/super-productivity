@@ -11,6 +11,45 @@ import { installDevErrorDialogHandler } from './runtime-errors';
  */
 
 /**
+ * Read the migrated store back out of the SUP_OPS snapshot (`state_cache/current`).
+ *
+ * Generic over the slices a given test cares about, so each caller keeps the
+ * narrow shape it asserts on without re-implementing the IndexedDB read.
+ */
+export const readMigratedState = async <T extends Record<string, unknown>>(
+  page: Page,
+): Promise<T> =>
+  page.evaluate(
+    () =>
+      new Promise((resolve, reject) => {
+        const request = indexedDB.open('SUP_OPS');
+        request.onsuccess = (event) => {
+          const db = (event.target as IDBOpenDBRequest).result;
+          try {
+            const tx = db.transaction('state_cache', 'readonly');
+            const getReq = tx.objectStore('state_cache').get('current');
+            getReq.onsuccess = () => {
+              db.close();
+              resolve(getReq.result?.state || {});
+            };
+            getReq.onerror = () => {
+              db.close();
+              reject(getReq.error);
+            };
+          } catch (e) {
+            // `open()` with no version CREATES an empty SUP_OPS when none
+            // exists, and `transaction()` then throws synchronously in here —
+            // without this the promise never settles and the caller hangs to
+            // the Playwright timeout instead of failing with the reason.
+            db.close();
+            reject(e);
+          }
+        };
+        request.onerror = () => reject(request.error);
+      }),
+  ) as Promise<T>;
+
+/**
  * Seed the legacy 'pf' IndexedDB database with data.
  * Must be called BEFORE the Angular app initializes.
  *
@@ -72,12 +111,16 @@ export const seedLegacyDatabase = async (
  * @param baseURL - App base URL (e.g., http://localhost:4242)
  * @param legacyData - Legacy data to seed (the 'data' property from backup JSON)
  * @param clientName - Human-readable name for debugging (e.g., "A", "B")
+ * @param options.seedBeforeBoot - Extra seeding that runs in the same JS-blocked
+ *   phase as the legacy database (e.g. `seedSuperSyncCredentials`), before the
+ *   reload that triggers the migration.
  */
 export const createLegacyMigratedClient = async (
   browser: Browser,
   baseURL: string,
   legacyData: Record<string, unknown>,
   clientName: string,
+  options: { seedBeforeBoot?: (page: Page) => Promise<void> } = {},
 ): Promise<{ context: BrowserContext; page: Page }> => {
   const effectiveBaseURL = baseURL || 'http://localhost:4242';
 
@@ -111,6 +154,10 @@ export const createLegacyMigratedClient = async (
   // Seed the legacy 'pf' database
   await seedLegacyDatabase(page, legacyData);
   console.log(`[Legacy Client ${clientName}] Legacy database seeded`);
+  if (options.seedBeforeBoot) {
+    await options.seedBeforeBoot(page);
+    console.log(`[Legacy Client ${clientName}] Extra pre-boot seed applied`);
+  }
 
   // Unblock JS so app can load
   await page.unroute('**/*.js');

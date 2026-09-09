@@ -44,6 +44,20 @@ import type { ValidationResult } from './services/validation.service';
  *
  * The second query only runs for the rare account holding no import at all, so
  * the ordinary upload path still costs a single indexed lookup.
+ *
+ * The REPAIR is a STAND-IN for a pruned import, not a boundary in its own
+ * right. The fence enforces IMPORT semantics: a client below a SYNC_IMPORT /
+ * BACKUP_IMPORT must download it so `SyncImportFilterService` drops its
+ * concurrent ops. A causal REPAIR is borrowed only as the nearest higher seq
+ * that still forces that download once the import row itself is gone. Its own
+ * client contract is the opposite — a REPAIR is automatic, and concurrent work
+ * replays on top of it instead of being dropped.
+ *
+ * That is why the accepted-op write in `uploadOps` records SYNC_IMPORT /
+ * BACKUP_IMPORT and NOT an accepted REPAIR: at that moment no import row has
+ * been pruned yet, so there is no missing fence to reconstruct. Writer and
+ * resolver answering differently is the design, not an asymmetry to close
+ * (#9703, #9755).
  */
 const resolveRetainedReplacementSeq = async (
   db: Prisma.TransactionClient,
@@ -63,42 +77,6 @@ const resolveRetainedReplacementSeq = async (
     select: { serverSeq: true },
   });
   return retainedCausalRepair?.serverSeq ?? null;
-};
-
-const getPrismaP2002TargetTokens = (
-  err: Prisma.PrismaClientKnownRequestError,
-): string[] => {
-  const target = err.meta?.target;
-  if (Array.isArray(target)) return target.map(String);
-  if (typeof target === 'string') return [target];
-  return [];
-};
-
-const isRetryableOperationUniqueViolation = (err: unknown): boolean => {
-  if (!(err instanceof Prisma.PrismaClientKnownRequestError) || err.code !== 'P2002') {
-    return false;
-  }
-
-  const targetTokens = getPrismaP2002TargetTokens(err);
-  if (targetTokens.length === 0) return true;
-
-  const normalizedTargets = targetTokens.map((target) =>
-    target.toLowerCase().replace(/"/g, ''),
-  );
-  const targetSet = new Set(normalizedTargets);
-
-  return (
-    normalizedTargets.some(
-      (target) =>
-        target.includes('operations_pkey') ||
-        target.includes('operation_pkey') ||
-        target.includes('operations_id') ||
-        target.includes('operation_id'),
-    ) ||
-    targetSet.has('id') ||
-    (targetSet.has('user_id') && targetSet.has('server_seq')) ||
-    (targetSet.has('userid') && targetSet.has('serverseq'))
-  );
 };
 
 class CleanSlateUploadRejectedError extends Error {
@@ -379,73 +357,64 @@ export class SyncService {
           let acceptedDeltaBytes = 0;
           let unserializableAccepted = 0;
 
-          if (this.config.batchUpload) {
-            const batchResult = await this.operationUploadService.processOperationBatch(
-              userId,
-              clientId,
-              ops,
-              now,
-              tx,
-              prevalidatedResults,
-              requestStartOccupiedIds,
-            );
-            results.push(...batchResult.results);
-            acceptedDeltaBytes = batchResult.acceptedDeltaBytes;
-            unserializableAccepted = batchResult.unserializableAccepted;
-            uploadDbRoundtrips += batchResult.dbRoundtrips;
-          } else {
-            // Ensure user has sync state row (init if needed)
-            // We assume user exists in `users` table because of foreign key,
-            // but if `uploadOps` is called, authentication should have verified user existence.
-            // However, `user_sync_state` might not exist yet.
-            if (!needsSyncStateLock) {
-              await tx.userSyncState.upsert({
-                where: { userId },
-                create: { userId, lastSeq: 0 },
-                update: {}, // No-op update to ensure it exists
+          // Ensure user has sync state row (init if needed)
+          // We assume user exists in `users` table because of foreign key,
+          // but if `uploadOps` is called, authentication should have verified user existence.
+          // However, `user_sync_state` might not exist yet.
+          if (!needsSyncStateLock) {
+            await tx.userSyncState.upsert({
+              where: { userId },
+              create: { userId, lastSeq: 0 },
+              update: {}, // No-op update to ensure it exists
+            });
+            uploadDbRoundtrips++;
+          }
+
+          const firstOperationById = new Map<
+            string,
+            { op: Operation; originalTimestamp: number }
+          >();
+
+          for (const op of ops) {
+            const firstRequestOperation = firstOperationById.get(op.id);
+            if (!firstRequestOperation) {
+              firstOperationById.set(op.id, {
+                op,
+                originalTimestamp: op.timestamp,
               });
-              uploadDbRoundtrips++;
             }
+            const validation =
+              prevalidatedResults.get(op) ??
+              this.validationService.validateOp(op, clientId);
+            prevalidatedResults.set(op, validation);
 
-            const firstOperationById = new Map<
-              string,
-              { op: Operation; originalTimestamp: number }
-            >();
-
-            for (const op of ops) {
-              const firstRequestOperation = firstOperationById.get(op.id);
-              if (!firstRequestOperation) {
-                firstOperationById.set(op.id, {
-                  op,
-                  originalTimestamp: op.timestamp,
-                });
-              }
-              const validation =
-                prevalidatedResults.get(op) ??
-                this.validationService.validateOp(op, clientId);
-              prevalidatedResults.set(op, validation);
-
-              const { result, storageBytes, fallback } =
-                await this.operationUploadService.processOperation(
-                  userId,
-                  clientId,
-                  op,
-                  now,
-                  tx,
-                  validation,
-                  requestStartOccupiedIds?.has(op.id),
-                  firstRequestOperation,
-                );
-              results.push(result);
-              if (result.accepted) {
-                // Reuse the size computed in processOperation instead of
-                // re-measuring (the payload can be multi-MB).
-                acceptedDeltaBytes += storageBytes;
-                if (fallback) unserializableAccepted += 1;
-              }
+            const { result, storageBytes, fallback } =
+              await this.operationUploadService.processOperation(
+                userId,
+                clientId,
+                op,
+                now,
+                tx,
+                validation,
+                requestStartOccupiedIds?.has(op.id),
+                firstRequestOperation,
+              );
+            results.push(result);
+            if (result.accepted) {
+              // Reuse the size computed in processOperation instead of
+              // re-measuring (the payload can be multi-MB).
+              acceptedDeltaBytes += storageBytes;
+              if (fallback) unserializableAccepted += 1;
             }
           }
 
+          // Only an import moves the fence. An accepted causal REPAIR is
+          // deliberately NOT recorded here: the fence carries import semantics
+          // (the client drops concurrent ops at one), while a repair replays
+          // concurrent work on top. `resolveRetainedReplacementSeq` treats a
+          // REPAIR as a boundary only as a stand-in for an import row that
+          // pruning already deleted — a case that cannot exist at this point in
+          // an upload. See that resolver's comment before widening this (#9703).
           let latestAcceptedStateReplacementSeq: number | undefined;
           for (let index = 0; index < ops.length; index++) {
             const op = ops[index];
@@ -520,8 +489,6 @@ export class SyncService {
           });
           uploadDbRoundtrips++;
 
-          if (this.config.batchUpload && acceptedDeltaBytes === 0) return;
-
           // W1: write the storage counter as the LAST statement before COMMIT
           // so the row-level write lock on `users` is held for only the
           // commit round-trip, not for the entire 60s transaction window.
@@ -552,9 +519,8 @@ export class SyncService {
           // Default Prisma timeout (5s) is too short for these. Use 60s to match generateSnapshot.
           timeout: 60000,
           // FIX 1.6: Set explicit isolation level for strict consistency.
-          // The serial path also performs the legacy post-sequence conflict re-check.
-          // The batch path serializes accepted writers through the shared
-          // user_sync_state.last_seq row update; see ARCHITECTURE-DECISIONS.md.
+          // Accepted writers serialize through the shared
+          // user_sync_state.last_seq row update; see ARCHITECTURE-DECISIONS.md #4.
           isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead,
         },
       );
@@ -577,7 +543,6 @@ export class SyncService {
         rejected: results.length - accepted,
         txDurationMs: Date.now() - txStartedAt,
         dbRoundtrips: uploadDbRoundtrips,
-        batchUpload: this.config.batchUpload,
       });
     } catch (err) {
       if (err instanceof CleanSlateUploadRejectedError) {
@@ -595,7 +560,6 @@ export class SyncService {
       // PostgreSQL uses 40001 (serialization_failure) and 40P01 (deadlock_detected)
       const isSerializationFailure =
         (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2034') ||
-        (this.config.batchUpload && isRetryableOperationUniqueViolation(err)) ||
         errorMessage.includes('40001') ||
         errorMessage.includes('40P01') ||
         errorMessage.toLowerCase().includes('serialization') ||
@@ -837,10 +801,6 @@ export class SyncService {
   // === Storage Quota ===
   // Delegated to StorageQuotaService
 
-  async assertPayloadBytesBackfillComplete(): Promise<void> {
-    return this.storageQuotaService.assertPayloadBytesBackfillComplete();
-  }
-
   async checkStorageQuota(
     userId: number,
     additionalBytes: number,
@@ -906,6 +866,42 @@ export class SyncService {
   }
 
   /**
+   * Delete pending passkey registrations whose verification token expired
+   * before `beforeTime`. Expiry is otherwise only enforced at read time
+   * (verifyEmail), so rows for abandoned registration attempts — including
+   * their credential public keys — would linger forever.
+   */
+  async deleteExpiredPendingPasskeyRegistrations(beforeTime: number): Promise<number> {
+    const result = await prisma.pendingPasskeyRegistration.deleteMany({
+      where: { verificationTokenExpiresAt: { lt: BigInt(beforeTime) } },
+    });
+    return result.count;
+  }
+
+  /**
+   * Delete unverified users created before `createdBefore` with no registration
+   * still in flight: no pending passkey registration row and no unexpired
+   * verification token (re-registering refreshes the token on the same row).
+   * Verified users can never match, and unverified users are denied auth, so
+   * nothing of value is lost when their related rows (operations, devices,
+   * sync state, passkeys, pending registrations) cascade on delete.
+   */
+  async deleteAbandonedUnverifiedUsers(createdBefore: number): Promise<number> {
+    const result = await prisma.user.deleteMany({
+      where: {
+        isVerified: 0,
+        createdAt: { lt: new Date(createdBefore) },
+        pendingPasskeyRegistrations: { none: {} },
+        OR: [
+          { verificationTokenExpiresAt: null },
+          { verificationTokenExpiresAt: { lt: BigInt(Date.now()) } },
+        ],
+      },
+    });
+    return result.count;
+  }
+
+  /**
    * Delete ALL sync data for a user. Used for encryption password changes.
    * Deletes operations, devices, and resets sync state.
    */
@@ -959,7 +955,7 @@ export const getSyncService = (): SyncService => {
   return syncServiceInstance;
 };
 
-export const initSyncService = (config?: Partial<SyncConfig>): SyncService => {
-  syncServiceInstance = new SyncService(config);
+export const initSyncService = (): SyncService => {
+  syncServiceInstance = new SyncService();
   return syncServiceInstance;
 };

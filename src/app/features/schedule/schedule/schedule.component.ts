@@ -44,6 +44,7 @@ import { DEFAULT_FIRST_DAY_OF_WEEK } from '../../../core/locale.constants';
 import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 import { getWeekNumber } from '../../../util/get-week-number';
 import { parseDbDateStr } from '../../../util/parse-db-date-str';
+import { anchorContextNow } from '../anchor-context-now';
 
 @Component({
   selector: 'schedule',
@@ -245,36 +246,32 @@ export class ScheduleComponent {
     return cfg !== null && cfg !== undefined ? cfg : DEFAULT_FIRST_DAY_OF_WEEK;
   });
 
-  // Calculate context-aware "now" based on selected date
-  // When viewing a future week, use the start of that week as reference time
+  // Calculate context-aware "now" anchored to the first displayed day
+  // When viewing a future range, use the start of that range as reference time
   private _contextNow = computed(() => {
     // Date.now() is not reactive and computeds cache, so without a time-varying
     // dependency the reference would freeze at whatever instant this last ran.
     // Same 2-min tick currentTimeRow and scheduleDays already refresh on.
     this.scheduleService.scheduleRefreshTick();
 
-    const selectedDate = this._selectedDate();
-    if (selectedDate === null) {
+    // contextNow anchors dayDates[0] (`startTime = i == 0 ? now` in
+    // create-schedule-days), so it has to stay inside that day. Day 0 is not
+    // always the selected date: month view pads the grid back to the start of
+    // the week containing the 1st, so its first cell usually sits in the
+    // previous month, and deriving the anchor from the selected date stamped
+    // that cell with a timestamp from a different day. The bounds therefore
+    // come from daysToShow()[0] itself, via the same helper
+    // create-schedule-days resolves day bounds with. Testing where the wall
+    // clock sits within that day - rather than comparing day strings - lets
+    // the view self-correct once it drifts under a midnight rollover (a day
+    // picked as "tomorrow" becomes today while the view stays put), and can
+    // never hand the mapper a now past day 0's end, which would push every
+    // entry out of the column.
+    const firstDay = this.daysToShow()[0];
+    if (!firstDay) {
       return Date.now();
     }
-
-    // contextNow anchors dayDates[0] (`startTime = i == 0 ? now` in
-    // create-schedule-days), so it has to stay inside that day. Testing where the
-    // wall clock sits within the selected day - rather than comparing day strings -
-    // lets the view self-correct once it drifts under a midnight rollover (a day
-    // picked as "tomorrow" becomes today while the view stays put), and can never
-    // hand the mapper a now past day 0's end, which would push every entry out of
-    // the column.
-    const dayStart = new Date(selectedDate);
-    dayStart.setHours(0, 0, 0, 0);
-    // setDate rather than +24h: DST-safe day advancement.
-    const nextDayStart = new Date(dayStart);
-    nextDayStart.setDate(nextDayStart.getDate() + 1);
-
-    const now = Date.now();
-    return now >= dayStart.getTime() && now < nextDayStart.getTime()
-      ? now
-      : dayStart.getTime();
+    return anchorContextNow(firstDay, Date.now());
   });
 
   scheduleDays = computed(() => {

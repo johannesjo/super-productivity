@@ -35,7 +35,6 @@ import {
   expandFadeInOnlyAnimation,
 } from '../../../ui/animations/expand.ani';
 import { fadeAnimation } from '../../../ui/animations/fade.ani';
-import { swirlAnimation } from '../../../ui/animations/swirl-in-out.ani';
 import { DialogTimeEstimateComponent } from '../dialog-time-estimate/dialog-time-estimate.component';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
@@ -105,7 +104,6 @@ import { TaskContextMenuComponent } from '../task-context-menu/task-context-menu
     expandFadeAnimation,
     expandFadeInOnlyAnimation,
     fadeAnimation,
-    swirlAnimation,
   ],
   imports: [
     TaskTitleComponent,

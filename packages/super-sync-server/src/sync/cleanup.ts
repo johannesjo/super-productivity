@@ -12,6 +12,9 @@ const reconcileTimers: Set<NodeJS.Timeout> = new Set();
 const RECONCILE_INTERVAL_MS = 5_000;
 const RECONCILE_BUDGET_MS = 60 * 60 * 1000;
 const INITIAL_CLEANUP_DELAY_MS = 10_000;
+// Grace window before an abandoned (never-verified, nothing in flight) account is
+// deleted — reuses the unified retention period rather than adding a second knob.
+const UNVERIFIED_USER_GRACE_MS = DEFAULT_SYNC_CONFIG.retentionMs;
 
 /**
  * Runs all cleanup tasks in a single daily job.
@@ -25,11 +28,13 @@ const runDailyCleanup = async (): Promise<void> => {
   try {
     const { totalDeleted, affectedUserIds } =
       await syncService.deleteOldSyncedOpsForAllUsers(cutoffTime);
-    if (totalDeleted > 0) {
-      Logger.info(
-        `Cleanup [old-ops]: removed ${totalDeleted} entries (affected ${affectedUserIds.length} users)`,
-      );
-    }
+    // Logged unconditionally, INCLUDING zero. The 2026-08 fleet-wide retention outage was
+    // diagnosable only as an absence — an ERROR line with no accompanying "removed N" line
+    // — because this was gated on `totalDeleted > 0`, which makes "the sweep ran and had
+    // nothing to do" indistinguishable from "the sweep never got that far" in the log.
+    Logger.info(
+      `Cleanup [old-ops]: removed ${totalDeleted} entries (affected ${affectedUserIds.length} users)`,
+    );
     // Storage counter is maintained incrementally on uploads. Doing one full
     // pg_column_size scan per affected user inside this loop was a DoS — but
     // skipping reconcile entirely lets counters drift stale-high forever, so
@@ -69,6 +74,32 @@ const runDailyCleanup = async (): Promise<void> => {
     }
   } catch (error) {
     Logger.error(`Cleanup [request-dedup] failed: ${error}`);
+  }
+
+  // 5. Delete expired pending passkey registrations (expiry is otherwise only
+  // checked at read time, so abandoned rows would be retained forever)
+  try {
+    const deleted = await syncService.deleteExpiredPendingPasskeyRegistrations(
+      Date.now(),
+    );
+    if (deleted > 0) {
+      Logger.info(`Cleanup [pending-passkeys]: removed ${deleted} entries`);
+    }
+  } catch (error) {
+    Logger.error(`Cleanup [pending-passkeys] failed: ${error}`);
+  }
+
+  // 6. Delete abandoned unverified users (never verified, no registration still
+  // in flight, older than the grace window; verified users can never match)
+  try {
+    const deleted = await syncService.deleteAbandonedUnverifiedUsers(
+      Date.now() - UNVERIFIED_USER_GRACE_MS,
+    );
+    if (deleted > 0) {
+      Logger.info(`Cleanup [unverified-users]: removed ${deleted} entries`);
+    }
+  } catch (error) {
+    Logger.error(`Cleanup [unverified-users] failed: ${error}`);
   }
 };
 

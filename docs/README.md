@@ -14,6 +14,7 @@ Update these alongside the behavior or workflow they describe:
 - [Development environment variables](ENV_SETUP.md)
 - [Plugin development](plugin-development.md)
 - [Adding an issue integration](add-new-integration.md)
+- [Feature and PR review guide](feature-review-guide.md)
 - [Styling guide](styling-guide.md) and [theming contract](theming-contract.md)
 - [Android edge-to-edge and keyboard behavior](android-edge-to-edge-keyboard.md)
 - [Android home-screen widget](android-home-screen-widget.md)
@@ -73,7 +74,10 @@ it wrong: any claim about which releases carry a change must be re-derived with
 any code changing.
 
 - [Recurring events implementation plan](research/recurring-events-implementation-plan.md)
-- [Snap Wayland GPU fix](research/snap-wayland-gpu-fix-research.md)
+- [Snap Wayland GPU root cause and shipped fix](research/snap-wayland-gpu-fix-research.md)
+  — kept past its research life because `electron-builder.yaml`,
+  `tools/afterPack.js` and `build/linux/snap-wrapper.sh` cite it for the reason
+  their guards exist
 
 ## Review checklist
 

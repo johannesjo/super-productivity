@@ -6,6 +6,7 @@ import {
   OperationLogEntry,
   VectorClock,
   isFullStateOpType,
+  isGenesisEntityType,
   FULL_STATE_OP_TYPES,
 } from '../core/operation.types';
 import { StorageQuotaExceededError } from '../core/errors/sync-errors';
@@ -24,7 +25,6 @@ import {
   RAW_REBUILD_RECOVERY_META_KEY,
   OPS_INDEXES,
   ArchiveStoreEntry,
-  ProfileDataStoreEntry,
 } from './db-keys.const';
 import {
   buildFullStateOpsMeta,
@@ -308,14 +308,6 @@ interface OpLogDB extends DBSchema {
   [STORE_NAMES.ARCHIVE_OLD]: {
     key: string; // SINGLETON_KEY ('current')
     value: ArchiveStoreEntry;
-  };
-  /**
-   * Stores profile data (CompleteBackup) for user profile switching.
-   * Moved from localStorage to avoid 5-10 MB quota limits.
-   */
-  [STORE_NAMES.PROFILE_DATA]: {
-    key: string; // profile ID
-    value: ProfileDataStoreEntry;
   };
   /**
    * Stores the sync clientId (device identity). Consolidated from legacy 'pf'
@@ -1048,7 +1040,7 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
           let preAppendLastSeq = 0;
           await tx.iterate<StoredOperationLogEntry>(
             STORE_NAMES.OPS,
-            { direction: 'prev' },
+            { direction: 'prev', limit: 1 },
             (_value, key) => {
               if (typeof key !== 'number') {
                 throw new Error('Operation sequence key is not numeric');
@@ -1194,7 +1186,7 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
           let preAppendLastSeq = 0;
           await tx.iterate<StoredOperationLogEntry>(
             STORE_NAMES.OPS,
-            { direction: 'prev' },
+            { direction: 'prev', limit: 1 },
             (_value, key) => {
               if (typeof key !== 'number') {
                 throw new Error('Operation sequence key is not numeric');
@@ -1534,11 +1526,10 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
     await this._ensureInit();
     let storedEntries: StoredOperationLogEntry[];
     try {
-      // Exact compound-key match expressed as a degenerate [k, k] range.
       storedEntries = await this._adapter.getAllFromIndex<StoredOperationLogEntry>(
         STORE_NAMES.OPS,
         OPS_INDEXES.BY_SOURCE_AND_STATUS,
-        { lower: ['remote', 'pending'], upper: ['remote', 'pending'] },
+        ['remote', 'pending'],
       );
     } catch (e) {
       // Fallback for databases created before version 3 index migration
@@ -2004,15 +1995,12 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
         this._adapter.getAllFromIndex<StoredOperationLogEntry>(
           STORE_NAMES.OPS,
           OPS_INDEXES.BY_SOURCE_AND_STATUS,
-          {
-            lower: ['remote', 'archive_pending'],
-            upper: ['remote', 'archive_pending'],
-          },
+          ['remote', 'archive_pending'],
         ),
         this._adapter.getAllFromIndex<StoredOperationLogEntry>(
           STORE_NAMES.OPS,
           OPS_INDEXES.BY_SOURCE_AND_STATUS,
-          { lower: ['remote', 'failed'], upper: ['remote', 'failed'] },
+          ['remote', 'failed'],
         ),
       ]);
       storedEntries = [...archivePendingEntries, ...failedEntries];
@@ -2081,14 +2069,29 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
       // Pure read on the hottest path (getUnsynced/getAppliedOpIds); readonly
       // so it takes no exclusive write lock. On IndexedDB it runs concurrently
       // with appends; on the single-connection SQLite backend it queues in the
-      // shared serializer but holds it only for one SELECT (no BEGIN…COMMIT).
-      { direction: 'prev', mode: 'readonly' },
+      // shared serializer for one `SELECT … LIMIT 1` (no BEGIN…COMMIT).
+      { direction: 'prev', mode: 'readonly', limit: 1 },
       (_value, key) => {
         lastSeq = key as number;
         return 'stop';
       },
     );
     return lastSeq;
+  }
+
+  /** First (lowest-seq) entry, or undefined when empty. Decodes one row (#9921). */
+  async getFirstOpEntry(): Promise<OperationLogEntry | undefined> {
+    await this._ensureInit();
+    let firstEntry: OperationLogEntry | undefined;
+    await this._adapter.iterate<StoredOperationLogEntry>(
+      STORE_NAMES.OPS,
+      { mode: 'readonly' },
+      (value) => {
+        firstEntry = decodeStoredEntry(value);
+        return 'stop';
+      },
+    );
+    return firstEntry;
   }
 
   /**
@@ -2104,20 +2107,14 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
   }
 
   /**
-   * Checks if there are any operations that have been synced to the server.
-   * Used to distinguish between:
-   * - Fresh client (only local ops, never synced) → NOT a server migration
-   * - Client that previously synced (has synced ops) → Server migration scenario
-   *
-   * NOTE: Excludes MIGRATION and RECOVERY entity types from the check.
-   * These are special ops created during local migration from legacy data and
-   * don't represent real sync history with a remote server. Including them
-   * would incorrectly trigger server migration when multiple clients with
-   * legacy data join a new sync group.
+   * Whether any op was ever synced with a server: false for a fresh client
+   * (local ops only), true for one that synced before (server-migration case).
+   * Genesis ops (isGenesisEntityType) don't count — they come from the local
+   * legacy migration, and counting them would trigger server migration when
+   * several legacy clients join a new sync group.
    */
   async hasSyncedOps(): Promise<boolean> {
     await this._ensureInit();
-    // Use the bySyncedAt index to find synced ops, but exclude MIGRATION/RECOVERY
     let foundRealSyncedOp = false;
     await this._adapter.iterate<StoredOperationLogEntry>(
       STORE_NAMES.OPS,
@@ -2127,8 +2124,7 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
         const op = value.op;
         // Handle both compact format ('e') and full format ('entityType')
         const entityType = isCompactOperation(op) ? op.e : (op as Operation).entityType;
-        // Skip MIGRATION and RECOVERY entity types - they're not real sync history
-        if (entityType !== 'MIGRATION' && entityType !== 'RECOVERY') {
+        if (!isGenesisEntityType(entityType)) {
           foundRealSyncedOp = true;
           return 'stop';
         }
@@ -2354,7 +2350,6 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
       STORE_NAMES.VECTOR_CLOCK,
       STORE_NAMES.ARCHIVE_YOUNG,
       STORE_NAMES.ARCHIVE_OLD,
-      STORE_NAMES.PROFILE_DATA,
       STORE_NAMES.CLIENT_ID,
       STORE_NAMES.META,
     ];
@@ -3228,47 +3223,6 @@ export class OperationLogStoreService implements RemoteOperationApplyStorePort<O
       }
       throw e;
     }
-  }
-  // ============================================================
-  // Profile Data Storage
-  // ============================================================
-
-  /**
-   * Saves profile data (CompleteBackup) for a specific profile.
-   */
-  async saveProfileData(
-    profileId: string,
-    data: ProfileDataStoreEntry['data'],
-  ): Promise<void> {
-    await this._ensureInit();
-    await this._adapter.put(STORE_NAMES.PROFILE_DATA, {
-      id: profileId,
-      data,
-      lastModified: Date.now(),
-    });
-  }
-
-  /**
-   * Loads profile data (CompleteBackup) for a specific profile.
-   * Returns null if no data exists for the given profile ID.
-   */
-  async loadProfileData(
-    profileId: string,
-  ): Promise<ProfileDataStoreEntry['data'] | null> {
-    await this._ensureInit();
-    const entry = await this._adapter.get<ProfileDataStoreEntry>(
-      STORE_NAMES.PROFILE_DATA,
-      profileId,
-    );
-    return entry?.data ?? null;
-  }
-
-  /**
-   * Deletes profile data for a specific profile.
-   */
-  async deleteProfileData(profileId: string): Promise<void> {
-    await this._ensureInit();
-    await this._adapter.delete(STORE_NAMES.PROFILE_DATA, profileId);
   }
 }
 

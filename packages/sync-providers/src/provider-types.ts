@@ -130,6 +130,7 @@ export interface OpUploadResponse {
   newOps?: ServerSyncOperation[];
   latestSeq: number;
   hasMorePiggyback?: boolean;
+  deduplicated?: boolean;
 }
 
 export interface OpDownloadResponseBase {
@@ -140,7 +141,7 @@ export interface OpDownloadResponseBase {
   snapshotVectorClock?: VectorClock;
   serverTime?: number;
   capabilities?: {
-    causalRepairSnapshots?: true;
+    causalRepairSnapshots?: boolean;
   };
 }
 
