@@ -20,6 +20,7 @@ const CARD_FIELDS =
 const MEMBER_FIELDS = 'fullName,username';
 const ATTACHMENT_FIELDS = 'id,name,url,bytes,date,mimeType';
 const BOARD_FIELDS = 'name,id';
+const LIST_FIELDS = 'name,id';
 
 interface TrelloConfig {
   apiKey?: string;
@@ -28,6 +29,11 @@ interface TrelloConfig {
   boardName?: string;
   filterUsername?: string;
   defaultListId?: string;
+}
+
+interface TrelloList {
+  id: string;
+  name: string;
 }
 
 interface TrelloLabel {
@@ -244,6 +250,27 @@ const loadBoards = async (
   return mergeUniqueBoards(all).map((b) => ({ label: b.name, value: b.id }));
 };
 
+// --- Load lists for the config dropdown ---
+
+const loadLists = async (
+  config: Record<string, unknown>,
+  http: PluginHttp,
+): Promise<{ label: string; value: string }[]> => {
+  const cfg = config as unknown as TrelloConfig;
+  if (!cfg.apiKey || !cfg.token || !cfg.boardId) {
+    return [];
+  }
+
+  const lists = await http
+    .get<TrelloList[]>(`${TRELLO_API}/boards/${cfg.boardId}/lists`, {
+      params: { filter: 'open', fields: LIST_FIELDS },
+    })
+    .catch(() => [] as TrelloList[]);
+
+  const arr = Array.isArray(lists) ? lists : [];
+  return arr.map((l) => ({ label: l.name, value: l.id }));
+};
+
 PluginAPI.registerIssueProvider({
   configFields: [
     {
@@ -275,17 +302,17 @@ PluginAPI.registerIssueProvider({
       loadOptions: loadBoards,
     },
     {
+      key: 'defaultListId',
+      type: 'select',
+      label: t('CFG.DEFAULT_LIST_ID'),
+      description: t('CFG.DEFAULT_LIST_ID_DESC'),
+      loadOptions: loadLists,
+    },
+    {
       key: 'filterUsername',
       type: 'input',
       label: t('CFG.FILTER_USERNAME'),
       description: t('CFG.FILTER_USERNAME_DESC'),
-      advanced: true,
-    },
-    {
-      key: 'defaultListId',
-      type: 'input',
-      label: t('CFG.DEFAULT_LIST_ID'),
-      description: t('CFG.DEFAULT_LIST_ID_DESC'),
       advanced: true,
     },
   ],
@@ -416,13 +443,6 @@ PluginAPI.registerIssueProvider({
       toIssueValue: (taskValue: unknown): string => (taskValue as string) ?? '',
       toTaskValue: (issueValue: unknown): string => (issueValue as string) ?? '',
     },
-    {
-      taskField: 'notes',
-      issueField: 'body',
-      defaultDirection: 'off',
-      toIssueValue: (taskValue: unknown): string => (taskValue as string) ?? '',
-      toTaskValue: (issueValue: unknown): string => (issueValue as string) ?? '',
-    },
   ] satisfies PluginFieldMapping[],
 
   async updateIssue(
@@ -437,9 +457,6 @@ PluginAPI.registerIssueProvider({
     }
     if ('title' in changes) {
       cardChanges['name'] = changes['title'];
-    }
-    if ('body' in changes) {
-      cardChanges['desc'] = changes['body'];
     }
     await http.put(`${TRELLO_API}/cards/${id}`, cardChanges);
   },
@@ -463,19 +480,10 @@ PluginAPI.registerIssueProvider({
     };
   },
 
-  async deleteIssue(
-    id: string,
-    _config: Record<string, unknown>,
-    http: PluginHttp,
-  ): Promise<void> {
-    await http.put(`${TRELLO_API}/cards/${id}`, { closed: true });
-  },
-
   extractSyncValues(issue: PluginIssue): Record<string, unknown> {
     return {
       state: issue.state,
       title: issue.title,
-      body: issue.body,
     };
   },
 } satisfies IssueProviderPluginDefinition as IssueProviderPluginDefinition);
