@@ -986,6 +986,10 @@
       "D_DELETE": {
         "MSG": "Are you sure you want to delete the project \"{{title}}\"?"
       },
+      "D_RENAME": {
+        "LABEL": "Project name",
+        "PLACEHOLDER": "Enter project name"
+      },
       "COMPLETE": {
         "COMPLETED_ON": "Completed {{date}}",
         "REOPEN": "Reopen",
@@ -1758,6 +1762,10 @@
       "D_DELETE": {
         "CONFIRM_MSG": "Do you really want to delete the tag \"{{tagName}}\"? It will be removed from all tasks. This cannot be undone!"
       },
+      "D_RENAME": {
+        "LABEL": "Tag name",
+        "PLACEHOLDER": "Enter tag name"
+      },
       "D_EDIT": {
         "ADD": "Add tags for \"{{title}}\"",
         "EDIT": "Edit tags for \"{{title}}\"",
@@ -2426,6 +2434,7 @@
     "PASSWORD_STRENGTH_WEAK": "Weak",
     "PROCESSING": "Processing",
     "REMOVE": "Remove",
+    "RENAME": "Rename",
     "SAVE": "Save",
     "SHARE": "Share",
     "SUBMIT": "Submit",
