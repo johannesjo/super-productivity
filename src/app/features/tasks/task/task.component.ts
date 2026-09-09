@@ -1246,7 +1246,6 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   focusTitleForEdit(): void {
     const taskTitleEditEl = this.taskTitleEditEl();
     if (!taskTitleEditEl) {
-      TaskLog.log(taskTitleEditEl);
       throw new Error('No el');
     }
     taskTitleEditEl.focusInput();
@@ -1332,9 +1331,9 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
               targetProject,
             ]) => {
               TaskLog.log({
-                reminderCfg,
-                nonArchiveInstancesWithSubTasks,
-                archiveInstances,
+                hasReminderCfg: !!reminderCfg,
+                nonArchiveInstanceCount: nonArchiveInstancesWithSubTasks.length,
+                archiveInstanceCount: archiveInstances.length,
               });
 
               // Repeat config was deleted (e.g. via cross-client sync) but the task
