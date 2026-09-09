@@ -9,8 +9,6 @@ import { OperationLogUploadService } from '../../sync/operation-log-upload.servi
 import { OperationLogDownloadService } from '../../sync/operation-log-download.service';
 import { OperationEncryptionService } from '../../sync/operation-encryption.service';
 import { OperationLogStoreService } from '../../persistence/operation-log-store.service';
-import { OperationLogCompactionService } from '../../persistence/operation-log-compaction.service';
-import { COMPACTION_RETENTION_MS } from '../../core/operation-log.const';
 import { VectorClockService } from '../../sync/vector-clock.service';
 import { OperationApplierService } from '../../apply/operation-applier.service';
 import { ConflictResolutionService } from '../../sync/conflict-resolution.service';
@@ -27,7 +25,7 @@ import {
 } from '../../sync-providers/provider.interface';
 import { SyncProviderId } from '../../sync-providers/provider.const';
 import type { SuperSyncPrivateCfg } from '@sp/sync-providers/super-sync';
-import { ActionType, Operation, OpType, VectorClock } from '../../core/operation.types';
+import { ActionType, Operation, OpType } from '../../core/operation.types';
 import { UserInputWaitStateService } from '../../../imex/sync/user-input-wait-state.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { resetTestUuidCounter } from './helpers/test-client.helper';
@@ -40,7 +38,6 @@ import { RemoteOpsProcessingService } from '../../sync/remote-ops-processing.ser
 import { RejectedOpsHandlerService } from '../../sync/rejected-ops-handler.service';
 import { SyncHydrationService } from '../../persistence/sync-hydration.service';
 import { SyncImportFilterService } from '../../sync/sync-import-filter.service';
-import { SyncImportConflictDialogService } from '../../sync/sync-import-conflict-dialog.service';
 import { OperationLogEffects } from '../../capture/operation-log.effects';
 import { clearDeferredActions } from '../../capture/operation-capture.meta-reducer';
 import { createValidAppData } from '../../validation/state-validity-test-utils';
@@ -48,37 +45,24 @@ import { DEFAULT_GLOBAL_CONFIG } from '../../../features/config/default-global-c
 import { selectSyncConfig } from '../../../features/config/store/global-config.reducer';
 import { CLIENT_ID_PROVIDER } from '../../util/client-id.provider';
 
+import { BackupService } from '../../backup/backup.service';
+import { T } from '../../../t.const';
+
 /**
- * A forced seq-0 download re-delivers ops that compaction already pruned from
- * the local log. This spec drives the REAL store, compaction, download service,
- * conflict gate and sync service (only state application and UI are mocked)
- * through the scenario the unit specs can only stub:
- *
- * 1. An installed client applies another device's SYNC_IMPORT plus follow-up ops.
- * 2. The 7-day retention window elapses; real compaction prunes them, so the
- *    applied-id filter no longer knows the import.
- * 3. A forced seq-0 download (concurrent-rejection retry, provider switch)
- *    re-delivers the import. It must NOT resurface as a new incoming import
- *    while local work is pending — that is the sync-import conflict dialog
- *    from the field report, whose every answer destroys data.
- *
- * The second case guards the filter's false-positive edge: an op the local
- * clock covers only because the rejection resolver merged its clock, but
- * that was never applied because it is schema-blocked, sits ABOVE the cursor
- * and must still be delivered (and stay blocked).
+ * "Use server data" captures a FORCE_DOWNLOAD recovery point, replaces the
+ * local baseline, replays the server history and then verifies that the undo
+ * pointer still names that capture before offering Undo. The replay goes
+ * through the same full-state path that captures a REMOTE_IMPORT recovery
+ * point during normal sync; without `skipRecoveryPoint` a REPAIR in the
+ * history would move the pointer and silently drop the Undo offer
+ * (local-recovery-points.md). This spec drives the REAL store, backup service,
+ * remote-ops processing and sync service (only state application and UI are
+ * mocked) through that history.
  */
 
 const IMPORTER = 'importer-client';
-const OTHER = 'other-client';
-const SHARED_TASK_ID = 'shared-task';
 
-/**
- * In-memory SuperSync stand-in with the two server behaviours that matter here:
- * real per-op `serverSeq`, and the seq-0 fast-forward to the latest full-state
- * op (super-sync-server `operation-download.service.ts`). Own ops are excluded
- * like the real endpoint does.
- */
-class PrunedImportSyncProvider
+class RebuildSyncProvider
   implements SyncProviderBase<SyncProviderId>, OperationSyncCapable
 {
   id = SyncProviderId.SuperSync;
@@ -173,14 +157,13 @@ class PrunedImportSyncProvider
   }
 }
 
-describe('Forced seq-0 download after compaction pruned an applied SYNC_IMPORT (integration)', () => {
+describe('Force download rebuild keeps its own recovery point (integration)', () => {
   let syncService: OperationLogSyncService;
-  let downloadService: OperationLogDownloadService;
-  let compactionService: OperationLogCompactionService;
   let opLogStore: OperationLogStoreService;
-  let provider: PrunedImportSyncProvider;
+  let backupService: BackupService;
+  let provider: RebuildSyncProvider;
   let applierSpy: jasmine.SpyObj<OperationApplierService>;
-  let showConflictDialogSpy: jasmine.Spy;
+  let snackSpy: jasmine.SpyObj<SnackService>;
   let ownClientId: string;
 
   const serverOp = (serverSeq: number, op: SyncOperation): ServerSyncOperation => ({
@@ -202,102 +185,20 @@ describe('Forced seq-0 download after compaction pruned an applied SYNC_IMPORT (
     syncImportReason: 'PASSWORD_CHANGED',
   });
 
-  const remoteTaskUpdate = (
-    id: string,
-    clientId: string,
-    vectorClock: VectorClock,
-    schemaVersion = CURRENT_SCHEMA_VERSION,
-  ): SyncOperation => ({
-    id,
-    clientId,
-    actionType: '[Task] Update Task' as ActionType,
-    opType: OpType.Update,
-    entityType: 'TASK',
-    entityId: SHARED_TASK_ID,
-    payload: { task: { id: SHARED_TASK_ID, changes: { title: id } } },
-    vectorClock,
-    timestamp: Date.now(),
-    schemaVersion,
-  });
-
-  const localTaskUpdate = (id: string, vectorClock: VectorClock): Operation => ({
-    id,
-    clientId: ownClientId,
-    actionType: '[Task] Update Task' as ActionType,
-    opType: OpType.Update,
-    entityType: 'TASK',
-    entityId: SHARED_TASK_ID,
-    payload: { task: { id: SHARED_TASK_ID, changes: { title: id } } },
-    vectorClock,
+  const remoteRepair = (): SyncOperation => ({
+    id: 'remote-repair',
+    clientId: IMPORTER,
+    actionType: ActionType.LOAD_ALL_DATA,
+    opType: OpType.Repair,
+    entityType: 'ALL',
+    payload: {
+      appDataComplete: structuredClone(createValidAppData()),
+      repairSummary: {},
+    },
+    vectorClock: { [IMPORTER]: 2 },
     timestamp: Date.now(),
     schemaVersion: CURRENT_SCHEMA_VERSION,
   });
-
-  /** Appends a local op whose clock extends the durable clock by one own tick. */
-  const appendPendingLocalOp = async (
-    id: string,
-    extraClock: VectorClock = {},
-  ): Promise<Operation> => {
-    const durable = (await opLogStore.getVectorClock()) ?? {};
-    const clock: VectorClock = { ...durable, ...extraClock };
-    clock[ownClientId] = (clock[ownClientId] ?? 0) + 1;
-    const op = localTaskUpdate(id, clock);
-    await opLogStore.appendWithVectorClockOverwrite(op, 'local');
-    return op;
-  };
-
-  const forcedDownloadNewOpIds = async (): Promise<string[]> => {
-    const result = await downloadSpy.calls.mostRecent().returnValue;
-    return result.newOps.map((op) => op.id);
-  };
-  let downloadSpy: jasmine.Spy<OperationLogDownloadService['downloadRemoteOps']>;
-
-  /**
-   * Seeds the log the way real history does: the import and two follow-up ops
-   * arrive through the normal download path more than a retention window ago;
-   * one more follow-up arrives recently, so the client still counts as synced
-   * after compaction (exactly the state of a device that syncs daily).
-   */
-  const seedAppliedImportAndCompact = async (): Promise<void> => {
-    const oneHourMs = 60 * 60 * 1000;
-    const nowSpy = spyOn(Date, 'now').and.returnValue(
-      new Date().getTime() - COMPACTION_RETENTION_MS - oneHourMs,
-    );
-    // An installed client always carries a state cache from an earlier
-    // compaction. Without one, the first ordinary remote batch fires a
-    // background compaction (old snapshot format path) that would race the
-    // assertions below.
-    expect(await compactionService.compact()).toBeTrue();
-    provider.serverOps = [
-      serverOp(1, remoteSyncImport()),
-      serverOp(2, remoteTaskUpdate('importer-update-1', IMPORTER, { [IMPORTER]: 2 })),
-      serverOp(3, remoteTaskUpdate('importer-update-2', IMPORTER, { [IMPORTER]: 3 })),
-    ];
-    const oldOutcome = await syncService.downloadRemoteOps(provider);
-    expect(oldOutcome.kind).toBe('ops_processed');
-    nowSpy.and.callThrough();
-
-    provider.serverOps.push(
-      serverOp(4, remoteTaskUpdate('importer-update-3', IMPORTER, { [IMPORTER]: 4 })),
-    );
-    const recentOutcome = await syncService.downloadRemoteOps(provider);
-    expect(recentOutcome.kind).toBe('ops_processed');
-
-    // Precondition guards: everything applied, cursor advanced, clock covers it.
-    expect(await opLogStore.hasOp('remote-sync-import')).toBeTrue();
-    expect(await provider.getLastServerSeq()).toBe(4);
-    expect((await opLogStore.getVectorClock())?.[IMPORTER]).toBe(4);
-
-    // Real compaction with the production retention window.
-    expect(await compactionService.compact()).toBeTrue();
-    expect(await opLogStore.hasOp('remote-sync-import')).toBeFalse();
-    expect(await opLogStore.hasOp('importer-update-2')).toBeFalse();
-    expect(await opLogStore.hasOp('importer-update-3')).toBeTrue();
-    expect(await opLogStore.getLatestFullStateOpEntry()).toBeUndefined();
-    expect(await opLogStore.hasSyncedOps()).toBeTrue();
-    // Compaction keeps the durable clock, which is what the fix relies on.
-    expect((await opLogStore.getVectorClock())?.[IMPORTER]).toBe(4);
-  };
 
   beforeEach(async () => {
     if (!(window.confirm as jasmine.Spy).and) {
@@ -328,6 +229,11 @@ describe('Forced seq-0 download after compaction pruned an applied SYNC_IMPORT (
       'startWaiting',
     ]);
     waitServiceSpy.startWaiting.and.returnValue(() => {});
+    snackSpy = jasmine.createSpyObj('SnackService', [
+      'open',
+      'hasPendingPersistentAction',
+    ]);
+    snackSpy.hasPendingPersistentAction.and.returnValue(false);
     const dialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
     dialogSpy.open.and.returnValue({ afterClosed: () => of(true) });
     const superSyncStatusSpy = jasmine.createSpyObj('SuperSyncStatusService', [
@@ -344,8 +250,10 @@ describe('Forced seq-0 download after compaction pruned an applied SYNC_IMPORT (
     const writeFlushSpy = jasmine.createSpyObj('OperationWriteFlushService', [
       'flushPendingWrites',
       'flushThenRunExclusive',
+      'hasPendingWrites',
     ]);
     writeFlushSpy.flushPendingWrites.and.resolveTo();
+    writeFlushSpy.hasPendingWrites.and.returnValue(false);
     writeFlushSpy.flushThenRunExclusive.and.callFake(
       async <T>(fn: () => Promise<T>): Promise<T> => fn(),
     );
@@ -377,7 +285,6 @@ describe('Forced seq-0 download after compaction pruned an applied SYNC_IMPORT (
         OperationLogSyncService,
         OperationLogUploadService,
         OperationLogDownloadService,
-        OperationLogCompactionService,
         OperationEncryptionService,
         OperationLogStoreService,
         LockService,
@@ -408,13 +315,7 @@ describe('Forced seq-0 download after compaction pruned an applied SYNC_IMPORT (
             'createRepairOperation',
           ]),
         },
-        {
-          provide: SnackService,
-          useValue: jasmine.createSpyObj('SnackService', [
-            'open',
-            'hasPendingPersistentAction',
-          ]),
-        },
+        { provide: SnackService, useValue: snackSpy },
         { provide: MatDialog, useValue: dialogSpy },
         { provide: UserInputWaitStateService, useValue: waitServiceSpy },
         {
@@ -429,73 +330,94 @@ describe('Forced seq-0 download after compaction pruned an applied SYNC_IMPORT (
     });
 
     syncService = TestBed.inject(OperationLogSyncService);
-    downloadService = TestBed.inject(OperationLogDownloadService);
-    compactionService = TestBed.inject(OperationLogCompactionService);
     opLogStore = TestBed.inject(OperationLogStoreService);
-    // CANCEL keeps a regression on the assertions below instead of turning it
-    // into a state replacement that fails somewhere deeper.
-    showConflictDialogSpy = spyOn(
-      TestBed.inject(SyncImportConflictDialogService),
-      'showConflictDialog',
-    ).and.resolveTo('CANCEL');
-    downloadSpy = spyOn(downloadService, 'downloadRemoteOps').and.callThrough();
-    provider = new PrunedImportSyncProvider();
+    provider = new RebuildSyncProvider();
 
     await opLogStore.init();
     await opLogStore._clearAllDataForTesting();
     resetTestUuidCounter();
     clearDeferredActions();
     ownClientId = await TestBed.inject(CLIENT_ID_PROVIDER).getOrGenerateClientId();
+    backupService = TestBed.inject(BackupService);
+    provider.serverOps = [serverOp(1, remoteSyncImport()), serverOp(2, remoteRepair())];
   });
 
-  it('does not treat the re-delivered, already-applied import as a new incoming import while local work is pending', async () => {
-    await seedAppliedImportAndCompact();
-    const pendingOp = await appendPendingLocalOp('local-concurrent-edit');
-    applierSpy.applyOperations.calls.reset();
+  it('offers Undo for the FORCE_DOWNLOAD capture although the replayed history holds a REPAIR', async () => {
+    expect(ownClientId).toBeTruthy();
 
-    const outcome = await syncService.downloadRemoteOps(provider, {
-      forceFromSeq0: true,
-    });
+    await syncService.forceDownloadRemoteState(provider);
 
-    // Server re-delivered 1..4 (fast-forwarded to the import); 1..3 are behind
-    // the cursor and covered by the clock, 4 is still in the applied-id set.
-    expect(await forcedDownloadNewOpIds()).toEqual([]);
-    expect(showConflictDialogSpy).not.toHaveBeenCalled();
-    expect(outcome.kind).toBe('no_new_ops');
-    expect(applierSpy.applyOperations).not.toHaveBeenCalled();
-    expect(await opLogStore.hasOp('remote-sync-import')).toBeFalse();
-    // The pending local work survives untouched (neither discarded nor rejected).
-    const pendingIds = (await opLogStore.getUnsynced()).map((entry) => entry.op.id);
-    expect(pendingIds).toEqual([pendingOp.id]);
-    expect(await provider.getLastServerSeq()).toBe(4);
-  });
-
-  it('still delivers a schema-blocked op above the cursor even though the local clock already covers it', async () => {
-    await seedAppliedImportAndCompact();
-    // A device on a newer app version uploads an op this client cannot apply.
-    const newerSchemaOp = remoteTaskUpdate(
-      'newer-schema-op',
-      OTHER,
-      { [IMPORTER]: 4, [OTHER]: 1 },
-      CURRENT_SCHEMA_VERSION + 1,
+    const ring = await opLogStore.listImportBackups();
+    expect(ring.map((entry) => entry.reason)).toEqual(['FORCE_DOWNLOAD']);
+    expect((await opLogStore.loadImportBackup())?.backupId).toBe(ring[0].backupId);
+    expect(await opLogStore.loadRawRebuildIncomplete()).toBeNull();
+    expect(snackSpy.open).toHaveBeenCalledWith(
+      jasmine.objectContaining({ msg: T.F.SYNC.S.LOCAL_DATA_REPLACE_UNDO }),
     );
-    provider.serverOps.push(serverOp(5, newerSchemaOp));
-    // The rejection resolver merges every clock of a forced download into the
-    // new local ops it creates, so the durable clock can cover the blocked op
-    // before it was ever applied. Reproduce that over-claim through the store.
-    await appendPendingLocalOp('local-resolved-edit', { [OTHER]: 1 });
-    expect((await opLogStore.getVectorClock())?.[OTHER]).toBe(1);
+    expect(applierSpy.applyOperations).toHaveBeenCalled();
+  });
 
-    const outcome = await syncService.downloadRemoteOps(provider, {
-      forceFromSeq0: true,
+  it('captures once when the same full-state op is delivered three times', async () => {
+    // A forced download from seq 0 re-delivers an already-applied import
+    // (#9975). The store skips it by id; the ring must not rotate for it.
+    const remoteOps = TestBed.inject(RemoteOpsProcessingService);
+
+    for (let i = 0; i < 3; i++) {
+      await remoteOps.processRemoteOps([remoteSyncImport() as unknown as Operation]);
+    }
+
+    const ring = await opLogStore.listImportBackups();
+    expect(ring.map((entry) => entry.reason)).toEqual(['REMOTE_IMPORT']);
+  });
+
+  it('keeps the newest snapshot and still applies when the ring write hits the storage quota', async () => {
+    // Two prior captures so pruning has something to evict.
+    await backupService.captureImportBackup('LOCAL_IMPORT');
+    const newest = await backupService.captureImportBackup('LOCAL_IMPORT');
+    // Real adapter, real DOMException: the name must survive the store layer
+    // untranslated (unlike append errors) for the fallback to trigger.
+    const adapter = opLogStore['_adapter'];
+    const realTransaction = adapter.transaction.bind(adapter);
+    let didReject = false;
+    spyOn(adapter, 'transaction').and.callFake((stores, mode, fn) => {
+      if (!didReject && mode === 'readwrite' && stores.includes('import_backup')) {
+        didReject = true;
+        return Promise.reject(new DOMException('full', 'QuotaExceededError'));
+      }
+      return realTransaction(stores, mode, fn);
     });
+    const remoteOps = TestBed.inject(RemoteOpsProcessingService);
 
-    // Behind-cursor ops are skipped; the blocked op is above the cursor and delivered.
-    expect(await forcedDownloadNewOpIds()).toEqual(['newer-schema-op']);
-    expect(outcome.kind).toBe('blocked_incompatible');
-    expect(showConflictDialogSpy).not.toHaveBeenCalled();
-    expect(await opLogStore.hasOp('newer-schema-op')).toBeFalse();
-    // Cursor stays behind the blocked op so it is retried after an app update.
-    expect(await provider.getLastServerSeq()).toBe(4);
+    await remoteOps.processRemoteOps([remoteSyncImport() as unknown as Operation]);
+
+    expect(didReject).toBeTrue();
+    const ring = await opLogStore.listImportBackups();
+    expect(ring.map((entry) => entry.reason)).toEqual(['REMOTE_IMPORT', 'LOCAL_IMPORT']);
+    expect(ring[1].backupId).toBe(newest.backupId);
+    expect(await opLogStore.hasOp('remote-sync-import')).toBeTrue();
+  });
+
+  it('would lose the Undo offer if the replay captured its own recovery point', async () => {
+    // Documents the failure the option prevents: a second capture during the
+    // replay moves the pointer, so the rebuild no longer recognises its backup.
+    const capture = backupService.captureRecoveryPointIfMeaningful.bind(backupService);
+    spyOn(backupService, 'captureRecoveryPointIfMeaningful').and.callFake(capture);
+    const remoteOps = TestBed.inject(RemoteOpsProcessingService);
+    const originalProcess = remoteOps.processRemoteOps.bind(remoteOps);
+    spyOn(remoteOps, 'processRemoteOps').and.callFake((ops, options) =>
+      originalProcess(ops, { ...options, skipRecoveryPoint: false }),
+    );
+
+    await syncService.forceDownloadRemoteState(provider);
+
+    expect(backupService.captureRecoveryPointIfMeaningful).toHaveBeenCalled();
+    const ring = await opLogStore.listImportBackups();
+    expect(ring.map((entry) => entry.reason)).toEqual([
+      'REMOTE_IMPORT',
+      'FORCE_DOWNLOAD',
+    ]);
+    expect(snackSpy.open).not.toHaveBeenCalledWith(
+      jasmine.objectContaining({ msg: T.F.SYNC.S.LOCAL_DATA_REPLACE_UNDO }),
+    );
   });
 });
