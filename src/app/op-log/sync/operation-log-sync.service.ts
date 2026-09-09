@@ -2116,7 +2116,8 @@ export class OperationLogSyncService {
             );
           } else {
             try {
-              currentBackupRef = await this.backupService.captureImportBackup();
+              currentBackupRef =
+                await this.backupService.captureImportBackup('FORCE_DOWNLOAD');
               capturedBackupRef = currentBackupRef;
             } catch (e) {
               OpLog.warn(
@@ -2192,6 +2193,7 @@ export class OperationLogSyncService {
                   {
                     skipConflictDetection: true,
                     callerHoldsOperationLogLock: true,
+                    skipRecoveryPoint: true,
                   },
                 );
               if (processResult.blockedByIncompatibleOp) {
@@ -2241,6 +2243,7 @@ export class OperationLogSyncService {
               this.remoteOpsProcessingService.processRemoteOps(migratedRemoteOps, {
                 skipConflictDetection: true,
                 callerHoldsOperationLogLock: true,
+                skipRecoveryPoint: true,
               }),
           );
 

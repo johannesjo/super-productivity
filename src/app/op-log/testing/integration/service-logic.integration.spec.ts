@@ -423,7 +423,11 @@ describe('Service Logic Integration', () => {
         },
         {
           provide: StateSnapshotService,
-          useValue: jasmine.createSpyObj('StateSnapshotService', ['getStateSnapshot']),
+          useValue: {
+            ...jasmine.createSpyObj('StateSnapshotService', ['getStateSnapshot']),
+            // Nothing meaningful locally → the pre-apply recovery point is skipped.
+            getStateSnapshotAsync: async () => ({}),
+          },
         },
         {
           provide: SnackService,

@@ -5633,6 +5633,7 @@ describe('OperationLogSyncService', () => {
         {
           skipConflictDetection: true,
           callerHoldsOperationLogLock: true,
+          skipRecoveryPoint: true,
         },
       );
     });
@@ -5809,6 +5810,7 @@ describe('OperationLogSyncService', () => {
         {
           skipConflictDetection: true,
           callerHoldsOperationLogLock: true,
+          skipRecoveryPoint: true,
         },
       );
     });
@@ -5989,6 +5991,7 @@ describe('OperationLogSyncService', () => {
         {
           skipConflictDetection: true,
           callerHoldsOperationLogLock: true,
+          skipRecoveryPoint: true,
         },
       );
     });
@@ -6026,6 +6029,7 @@ describe('OperationLogSyncService', () => {
         {
           skipConflictDetection: true,
           callerHoldsOperationLogLock: true,
+          skipRecoveryPoint: true,
         },
       );
     });
