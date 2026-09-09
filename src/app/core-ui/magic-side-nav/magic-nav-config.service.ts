@@ -37,8 +37,6 @@ import { GlobalConfigService } from '../../features/config/global-config.service
 import { AppFeaturesConfig } from '../../features/config/global-config.model';
 import { SnackService } from '../../core/snack/snack.service';
 import { IS_DONATION_UI_RESTRICTED } from '../../app.constants';
-import { ProjectService } from '../../features/project/project.service';
-import { TranslateService } from '@ngx-translate/core';
 
 @Injectable({
   providedIn: 'root',
@@ -55,8 +53,6 @@ export class MagicNavConfigService {
   private readonly _configService = inject(GlobalConfigService);
   private readonly _snackService = inject(SnackService);
   private readonly _router = inject(Router);
-  private readonly _projectService = inject(ProjectService);
-  private readonly _translateService = inject(TranslateService);
 
   // Simple state signals
   private readonly _isProjectsExpanded = signal(
@@ -606,87 +602,6 @@ export class MagicNavConfigService {
 
   createNewTag(): void {
     this._createNewTag();
-  }
-
-  // Double-click-to-rename (nav-item.component.ts) for tree rows.
-  renameProject(projectId: string): void {
-    const project =
-      this._allProjectsExceptInbox().find((p) => p.id === projectId) ||
-      this._allUnarchivedProjects().find((p) => p.id === projectId);
-    if (!project) return;
-
-    this._matDialog
-      .open(DialogPromptComponent, {
-        restoreFocus: true,
-        data: {
-          txtLabel: this._translateService.instant(T.F.PROJECT.D_RENAME.LABEL),
-          txtValue: project.title,
-          placeholder: this._translateService.instant(T.F.PROJECT.D_RENAME.PLACEHOLDER),
-        },
-      })
-      .afterClosed()
-      .subscribe((result: string | null) => {
-        const trimmed = result?.trim();
-        if (!trimmed || trimmed === project.title) return;
-        this._projectService.update(projectId, { title: trimmed });
-      });
-  }
-
-  renameTag(tagId: string): void {
-    const tag = this._tags().find((t) => t.id === tagId);
-    if (!tag) return;
-
-    this._matDialog
-      .open(DialogPromptComponent, {
-        restoreFocus: true,
-        data: {
-          txtLabel: this._translateService.instant(T.F.TAG.D_RENAME.LABEL),
-          txtValue: tag.title,
-          placeholder: this._translateService.instant(T.F.TAG.D_RENAME.PLACEHOLDER),
-        },
-      })
-      .afterClosed()
-      .subscribe((result: string | null) => {
-        const trimmed = result?.trim();
-        if (!trimmed || trimmed === tag.title) return;
-        this._tagService.updateTag(tagId, { title: trimmed });
-      });
-  }
-
-  renameFolder(folderId: string, treeKind: MenuTreeKind): void {
-    const cleanId = folderId.startsWith('folder-') ? folderId.substring(7) : folderId;
-    const projectTree = this._menuTreeService.projectTree();
-    const tagTree = this._menuTreeService.tagTree();
-    const primaryTree = treeKind === MenuTreeKind.PROJECT ? projectTree : tagTree;
-    const secondaryTree = treeKind === MenuTreeKind.PROJECT ? tagTree : projectTree;
-    const folder =
-      this._menuTreeService.findFolderInTree(cleanId, primaryTree) ||
-      this._menuTreeService.findFolderInTree(cleanId, secondaryTree);
-    if (!folder) return;
-
-    const folderNs =
-      treeKind === MenuTreeKind.PROJECT ? T.F.PROJECT_FOLDER : T.F.TAG_FOLDER;
-
-    this._matDialog
-      .open(DialogPromptComponent, {
-        restoreFocus: true,
-        data: {
-          txtLabel: this._translateService.instant(folderNs.DIALOG.NAME_LABEL),
-          txtValue: folder.name,
-          placeholder: this._translateService.instant(folderNs.DIALOG.NAME_PLACEHOLDER),
-        },
-      })
-      .afterClosed()
-      .subscribe((result: string | null) => {
-        const trimmed = result?.trim();
-        if (!trimmed || trimmed === folder.name) return;
-
-        if (treeKind === MenuTreeKind.PROJECT) {
-          this._menuTreeService.updateFolderInProject(cleanId, trimmed);
-        } else {
-          this._menuTreeService.updateFolderInTag(cleanId, trimmed);
-        }
-      });
   }
 
   disableFeature(configKey: keyof AppFeaturesConfig, featureName: string): void {

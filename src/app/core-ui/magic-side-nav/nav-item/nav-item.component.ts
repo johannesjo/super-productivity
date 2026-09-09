@@ -228,45 +228,4 @@ export class NavItemComponent {
     const translatedLabel = labelKey ? this._translateService.instant(labelKey) : '';
     this._navConfigService.disableFeature(key, translatedLabel);
   }
-
-  // Folders toggle expand/collapse on click, unlike work items (which navigate
-  // and are fine being triggered twice by a double-click). A native double-click
-  // fires two `click` events before `dblclick` — MouseEvent.detail is 2 on the
-  // second one, using the same timing threshold the browser uses to decide
-  // whether `dblclick` fires. Skip that second click's toggle so a double-click
-  // doesn't flip the folder open-then-closed as a visible flicker right before
-  // the rename dialog opens. This intentionally leaves the folder toggled once
-  // rather than reverted — matching how work-item rows also just let their
-  // single-click side effect (navigation) stand once instead of undoing it.
-  onFolderClick(event: MouseEvent): void {
-    if (event.detail > 1) return;
-    this.clicked.emit();
-  }
-
-  // Double-click-to-rename. Single click still fires as normal (navigation for
-  // work items, expand/collapse for folders) — the dblclick just additionally
-  // opens the rename prompt on top of that.
-  onDblClickRename(event: MouseEvent): void {
-    event.preventDefault();
-    event.stopPropagation();
-
-    if (this.mode() === 'folder') {
-      const folderId = this.folderId();
-      if (folderId) {
-        this._navConfigService.renameFolder(folderId, this.treeKind());
-      }
-      return;
-    }
-
-    const wc = this.workContext();
-    if (!wc) return;
-    // Today/Inbox are system rows, not user-owned projects/tags — not renamable.
-    if (this.defaultIcon() === 'today' || this.defaultIcon() === 'inbox') return;
-
-    if (this.type() === WorkContextType.PROJECT) {
-      this._navConfigService.renameProject(wc.id);
-    } else if (this.type() === WorkContextType.TAG) {
-      this._navConfigService.renameTag(wc.id);
-    }
-  }
 }
