@@ -317,6 +317,9 @@
   // Task Component
   // -----------------------------
   --task-first-line-min-height: 40px;
+  // Width of a row's leading control slot (done-toggle, select ring, the repeat
+  // icon on recurring-config rows) — shared so those rows' titles line up.
+  --task-icon-size: 40px;
   --task-icon-default-opacity: 0.7;
   --task-inner-padding-top-bottom: 4px;
   --task-is-done-dim-opacity: 0.3;
@@ -539,7 +542,6 @@ body.isDarkTheme {
   // never cancel each other out on the same element.
   --task-row-edge: var(--task-separator);
   --task-selected-edge: 3px solid color-mix(in srgb, var(--text-color) 65%, transparent);
-  --task-hover-bg: var(--state-hover);
   --task-list-row-gap: 0px;
 
   // Task shadows (Cat A — same in both modes)
@@ -641,6 +643,9 @@ body {
   // Task colors (Cat B)
   --task-c-current-bg: color-mix(in srgb, var(--c-accent) 10%, var(--surface-2));
   --task-c-selected-bg: var(--state-selected);
+  // Multi-selection reads as a tinted surface — the focus ring is the only
+  // outlined state, so the two never look alike.
+  --task-c-multi-selected-bg: color-mix(in srgb, var(--c-primary) 18%, var(--surface-2));
   --sub-task-c-bg: var(--task-c-bg);
   --sub-task-c-bg-done: var(--task-c-bg);
   --task-c-bg-done: var(--task-c-bg);
@@ -719,6 +724,7 @@ body.isDarkTheme {
   // Task colors (Cat B)
   --task-c-current-bg: color-mix(in srgb, var(--c-accent) 18%, var(--surface-3));
   --task-c-selected-bg: var(--state-selected);
+  --task-c-multi-selected-bg: color-mix(in srgb, var(--c-primary) 28%, var(--surface-3));
   --sub-task-c-bg: var(--task-c-bg);
   --sub-task-c-bg-done: var(--task-c-bg);
   --task-c-bg-done: var(--task-c-bg);

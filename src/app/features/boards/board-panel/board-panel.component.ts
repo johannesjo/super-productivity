@@ -338,11 +338,19 @@ export class BoardPanelComponent implements TaskCardList {
     }
     const ids = this._taskIdsToMove(ev.item.data.id, ev.previousContainer.data);
     if (!ids.length) return;
-    if (ev.previousContainer.id === ev.container.id) {
-      this._placeInOrder(ids, ev.currentIndex);
+    const isSamePanel = ev.previousContainer.id === ev.container.id;
+    const moving = new Set(ids);
+    // CDK removes only the dragged row when calculating its insertion index.
+    // Group placement removes every moving row, including destination duplicates.
+    const index = this.tasks()
+      .filter((task) => !isSamePanel || task.id !== ev.item.data.id)
+      .slice(0, ev.currentIndex)
+      .filter((task) => !moving.has(task.id)).length;
+    if (isSamePanel) {
+      this._placeInOrder(ids, index);
       return;
     }
-    await this.moveTasks(ids, ev.currentIndex);
+    await this.moveTasks(ids, index);
   }
 
   /** Shared by dragging and keyboard placement; normal task actions retain their effects. */
@@ -404,6 +412,7 @@ export class BoardPanelComponent implements TaskCardList {
             .scheduleFor(schedule, tasksToSchedule);
         }
         await new Promise<void>((resolve) => setTimeout(resolve, 0));
+        this.multiSelect.reanchorAfterMove(movingIds, this.rows());
       } finally {
         this.multiSelect.setBulkFeedbackSuppressed(false);
       }

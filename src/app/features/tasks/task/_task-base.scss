@@ -17,7 +17,6 @@
 :host {
   --task-button-spacer: 1px;
   --play-icon-size: 22px;
-  --task-icon-size: 40px;
   --mini-badge-size: var(--s2);
 
   display: block;
@@ -28,6 +27,10 @@
   // Rows are separated by a hairline (flat list look). Themes that want boxed
   // tasks set --task-separator: none and give --task-border a value instead.
   border-top: var(--task-separator);
+
+  &:not(:last-of-type) {
+    margin-bottom: var(--task-list-row-gap);
+  }
 
   &:last-of-type {
     border-bottom: var(--task-separator);
@@ -47,7 +50,7 @@
 
   &:focus {
     z-index: var(--z-focus-host);
-    outline: none;
+    outline: none !important;
   }
 
   &.highlight-searched-task {
@@ -67,8 +70,8 @@
   position: absolute;
   left: 0;
   right: 0;
-  bottom: 2px;
-  top: 2px;
+  bottom: 0;
+  top: 0;
   transition: var(--transition-standard);
   transition-property: background-color, box-shadow;
   border: var(--task-border);
@@ -77,76 +80,30 @@
 
   background: var(--task-c-bg);
 
-  // Hover tint so the flat list feels responsive. Only on hover-capable
-  // devices (on touch, :hover sticks on the last-tapped row), and only on the
-  // deepest hovered task so hovering a subtask doesn't also tint its parent.
-  // The direct-child chain keeps the rule off sub-task boxes, which share this
-  // component's emulated-encapsulation attribute.
-  @media (hover: hover) {
-    :host:not(.isSelected):not(.isCurrent):not(.isMultiSelected):hover:not(
-        :has(task:hover)
-      )
-      > swipe-block
-      > .inner-wrapper
-      > & {
-      background: var(--task-hover-bg);
-    }
-  }
-
-  // NOTE: also applies to child tasks
-  :host-context(.isLightTheme).isSelected.isSelected & {
-    background: var(--task-c-selected-bg);
-  }
-
   :host-context(.isDarkTheme).isDone & {
     background: var(--task-c-bg-done);
   }
 
-  :host-context(.isDarkTheme).isSelected.isSelected & {
-    background: var(--task-c-selected-bg);
-  }
-
-  // Direct-child chain: sub-task boxes share this component's emulated
-  // encapsulation attribute, so a descendant selector would hit them too.
-  :host.isSelected.isSelected > swipe-block > .inner-wrapper > & {
-    box-shadow: var(--task-selected-shadow);
-    // A leading edge marks the task open in the detail panel; boxed themes set
-    // the token to none and rely on surface + shadow instead.
-    border-left: var(--task-selected-edge);
-
-    @at-root :host-context(.isDarkTheme).isSelected.isSelected.isSelected
-        .sub-tasks
-        ::ng-deep
-        .box {
-      background: var(--sub-task-c-bg-in-selected);
-    }
-  }
-
-  // Focused task: a soft brand tint reads as "this is the row I am on" rather
-  // than the former 1px primary border, which looked like a text input. The
-  // ring is kept for keyboard focus only, so mouse clicks stay quiet. A
-  // selected task keeps its selected surface so a click-then-edit doesn't
-  // flip colours when focus moves to the detail panel.
-  :host:focus:not(.isSelected) > swipe-block > .inner-wrapper > & {
-    border-radius: var(--task-border-radius);
-    background: color-mix(in srgb, var(--c-primary) 8%, transparent);
-  }
-
-  :host:focus-visible > swipe-block > .inner-wrapper > & {
-    outline: var(--focus-ring-width) solid var(--focus-ring-color);
-    outline-offset: calc(-1 * var(--focus-ring-width));
-  }
-
   // Temporary attention highlight for a task revealed via navigation, e.g. from
   // a search result (LayoutService.highlightTaskBriefly, #5476). An outline, so
-  // it stays clearly visible even once the focus border above is gone, and it
+  // it stays clearly visible even once focus moves elsewhere, and it
   // traces whatever radius the box already has — no border-radius of its own, so
   // nothing can leak into the sub-task boxes (which are deliberately square).
-  :host.highlight-searched-task .inner-wrapper > & {
+  :host.highlight-searched-task
+    > swipe-block
+    ::ng-deep
+    > .inner-wrapper
+    > .inner-wrapper
+    > & {
     outline: var(--focus-ring-width) solid var(--c-accent);
   }
 
-  :host.isCurrent.isCurrent.isCurrent.isCurrent.isCurrent & {
+  :host.isCurrent.isCurrent.isCurrent.isCurrent.isCurrent
+    > swipe-block
+    ::ng-deep
+    > .inner-wrapper
+    > .inner-wrapper
+    > & {
     background: var(--task-c-current-bg);
     border-radius: var(--task-border-radius);
     box-shadow: var(--task-current-shadow);
@@ -270,19 +227,32 @@
   }
 }
 
-// MULTI-SELECT
-// ------------
-// Part of a multi-selection (see TaskMultiSelectService). Deliberately no
-// checkmark: a check means *done* in this app. The tint plus the leading accent
-// stripe carry the state and stay distinct from the focus ring (border) and
-// the detail-panel highlight (.isSelected shadow).
-:host.isMultiSelected > swipe-block > .inner-wrapper > .box {
-  background: color-mix(in srgb, var(--c-accent) 14%, var(--task-c-bg));
-  border-left: 3px solid var(--c-accent);
+// The task open in the detail panel has a surface highlight, distinct from
+// keyboard focus and multi-selection. Keep it on the owning row's box.
+:host.isSelected > swipe-block ::ng-deep > .inner-wrapper > .inner-wrapper > .box {
+  // Override theme resting surfaces, including nested task surfaces.
+  background: var(--task-c-selected-bg) !important;
 }
 
-:host.isMultiSelected.isDone > swipe-block > .inner-wrapper > .box {
-  background: color-mix(in srgb, var(--c-accent) 10%, var(--task-c-bg-done));
+// Multi-selection stays on the owning row, across SwipeBlock's projection wrapper.
+// The tint is what separates it from the focus ring below (a 1px vs 2px line in
+// one colour was not readable as two states). The 1px outline stays as the
+// fallback channel: `background` on this box is contested — the `isCurrent` chain
+// and the `isSelected` !important rule below both win, and several bundled themes
+// (velvet, and the `:not(.isSelected):not(.isCurrent)` hover rules) force it with
+// !important — whereas nothing else draws an outline here. It also survives
+// forced-colors mode, where author backgrounds are dropped.
+:host.isMultiSelected > swipe-block ::ng-deep > .inner-wrapper > .inner-wrapper > .box {
+  background: var(--task-c-multi-selected-bg);
+  outline: 1px solid var(--palette-primary-400);
+  outline-offset: -1px;
+}
+
+// A thicker outline marks the keyboard target inside a multi-selection.
+// :focus also covers the app's programmatic navigation and focus restoration.
+:host:focus > swipe-block ::ng-deep > .inner-wrapper > .inner-wrapper > .box {
+  outline: var(--focus-ring-width) solid var(--palette-primary-400);
+  outline-offset: calc(-1 * var(--focus-ring-width));
 }
 
 // Touch selection mode: the leading slot shows an empty ring that fills solid

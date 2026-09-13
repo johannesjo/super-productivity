@@ -31,28 +31,6 @@
   }
 }
 
-// Same focus treatment as the main task list: brand tint on any focus, ring
-// for keyboard focus only (see _task-base.scss).
-:host:focus {
-  outline: none;
-  background: color-mix(in srgb, var(--c-primary) 8%, transparent);
-}
-
-:host:focus-visible {
-  outline: var(--focus-ring-width) solid var(--focus-ring-color);
-  outline-offset: calc(-1 * var(--focus-ring-width));
-}
-
-@media (hover: hover) {
-  :host:not(.isCurrent):not(:focus):hover {
-    background: var(--task-hover-bg);
-  }
-}
-
-:host.isMultiSelected {
-  box-shadow: inset 0 0 0 var(--focus-ring-width) var(--focus-ring-color);
-}
-
 :host.isDragReady:not(.cdk-drag-placeholder) {
   background: var(--bg-lighter);
   box-shadow: var(--whiteframe-shadow-8dp);
@@ -66,6 +44,20 @@
 :host.isCurrent {
   background: var(--task-c-current-bg);
   box-shadow: var(--task-current-shadow);
+}
+
+// Tint plus a 1px outline — see _task-base.scss for why the outline stays as the
+// fallback channel where a theme or a stronger state owns the background.
+:host.isMultiSelected {
+  background: var(--task-c-multi-selected-bg);
+  outline: 1px solid var(--palette-primary-400);
+  outline-offset: -1px;
+}
+
+// Keep the focused card distinct even when it is current or multi-selected.
+:host:focus {
+  outline: var(--focus-ring-width) solid var(--palette-primary-400) !important;
+  outline-offset: calc(-1 * var(--focus-ring-width));
 }
 
 .no-drag {

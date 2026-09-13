@@ -186,6 +186,23 @@ describe('TaskMultiSelectService', () => {
       expect(service.selectionScope()).toBeNull();
     });
 
+    it('extends a moved selection from its original anchor in the destination', () => {
+      const [left, right] = boardRows();
+      left[1].dataset.taskId = 'middle';
+      stubActiveElement(left[0]);
+      service.toggle('shared');
+      stubActiveElement(left[1]);
+      service.selectRange('middle');
+      expect(selected()).toEqual(['middle', 'shared']);
+
+      // Moving a selection can leave duplicate copies in the source panel.
+      service.reanchorAfterMove(['shared', 'middle'], right);
+      stubActiveElement(right[1]);
+      expect(extend('down')).toBe(right[2]);
+      expect(selected()).toEqual(['last', 'middle', 'shared']);
+      expect(service.anchorId()).toBe('shared');
+    });
+
     it('ranges across all-day and timed Planner rows within one day only', () => {
       stubActiveElement(root.querySelector('planner-task[data-task-id="p1"]'));
       service.toggle('p1');

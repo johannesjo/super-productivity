@@ -885,6 +885,64 @@ describe('BoardPanelComponent - drop()', () => {
     expect(updateTagsSpy).not.toHaveBeenCalled();
   });
 
+  for (const scenario of [
+    { selected: ['a', 'b'], dragged: 'a', index: 2, expected: ['c', 'a', 'b', 'd', 'e'] },
+    { selected: ['d', 'e'], dragged: 'e', index: 1, expected: ['a', 'd', 'e', 'b', 'c'] },
+    { selected: ['b'], dragged: 'b', index: 3, expected: ['a', 'c', 'd', 'b', 'e'] },
+    { selected: ['a', 'b'], dragged: 'a', index: 0, expected: ['a', 'b', 'c', 'd', 'e'] },
+  ]) {
+    it(`drops ${scenario.selected.join(',')} at the marker for row ${scenario.index}`, async () => {
+      const tasks = ['a', 'b', 'c', 'd', 'e'].map((id) => mkTask({ id }));
+      await setup(tasks);
+      fixture.componentRef.setInput('panelCfg', { ...DEFAULT_PANEL_CFG, id: 'p' });
+      fixture.detectChanges();
+      scenario.selected.forEach((id) => component.multiSelect.toggle(id));
+
+      await component.drop(
+        mkDropEvent({
+          panelCfg: component.panelCfg(),
+          task: tasks.find((task) => task.id === scenario.dragged)!,
+          sourceTasks: tasks,
+          previousContainerId: 'same',
+          containerId: 'same',
+          currentIndex: scenario.index,
+        }),
+      );
+
+      expect(dispatchSpy).toHaveBeenCalledOnceWith(
+        BoardsActions.updatePanelCfgTaskIds({
+          panelId: 'p',
+          taskIds: scenario.expected,
+        }),
+      );
+    });
+  }
+
+  it('accounts for selected rows already above a drop marker in another panel', async () => {
+    const tasks = ['a', 'b', 'c', 'd'].map((id) => mkTask({ id }));
+    await setup(tasks);
+    fixture.componentRef.setInput('panelCfg', { ...DEFAULT_PANEL_CFG, id: 'p' });
+    fixture.detectChanges();
+    component.multiSelect.toggle('a');
+    component.multiSelect.toggle('b');
+
+    await component.drop(
+      mkDropEvent({
+        panelCfg: component.panelCfg(),
+        task: tasks[0],
+        sourceTasks: tasks.slice(0, 2),
+        currentIndex: 3,
+      }),
+    );
+
+    expect(dispatchSpy).toHaveBeenCalledOnceWith(
+      BoardsActions.updatePanelCfgTaskIds({
+        panelId: 'p',
+        taskIds: ['c', 'a', 'b', 'd'],
+      }),
+    );
+  });
+
   it('does not keyboard-reorder a sorted panel', async () => {
     await setup(['a', 'b'].map((id) => mkTask({ id })));
     fixture.componentRef.setInput('panelCfg', {
@@ -954,7 +1012,12 @@ describe('BoardPanelComponent - drop()', () => {
     await setup(['a', 'b', 'c'].map((id) => mkTask({ id })));
     fixture.componentRef.setInput('panelCfg', { ...DEFAULT_PANEL_CFG, id: 'p' });
     fixture.detectChanges();
+    const reanchorSpy = spyOn(
+      component.multiSelect,
+      'reanchorAfterMove',
+    ).and.callThrough();
     await component.moveTasks(['c', 'c'], 0);
+    expect(reanchorSpy).toHaveBeenCalledOnceWith(['c'], component.rows());
     expect(dispatchSpy).toHaveBeenCalledOnceWith(
       BoardsActions.updatePanelCfgTaskIds({
         panelId: 'p',

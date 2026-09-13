@@ -113,6 +113,19 @@ export class TaskMultiSelectService {
     );
   }
 
+  /** Preserve the range anchor when its selected group moves to another panel. */
+  reanchorAfterMove(movedIds: readonly string[], rows: readonly HTMLElement[]): void {
+    const anchorId = this._anchorId();
+    if (!anchorId || !this.has(anchorId) || !movedIds.includes(anchorId)) return;
+    const anchorRow = rows.find(
+      (row) =>
+        row.dataset.taskId === anchorId &&
+        row.isConnected &&
+        !this._destroyedHosts.has(row),
+    );
+    if (anchorRow) this._setAnchorRow(anchorRow);
+  }
+
   /** Ctrl/Cmd+click and `X`: toggle one task, which becomes the anchor. */
   toggle(id: string): void {
     const next = new Set(this._selectedIds());

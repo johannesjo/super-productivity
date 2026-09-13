@@ -62,21 +62,6 @@ h2 {
   }
 }
 
-.completed-tasks-heading {
-  margin: var(--s);
-  margin-top: var(--s2);
-  //text-align: left;
-  font-size: 16px;
-  //border-bottom: 1px solid var(--extra-border-color);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.backlog-heading {
-  margin: var(--s);
-}
-
 .status-bar {
   display: flex;
   align-items: center;
@@ -286,7 +271,10 @@ finish-day-btn,
 }
 
 .repeat-cfg-list {
-  padding: var(--s-half);
+  // No top padding: the first row's own top hairline has to land exactly on the
+  // section heading's bottom border, the way the task lists do. Any gap here
+  // renders the two as separate lines.
+  padding: 0 0 var(--s-half);
 }
 
 // Read-only calendar event outlines below the Later Today task list.

@@ -1,14 +1,14 @@
 <header>
   <div class="title">{{ panelCfg().title | translate }}</div>
-  <div
-    class="tasks-total-estimate"
-    [title]="tasks().length"
-  >
-    {{ totalEstimate() | msToString }}
-    <mat-icon style="font-size: 14px; line-height: 14px; height: 14px; width: 14px"
-      >task_alt</mat-icon
-    >{{ this.tasks().length }}
-  </div>
+  @if (tasks().length) {
+    <div class="tasks-total-estimate">
+      @if (totalEstimate()) {
+        <!-- placeholder hidden: the pipe renders '-' for any sub-minute total -->
+        <span>{{ totalEstimate() | msToString: false : true }}</span>
+      }
+      <mat-icon>task_alt</mat-icon>{{ tasks().length }}
+    </div>
+  }
   <button
     mat-icon-button
     (click)="editBoard.emit()"

@@ -11,15 +11,27 @@
   min-height: var(--bar-height);
   padding: 0 var(--s);
   gap: var(--s-half);
-  font-size: var(--font-size-md);
-  font-weight: var(--font-weight-medium);
   text-align: start;
   border-bottom: 1px solid transparent;
 
   .collapsible-expand-icon {
     margin-right: 0;
     color: var(--text-color-muted);
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    line-height: 18px;
   }
+}
+
+// Deliberately typed as a label (small, semibold, muted) rather than as body
+// text, so a heading never reads as just another task row. No uppercase: section
+// titles can be long and user-authored, where caps only add width and noise.
+:host(.task-section) .collapsible-title {
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-semibold);
+  letter-spacing: var(--letter-spacing-wide);
+  color: var(--text-color-muted);
 }
 
 :host(.task-section.isExpanded) .collapsible-header {

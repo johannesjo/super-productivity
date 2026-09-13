@@ -74,7 +74,6 @@ body.isDarkTheme {
   --task-separator: none;
   --task-row-edge: var(--task-border);
   --task-selected-edge: none;
-  --task-hover-bg: transparent;
   --task-border-radius: var(--lg-radius-md);
   --task-list-row-gap: var(--s-half);
 }

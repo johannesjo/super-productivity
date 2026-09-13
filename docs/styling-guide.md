@@ -168,8 +168,6 @@ every switch must stay token-driven — never hardcode a border or surface on a 
 | `--task-border`        | `none`                             | `1px solid var(--task-border-color)` |
 | `--task-separator`     | `1px solid var(--separator-color)` | `none`                               |
 | `--task-row-edge`      | `var(--task-separator)`            | `var(--task-border)`                 |
-| `--task-selected-edge` | 3px leading bar                    | `none` (surface + shadow instead)    |
-| `--task-hover-bg`      | `var(--state-hover)`               | `transparent`                        |
 | `--task-border-radius` | `0`                                | `var(--radius-sm)`                   |
 | `--task-list-row-gap`  | `0`                                | `var(--s-half)`                      |
 | `--task-c-bg` & co     | `transparent`                      | surfaces                             |
@@ -177,6 +175,25 @@ every switch must stay token-driven — never hardcode a border or surface on a 
 Rows that draw their own box (planner, board and issue-panel items) take their
 top/bottom edge from `--task-row-edge`, so the separator and the box border never
 cancel each other out on one element. Bare `task` hosts use `--task-separator`.
+
+Chrome around task lists — section headings (`collapsible.task-section`), board panel
+titles, the collapsed "+ n completed subtasks" label — is typed one level below the
+content it frames: `--font-size-sm`, `--font-weight-semibold` (regular for inline
+labels), `--letter-spacing-wide`, `--text-color-muted`. Task text stays at the 14px
+base, so the two never read alike. No `text-transform: uppercase` — these labels are
+often long and user-authored, where caps only add width. Meta counts follow the same
+label style and are omitted entirely when zero rather than shown as `-` or `0`.
+
+Task multi-selection is a `--task-c-multi-selected-bg` tint plus a 1px
+`--palette-primary-400` outline; keyboard focus is a `--focus-ring-width` (2px) outline
+in the same color and no tint. The tint is what separates them — a 1px vs 2px line in
+one color is not readable as two states — but it is the weaker channel, so the outline
+stays: `background` on a task row is contested (the `isCurrent` chain and the
+`isSelected` `!important` rule win over it, and several bundled themes force it with
+`!important`), and author backgrounds are dropped in forced-colors mode while outlines
+survive. Never make a row state depend on `background` alone. The task open in the
+detail panel uses the neutral `--task-c-selected-bg`. Row focus uses `:focus` to cover
+scripted navigation, including when that task's detail panel is open.
 
 ## Shadows & Elevation
 
