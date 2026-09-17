@@ -10,7 +10,10 @@ import { prepareMainTaskAdd } from '../../features/tasks/util/prepare-main-task-
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { DateService } from '../../core/date/date.service';
 import { VectorClockService } from '../sync/vector-clock.service';
-import { readCapturePreparationClock } from './capture-preparation-clock';
+import {
+  findCapturePreparationBlocker,
+  readCapturePreparationClock,
+} from './capture-preparation-clock';
 import { SyncCycleGuardService } from '../sync/sync-cycle-guard.service';
 import { SyncProviderManager } from '../sync-providers/provider-manager.service';
 import { WrappedProviderService } from '../sync-providers/wrapped-provider.service';
@@ -74,7 +77,13 @@ export const createAgentCaptureE2eHelpers = (
         const prepared = await flush.flushThenRunExclusive(async () => {
           manager.assertSyncEpochUnchanged(epoch, 'capture preparation');
           opLogStore.clearVectorClockCache();
+          // Refuse before building anything: an unapplied download would
+          // otherwise reach both the candidate clock and the task itself.
+          const blocker = await findCapturePreparationBlocker(opLogStore);
+          if (blocker)
+            throw new Error(`Capture preparation needs an applied baseline: ${blocker}`);
           const clock = await readCapturePreparationClock(
+            opLogStore,
             injector.get(VectorClockService),
           );
           // Keep the exact preparation cursor with this candidate. A later sync

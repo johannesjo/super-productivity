@@ -6,31 +6,33 @@ import { ActionType } from '../../core/action-types.enum';
 import { OperationLogStoreService } from '../../persistence/operation-log-store.service';
 import { CURRENT_SCHEMA_VERSION } from '../../persistence/schema-migration.service';
 import { VectorClockService } from '../../sync/vector-clock.service';
-import { readCapturePreparationClock } from '../capture-preparation-clock';
+import {
+  findAppliedFullStateBaseline,
+  findCapturePreparationBlocker,
+  readCapturePreparationClock,
+} from '../capture-preparation-clock';
 import { createMinimalTaskPayload } from './helpers/operation-factory.helper';
 
 /**
- * Stage A step 1: which state may a prepared capture depend on?
+ * Stage A: which state may a prepared capture depend on?
  *
- * The publication experiment prepares its candidate clock from
- * `readCapturePreparationClock()`, which merges the durable clock with
- * `getFullVectorClock()`. The durable clock advances only when reducers commit
- * (`markReducersCommittedAndMergeClocks`), so on its own it is evidence of
- * APPLIED state. `getFullVectorClock()` merges every retained op regardless of
- * whether it applied, so the merge downgrades that evidence to "downloaded".
+ * Answer, reproduced then fixed here: only state this device APPLIED. The
+ * durable clock advances solely in `markReducersCommittedAndMergeClocks`, so it
+ * is applied-state evidence; `getFullVectorClock()` merges every RETAINED op
+ * regardless of outcome, so preparing from it once let a capture publish over a
+ * replacement this device had rejected, failed to apply, or not yet applied.
  *
- * These cases reproduce the consequence for a full-state replacement the device
- * never applied: rejected, failed, and still-pending. In every case the
- * candidate inherits the replacement's counters and the server's publication
- * gate — the same `classifyOpAgainstSyncImport` the harness runs inside the
- * upload transaction — accepts it, committing a terminal receipt from a device
- * that never reached the replacement's state.
+ * `readCapturePreparationClock()` now merges the durable clock with the newest
+ * full-state replacement the device actually applied, and
+ * `findCapturePreparationBlocker()` refuses preparation entirely while the
+ * ordinary incomplete-remote conditions hold. The two cases at the end pin the
+ * behavior the fix had to preserve: an applied remote import, and a local import
+ * whose own counter ran ahead of the durable clock. Dropping the merge outright
+ * satisfies the first four cases and breaks that last one.
  *
- * Required result (not yet implemented): the capture stays pending until the
- * app has a valid, applied baseline. These specs therefore assert the CURRENT
- * unsafe outcome. A fix must flip them to the required result rather than
- * delete them; the contrast assertion in each case shows the applied-only
- * baseline already produces it.
+ * The gate is asserted alongside the clock because preparation also builds the
+ * task from live state: a correct clock alone would still capture into state the
+ * device has not caught up to.
  */
 describe('Capture preparation baseline (integration, real op-log store)', () => {
   const DEVICE_A = 'device-a';
@@ -111,74 +113,67 @@ describe('Capture preparation baseline (integration, real op-log store)', () => 
     expect(wouldPublish(buildCandidateClock({ [DEVICE_A]: 1 }))).toBeFalse();
   });
 
-  it('should currently publish a capture prepared over a REJECTED replacement', async () => {
+  it('should stay pending for a capture prepared over a REJECTED replacement', async () => {
     const importOp = await seedAppliedLocalWorkAndDownloadedImport();
     await store.markRejected([importOp.id]);
 
-    // The app's own applied-baseline reader correctly refuses the rejected
-    // import: this device has NO established replacement baseline at all.
+    // This device has no established replacement baseline at all. Nothing is
+    // mid-flight either, so the gate stays open and the clock has to carry it.
     expect(await store.getLatestFullStateOpEntry()).toBeUndefined();
+    expect(await findAppliedFullStateBaseline(store)).toBeUndefined();
+    expect(await findCapturePreparationBlocker(store)).toBeUndefined();
 
-    const preparationClock = await readCapturePreparationClock(clocks);
+    const preparationClock = await readCapturePreparationClock(store, clocks);
 
-    // REPRODUCTION: preparation claims the replacement anyway.
-    expect(preparationClock[IMPORTING_DEVICE]).toBe(4);
-    expect(wouldPublish(buildCandidateClock(preparationClock))).toBeTrue();
-
-    // Required result, already reachable from applied state alone.
-    expect(wouldPublish(buildCandidateClock(await clocks.getCurrentVectorClock()))).toBe(
-      false,
-    );
+    expect(preparationClock[IMPORTING_DEVICE]).toBeUndefined();
+    expect(wouldPublish(buildCandidateClock(preparationClock))).toBeFalse();
   });
 
-  it('should currently publish a capture prepared over a FAILED replacement', async () => {
+  it('should refuse to prepare a capture over a FAILED replacement', async () => {
     const importOp = await seedAppliedLocalWorkAndDownloadedImport();
     await store.markFailed([importOp.id]);
 
-    // Ordinary sync is blocked here — the incomplete-remote gate sees the
-    // failure. Capture preparation consults no equivalent gate.
-    expect((await store.getFailedRemoteOps()).map((entry) => entry.op.id)).toEqual([
-      importOp.id,
-    ]);
-    // Worse than the rejected case: the applied-baseline reader cannot tell a
-    // failed import from an applied one, so it reports this as the baseline.
-    expect((await store.getLatestFullStateOpEntry())?.op.id).toBe(importOp.id);
-
-    const preparationClock = await readCapturePreparationClock(clocks);
-
-    expect(preparationClock[IMPORTING_DEVICE]).toBe(4);
-    expect(wouldPublish(buildCandidateClock(preparationClock))).toBeTrue();
-    expect(wouldPublish(buildCandidateClock(await clocks.getCurrentVectorClock()))).toBe(
-      false,
+    expect(await findCapturePreparationBlocker(store)).toBe(
+      '1 downloaded operation(s) failed to apply',
     );
+    // The failure is why the gate is needed: `getLatestFullStateOpEntry()` still
+    // names this import, because it only filters rejections.
+    expect((await store.getLatestFullStateOpEntry())?.op.id).toBe(importOp.id);
+    expect(await findAppliedFullStateBaseline(store)).toBeUndefined();
+
+    const preparationClock = await readCapturePreparationClock(store, clocks);
+
+    expect(preparationClock[IMPORTING_DEVICE]).toBeUndefined();
+    expect(wouldPublish(buildCandidateClock(preparationClock))).toBeFalse();
   });
 
-  it('should currently publish a capture prepared over a PENDING replacement', async () => {
+  it('should refuse to prepare a capture over a PENDING replacement', async () => {
     const importOp = await seedAppliedLocalWorkAndDownloadedImport();
 
-    // Downloaded, reducers not yet committed. Ordinary sync is blocked.
+    // Downloaded, reducers not yet committed.
     expect((await store.getPendingRemoteOps()).map((entry) => entry.op.id)).toEqual([
       importOp.id,
     ]);
-
-    const preparationClock = await readCapturePreparationClock(clocks);
-
-    expect(preparationClock[IMPORTING_DEVICE]).toBe(4);
-    expect(wouldPublish(buildCandidateClock(preparationClock))).toBeTrue();
-    expect(wouldPublish(buildCandidateClock(await clocks.getCurrentVectorClock()))).toBe(
-      false,
+    expect(await findCapturePreparationBlocker(store)).toBe(
+      '1 downloaded operation(s) have not been applied',
     );
+    expect(await findAppliedFullStateBaseline(store)).toBeUndefined();
+
+    const preparationClock = await readCapturePreparationClock(store, clocks);
+
+    expect(preparationClock[IMPORTING_DEVICE]).toBeUndefined();
+    expect(wouldPublish(buildCandidateClock(preparationClock))).toBeFalse();
   });
 
   it('should still carry a replacement this device actually applied', async () => {
     // Control: the applied case must keep passing the gate. Any fix has to
-    // preserve this, and dropping the merge does — the reducer checkpoint puts
-    // an applied remote import into the durable clock by itself.
+    // preserve this. The reducer checkpoint puts an applied remote import into
+    // the durable clock by itself, so this one passes on either source.
     const importOp = createImportOp();
     const seq = await store.append(importOp, 'remote', { pendingApply: true });
     await store.markReducersCommittedAndMergeClocks([seq], [importOp]);
 
-    const preparationClock = await readCapturePreparationClock(clocks);
+    const preparationClock = await readCapturePreparationClock(store, clocks);
 
     expect(preparationClock[IMPORTING_DEVICE]).toBe(4);
     expect(wouldPublish(buildCandidateClock(preparationClock))).toBeTrue();
@@ -191,9 +186,9 @@ describe('Capture preparation baseline (integration, real op-log store)', () => 
     // clock stayed at 2. Here the retained log is the ONLY evidence of applied
     // state, so the durable clock alone loses the capture.
     //
-    // Together with the three cases above this is the open question: the same
-    // reader must include this import and exclude an unapplied one, and neither
-    // source can do both. Dropping the merge is therefore not the fix.
+    // This is why the fix is an applied-baseline merge rather than dropping the
+    // merge: the same reader must include this import and exclude an unapplied
+    // one, and the durable clock alone cannot do both.
     await store.setVectorClock({ [DEVICE_A]: 2 });
     const localImport = createOp('local-import', {
       opType: OpType.SyncImport,
@@ -215,7 +210,7 @@ describe('Capture preparation baseline (integration, real op-log store)', () => 
       ),
     ).toBeFalse();
 
-    const preparationClock = await readCapturePreparationClock(clocks);
+    const preparationClock = await readCapturePreparationClock(store, clocks);
 
     expect(preparationClock[DEVICE_A]).toBe(3);
     expect(classifyAgainstLocalImport(buildCandidateClock(preparationClock))).toBeTrue();
