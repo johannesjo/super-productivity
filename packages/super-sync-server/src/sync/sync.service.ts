@@ -60,25 +60,44 @@ import type { ValidationResult } from './services/validation.service';
  * resolver answering differently is the design, not an asymmetry to close
  * (#9703, #9755).
  */
-const resolveRetainedReplacementSeq = async (
+const resolveRetainedReplacement = async (
   db: Prisma.TransactionClient,
   userId: number,
-): Promise<number | null> => {
+): Promise<{
+  serverSeq: number;
+  /** Present only for a real retained import; never for the REPAIR stand-in. */
+  evidence?: { clientId: string; vectorClock: Prisma.JsonValue };
+} | null> => {
   const retainedImport = await db.operation.findFirst({
     where: { userId, opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT'] } },
     orderBy: { serverSeq: 'desc' },
-    select: { serverSeq: true },
+    select: { serverSeq: true, clientId: true, vectorClock: true },
   });
   if (retainedImport) {
-    return retainedImport.serverSeq;
+    return {
+      serverSeq: retainedImport.serverSeq,
+      evidence: {
+        clientId: retainedImport.clientId,
+        vectorClock: retainedImport.vectorClock,
+      },
+    };
   }
   const retainedCausalRepair = await db.operation.findFirst({
     where: { userId, opType: 'REPAIR', repairBaseServerSeq: { not: null } },
     orderBy: { serverSeq: 'desc' },
     select: { serverSeq: true },
   });
-  return retainedCausalRepair?.serverSeq ?? null;
+  // Deliberately no evidence: this row is a stand-in for a pruned import, and
+  // a REPAIR replays concurrent work instead of dropping it. Recording it as
+  // the boundary's author would widen REPAIR into import semantics (#9703).
+  return retainedCausalRepair ? { serverSeq: retainedCausalRepair.serverSeq } : null;
 };
+
+const resolveRetainedReplacementSeq = async (
+  db: Prisma.TransactionClient,
+  userId: number,
+): Promise<number | null> =>
+  (await resolveRetainedReplacement(db, userId))?.serverSeq ?? null;
 
 class CleanSlateUploadRejectedError extends Error {
   constructor(readonly results: UploadResult[]) {
@@ -266,17 +285,27 @@ export class SyncService {
               // while migrations run. Resolve retained replacements lazily
               // after the new process owns the write path, then persist the
               // answer for subsequent uploads.
-              const retainedReplacementSeq = await resolveRetainedReplacementSeq(
-                tx,
-                userId,
-              );
+              const retainedReplacement = await resolveRetainedReplacement(tx, userId);
               // Zero is a resolved "no retained replacement" sentinel. Keeping
               // null exclusively for unresolved upgrade rows avoids repeating
               // this indexed lookup on every upload for ordinary accounts.
-              latestStateReplacementSeq = retainedReplacementSeq ?? 0;
+              latestStateReplacementSeq = retainedReplacement?.serverSeq ?? 0;
+              const evidence = retainedReplacement?.evidence;
               await tx.userSyncState.update({
                 where: { userId },
-                data: { latestStateReplacementSeq },
+                data: {
+                  latestStateReplacementSeq,
+                  // Backfill the boundary's causal identity while its row is
+                  // still retained. Once pruned there is nothing to recover
+                  // from, so a reader must keep refusing rather than assume.
+                  ...(evidence
+                    ? {
+                        latestStateReplacementClientId: evidence.clientId,
+                        latestStateReplacementVectorClock:
+                          evidence.vectorClock as Prisma.InputJsonValue,
+                      }
+                    : {}),
+                },
               });
               uploadDbRoundtrips++;
             }
@@ -349,6 +378,8 @@ export class SyncService {
                 latestFullStateSeq: null,
                 latestFullStateVectorClock: Prisma.DbNull,
                 latestStateReplacementSeq: null,
+                latestStateReplacementClientId: null,
+                latestStateReplacementVectorClock: Prisma.DbNull,
               },
             });
 
@@ -428,26 +459,39 @@ export class SyncService {
           // REPAIR as a boundary only as a stand-in for an import row that
           // pruning already deleted — a case that cannot exist at this point in
           // an upload. See that resolver's comment before widening this (#9703).
-          let latestAcceptedStateReplacementSeq: number | undefined;
+          let latestAcceptedStateReplacement:
+            | { serverSeq: number; vectorClock: Operation['vectorClock'] }
+            | undefined;
           for (let index = 0; index < ops.length; index++) {
             const op = ops[index];
             const result = results[index];
             if (
               result?.accepted &&
               result.serverSeq !== undefined &&
-              (op.opType === 'SYNC_IMPORT' || op.opType === 'BACKUP_IMPORT')
+              (op.opType === 'SYNC_IMPORT' || op.opType === 'BACKUP_IMPORT') &&
+              result.serverSeq > (latestAcceptedStateReplacement?.serverSeq ?? 0)
             ) {
-              latestAcceptedStateReplacementSeq = Math.max(
-                latestAcceptedStateReplacementSeq ?? 0,
-                result.serverSeq,
-              );
+              // processOperation prunes op.vectorClock IN PLACE before storage,
+              // so by now this is exactly the clock the operations row holds —
+              // which is what a reader comparing against this boundary must see.
+              latestAcceptedStateReplacement = {
+                serverSeq: result.serverSeq,
+                vectorClock: op.vectorClock,
+              };
             }
           }
-          if (latestAcceptedStateReplacementSeq !== undefined) {
+          if (latestAcceptedStateReplacement !== undefined) {
             await tx.userSyncState.update({
               where: { userId },
               data: {
-                latestStateReplacementSeq: latestAcceptedStateReplacementSeq,
+                latestStateReplacementSeq: latestAcceptedStateReplacement.serverSeq,
+                // Recorded with the seq so the boundary's causal identity
+                // outlives its operations row (retention deletes below the
+                // newest causal full-state op, which can be a later REPAIR).
+                // `clientId` is the uploader, mirroring the row's column.
+                latestStateReplacementClientId: clientId,
+                latestStateReplacementVectorClock:
+                  latestAcceptedStateReplacement.vectorClock as Prisma.InputJsonValue,
               },
             });
             uploadDbRoundtrips++;

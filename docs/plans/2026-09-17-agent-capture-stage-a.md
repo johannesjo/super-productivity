@@ -546,11 +546,12 @@ the gate should be open, but that is unverified.
 Still open and unchanged by this: account/key changes after preparation,
 cross-tab cursor races, and power-loss recovery.
 
-### Replacement retention experiment (2026-09-17): safe, not available
+### Replacement retention experiment (2026-09-17): reproduced, then fixed
 
-**Reproduced against real PostgreSQL: pruning the import row refuses every
-later capture for that account, permanently.** Added as a tenth case to the
-publication SQL suite; all ten pass.
+**Reproduced against real PostgreSQL: pruning the import row refused every
+later capture for that account, permanently.** Fixed by persisting the
+boundary's causal identity; the publication SQL suite is now eleven cases and
+all pass.
 
 `latestStateReplacementSeq` tracks imports only — an accepted causal REPAIR
 deliberately does not move it (#9703). The retention sweep's boundary is the
@@ -571,15 +572,30 @@ operation, no receipt, watermark unmoved, and the capture still pending rather
 than consumed. Causation was confirmed by retaining the row and re-running — the
 identical candidate publishes — so the refusal is not incidental.
 
-**Design for durable evidence (not implemented).** Persist the replacement's
-causal identity next to its seq on `user_sync_state`
-(`latest_state_replacement_client_id`, `latest_state_replacement_vector_clock`),
-written by the same `userSyncState.update` that already sets the seq inside the
-upload transaction holding the per-user lock. Additive, nullable, no extra round
-trip, and `latestFullStateVectorClock` is the existing precedent for the shape.
-Evidence then survives pruning because it never lives in a prunable row. Legacy
-rows stay null until that account's next import; the lazy resolver can backfill
-from the retained row while it still exists.
+**Durable evidence (implemented).** The replacement's causal identity is now
+persisted next to its seq on `user_sync_state`
+(`latest_state_replacement_client_id`, `latest_state_replacement_vector_clock`,
+migration `20260917000000_add_state_replacement_evidence`), written by the same
+`userSyncState.update` that already sets the seq inside the upload transaction
+holding the per-user lock. Additive, nullable, no extra round trip, and
+`latestFullStateVectorClock` is the existing precedent for the shape. Evidence
+survives pruning because it never lives in a prunable row.
+
+The recorded clock is the one `processOperation` already pruned in place, so it
+is byte-for-byte what the operations row holds — a reader comparing against the
+boundary sees the same clock either way. `resolveRetainedReplacement` backfills
+legacy rows lazily, but **only from a still-retained import**, never from the
+causal-REPAIR stand-in: recording the REPAIR as the boundary's author would
+widen it into import semantics, the exact confusion #9703 warns against.
+
+**The residual gap is pinned, not papered over.** An account whose import was
+accepted before this migration and whose row was pruned before any later upload
+could backfill has no causal identity anywhere. Publication keeps refusing
+there; the eleventh case asserts it, because reading a missing boundary as an
+absent one would publish work prepared before the import — the safety failure
+the gate exists for. Both halves were falsified independently: dropping the
+upload-side write fails only the pruned case, and treating a missing boundary as
+absent fails only the legacy case.
 
 Two alternatives were considered and rejected. Exempting the replacement row from
 pruning fights the quota design for a row that can be 20MB, and the pointer can
@@ -588,10 +604,11 @@ REPAIR that authorized the deletion would treat a REPAIR as an import — it
 replays concurrent work instead of dropping it — which #9703 explicitly warns
 against.
 
-**Recommendation: do not ship the migration yet.** It is small and additive, but
-it only matters if publication-before-application is the selected protocol, and
-the current behavior is safe. Land it with protocol selection rather than ahead
-of it; until then a pruned boundary correctly refuses.
+**Shipped ahead of protocol selection, deliberately.** The migration only
+matters if publication-before-application is the selected protocol, so the
+earlier recommendation was to land it alongside that decision. It went in early
+on request; it is additive, nullable, and inert for every reader that does not
+consult the new columns, so it does not pre-commit the protocol choice.
 
 The proposed import contract remains: unpublished captures survive task-data
 imports; published captures stay consumed. Thus restoring a backup just before
@@ -618,20 +635,21 @@ separate assistant submissions. See the
 Use the real server database transaction, valid task operation envelopes, and
 the app's normal remote replay. An in-memory fake queue is not sufficient.
 
-| Failure or race                                            | Required result                                                                     |
-| ---------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| Device dies before publication                             | Item remains pending; no optimistic task survives.                                  |
-| Two devices prepare different candidates                   | One ordinary task operation is committed; both observe the same receipt.            |
-| Server commits but the response is lost                    | Retry observes publication; no second task operation.                               |
-| Server transaction fails                                   | Neither the operation nor a success receipt is committed.                           |
-| Download or local apply fails after publication            | Normal sync retries/rebuilds; the capture is not republished.                       |
-| User edits, moves, or deletes the imported task            | Late queue retries leave those changes intact.                                      |
-| Import/reset races with publication                        | Existing replacement fence and explicit queue policy govern the result.             |
-| Operation is pruned after publication                      | Receipt stays terminal; normal snapshot recovery supplies current state.            |
-| Device/account/encryption configuration changes            | Stale work aborts without cross-account delivery.                                   |
-| Local write races with preparation, or preparation crashes | Clock reservation and subsequent operations remain causally valid.                  |
-| Server database backup restores old pending items          | Queue consumption stays paused until recovery resolves consumption ambiguity.       |
-| Replacement row pruned by retention or quota recovery      | Reproduced: refuses safely and permanently. Durable evidence designed, not shipped. |
+| Failure or race                                            | Required result                                                                                |
+| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| Device dies before publication                             | Item remains pending; no optimistic task survives.                                             |
+| Two devices prepare different candidates                   | One ordinary task operation is committed; both observe the same receipt.                       |
+| Server commits but the response is lost                    | Retry observes publication; no second task operation.                                          |
+| Server transaction fails                                   | Neither the operation nor a success receipt is committed.                                      |
+| Download or local apply fails after publication            | Normal sync retries/rebuilds; the capture is not republished.                                  |
+| User edits, moves, or deletes the imported task            | Late queue retries leave those changes intact.                                                 |
+| Import/reset races with publication                        | Existing replacement fence and explicit queue policy govern the result.                        |
+| Operation is pruned after publication                      | Receipt stays terminal; normal snapshot recovery supplies current state.                       |
+| Device/account/encryption configuration changes            | Stale work aborts without cross-account delivery.                                              |
+| Local write races with preparation, or preparation crashes | Clock reservation and subsequent operations remain causally valid.                             |
+| Server database backup restores old pending items          | Queue consumption stays paused until recovery resolves consumption ambiguity.                  |
+| Replacement row pruned by retention or quota recovery      | Fixed: the boundary's causal identity is persisted beside its seq and outlives the row.        |
+| Boundary pruned on a pre-migration row, never backfilled   | Publication refuses: no causal identity anywhere, and a missing boundary is not an absent one. |
 
 ## Implementation order and release gates
 
@@ -641,9 +659,9 @@ the app's normal remote replay. An in-memory fake queue is not sufficient.
    import causality before receipt commitment. The baseline experiment then
    reproduced rejected/failed/pending imports and replaced the retained-history
    clock reader with an applied baseline plus a preparation gate, and the
-   retention experiment showed a pruned replacement refuses safely but
-   permanently. Next compare protocols, then account/key changes and multiple
-   tabs; the durable-evidence migration lands with protocol selection.
+   retention experiment reproduced a pruned replacement refusing safely but
+   permanently, then fixed it by persisting the boundary's causal identity.
+   Next compare protocols, then account/key changes and multiple tabs.
 2. **Delivery comparison:** compare publication before application with any
    concrete coordinated consumer alternative against the same failure cases.
    Select using the criteria above, including the cost of rollback/rebase or
@@ -720,9 +738,13 @@ actual supported workflow. A longer schedule does not by itself justify them.
   unimplemented. Submission retry identity, server-database restoration, clock
   pruning, and encryption/account changes remain release gates.
 
-The tenth publication SQL case covers the pruned replacement boundary. It uses
-the ordinary upload path for the import and the causal REPAIR, then deletes below
-the retention sweep's boundary exactly as that sweep does.
+The tenth and eleventh publication SQL cases cover the pruned replacement
+boundary. Both use the ordinary upload path for the import (and, for the tenth,
+a causal REPAIR), then delete below the retention sweep's boundary exactly as
+that sweep does. The tenth asserts that persisted evidence keeps the boundary
+enforceable — a descending candidate publishes, a stale one is still rejected.
+The eleventh nulls the evidence columns first to stand in for a pre-migration
+row and asserts publication still refuses.
 
 Run the SQL experiment from `packages/super-sync-server` with `DATABASE_URL`
 pointing to an isolated PostgreSQL database containing the existing SuperSync

@@ -7,6 +7,7 @@
  * capture spike database provisioned for this experiment.
  */
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
+import { Prisma } from '@prisma/client';
 import { prisma, disconnectDb } from '../../src/db';
 import { SyncService } from '../../src/sync/sync.service';
 import { Operation } from '../../src/sync/sync.types';
@@ -335,13 +336,15 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
    * deletes import rows, but it is consulted only for unresolved upgrade rows.
    *
    * The ordinary upload fence is unharmed: it compares the pointer as a number
-   * and never joins the row. Publication does join it, for the clientId and
-   * vector clock the import classifier needs, so a dangling pointer refuses
-   * every future capture for that account. That is an availability failure, not
-   * a safety failure: this asserts both that nothing publishes AND that the
-   * capture survives pending rather than being consumed.
+   * and never joins the row. Publication needs the boundary's clientId and
+   * vector clock, which used to come from that row alone — so a pruned import
+   * refused every future capture for the account. `uploadOps` now records the
+   * accepted import's causal identity beside the seq, so the boundary outlives
+   * its row. This asserts the recovered availability AND that the boundary is
+   * still enforced: a candidate that does not descend from the pruned import is
+   * still rejected.
    */
-  it('refuses every capture forever once the replacement row has been pruned', async () => {
+  it('still classifies against the replacement once its row has been pruned', async () => {
     const userId = await createUser();
     const importer = 'pruned-importer';
     const importClock = { [importer]: 1 };
@@ -407,7 +410,11 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
     });
     const syncState = await prisma.userSyncState.findUniqueOrThrow({
       where: { userId },
-      select: { latestStateReplacementSeq: true },
+      select: {
+        latestStateReplacementSeq: true,
+        latestStateReplacementClientId: true,
+        latestStateReplacementVectorClock: true,
+      },
     });
     expect(syncState.latestStateReplacementSeq).toBe(importSeq);
     expect(
@@ -415,33 +422,102 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
         where: { userId_serverSeq: { userId, serverSeq: importSeq } },
       }),
     ).toBeNull();
+    // The evidence the upload recorded beside the seq is what survives.
+    expect(syncState.latestStateReplacementClientId).toBe(importer);
+    expect(syncState.latestStateReplacementVectorClock).toEqual(importClock);
 
-    // A candidate that correctly descends from the import — it would publish if
-    // the boundary were still readable.
+    // A candidate that does NOT descend from the import must still be refused:
+    // recovering availability must not turn the pruned boundary into no
+    // boundary. Rejected by classification, not by a missing row.
+    const staleCaptureId = unique('pruned-stale');
+    await harness.enqueueCapture({
+      userId,
+      captureId: staleCaptureId,
+      title: 'Prepared before the import',
+    });
+    expect(
+      await publish(userId, staleCaptureId, makeTaskCandidate(userId, 0), 0, repairSeq),
+    ).toMatchObject({
+      status: 'rejected',
+      error: 'Capture candidate does not include the latest state replacement',
+    });
+
+    // A candidate that correctly descends from the import now publishes.
     const captureId = unique('pruned-replacement');
-    await harness.enqueueCapture({ userId, captureId, title: 'Blocked by retention' });
+    await harness.enqueueCapture({ userId, captureId, title: 'Survives retention' });
     const candidate = makeTaskCandidate(userId, 0);
     candidate.vectorClock = { ...candidate.vectorClock, ...importClock };
 
-    const rejection = {
+    expect(await publish(userId, captureId, candidate, 0, repairSeq)).toMatchObject({
+      status: 'published',
+    });
+    expect(await harness.countCaptureActorOperations({ userId })).toBe(1);
+    expect(await harness.readCaptureReceipt({ userId, captureId })).not.toBeNull();
+  });
+
+  /**
+   * The residual gap, pinned rather than papered over: an account whose import
+   * was accepted before the evidence columns existed, and whose row was pruned
+   * before any later upload could backfill them, has no causal identity for its
+   * boundary anywhere. Publication must keep refusing. Treating the missing
+   * boundary as an absent one would publish work prepared before the import —
+   * exactly the safety failure the gate exists for.
+   */
+  it('refuses when neither the row nor the recorded evidence has the boundary', async () => {
+    const userId = await createUser();
+    const importer = 'legacy-importer';
+    const importClock = { [importer]: 1 };
+    const importResult = await new SyncService().uploadOps(
+      userId,
+      importer,
+      [
+        {
+          id: unique('legacy-import'),
+          clientId: importer,
+          actionType: '[SP_ALL] Load(import) all data',
+          opType: 'SYNC_IMPORT',
+          entityType: 'ALL',
+          payload: { appDataComplete: { TASK: {} } },
+          vectorClock: importClock,
+          timestamp: Date.now(),
+          schemaVersion: 1,
+          syncImportReason: 'BACKUP_RESTORE',
+        },
+      ],
+      true,
+      undefined,
+      undefined,
+      false,
+      0,
+    );
+    expect(importResult[0]?.accepted).toBe(true);
+    const importSeq = importResult[0].serverSeq!;
+
+    // A row as it existed before this migration: seq only, no evidence.
+    await prisma.userSyncState.update({
+      where: { userId },
+      data: {
+        latestStateReplacementClientId: null,
+        latestStateReplacementVectorClock: Prisma.DbNull,
+      },
+    });
+    await prisma.operation.deleteMany({
+      where: { userId, serverSeq: { lte: importSeq } },
+    });
+
+    const captureId = unique('legacy-pruned');
+    await harness.enqueueCapture({ userId, captureId, title: 'No evidence anywhere' });
+    const candidate = makeTaskCandidate(userId, 0);
+    candidate.vectorClock = { ...candidate.vectorClock, ...importClock };
+
+    expect(await publish(userId, captureId, candidate, 0, importSeq)).toMatchObject({
       status: 'rejected',
       error: 'Capture state replacement is no longer retained',
-    };
-    expect(await publish(userId, captureId, candidate, 0, repairSeq)).toMatchObject(
-      rejection,
-    );
-    // Permanent, not transient: nothing about the account will restore the row.
-    expect(await publish(userId, captureId, candidate, 0, repairSeq)).toMatchObject(
-      rejection,
-    );
-
-    // Safe but unavailable: no operation, no receipt, capture still pending.
+    });
     expect(await harness.countCaptureActorOperations({ userId })).toBe(0);
-    expect(await harness.readCaptureReceipt({ userId, captureId })).toBeNull();
-    expect(await harness.readPublicationWatermark({ userId })).toBe(0);
     expect(await harness.readPendingCapture({ userId, captureId })).toMatchObject({
       captureId,
-      title: 'Blocked by retention',
+      title: 'No evidence anywhere',
     });
   });
 

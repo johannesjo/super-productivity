@@ -253,24 +253,36 @@ export const createAgentCapturePublicationHarness = (
         // sequence, device and storage writes as well as any capture bookkeeping.
         const syncState = await tx.userSyncState.findUniqueOrThrow({
           where: { userId: input.userId },
-          select: { latestStateReplacementSeq: true },
+          select: {
+            latestStateReplacementSeq: true,
+            latestStateReplacementClientId: true,
+            latestStateReplacementVectorClock: true,
+          },
         });
         if (syncState.latestStateReplacementSeq) {
-          const replacement = await tx.operation.findUnique({
-            where: {
-              userId_serverSeq: {
-                userId: input.userId,
-                serverSeq: syncState.latestStateReplacementSeq,
-              },
-            },
-            select: { clientId: true, vectorClock: true },
-          });
-          // This bounded spike refuses publication when the old boundary was
-          // pruned. Persisting/reconstructing its causal evidence is still an
-          // open design gate; silently treating a missing row as no import loses
-          // that evidence. A retained causal REPAIR fallback is conservatively
-          // required to pass the same classification, without widening production
-          // REPAIR semantics.
+          // Prefer the evidence recorded beside the seq: retention deletes below
+          // the newest CAUSAL full-state op, which can be a later REPAIR, so the
+          // import's own row may be gone while it is still the boundary.
+          const replacement =
+            syncState.latestStateReplacementClientId !== null &&
+            syncState.latestStateReplacementVectorClock !== null
+              ? {
+                  clientId: syncState.latestStateReplacementClientId,
+                  vectorClock: syncState.latestStateReplacementVectorClock,
+                }
+              : await tx.operation.findUnique({
+                  where: {
+                    userId_serverSeq: {
+                      userId: input.userId,
+                      serverSeq: syncState.latestStateReplacementSeq,
+                    },
+                  },
+                  select: { clientId: true, vectorClock: true },
+                });
+          // Still refuse when neither source has it: a row written before the
+          // evidence columns existed and pruned before any upload backfilled
+          // them leaves no causal identity. Do not read the missing boundary as
+          // an absent one — that would publish work prepared before the import.
           const error = !replacement
             ? 'Capture state replacement is no longer retained'
             : !classifyOpAgainstSyncImport(

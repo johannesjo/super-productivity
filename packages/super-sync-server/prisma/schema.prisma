@@ -131,15 +131,19 @@ model Operation {
 }
 
 model UserSyncState {
-  userId                     Int     @id @map("user_id")
-  lastSeq                    Int     @default(0) @map("last_seq")
-  lastSnapshotSeq            Int?    @map("last_snapshot_seq")
-  snapshotData               Bytes?  @map("snapshot_data")
-  snapshotAt                 BigInt? @map("snapshot_at")
-  snapshotSchemaVersion      Int?    @default(1) @map("snapshot_schema_version")
-  latestFullStateSeq         Int?    @map("latest_full_state_seq")
-  latestFullStateVectorClock Json?   @map("latest_full_state_vector_clock")
-  latestStateReplacementSeq  Int?    @map("latest_state_replacement_seq")
+  userId                            Int     @id @map("user_id")
+  lastSeq                           Int     @default(0) @map("last_seq")
+  lastSnapshotSeq                   Int?    @map("last_snapshot_seq")
+  snapshotData                      Bytes?  @map("snapshot_data")
+  snapshotAt                        BigInt? @map("snapshot_at")
+  snapshotSchemaVersion             Int?    @default(1) @map("snapshot_schema_version")
+  latestFullStateSeq                Int?    @map("latest_full_state_seq")
+  latestFullStateVectorClock        Json?   @map("latest_full_state_vector_clock")
+  latestStateReplacementSeq         Int?    @map("latest_state_replacement_seq")
+  // Causal identity of the op latestStateReplacementSeq points at, kept here so
+  // it survives that row being pruned. See the migration for why.
+  latestStateReplacementClientId    String? @map("latest_state_replacement_client_id")
+  latestStateReplacementVectorClock Json?   @map("latest_state_replacement_vector_clock")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
