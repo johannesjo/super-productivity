@@ -264,9 +264,11 @@ maintenance cost, operational complexity, online delivery latency, and
 reversibility. Include the durable metadata, client/server coupling, and new
 failure states each design requires. Record untested cases explicitly.
 
-Neither delivery protocol nor clock-ownership strategy is selected for production.
 Use bounded experiments to resolve the differences; implement only the chosen
-protocol as product behavior.
+protocol as product behavior. The comparison below now recommends publication
+before application and explains why a coordinated consumer is not the simpler
+option here; the clock-ownership strategy within it is still unsettled, and
+selection remains the maintainer's decision.
 
 ### Candidate C: consume on ordinary upload acceptance
 
@@ -725,6 +727,61 @@ server, under whatever key that device holds), which is why this is recorded as
 a limitation rather than fenced on the server; that comparison is reasoned from
 the source, not reproduced.
 
+### Delivery comparison (2026-09-17): publication-first is the recommendation
+
+Step 2 of the implementation order, decided against the failure table below and
+the stated criteria. This is a source-grounded comparison, not a new experiment;
+Candidate B was never implemented, so its costs are derived from what this
+codebase would require of it.
+
+**The finding that decides it: this client has no durable "prepared but not
+applied" state.** `OperationLogEntry.applicationStatus` is documented as remote
+ops only, and hydration's `_replayTailOps` replays every tail entry except
+`reducerRejectedAt` ones. So any operation a device writes to its own log is
+applied state after the next reload — there is no status a local entry can carry
+that means "durable, mine, not yet real". A device-owned outbox therefore has
+exactly two shapes: store the candidate in the op log, which _is_ optimistic
+creation and is rejected by the retry characterization above (a repeat after
+deletion recreates the task; a repeat after a project move restores the old
+membership), or add a second durable store outside the op log, with its own
+hydration, recovery, compaction interaction, and a persisted clock reservation
+under the device's real `clientId`.
+
+**And it still needs the server arbiter anyway.** Two devices can read the same
+pending capture, so B needs a claim; a lease's expiry cannot distinguish a dead
+device from a slow one, which is the same ambiguity that rejected create-then-ACK.
+B is thus A's coordination plus new durable client state — not a simpler
+alternative.
+
+| Criterion               | A: publish, then receive via sync                                                          | B: device-owned durable outbox                                                                       |
+| ----------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| Correctness             | One atomic decision point; unaccepted candidates never touch task state.                   | Needs a claim _and_ a durable local binding; no local representation for unapplied work.             |
+| Crash recovery          | Nothing to recover: the candidate is in-memory, the capture stays pending.                 | Must recover the same op and its reserved clock, and must let another device take over a dead one.   |
+| Maintenance cost        | Server: receipt ledger, publication counter, one publication route.                        | Every client: a new persisted store, its recovery path, and its interaction with compaction/pruning. |
+| Operational complexity  | One deployment the maintainer migrates; state is server-side and inspectable.              | Debugging spans installed clients; a bad outbox row is on a user's disk.                             |
+| Online latency          | Equal — both deliver only when some device prepares. `queued` semantics either way.        | Equal.                                                                                               |
+| Reversibility           | Additive, nullable server columns; a server migration can withdraw them.                   | A persisted client model cannot be un-shipped (rules 10/11); removal is a fleet-wide migration.      |
+| Vector-clock budget     | Costs one permanent actor slot per account out of `MAX_VECTOR_CLOCK_SIZE = 20` — untested. | Costs none; the task is authored by a real device.                                                   |
+| Fit with existing model | Introduces a non-device actor into clocks, device lists, and `clientId` tie-breaks.        | Authorship matches every existing assumption.                                                        |
+
+B's two genuine advantages are the last two rows: no virtual publisher identity,
+and ops authored by a real device. They do not outweigh the first four. The
+decisive asymmetry is reversibility: the server is one deployment under the
+maintainer's control, while persisted client state ships to an installed fleet
+where a required new field breaks existing installs and a schema bump protects
+nobody already out there. A keeps its durable state where it can be withdrawn.
+
+**Recommendation: implement publication before application (Candidate A).**
+Candidate C stays rejected (its convergence failures are recorded above) with
+atomic upload consumption retained as a primitive. Selection remains the
+maintainer's call; what this comparison establishes is that "a coordinated
+consumer would be simpler" is not true in this codebase.
+
+Gates that remain open for A, none of them resolved by this comparison: key
+agreement inside the encryption wipe window, the 20-entry clock limit and
+pruning with a virtual publisher actor, cross-tab cursor races, power loss
+during preparation, submission retry identity, and server-database restoration.
+
 ### Failure tests required before production
 
 Use the real server database transaction, valid task operation envelopes, and
@@ -764,10 +821,11 @@ the app's normal remote replay. An in-memory fake queue is not sufficient.
    account binding and multi-tab concurrency were already guarded. The generation's
    delivery is now resolved on the queue read rather than the sync contract, and
    both suites source it that way. Next compare protocols.
-2. **Delivery comparison:** compare publication before application with any
-   concrete coordinated consumer alternative against the same failure cases.
-   Select using the criteria above, including the cost of rollback/rebase or
-   durable ownership if an alternative needs them.
+2. **Delivery comparison:** done — see the comparison section. Publication
+   before application is recommended, because a device-owned outbox needs the
+   same server arbiter plus durable client state the op log cannot represent
+   (local entries have no unapplied status; replay applies them all). Remaining
+   work is the gate list there, not another candidate.
 3. **Real connector spike:** deploy a disposable capture-only endpoint with real
    OAuth and test the exact phone journey. Record compatibility results instead
    of advertising all assistants. This requires an actual publicly reachable
@@ -869,6 +927,14 @@ actual supported workflow. A longer schedule does not by itself justify them.
   the evidence here is the server test files' clean `tsc` pass, the E2E
   project's error count staying at its 42 pre-existing errors with none in this
   spec, and `checkFile`. Re-run both suites before trusting it.
+- The delivery comparison is source evidence, not a run: the decisive facts are
+  `OperationLogEntry.applicationStatus` being documented for remote ops only
+  (`packages/sync-core/src/operation.types.ts`), hydration replaying every tail
+  entry except `reducerRejectedAt` ones
+  (`operation-log-hydrator.service.ts` `_replayTailOps`), and
+  `MAX_VECTOR_CLOCK_SIZE = 20` (`packages/sync-core/src/vector-clock.ts`).
+  Candidate B was never built, so its column in that table is derived cost, not
+  a measurement.
 - Production publication and actual phone/assistant onboarding remain
   unimplemented. Submission retry identity, server-database restoration, and
   clock pruning remain release gates, as does key agreement inside the wipe
