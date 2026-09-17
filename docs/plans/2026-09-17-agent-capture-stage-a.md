@@ -481,12 +481,58 @@ This is a narrower result than general production-safe causal preparation. The
 full-clock reader includes retained rejected and pending-apply operations; the
 current fixtures prepare after successful sync. The fallback also scans the
 retained log on each preparation; its cost has not been benchmarked.
-Failed/rejected full-state application needs a dedicated test before this reader becomes a production
-contract. Same-tab cycle exclusion also does not settle cross-tab cursor races.
+Failed/rejected full-state application is now reproduced — see the baseline
+experiment below — and rejects this reader as a production contract.
+Same-tab cycle exclusion also does not settle cross-tab cursor races.
 Account/key changes after preparation, virtual-device lifecycle/version reporting,
 and power-loss recovery remain open. A missing retained replacement row currently
 refuses publication; durable replacement evidence after retention remains an
 availability gate. Do not silently treat the missing boundary as an empty one.
+
+### Preparation baseline experiment (2026-09-17): retained history is not applied state
+
+**Reproduced: a capture publishes over a replacement this device never applied.**
+The preparation clock reader is now shared with
+[`capture-preparation-baseline.integration.spec.ts`](../../src/app/op-log/testing/integration/capture-preparation-baseline.integration.spec.ts),
+which drives the real `OperationLogStoreService` and the same
+`classifyOpAgainstSyncImport` the publication transaction runs. Six cases pass.
+
+The two clock sources prove different things. The durable clock advances only in
+`markReducersCommittedAndMergeClocks`, so alone it is evidence of **applied**
+state. `getFullVectorClock()` merges every **retained** op regardless of outcome.
+Merging them downgrades the evidence to "downloaded".
+
+| Downloaded remote replacement | Applied? | Ordinary sync | Prepared candidate            |
+| ----------------------------- | -------- | ------------- | ----------------------------- |
+| `rejectedAt` set              | no       | proceeds      | publishes (must stay pending) |
+| `applicationStatus: failed`   | no       | blocked       | publishes (must stay pending) |
+| `applicationStatus: pending`  | no       | blocked       | publishes (must stay pending) |
+| reducers committed            | yes      | proceeds      | publishes (correct)           |
+
+Two further results sharpen the design question rather than settle it:
+
+- `getLatestFullStateOpEntry()` skips the rejected import (no baseline exists at
+  all) but **cannot distinguish a failed import from an applied one** — it names
+  the failed import as the baseline. No existing reader answers "was this
+  replacement applied?". The only applied-state signals are the durable clock and
+  the incomplete-remote gate (`getPendingRemoteOps`/`getFailedRemoteOps`), and
+  capture preparation consults neither.
+- **Dropping the merge is not the fix.** The sixth case reproduces the shape the
+  merge was added for: a device that imports a backup and chooses "Use My Data"
+  writes a local `SYNC_IMPORT` at its own counter 3 while its durable clock stays
+  at 2, and there the retained log is the only evidence of applied state. Removing
+  the merge was observed flipping the three unapplied cases to the required result
+  while leaving the applied remote import correct — but it re-loses this local one.
+  The same reader must include a local import ahead of the durable clock and
+  exclude an unapplied remote one; neither source does both.
+
+**Recommendation:** treat "applied baseline" as a distinct, explicitly persisted
+fact rather than something inferred from either clock. Preparation must refuse
+while the incomplete-remote gate is blocked, and must derive its baseline from
+applied state, not retained history. Specify that fact's durability alongside the
+replacement-evidence retention gate above; the two are the same question asked at
+different layers. Do not add a preparation guard before that fact exists — it
+would encode the same inference at one more site.
 
 The proposed import contract remains: unpublished captures survive task-data
 imports; published captures stay consumed. Thus restoring a backup just before
@@ -532,9 +578,10 @@ the app's normal remote replay. An in-memory fake queue is not sufficient.
 1. **Delivery evidence:** consume-on-accept rejects reliance on existing
    losing-device reconciliation. The revised publication experiment keeps
    unaccepted candidates out of task state, shares task preparation, and checks
-   import causality before receipt commitment. Next establish a preparation
-   baseline specifically tied to applied state, including rejected/failed imports
-   and replacement evidence after operation retention.
+   import causality before receipt commitment. The baseline experiment then
+   reproduced rejected/failed/pending imports and rejected the retained-history
+   clock reader. Next define the durable applied-baseline fact that gate needs,
+   together with replacement evidence after operation retention.
 2. **Delivery comparison:** compare publication before application with any
    concrete coordinated consumer alternative against the same failure cases.
    Select using the criteria above, including the cost of rollback/rebase or
@@ -588,6 +635,14 @@ actual supported workflow. A longer schedule does not by itself justify them.
   action semantics, no dispatch during preparation, and Inbox isolation from
   active Today/tag contexts. App TypeScript compilation passes. Preparation and
   publication test files pass their required formatting/lint checks.
+- The preparation baseline experiment passes six cases against the real
+  operation log store and the shared import classifier: rejected, failed and
+  pending remote replacements each publish when they must stay pending; an
+  applied remote replacement and a local import ahead of the durable clock each
+  publish correctly. Removing the full-clock merge was observed flipping the
+  three unapplied cases to the required result and re-breaking the local-import
+  case, so the reproduction is not a tautology and the naive fix is rejected.
+  Run it with `npm run test:file src/app/op-log/testing/integration/capture-preparation-baseline.integration.spec.ts`.
 - The revised publication browser suite passes all three scenarios with ordinary
   encrypted download/replay against isolated PostgreSQL. These are successful
   delivery assertions, unlike the consume-on-accept suite's expected failures.

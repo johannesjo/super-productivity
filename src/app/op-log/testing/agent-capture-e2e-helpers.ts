@@ -10,7 +10,7 @@ import { prepareMainTaskAdd } from '../../features/tasks/util/prepare-main-task-
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { DateService } from '../../core/date/date.service';
 import { VectorClockService } from '../sync/vector-clock.service';
-import { mergeVectorClocks } from '../../core/util/vector-clock';
+import { readCapturePreparationClock } from './capture-preparation-clock';
 import { SyncCycleGuardService } from '../sync/sync-cycle-guard.service';
 import { SyncProviderManager } from '../sync-providers/provider-manager.service';
 import { WrappedProviderService } from '../sync-providers/wrapped-provider.service';
@@ -74,10 +74,8 @@ export const createAgentCaptureE2eHelpers = (
         const prepared = await flush.flushThenRunExclusive(async () => {
           manager.assertSyncEpochUnchanged(epoch, 'capture preparation');
           opLogStore.clearVectorClockCache();
-          const clocks = injector.get(VectorClockService);
-          const clock = mergeVectorClocks(
-            await clocks.getCurrentVectorClock(),
-            await clocks.getFullVectorClock(),
+          const clock = await readCapturePreparationClock(
+            injector.get(VectorClockService),
           );
           // Keep the exact preparation cursor with this candidate. A later sync
           // must never replace it with a newer cursor when submitting old work.
