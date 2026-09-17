@@ -553,7 +553,15 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
   it('refuses a candidate prepared under a wiped encryption context', async () => {
     const userId = await createUser();
     const captureId = unique('stale-key');
-    await harness.enqueueCapture({ userId, captureId, title: 'Prepared under old key' });
+    // The queue read is where a production preparer learns the generation: it
+    // is already an authenticated call to this server, so nothing has to be
+    // added to the sync contract or kept on the client.
+    const queued = await harness.enqueueCapture({
+      userId,
+      captureId,
+      title: 'Prepared under old key',
+    });
+    expect(queued.dataGeneration).toBe(0);
     // Prepared while the account was on the OLD key: opaque ciphertext the
     // server cannot inspect, and by now cannot be decrypted by anyone.
     const candidate = makeTaskCandidate(userId, 0, {
@@ -565,7 +573,14 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
     await new SyncService().deleteAllUserData(userId);
     expect(await prisma.userSyncState.findUnique({ where: { userId } })).toBeNull();
 
-    const result = await publish(userId, captureId, candidate, 0);
+    const result = await publish(
+      userId,
+      captureId,
+      candidate,
+      0,
+      0,
+      queued.dataGeneration,
+    );
 
     expect(result).toMatchObject({
       status: 'rejected',
@@ -591,20 +606,33 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
   it('refuses the pre-wipe candidate even after the capture is re-queued', async () => {
     const userId = await createUser();
     const captureId = unique('replayed');
-    await harness.enqueueCapture({ userId, captureId, title: 'Prepared under old key' });
+    const queued = await harness.enqueueCapture({
+      userId,
+      captureId,
+      title: 'Prepared under old key',
+    });
     const staleCandidate = makeTaskCandidate(userId, 0, {
       isPayloadEncrypted: true,
       payload: 'ciphertext-from-the-retired-key',
     });
 
     await new SyncService().deleteAllUserData(userId);
-    // The assistant re-queues the same capture against the fresh account.
-    await harness.enqueueCapture({ userId, captureId, title: 'Prepared under old key' });
+    // The assistant re-queues the same capture against the fresh account. Its
+    // read reports the advanced generation, but this candidate carries the one
+    // from the read it was actually built from.
+    const reQueued = await harness.enqueueCapture({
+      userId,
+      captureId,
+      title: 'Prepared under old key',
+    });
+    expect([queued.dataGeneration, reQueued.dataGeneration]).toEqual([0, 1]);
     expect(await harness.readPublicationWatermark({ userId })).toBe(0);
 
     // Watermark, actor identity, op id and (absent) replacement fence all agree
     // with the stale candidate. The generation is the only thing that does not.
-    expect(await publish(userId, captureId, staleCandidate, 0)).toMatchObject({
+    expect(
+      await publish(userId, captureId, staleCandidate, 0, 0, queued.dataGeneration),
+    ).toMatchObject({
       status: 'rejected',
       error: 'Capture was prepared for a superseded account state',
     });
@@ -700,7 +728,8 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
       0,
     );
     expect(reupload[0]?.accepted).toBe(true);
-    const generation = await harness.readDataGeneration({ userId });
+    const generation = (await harness.readPendingCapture({ userId, captureId }))
+      ?.dataGeneration;
     expect(generation).toBe(1);
     expect(
       (await prisma.userSyncState.findUniqueOrThrow({ where: { userId } }))

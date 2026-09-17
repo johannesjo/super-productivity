@@ -117,31 +117,30 @@ const readCaptureState = async (
   }, taskId);
 
 /**
- * Spike shortcut: the account's data generation is read straight from the
- * database at preparation time. A production preparer has no such access — it
- * would have to learn the generation from a sync response, which is an open
- * protocol gate recorded in the Stage A plan. What this DOES exercise is that
- * the value is captured when the candidate is built, not when it is published.
+ * The data generation travels with the queue read, exactly as a production
+ * preparer would receive it: reading a pending capture is already an
+ * authenticated round trip to the same server, so no sync-contract field or
+ * client-persisted copy is needed. Passing it in also keeps what this exercises
+ * intact — the value belongs to the moment the candidate is built, not to the
+ * moment it is published.
  */
 const prepareCapture = async (options: {
   client: SimulatedE2EClient;
-  harness: CapturePublicationHarness;
-  userId: number;
   captureId: string;
   title: string;
   publisherClientId: string;
   publisherCounter: number;
+  /** As returned by the queue read that handed out this capture. */
+  dataGeneration: number;
 }): Promise<PreparedCaptureForPublication> => {
   const {
     client,
-    harness,
-    userId,
     captureId,
     title,
     publisherClientId,
     publisherCounter,
+    dataGeneration: expectedDataGeneration,
   } = options;
-  const expectedDataGeneration = await harness.readDataGeneration({ userId });
   const taskId = `capture-${captureId}`;
   const persistenceBefore = await readPreparationPersistence(client);
   const cursorBefore = await readCursor(client);
@@ -239,21 +238,19 @@ test.describe('@supersync Agent-capture publication feasibility', () => {
       const [preparedA, preparedB] = await Promise.all([
         prepareCapture({
           client: clientA,
-          harness,
-          userId: user.userId,
           captureId,
           title,
           publisherClientId: captureActorId,
           publisherCounter: watermark,
+          dataGeneration: pending.dataGeneration,
         }),
         prepareCapture({
           client: clientB,
-          harness,
-          userId: user.userId,
           captureId,
           title,
           publisherClientId: captureActorId,
           publisherCounter: watermark,
+          dataGeneration: pending.dataGeneration,
         }),
       ]);
       // Competing independently prepared tasks have never entered either store.
@@ -383,15 +380,18 @@ test.describe('@supersync Agent-capture publication feasibility', () => {
           await clientA.sync.syncAndWait();
           await clientB.sync.syncAndWait();
 
-          await harness.enqueueCapture({ userId: user.userId, captureId, title });
+          const queued = await harness.enqueueCapture({
+            userId: user.userId,
+            captureId,
+            title,
+          });
           const stalePreparation = await prepareCapture({
             client: clientA,
-            harness,
-            userId: user.userId,
             captureId,
             title,
             publisherClientId: captureActorId,
             publisherCounter: 0,
+            dataGeneration: queued.dataGeneration,
           });
 
           // Genuine app backup import before candidate preparation establishes the
@@ -402,18 +402,21 @@ test.describe('@supersync Agent-capture publication feasibility', () => {
           const watermark = await harness.readPublicationWatermark({
             userId: user.userId,
           });
-          expect(
-            await harness.readPendingCapture({ userId: user.userId, captureId }),
-          ).not.toBeNull();
+          // The consumer re-reads the queue before rebuilding, which is also
+          // where it learns the current generation.
+          const stillPending = await harness.readPendingCapture({
+            userId: user.userId,
+            captureId,
+          });
+          expect(stillPending).not.toBeNull();
           const consumer = useImportingDevice ? clientA : clientB;
           const prepared = await prepareCapture({
             client: consumer,
-            harness,
-            userId: user.userId,
             captureId,
             title,
             publisherClientId: captureActorId,
             publisherCounter: watermark,
+            dataGeneration: stillPending!.dataGeneration,
           });
           const { candidate } = prepared;
           // An import between preparation and submission rejects the immutable

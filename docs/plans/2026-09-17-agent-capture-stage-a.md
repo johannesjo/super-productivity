@@ -695,12 +695,35 @@ claimed inside the publication transaction, so exactly one candidate occupies
 each counter value and the loser stays pending for rebuild. Both cases pass
 against unchanged production code.
 
-**Open protocol gate.** The browser experiment reads the account's generation
-straight from the database at preparation time. A production preparer has no such
-access: it would have to learn the generation from a sync response, which means
-the value must be carried on the download/upload contract. What the experiment
-does establish is that the generation is captured when the candidate is built,
-not when it is published. This is a release gate, not a resolved design.
+**Generation delivery: resolved on the queue read, not the sync contract.** The
+earlier note here assumed a production preparer would have to learn the
+generation from a sync response, which would put the value on the
+download/upload contract. It does not: consuming a capture is already an
+authenticated read from the same server, so the pending-capture response carries
+the generation alongside the title, notes and publication watermark. That is
+strictly better than a sync-response copy — fresher, so fewer spurious
+refusals — and needs no contract field, no client-persisted value and no schema
+change. Both suites now take the generation from the queue read
+(`enqueueCapture` / `readPendingCapture`); the harness no longer exposes a
+database peek, so no test can rely on state a real preparer cannot see.
+
+Staleness between the queue read and publication is safe by construction: a wipe
+in that gap advances the generation, publication refuses, and the capture stays
+pending for a rebuild. That is the twelfth case, now sourced the production way.
+
+**What it still does not prove: key agreement.** The generation is evidence that
+the candidate was prepared in the current data era, not that the preparer's
+encryption key matches that era. A device still holding the retired key that
+prepares _inside_ the window reads the advanced generation from its own queue
+read, so the fence passes and its ciphertext publishes. This is not closable by
+the counter: the server cannot inspect ciphertext, and the value the preparer
+reports is the true current one. It needs client-side evidence instead — the
+preparer's own last successful sync round must belong to the current era — and
+stays open. Ordinary sync appears to face the same empty-server window
+(`planDownloadFullStateUpload` plans a full-state upload from a gap on an empty
+server, under whatever key that device holds), which is why this is recorded as
+a limitation rather than fenced on the server; that comparison is reasoned from
+the source, not reproduced.
 
 ### Failure tests required before production
 
@@ -720,6 +743,7 @@ the app's normal remote replay. An in-memory fake queue is not sufficient.
 | Device/account/encryption configuration changes            | Fixed: the wipe advances a monotonic data generation; work prepared under the retired key is refused. |
 | Candidate submitted to another account                     | Refused: the capture actor is derived from the account, so publisher identity disagrees.              |
 | Two tabs prepare against the same watermark                | Exactly one publishes; the loser stays pending. The watermark is claimed inside the transaction.      |
+| Retired-key device prepares inside the wipe window         | Open: the generation proves era membership, not key agreement. Needs client-side era evidence.        |
 | Local write races with preparation, or preparation crashes | Clock reservation and subsequent operations remain causally valid.                                    |
 | Server database backup restores old pending items          | Queue consumption stays paused until recovery resolves consumption ambiguity.                         |
 | Replacement row pruned by retention or quota recovery      | Fixed: the boundary's causal identity is persisted beside its seq and outlives the row.               |
@@ -737,8 +761,9 @@ the app's normal remote replay. An in-memory fake queue is not sufficient.
    permanently, then fixed it by persisting the boundary's causal identity. The
    account/key/tab experiment then reproduced the encryption-toggle wipe window,
    where every fence is absent, and fenced it with a monotonic data generation;
-   account binding and multi-tab concurrency were already guarded. Next compare
-   protocols, and resolve how a production preparer learns the generation.
+   account binding and multi-tab concurrency were already guarded. The generation's
+   delivery is now resolved on the queue read rather than the sync contract, and
+   both suites source it that way. Next compare protocols.
 2. **Delivery comparison:** compare publication before application with any
    concrete coordinated consumer alternative against the same failure cases.
    Select using the criteria above, including the cost of rollback/rebase or
@@ -834,11 +859,20 @@ actual supported workflow. A longer schedule does not by itself justify them.
   encryption toggle (wipe followed by the full-state re-upload) is refused by the
   ordinary replacement fence with the generation deliberately satisfied, so the
   new counter is credited only with the wipe window.
+- The generation now reaches both suites the way a production preparer would
+  get it, from the queue read that hands out the capture; the harness's database
+  peek is deleted. The three cases that turn on the generation are unchanged in
+  substance — pre-wipe read refuses, a post-wipe re-queue does not refresh an
+  older candidate's value, and a read after the wipe publishes. **Neither
+  DB-backed suite was re-run for this change**: the sandbox cannot reach the
+  PostgreSQL container (mapped host port and container IP both unreachable), so
+  the evidence here is the server test files' clean `tsc` pass, the E2E
+  project's error count staying at its 42 pre-existing errors with none in this
+  spec, and `checkFile`. Re-run both suites before trusting it.
 - Production publication and actual phone/assistant onboarding remain
   unimplemented. Submission retry identity, server-database restoration, and
-  clock pruning remain release gates, as does how a production preparer learns
-  the data generation — the browser experiment reads it from the database, which
-  no real preparer can do.
+  clock pruning remain release gates, as does key agreement inside the wipe
+  window (the generation proves era membership only).
 
 The tenth and eleventh publication SQL cases cover the pruned replacement
 boundary. Both use the ordinary upload path for the import (and, for the tenth,

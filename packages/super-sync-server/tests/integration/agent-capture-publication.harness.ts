@@ -46,6 +46,11 @@ export interface PendingCapture {
    * The account's data generation at read time. A preparer must carry this with
    * its candidate; `deleteAllUserData` advances it, and the ciphertext prepared
    * under the retired encryption context must not outlive that.
+   *
+   * It rides the queue read on purpose: consuming a capture is already an
+   * authenticated read from the same server, so the preparer needs neither a
+   * sync-contract field nor a client-persisted copy. Reading it here rather
+   * than at publication is what makes it evidence about the candidate.
    */
   dataGeneration: number;
 }
@@ -67,7 +72,6 @@ export interface CapturePublicationHarness {
     captureId: string;
   }): Promise<PendingCapture | null>;
   readPublicationWatermark(input: { userId: number }): Promise<number>;
-  readDataGeneration(input: { userId: number }): Promise<number>;
   publishCapture(input: {
     userId: number;
     captureId: string;
@@ -430,17 +434,6 @@ export const createAgentCapturePublicationHarness = (
       return rows[0]?.publishedCounter ?? 0;
     };
 
-  /** Models the preparer reading the account's generation at preparation time. */
-  const readDataGeneration: CapturePublicationHarness['readDataGeneration'] = async ({
-    userId,
-  }) =>
-    (
-      await prisma.user.findUniqueOrThrow({
-        where: { id: userId },
-        select: { syncDataGeneration: true },
-      })
-    ).syncDataGeneration;
-
   const publishCapture: CapturePublicationHarness['publishCapture'] = async (input) => {
     await initialize();
     for (let attempt = 1; attempt <= MAX_TRANSACTION_ATTEMPTS; attempt++) {
@@ -535,7 +528,6 @@ export const createAgentCapturePublicationHarness = (
     enqueueCapture,
     readPendingCapture,
     readPublicationWatermark,
-    readDataGeneration,
     publishCapture,
     readCaptureReceipt,
     countPublishedCaptures,
