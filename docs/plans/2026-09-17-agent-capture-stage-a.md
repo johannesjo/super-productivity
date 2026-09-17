@@ -485,9 +485,9 @@ Failed/rejected full-state application is now reproduced and fixed — see the
 baseline experiment below; preparation reads an applied baseline instead.
 Same-tab cycle exclusion also does not settle cross-tab cursor races.
 Account/key changes after preparation, virtual-device lifecycle/version reporting,
-and power-loss recovery remain open. A missing retained replacement row currently
-refuses publication; durable replacement evidence after retention remains an
-availability gate. Do not silently treat the missing boundary as an empty one.
+and power-loss recovery remain open. A missing retained replacement row refuses
+publication; the retention experiment below reproduces that and records the
+durable-evidence design. Do not silently treat the missing boundary as an empty one.
 
 ### Preparation baseline experiment (2026-09-17): only applied state
 
@@ -544,8 +544,54 @@ not re-run against the new gate; its fixtures prepare after a successful sync, s
 the gate should be open, but that is unverified.
 
 Still open and unchanged by this: account/key changes after preparation,
-cross-tab cursor races, power-loss recovery, and durable replacement evidence
-after retention.
+cross-tab cursor races, and power-loss recovery.
+
+### Replacement retention experiment (2026-09-17): safe, not available
+
+**Reproduced against real PostgreSQL: pruning the import row refuses every
+later capture for that account, permanently.** Added as a tenth case to the
+publication SQL suite; all ten pass.
+
+`latestStateReplacementSeq` tracks imports only — an accepted causal REPAIR
+deliberately does not move it (#9703). The retention sweep's boundary is the
+newest CAUSAL full-state op, which _does_ count a causal REPAIR, and it deletes
+everything below that. A REPAIR newer than the newest import therefore authorizes
+deleting that import's row, and nothing rewrites the pointer. Quota recovery
+reaches the same state by a second route: with two or more restore points it
+deletes up to and including the oldest. `resolveRetainedReplacementSeq` already
+exists because pruning deletes import rows, but it is consulted only for
+unresolved upgrade rows, so a resolved pointer keeps aiming at the deleted row.
+
+The ordinary upload fence is unharmed — it compares the pointer as a number and
+never joins the row. Publication joins it, for the `clientId` and vector clock
+the import classifier needs.
+
+**The failure is availability, not safety.** The reproduction asserts both: no
+operation, no receipt, watermark unmoved, and the capture still pending rather
+than consumed. Causation was confirmed by retaining the row and re-running — the
+identical candidate publishes — so the refusal is not incidental.
+
+**Design for durable evidence (not implemented).** Persist the replacement's
+causal identity next to its seq on `user_sync_state`
+(`latest_state_replacement_client_id`, `latest_state_replacement_vector_clock`),
+written by the same `userSyncState.update` that already sets the seq inside the
+upload transaction holding the per-user lock. Additive, nullable, no extra round
+trip, and `latestFullStateVectorClock` is the existing precedent for the shape.
+Evidence then survives pruning because it never lives in a prunable row. Legacy
+rows stay null until that account's next import; the lazy resolver can backfill
+from the retained row while it still exists.
+
+Two alternatives were considered and rejected. Exempting the replacement row from
+pruning fights the quota design for a row that can be 20MB, and the pointer can
+still dangle after a clean slate. Reconstructing the boundary from the causal
+REPAIR that authorized the deletion would treat a REPAIR as an import — it
+replays concurrent work instead of dropping it — which #9703 explicitly warns
+against.
+
+**Recommendation: do not ship the migration yet.** It is small and additive, but
+it only matters if publication-before-application is the selected protocol, and
+the current behavior is safe. Land it with protocol selection rather than ahead
+of it; until then a pruned boundary correctly refuses.
 
 The proposed import contract remains: unpublished captures survive task-data
 imports; published captures stay consumed. Thus restoring a backup just before
@@ -593,9 +639,10 @@ the app's normal remote replay. An in-memory fake queue is not sufficient.
    unaccepted candidates out of task state, shares task preparation, and checks
    import causality before receipt commitment. The baseline experiment then
    reproduced rejected/failed/pending imports and replaced the retained-history
-   clock reader with an applied baseline plus a preparation gate. Next settle
-   replacement evidence after operation retention, then account/key changes and
-   multiple tabs.
+   clock reader with an applied baseline plus a preparation gate, and the
+   retention experiment showed a pruned replacement refuses safely but
+   permanently. Next compare protocols, then account/key changes and multiple
+   tabs; the durable-evidence migration lands with protocol selection.
 2. **Delivery comparison:** compare publication before application with any
    concrete coordinated consumer alternative against the same failure cases.
    Select using the criteria above, including the cost of rollback/rebase or

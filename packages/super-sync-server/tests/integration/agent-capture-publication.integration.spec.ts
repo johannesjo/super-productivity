@@ -326,6 +326,125 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
     },
   );
 
+  /**
+   * The retention gate. `latestStateReplacementSeq` tracks imports only, while
+   * the retention sweep's boundary is the newest CAUSAL full-state op, which
+   * also counts a causal REPAIR. A REPAIR newer than the newest import
+   * therefore authorizes deleting that import's row, and nothing rewrites the
+   * pointer — `resolveRetainedReplacementSeq` exists precisely because pruning
+   * deletes import rows, but it is consulted only for unresolved upgrade rows.
+   *
+   * The ordinary upload fence is unharmed: it compares the pointer as a number
+   * and never joins the row. Publication does join it, for the clientId and
+   * vector clock the import classifier needs, so a dangling pointer refuses
+   * every future capture for that account. That is an availability failure, not
+   * a safety failure: this asserts both that nothing publishes AND that the
+   * capture survives pending rather than being consumed.
+   */
+  it('refuses every capture forever once the replacement row has been pruned', async () => {
+    const userId = await createUser();
+    const importer = 'pruned-importer';
+    const importClock = { [importer]: 1 };
+    const importResult = await new SyncService().uploadOps(
+      userId,
+      importer,
+      [
+        {
+          id: unique('pruned-import'),
+          clientId: importer,
+          actionType: '[SP_ALL] Load(import) all data',
+          opType: 'SYNC_IMPORT',
+          entityType: 'ALL',
+          payload: { appDataComplete: { TASK: {} } },
+          vectorClock: importClock,
+          timestamp: Date.now(),
+          schemaVersion: 1,
+          syncImportReason: 'BACKUP_RESTORE',
+        },
+      ],
+      true,
+      undefined,
+      undefined,
+      false,
+      0,
+    );
+    expect(importResult[0]?.accepted).toBe(true);
+    const importSeq = importResult[0].serverSeq!;
+
+    // A causal REPAIR above the import. It deliberately does not move the
+    // replacement pointer, but it does raise the retention boundary above it.
+    const repairer = 'repair-device';
+    const repairResult = await new SyncService().uploadOps(
+      userId,
+      repairer,
+      [
+        {
+          id: unique('causal-repair'),
+          clientId: repairer,
+          actionType: '[Repair] Auto Repair',
+          opType: 'REPAIR',
+          entityType: 'ALL',
+          payload: { appDataComplete: { TASK: {} } },
+          vectorClock: { ...importClock, [repairer]: 1 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+          repairBaseServerSeq: importSeq,
+        },
+      ],
+      false,
+      undefined,
+      importSeq,
+      false,
+      importSeq,
+    );
+    expect(repairResult[0]?.accepted).toBe(true);
+    const repairSeq = repairResult[0].serverSeq!;
+
+    // What the retention sweep does: delete below the newest causal full-state
+    // op. The import row goes; the pointer to it stays.
+    await prisma.operation.deleteMany({
+      where: { userId, serverSeq: { lt: repairSeq } },
+    });
+    const syncState = await prisma.userSyncState.findUniqueOrThrow({
+      where: { userId },
+      select: { latestStateReplacementSeq: true },
+    });
+    expect(syncState.latestStateReplacementSeq).toBe(importSeq);
+    expect(
+      await prisma.operation.findUnique({
+        where: { userId_serverSeq: { userId, serverSeq: importSeq } },
+      }),
+    ).toBeNull();
+
+    // A candidate that correctly descends from the import — it would publish if
+    // the boundary were still readable.
+    const captureId = unique('pruned-replacement');
+    await harness.enqueueCapture({ userId, captureId, title: 'Blocked by retention' });
+    const candidate = makeTaskCandidate(userId, 0);
+    candidate.vectorClock = { ...candidate.vectorClock, ...importClock };
+
+    const rejection = {
+      status: 'rejected',
+      error: 'Capture state replacement is no longer retained',
+    };
+    expect(await publish(userId, captureId, candidate, 0, repairSeq)).toMatchObject(
+      rejection,
+    );
+    // Permanent, not transient: nothing about the account will restore the row.
+    expect(await publish(userId, captureId, candidate, 0, repairSeq)).toMatchObject(
+      rejection,
+    );
+
+    // Safe but unavailable: no operation, no receipt, capture still pending.
+    expect(await harness.countCaptureActorOperations({ userId })).toBe(0);
+    expect(await harness.readCaptureReceipt({ userId, captureId })).toBeNull();
+    expect(await harness.readPublicationWatermark({ userId })).toBe(0);
+    expect(await harness.readPendingCapture({ userId, captureId })).toMatchObject({
+      captureId,
+      title: 'Blocked by retention',
+    });
+  });
+
   it('keeps the terminal receipt after delete, import, and operation removal', async () => {
     const userId = await createUser();
     const captureId = unique('terminal');
