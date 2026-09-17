@@ -123,17 +123,25 @@ const readCaptureState = async (
  * protocol gate recorded in the Stage A plan. What this DOES exercise is that
  * the value is captured when the candidate is built, not when it is published.
  */
-const prepareCapture = async (
-  client: SimulatedE2EClient,
-  captureId: string,
-  title: string,
-  publisherClientId: string,
-  publisherCounter: number,
-  userId: number,
-): Promise<PreparedCaptureForPublication> => {
-  const expectedDataGeneration = await createAgentCapturePublicationHarness(
-    prisma,
-  ).readDataGeneration({ userId });
+const prepareCapture = async (options: {
+  client: SimulatedE2EClient;
+  harness: CapturePublicationHarness;
+  userId: number;
+  captureId: string;
+  title: string;
+  publisherClientId: string;
+  publisherCounter: number;
+}): Promise<PreparedCaptureForPublication> => {
+  const {
+    client,
+    harness,
+    userId,
+    captureId,
+    title,
+    publisherClientId,
+    publisherCounter,
+  } = options;
+  const expectedDataGeneration = await harness.readDataGeneration({ userId });
   const taskId = `capture-${captureId}`;
   const persistenceBefore = await readPreparationPersistence(client);
   const cursorBefore = await readCursor(client);
@@ -229,8 +237,24 @@ test.describe('@supersync Agent-capture publication feasibility', () => {
       expect(pending.captureCounter).toBe(watermark);
 
       const [preparedA, preparedB] = await Promise.all([
-        prepareCapture(clientA, captureId, title, captureActorId, watermark, user.userId),
-        prepareCapture(clientB, captureId, title, captureActorId, watermark, user.userId),
+        prepareCapture({
+          client: clientA,
+          harness,
+          userId: user.userId,
+          captureId,
+          title,
+          publisherClientId: captureActorId,
+          publisherCounter: watermark,
+        }),
+        prepareCapture({
+          client: clientB,
+          harness,
+          userId: user.userId,
+          captureId,
+          title,
+          publisherClientId: captureActorId,
+          publisherCounter: watermark,
+        }),
       ]);
       // Competing independently prepared tasks have never entered either store.
       // Ignore both commit responses, then recover via the durable receipt.
@@ -360,14 +384,15 @@ test.describe('@supersync Agent-capture publication feasibility', () => {
           await clientB.sync.syncAndWait();
 
           await harness.enqueueCapture({ userId: user.userId, captureId, title });
-          const stalePreparation = await prepareCapture(
-            clientA,
+          const stalePreparation = await prepareCapture({
+            client: clientA,
+            harness,
+            userId: user.userId,
             captureId,
             title,
-            captureActorId,
-            0,
-            user.userId,
-          );
+            publisherClientId: captureActorId,
+            publisherCounter: 0,
+          });
 
           // Genuine app backup import before candidate preparation establishes the
           // replacement baseline; no fabricated server state is used.
@@ -381,14 +406,15 @@ test.describe('@supersync Agent-capture publication feasibility', () => {
             await harness.readPendingCapture({ userId: user.userId, captureId }),
           ).not.toBeNull();
           const consumer = useImportingDevice ? clientA : clientB;
-          const prepared = await prepareCapture(
-            consumer,
+          const prepared = await prepareCapture({
+            client: consumer,
+            harness,
+            userId: user.userId,
             captureId,
             title,
-            captureActorId,
-            watermark,
-            user.userId,
-          );
+            publisherClientId: captureActorId,
+            publisherCounter: watermark,
+          });
           const { candidate } = prepared;
           // An import between preparation and submission rejects the immutable
           // old cursor. Even substituting a new cursor cannot bless its old clock.

@@ -807,6 +807,14 @@ actual supported workflow. A longer schedule does not by itself justify them.
   The final run completed in 5.8 minutes. The independent adversarial source
   review found no blocker in this bounded proof and identified the retained-clock
   versus applied-state distinction recorded above as a production gate.
+- The same three scenarios pass again (5.9 minutes) with the data generation
+  threaded through preparation. Running them is what caught the threading bug:
+  the helper referenced a `prisma` binding that only exists inside each test, so
+  every scenario failed with `ReferenceError` until the harness was passed in
+  explicitly. `e2e/tsconfig.json` would have reported it, but that project has 42
+  pre-existing type errors and nothing runs it, so neither `checkFile` nor the
+  server build caught it. Treat a green `checkFile` on an E2E spec as formatting
+  and lint only.
 - The browser spec passes `checkFile`. This local run used a temporary minimal
   Playwright configuration against the running app and isolated PostgreSQL-backed
   SuperSync server: normal global setup stopped at unrelated bundled-plugin build
