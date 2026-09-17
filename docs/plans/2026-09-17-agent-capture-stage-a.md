@@ -618,19 +618,20 @@ separate assistant submissions. See the
 Use the real server database transaction, valid task operation envelopes, and
 the app's normal remote replay. An in-memory fake queue is not sufficient.
 
-| Failure or race                                            | Required result                                                               |
-| ---------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| Device dies before publication                             | Item remains pending; no optimistic task survives.                            |
-| Two devices prepare different candidates                   | One ordinary task operation is committed; both observe the same receipt.      |
-| Server commits but the response is lost                    | Retry observes publication; no second task operation.                         |
-| Server transaction fails                                   | Neither the operation nor a success receipt is committed.                     |
-| Download or local apply fails after publication            | Normal sync retries/rebuilds; the capture is not republished.                 |
-| User edits, moves, or deletes the imported task            | Late queue retries leave those changes intact.                                |
-| Import/reset races with publication                        | Existing replacement fence and explicit queue policy govern the result.       |
-| Operation is pruned after publication                      | Receipt stays terminal; normal snapshot recovery supplies current state.      |
-| Device/account/encryption configuration changes            | Stale work aborts without cross-account delivery.                             |
-| Local write races with preparation, or preparation crashes | Clock reservation and subsequent operations remain causally valid.            |
-| Server database backup restores old pending items          | Queue consumption stays paused until recovery resolves consumption ambiguity. |
+| Failure or race                                            | Required result                                                                     |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| Device dies before publication                             | Item remains pending; no optimistic task survives.                                  |
+| Two devices prepare different candidates                   | One ordinary task operation is committed; both observe the same receipt.            |
+| Server commits but the response is lost                    | Retry observes publication; no second task operation.                               |
+| Server transaction fails                                   | Neither the operation nor a success receipt is committed.                           |
+| Download or local apply fails after publication            | Normal sync retries/rebuilds; the capture is not republished.                       |
+| User edits, moves, or deletes the imported task            | Late queue retries leave those changes intact.                                      |
+| Import/reset races with publication                        | Existing replacement fence and explicit queue policy govern the result.             |
+| Operation is pruned after publication                      | Receipt stays terminal; normal snapshot recovery supplies current state.            |
+| Device/account/encryption configuration changes            | Stale work aborts without cross-account delivery.                                   |
+| Local write races with preparation, or preparation crashes | Clock reservation and subsequent operations remain causally valid.                  |
+| Server database backup restores old pending items          | Queue consumption stays paused until recovery resolves consumption ambiguity.       |
+| Replacement row pruned by retention or quota recovery      | Reproduced: refuses safely and permanently. Durable evidence designed, not shipped. |
 
 ## Implementation order and release gates
 
@@ -718,6 +719,10 @@ actual supported workflow. A longer schedule does not by itself justify them.
 - Production publication and actual phone/assistant onboarding remain
   unimplemented. Submission retry identity, server-database restoration, clock
   pruning, and encryption/account changes remain release gates.
+
+The tenth publication SQL case covers the pruned replacement boundary. It uses
+the ordinary upload path for the import and the causal REPAIR, then deletes below
+the retention sweep's boundary exactly as that sweep does.
 
 Run the SQL experiment from `packages/super-sync-server` with `DATABASE_URL`
 pointing to an isolated PostgreSQL database containing the existing SuperSync
