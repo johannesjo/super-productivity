@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { TaskService } from './task.service';
+import { prepareMainTaskAdd } from './util/prepare-main-task-add';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { WorkContextService } from '../work-context/work-context.service';
 import { GlobalTrackingIntervalService } from '../../core/global-tracking-interval/global-tracking-interval.service';
@@ -236,6 +237,55 @@ describe('TaskService', () => {
   });
 
   describe('add', () => {
+    it('should preserve the exact default add action shape', () => {
+      spyOn(Date, 'now').and.returnValue(1700000000000);
+      service.add('Literal #tag @tomorrow', false, { id: 'prepared-task' });
+
+      expect(store.dispatch).toHaveBeenCalledOnceWith(
+        TaskSharedActions.addTask({
+          task: {
+            ...DEFAULT_TASK,
+            id: 'prepared-task',
+            title: 'Literal #tag @tomorrow',
+            created: 1700000000000,
+            projectId: 'test-project',
+          },
+          workContextId: 'test-project',
+          workContextType: WorkContextType.PROJECT,
+          isAddToBacklog: false,
+          isAddToBottom: false,
+        }),
+      );
+    });
+
+    it('should preserve external-title and deadline options together', () => {
+      service.add(
+        'Literal #tag @tomorrow',
+        true,
+        { id: 'prepared-task', notes: 'notes', deadlineDay: '2026-01-05' },
+        true,
+        true,
+      );
+
+      expect(store.dispatch).toHaveBeenCalledOnceWith(
+        jasmine.objectContaining({
+          workContextId: 'test-project',
+          workContextType: WorkContextType.PROJECT,
+          isAddToBacklog: true,
+          isAddToBottom: true,
+          isIgnoreShortSyntax: true,
+          autoPlanToday: '2026-01-05',
+          autoPlanStartOfNextDayDiffMs: 0,
+          task: jasmine.objectContaining({
+            id: 'prepared-task',
+            title: 'Literal #tag @tomorrow',
+            notes: 'notes',
+            deadlineDay: '2026-01-05',
+          }),
+        }),
+      );
+    });
+
     it('should dispatch addTask with correct payload', () => {
       const id = service.add('New Task');
 
@@ -293,6 +343,67 @@ describe('TaskService', () => {
       expect(action.autoPlanToday).toBe('2026-01-05');
       expect(action.autoPlanStartOfNextDayDiffMs).toBe(0);
     });
+  });
+
+  describe('prepareMainTaskAdd', () => {
+    it('should prepare the same action as add without dispatching it', () => {
+      spyOn(Date, 'now').and.returnValue(1700000000000);
+      const additional = { id: 'prepared-task', deadlineDay: '2026-01-05' };
+      const prepared = prepareMainTaskAdd(
+        {
+          title: 'Prepared task',
+          additional,
+          workContextType: WorkContextType.PROJECT,
+          workContextId: 'test-project',
+          isAddToBacklog: true,
+          isAddToBottom: true,
+          isIgnoreShortSyntax: true,
+        },
+        (input) => service.createNewTaskWithDefaults(input),
+        TestBed.inject(DateService),
+      );
+
+      expect(store.dispatch).not.toHaveBeenCalled();
+      service.add('Prepared task', true, additional, true, true);
+      expect(store.dispatch).toHaveBeenCalledOnceWith(prepared);
+    });
+
+    for (const activeContextId of [TODAY_TAG.id, 'active-tag']) {
+      it(`should prepare literal Inbox captures without inheriting ${activeContextId}`, () => {
+        const workContext = TestBed.inject(WorkContextService);
+        (
+          Object.getOwnPropertyDescriptor(workContext, 'activeWorkContextId')!
+            .get as jasmine.Spy
+        ).and.returnValue(activeContextId);
+        (
+          Object.getOwnPropertyDescriptor(workContext, 'activeWorkContextType')!
+            .get as jasmine.Spy
+        ).and.returnValue(WorkContextType.TAG);
+
+        const prepared = prepareMainTaskAdd(
+          {
+            title: 'Literal #tag @tomorrow +project',
+            additional: { id: 'capture-id', notes: 'Literal notes' },
+            workContextType: WorkContextType.PROJECT,
+            workContextId: INBOX_PROJECT.id,
+            isIgnoreShortSyntax: true,
+          },
+          (input) => service.createNewTaskWithDefaults(input),
+          TestBed.inject(DateService),
+        );
+
+        expect(store.dispatch).not.toHaveBeenCalled();
+        expect(prepared.task.id).toBe('capture-id');
+        expect(prepared.task.title).toBe('Literal #tag @tomorrow +project');
+        expect(prepared.task.notes).toBe('Literal notes');
+        expect(prepared.task.projectId).toBe(INBOX_PROJECT.id);
+        expect(prepared.task.tagIds).toEqual([]);
+        expect(prepared.task.dueDay).toBeFalsy();
+        expect(prepared.task.dueWithTime).toBeFalsy();
+        expect(prepared.isIgnoreShortSyntax).toBeTrue();
+        expect(prepared.workContextId).toBe(INBOX_PROJECT.id);
+      });
+    }
   });
 
   describe('addToToday', () => {

@@ -156,6 +156,19 @@ describe('OperationLogUploadService', () => {
         expect(mockApiProvider.uploadOps).toHaveBeenCalled();
       });
 
+      it('should forward capture identity on regular uploads without changing other operations', async () => {
+        const capture = createMockEntry(1, 'capture-op', 'client-1');
+        capture.op.captureId = 'capture-123';
+        const ordinary = createMockEntry(2, 'ordinary-op', 'client-1');
+        mockOpLogStore.getUnsynced.and.resolveTo([capture, ordinary]);
+
+        await service.uploadPendingOps(mockApiProvider);
+
+        const operations = mockApiProvider.uploadOps.calls.mostRecent().args[0];
+        expect(operations[0].captureId).toBe('capture-123');
+        expect(Object.hasOwn(operations[1], 'captureId')).toBeFalse();
+      });
+
       // Regression guard for GHSA-9v8x-68pf-p5x7: a provider that mandates E2E
       // encryption (SuperSync) must never upload plaintext ops. During first-time
       // setup the config has no encryption key yet, so the initial sync used to

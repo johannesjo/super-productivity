@@ -249,6 +249,7 @@ export interface Operation {
   isPayloadEncrypted?: boolean; // True if payload is E2E encrypted
   syncImportReason?: string;
   repairBaseServerSeq?: number;
+  captureId?: string;
 }
 
 export const isCausalFullStateOperation = (

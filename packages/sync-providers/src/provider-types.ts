@@ -108,6 +108,7 @@ export interface SyncOperation {
   isPayloadEncrypted?: boolean;
   syncImportReason?: string;
   repairBaseServerSeq?: number;
+  captureId?: string;
 }
 
 export interface ServerSyncOperation {

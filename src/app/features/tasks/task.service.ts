@@ -104,7 +104,7 @@ import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
 import { TaskFocusService } from './task-focus.service';
 import { DeletedTaskIssueSidecarService } from '../issue/two-way-sync/deleted-task-issue-sidecar.service';
 import { TimeBlockDeleteSidecarService } from '../calendar-integration/time-block/time-block-delete-sidecar.service';
-import { getDeadlineAutoPlanFields } from './util/get-deadline-auto-plan-fields';
+import { prepareMainTaskAdd } from './util/prepare-main-task-add';
 import { TaskTimeSyncService } from './task-time-sync.service';
 
 @Injectable({
@@ -402,31 +402,22 @@ export class TaskService {
     const workContextId = this._workContextService.activeWorkContextId as string;
     const workContextType = this._workContextService
       .activeWorkContextType as WorkContextType;
-    const task = this.createNewTaskWithDefaults({
-      title,
-      additional,
-      workContextType,
-      workContextId,
-    });
-
-    TaskLog.log('addTask', { taskId: task.id, workContextId, workContextType });
-
-    this._store.dispatch(
-      TaskSharedActions.addTask({
-        task,
-        workContextId,
+    const action = prepareMainTaskAdd(
+      {
+        title,
+        additional,
         workContextType,
+        workContextId,
         isAddToBacklog,
         isAddToBottom,
-        ...(isIgnoreShortSyntax ? { isIgnoreShortSyntax: true } : {}),
-        ...getDeadlineAutoPlanFields(
-          this._dateService,
-          task.deadlineDay,
-          task.deadlineWithTime,
-        ),
-      }),
+        isIgnoreShortSyntax,
+      },
+      (input) => this.createNewTaskWithDefaults(input),
+      this._dateService,
     );
-    return task && task.id;
+    TaskLog.log('addTask', { taskId: action.task.id, workContextId, workContextType });
+    this._store.dispatch(action);
+    return action.task.id;
   }
 
   async addAndSchedule(

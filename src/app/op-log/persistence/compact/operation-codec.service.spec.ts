@@ -73,6 +73,19 @@ describe('operation-codec.service', () => {
       expect(decoded).toEqual(mockOperationWithOptionals);
     });
 
+    it('should preserve capture identity through persisted JSON without changing legacy entries', () => {
+      const captureOp: Operation = { ...mockOperation, captureId: 'capture-123' };
+      const encoded = encodeOperation(captureOp);
+      expect(encoded.q).toBe('capture-123');
+      expect(decodeOperation(JSON.parse(JSON.stringify(encoded)))).toEqual(captureOp);
+      expect(encodeOperation(mockOperation)).not.toEqual(
+        jasmine.objectContaining({ q: jasmine.anything() }),
+      );
+      expect(
+        Object.hasOwn(decodeOperation(encodeOperation(mockOperation)), 'captureId'),
+      ).toBeFalse();
+    });
+
     it('should preserve syncImportReason through encode/decode', () => {
       const op: Operation = {
         ...mockOperation,

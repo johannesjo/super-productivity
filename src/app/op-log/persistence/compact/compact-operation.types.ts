@@ -56,6 +56,9 @@ export interface CompactOperation {
 
   /** repairBaseServerSeq (optional) */
   b?: number;
+
+  /** captureId (optional) */
+  q?: string;
 }
 
 /**

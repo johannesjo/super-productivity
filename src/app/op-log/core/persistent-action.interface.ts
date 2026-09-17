@@ -18,6 +18,8 @@ export interface PersistentActionMeta {
   isBulk?: boolean; // TRUE for batch operations
   lwwUpdateMode?: LwwUpdateMode;
   recreatesEntityAfterDelete?: boolean;
+  /** External capture identity; ordinary actions omit it. */
+  captureId?: string;
   // Authenticated project-move footprint surfaced from the encrypted
   // LwwUpdatePayload.projectMoveFootprint. Reducers relocate task families from
   // THIS field, never the plaintext `entityIds` envelope. GHSA-8pxh-mgc7-gp3g.

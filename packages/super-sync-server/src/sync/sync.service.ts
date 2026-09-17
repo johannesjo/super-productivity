@@ -153,6 +153,18 @@ export class SyncService {
 
   // === Upload Operations ===
 
+  /** Allows publication metadata to commit atomically with the normal upload. */
+  protected runUploadTransaction<T>(
+    work: (tx: Prisma.TransactionClient) => Promise<T>,
+    options?: {
+      maxWait?: number;
+      timeout?: number;
+      isolationLevel?: Prisma.TransactionIsolationLevel;
+    },
+  ): Promise<T> {
+    return prisma.$transaction(work, options);
+  }
+
   async uploadOps(
     userId: number,
     clientId: string,
@@ -217,7 +229,7 @@ export class SyncService {
 
     try {
       // Use transaction to acquire write lock and ensure atomicity
-      await prisma.$transaction(
+      await this.runUploadTransaction(
         async (tx) => {
           const needsSyncStateLock =
             shouldCleanSlate ||

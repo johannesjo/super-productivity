@@ -85,6 +85,8 @@ export interface Operation extends Omit<LibOperation, 'actionType' | 'entityType
   syncImportReason?: SyncImportReason;
   /** Server cursor included in a causally accepted automatic repair snapshot. */
   repairBaseServerSeq?: number;
+  /** Optional identity of an externally queued capture consumed by this operation. */
+  captureId?: string;
 }
 
 export interface OperationLogEntry extends Omit<LibOperationLogEntry, 'op'> {

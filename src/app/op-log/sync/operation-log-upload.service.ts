@@ -676,6 +676,7 @@ export class OperationLogUploadService {
       vectorClock: entry.op.vectorClock,
       timestamp: entry.op.timestamp,
       schemaVersion: entry.op.schemaVersion,
+      ...(entry.op.captureId !== undefined ? { captureId: entry.op.captureId } : {}),
       ...(entry.op.syncImportReason
         ? { syncImportReason: entry.op.syncImportReason }
         : {}),

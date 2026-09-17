@@ -361,10 +361,14 @@ bootstrapApplication(AppComponent, {
   // recurring-task tests. Stripped from production via the env guard.
   if (!environment.production && !environment.stage) {
     const storeRef = appRef.injector.get(Store);
-    import('./app/op-log/apply/hydration-state.service').then((m) => {
+    Promise.all([
+      import('./app/op-log/apply/hydration-state.service'),
+      import('./app/op-log/testing/agent-capture-e2e-helpers'),
+    ]).then(([m, captureHelpers]) => {
       (window as unknown as { __e2eTestHelpers?: unknown }).__e2eTestHelpers = {
         store: storeRef,
         hydrationState: appRef.injector.get(m.HydrationStateService),
+        ...captureHelpers.createAgentCaptureE2eHelpers(appRef.injector),
       };
     });
   }

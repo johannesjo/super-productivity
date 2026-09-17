@@ -84,6 +84,7 @@ export const SUPER_SYNC_ERROR_CODES = {
 
   // Server errors (500)
   INTERNAL_ERROR: 'INTERNAL_ERROR',
+  CAPTURE_ALREADY_CONSUMED: 'CAPTURE_ALREADY_CONSUMED',
 } as const;
 
 export type SuperSyncErrorCode =
@@ -132,6 +133,8 @@ export const SuperSyncOperationSchema = z.object({
   syncImportReason: z.enum(SUPER_SYNC_IMPORT_REASONS).optional(),
   /** Server cursor proven to be included in a causally accepted REPAIR snapshot. */
   repairBaseServerSeq: z.number().int().min(0).optional(),
+  /** Optional capture-delivery correlation; absent for ordinary task operations. */
+  captureId: z.string().min(1).max(200).optional(),
 });
 
 // Upload requests are envelopes for independently validated operations. Keep

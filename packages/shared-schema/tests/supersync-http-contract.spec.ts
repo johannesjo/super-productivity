@@ -26,6 +26,14 @@ const createValidOperation = (clientId: string = 'client_1') => ({
 });
 
 describe('SuperSync HTTP contract schemas', () => {
+  it('preserves optional capture identity through the upload contract', () => {
+    const parsed = SuperSyncUploadOpsRequestSchema.parse({
+      ops: [{ ...createValidOperation(), captureId: 'capture-1' }],
+      clientId: 'client_1',
+    });
+    expect(parsed.ops[0]).toHaveProperty('captureId', 'capture-1');
+  });
+
   it('validates ops upload requests with the shared server limit', () => {
     const parsed = SuperSyncUploadOpsRequestSchema.parse({
       ops: [createValidOperation()],

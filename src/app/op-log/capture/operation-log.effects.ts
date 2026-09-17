@@ -295,6 +295,9 @@ export class OperationLogEffects implements DeferredLocalActionsPort {
           vectorClock: newClock,
           timestamp: operationTimestamp,
           schemaVersion: CURRENT_SCHEMA_VERSION,
+          ...(action.meta.captureId !== undefined
+            ? { captureId: action.meta.captureId }
+            : {}),
         };
 
         // CHECKPOINT A: Validate payload before persisting

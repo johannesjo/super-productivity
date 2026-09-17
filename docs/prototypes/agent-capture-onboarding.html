@@ -1,0 +1,636 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+    />
+    <title>Capture onboarding · Super Productivity prototype</title>
+    <style>
+      :root {
+        --text-color: #1d2939;
+        --text-color-muted: #667085;
+        --bg: #f5f7fb;
+        --card-bg: #ffffff;
+        --separator-color: #d0d5dd;
+        --c-primary: #4f46e5;
+        --color-success: #087443;
+        --color-warning: #9a6700;
+        --s: 8px;
+        --s2: 16px;
+        --s3: 24px;
+        --radius-sm: 8px;
+        --font-size-sm: 12px;
+        --font-size-md: 14px;
+        --font-size-lg: 16px;
+        --font-size-xl: 18px;
+        --font-size-3xl: 28px;
+        color-scheme: light;
+        font:
+          var(--font-size-lg)/1.5 system-ui,
+          sans-serif;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        color: var(--text-color);
+        background: var(--bg);
+      }
+      .shell {
+        max-width: 700px;
+        margin: auto;
+        padding: var(--s2);
+      }
+      .topbar,
+      .progress,
+      .connected,
+      .toggle-row,
+      .button-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--s);
+      }
+      .topbar,
+      .connected,
+      .toggle-row {
+        justify-content: space-between;
+      }
+      .topbar,
+      .intro,
+      .progress {
+        margin-bottom: var(--s3);
+      }
+      .wordmark,
+      label,
+      .active {
+        font-weight: 600;
+      }
+      .mark,
+      .check {
+        color: var(--color-success);
+      }
+      .prototype-badge,
+      .hint,
+      .footer-note {
+        font-size: var(--font-size-sm);
+      }
+      .prototype-badge,
+      .active {
+        color: var(--c-primary);
+      }
+      .progress {
+        justify-content: space-between;
+        font-size: var(--font-size-md);
+      }
+      h1 {
+        font-size: var(--font-size-3xl);
+        line-height: 1.2;
+      }
+      h2 {
+        font-size: var(--font-size-xl);
+      }
+      h1,
+      h2,
+      p {
+        margin: 0 0 var(--s);
+      }
+      .eyebrow,
+      .lede,
+      .card-copy,
+      .hint,
+      .toggle-label span {
+        color: var(--text-color-muted);
+      }
+      .eyebrow,
+      .card-copy,
+      .toggle-label span {
+        font-size: var(--font-size-md);
+      }
+      .card,
+      .callout,
+      .result,
+      .connected {
+        padding: var(--s2);
+        margin-bottom: var(--s2);
+        border: 1px solid var(--separator-color);
+        border-radius: var(--radius-sm);
+        background: var(--card-bg);
+      }
+      .card-head {
+        display: flex;
+        justify-content: space-between;
+        gap: var(--s);
+      }
+      .callout,
+      .result {
+        margin-top: var(--s2);
+        border-left: 3px solid var(--color-warning);
+      }
+      .result {
+        border-left-color: var(--color-success);
+        overflow-wrap: anywhere;
+      }
+      .callout > span {
+        display: none;
+      }
+      .callout strong,
+      .result strong,
+      .connected small,
+      .toggle-label span {
+        display: block;
+      }
+      .field {
+        display: grid;
+        gap: var(--s);
+        margin: var(--s2) 0;
+      }
+      input,
+      textarea,
+      button {
+        font: inherit;
+        accent-color: var(--c-primary);
+      }
+      input[type='text'],
+      textarea {
+        width: 100%;
+        padding: var(--s);
+        border: 1px solid var(--separator-color);
+        border-radius: var(--radius-sm);
+        background: var(--bg);
+        color: var(--text-color);
+      }
+      textarea {
+        min-height: 96px;
+        resize: vertical;
+      }
+      input:focus-visible,
+      textarea:focus-visible,
+      button:focus-visible {
+        outline: 2px solid var(--c-primary);
+        outline-offset: 2px;
+      }
+      .switch input {
+        width: var(--s3);
+        height: var(--s3);
+      }
+      .track {
+        display: none;
+      }
+      .button-row {
+        margin-top: var(--s2);
+      }
+      button {
+        padding: var(--s) var(--s2);
+        border: 1px solid var(--c-primary);
+        border-radius: var(--radius-sm);
+        background: var(--c-primary);
+        color: var(--card-bg);
+        cursor: pointer;
+      }
+      button.secondary {
+        background: var(--card-bg);
+        color: var(--c-primary);
+      }
+      button:disabled {
+        opacity: 0.5;
+        cursor: default;
+      }
+      .consent {
+        display: flex;
+        gap: var(--s);
+        align-items: baseline;
+      }
+      .status {
+        margin-top: var(--s2);
+        color: var(--color-success);
+        font-size: var(--font-size-md);
+      }
+      .status:empty,
+      [hidden] {
+        display: none !important;
+      }
+      .footer-note {
+        text-align: center;
+      }
+      @media (max-width: 480px) {
+        .button-row button {
+          width: 100%;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="topbar">
+        <div class="wordmark">
+          <span
+            class="mark"
+            aria-hidden="true"
+            >✓</span
+          >
+          Super Productivity
+        </div>
+        <span class="prototype-badge">Simulated prototype</span>
+      </header>
+
+      <section
+        class="intro"
+        aria-labelledby="page-title"
+      >
+        <p class="eyebrow">Capture-first assistant</p>
+        <h1 id="page-title">A quick path from thought to task.</h1>
+        <p class="lede">
+          Connect a named assistant for one narrow job: creating tasks from dictated
+          titles and notes. Tasks appear when Super Productivity next syncs.
+        </p>
+      </section>
+
+      <nav
+        class="progress"
+        aria-label="Onboarding progress"
+      >
+        <span
+          class="progress-step active"
+          id="progress-setup"
+          >Set up</span
+        >
+        <span
+          class="progress-step"
+          id="progress-connect"
+          >Connect</span
+        >
+        <span
+          class="progress-step"
+          id="progress-capture"
+          >Capture</span
+        >
+      </nav>
+
+      <section
+        class="card"
+        aria-labelledby="setup-title"
+      >
+        <div class="card-head">
+          <div>
+            <h2 id="setup-title">1. Start with your sync setup</h2>
+            <p class="card-copy">Capture uses your existing SuperSync configuration.</p>
+          </div>
+          <span
+            class="check"
+            aria-label="Complete"
+            >✓</span
+          >
+        </div>
+        <p class="card-copy">
+          SuperSync is configured and ready to import a captured task.
+        </p>
+      </section>
+
+      <section
+        class="card"
+        aria-labelledby="capture-title"
+      >
+        <div class="card-head">
+          <div>
+            <h2 id="capture-title">2. Turn on capture</h2>
+            <p class="card-copy">Keep the assistant focused on creating tasks.</p>
+          </div>
+        </div>
+        <div class="toggle-row">
+          <label
+            class="toggle-label"
+            for="capture-toggle"
+            >Task capture
+            <span>Allow create-only requests from your named assistant.</span></label
+          >
+          <span class="switch"
+            ><input
+              id="capture-toggle"
+              type="checkbox"
+              role="switch"
+              aria-describedby="capture-help" /><span
+              class="track"
+              aria-hidden="true"
+            ></span
+          ></span>
+        </div>
+        <p
+          class="hint"
+          id="capture-help"
+        >
+          The assistant cannot read your tasks, projects, tags, or dates.
+        </p>
+        <div
+          class="callout"
+          role="note"
+        >
+          <span aria-hidden="true">!</span>
+          <p>
+            <strong>Who can read captured tasks?</strong>The server operator can read
+            dictated titles and notes while they wait in the live capture queue. The live
+            queue copy is deleted after import; backup retention is not yet finalized.
+          </p>
+        </div>
+        <div class="field">
+          <label for="endpoint">Example endpoint URL</label
+          ><input
+            id="endpoint"
+            type="text"
+            value="https://example.invalid/mcp"
+            readonly
+            aria-describedby="endpoint-help"
+          />
+          <p
+            class="hint"
+            id="endpoint-help"
+          >
+            This is an example address for the screen demo; it makes no network
+            connection.
+          </p>
+        </div>
+        <div class="button-row">
+          <button
+            class="button"
+            id="connect-button"
+            type="button"
+            disabled
+          >
+            Connect simulated assistant
+          </button>
+        </div>
+        <p
+          class="status"
+          id="connect-status"
+          aria-live="polite"
+        ></p>
+      </section>
+
+      <section
+        class="card"
+        id="assistant-card"
+        aria-labelledby="assistant-title"
+        hidden
+      >
+        <div class="card-head">
+          <div>
+            <h2 id="assistant-title">3. Give one assistant permission</h2>
+            <p class="card-copy">This consent applies to task capture only.</p>
+          </div>
+        </div>
+        <div
+          class="connected"
+          id="connected-card"
+          hidden
+        >
+          <p>
+            <strong>Nova Assistant</strong
+            ><small>Simulated connection · create tasks only</small>
+          </p>
+          <button
+            class="button secondary"
+            id="disconnect-button"
+            type="button"
+          >
+            Disconnect
+          </button>
+        </div>
+        <div id="consent-panel">
+          <label class="consent"
+            ><input
+              id="consent-check"
+              disabled
+              type="checkbox"
+            /><span
+              >I consent to <strong>Nova Assistant</strong> sending dictated titles and
+              notes to Super Productivity for task creation only.</span
+            ></label
+          >
+          <div class="button-row">
+            <button
+              class="button"
+              id="consent-button"
+              type="button"
+              disabled
+            >
+              Allow capture
+            </button>
+          </div>
+        </div>
+        <p
+          class="status"
+          id="consent-status"
+          aria-live="polite"
+        ></p>
+      </section>
+
+      <section
+        class="card"
+        id="sample-card"
+        aria-labelledby="sample-title"
+        hidden
+      >
+        <div class="card-head">
+          <div>
+            <h2 id="sample-title">Try one capture</h2>
+            <p class="card-copy">A sample request shows what the assistant can create.</p>
+          </div>
+        </div>
+        <div class="capture-fields">
+          <div class="field">
+            <label for="task-title">Sample title</label
+            ><input
+              id="task-title"
+              type="text"
+              value="Plan next week’s deep work"
+              autocomplete="off"
+            />
+          </div>
+          <div class="field">
+            <label for="task-notes"
+              >Sample notes <span class="hint">(optional)</span></label
+            ><textarea id="task-notes">
+Block two quiet mornings and review the open questions.</textarea
+            >
+          </div>
+        </div>
+        <div class="button-row">
+          <button
+            class="button"
+            id="queue-button"
+            type="button"
+          >
+            Send sample capture
+          </button>
+        </div>
+        <p
+          class="status"
+          id="capture-status"
+          aria-live="polite"
+        ></p>
+        <div
+          class="result"
+          id="queue-result"
+          hidden
+        >
+          <strong>Capture queued</strong>
+          <p id="queue-copy"></p>
+        </div>
+        <div
+          class="button-row"
+          id="sync-row"
+          hidden
+        >
+          <button
+            class="button"
+            id="sync-button"
+            type="button"
+          >
+            Simulate Super Productivity syncing
+          </button>
+        </div>
+        <div
+          class="result"
+          id="import-result"
+          tabindex="-1"
+          hidden
+        >
+          <strong>Task imported into Inbox</strong>
+          <p id="import-copy"></p>
+        </div>
+      </section>
+
+      <p class="footer-note">
+        <button
+          class="button secondary"
+          id="reset-button"
+          type="button"
+        >
+          Reset prototype
+        </button>
+      </p>
+    </main>
+    <script>
+      (() => {
+        const $ = (id) => document.getElementById(id);
+        const toggle = $('capture-toggle');
+        const connect = $('connect-button');
+        const consentCheck = $('consent-check');
+        const consentButton = $('consent-button');
+        const assistantCard = $('assistant-card');
+        const sampleCard = $('sample-card');
+        const captureFields = [$('task-title'), $('task-notes')];
+        let pendingCapture = null;
+        let itemImported = false;
+        const focus = (id) => $(id).focus();
+        const setProgress = (active) =>
+          ['setup', 'connect', 'capture'].forEach((step) =>
+            $('progress-' + step).classList.toggle('active', step === active),
+          );
+        const hasSample = () => pendingCapture !== null || itemImported;
+        const setCaptureFormEnabled = (enabled) => {
+          captureFields.forEach((field) => {
+            field.disabled = !enabled;
+          });
+          $('queue-button').disabled =
+            !enabled || pendingCapture !== null || itemImported;
+        };
+        const revokeConnection = (message) => {
+          connect.disabled = !toggle.checked;
+          $('consent-panel').hidden = false;
+          $('connected-card').hidden = true;
+          $('consent-status').textContent = message;
+          consentCheck.checked = false;
+          consentCheck.disabled = true;
+          consentButton.disabled = true;
+          sampleCard.hidden = !hasSample();
+          setCaptureFormEnabled(false);
+          setProgress(hasSample() ? 'capture' : 'connect');
+        };
+
+        toggle.addEventListener('change', () => {
+          connect.disabled = !toggle.checked;
+          if (toggle.checked) {
+            $('connect-status').textContent = 'Capture is ready to connect.';
+            setProgress('connect');
+            return;
+          }
+          revokeConnection(
+            'Capture is off. The simulated assistant connection was revoked.',
+          );
+          $('connect-status').textContent =
+            'Capture is off. Turn it on to connect again.';
+        });
+        connect.addEventListener('click', () => {
+          if (!toggle.checked) return;
+          connect.disabled = true;
+          assistantCard.hidden = false;
+          consentCheck.disabled = false;
+          $('connect-status').textContent =
+            'Simulated connection ready. Review the named assistant permission.';
+          focus('consent-check');
+        });
+        consentCheck.addEventListener('change', () => {
+          consentButton.disabled = !toggle.checked || !consentCheck.checked;
+        });
+        consentButton.addEventListener('click', () => {
+          if (!toggle.checked || !consentCheck.checked) return;
+          $('consent-panel').hidden = true;
+          $('connected-card').hidden = false;
+          $('consent-status').textContent =
+            'Nova Assistant can now send create-only captures.';
+          sampleCard.hidden = false;
+          setCaptureFormEnabled(true);
+          setProgress('capture');
+          focus('task-title');
+        });
+        $('disconnect-button').addEventListener('click', () => {
+          revokeConnection(
+            'Assistant disconnected. Any accepted capture remains available to sync.',
+          );
+          focus('connect-button');
+        });
+        $('queue-button').addEventListener('click', () => {
+          const title = $('task-title').value.trim();
+          const notes = $('task-notes').value.trim();
+          if (!title) {
+            $('capture-status').textContent =
+              'Add a title before sending the sample capture.';
+            focus('task-title');
+            return;
+          }
+          pendingCapture = { title, notes };
+          $('queue-copy').textContent = notes
+            ? `“${title}” · Notes: ${notes}`
+            : `“${title}” · No notes`;
+          $('queue-result').hidden = false;
+          $('sync-row').hidden = false;
+          $('capture-status').textContent =
+            'Capture queued and waiting for Super Productivity to sync.';
+          setCaptureFormEnabled(false);
+          focus('sync-button');
+        });
+        $('sync-button').addEventListener('click', () => {
+          if (!pendingCapture) return;
+          const { title, notes } = pendingCapture;
+          $('import-copy').textContent = notes
+            ? `“${title}” · Notes: ${notes}`
+            : `“${title}” · No notes`;
+          $('queue-result').hidden = true;
+          $('sync-row').hidden = true;
+          $('import-result').hidden = false;
+          $('sync-button').disabled = true;
+          $('capture-status').textContent = `“${title}” imported into Inbox.`;
+          itemImported = true;
+          pendingCapture = null;
+          setCaptureFormEnabled(false);
+          focus('import-result');
+        });
+        $('reset-button').addEventListener('click', () => window.location.reload());
+      })();
+    </script>
+  </body>
+</html>
