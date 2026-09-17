@@ -1,0 +1,35 @@
+-- Fence for work prepared against an account state that was wiped.
+--
+-- Enabling encryption, disabling it, and importing data whose encryption
+-- settings differ all run `deleteAndReuploadWithNewEncryption`: `DELETE
+-- /api/sync/data` (`deleteAllUserData` — every operation, every device, and the
+-- whole `user_sync_state` ROW) and only then a full-state re-upload under the
+-- new key. A password change does NOT take this route; it uses the clean-slate
+-- upload path, which keeps the row and writes a real SYNC_IMPORT.
+--
+-- This counter fences the WINDOW between the delete and the re-upload:
+--
+--   1. In that window `latest_state_replacement_seq` is gone with its row and no
+--      operation has been written yet, so the state-replacement fence is not
+--      stale — it is absent. The window is not brief: the toggle keeps the new
+--      key config when the upload fails, leaving the server empty until the user
+--      retries. Once the re-upload lands it is a SYNC_IMPORT through `uploadOps`
+--      and the ordinary replacement fence takes over again.
+--   2. Work prepared before the wipe carries ciphertext produced with the
+--      RETIRED key. No device can decrypt it, and the client rethrows for the
+--      whole download page rather than skipping the item, so one such operation
+--      wedges downloads for every device on the account, permanently.
+--
+-- The counter lives on `users` precisely because that is the one row the wipe
+-- keeps. It is monotonic and never reset: resetting it (or relying on a
+-- watermark that restarts at 0) makes the first prepared item after a wipe
+-- collide with the one prepared before it.
+--
+-- Deliberately NOT bumped by the clean-slate upload path: that path preserves
+-- the sync-state row and writes a real SYNC_IMPORT, so the existing replacement
+-- fence already covers it.
+--
+-- NOT NULL with a default is a catalog-only change on PostgreSQL 11+; existing
+-- rows read 0 without a table rewrite.
+ALTER TABLE "users"
+  ADD COLUMN "sync_data_generation" INTEGER NOT NULL DEFAULT 0;

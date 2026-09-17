@@ -42,6 +42,12 @@ export interface PendingCapture {
   notes: string | null;
   /** The stable capture actor's latest published counter for this account. */
   captureCounter: number;
+  /**
+   * The account's data generation at read time. A preparer must carry this with
+   * its candidate; `deleteAllUserData` advances it, and the ciphertext prepared
+   * under the retired encryption context must not outlive that.
+   */
+  dataGeneration: number;
 }
 
 export type PublishCaptureResult =
@@ -61,12 +67,15 @@ export interface CapturePublicationHarness {
     captureId: string;
   }): Promise<PendingCapture | null>;
   readPublicationWatermark(input: { userId: number }): Promise<number>;
+  readDataGeneration(input: { userId: number }): Promise<number>;
   publishCapture(input: {
     userId: number;
     captureId: string;
     candidate: Operation;
     lastKnownServerSeq: number;
     expectedCaptureCounter: number;
+    /** The `dataGeneration` the candidate was prepared under. */
+    expectedDataGeneration: number;
   }): Promise<PublishCaptureResult>;
   readCaptureReceipt(input: {
     userId: number;
@@ -180,6 +189,23 @@ export const createAgentCapturePublicationHarness = (
     ): Promise<T> {
       return super.runUploadTransaction(async (tx) => {
         const { input } = this.publication;
+        // Check the generation FIRST: between `deleteAllUserData` and the
+        // re-upload that follows it there is no capture row, no sync state and
+        // no replacement boundary left to disagree with, so every later check
+        // would pass a candidate carrying ciphertext from the retired
+        // encryption context. This is the only fence that survives the wipe,
+        // because the counter lives on the user row.
+        const user = await tx.user.findUniqueOrThrow({
+          where: { id: input.userId },
+          select: { syncDataGeneration: true },
+        });
+        if (user.syncDataGeneration !== input.expectedDataGeneration) {
+          this.publication.rejection = {
+            status: 'rejected',
+            error: 'Capture was prepared for a superseded account state',
+          };
+          return undefined as T;
+        }
         await ensureAccountRow(tx, input.userId);
         const account = await readAccountForUpdate(tx, input.userId);
         const capture = await readQueueForUpdate(tx, input.userId, input.captureId);
@@ -349,11 +375,16 @@ export const createAgentCapturePublicationHarness = (
       if (capture.title !== input.title || capture.notes !== (input.notes ?? null)) {
         throw new Error(`Capture ${input.captureId} is immutable once queued`);
       }
+      const user = await tx.user.findUniqueOrThrow({
+        where: { id: input.userId },
+        select: { syncDataGeneration: true },
+      });
       return {
         captureId: capture.captureId,
         title: capture.title,
         notes: capture.notes,
         captureCounter: account.publishedCounter,
+        dataGeneration: user.syncDataGeneration,
       };
     });
   };
@@ -362,7 +393,7 @@ export const createAgentCapturePublicationHarness = (
     input,
   ) => {
     await initialize();
-    const [accounts, captures] = await Promise.all([
+    const [accounts, captures, user] = await Promise.all([
       prisma.$queryRawUnsafe<CaptureAccountRow[]>(
         `SELECT published_counter AS "publishedCounter" FROM ${ACCOUNT_TABLE} WHERE user_id = $1`,
         input.userId,
@@ -373,6 +404,10 @@ export const createAgentCapturePublicationHarness = (
         input.userId,
         input.captureId,
       ),
+      prisma.user.findUnique({
+        where: { id: input.userId },
+        select: { syncDataGeneration: true },
+      }),
     ]);
     const capture = captures[0];
     if (!capture || capture.publishedOpId !== null) return null;
@@ -381,6 +416,7 @@ export const createAgentCapturePublicationHarness = (
       title: capture.title,
       notes: capture.notes,
       captureCounter: accounts[0]?.publishedCounter ?? 0,
+      dataGeneration: user?.syncDataGeneration ?? 0,
     };
   };
 
@@ -393,6 +429,17 @@ export const createAgentCapturePublicationHarness = (
       );
       return rows[0]?.publishedCounter ?? 0;
     };
+
+  /** Models the preparer reading the account's generation at preparation time. */
+  const readDataGeneration: CapturePublicationHarness['readDataGeneration'] = async ({
+    userId,
+  }) =>
+    (
+      await prisma.user.findUniqueOrThrow({
+        where: { id: userId },
+        select: { syncDataGeneration: true },
+      })
+    ).syncDataGeneration;
 
   const publishCapture: CapturePublicationHarness['publishCapture'] = async (input) => {
     await initialize();
@@ -488,6 +535,7 @@ export const createAgentCapturePublicationHarness = (
     enqueueCapture,
     readPendingCapture,
     readPublicationWatermark,
+    readDataGeneration,
     publishCapture,
     readCaptureReceipt,
     countPublishedCaptures,

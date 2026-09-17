@@ -30,6 +30,10 @@ interface PreparedCapture {
   taskId: string;
 }
 
+type PreparedCaptureForPublication = PreparedCapture & {
+  expectedDataGeneration: number;
+};
+
 const readPreparationPersistence = (
   client: SimulatedE2EClient,
 ): Promise<{
@@ -112,13 +116,24 @@ const readCaptureState = async (
     };
   }, taskId);
 
+/**
+ * Spike shortcut: the account's data generation is read straight from the
+ * database at preparation time. A production preparer has no such access — it
+ * would have to learn the generation from a sync response, which is an open
+ * protocol gate recorded in the Stage A plan. What this DOES exercise is that
+ * the value is captured when the candidate is built, not when it is published.
+ */
 const prepareCapture = async (
   client: SimulatedE2EClient,
   captureId: string,
   title: string,
   publisherClientId: string,
   publisherCounter: number,
-): Promise<PreparedCapture> => {
+  userId: number,
+): Promise<PreparedCaptureForPublication> => {
+  const expectedDataGeneration = await createAgentCapturePublicationHarness(
+    prisma,
+  ).readDataGeneration({ userId });
   const taskId = `capture-${captureId}`;
   const persistenceBefore = await readPreparationPersistence(client);
   const cursorBefore = await readCursor(client);
@@ -140,7 +155,7 @@ const prepareCapture = async (
   expect(await readPreparationPersistence(client)).toEqual(persistenceBefore);
   expect(await readCursor(client)).toBe(cursorBefore);
   expect(prepared.lastKnownServerSeq).toBe(cursorBefore);
-  return prepared;
+  return { ...prepared, expectedDataGeneration };
 };
 
 const importBackupAndSync = async (
@@ -214,8 +229,8 @@ test.describe('@supersync Agent-capture publication feasibility', () => {
       expect(pending.captureCounter).toBe(watermark);
 
       const [preparedA, preparedB] = await Promise.all([
-        prepareCapture(clientA, captureId, title, captureActorId, watermark),
-        prepareCapture(clientB, captureId, title, captureActorId, watermark),
+        prepareCapture(clientA, captureId, title, captureActorId, watermark, user.userId),
+        prepareCapture(clientB, captureId, title, captureActorId, watermark, user.userId),
       ]);
       // Competing independently prepared tasks have never entered either store.
       // Ignore both commit responses, then recover via the durable receipt.
@@ -351,6 +366,7 @@ test.describe('@supersync Agent-capture publication feasibility', () => {
             title,
             captureActorId,
             0,
+            user.userId,
           );
 
           // Genuine app backup import before candidate preparation establishes the
@@ -371,6 +387,7 @@ test.describe('@supersync Agent-capture publication feasibility', () => {
             title,
             captureActorId,
             watermark,
+            user.userId,
           );
           const { candidate } = prepared;
           // An import between preparation and submission rejects the immutable

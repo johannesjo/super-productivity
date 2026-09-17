@@ -630,26 +630,100 @@ deduplicating publication of one capture does not establish deduplication of
 separate assistant submissions. See the
 [MCP message specification](https://modelcontextprotocol.io/specification/2025-11-25/basic).
 
+### Account, key, and tab experiment (2026-09-17): the wipe window
+
+**Reproduced against real PostgreSQL: in the window between an encryption
+toggle's server wipe and its re-upload, every existing fence is vacuous and a
+candidate prepared under the retired key publishes.** Fixed with a monotonic
+`users.sync_data_generation`; the publication SQL suite is now seventeen cases
+and all pass. Account binding and multi-tab concurrency were already guarded and
+needed no production change.
+
+Enabling encryption, disabling it, and importing data whose encryption settings
+differ all run `SnapshotUploadService.deleteAndReuploadWithNewEncryption`:
+`DELETE /api/sync/data` — `deleteAllUserData`, which drops every operation, every
+device and the whole `user_sync_state` ROW — and only then a full-state re-upload
+under the new key. A password change does **not** take this route: it uses the
+clean-slate upload path, which keeps the row and writes a real SYNC_IMPORT, so
+the existing replacement fence already covers it.
+
+**The gap is the window, not the completed change.** Between the delete and the
+re-upload the account has no operations, no sync state and no replacement
+boundary, so the state-replacement fence is not stale — it is absent, and so is
+every check that would otherwise disagree with a stale candidate. The window is
+not brief: the toggle deliberately keeps the new key config when the upload
+fails, which leaves the server empty until the user retries. Once the re-upload
+lands, the snapshot handler has stored it as a SYNC_IMPORT through `uploadOps`,
+which rewrites the replacement pointer, and the ordinary fence refuses the
+pre-wipe candidate again — on causality, not on the generation. A dedicated case
+asserts that, so the new counter is never credited with work it does not do.
+
+**The damage is fleet-wide, not one wrong task.** An operation encrypted under a
+retired key cannot be decrypted by any device, and `OperationLogDownloadService`
+rethrows `OperationDecryptionError` for the whole download page rather than
+skipping the item, so one such operation wedges downloads for every device on
+the account, at a fixed seq, permanently.
+
+**Monotonic counter on `users` (implemented).** `sync_data_generation` is
+incremented inside `deleteAllUserData`'s own transaction and checked first in the
+publication transaction, before any other fence (migration
+`20260917010000_add_sync_data_generation`). It lives on `users` because that is
+the one row the wipe keeps. It is deliberately **not** bumped by the clean-slate
+upload path, which preserves the sync-state row and writes a real SYNC_IMPORT.
+`NOT NULL DEFAULT 0` is a catalog-only change on PostgreSQL 11+, so existing rows
+read 0 without a table rewrite.
+
+**Monotonic, never reset.** A cheaper fix — drop the queue rows on wipe and let
+the assistant re-queue — is insufficient: after the wipe the publication
+watermark restarts at 0, so a re-queued capture with the same id admits the
+pre-wipe candidate again, ciphertext and all. A dedicated case asserts exactly
+that, with watermark, actor identity, op id and the (absent) replacement fence
+all agreeing with the stale candidate and only the generation disagreeing.
+
+**Both halves falsified independently.** Dropping the increment in
+`deleteAllUserData` fails three cases (the two safety refusals and the
+availability case that reads the advanced generation); disabling the
+publication-side comparison fails the two safety refusals. Neither assertion is a
+tautology.
+
+**Already guarded, verified rather than changed.** The capture actor is derived
+from the account (`agent-capture-<userId>`), so a candidate prepared for one
+account is refused by the publisher-identity check when submitted to another.
+`SyncCycleGuardService` is an in-tab guard, so two tabs can prepare concurrently
+against the same watermark; the server is the arbiter, because the watermark is
+claimed inside the publication transaction, so exactly one candidate occupies
+each counter value and the loser stays pending for rebuild. Both cases pass
+against unchanged production code.
+
+**Open protocol gate.** The browser experiment reads the account's generation
+straight from the database at preparation time. A production preparer has no such
+access: it would have to learn the generation from a sync response, which means
+the value must be carried on the download/upload contract. What the experiment
+does establish is that the generation is captured when the candidate is built,
+not when it is published. This is a release gate, not a resolved design.
+
 ### Failure tests required before production
 
 Use the real server database transaction, valid task operation envelopes, and
 the app's normal remote replay. An in-memory fake queue is not sufficient.
 
-| Failure or race                                            | Required result                                                                                |
-| ---------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Device dies before publication                             | Item remains pending; no optimistic task survives.                                             |
-| Two devices prepare different candidates                   | One ordinary task operation is committed; both observe the same receipt.                       |
-| Server commits but the response is lost                    | Retry observes publication; no second task operation.                                          |
-| Server transaction fails                                   | Neither the operation nor a success receipt is committed.                                      |
-| Download or local apply fails after publication            | Normal sync retries/rebuilds; the capture is not republished.                                  |
-| User edits, moves, or deletes the imported task            | Late queue retries leave those changes intact.                                                 |
-| Import/reset races with publication                        | Existing replacement fence and explicit queue policy govern the result.                        |
-| Operation is pruned after publication                      | Receipt stays terminal; normal snapshot recovery supplies current state.                       |
-| Device/account/encryption configuration changes            | Stale work aborts without cross-account delivery.                                              |
-| Local write races with preparation, or preparation crashes | Clock reservation and subsequent operations remain causally valid.                             |
-| Server database backup restores old pending items          | Queue consumption stays paused until recovery resolves consumption ambiguity.                  |
-| Replacement row pruned by retention or quota recovery      | Fixed: the boundary's causal identity is persisted beside its seq and outlives the row.        |
-| Boundary pruned on a pre-migration row, never backfilled   | Publication refuses: no causal identity anywhere, and a missing boundary is not an absent one. |
+| Failure or race                                            | Required result                                                                                       |
+| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Device dies before publication                             | Item remains pending; no optimistic task survives.                                                    |
+| Two devices prepare different candidates                   | One ordinary task operation is committed; both observe the same receipt.                              |
+| Server commits but the response is lost                    | Retry observes publication; no second task operation.                                                 |
+| Server transaction fails                                   | Neither the operation nor a success receipt is committed.                                             |
+| Download or local apply fails after publication            | Normal sync retries/rebuilds; the capture is not republished.                                         |
+| User edits, moves, or deletes the imported task            | Late queue retries leave those changes intact.                                                        |
+| Import/reset races with publication                        | Existing replacement fence and explicit queue policy govern the result.                               |
+| Operation is pruned after publication                      | Receipt stays terminal; normal snapshot recovery supplies current state.                              |
+| Device/account/encryption configuration changes            | Fixed: the wipe advances a monotonic data generation; work prepared under the retired key is refused. |
+| Candidate submitted to another account                     | Refused: the capture actor is derived from the account, so publisher identity disagrees.              |
+| Two tabs prepare against the same watermark                | Exactly one publishes; the loser stays pending. The watermark is claimed inside the transaction.      |
+| Local write races with preparation, or preparation crashes | Clock reservation and subsequent operations remain causally valid.                                    |
+| Server database backup restores old pending items          | Queue consumption stays paused until recovery resolves consumption ambiguity.                         |
+| Replacement row pruned by retention or quota recovery      | Fixed: the boundary's causal identity is persisted beside its seq and outlives the row.               |
+| Boundary pruned on a pre-migration row, never backfilled   | Publication refuses: no causal identity anywhere, and a missing boundary is not an absent one.        |
 
 ## Implementation order and release gates
 
@@ -660,8 +734,11 @@ the app's normal remote replay. An in-memory fake queue is not sufficient.
    reproduced rejected/failed/pending imports and replaced the retained-history
    clock reader with an applied baseline plus a preparation gate, and the
    retention experiment reproduced a pruned replacement refusing safely but
-   permanently, then fixed it by persisting the boundary's causal identity.
-   Next compare protocols, then account/key changes and multiple tabs.
+   permanently, then fixed it by persisting the boundary's causal identity. The
+   account/key/tab experiment then reproduced the encryption-toggle wipe window,
+   where every fence is absent, and fenced it with a monotonic data generation;
+   account binding and multi-tab concurrency were already guarded. Next compare
+   protocols, and resolve how a production preparer learns the generation.
 2. **Delivery comparison:** compare publication before application with any
    concrete coordinated consumer alternative against the same failure cases.
    Select using the criteria above, including the cost of rollback/rebase or
@@ -734,9 +811,26 @@ actual supported workflow. A longer schedule does not by itself justify them.
   Playwright configuration against the running app and isolated PostgreSQL-backed
   SuperSync server: normal global setup stopped at unrelated bundled-plugin build
   failures. The full E2E suite and live assistant/OAuth flows were not run.
+- The account/key/tab cases bring the publication SQL suite to seventeen, all
+  passing against isolated PostgreSQL, alongside the full server unit suite
+  (1321 passing) and the canonical `test:integration:postgres` list. The only
+  failure in that list is `operations-autovacuum-reloptions`, which asserts a
+  PostgreSQL 16 floor against a 15 container — environmental, unrelated to this
+  change. `multi-client-sync` and `snapshot-skip-optimization` are mocked-Prisma
+  suites that the integration glob picks up but the canonical list excludes;
+  they fail under that config regardless of this change.
+- Both halves of the generation fence were falsified independently: dropping the
+  increment fails three cases, disabling the publication-side comparison fails
+  the two safety refusals.
+- The boundary between the two fences is asserted, not assumed: a completed
+  encryption toggle (wipe followed by the full-state re-upload) is refused by the
+  ordinary replacement fence with the generation deliberately satisfied, so the
+  new counter is credited only with the wipe window.
 - Production publication and actual phone/assistant onboarding remain
-  unimplemented. Submission retry identity, server-database restoration, clock
-  pruning, and encryption/account changes remain release gates.
+  unimplemented. Submission retry identity, server-database restoration, and
+  clock pruning remain release gates, as does how a production preparer learns
+  the data generation — the browser experiment reads it from the database, which
+  no real preparer can do.
 
 The tenth and eleventh publication SQL cases cover the pruned replacement
 boundary. Both use the ordinary upload path for the import (and, for the tenth,
@@ -745,6 +839,15 @@ that sweep does. The tenth asserts that persisted evidence keeps the boundary
 enforceable — a descending candidate publishes, a stale one is still rejected.
 The eleventh nulls the evidence columns first to stand in for a pre-migration
 row and asserts publication still refuses.
+
+The twelfth through seventeenth cases cover account, key, and tab changes. Three
+use the real `deleteAllUserData` for the wipe: refusal of a candidate prepared
+before it, refusal again after the capture is re-queued at a restarted watermark,
+and successful publication once prepared against the current generation. A fourth
+runs the whole toggle — wipe plus the full-state re-upload through the ordinary
+upload path — and asserts the pre-existing replacement fence refuses the stale
+candidate on its own. The last two assert cross-account refusal and that exactly
+one of two same-watermark candidates publishes.
 
 Run the SQL experiment from `packages/super-sync-server` with `DATABASE_URL`
 pointing to an isolated PostgreSQL database containing the existing SuperSync

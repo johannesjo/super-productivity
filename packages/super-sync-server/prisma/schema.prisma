@@ -31,6 +31,10 @@ model User {
   createdAt                     DateTime @default(now()) @map("created_at")
   storageQuotaBytes             BigInt   @default(104857600) @map("storage_quota_bytes") // 100MB default
   storageUsedBytes              BigInt   @default(0) @map("storage_used_bytes")
+  // Monotonic counter over account-data wipes (`deleteAllUserData`). Lives on
+  // the user because that wipe DELETES the user_sync_state row. See the
+  // migration for why a wipe needs its own fence.
+  syncDataGeneration            Int      @default(0) @map("sync_data_generation")
 
   operations                  Operation[]
   syncState                   UserSyncState?

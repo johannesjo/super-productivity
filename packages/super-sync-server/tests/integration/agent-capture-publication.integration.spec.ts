@@ -65,6 +65,8 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
     candidate: Operation,
     watermark: number,
     lastKnownServerSeq: number = 0,
+    /** Defaults to 0: a fresh account has never been wiped. */
+    expectedDataGeneration: number = 0,
   ) =>
     harness.publishCapture({
       userId,
@@ -72,6 +74,7 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
       candidate,
       expectedCaptureCounter: watermark,
       lastKnownServerSeq,
+      expectedDataGeneration,
     });
 
   beforeAll(async () => {
@@ -107,6 +110,7 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
       candidate,
       expectedCaptureCounter: 0,
       lastKnownServerSeq: 0,
+      expectedDataGeneration: 0,
     });
     expect(retry).toEqual({ status: 'already_published', receipt: first.receipt });
     expect(await restarted.countCaptureActorOperations({ userId })).toBe(1);
@@ -176,6 +180,7 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
         candidate,
         expectedCaptureCounter: 0,
         lastKnownServerSeq: 0,
+        expectedDataGeneration: 0,
       }),
     ).toMatchObject({ status: 'rejected' });
     expect(await harness.readCaptureReceipt({ userId, captureId })).toBeNull();
@@ -193,6 +198,7 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
       candidate,
       expectedCaptureCounter: 0,
       lastKnownServerSeq: 0,
+      expectedDataGeneration: 0,
     });
     expect(result.status).toBe('rejected');
     expect(await harness.readCaptureReceipt({ userId, captureId })).toBeNull();
@@ -521,6 +527,261 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
     });
   });
 
+  /**
+   * Step 3, account/encryption binding. A prepared candidate carries ciphertext
+   * produced with the key that was active at preparation time. Enabling
+   * encryption, disabling it, and importing data whose encryption settings
+   * differ all run `SnapshotUploadService.deleteAndReuploadWithNewEncryption`:
+   * `DELETE /api/sync/data` — that is `deleteAllUserData`, which drops every
+   * operation and the whole `user_sync_state` ROW — and only then a full-state
+   * re-upload under the NEW key. A password change does NOT take this route: it
+   * uses the clean-slate upload path, which keeps the row and writes a real
+   * SYNC_IMPORT, so the existing replacement fence already covers it.
+   *
+   * This case is the WINDOW between the delete and the re-upload. There the
+   * account has no operations, no sync state and no replacement boundary, so
+   * every existing fence is vacuous — not stale, absent. The window is not
+   * brief: the toggle deliberately keeps the new key config when the upload
+   * fails, leaving the server empty until the user retries.
+   *
+   * The damage is not a wrong task. An operation encrypted under a retired key
+   * cannot be decrypted by any device, and
+   * `OperationLogDownloadService` rethrows `OperationDecryptionError` for the
+   * whole page rather than skipping the item — so one poison operation wedges
+   * downloads for every device on the account, at a fixed seq, permanently.
+   */
+  it('refuses a candidate prepared under a wiped encryption context', async () => {
+    const userId = await createUser();
+    const captureId = unique('stale-key');
+    await harness.enqueueCapture({ userId, captureId, title: 'Prepared under old key' });
+    // Prepared while the account was on the OLD key: opaque ciphertext the
+    // server cannot inspect, and by now cannot be decrypted by anyone.
+    const candidate = makeTaskCandidate(userId, 0, {
+      isPayloadEncrypted: true,
+      payload: 'ciphertext-from-the-retired-key',
+    });
+
+    // The wipe half of the encryption toggle, before its re-upload lands.
+    await new SyncService().deleteAllUserData(userId);
+    expect(await prisma.userSyncState.findUnique({ where: { userId } })).toBeNull();
+
+    const result = await publish(userId, captureId, candidate, 0);
+
+    expect(result).toMatchObject({
+      status: 'rejected',
+      error: 'Capture was prepared for a superseded account state',
+    });
+    expect(await harness.countCaptureActorOperations({ userId })).toBe(0);
+    expect(await harness.readCaptureReceipt({ userId, captureId })).toBeNull();
+    // Still pending, so the assistant's work is not silently lost — it is
+    // rebuilt against the current encryption context instead.
+    expect(await harness.readPendingCapture({ userId, captureId })).toMatchObject({
+      captureId,
+    });
+  });
+
+  /**
+   * Why a monotonic counter and not a reset. The wipe destroys the capture
+   * queue, the watermark and the sync state, so a cheaper fix — drop the queue
+   * rows and let the assistant re-queue — looks sufficient. It is not: after the
+   * wipe the watermark restarts at 0, so a re-queued capture with the SAME id
+   * admits the pre-wipe candidate again, ciphertext and all. Only a value that
+   * never returns to a previous state distinguishes the two.
+   */
+  it('refuses the pre-wipe candidate even after the capture is re-queued', async () => {
+    const userId = await createUser();
+    const captureId = unique('replayed');
+    await harness.enqueueCapture({ userId, captureId, title: 'Prepared under old key' });
+    const staleCandidate = makeTaskCandidate(userId, 0, {
+      isPayloadEncrypted: true,
+      payload: 'ciphertext-from-the-retired-key',
+    });
+
+    await new SyncService().deleteAllUserData(userId);
+    // The assistant re-queues the same capture against the fresh account.
+    await harness.enqueueCapture({ userId, captureId, title: 'Prepared under old key' });
+    expect(await harness.readPublicationWatermark({ userId })).toBe(0);
+
+    // Watermark, actor identity, op id and (absent) replacement fence all agree
+    // with the stale candidate. The generation is the only thing that does not.
+    expect(await publish(userId, captureId, staleCandidate, 0)).toMatchObject({
+      status: 'rejected',
+      error: 'Capture was prepared for a superseded account state',
+    });
+    expect(await harness.countCaptureActorOperations({ userId })).toBe(0);
+  });
+
+  /**
+   * The same binding from the other direction: an ordinary capture must still
+   * publish after a wipe once it is prepared against the CURRENT generation.
+   * Without this, "refuse after a wipe" could be satisfied by refusing forever,
+   * which is the availability failure the retention experiment already hit.
+   */
+  it('publishes a candidate prepared after the wipe', async () => {
+    const userId = await createUser();
+    await new SyncService().deleteAllUserData(userId);
+
+    const captureId = unique('post-wipe');
+    await harness.enqueueCapture({ userId, captureId, title: 'Prepared after wipe' });
+    const pending = await harness.readPendingCapture({ userId, captureId });
+    expect(pending?.dataGeneration).toBe(1);
+
+    const result = await publish(
+      userId,
+      captureId,
+      makeTaskCandidate(userId, 0),
+      0,
+      0,
+      pending!.dataGeneration,
+    );
+
+    expect(result).toMatchObject({ status: 'published' });
+    expect(await harness.countCaptureActorOperations({ userId })).toBe(1);
+  });
+
+  /**
+   * Where the generation fence stops. Once the toggle's re-upload lands, the
+   * snapshot handler has stored it as a SYNC_IMPORT through `uploadOps`, which
+   * rewrites the replacement pointer — so the ORDINARY fence already refuses the
+   * pre-wipe candidate, and it refuses it on causality rather than on the
+   * generation. Recorded so the new counter is never credited with work it does
+   * not do: it covers the wipe window, not the completed encryption change.
+   *
+   * The generation is deliberately passed as the CURRENT one, satisfying the new
+   * fence, so only the pre-existing fences can decide the outcome.
+   */
+  it('leaves a completed encryption toggle to the ordinary replacement fence', async () => {
+    const userId = await createUser();
+    const device = 'toggling-device';
+    const actor = getAgentCaptureActorId(userId);
+    const syncService = new SyncService();
+
+    // Account history from the device that will toggle encryption.
+    const preWipe = await syncService.uploadOps(userId, device, [
+      makeTaskCandidate(userId, 0, {
+        clientId: device,
+        vectorClock: { [device]: 1 },
+      }),
+    ]);
+    const preWipeCursor = preWipe[0].serverSeq!;
+
+    const captureId = unique('completed-toggle');
+    await harness.enqueueCapture({ userId, captureId, title: 'Prepared under old key' });
+    const staleCandidate = makeTaskCandidate(userId, 0, {
+      isPayloadEncrypted: true,
+      payload: 'ciphertext-from-the-retired-key',
+      vectorClock: { [device]: 1, [actor]: 1 },
+    });
+
+    // The whole toggle: wipe, then the full-state re-upload under the new key.
+    await syncService.deleteAllUserData(userId);
+    const reupload = await syncService.uploadOps(
+      userId,
+      device,
+      [
+        {
+          id: unique('toggle-import'),
+          clientId: device,
+          actionType: '[SP_ALL] Load(import) all data',
+          opType: 'SYNC_IMPORT',
+          entityType: 'ALL',
+          payload: 'encrypted-full-state-under-the-new-key',
+          isPayloadEncrypted: true,
+          vectorClock: { [device]: 2 },
+          timestamp: Date.now(),
+          schemaVersion: 1,
+          syncImportReason: 'FORCE_UPLOAD',
+        },
+      ],
+      true,
+      undefined,
+      undefined,
+      false,
+      0,
+    );
+    expect(reupload[0]?.accepted).toBe(true);
+    const generation = await harness.readDataGeneration({ userId });
+    expect(generation).toBe(1);
+    expect(
+      (await prisma.userSyncState.findUniqueOrThrow({ where: { userId } }))
+        .latestStateReplacementSeq,
+    ).toBe(reupload[0].serverSeq);
+
+    expect(
+      await publish(userId, captureId, staleCandidate, 0, preWipeCursor, generation),
+    ).toMatchObject({
+      status: 'rejected',
+      error: 'Capture candidate does not include the latest state replacement',
+    });
+    expect(await harness.countCaptureActorOperations({ userId })).toBe(0);
+  });
+
+  /**
+   * Account binding. The capture actor is derived from the account
+   * (`agent-capture-<userId>`), so a candidate prepared for one account cannot
+   * be published into another even if both queues hold the same capture id.
+   */
+  it('refuses a candidate prepared for a different account', async () => {
+    const preparedForUserId = await createUser();
+    const publishingUserId = await createUser();
+    const captureId = unique('cross-account');
+    await harness.enqueueCapture({
+      userId: publishingUserId,
+      captureId,
+      title: 'Belongs to another account',
+    });
+
+    const foreignCandidate = makeTaskCandidate(preparedForUserId, 0);
+
+    expect(await publish(publishingUserId, captureId, foreignCandidate, 0)).toMatchObject(
+      {
+        status: 'rejected',
+        error: 'Capture candidate has the wrong publisher identity',
+      },
+    );
+    expect(await harness.countCaptureActorOperations({ userId: publishingUserId })).toBe(
+      0,
+    );
+    expect(await harness.countCaptureActorOperations({ userId: preparedForUserId })).toBe(
+      0,
+    );
+  });
+
+  /**
+   * Multiple tabs. `SyncCycleGuardService` is an IN-TAB guard, so two tabs can
+   * prepare concurrently and both read the same publication watermark. The
+   * server is the arbiter: the watermark is claimed inside the publication
+   * transaction, so exactly one candidate can occupy each counter value.
+   */
+  it('accepts exactly one of two candidates prepared at the same watermark', async () => {
+    const userId = await createUser();
+    const firstCaptureId = unique('tab-a');
+    const secondCaptureId = unique('tab-b');
+    await harness.enqueueCapture({ userId, captureId: firstCaptureId, title: 'Tab A' });
+    await harness.enqueueCapture({ userId, captureId: secondCaptureId, title: 'Tab B' });
+
+    // Both tabs prepared against watermark 0 — neither saw the other.
+    const [first, second] = await Promise.all([
+      publish(userId, firstCaptureId, makeTaskCandidate(userId, 0), 0),
+      publish(userId, secondCaptureId, makeTaskCandidate(userId, 0), 0),
+    ]);
+
+    const statuses = [first.status, second.status].sort();
+    expect(statuses).toEqual(['published', 'rejected']);
+    expect(await harness.countCaptureActorOperations({ userId })).toBe(1);
+    expect(await harness.readPublicationWatermark({ userId })).toBe(1);
+    // The loser stays pending and is rebuilt against the new watermark.
+    const [winner, loser] =
+      first.status === 'rejected'
+        ? [secondCaptureId, firstCaptureId]
+        : [firstCaptureId, secondCaptureId];
+    expect(
+      await harness.readCaptureReceipt({ userId, captureId: winner }),
+    ).not.toBeNull();
+    expect(await harness.readCaptureReceipt({ userId, captureId: loser })).toBeNull();
+    expect(await harness.readPendingCapture({ userId, captureId: loser })).not.toBeNull();
+  });
+
   it('keeps the terminal receipt after delete, import, and operation removal', async () => {
     const userId = await createUser();
     const captureId = unique('terminal');
@@ -597,6 +858,7 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
         candidate,
         expectedCaptureCounter: 0,
         lastKnownServerSeq: 0,
+        expectedDataGeneration: 0,
       }),
     ).toEqual({ status: 'already_published', receipt: published.receipt });
   });

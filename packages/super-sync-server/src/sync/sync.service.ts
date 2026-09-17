@@ -981,10 +981,13 @@ export class SyncService {
       // and trigger a full state re-upload.
       await tx.userSyncState.deleteMany({ where: { userId } });
 
-      // Reset storage usage
+      // Reset storage usage, and advance the data generation in the same
+      // transaction. The wipe removes the user_sync_state row, so the
+      // state-replacement fence cannot survive it; this counter is what work
+      // prepared against the pre-wipe account is checked against.
       await tx.user.update({
         where: { id: userId },
-        data: { storageUsedBytes: BigInt(0) },
+        data: { storageUsedBytes: BigInt(0), syncDataGeneration: { increment: 1 } },
       });
     });
 
