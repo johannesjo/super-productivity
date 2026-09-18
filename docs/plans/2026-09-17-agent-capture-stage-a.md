@@ -661,6 +661,62 @@ commitment or the endpoint could use another authenticated binding, but selectin
 either policy is outside this experiment. A connector without a stable identity
 must document that a retried submission can create another capture; title/notes
 must not be used as a deduplication key because identical tasks can be intended.
+The next section narrows this decision to two honest options and records what
+would settle it.
+
+### Narrowing the submission decision (2026-09-18): analysis, no new code
+
+Three independent reviews — two adversarial analyses with opposing mandates and
+an external CLI review — narrowed the decision above without closing it. Every
+claim below was re-verified against the cited source.
+
+**The identity choice is binary, and an optional key is the one shape to avoid.**
+This server makes an identity mandatory only on its destructive path: `opId` is
+`.optional()` in `packages/shared-schema/src/supersync-http-contract.ts` and
+required by a `superRefine` only when `isCleanSlate` is set, while `requestId`
+stays optional on both additive upload routes. Capture is additive, so that
+precedent does not carry a refuse-without-a-key rule. But the reverse reading is
+also wrong: an optional key advertised as idempotency promises a guarantee it
+cannot keep. The honest release contract is one of two, chosen deliberately —
+a connector-owned opaque key that the endpoint requires, where reuse always means
+the original intent and returns its receipt; or an explicitly at-least-once
+endpoint that makes no duplicate-prevention claim and documents that a retried
+submission can create another capture.
+
+**A conflict response is sound only while the capture is pending.** The
+immutable-row check already implements it and two spec cases pin it, and `409`
+is this server's established code for a colliding durable identity
+(`sendSyncImportExistsReply`, whose docstring names the dropped-response failure
+this must avoid). It must not extend past publication: plaintext is cleared
+there, so a byte-identical retry currently hits the same immutability error and
+would tell an assistant the capture failed while its task exists.
+
+**Content comparison does not earn its place in either branch.** A persisted
+hash is a low-entropy commitment over short task titles that would outlive the
+plaintext publication deliberately erases and ride 14 days of full dumps
+(`scripts/backup.sh`). An ephemeral fingerprint scoped to the retry window was
+considered and rejected as a contract basis: the existing dedup cache is
+process-local with a 10,000-entry cap and a five-minute TTL, and the server's own
+README lists process-local state as a multi-instance hazard — after expiry,
+eviction, restart, or a second replica the comparison basis is simply gone, so
+the endpoint would still have to fall back to returning the receipt for all reuse
+or refusing all reuse. Under a required connector-owned key the comparison is
+unnecessary, because reuse means the same intent by definition; without one it
+cannot be made reliable. Note also that the existing fingerprint layer
+deliberately re-processes a mismatch rather than refusing it, so it is precedent
+for short-lived same-body replay, not for conflict detection.
+
+**What decides it is cheap and is not the connector spike.** The open question is
+narrow: does a real assistant re-send identical tool arguments when a call is
+retried? A local MCP server exposing a capture tool that records only a keyed
+per-run digest and a counter answers it, with no public deployment, OAuth, or
+disposable account. It characterizes one assistant's argument handling and
+nothing else — not transport retries, authorization, or deployment routing.
+Until it runs, any refuse-without-a-key rule is a bet.
+
+**Unchanged by all of this:** the database-restore duplicate remains open, and no
+submission contract touches it — the restore rolls back the queue row, so a key,
+a conflict policy, and a commitment are all rolled back with it.
 
 ### Account, key, and tab experiment (2026-09-17): the wipe window
 
@@ -1039,6 +1095,13 @@ actual supported workflow. A longer schedule does not by itself justify them.
 
 ## Validation record
 
+- 2026-09-18: analysis only, no code changed. Two adversarial reviews with
+  opposing mandates and an external CLI review narrowed the submission-identity
+  decision; the CLI review found that an ephemeral fingerprint cannot back the
+  post-publication conflict response, which the in-repo cache bounds confirm.
+  Conclusions and their sources are in "Narrowing the submission decision". The
+  decision itself stays open, and the local-MCP experiment that would settle it
+  has not been built or run.
 - 2026-09-18: the focused PostgreSQL suite passes 25 cases (3.0 seconds test
   duration) against a fresh disposable PostgreSQL 15 container reachable only
   over a bind-mounted unix socket, with the current Prisma schema applied by
