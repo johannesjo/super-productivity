@@ -714,6 +714,15 @@ disposable account. It characterizes one assistant's argument handling and
 nothing else — not transport retries, authorization, or deployment routing.
 Until it runs, any refuse-without-a-key rule is a bet.
 
+That probe now exists at
+`packages/super-sync-server/tests/experiments/agent-capture-retry-probe/`:
+dependency-free, four injectable first-call failure modes, and arguments reduced
+to an HMAC digest under a per-run in-memory key so no title ever reaches the log.
+Its protocol handshake and repeat detection are verified against a scripted
+client, with a negative control confirming differing arguments produce differing
+digests. **It has not been run against a real assistant, so the gate is still
+open** — running it needs a human driving a client through the retry modes.
+
 **Unchanged by all of this:** the database-restore duplicate remains open, and no
 submission contract touches it — the restore rolls back the queue row, so a key,
 a conflict policy, and a commitment are all rolled back with it.
@@ -1071,7 +1080,8 @@ the app's normal remote replay. An in-memory fake queue is not sufficient.
    newest causal full-state baseline rather than requiring a retired import edge.
    The current-key experiment authenticates that baseline with the candidate's
    encryption key and rechecks its identity during publication.
-2. **Delivery comparison:** done — see the comparison section. Publication
+2. **Delivery comparison:** done, and **Candidate A is now the selected
+   direction** (maintainer decision, 2026-09-18). Publication
    before application is recommended, because a device-owned outbox needs the
    same server arbiter plus durable client state the op log cannot represent
    (local entries have no unapplied status; replay applies them all). Remaining
