@@ -22,8 +22,10 @@ import {
 } from '../../src/sync/sync.types';
 import { SyncService } from '../../src/sync/sync.service';
 
-const ACCOUNT_TABLE = 'agent_capture_spike_accounts';
-const QUEUE_TABLE = 'agent_capture_spike_queue';
+// Exported so a spec can snapshot and roll back these rows when it simulates a
+// server database restore. Nothing outside the tests may depend on them.
+export const ACCOUNT_TABLE = 'agent_capture_spike_accounts';
+export const QUEUE_TABLE = 'agent_capture_spike_queue';
 const MAX_TRANSACTION_ATTEMPTS = 3;
 
 type CaptureAccountRow = { publishedCounter: number };

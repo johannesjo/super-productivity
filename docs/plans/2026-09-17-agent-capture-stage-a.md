@@ -846,7 +846,8 @@ agreement inside the encryption wipe window, the 20-entry clock limit and
 pruning with a virtual publisher actor, power loss during preparation, submission
 retry identity, and server-database restoration. The subsequent experiments cover
 key agreement, publisher pruning, and tab closure; simultaneous active tabs are
-outside capture scope.
+outside capture scope. Server-database restoration is now characterized as
+undetectable server-side rather than resolved.
 
 ### Repair baseline under clock pressure (2026-09-18)
 
@@ -921,31 +922,56 @@ cases and the spec's `checkFile` pass. The E2E TypeScript project still reports
 42 existing errors, none in this spec; the four earlier browser cases were not
 rerun for this test-only addition.
 
+### Database restore ambiguity (2026-09-18): characterized, not fixed
+
+A new PostgreSQL case rolls the server back to a point-in-time snapshot taken
+before a capture was published: the accepted operation, the `user_sync_state`
+row, the account's data generation, the publication watermark, and the queue
+row are all restored to their pre-publication values. The device's copy of the
+already delivered task is deliberately not rolled back, because that divergence
+is the failure.
+
+Every existing fence then agrees with a capture that was never published. The
+restored generation matches, the watermark matches, the queue row is pending
+again, and the candidate's operation ID is unoccupied. Publication succeeds and
+creates a second task, so the device that kept the first one now holds two tasks
+for one capture. The server retains nothing that distinguishes this from a first
+publication, and no server-side check can, because the evidence was in the rows
+the restore discarded.
+
+This is characterization of an unfixed gate, not an accepted outcome. It confirms
+the required result already recorded in the failure table: consumption must stay
+paused after a restore until recovery resolves the ambiguity, and that pause is
+an operational policy the maintainer owns rather than something publication can
+enforce. Detecting it at all would need evidence the restore cannot roll back —
+for example a device reporting its retained receipt, or a restore procedure that
+advances the data generation. Selecting either remains an open decision.
+
 ### Failure tests required before production
 
 Use the real server database transaction, valid task operation envelopes, and
 the app's normal remote replay. An in-memory fake queue is not sufficient.
 
-| Failure or race                                                        | Required result                                                                                       |
-| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Device dies before publication                                         | Item remains pending; no optimistic task survives.                                                    |
-| Two devices prepare different candidates                               | One ordinary task operation is committed; both observe the same receipt.                              |
-| Server commits but the response is lost                                | Retry observes publication; no second task operation.                                                 |
-| Server transaction fails                                               | Neither the operation nor a success receipt is committed.                                             |
-| Download or local apply fails after publication                        | Normal sync retries/rebuilds; the capture is not republished.                                         |
-| User edits, moves, or deletes the imported task                        | Late queue retries leave those changes intact.                                                        |
-| Import/reset races with publication                                    | Existing replacement fence and explicit queue policy govern the result.                               |
-| Operation is pruned after publication                                  | Receipt stays terminal; normal snapshot recovery supplies current state.                              |
-| Device/account/encryption configuration changes                        | Fixed: the wipe advances a monotonic data generation; work prepared under the retired key is refused. |
-| Candidate submitted to another account                                 | Refused: the capture actor is derived from the account, so publisher identity disagrees.              |
-| Two devices prepare against the same watermark                         | Exactly one publishes; the loser stays pending. The watermark is claimed inside the transaction.      |
-| Retired-key device prepares inside the wipe window                     | Fixed in the experiment: authenticate the current encrypted baseline and bind its ID to publication.  |
-| Local write during baseline probe; tab closes during/after preparation | Covered: local task survives; no capture counter is consumed; retry publishes once.                   |
-| Server database backup restores old pending items                      | Queue consumption stays paused until recovery resolves consumption ambiguity.                         |
-| Replacement row pruned by retention or quota recovery                  | Fixed: the boundary's causal identity is persisted beside its seq and outlives the row.               |
-| Repair pruning drops the earlier import author's counter               | Fixed in the harness: use the newer causal repair, with the import sequence as a floor.               |
-| Client pruning drops the capture publisher before a local edit         | Covered: ordinary conflict resolution recovers the edge; edits and deletion converge on both devices. |
-| Boundary pruned on a pre-migration row, never backfilled               | Publication refuses: no causal identity anywhere, and a missing boundary is not an absent one.        |
+| Failure or race                                                        | Required result                                                                                           |
+| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| Device dies before publication                                         | Item remains pending; no optimistic task survives.                                                        |
+| Two devices prepare different candidates                               | One ordinary task operation is committed; both observe the same receipt.                                  |
+| Server commits but the response is lost                                | Retry observes publication; no second task operation.                                                     |
+| Server transaction fails                                               | Neither the operation nor a success receipt is committed.                                                 |
+| Download or local apply fails after publication                        | Normal sync retries/rebuilds; the capture is not republished.                                             |
+| User edits, moves, or deletes the imported task                        | Late queue retries leave those changes intact.                                                            |
+| Import/reset races with publication                                    | Existing replacement fence and explicit queue policy govern the result.                                   |
+| Operation is pruned after publication                                  | Receipt stays terminal; normal snapshot recovery supplies current state.                                  |
+| Device/account/encryption configuration changes                        | Fixed: the wipe advances a monotonic data generation; work prepared under the retired key is refused.     |
+| Candidate submitted to another account                                 | Refused: the capture actor is derived from the account, so publisher identity disagrees.                  |
+| Two devices prepare against the same watermark                         | Exactly one publishes; the loser stays pending. The watermark is claimed inside the transaction.          |
+| Retired-key device prepares inside the wipe window                     | Fixed in the experiment: authenticate the current encrypted baseline and bind its ID to publication.      |
+| Local write during baseline probe; tab closes during/after preparation | Covered: local task survives; no capture counter is consumed; retry publishes once.                       |
+| Server database backup restores old pending items                      | Open: characterized as undetectable server-side; consumption must stay paused until recovery resolves it. |
+| Replacement row pruned by retention or quota recovery                  | Fixed: the boundary's causal identity is persisted beside its seq and outlives the row.                   |
+| Repair pruning drops the earlier import author's counter               | Fixed in the harness: use the newer causal repair, with the import sequence as a floor.                   |
+| Client pruning drops the capture publisher before a local edit         | Covered: ordinary conflict resolution recovers the edge; edits and deletion converge on both devices.     |
+| Boundary pruned on a pre-migration row, never backfilled               | Publication refuses: no causal identity anywhere, and a missing boundary is not an absent one.            |
 
 ## Implementation order and release gates
 
@@ -989,6 +1015,16 @@ actual supported workflow. A longer schedule does not by itself justify them.
 
 ## Validation record
 
+- 2026-09-18: the focused PostgreSQL suite passes 25 cases (3.0 seconds test
+  duration) against a fresh disposable PostgreSQL 15 container reachable only
+  over a bind-mounted unix socket, with the current Prisma schema applied by
+  `db push`. The added case characterizes the database-restore gate: a
+  point-in-time rollback of the operation, sync-state, generation, watermark and
+  queue rows lets the same capture publish a second task while the device keeps
+  the first. A negative control confirms it fails when the queue rollback is
+  removed. `checkFile` passes for the spec and the harness; the harness change
+  only exports its two test-table names. No production code changed, and the gate
+  is recorded as open rather than closed.
 - 2026-09-18: the publication/wipe ordering regression passes in the focused
   24-case PostgreSQL suite. It pauses publication after its account-generation
   read, starts a real `deleteAllUserData`, and verifies the reset waits until

@@ -13,6 +13,8 @@ import { prisma, disconnectDb } from '../../src/db';
 import { SyncService } from '../../src/sync/sync.service';
 import { Operation } from '../../src/sync/sync.types';
 import {
+  ACCOUNT_TABLE as CAPTURE_ACCOUNT_TABLE,
+  QUEUE_TABLE as CAPTURE_QUEUE_TABLE,
   createAgentCapturePublicationHarness,
   getAgentCaptureActorId,
 } from './agent-capture-publication.harness';
@@ -1178,5 +1180,168 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
         expectedDataGeneration: 0,
       }),
     ).toEqual({ status: 'already_published', receipt: published.receipt });
+  });
+
+  /**
+   * A point-in-time restore of every server row the publication path reads. The
+   * device's own copy of an already delivered task is deliberately NOT rolled
+   * back — that divergence is the whole failure mode, and restoring the real
+   * rows rather than stubbing the reads is what makes this evidence.
+   */
+  const snapshotServerState = async (
+    userId: number,
+  ): Promise<{
+    userId: number;
+    syncDataGeneration: number;
+    syncState: Awaited<ReturnType<typeof prisma.userSyncState.findUnique>>;
+    accountRows: Array<{ publishedCounter: number }>;
+    queueRows: Array<{
+      captureId: string;
+      title: string;
+      notes: string | null;
+      publishedOpId: string | null;
+      publishedServerSeq: number | null;
+    }>;
+  }> => {
+    const [user, syncState, accountRows, queueRows] = await Promise.all([
+      prisma.user.findUniqueOrThrow({
+        where: { id: userId },
+        select: { syncDataGeneration: true },
+      }),
+      prisma.userSyncState.findUnique({ where: { userId } }),
+      prisma.$queryRawUnsafe<Array<{ publishedCounter: number }>>(
+        `SELECT published_counter AS "publishedCounter" FROM ${CAPTURE_ACCOUNT_TABLE} WHERE user_id = $1`,
+        userId,
+      ),
+      prisma.$queryRawUnsafe<
+        Array<{
+          captureId: string;
+          title: string;
+          notes: string | null;
+          publishedOpId: string | null;
+          publishedServerSeq: number | null;
+        }>
+      >(
+        `SELECT capture_id AS "captureId", title, notes, published_op_id AS "publishedOpId", published_server_seq AS "publishedServerSeq"
+         FROM ${CAPTURE_QUEUE_TABLE} WHERE user_id = $1`,
+        userId,
+      ),
+    ]);
+    return {
+      userId,
+      syncDataGeneration: user.syncDataGeneration,
+      syncState,
+      accountRows,
+      queueRows,
+    };
+  };
+
+  const restoreServerState = async (
+    snapshot: Awaited<ReturnType<typeof snapshotServerState>>,
+  ): Promise<void> => {
+    const { userId } = snapshot;
+    await prisma.operation.deleteMany({
+      where: { userId, serverSeq: { gt: snapshot.syncState?.lastSeq ?? 0 } },
+    });
+    if (snapshot.syncState) {
+      const { latestFullStateVectorClock, latestStateReplacementVectorClock, ...rest } =
+        snapshot.syncState;
+      await prisma.userSyncState.update({
+        where: { userId },
+        data: {
+          ...rest,
+          latestFullStateVectorClock:
+            (latestFullStateVectorClock as Prisma.InputJsonValue) ?? Prisma.DbNull,
+          latestStateReplacementVectorClock:
+            (latestStateReplacementVectorClock as Prisma.InputJsonValue) ?? Prisma.DbNull,
+        },
+      });
+    } else {
+      await prisma.userSyncState.deleteMany({ where: { userId } });
+    }
+    await prisma.user.update({
+      where: { id: userId },
+      data: { syncDataGeneration: snapshot.syncDataGeneration },
+    });
+    await prisma.$executeRawUnsafe(
+      `DELETE FROM ${CAPTURE_QUEUE_TABLE} WHERE user_id = $1`,
+      userId,
+    );
+    await prisma.$executeRawUnsafe(
+      `DELETE FROM ${CAPTURE_ACCOUNT_TABLE} WHERE user_id = $1`,
+      userId,
+    );
+    for (const row of snapshot.accountRows) {
+      await prisma.$executeRawUnsafe(
+        `INSERT INTO ${CAPTURE_ACCOUNT_TABLE} (user_id, published_counter) VALUES ($1, $2)`,
+        userId,
+        row.publishedCounter,
+      );
+    }
+    for (const row of snapshot.queueRows) {
+      await prisma.$executeRawUnsafe(
+        `INSERT INTO ${CAPTURE_QUEUE_TABLE} (user_id, capture_id, title, notes, published_op_id, published_server_seq)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        userId,
+        row.captureId,
+        row.title,
+        row.notes,
+        row.publishedOpId,
+        row.publishedServerSeq,
+      );
+    }
+  };
+
+  const readOperationEntityId = async (opId: string): Promise<string | null> =>
+    (
+      await prisma.operation.findUniqueOrThrow({
+        where: { id: opId },
+        select: { entityId: true },
+      })
+    ).entityId;
+
+  it('cannot detect a database restore that rolled back a terminal receipt', async () => {
+    const userId = await createUser();
+    const captureId = unique('database-restore');
+    await harness.enqueueCapture({
+      userId,
+      captureId,
+      title: 'Restored capture',
+      notes: 'Queued before the backup',
+    });
+    const beforePublication = await snapshotServerState(userId);
+
+    const published = await publish(userId, captureId, makeTaskCandidate(userId, 0), 0);
+    expect(published.status).toBe('published');
+    if (published.status === 'rejected') throw new Error(published.error);
+    // The device downloaded and applied this task before the backup was restored.
+    const deliveredTaskId = await readOperationEntityId(published.receipt.opId);
+
+    await restoreServerState(beforePublication);
+
+    // Every fence now agrees with a capture that was never published: the
+    // account generation, the publication watermark and the queue row were all
+    // rolled back together, and the accepted operation is gone.
+    expect(await harness.readCaptureReceipt({ userId, captureId })).toBeNull();
+    expect(await harness.readPendingCapture({ userId, captureId })).toMatchObject({
+      title: 'Restored capture',
+      captureCounter: 0,
+      dataGeneration: 0,
+    });
+
+    const republished = await publish(userId, captureId, makeTaskCandidate(userId, 0), 0);
+    expect(republished.status).toBe('published');
+    if (republished.status === 'rejected') throw new Error(republished.error);
+
+    // Characterization, not an accepted outcome. The server sees one publication
+    // and cannot tell that the device kept the first task, so the user ends up
+    // with two tasks for one capture. Nothing the server retains distinguishes
+    // this from a first publication, which is why consumption must stay paused
+    // after a restore until recovery resolves the ambiguity.
+    expect(await readOperationEntityId(republished.receipt.opId)).not.toBe(
+      deliveredTaskId,
+    );
+    expect(await harness.countCaptureActorOperations({ userId })).toBe(1);
+    expect(await harness.countPublishedCaptures({ userId })).toBe(1);
   });
 });
