@@ -847,7 +847,9 @@ pruning with a virtual publisher actor, power loss during preparation, submissio
 retry identity, and server-database restoration. The subsequent experiments cover
 key agreement, publisher pruning, and tab closure; simultaneous active tabs are
 outside capture scope. Server-database restoration is now characterized as
-undetectable server-side rather than resolved.
+undetectable server-side rather than resolved, and power loss during preparation
+is recorded as a reasoned gap rather than tested. Submission retry identity
+remains the one gate with no evidence at all, because it is a protocol decision.
 
 ### Repair baseline under clock pressure (2026-09-18)
 
@@ -921,6 +923,28 @@ possible interleaving inside the exclusive preparation callback. Both focused
 cases and the spec's `checkFile` pass. The E2E TypeScript project still reports
 42 existing errors, none in this spec; the four earlier browser cases were not
 rerun for this test-only addition.
+
+### Power loss during preparation (2026-09-18): recorded gap, not tested
+
+Deliberately not reproduced. Playwright cannot produce OS power loss: closing a
+context or a page is a graceful teardown, which is exactly what the two cases
+above already cover. The closest approximation is killing the browser process
+mid-preparation to leave an IndexedDB transaction unflushed, and what that would
+exercise is the app's own persistence layer, not anything capture-specific.
+
+The reasoning that makes it a gap rather than a gate rests on those passing
+cases, not on assumption: preparation writes no durable capture state. The
+candidate is in-memory, the publisher counter and the queue receipt are consumed
+only inside the server's upload transaction, and the tab-closure cases confirmed
+that an interrupted preparation leaves operations, cursor, counter and watermark
+untouched. A power cut therefore has nothing capture-owned to leave half-written;
+the capture stays pending and republishes correctly on the next attempt.
+
+What stays uncovered is an unflushed or partially applied local write in the
+app's ordinary IndexedDB persistence. That is an app-wide crash concern that
+predates capture and is not made worse by it — a lost local edit is lost the same
+way whether or not a capture was being prepared. Revisit this only if an observed
+failure implicates the preparation callback specifically.
 
 ### Database restore ambiguity (2026-09-18): characterized, not fixed
 
