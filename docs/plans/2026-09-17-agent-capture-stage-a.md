@@ -395,10 +395,13 @@ winning operation even after the operation itself is removed; live title/notes
 are cleared when publication commits.
 
 This is a feasibility harness, not a production route. It bypasses HTTP
-authentication, route quotas, and submission deduplication. The browser fixture
-uses the shared no-dispatch task preparation helper and the app's payload
-validation and encryption. A separate capture author remains in the experiment.
-There is no automatic queue consumer or production publication API yet.
+authentication, route quotas, and endpoint-specific request deduplication. Its
+test-only queue boundary does characterize account-scoped identical-submission
+handling; that is not evidence for an HTTP or MCP submission protocol. The
+browser fixture uses the shared no-dispatch task preparation helper and the
+app's payload validation and encryption. A separate capture author remains in
+the experiment. There is no automatic queue consumer or production publication
+API yet.
 
 **Original reproduced failure: copying only the persisted vector clock is insufficient.** A
 real backup import followed by "Use My Data" published a `SYNC_IMPORT` with the
@@ -994,15 +997,18 @@ actual supported workflow. A longer schedule does not by itself justify them.
   behind; the regression fails as expected. The lock is deliberately acquired
   before either path changes sync rows, so it serializes the generation read
   with the reset rather than merely protecting the final increment.
-- 2026-09-18: the focused PostgreSQL publication suite passes 23 cases against
-  a fresh disposable PostgreSQL 15 database (2.1 seconds). Four cases separate
-  queue submission behavior from publication retries: repeated/concurrent
-  identical pending submissions retain one immutable capture, IDs are scoped to
-  an account, conflicting pending content is refused, and a post-publication
-  retry remains unsupported rather than being mistaken for receipt recovery.
-  `npm run checkFile` passes for the modified server spec. No production
-  sync/encryption code changed. The endpoint's stable-identity ownership and
-  conflicting-content response remain an explicit release decision.
+- 2026-09-18: the focused PostgreSQL publication suite passes 24 cases against
+  a fresh disposable loopback-only PostgreSQL 15 database (2.02 seconds test
+  duration; 2.46 seconds total). Prisma applied the current server schema
+  before the run. Four cases separate test-only queue submission behavior from
+  publication retries: repeated/concurrent identical pending submissions retain
+  one immutable capture, IDs are scoped to an account, conflicting pending
+  content is refused, and a post-publication retry remains unsupported rather
+  than being mistaken for receipt recovery. This does not establish an HTTP or
+  MCP endpoint, connector retry behavior, or a production request-deduplication
+  contract. No production sync/encryption code changed. The endpoint's
+  stable-identity ownership and conflicting-content response remain explicit
+  release decisions.
 - 2026-09-18: the original encrypted publication/edit/delete browser case and
   its new 21-identity clock-pressure variant both pass (2.0 minutes). The latter
   asserts actual client pruning, a genuine concurrent rejection, and acceptance
