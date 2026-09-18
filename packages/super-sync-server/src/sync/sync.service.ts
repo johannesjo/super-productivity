@@ -184,6 +184,24 @@ export class SyncService {
     return prisma.$transaction(work, options);
   }
 
+  /** Serializes destructive resets with uploads using the established lock order. */
+  protected async lockUserSyncStateForUpdate(
+    tx: Prisma.TransactionClient,
+    userId: number,
+  ): Promise<void> {
+    // Prisma's read-then-write upsert can lose a concurrent first-row race.
+    // PostgreSQL's conflict path waits for the winner, then this transaction's
+    // following statement can lock the row it created.
+    await tx.$executeRaw`
+      INSERT INTO user_sync_state (user_id)
+      VALUES (${userId})
+      ON CONFLICT (user_id) DO NOTHING
+    `;
+    await tx.$queryRaw`
+      SELECT user_id FROM user_sync_state WHERE user_id = ${userId} FOR UPDATE
+    `;
+  }
+
   async uploadOps(
     userId: number,
     clientId: string,
@@ -969,6 +987,11 @@ export class SyncService {
    */
   async deleteAllUserData(userId: number): Promise<void> {
     await prisma.$transaction(async (tx) => {
+      // Serialize a destructive reset with capture publication before either
+      // path reads or removes account-scoped sync state. This must follow the
+      // ordinary upload's `user_sync_state` → `users` lock order.
+      await this.lockUserSyncStateForUpdate(tx, userId);
+
       // Delete all operations
       await tx.operation.deleteMany({ where: { userId } });
 

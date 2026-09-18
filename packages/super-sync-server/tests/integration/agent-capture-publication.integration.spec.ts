@@ -8,6 +8,7 @@
  */
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest';
 import { Prisma } from '@prisma/client';
+import { decrypt, encrypt } from '@sp/sync-core';
 import { prisma, disconnectDb } from '../../src/db';
 import { SyncService } from '../../src/sync/sync.service';
 import { Operation } from '../../src/sync/sync.types';
@@ -114,6 +115,104 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
     });
     expect(retry).toEqual({ status: 'already_published', receipt: first.receipt });
     expect(await restarted.countCaptureActorOperations({ userId })).toBe(1);
+  });
+
+  /**
+   * This is queue submission idempotency, before a publisher prepares or
+   * accepts an operation. It is deliberately separate from the receipt retry
+   * above: the latter proves that one capture is published once, while this
+   * one proves that transport retries do not create several pending captures.
+   */
+  it('keeps repeated and concurrent identical submissions as one pending capture', async () => {
+    const userId = await createUser();
+    const captureId = unique('submission-retry');
+    const input = {
+      userId,
+      captureId,
+      title: 'Keep this once',
+      notes: 'Same request retried',
+    };
+
+    const [first, ...retries] = await Promise.all([
+      harness.enqueueCapture(input),
+      harness.enqueueCapture(input),
+      harness.enqueueCapture(input),
+      harness.enqueueCapture(input),
+    ]);
+
+    expect(retries).toEqual([first, first, first]);
+    expect(await harness.readPendingCapture({ userId, captureId })).toEqual(first);
+  });
+
+  it('keeps the first pending content immutable when an identity is reused', async () => {
+    const userId = await createUser();
+    const captureId = unique('submission-conflict');
+    await harness.enqueueCapture({
+      userId,
+      captureId,
+      title: 'First title',
+      notes: 'First notes',
+    });
+
+    await expect(
+      harness.enqueueCapture({
+        userId,
+        captureId,
+        title: 'Changed title',
+        notes: 'Changed notes',
+      }),
+    ).rejects.toThrow(`Capture ${captureId} is immutable once queued`);
+    expect(await harness.readPendingCapture({ userId, captureId })).toMatchObject({
+      title: 'First title',
+      notes: 'First notes',
+    });
+  });
+
+  it('keeps identical submission identities independent across accounts', async () => {
+    const firstUserId = await createUser();
+    const secondUserId = await createUser();
+    const captureId = unique('account-scoped-submission');
+
+    await Promise.all([
+      harness.enqueueCapture({
+        userId: firstUserId,
+        captureId,
+        title: 'First account',
+      }),
+      harness.enqueueCapture({
+        userId: secondUserId,
+        captureId,
+        title: 'Second account',
+      }),
+    ]);
+
+    await expect(
+      harness.readPendingCapture({ userId: firstUserId, captureId }),
+    ).resolves.toMatchObject({ title: 'First account' });
+    await expect(
+      harness.readPendingCapture({ userId: secondUserId, captureId }),
+    ).resolves.toMatchObject({ title: 'Second account' });
+  });
+
+  it('does not mistake a publication receipt for submission retry deduplication', async () => {
+    const userId = await createUser();
+    const captureId = unique('post-publication-submission');
+    const input = { userId, captureId, title: 'Published capture', notes: 'Original' };
+    await harness.enqueueCapture(input);
+    expect(
+      await publish(userId, captureId, makeTaskCandidate(userId, 0), 0),
+    ).toMatchObject({
+      status: 'published',
+    });
+
+    // Publication clears plaintext queue content. Until a real endpoint owns a
+    // stable request identity and comparison policy, it cannot decide whether
+    // this retry is the original request or a conflicting reuse of its ID.
+    await expect(harness.enqueueCapture(input)).rejects.toThrow(
+      `Capture ${captureId} is immutable once queued`,
+    );
+    expect(await harness.readCaptureReceipt({ userId, captureId })).not.toBeNull();
+    expect(await harness.countCaptureActorOperations({ userId })).toBe(1);
   });
 
   it('serializes competing candidates for one capture to one canonical operation', async () => {
@@ -346,14 +445,21 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
    * vector clock, which used to come from that row alone — so a pruned import
    * refused every future capture for the account. `uploadOps` now records the
    * accepted import's causal identity beside the seq, so the boundary outlives
-   * its row. This asserts the recovered availability AND that the boundary is
-   * still enforced: a candidate that does not descend from the pruned import is
-   * still rejected.
+   * its row. With an oversized clock, the newer repair drops the import author;
+   * publication must use that repair's baseline, just as ordinary sync does.
+   * A candidate prepared before both boundaries must still be rejected.
    */
-  it('still classifies against the replacement once its row has been pruned', async () => {
+  it.each([false, true])('publishes after repair (pruning=%s)', async (prune) => {
     const userId = await createUser();
     const importer = 'pruned-importer';
-    const importClock = { [importer]: 1 };
+    const importClock = {
+      ...(prune
+        ? Object.fromEntries(
+            Array.from({ length: 30 }, (_, i) => [`old-client-${i}`, 100 + i]),
+          )
+        : {}),
+      [importer]: 1,
+    };
     const importResult = await new SyncService().uploadOps(
       userId,
       importer,
@@ -408,6 +514,15 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
     );
     expect(repairResult[0]?.accepted).toBe(true);
     const repairSeq = repairResult[0].serverSeq!;
+    const storedRepair = await prisma.operation.findUniqueOrThrow({
+      where: { userId_serverSeq: { userId, serverSeq: repairSeq } },
+    });
+    const repairClock = storedRepair.vectorClock as Record<string, number>;
+    expect(repairClock[repairer]).toBe(1);
+    if (prune) {
+      expect(Object.keys(repairClock)).toHaveLength(20);
+      expect(repairClock[importer]).toBeUndefined();
+    }
 
     // What the retention sweep does: delete below the newest causal full-state
     // op. The import row goes; the pointer to it stays.
@@ -430,7 +545,9 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
     ).toBeNull();
     // The evidence the upload recorded beside the seq is what survives.
     expect(syncState.latestStateReplacementClientId).toBe(importer);
-    expect(syncState.latestStateReplacementVectorClock).toEqual(importClock);
+    expect(syncState.latestStateReplacementVectorClock).toMatchObject({
+      [importer]: 1,
+    });
 
     // A candidate that does NOT descend from the import must still be refused:
     // recovering availability must not turn the pruned boundary into no
@@ -448,17 +565,27 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
       error: 'Capture candidate does not include the latest state replacement',
     });
 
-    // A candidate that correctly descends from the import now publishes.
+    // A candidate prepared from the applied repair now publishes.
     const captureId = unique('pruned-replacement');
     await harness.enqueueCapture({ userId, captureId, title: 'Survives retention' });
     const candidate = makeTaskCandidate(userId, 0);
-    candidate.vectorClock = { ...candidate.vectorClock, ...importClock };
+    // Use the clock a client actually downloads and applies. The old import
+    // author can be absent after pruning; the repair is the current baseline.
+    candidate.vectorClock = { ...candidate.vectorClock, ...repairClock };
 
     expect(await publish(userId, captureId, candidate, 0, repairSeq)).toMatchObject({
       status: 'published',
     });
     expect(await harness.countCaptureActorOperations({ userId })).toBe(1);
     expect(await harness.readCaptureReceipt({ userId, captureId })).not.toBeNull();
+    const storedCapture = await prisma.operation.findUniqueOrThrow({
+      where: { id: candidate.id },
+    });
+    expect(storedCapture.vectorClock).toMatchObject({
+      [repairer]: 1,
+      [getAgentCaptureActorId(userId)]: 1,
+    });
+    if (prune) expect(Object.keys(storedCapture.vectorClock as object)).toHaveLength(20);
   });
 
   /**
@@ -595,6 +722,57 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
     });
   });
 
+  it('serializes a wipe behind publication before either path changes sync data', async () => {
+    const userId = await createUser();
+    const captureId = unique('wipe-publication-race');
+    await harness.enqueueCapture({ userId, captureId, title: 'Race with wipe' });
+    let releasePublication: (() => void) | undefined;
+    const publicationPaused = new Promise<void>((resolve) => {
+      releasePublication = resolve;
+    });
+    let generationRead: (() => void) | undefined;
+    const generationReadPromise = new Promise<void>((resolve) => {
+      generationRead = resolve;
+    });
+    const gatedHarness = createAgentCapturePublicationHarness(prisma, {
+      afterGenerationRead: async () => {
+        generationRead?.();
+        await publicationPaused;
+      },
+    });
+
+    const publishing = gatedHarness.publishCapture({
+      userId,
+      captureId,
+      candidate: makeTaskCandidate(userId, 0),
+      expectedCaptureCounter: 0,
+      lastKnownServerSeq: 0,
+      expectedDataGeneration: 0,
+    });
+    await generationReadPromise;
+
+    let wipeFinished = false;
+    const wiping = new SyncService().deleteAllUserData(userId).then(() => {
+      wipeFinished = true;
+    });
+    // The publication owns the account lock, so the wipe cannot delete rows
+    // while the candidate is paused after reading its generation.
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(wipeFinished).toBe(false);
+
+    releasePublication?.();
+    expect(await publishing).toMatchObject({ status: 'published' });
+    await wiping;
+
+    // The wipe started after the publication, so its delete observes and
+    // removes the accepted operation. Its terminal receipt remains terminal.
+    expect(await gatedHarness.countCaptureActorOperations({ userId })).toBe(0);
+    expect(await gatedHarness.readCaptureReceipt({ userId, captureId })).not.toBeNull();
+    expect(await prisma.user.findUniqueOrThrow({ where: { id: userId } })).toMatchObject({
+      syncDataGeneration: 1,
+    });
+  });
+
   /**
    * Why a monotonic counter and not a reset. The wipe destroys the capture
    * queue, the watermark and the sync state, so a cheaper fix — drop the queue
@@ -640,31 +818,141 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
   });
 
   /**
-   * The same binding from the other direction: an ordinary capture must still
-   * publish after a wipe once it is prepared against the CURRENT generation.
-   * Without this, "refuse after a wipe" could be satisfied by refusing forever,
-   * which is the availability failure the retention experiment already hit.
+   * Reading the current generation inside the wipe window says nothing about
+   * the key. The following control also requires successful encrypted delivery
+   * once the current baseline exists, rather than refusing every future capture.
    */
-  it('publishes a candidate prepared after the wipe', async () => {
+  it('refuses retired-key ciphertext prepared inside the wipe window', async () => {
     const userId = await createUser();
     await new SyncService().deleteAllUserData(userId);
+    const captureId = unique('inside-wipe');
+    const pending = await harness.enqueueCapture({
+      userId,
+      captureId,
+      title: 'During wipe',
+    });
+    expect(pending.dataGeneration).toBe(1);
+    const candidate = makeTaskCandidate(userId, 0);
+    const ciphertext = await encrypt(
+      JSON.stringify(candidate.payload),
+      'retired-capture-key',
+    );
+    candidate.payload = ciphertext;
+    candidate.isPayloadEncrypted = true;
+    await expect(decrypt(ciphertext, 'replacement-capture-key')).rejects.toThrow();
+
+    expect(
+      await publish(userId, captureId, candidate, 0, 0, pending.dataGeneration),
+    ).toMatchObject({ status: 'rejected' });
+    expect(await harness.readCaptureReceipt({ userId, captureId })).toBeNull();
+    expect(await harness.countCaptureActorOperations({ userId })).toBe(0);
+    expect(await harness.readPendingCapture({ userId, captureId })).not.toBeNull();
+  });
+
+  it('requires current key evidence after a wipe and preserves terminal receipts', async () => {
+    const userId = await createUser();
+    const sync = new SyncService();
+    await sync.deleteAllUserData(userId);
 
     const captureId = unique('post-wipe');
     await harness.enqueueCapture({ userId, captureId, title: 'Prepared after wipe' });
     const pending = await harness.readPendingCapture({ userId, captureId });
     expect(pending?.dataGeneration).toBe(1);
 
-    const result = await publish(
+    const key = 'replacement-capture-key';
+    const baseline = makeTaskCandidate(userId, 0, {
+      clientId: 'key-owner',
+      vectorClock: { 'key-owner': 1 },
+      actionType: '[SP_ALL] Load(import) all data',
+      opType: 'SYNC_IMPORT',
+      entityType: 'ALL',
+      entityId: undefined,
+      payload: await encrypt(JSON.stringify({ appDataComplete: { TASK: {} } }), key),
+      isPayloadEncrypted: true,
+    });
+    expect(
+      (await sync.uploadOps(userId, baseline.clientId, [baseline], true))[0].accepted,
+    ).toBe(true);
+    // Ordinary download supplies key evidence without advancing the app cursor.
+    const downloaded = (await sync.getOpsSinceWithSeq(userId, 0, undefined, 1)).ops[0];
+    await expect(decrypt(downloaded.op.payload as string, key)).resolves.toContain(
+      'appDataComplete',
+    );
+    const candidate = makeTaskCandidate(userId, 0, {
+      vectorClock: { ...baseline.vectorClock, [getAgentCaptureActorId(userId)]: 1 },
+    });
+    candidate.payload = await encrypt(JSON.stringify(candidate.payload), key);
+    candidate.isPayloadEncrypted = true;
+    const input = {
       userId,
       captureId,
-      makeTaskCandidate(userId, 0),
-      0,
-      0,
-      pending!.dataGeneration,
-    );
-
-    expect(result).toMatchObject({ status: 'published' });
+      candidate,
+      expectedCaptureCounter: 0,
+      lastKnownServerSeq: downloaded.serverSeq,
+      expectedDataGeneration: pending!.dataGeneration,
+    };
+    for (const verifiedEncryptionOpId of [undefined, unique('wrong-proof')]) {
+      expect(
+        await harness.publishCapture({ ...input, verifiedEncryptionOpId }),
+      ).toMatchObject({
+        status: 'rejected',
+        error: 'Capture requires verification of the current encrypted baseline',
+      });
+      expect(await harness.readCaptureReceipt({ userId, captureId })).toBeNull();
+      expect(await harness.countCaptureActorOperations({ userId })).toBe(0);
+    }
+    const verified = { ...input, verifiedEncryptionOpId: downloaded.op.id };
+    expect(await harness.publishCapture(verified)).toMatchObject({ status: 'published' });
     expect(await harness.countCaptureActorOperations({ userId })).toBe(1);
+
+    // A password replacement can preserve the generation AND causal clock.
+    // Its new baseline identity still invalidates proof for unpublished work.
+    const replacement = {
+      ...baseline,
+      id: unique('new-key-baseline'),
+      payload: await encrypt(
+        JSON.stringify({ appDataComplete: { TASK: {} } }),
+        'next-capture-key',
+      ),
+    };
+    const replacementResult = await sync.uploadOps(
+      userId,
+      replacement.clientId,
+      [replacement],
+      true,
+    );
+    expect(replacementResult[0].accepted).toBe(true);
+    expect(await harness.publishCapture(verified)).toMatchObject({
+      status: 'already_published',
+    });
+    const nextCaptureId = unique('stale-key-proof');
+    const next = await harness.enqueueCapture({
+      userId,
+      captureId: nextCaptureId,
+      title: 'Next',
+    });
+    expect(next.dataGeneration).toBe(pending!.dataGeneration);
+    expect(
+      await harness.publishCapture({
+        ...verified,
+        captureId: nextCaptureId,
+        // Satisfy the ordinary cursor fence to isolate the encryption evidence.
+        lastKnownServerSeq: replacementResult[0].serverSeq!,
+        expectedCaptureCounter: 1,
+        candidate: {
+          ...candidate,
+          id: unique('stale-key-candidate'),
+          vectorClock: { ...candidate.vectorClock, [getAgentCaptureActorId(userId)]: 2 },
+        },
+      }),
+    ).toMatchObject({
+      status: 'rejected',
+      error: 'Capture requires verification of the current encrypted baseline',
+    });
+    expect(
+      await harness.readCaptureReceipt({ userId, captureId: nextCaptureId }),
+    ).toBeNull();
+    expect(await harness.readPublicationWatermark({ userId })).toBe(1);
   });
 
   /**

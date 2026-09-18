@@ -19,7 +19,7 @@ import { SyncProviderManager } from '../sync-providers/provider-manager.service'
 import { WrappedProviderService } from '../sync-providers/wrapped-provider.service';
 import { OperationEncryptionService } from '../sync/operation-encryption.service';
 import { SyncOperation } from '../sync-providers/provider.interface';
-import { Operation, ActionType } from '../core/operation.types';
+import { Operation, ActionType, isFullStateOpType } from '../core/operation.types';
 import { CURRENT_SCHEMA_VERSION } from '../persistence/schema-migration.service';
 import { uuidv7 } from '../../util/uuid-v7';
 import { validateOperationPayload } from '../validation/validate-operation-payload';
@@ -37,6 +37,7 @@ interface AgentCaptureE2eHelpers {
     candidate: SyncOperation;
     lastKnownServerSeq: number;
     expectedCaptureCounter: number;
+    verifiedEncryptionOpId: string;
     taskId: string;
   }>;
   addCaptureTask: (
@@ -74,6 +75,20 @@ export const createAgentCaptureE2eHelpers = (
           .getOperationSyncCapable(provider, { fenceEpoch: epoch });
         if (!sync || sync.providerMode !== 'superSyncOps')
           throw new Error('Capture preparation requires SuperSync');
+        const key = await sync.getEncryptKey?.();
+        if (!key)
+          throw new Error('Encrypted capture experiment requires an encryption key');
+        // Read-only probe: never apply it or advance the download cursor. An
+        // empty server during an encryption wipe has no current key evidence.
+        const probe = (await sync.downloadOps(0, undefined, 1)).ops[0]?.op;
+        if (
+          !probe?.isPayloadEncrypted ||
+          !isFullStateOpType(probe.opType) ||
+          (probe.opType === 'REPAIR' && probe.repairBaseServerSeq === undefined)
+        )
+          throw new Error('Capture preparation requires a current encrypted baseline');
+        const encryption = injector.get(OperationEncryptionService);
+        await encryption.decryptOperation(probe, key);
         const prepared = await flush.flushThenRunExclusive(async () => {
           manager.assertSyncEpochUnchanged(epoch, 'capture preparation');
           opLogStore.clearVectorClockCache();
@@ -130,16 +145,12 @@ export const createAgentCaptureE2eHelpers = (
             expectedCaptureCounter: input.publisherCounter,
           };
         });
-        const key = await sync.getEncryptKey?.();
-        if (!key)
-          throw new Error('Encrypted capture experiment requires an encryption key');
-        const [candidate] = await injector
-          .get(OperationEncryptionService)
-          .encryptOperations([prepared.candidate], key);
+        // Use exactly the key that authenticated the current baseline.
+        const [candidate] = await encryption.encryptOperations([prepared.candidate], key);
         manager.assertSyncEpochUnchanged(epoch, 'capture preparation complete');
         // No dispatch, local log append, own-clock reservation, or cursor update.
         // The test publisher owns the virtual actor's counter transactionally.
-        return { ...prepared, candidate };
+        return { ...prepared, candidate, verifiedEncryptionOpId: probe.id };
       } finally {
         cycle.end();
       }

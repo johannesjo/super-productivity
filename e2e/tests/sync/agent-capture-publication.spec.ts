@@ -9,12 +9,15 @@ import {
   deleteTask,
   getSuperSyncConfig,
   renameTask,
+  parseSuperSyncRequestBody,
+  routeSuperSyncOps,
   waitForTask,
   type SimulatedE2EClient,
 } from '../../utils/supersync-helpers';
 import { waitForAppReady } from '../../utils/waits';
-import { classifyOpAgainstSyncImport } from '@sp/sync-core';
+import { classifyOpAgainstSyncImport, decrypt, encrypt } from '@sp/sync-core';
 import { PrismaClient } from '@prisma/client';
+import { SyncService } from '../../../packages/super-sync-server/src/sync/sync.service';
 import type { Operation } from '../../../packages/super-sync-server/src/sync/sync.types';
 import {
   createAgentCapturePublicationHarness,
@@ -27,6 +30,7 @@ interface PreparedCapture {
   candidate: Operation;
   lastKnownServerSeq: number;
   expectedCaptureCounter: number;
+  verifiedEncryptionOpId: string;
   taskId: string;
 }
 
@@ -198,158 +202,526 @@ const importBackupAndSync = async (
 test.describe('@supersync Agent-capture publication feasibility', () => {
   test.skip(!DATABASE_URL, 'requires the isolated SuperSync PostgreSQL DATABASE_URL');
 
-  test('publishes an encrypted capture once after a lost response and never recreates a deleted task', async ({
+  for (const closeDuringProbe of [true, false]) {
+    test(`preserves local writes when the active tab closes ${closeDuringProbe ? 'during' : 'after'} preparation`, async ({
+      browser,
+      baseURL,
+      testRunId,
+    }) => {
+      const prisma = new PrismaClient();
+      const harness = createAgentCapturePublicationHarness(prisma);
+      let client: SimulatedE2EClient | null = null;
+      let releaseProbe = (): void => undefined;
+      try {
+        await harness.initialize();
+        const user = await createTestUser(`${testRunId}-capture-interruption`);
+        client = await createSimulatedClient(browser, baseURL!, 'Interrupted', testRunId);
+        await client.sync.setupSuperSync(getSuperSyncConfig(user));
+        await client.sync.syncAndWait();
+        const blockBackgroundSync = (): void => {
+          const flags = globalThis as typeof globalThis & {
+            __SP_E2E_BLOCK_AUTO_SYNC?: boolean;
+            __SP_E2E_BLOCK_IMMEDIATE_UPLOAD?: boolean;
+            __SP_E2E_BLOCK_WS_DOWNLOAD?: boolean;
+          };
+          flags.__SP_E2E_BLOCK_AUTO_SYNC = true;
+          flags.__SP_E2E_BLOCK_IMMEDIATE_UPLOAD = true;
+          flags.__SP_E2E_BLOCK_WS_DOWNLOAD = true;
+        };
+        await client.context.addInitScript(blockBackgroundSync);
+        await client.page.evaluate(blockBackgroundSync);
+        const captureId = `interrupted-${testRunId}`;
+        const title = `Interrupted capture ${testRunId}`;
+        const pending = await harness.enqueueCapture({
+          userId: user.userId,
+          captureId,
+          title,
+        });
+        const actor = getAgentCaptureActorId(user.userId);
+        const input = {
+          captureId,
+          title,
+          publisherClientId: actor,
+          publisherCounter: pending.captureCounter,
+        };
+        const before = await readPreparationPersistence(client);
+        const cursor = await readCursor(client);
+        const page = client.page;
+        let probeArrived = (): void => undefined;
+        const probeSeen = new Promise<void>((resolve) => {
+          probeArrived = resolve;
+        });
+        const probeReleased = new Promise<void>((resolve) => {
+          releaseProbe = resolve;
+        });
+        // Delay the actual HTTP request; no fabricated response or storage seam.
+        await routeSuperSyncOps(page, async (route) => {
+          const url = new URL(route.request().url());
+          if (
+            url.searchParams.get('sinceSeq') === '0' &&
+            url.searchParams.get('limit') === '1'
+          ) {
+            probeArrived();
+            await probeReleased;
+          }
+          if (!page.isClosed()) await route.continue();
+        });
+        const preparing = page
+          .evaluate(
+            (value) =>
+              (
+                window as unknown as {
+                  __e2eTestHelpers: {
+                    prepareCapturePublication: (
+                      args: typeof value,
+                    ) => Promise<PreparedCapture>;
+                  };
+                }
+              ).__e2eTestHelpers.prepareCapturePublication(value),
+            input,
+          )
+          .then(
+            (prepared) => ({ prepared }),
+            (error: unknown) => ({ error: String(error) }),
+          );
+        await probeSeen;
+        const localTitle = `Local edit during preparation ${testRunId}`;
+        await client.workView.addTask(localTitle);
+        await page.evaluate(() =>
+          (
+            window as unknown as {
+              __e2eTestHelpers: {
+                flushPendingWrites: () => Promise<void>;
+              };
+            }
+          ).__e2eTestHelpers.flushPendingWrites(),
+        );
+        const afterWrite = await readPreparationPersistence(client);
+        expect(afterWrite.operationIds.length).toBeGreaterThan(
+          before.operationIds.length,
+        );
+        expect(afterWrite.clock[actor]).toBeUndefined();
+        if (!closeDuringProbe) {
+          releaseProbe();
+          const outcome = await preparing;
+          if ('error' in outcome) throw new Error(outcome.error);
+          expect(outcome.prepared.candidate.vectorClock).toEqual({
+            ...afterWrite.clock,
+            [actor]: 1,
+          });
+          expect(outcome.prepared.lastKnownServerSeq).toBe(cursor);
+          expect(await readPreparationPersistence(client)).toEqual(afterWrite);
+          expect(await readCursor(client)).toBe(cursor);
+        }
+        await page.close();
+        releaseProbe();
+        if (closeDuringProbe) {
+          expect(await preparing).toMatchObject({
+            error: expect.stringMatching(/closed|destroyed/),
+          });
+        }
+        expect(
+          await harness.readCaptureReceipt({ userId: user.userId, captureId }),
+        ).toBeNull();
+        expect(await harness.readPublicationWatermark({ userId: user.userId })).toBe(0);
+        expect(await harness.countCaptureActorOperations({ userId: user.userId })).toBe(
+          0,
+        );
+
+        // Reopen the same storage with the normal single-instance check intact.
+        client.page = await client.context.newPage();
+        await client.page.goto(baseURL!);
+        await waitForAppReady(client.page);
+        client.workView = new WorkViewPage(client.page, `Reopened-${testRunId}`);
+        client.sync = new SuperSyncPage(client.page);
+        await waitForTask(client.page, localTitle);
+        expect(await readCaptureState(client, `capture-${captureId}`)).toEqual({
+          task: null,
+          projects: [],
+        });
+        expect((await readPreparationPersistence(client)).clock[actor]).toBeUndefined();
+        expect(await readCursor(client)).toBe(cursor);
+        const retry = await harness.readPendingCapture({
+          userId: user.userId,
+          captureId,
+        });
+        expect(retry?.captureCounter).toBe(0);
+        const prepared = await prepareCapture({
+          client,
+          ...input,
+          dataGeneration: retry!.dataGeneration,
+        });
+        expect(
+          await harness.publishCapture({ userId: user.userId, captureId, ...prepared }),
+        ).toMatchObject({ status: 'published' });
+        await client.sync.syncAndWait();
+        expect((await readCaptureState(client, prepared.taskId)).task?.title).toBe(title);
+        await waitForTask(client.page, localTitle);
+        expect(await harness.countCaptureActorOperations({ userId: user.userId })).toBe(
+          1,
+        );
+      } finally {
+        releaseProbe();
+        if (client?.page.isClosed()) await client.context.close();
+        else if (client) await closeClient(client);
+        await prisma.$disconnect();
+      }
+    });
+  }
+
+  test('keeps captures pending through an encryption wipe and a retired-key preparation', async ({
     browser,
     baseURL,
     testRunId,
   }) => {
-    test.setTimeout(240000);
-    const appUrl = baseURL || 'http://localhost:4242';
-    const prisma = new PrismaClient({ datasources: { db: { url: DATABASE_URL } } });
-    const harness: CapturePublicationHarness =
-      createAgentCapturePublicationHarness(prisma);
-    let clientA: SimulatedE2EClient | null = null;
-    let clientB: SimulatedE2EClient | null = null;
-    const title = `Agent capture ${testRunId}`;
-
+    const prisma = new PrismaClient();
+    const harness = createAgentCapturePublicationHarness(prisma);
+    const sync = new SyncService();
+    let oldClient: SimulatedE2EClient | null = null;
+    let currentClient: SimulatedE2EClient | null = null;
     try {
-      await prisma.$connect();
       await harness.initialize();
-      const user = await createTestUser(`${testRunId}-capture-publication`);
-      const syncConfig = getSuperSyncConfig(user);
-      const captureId = `capture-${testRunId}`;
-      const captureActorId = getAgentCaptureActorId(user.userId);
+      const user = await createTestUser(`${testRunId}-capture-key`);
+      const config = getSuperSyncConfig(user);
+      oldClient = await createSimulatedClient(browser, baseURL!, 'Old-key', testRunId);
+      await oldClient.sync.setupSuperSync(config);
+      await oldClient.sync.syncAndWait();
+      const oldBaseline = (await sync.getOpsSinceWithSeq(user.userId, 0, undefined, 1))
+        .ops[0].op;
+      expect(oldBaseline.isPayloadEncrypted).toBe(true);
+      expect(oldBaseline.opType).toBe('SYNC_IMPORT');
+      const plaintext = await decrypt(oldBaseline.payload as string, config.password!);
+      const currentKey = 'capture-replacement-encryption-key';
+      await sync.deleteAllUserData(user.userId);
 
-      clientA = await createSimulatedClient(browser, appUrl, 'Capture-A', testRunId);
-      await clientA.sync.setupSuperSync(syncConfig);
-      clientB = await createSimulatedClient(browser, appUrl, 'Capture-B', testRunId);
-      await clientB.sync.setupSuperSync(syncConfig);
-      await clientA.sync.syncAndWait();
-      await clientB.sync.syncAndWait();
-
+      const captureId = `key-capture-${testRunId}`;
+      const title = `After key change ${testRunId}`;
       const pending = await harness.enqueueCapture({
         userId: user.userId,
         captureId,
         title,
       });
-      const watermark = await harness.readPublicationWatermark({ userId: user.userId });
-      expect(pending.captureCounter).toBe(watermark);
-
-      const [preparedA, preparedB] = await Promise.all([
-        prepareCapture({
-          client: clientA,
-          captureId,
-          title,
-          publisherClientId: captureActorId,
-          publisherCounter: watermark,
-          dataGeneration: pending.dataGeneration,
-        }),
-        prepareCapture({
-          client: clientB,
-          captureId,
-          title,
-          publisherClientId: captureActorId,
-          publisherCounter: watermark,
-          dataGeneration: pending.dataGeneration,
-        }),
-      ]);
-      // Competing independently prepared tasks have never entered either store.
-      // Ignore both commit responses, then recover via the durable receipt.
-      await Promise.all([
-        harness.publishCapture({ userId: user.userId, captureId, ...preparedA }),
-        harness.publishCapture({ userId: user.userId, captureId, ...preparedB }),
-      ]);
-
-      const receipt = await harness.readCaptureReceipt({
-        userId: user.userId,
+      const input = {
         captureId,
-      });
-      expect(receipt).not.toBeNull();
-      expect(await harness.countPublishedCaptures({ userId: user.userId })).toBe(1);
-      expect(await harness.countCaptureActorOperations({ userId: user.userId })).toBe(1);
-      const storedOperation = await prisma.operation.findUnique({
-        where: { id: receipt!.opId },
-        select: { isPayloadEncrypted: true, payload: true },
-      });
-      expect(storedOperation?.isPayloadEncrypted).toBe(true);
-      expect(typeof storedOperation?.payload).toBe('string');
-      expect(JSON.stringify(storedOperation?.payload)).not.toContain(title);
-
-      // A normal edit/upload of the delivered task occurs before app restart and
-      // receipt retry. The retry must not overwrite that later user change.
-      await clientA.sync.syncAndWait();
-      await clientB.sync.syncAndWait();
-      expect(await readCaptureState(clientA, preparedA.taskId)).toEqual(
-        await readCaptureState(clientB, preparedA.taskId),
+        title,
+        publisherClientId: getAgentCaptureActorId(user.userId),
+        publisherCounter: pending.captureCounter,
+        dataGeneration: pending.dataGeneration,
+      };
+      const before = await readPreparationPersistence(oldClient);
+      const cursor = await readCursor(oldClient);
+      await expect(prepareCapture({ client: oldClient, ...input })).rejects.toThrow(
+        'current encrypted baseline',
       );
-      expect(await readCursor(clientA)).toBeGreaterThanOrEqual(receipt!.serverSeq);
-      expect(await readCursor(clientB)).toBeGreaterThanOrEqual(receipt!.serverSeq);
-      expect((await readCaptureState(clientA, preparedA.taskId)).task?.title).toBe(title);
-      await Promise.all([
-        clientA.page.goto('/#/project/INBOX_PROJECT/tasks'),
-        clientB.page.goto('/#/project/INBOX_PROJECT/tasks'),
-      ]);
-      await waitForTask(clientA.page, title);
-      const editedTitle = `${title} after local edit`;
-      await renameTask(clientA, title, editedTitle);
-      await clientA.sync.syncAndWait();
-      await clientA.page.reload({ waitUntil: 'domcontentloaded', timeout: 60000 });
-      await waitForAppReady(clientA.page);
 
-      const restartedHarness = createAgentCapturePublicationHarness(prisma);
-      const retry = await restartedHarness.publishCapture({
-        userId: user.userId,
-        captureId,
-        ...preparedB,
-      });
-      expect(retry.status).toBe('already_published');
+      // Complete the wipe with real, valid full-state ciphertext under the new
+      // key. Deliberately retain the clock: causal knowledge alone is not key evidence.
+      const currentBaseline = {
+        ...oldBaseline,
+        id: `key-baseline-${testRunId}`,
+        payload: await encrypt(plaintext, currentKey),
+      };
+      const uploaded = await sync.uploadOps(
+        user.userId,
+        currentBaseline.clientId,
+        [currentBaseline],
+        true,
+      );
+      expect(uploaded[0].accepted).toBe(true);
+      await expect(prepareCapture({ client: oldClient, ...input })).rejects.toThrow(
+        'Failed to decrypt operation payload',
+      );
+      expect(await readPreparationPersistence(oldClient)).toEqual(before);
+      expect(await readCursor(oldClient)).toBe(cursor);
       expect(
-        await restartedHarness.countCaptureActorOperations({ userId: user.userId }),
-      ).toBe(1);
+        await harness.readCaptureReceipt({ userId: user.userId, captureId }),
+      ).toBeNull();
+      expect(await harness.countCaptureActorOperations({ userId: user.userId })).toBe(0);
+      expect(
+        await harness.readPendingCapture({ userId: user.userId, captureId }),
+      ).not.toBeNull();
 
-      await clientA.sync.syncAndWait();
-      await clientB.sync.syncAndWait();
-      await Promise.all([
-        waitForTask(clientA.page, editedTitle),
-        waitForTask(clientB.page, editedTitle),
-      ]);
-      await expect(clientA.page.locator('task', { hasText: editedTitle })).toHaveCount(1);
-      await expect(clientB.page.locator('task', { hasText: editedTitle })).toHaveCount(1);
-
-      await deleteTask(clientA, editedTitle);
-      await clientA.sync.syncAndWait();
-      await clientB.sync.syncAndWait();
-      await expect(clientA.page.locator('task', { hasText: editedTitle })).toHaveCount(0);
-      await expect(clientB.page.locator('task', { hasText: editedTitle })).toHaveCount(0);
-      await expect(clientA.page.locator('task', { hasText: title })).toHaveCount(0);
-      await expect(clientB.page.locator('task', { hasText: title })).toHaveCount(0);
-      expect(await readCaptureState(clientA, preparedA.taskId)).toEqual({
-        task: null,
-        projects: [],
-      });
-      expect(await readCaptureState(clientB, preparedA.taskId)).toEqual({
-        task: null,
-        projects: [],
-      });
-
-      const lateRetry = await restartedHarness.publishCapture({
-        userId: user.userId,
-        captureId,
-        ...preparedA,
-      });
-      expect(lateRetry.status).toBe('already_published');
-      await clientA.sync.syncAndWait();
-      await clientB.sync.syncAndWait();
-      // The original title also matches the edited title and catches a replay
-      // that resurrects the task with its original contents.
-      await expect(clientA.page.locator('task', { hasText: title })).toHaveCount(0);
-      await expect(clientB.page.locator('task', { hasText: title })).toHaveCount(0);
+      currentClient = await createSimulatedClient(
+        browser,
+        baseURL!,
+        'Current-key',
+        testRunId,
+      );
+      await currentClient.sync.setupSuperSync({ ...config, password: currentKey });
+      const prepared = await prepareCapture({ client: currentClient, ...input });
+      expect(prepared.verifiedEncryptionOpId).toBe(currentBaseline.id);
+      expect(
+        await harness.publishCapture({ userId: user.userId, captureId, ...prepared }),
+      ).toMatchObject({ status: 'published' });
+      await currentClient.sync.syncAndWait();
+      expect((await readCaptureState(currentClient, prepared.taskId)).task?.title).toBe(
+        title,
+      );
     } finally {
-      if (clientA) await closeClient(clientA);
-      if (clientB) await closeClient(clientB);
+      if (oldClient) await closeClient(oldClient);
+      if (currentClient) await closeClient(currentClient);
       await prisma.$disconnect();
     }
   });
+
+  for (const clockPressure of [false, true]) {
+    test(`publishes an encrypted capture once after a lost response and never recreates a deleted task${clockPressure ? ' with client clock pruning' : ''}`, async ({
+      browser,
+      baseURL,
+      testRunId,
+    }) => {
+      test.setTimeout(240000);
+      const appUrl = baseURL || 'http://localhost:4242';
+      const prisma = new PrismaClient({ datasources: { db: { url: DATABASE_URL } } });
+      const harness: CapturePublicationHarness =
+        createAgentCapturePublicationHarness(prisma);
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+      const title = `Agent capture ${testRunId}`;
+
+      try {
+        await prisma.$connect();
+        await harness.initialize();
+        const user = await createTestUser(`${testRunId}-capture-publication`);
+        const syncConfig = getSuperSyncConfig(user);
+        const captureId = `capture-${testRunId}`;
+        const captureActorId = getAgentCaptureActorId(user.userId);
+
+        clientA = await createSimulatedClient(browser, appUrl, 'Capture-A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+        clientB = await createSimulatedClient(browser, appUrl, 'Capture-B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+        await clientA.sync.syncAndWait();
+        await clientB.sync.syncAndWait();
+
+        if (clockPressure) {
+          // Seed retained history from 21 identities, not 21 live browsers. Each
+          // task has a genuine encrypted app payload and uses ordinary server upload.
+          for (const client of [clientA, clientB]) {
+            const blockBackgroundSync = (): void => {
+              const flags = globalThis as typeof globalThis & {
+                __SP_E2E_BLOCK_AUTO_SYNC?: boolean;
+                __SP_E2E_BLOCK_IMMEDIATE_UPLOAD?: boolean;
+                __SP_E2E_BLOCK_WS_DOWNLOAD?: boolean;
+              };
+              flags.__SP_E2E_BLOCK_AUTO_SYNC = true;
+              flags.__SP_E2E_BLOCK_IMMEDIATE_UPLOAD = true;
+              flags.__SP_E2E_BLOCK_WS_DOWNLOAD = true;
+            };
+            await client.context.addInitScript(blockBackgroundSync);
+            await client.page.evaluate(blockBackgroundSync);
+          }
+          const sync = new SyncService();
+          let historyClock: Record<string, number> = {};
+          for (let i = 0; i < 21; i++) {
+            const seed = await prepareCapture({
+              client: clientA,
+              captureId: `clock-history-${i}-${testRunId}`,
+              title: `Clock history ${i}`,
+              publisherClientId: `history-device-${i}`,
+              publisherCounter: 100 + i,
+              dataGeneration: 0,
+            });
+            historyClock = { ...seed.candidate.vectorClock, ...historyClock };
+            const results = await sync.uploadOps(user.userId, seed.candidate.clientId, [
+              { ...seed.candidate, vectorClock: { ...historyClock } },
+            ]);
+            expect(results[0].accepted).toBe(true);
+          }
+          expect(Object.keys(historyClock).length).toBeGreaterThan(20);
+          await clientA.sync.syncAndWait();
+          await clientB.sync.syncAndWait();
+          for (const client of [clientA, clientB]) {
+            expect(
+              Object.keys((await readPreparationPersistence(client)).clock),
+            ).toHaveLength(20);
+          }
+        }
+
+        const pending = await harness.enqueueCapture({
+          userId: user.userId,
+          captureId,
+          title,
+        });
+        const watermark = await harness.readPublicationWatermark({ userId: user.userId });
+        expect(pending.captureCounter).toBe(watermark);
+
+        const [preparedA, preparedB] = await Promise.all([
+          prepareCapture({
+            client: clientA,
+            captureId,
+            title,
+            publisherClientId: captureActorId,
+            publisherCounter: watermark,
+            dataGeneration: pending.dataGeneration,
+          }),
+          prepareCapture({
+            client: clientB,
+            captureId,
+            title,
+            publisherClientId: captureActorId,
+            publisherCounter: watermark,
+            dataGeneration: pending.dataGeneration,
+          }),
+        ]);
+        // Competing independently prepared tasks have never entered either store.
+        // Ignore both commit responses, then recover via the durable receipt.
+        await Promise.all([
+          harness.publishCapture({ userId: user.userId, captureId, ...preparedA }),
+          harness.publishCapture({ userId: user.userId, captureId, ...preparedB }),
+        ]);
+
+        const receipt = await harness.readCaptureReceipt({
+          userId: user.userId,
+          captureId,
+        });
+        expect(receipt).not.toBeNull();
+        expect(await harness.countPublishedCaptures({ userId: user.userId })).toBe(1);
+        expect(await harness.countCaptureActorOperations({ userId: user.userId })).toBe(
+          1,
+        );
+        const storedOperation = await prisma.operation.findUnique({
+          where: { id: receipt!.opId },
+          select: { isPayloadEncrypted: true, payload: true },
+        });
+        expect(storedOperation?.isPayloadEncrypted).toBe(true);
+        expect(typeof storedOperation?.payload).toBe('string');
+        expect(JSON.stringify(storedOperation?.payload)).not.toContain(title);
+
+        // A normal edit/upload of the delivered task occurs before app restart and
+        // receipt retry. The retry must not overwrite that later user change.
+        await clientA.sync.syncAndWait();
+        await clientB.sync.syncAndWait();
+        expect(await readCaptureState(clientA, preparedA.taskId)).toEqual(
+          await readCaptureState(clientB, preparedA.taskId),
+        );
+        expect(await readCursor(clientA)).toBeGreaterThanOrEqual(receipt!.serverSeq);
+        expect(await readCursor(clientB)).toBeGreaterThanOrEqual(receipt!.serverSeq);
+        expect((await readCaptureState(clientA, preparedA.taskId)).task?.title).toBe(
+          title,
+        );
+        await Promise.all([
+          clientA.page.goto('/#/project/INBOX_PROJECT/tasks'),
+          clientB.page.goto('/#/project/INBOX_PROJECT/tasks'),
+        ]);
+        await waitForTask(clientA.page, title);
+        const editUploads: {
+          clock: Record<string, number>;
+          accepted: boolean;
+          errorCode?: string;
+        }[] = [];
+        if (clockPressure) {
+          for (const client of [clientA, clientB]) {
+            const clock = (await readPreparationPersistence(client)).clock;
+            expect(Object.keys(clock)).toHaveLength(20);
+            expect(clock[captureActorId]).toBeUndefined();
+          }
+          // Observe genuine server responses without altering requests or results.
+          await routeSuperSyncOps(clientA.page, async (route) => {
+            if (route.request().method() !== 'POST') {
+              await route.continue();
+              return;
+            }
+            const body = parseSuperSyncRequestBody<{ ops: Operation[] }>(route.request());
+            const response = await route.fetch();
+            const json = (await response.json()) as {
+              results: { opId: string; accepted: boolean; errorCode?: string }[];
+            };
+            for (const op of body.ops.filter(
+              (entry) => entry.entityId === preparedA.taskId,
+            )) {
+              const result = json.results.find((entry) => entry.opId === op.id);
+              if (result) editUploads.push({ clock: op.vectorClock, ...result });
+            }
+            await route.fulfill({ response });
+          });
+        }
+        const editedTitle = `${title} after local edit`;
+        await renameTask(clientA, title, editedTitle);
+        await clientA.sync.syncAndWait();
+        if (clockPressure) {
+          expect(
+            editUploads.some(
+              (upload) =>
+                upload.clock[captureActorId] === undefined &&
+                upload.errorCode === 'CONFLICT_CONCURRENT',
+            ),
+          ).toBe(true);
+          expect(
+            editUploads.some(
+              (upload) =>
+                upload.clock[captureActorId] === 1 &&
+                Object.keys(upload.clock).length > 20 &&
+                upload.accepted,
+            ),
+          ).toBe(true);
+        }
+        await clientA.page.reload({ waitUntil: 'domcontentloaded', timeout: 60000 });
+        await waitForAppReady(clientA.page);
+
+        const restartedHarness = createAgentCapturePublicationHarness(prisma);
+        const retry = await restartedHarness.publishCapture({
+          userId: user.userId,
+          captureId,
+          ...preparedB,
+        });
+        expect(retry.status).toBe('already_published');
+        expect(
+          await restartedHarness.countCaptureActorOperations({ userId: user.userId }),
+        ).toBe(1);
+
+        await clientA.sync.syncAndWait();
+        await clientB.sync.syncAndWait();
+        await Promise.all([
+          waitForTask(clientA.page, editedTitle),
+          waitForTask(clientB.page, editedTitle),
+        ]);
+        await expect(clientA.page.locator('task', { hasText: editedTitle })).toHaveCount(
+          1,
+        );
+        await expect(clientB.page.locator('task', { hasText: editedTitle })).toHaveCount(
+          1,
+        );
+
+        await deleteTask(clientA, editedTitle);
+        await clientA.sync.syncAndWait();
+        await clientB.sync.syncAndWait();
+        await expect(clientA.page.locator('task', { hasText: editedTitle })).toHaveCount(
+          0,
+        );
+        await expect(clientB.page.locator('task', { hasText: editedTitle })).toHaveCount(
+          0,
+        );
+        await expect(clientA.page.locator('task', { hasText: title })).toHaveCount(0);
+        await expect(clientB.page.locator('task', { hasText: title })).toHaveCount(0);
+        expect(await readCaptureState(clientA, preparedA.taskId)).toEqual({
+          task: null,
+          projects: [],
+        });
+        expect(await readCaptureState(clientB, preparedA.taskId)).toEqual({
+          task: null,
+          projects: [],
+        });
+
+        const lateRetry = await restartedHarness.publishCapture({
+          userId: user.userId,
+          captureId,
+          ...preparedA,
+        });
+        expect(lateRetry.status).toBe('already_published');
+        await clientA.sync.syncAndWait();
+        await clientB.sync.syncAndWait();
+        // The original title also matches the edited title and catches a replay
+        // that resurrects the task with its original contents.
+        await expect(clientA.page.locator('task', { hasText: title })).toHaveCount(0);
+        await expect(clientB.page.locator('task', { hasText: title })).toHaveCount(0);
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+        await prisma.$disconnect();
+      }
+    });
+  }
 
   for (const useImportingDevice of [true, false]) {
     test(

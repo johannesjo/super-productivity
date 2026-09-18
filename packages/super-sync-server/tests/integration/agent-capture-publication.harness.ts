@@ -14,7 +14,12 @@
  */
 import { Prisma, PrismaClient } from '@prisma/client';
 import { classifyOpAgainstSyncImport, type VectorClock } from '@sp/sync-core';
-import { Operation, UploadResult } from '../../src/sync/sync.types';
+import {
+  latestCausalFullStateSql,
+  LatestCausalFullStateRow,
+  Operation,
+  UploadResult,
+} from '../../src/sync/sync.types';
 import { SyncService } from '../../src/sync/sync.service';
 
 const ACCOUNT_TABLE = 'agent_capture_spike_accounts';
@@ -80,6 +85,8 @@ export interface CapturePublicationHarness {
     expectedCaptureCounter: number;
     /** The `dataGeneration` the candidate was prepared under. */
     expectedDataGeneration: number;
+    /** Encrypted candidates must authenticate this current full-state op locally. */
+    verifiedEncryptionOpId?: string;
   }): Promise<PublishCaptureResult>;
   readCaptureReceipt(input: {
     userId: number;
@@ -99,6 +106,8 @@ const isRetryableUploadResult = (result: UploadResult | undefined): boolean =>
 export const createAgentCapturePublicationHarness = (
   prisma: PrismaClient,
   options: {
+    /** Test-only barrier after the account generation has been read under its lock. */
+    afterGenerationRead?: () => Promise<void> | void;
     /** Test-only failure point: runs after the real op insert and before receipt persistence. */
     afterOperationAccepted?: () => Promise<void> | void;
     /** Test-only failure point: runs after receipt writes but before transaction commit. */
@@ -199,6 +208,10 @@ export const createAgentCapturePublicationHarness = (
         // would pass a candidate carrying ciphertext from the retired
         // encryption context. This is the only fence that survives the wipe,
         // because the counter lives on the user row.
+        // Match the ordinary upload/reset lock order. This synchronizes the
+        // generation read with a wipe without taking `users` ahead of the
+        // upload path's existing `user_sync_state` lock.
+        await this.lockUserSyncStateForUpdate(tx, input.userId);
         const user = await tx.user.findUniqueOrThrow({
           where: { id: input.userId },
           select: { syncDataGeneration: true },
@@ -210,6 +223,7 @@ export const createAgentCapturePublicationHarness = (
           };
           return undefined as T;
         }
+        await options.afterGenerationRead?.();
         await ensureAccountRow(tx, input.userId);
         const account = await readAccountForUpdate(tx, input.userId);
         const capture = await readQueueForUpdate(tx, input.userId, input.captureId);
@@ -289,11 +303,19 @@ export const createAgentCapturePublicationHarness = (
             latestStateReplacementVectorClock: true,
           },
         });
-        if (syncState.latestStateReplacementSeq) {
-          // Prefer the evidence recorded beside the seq: retention deletes below
-          // the newest CAUSAL full-state op, which can be a later REPAIR, so the
-          // import's own row may be gone while it is still the boundary.
+        const [latestFullState] = await tx.$queryRaw<LatestCausalFullStateRow[]>(
+          latestCausalFullStateSql(input.userId),
+        );
+        // A causal repair supersedes the import as the applied-state baseline.
+        // Pruning protects that repair's author, not the older import's author.
+        // Never fall back to a retained row older than the replacement fence.
+        const baselineSeq = Math.max(
+          syncState.latestStateReplacementSeq ?? 0,
+          latestFullState?.server_seq ?? 0,
+        );
+        if (baselineSeq) {
           const replacement =
+            baselineSeq === syncState.latestStateReplacementSeq &&
             syncState.latestStateReplacementClientId !== null &&
             syncState.latestStateReplacementVectorClock !== null
               ? {
@@ -304,7 +326,7 @@ export const createAgentCapturePublicationHarness = (
                   where: {
                     userId_serverSeq: {
                       userId: input.userId,
-                      serverSeq: syncState.latestStateReplacementSeq,
+                      serverSeq: baselineSeq,
                     },
                   },
                   select: { clientId: true, vectorClock: true },
@@ -328,6 +350,29 @@ export const createAgentCapturePublicationHarness = (
               ? 'Capture candidate does not include the latest state replacement'
               : undefined;
           if (error) {
+            this.publication.rejection = { status: 'rejected', error };
+            throw new Error(error);
+          }
+        }
+
+        if (input.candidate.isPayloadEncrypted) {
+          // The client decrypted this baseline with the SAME key used for the
+          // candidate. Recheck its identity under the upload's replacement lock:
+          // the generation alone also passes a retired-key read inside a wipe.
+          const baseline = baselineSeq
+            ? await tx.operation.findUnique({
+                where: {
+                  userId_serverSeq: { userId: input.userId, serverSeq: baselineSeq },
+                },
+                select: { id: true, isPayloadEncrypted: true },
+              })
+            : null;
+          if (
+            !baseline?.isPayloadEncrypted ||
+            baseline.id !== input.verifiedEncryptionOpId
+          ) {
+            const error =
+              'Capture requires verification of the current encrypted baseline';
             this.publication.rejection = { status: 'rejected', error };
             throw new Error(error);
           }

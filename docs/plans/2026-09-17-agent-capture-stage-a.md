@@ -485,7 +485,9 @@ current fixtures prepare after successful sync. The fallback also scans the
 retained log on each preparation; its cost has not been benchmarked.
 Failed/rejected full-state application is now reproduced and fixed — see the
 baseline experiment below; preparation reads an applied baseline instead.
-Same-tab cycle exclusion also does not settle cross-tab cursor races.
+Same-tab cycle exclusion does not settle cross-tab cursor races; simultaneous
+active browser tabs are outside the supported scope (see the single-instance
+experiment below).
 Account/key changes after preparation, virtual-device lifecycle/version reporting,
 and power-loss recovery remain open. A missing retained replacement row refuses
 publication; the retention experiment below reproduces that and records the
@@ -545,8 +547,8 @@ now has no callers again, as before this experiment. The publication E2E suite w
 not re-run against the new gate; its fixtures prepare after a successful sync, so
 the gate should be open, but that is unverified.
 
-Still open and unchanged by this: account/key changes after preparation,
-cross-tab cursor races, and power-loss recovery.
+Still open at this stage: account/key changes after preparation and power-loss
+recovery. Cross-tab cursor races are outside the supported single-instance scope.
 
 ### Replacement retention experiment (2026-09-17): reproduced, then fixed
 
@@ -632,6 +634,31 @@ deduplicating publication of one capture does not establish deduplication of
 separate assistant submissions. See the
 [MCP message specification](https://modelcontextprotocol.io/specification/2025-11-25/basic).
 
+### Submission retry identity characterization (2026-09-18)
+
+The PostgreSQL publication harness now characterizes its queue boundary separately
+from publication retries. Repeated and concurrent pending submissions with the
+same account-scoped capture ID and identical title/notes resolve to the one
+immutable queue row. The same capture ID remains independent in another account.
+Before publication, reusing the ID with different title/notes is refused and the
+first accepted content remains unchanged.
+
+This is evidence about the test-only queue's storage invariant, not a proposed
+MCP submission protocol. After publication, the receipt still prevents a second
+operation, but the harness has cleared its plaintext content. A later submission
+with that ID therefore cannot establish whether it matches the original request
+and is refused by the existing immutable-row check. Publication receipt recovery
+remains covered separately; it is not submission deduplication.
+
+**Release decision still required:** define which authenticated party owns and
+supplies a stable user-intent identity across connector retries, and define the
+endpoint response for a reused identity whose content conflicts with the first
+submission, including after publication. The queue could retain a comparison
+commitment or the endpoint could use another authenticated binding, but selecting
+either policy is outside this experiment. A connector without a stable identity
+must document that a retried submission can create another capture; title/notes
+must not be used as a deduplication key because identical tasks can be intended.
+
 ### Account, key, and tab experiment (2026-09-17): the wipe window
 
 **Reproduced against real PostgreSQL: in the window between an encryption
@@ -709,9 +736,14 @@ change. Both suites now take the generation from the queue read
 (`enqueueCapture` / `readPendingCapture`); the harness no longer exposes a
 database peek, so no test can rely on state a real preparer cannot see.
 
-Staleness between the queue read and publication is safe by construction: a wipe
-in that gap advances the generation, publication refuses, and the capture stays
-pending for a rebuild. That is the twelfth case, now sourced the production way.
+Publication and a destructive wipe now lock the same account sync-state row
+before either path reads or deletes sync data, preserving the ordinary upload
+lock order. If the wipe wins, publication reads the advanced generation and
+refuses; if publication wins, the wipe observes and removes its accepted
+operation in the ordinary reset. The PostgreSQL race test pauses a publication
+after its locked generation read and proves the wipe cannot delete rows until
+that publication commits. The terminal receipt remains consumed in the latter
+order.
 
 **What it still does not prove: key agreement.** The generation is evidence that
 the candidate was prepared in the current data era, not that the preparer's
@@ -719,13 +751,42 @@ encryption key matches that era. A device still holding the retired key that
 prepares _inside_ the window reads the advanced generation from its own queue
 read, so the fence passes and its ciphertext publishes. This is not closable by
 the counter: the server cannot inspect ciphertext, and the value the preparer
-reports is the true current one. It needs client-side evidence instead — the
-preparer's own last successful sync round must belong to the current era — and
-stays open. Ordinary sync appears to face the same empty-server window
+reports is the true current one. The current-baseline experiment below now supplies
+client-side evidence without persisting a successful-sync era. Ordinary sync
+appears to face the same empty-server window
 (`planDownloadFullStateUpload` plans a full-state upload from a gap on an empty
 server, under whatever key that device holds), which is why this is recorded as
 a limitation rather than fenced on the server; that comparison is reasoned from
 the source, not reproduced.
+
+### Current-key evidence (2026-09-18)
+
+The new SQL reproduction encrypts a candidate with the retired key after a real
+wipe and reads the advanced generation from the queue. The old harness accepts
+it, even though decryption with the replacement key fails.
+
+Preparation now uses the existing read-only `downloadOps(0, undefined, 1)` probe.
+It requires an encrypted causal full-state baseline and authenticates it through
+`OperationEncryptionService.decryptOperation`, including the existing payload
+integrity checks. The same captured key encrypts the candidate. An empty server,
+plaintext baseline, or wrong key refuses preparation without applying the probe
+or changing local task state, the operation log, or the download cursor.
+
+The candidate carries the verified baseline's operation ID. Before committing an
+encrypted capture, the publication transaction verifies that this is still the
+current encrypted baseline under the ordinary upload lock. A wipe or baseline
+replacement between preparation and publication therefore refuses publication;
+a password replacement that preserves both generation and clock still changes
+the baseline ID. Terminal receipt retries do not require the old baseline to
+remain available. No new persisted fields, key registry, or sync contract fields
+are required; the proof travels only on the experimental publication request.
+
+This is a cooperative-client correctness check, not a server-side cryptographic
+proof of the candidate's key. The server cannot verify that a caller decrypted
+anything. Ordinary clients establishing the wrong key on an empty server remain
+outside this capture fix. The probe also downloads and validates a full snapshot
+for each preparation, and even same-key baseline replacement requires a retry;
+those are explicit latency and availability costs of this bounded experiment.
 
 ### Delivery comparison (2026-09-17): publication-first is the recommendation
 
@@ -753,16 +814,16 @@ device from a slow one, which is the same ambiguity that rejected create-then-AC
 B is thus A's coordination plus new durable client state — not a simpler
 alternative.
 
-| Criterion               | A: publish, then receive via sync                                                          | B: device-owned durable outbox                                                                       |
-| ----------------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
-| Correctness             | One atomic decision point; unaccepted candidates never touch task state.                   | Needs a claim _and_ a durable local binding; no local representation for unapplied work.             |
-| Crash recovery          | Nothing to recover: the candidate is in-memory, the capture stays pending.                 | Must recover the same op and its reserved clock, and must let another device take over a dead one.   |
-| Maintenance cost        | Server: receipt ledger, publication counter, one publication route.                        | Every client: a new persisted store, its recovery path, and its interaction with compaction/pruning. |
-| Operational complexity  | One deployment the maintainer migrates; state is server-side and inspectable.              | Debugging spans installed clients; a bad outbox row is on a user's disk.                             |
-| Online latency          | Equal — both deliver only when some device prepares. `queued` semantics either way.        | Equal.                                                                                               |
-| Reversibility           | Additive, nullable server columns; a server migration can withdraw them.                   | A persisted client model cannot be un-shipped (rules 10/11); removal is a fleet-wide migration.      |
-| Vector-clock budget     | Costs one permanent actor slot per account out of `MAX_VECTOR_CLOCK_SIZE = 20` — untested. | Costs none; the task is authored by a real device.                                                   |
-| Fit with existing model | Introduces a non-device actor into clocks, device lists, and `clientId` tie-breaks.        | Authorship matches every existing assumption.                                                        |
+| Criterion               | A: publish, then receive via sync                                                   | B: device-owned durable outbox                                                                       |
+| ----------------------- | ----------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Correctness             | One atomic decision point; unaccepted candidates never touch task state.            | Needs a claim _and_ a durable local binding; no local representation for unapplied work.             |
+| Crash recovery          | Nothing to recover: the candidate is in-memory, the capture stays pending.          | Must recover the same op and its reserved clock, and must let another device take over a dead one.   |
+| Maintenance cost        | Server: receipt ledger, publication counter, one publication route.                 | Every client: a new persisted store, its recovery path, and its interaction with compaction/pruning. |
+| Operational complexity  | One deployment the maintainer migrates; state is server-side and inspectable.       | Debugging spans installed clients; a bad outbox row is on a user's disk.                             |
+| Online latency          | Equal — both deliver only when some device prepares. `queued` semantics either way. | Equal.                                                                                               |
+| Reversibility           | Additive, nullable server columns; a server migration can withdraw them.            | A persisted client model cannot be un-shipped (rules 10/11); removal is a fleet-wide migration.      |
+| Vector-clock budget     | Adds an actor to the 20-entry clock budget; client pruning may drop it.             | Costs no extra actor; the task is authored by a real device.                                         |
+| Fit with existing model | Introduces a non-device actor into clocks, device lists, and `clientId` tie-breaks. | Authorship matches every existing assumption.                                                        |
 
 B's two genuine advantages are the last two rows: no virtual publisher identity,
 and ops authored by a real device. They do not outweigh the first four. The
@@ -779,32 +840,109 @@ consumer would be simpler" is not true in this codebase.
 
 Gates that remain open for A, none of them resolved by this comparison: key
 agreement inside the encryption wipe window, the 20-entry clock limit and
-pruning with a virtual publisher actor, cross-tab cursor races, power loss
-during preparation, submission retry identity, and server-database restoration.
+pruning with a virtual publisher actor, power loss during preparation, submission
+retry identity, and server-database restoration. The subsequent experiments cover
+key agreement, publisher pruning, and tab closure; simultaneous active tabs are
+outside capture scope.
+
+### Repair baseline under clock pressure (2026-09-18)
+
+The PostgreSQL experiment now reproduces a concrete pruning failure. An import
+with 30 historical device counters is followed by a causal repair from another
+device. The server keeps the repair author's counter when pruning to 20 entries,
+and drops the old import author's counter. Retention then removes the import row.
+A capture prepared from the repair's actual stored clock was refused forever:
+the publication gate still required the old import author's causal edge.
+
+The test-only publication gate now checks the newest causal full-state baseline,
+using the same indexed lookup as ordinary upload pruning. A causal repair is
+accepted only against the current server prefix, so it can advance that baseline.
+The persisted replacement sequence remains a floor: an older retained operation
+cannot bypass a newer import, and its persisted clock remains the fallback when
+the import row is gone. Markerless legacy repairs cannot advance this baseline.
+The stored capture clock must still pass classification before the receipt commits.
+
+The regression fails without this change and passes with it, for both small and
+oversized clocks. It also checks that stale work is refused and that the stored
+capture preserves both publisher and repair counters within the 20-entry limit.
+This fixes the demonstrated server-side refusal. The client-side experiment below
+now covers publisher pruning, subsequent edits and conflict recovery.
+No production schema, clock limit, or pruning preserve set changed.
+
+### Capture publisher pruned on clients (2026-09-18)
+
+The encrypted browser experiment now also seeds retained history from 21 device
+identities with counters above the capture publisher's counter. Each seed uses a
+valid task payload built and encrypted by the app and passes through ordinary
+server upload; the historical clocks are fixture data, not 21 running browsers.
+Two real clients download that history through normal sync. The test asserts
+their durable clocks contain exactly 20 entries and, after capture delivery,
+neither retains the capture publisher's entry.
+
+Editing the delivered capture then produces a real `CONFLICT_CONCURRENT` response
+for an upload missing that entry. The normal resolver recovers the publisher edge
+and submits a clock larger than 20 entries, which the server accepts. Both clients
+converge on the edited task; reload and receipt retry preserve it. Deletion syncs
+to both clients, and a late publication retry cannot recreate the task.
+
+No implementation change or additional preserved actor is needed for this case.
+This closes the demonstrated publisher-pruning/edit/delete gate, including its
+extra conflict-resolution round trip. It does not claim coverage of every
+concurrent-edit schedule or all possible histories at the server's input-size cap.
+Reducing the seed to one historical identity makes the test fail at its
+greater-than-20 prerequisite, confirming that ordinary low-pressure convergence
+cannot be reported as pruning coverage. The 21-identity seed was then restored.
+
+### Single-instance preparation and interruption (2026-09-18)
+
+Normal browser startup checks `BroadcastChannel('superProductivityTab')` and
+blocks initialization when another instance responds (`StartupService.init`).
+The existing multi-tab sync E2E suite deliberately suppresses that channel.
+Supporting two active tabs sharing storage is therefore not a capture release
+gate. Startup-check races remain a known limitation of that existing mechanism,
+not a reason to add a capture-specific coordination layer.
+
+Two additional encrypted browser cases pass with that startup check intact.
+Each stalls the real encrypted-baseline HTTP request, creates and persists a
+local task through the UI, then closes the active tab either during the probe or
+after preparation finishes. The completed candidate includes the local edit's
+clock; preparation changes neither durable operations nor the cursor. Reopening
+the same browser storage preserves the local task, with no capture task, receipt,
+publisher counter, or publication watermark consumed. Preparing again and syncing
+publishes exactly one capture and preserves the local task.
+
+No implementation change was needed. These cases establish recovery from tab
+closure at those two boundaries, not OS power loss, storage corruption, or every
+possible interleaving inside the exclusive preparation callback. Both focused
+cases and the spec's `checkFile` pass. The E2E TypeScript project still reports
+42 existing errors, none in this spec; the four earlier browser cases were not
+rerun for this test-only addition.
 
 ### Failure tests required before production
 
 Use the real server database transaction, valid task operation envelopes, and
 the app's normal remote replay. An in-memory fake queue is not sufficient.
 
-| Failure or race                                            | Required result                                                                                       |
-| ---------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| Device dies before publication                             | Item remains pending; no optimistic task survives.                                                    |
-| Two devices prepare different candidates                   | One ordinary task operation is committed; both observe the same receipt.                              |
-| Server commits but the response is lost                    | Retry observes publication; no second task operation.                                                 |
-| Server transaction fails                                   | Neither the operation nor a success receipt is committed.                                             |
-| Download or local apply fails after publication            | Normal sync retries/rebuilds; the capture is not republished.                                         |
-| User edits, moves, or deletes the imported task            | Late queue retries leave those changes intact.                                                        |
-| Import/reset races with publication                        | Existing replacement fence and explicit queue policy govern the result.                               |
-| Operation is pruned after publication                      | Receipt stays terminal; normal snapshot recovery supplies current state.                              |
-| Device/account/encryption configuration changes            | Fixed: the wipe advances a monotonic data generation; work prepared under the retired key is refused. |
-| Candidate submitted to another account                     | Refused: the capture actor is derived from the account, so publisher identity disagrees.              |
-| Two tabs prepare against the same watermark                | Exactly one publishes; the loser stays pending. The watermark is claimed inside the transaction.      |
-| Retired-key device prepares inside the wipe window         | Open: the generation proves era membership, not key agreement. Needs client-side era evidence.        |
-| Local write races with preparation, or preparation crashes | Clock reservation and subsequent operations remain causally valid.                                    |
-| Server database backup restores old pending items          | Queue consumption stays paused until recovery resolves consumption ambiguity.                         |
-| Replacement row pruned by retention or quota recovery      | Fixed: the boundary's causal identity is persisted beside its seq and outlives the row.               |
-| Boundary pruned on a pre-migration row, never backfilled   | Publication refuses: no causal identity anywhere, and a missing boundary is not an absent one.        |
+| Failure or race                                                        | Required result                                                                                       |
+| ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Device dies before publication                                         | Item remains pending; no optimistic task survives.                                                    |
+| Two devices prepare different candidates                               | One ordinary task operation is committed; both observe the same receipt.                              |
+| Server commits but the response is lost                                | Retry observes publication; no second task operation.                                                 |
+| Server transaction fails                                               | Neither the operation nor a success receipt is committed.                                             |
+| Download or local apply fails after publication                        | Normal sync retries/rebuilds; the capture is not republished.                                         |
+| User edits, moves, or deletes the imported task                        | Late queue retries leave those changes intact.                                                        |
+| Import/reset races with publication                                    | Existing replacement fence and explicit queue policy govern the result.                               |
+| Operation is pruned after publication                                  | Receipt stays terminal; normal snapshot recovery supplies current state.                              |
+| Device/account/encryption configuration changes                        | Fixed: the wipe advances a monotonic data generation; work prepared under the retired key is refused. |
+| Candidate submitted to another account                                 | Refused: the capture actor is derived from the account, so publisher identity disagrees.              |
+| Two devices prepare against the same watermark                         | Exactly one publishes; the loser stays pending. The watermark is claimed inside the transaction.      |
+| Retired-key device prepares inside the wipe window                     | Fixed in the experiment: authenticate the current encrypted baseline and bind its ID to publication.  |
+| Local write during baseline probe; tab closes during/after preparation | Covered: local task survives; no capture counter is consumed; retry publishes once.                   |
+| Server database backup restores old pending items                      | Queue consumption stays paused until recovery resolves consumption ambiguity.                         |
+| Replacement row pruned by retention or quota recovery                  | Fixed: the boundary's causal identity is persisted beside its seq and outlives the row.               |
+| Repair pruning drops the earlier import author's counter               | Fixed in the harness: use the newer causal repair, with the import sequence as a floor.               |
+| Client pruning drops the capture publisher before a local edit         | Covered: ordinary conflict resolution recovers the edge; edits and deletion converge on both devices. |
+| Boundary pruned on a pre-migration row, never backfilled               | Publication refuses: no causal identity anywhere, and a missing boundary is not an absent one.        |
 
 ## Implementation order and release gates
 
@@ -820,7 +958,10 @@ the app's normal remote replay. An in-memory fake queue is not sufficient.
    where every fence is absent, and fenced it with a monotonic data generation;
    account binding and multi-tab concurrency were already guarded. The generation's
    delivery is now resolved on the queue read rather than the sync contract, and
-   both suites source it that way. Next compare protocols.
+   both suites source it that way. The repair/pruning experiment now uses the
+   newest causal full-state baseline rather than requiring a retired import edge.
+   The current-key experiment authenticates that baseline with the candidate's
+   encryption key and rechecks its identity during publication.
 2. **Delivery comparison:** done — see the comparison section. Publication
    before application is recommended, because a device-owned outbox needs the
    same server arbiter plus durable client state the op log cannot represent
@@ -845,6 +986,56 @@ actual supported workflow. A longer schedule does not by itself justify them.
 
 ## Validation record
 
+- 2026-09-18: the publication/wipe ordering regression passes in the focused
+  24-case PostgreSQL suite. It pauses publication after its account-generation
+  read, starts a real `deleteAllUserData`, and verifies the reset waits until
+  publication commits, then removes that accepted operation while retaining its
+  receipt. Removing only the wipe-side sync-state lock leaves the operation
+  behind; the regression fails as expected. The lock is deliberately acquired
+  before either path changes sync rows, so it serializes the generation read
+  with the reset rather than merely protecting the final increment.
+- 2026-09-18: the focused PostgreSQL publication suite passes 23 cases against
+  a fresh disposable PostgreSQL 15 database (2.1 seconds). Four cases separate
+  queue submission behavior from publication retries: repeated/concurrent
+  identical pending submissions retain one immutable capture, IDs are scoped to
+  an account, conflicting pending content is refused, and a post-publication
+  retry remains unsupported rather than being mistaken for receipt recovery.
+  `npm run checkFile` passes for the modified server spec. No production
+  sync/encryption code changed. The endpoint's stable-identity ownership and
+  conflicting-content response remain an explicit release decision.
+- 2026-09-18: the original encrypted publication/edit/delete browser case and
+  its new 21-identity clock-pressure variant both pass (2.0 minutes). The latter
+  asserts actual client pruning, a genuine concurrent rejection, and acceptance
+  of the resolver's recovered clock with more than 20 entries. The one-identity
+  negative control fails at the pressure prerequisite. `checkFile` passes for the
+  modified spec; the E2E TypeScript project retains 42 existing errors, none in
+  this spec. The other browser cases and SQL suite were not rerun for this
+  test-only extension.
+- The current-key experiment passes 19 PostgreSQL cases, using real ciphertext
+  for the wipe-window failure and the post-wipe success path. Coverage includes
+  missing/wrong baseline evidence, same-generation baseline replacement, and
+  terminal receipt recovery after the verified baseline is deleted. The
+  wipe-window safety assertion was observed failing before the fix.
+  The new Chromium scenario also passes: empty-window refusal, wrong-key refusal
+  after re-upload, unchanged local persistence/cursor, then ordinary delivery
+  on a second device with the current key. Temporarily bypassing only the local
+  decrypt made its wrong-key assertion fail; the helper was then restored.
+  With the restored guard, all four publication Chromium scenarios pass in
+  7.0 minutes using the focused local configuration. All four modified TypeScript
+  files pass `checkFile`; app compilation and focused server-test compilation
+  pass. The E2E TypeScript project retains its 42 pre-existing errors, with none
+  in the changed publication spec. The full E2E suite and real connector flows
+  were not run.
+- 2026-09-18: the unchanged 17-case publication SQL suite passes against a fresh
+  isolated PostgreSQL database, closing its queue-generation rerun gap. The
+  expanded repair/pruning suite passes 18 cases; the oversized-clock regression
+  was first observed failing at publication before the harness fix.
+  All three encrypted Chromium publication scenarios also pass (6.3 minutes),
+  closing the browser queue-generation rerun gap with the updated harness. This
+  used the existing temporary focused Playwright configuration, not global setup
+  or the full E2E suite. Both changed TypeScript files pass `checkFile` and a
+  focused strict TypeScript compilation. The new pruning case is SQL coverage;
+  the browser scenarios do not exercise oversized clocks.
 - The four reducer characterization tests pass. Run them with
   `npm run test:file src/app/root-store/meta/task-shared-meta-reducers/agent-capture-retry.integration.spec.ts`.
 - The spec passes the required `npm run checkFile` formatting/lint check.
@@ -921,8 +1112,8 @@ actual supported workflow. A longer schedule does not by itself justify them.
   get it, from the queue read that hands out the capture; the harness's database
   peek is deleted. The three cases that turn on the generation are unchanged in
   substance — pre-wipe read refuses, a post-wipe re-queue does not refresh an
-  older candidate's value, and a read after the wipe publishes. **Neither
-  DB-backed suite was re-run for this change**: the sandbox cannot reach the
+  older candidate's value, and a read after the wipe publishes. **At that commit,
+  neither DB-backed suite was re-run**: the sandbox could not reach the
   PostgreSQL container (mapped host port and container IP both unreachable), so
   the evidence here is the server test files' clean `tsc` pass, the E2E
   project's error count staying at its 42 pre-existing errors with none in this
@@ -937,21 +1128,20 @@ actual supported workflow. A longer schedule does not by itself justify them.
   a measurement.
 - Production publication and actual phone/assistant onboarding remain
   unimplemented. Submission retry identity, server-database restoration, and
-  clock pruning remain release gates, as does key agreement inside the wipe
-  window (the generation proves era membership only).
+  power-loss recovery remain release gates. Current-key
+  verification is now implemented in the experiment, not the production app.
 
-The tenth and eleventh publication SQL cases cover the pruned replacement
-boundary. Both use the ordinary upload path for the import (and, for the tenth,
-a causal REPAIR), then delete below the retention sweep's boundary exactly as
-that sweep does. The tenth asserts that persisted evidence keeps the boundary
-enforceable — a descending candidate publishes, a stale one is still rejected.
-The eleventh nulls the evidence columns first to stand in for a pre-migration
-row and asserts publication still refuses.
+The publication SQL retention cases use the ordinary upload path for an import
+and a later causal REPAIR, then delete below the retention sweep's boundary.
+Both small and oversized clocks are covered: a candidate prepared from the repair
+publishes, while stale work is still refused. A separate case nulls the evidence
+columns to stand in for a pre-migration row with no retained boundary and asserts
+publication still refuses.
 
-The twelfth through seventeenth cases cover account, key, and tab changes. Three
+Additional SQL cases cover account changes, key changes, and competing candidates. Three
 use the real `deleteAllUserData` for the wipe: refusal of a candidate prepared
 before it, refusal again after the capture is re-queued at a restarted watermark,
-and successful publication once prepared against the current generation. A fourth
+and successful encrypted publication after verifying the current baseline. Another
 runs the whole toggle — wipe plus the full-state re-upload through the ordinary
 upload path — and asserts the pre-existing replacement fence refuses the stale
 candidate on its own. The last two assert cross-account refusal and that exactly
@@ -970,7 +1160,8 @@ The browser experiment is
 It requires `DATABASE_URL` for the same isolated database used by
 `SUPERSYNC_E2E_URL`, plus the app's `E2E_BASE_URL`. These tests construct and publish
 through the test harness; response loss is simulated by ignoring the result,
-and restart coverage uses app reload and a fresh harness instance. They do not
+and restart coverage uses app reload, tab closure with the same storage, and a
+fresh harness instance. They do not
 exercise a real MCP request, an HTTP publication route, or process power loss.
 
 Run the consume-on-accept server checks from `packages/super-sync-server`:
