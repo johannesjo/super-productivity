@@ -151,6 +151,12 @@ it is not an automatic reconciliation mechanism. The switch is deployment-wide,
 so unresolved accounts keep capture delivery paused for the whole deployment.
 Ordinary task sync may resume separately once its recovery is verified.
 
+The encrypted browser restore regression demonstrates why this hold is required:
+with delivery still enabled, a restored pending capture publishes a new operation
+for the same task ID. The surviving device retains its edit or deletion, while a
+fresh device recovers the original title. A stable task ID alone does not preserve
+those changes across recovered clients.
+
 1. Stop every application server/replica and exclude traffic **before** restoring.
    Let in-flight requests stop; changing a setting cannot undo a committed request.
    Preserve the pre-recovery database, available backups and device copies before
@@ -202,6 +208,23 @@ account generation and passkeys, excludes the operation log, and remains private
 Run with `DATABASE_URL` and `BACKUP_TEST_DB_CONTAINER` pointing to the same isolated
 PostgreSQL container; the canonical PostgreSQL CI job supplies both. The delivery
 route suite separately verifies the pause responses.
+
+The browser characterization is `e2e/tests/sync/agent-capture-restore.spec.ts`.
+From the repository root, with the E2E frontend running and an isolated PostgreSQL
+database already migrated, run:
+
+```bash
+DATABASE_URL=postgresql://capture:capture@127.0.0.1:55439/capture \
+CAPTURE_RESTORE_E2E=true SUPERSYNC_E2E_URL=http://127.0.0.1:1903 \
+E2E_BASE_URL=http://127.0.0.1:4242 E2E_REQUIRE_SUPERSYNC=true \
+  npx playwright test --config e2e/playwright-capture-restore.config.ts --retries=0
+```
+
+Use an unused local backend port. The spec starts and restarts its own server,
+restores only its test accounts, and skips without the explicit opt-in. Its runner
+skips the normal pre-existing-backend health check and unrelated plugin build;
+shared packages and the Prisma client must already be built/generated. Passing
+records the unsafe behavior; it does not authorize resumption.
 
 ## Per-User Recovery (single account wiped)
 

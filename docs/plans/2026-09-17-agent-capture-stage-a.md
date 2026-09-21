@@ -1033,8 +1033,12 @@ restored generation matches, the watermark matches, the queue row is pending
 again, and the candidate's operation ID is unoccupied. The service-level test
 publishes a fresh task ID and demonstrates a second publication. Current production preparation and HTTP validation instead require
 `capture-${captureId}` as the task ID: another accepted create would target that
-same task. Its effect on retained edits/deletions needs ordinary replay evidence;
-the service-only test does not establish two distinct production tasks. The
+same task. The 2026-09-21 production HTTP/browser cases now restore exact account
+rows, restart the backend to clear process caches, and use ordinary encrypted
+sync. After two syncs the surviving device retains its edit or deletion, while a
+fresh device recovers the original task title. A new receipt and operation ID
+prove republication; the stable task ID does not preserve the same state across
+these devices. This does not establish two distinct production task IDs. The
 server retains nothing that distinguishes this from a first publication, and no server-side check can, because the evidence was in the rows
 the restore discarded.
 
@@ -1079,7 +1083,7 @@ the app's normal remote replay. An in-memory fake queue is not sufficient.
 | Two devices prepare against the same watermark                         | Exactly one publishes; the loser stays pending. The watermark is claimed inside the transaction.          |
 | Retired-key device prepares inside the wipe window                     | Fixed in the experiment: authenticate the current encrypted baseline and bind its ID to publication.      |
 | Local write during baseline probe; tab closes during/after preparation | Covered: local task survives; no capture counter is consumed; retry publishes once.                       |
-| Server database backup restores old pending items                      | Open: characterized as undetectable server-side; consumption must stay paused until recovery resolves it. |
+| Server database backup restores old pending items                      | Open: fresh device recovers original task despite surviving edit/deletion; keep consumption paused.       |
 | Replacement row pruned by retention or quota recovery                  | Fixed: the boundary's causal identity is persisted beside its seq and outlives the row.                   |
 | Repair pruning drops the earlier import author's counter               | Fixed in the harness: use the newer causal repair, with the import sequence as a floor.                   |
 | Client pruning drops the capture publisher before a local edit         | Covered: ordinary conflict resolution recovers the edge; edits and deletion converge on both devices.     |
@@ -1127,6 +1131,20 @@ replicas, and encryption-key transfer remain separate scope decisions tied to an
 actual supported workflow. A longer schedule does not by itself justify them.
 
 ## Validation record
+
+- 2026-09-21: two production encrypted browser restore cases pass as
+  characterization of an unresolved failure. Each snapshots the queue, receipts,
+  publisher counter, operations, sync state, devices and account generation before
+  publication; then publishes, edits/deletes, syncs, stops the backend, restores
+  those exact rows and starts a fresh backend process. The initial assertion that
+  restore would not republish failed: a new operation and receipt were accepted.
+  After two ordinary syncs, the surviving client retains its edit/deletion, but a
+  fresh client recovers the original title. Stable task IDs therefore do not make
+  unpaused restore safe. The spec and dedicated runner pass `checkFile`; E2E
+  type-checking retains 41 pre-existing errors, none in these files. This exercises
+  a full point-in-time account rollback, not accounts-only reconstruction or a
+  successful reconciliation. No production sync behavior changes; the restore
+  gate remains open. See the restore guide for the isolated runner command.
 
 - 2026-09-21: a real backup/restore regression reproduced loss of the entire
   capture ledger in the recommended accounts-only recovery artifact: the

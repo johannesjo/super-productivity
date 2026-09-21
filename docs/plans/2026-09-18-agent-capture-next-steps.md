@@ -146,9 +146,12 @@ A point-in-time restore rolls back the queue row, the publication watermark, the
 account generation and the accepted operation together, while a device keeps the
 task it already downloaded. Every fence then agrees with a capture that was never
 published, so it can accept another create operation for the same capture.
-Production fixes the task ID to `capture-${captureId}`; the effect on retained
-edits/deletions needs replay evidence, rather than assuming two distinct tasks.
-The older service-level test used distinct task IDs. The lost-publication history
+Production fixes the task ID to `capture-${captureId}`. The 2026-09-21 encrypted
+browser restore cases now demonstrate a second accepted CREATE with that same
+identity: the surviving client keeps its edit or deletion, while a fresh client
+recovers the original title from the republished capture. These are mismatched
+device states, not evidence of two distinct task IDs. The older service-level
+test used distinct task IDs. The lost-publication history
 cannot be detected from restored server rows — the evidence was in the rows the
 restore discarded.
 
