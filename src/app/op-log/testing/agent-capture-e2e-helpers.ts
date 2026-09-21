@@ -6,23 +6,11 @@ import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { OperationLogCompactionService } from '../persistence/operation-log-compaction.service';
 import { OperationLogStoreService } from '../persistence/operation-log-store.service';
 import { OperationWriteFlushService } from '../sync/operation-write-flush.service';
-import { prepareMainTaskAdd } from '../../features/tasks/util/prepare-main-task-add';
-import { WorkContextType } from '../../features/work-context/work-context.model';
-import { DateService } from '../../core/date/date.service';
-import { VectorClockService } from '../sync/vector-clock.service';
-import {
-  findCapturePreparationBlocker,
-  readCapturePreparationClock,
-} from './capture-preparation-clock';
 import { SyncCycleGuardService } from '../sync/sync-cycle-guard.service';
 import { SyncProviderManager } from '../sync-providers/provider-manager.service';
 import { WrappedProviderService } from '../sync-providers/wrapped-provider.service';
-import { OperationEncryptionService } from '../sync/operation-encryption.service';
 import { SyncOperation } from '../sync-providers/provider.interface';
-import { Operation, ActionType, isFullStateOpType } from '../core/operation.types';
-import { CURRENT_SCHEMA_VERSION } from '../persistence/schema-migration.service';
-import { uuidv7 } from '../../util/uuid-v7';
-import { validateOperationPayload } from '../validation/validate-operation-payload';
+import { AgentCapturePreparationService } from '../sync/agent-capture-preparation.service';
 
 interface CaptureTaskInput {
   captureId: string;
@@ -75,82 +63,32 @@ export const createAgentCaptureE2eHelpers = (
           .getOperationSyncCapable(provider, { fenceEpoch: epoch });
         if (!sync || sync.providerMode !== 'superSyncOps')
           throw new Error('Capture preparation requires SuperSync');
-        const key = await sync.getEncryptKey?.();
-        if (!key)
-          throw new Error('Encrypted capture experiment requires an encryption key');
-        // Read-only probe: never apply it or advance the download cursor. An
-        // empty server during an encryption wipe has no current key evidence.
-        const probe = (await sync.downloadOps(0, undefined, 1)).ops[0]?.op;
-        if (
-          !probe?.isPayloadEncrypted ||
-          !isFullStateOpType(probe.opType) ||
-          (probe.opType === 'REPAIR' && probe.repairBaseServerSeq === undefined)
-        )
-          throw new Error('Capture preparation requires a current encrypted baseline');
-        const encryption = injector.get(OperationEncryptionService);
-        await encryption.decryptOperation(probe, key);
-        const prepared = await flush.flushThenRunExclusive(async () => {
-          manager.assertSyncEpochUnchanged(epoch, 'capture preparation');
-          opLogStore.clearVectorClockCache();
-          // Refuse before building anything: an unapplied download would
-          // otherwise reach both the candidate clock and the task itself.
-          const blocker = await findCapturePreparationBlocker(opLogStore);
-          if (blocker)
-            throw new Error(`Capture preparation needs an applied baseline: ${blocker}`);
-          const clock = await readCapturePreparationClock(
-            opLogStore,
-            injector.get(VectorClockService),
-          );
-          // Keep the exact preparation cursor with this candidate. A later sync
-          // must never replace it with a newer cursor when submitting old work.
-          const lastKnownServerSeq = await sync.getLastServerSeq();
-          const taskId = `capture-${input.captureId}`;
-          const action = prepareMainTaskAdd(
-            {
-              title: input.title,
-              additional: {
-                id: taskId,
-                ...(input.notes !== undefined ? { notes: input.notes } : {}),
-              },
-              workContextId: INBOX_PROJECT.id,
-              workContextType: WorkContextType.PROJECT,
-              isIgnoreShortSyntax: true,
-            },
-            taskService.createNewTaskWithDefaults.bind(taskService),
-            injector.get(DateService),
-          );
-          const { type, meta, ...actionPayload } = action;
-          const candidate: Operation = {
-            id: uuidv7(),
-            actionType: type as ActionType,
-            opType: meta.opType,
-            entityType: meta.entityType,
-            entityId: taskId,
-            entityIds: [taskId],
-            payload: { actionPayload, entityChanges: [] },
-            clientId: input.publisherClientId,
-            vectorClock: {
-              ...clock,
-              [input.publisherClientId]: input.publisherCounter + 1,
-            },
-            timestamp: Date.now(),
-            schemaVersion: CURRENT_SCHEMA_VERSION,
-          };
-          if (!validateOperationPayload(candidate).success)
-            throw new Error('Invalid prepared capture payload');
-          return {
-            candidate,
-            lastKnownServerSeq,
-            taskId,
-            expectedCaptureCounter: input.publisherCounter,
-          };
-        });
-        // Use exactly the key that authenticated the current baseline.
-        const [candidate] = await encryption.encryptOperations([prepared.candidate], key);
-        manager.assertSyncEpochUnchanged(epoch, 'capture preparation complete');
-        // No dispatch, local log append, own-clock reservation, or cursor update.
-        // The test publisher owns the virtual actor's counter transactionally.
-        return { ...prepared, candidate, verifiedEncryptionOpId: probe.id };
+        const baseline = (await sync.downloadOps(0, undefined, 1)).ops[0];
+        const prepared = await injector.get(AgentCapturePreparationService).prepare(
+          {
+            captureId: input.captureId,
+            title: input.title,
+            notes: input.notes ?? null,
+            publisherClientId: input.publisherClientId,
+            captureCounter: input.publisherCounter,
+            // The E2E harness supplies the actual queue generation separately.
+            dataGeneration: 0,
+            ...(baseline
+              ? {
+                  encryptionBaseline: {
+                    opId: baseline.op.id,
+                    serverSeq: baseline.serverSeq,
+                  },
+                }
+              : {}),
+          },
+          sync,
+          epoch,
+        );
+        if (!prepared.verifiedEncryptionOpId) {
+          throw new Error('Capture preparation did not verify encryption');
+        }
+        return { ...prepared, verifiedEncryptionOpId: prepared.verifiedEncryptionOpId };
       } finally {
         cycle.end();
       }

@@ -276,6 +276,15 @@ All configuration is done via environment variables.
 | `ALLOWED_EMAILS`                        | - (anyone may register)              | Comma-separated exact addresses and/or `*@domain` rules.                                                                                       |
 | `SUPERSYNC_DEFAULT_STORAGE_QUOTA_BYTES` | `104857600` (100 MB)                 | Quota for accounts created from now on. Existing accounts keep the value stored on their row.                                                  |
 
+`ENABLE_AGENT_CAPTURE_DELIVERY` defaults to `false`. Set it to `true` only after
+the capture delivery rollout and restore procedure are ready (Helm:
+`supersync.agentCaptureDeliveryEnabled`). Before restoring a database, stop
+delivery with this switch and restart the server so no capture can publish
+against restored rows. Keep it paused while reconciling pending captures with
+tasks already delivered to devices, resolving ambiguous items with the user.
+Do not silently discard accepted captures. Resume only after that reconciliation
+by deliberately setting the switch back to `true`.
+
 ### Legal pages
 
 **The image ships no Terms of Service, and serves no privacy policy until you identify

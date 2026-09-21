@@ -56,7 +56,11 @@ export const violatesE2eeGate = (item: E2eeGateItem): boolean =>
 export const sendE2eeRequiredReply = (
   reply: FastifyReply,
   userId: number,
-  context: { clientId: string; surface: 'ops' | 'snapshot'; opsCount: number },
+  context: {
+    clientId: string;
+    surface: 'ops' | 'snapshot' | 'capture';
+    opsCount: number;
+  },
 ): FastifyReply => {
   Logger.audit({
     event: 'E2EE_REQUIRED',

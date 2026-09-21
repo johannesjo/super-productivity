@@ -1,11 +1,13 @@
 # Agent capture: Stage A validation and delivery design
 
-**Status:** Prototype plus publication and consume-on-accept experiments; no
-production endpoint, OAuth integration, queue, or app setting is implemented.
-The experiments add test-only PostgreSQL queues, optional capture metadata in
-the existing operation pipeline, and a development-only task-creation helper.
-The publication experiment also adds a small upload transaction seam; ordinary
-uploads preserve their existing behavior.
+**Status (2026-09-21):** The publication-first path now has production Prisma
+models, an additive migration, authenticated app delivery routes, and app
+preparation/publication followed by ordinary sync replay. Delivery is disabled
+by default with `ENABLE_AGENT_CAPTURE_DELIVERY=false`. Assistant submission,
+OAuth integration, settings/consent, and restore reconciliation are not
+implemented. Submission remains a test fixture; the consume-on-accept alternative
+remains experimental. Earlier dated sections below record the experiments that
+led here, rather than the current implementation boundary.
 
 **Scope:** Turn the capture-first proposal into reviewable prerequisites before
 committing to a release. Full control remains a separate investment decision.
@@ -706,13 +708,16 @@ cannot be made reliable. Note also that the existing fingerprint layer
 deliberately re-processes a mismatch rather than refusing it, so it is precedent
 for short-lived same-body replay, not for conflict detection.
 
-**What decides it is cheap and is not the connector spike.** The open question is
-narrow: does a real assistant re-send identical tool arguments when a call is
-retried? A local MCP server exposing a capture tool that records only a keyed
+**What the cheap probe can establish (clarified 2026-09-21).** The question is
+narrow: does a real assistant re-send the same normalized tool arguments when a
+call is retried? A local MCP server exposing a capture tool that records only a keyed
 per-run digest and a counter answers it, with no public deployment, OAuth, or
 disposable account. It characterizes one assistant's argument handling and
 nothing else — not transport retries, authorization, or deployment routing.
-Until it runs, any refuse-without-a-key rule is a bet.
+Its optional-key schema does not test whether a required key is usable, and
+successful reuse by an assistant does not establish connector-owned identity.
+The eventual contract must identify who generates and retains the key and be
+validated through the real connector path.
 
 That probe now exists at
 `packages/super-sync-server/tests/experiments/agent-capture-retry-probe/`:
@@ -721,7 +726,10 @@ to an HMAC digest under a per-run in-memory key so no title ever reaches the log
 Its protocol handshake and repeat detection are verified against a scripted
 client, with a negative control confirming differing arguments produce differing
 digests. **It has not been run against a real assistant, so the gate is still
-open** — running it needs a human driving a client through the retry modes.
+open** — running it needs a human driving fresh clients and server processes
+through the retry modes. `fail-first` returns a tool error after simulated
+acceptance; it does not drop a transport response. See the
+[next-steps runbook](./2026-09-18-agent-capture-next-steps.md) for trial validity.
 
 **Unchanged by all of this:** the database-restore duplicate remains open, and no
 submission contract touches it — the restore rolls back the queue row, so a key,
@@ -1034,7 +1042,14 @@ paused after a restore until recovery resolves the ambiguity, and that pause is
 an operational policy the maintainer owns rather than something publication can
 enforce. Detecting it at all would need evidence the restore cannot roll back —
 for example a device reporting its retained receipt, or a restore procedure that
-advances the data generation. Selecting either remains an open decision.
+advances the data generation. Selecting the executable mechanism remains open. The initial recommendation is
+an operator runbook, with consumption paused before restored service resumes.
+Pausing alone does not resolve ambiguous pending captures: reconcile retained
+device deliveries or explicitly resolve those items with the user before
+resuming, without silently discarding accepted work. A database-only pause flag
+can itself be rolled back; restore automation must set any such control after
+restoration or use a control outside that database. No pause/resumption mechanism
+is implemented by the internal publication service.
 
 ### Failure tests required before production
 
@@ -1104,6 +1119,58 @@ replicas, and encryption-key transfer remain separate scope decisions tied to an
 actual supported workflow. A longer schedule does not by itself justify them.
 
 ## Validation record
+
+- 2026-09-21: the client delivery slice adds authenticated app-only pending/read
+  and publication routes, an optional advertised provider capability, and a
+  disabled-by-default deployment flag. Preparation reuses the canonical Inbox
+  task factory, verifies the exact encrypted baseline, and preserves the
+  existing sync epoch/write locks. Publication never applies a local candidate;
+  normal download/replay owns task state and cursor advancement. Ten captures
+  bound one cycle; a full batch or optional delivery failure retains pending
+  sync status without blocking ordinary uploads. PostgreSQL/Fastify route
+  integration passes 3 cases; shared HTTP contracts 97, provider tests 109,
+  server configuration 32, app response validation 51, preparer 2, applied
+  baseline integration 6, delivery orchestration 14, sync wrapper 176, and
+  main-header 23 pass.
+  The three production-delivery browser cases pass: encrypted two-device
+  edit/delete, actual HTTP response loss followed by app reload without duplicate
+  publication, and an eleven-item queue split across manual syncs with truthful
+  pending status. The latter failed before the wrapper/header status connection
+  was fixed. A seeded capture also remained pending before consumer wiring and
+  published after wiring. These runs use a focused Playwright config that skips
+  unrelated bundled-plugin global setup. Full E2E type-checking still reports
+  41 existing errors outside the changed capture files (the previous 42 included
+  a stale generated-package error removed by rebuilding). The deployment flag
+  provides a restore pause, but does not resolve ambiguous restored captures or
+  authorize resumption.
+
+- 2026-09-21: the seven existing publication browser scenarios now use the
+  extracted production preparer. Six passed in the full run (tab closure during
+  and after preparation, encryption wipe/retired key, encrypted two-device
+  receipt replay, and both backup-import preparation paths). The clock-pruning
+  variant timed out on a completion indicator during a run that overlapped a
+  frontend rebuild, then passed on its isolated stable rerun. This is not proof
+  of process power-loss recovery. The three new HTTP-delivery scenarios pass
+  separately; the existing scenarios still orchestrate publication through the
+  production-service test fixture with automatic delivery disabled.
+
+- 2026-09-21: the server slice moves publication into
+  `src/sync/capture-publication.service.ts` and adds Prisma-backed capture and
+  publisher-counter rows. The receipt remains on the capture row without an
+  operation foreign key, so pruning/imports cannot remove it. Fault injection
+  and submission policy remain in the test fixture; no route enables capture.
+  Against a fresh disposable PostgreSQL 15 database, the existing 25 cases passed
+  before extraction. Bypassing publication for ordinary upload made the receipt
+  regression fail after the operation was accepted. After extraction, 26 cases
+  pass, including explicit plaintext-clearance/rollback assertions and account
+  deletion. The new migration was applied over the preceding Prisma schema.
+  Server and focused integration-test TypeScript compilation, all changed
+  TypeScript files' `checkFile`, Prisma validation, and 132 existing upload and
+  migration tests pass. The E2E TypeScript project reports 42 errors, matching
+  the previously recorded count, with none in the publication service, fixture,
+  or browser spec. This is server transaction evidence only: browser suites,
+  actual assistant retries, OAuth, and restore recovery were not validated by
+  this run.
 
 - 2026-09-18: analysis only, no code changed. Two adversarial reviews with
   opposing mandates and an external CLI review narrowed the submission-identity
@@ -1265,10 +1332,10 @@ actual supported workflow. A longer schedule does not by itself justify them.
   `MAX_VECTOR_CLOCK_SIZE = 20` (`packages/sync-core/src/vector-clock.ts`).
   Candidate B was never built, so its column in that table is derived cost, not
   a measurement.
-- Production publication and actual phone/assistant onboarding remain
-  unimplemented. Submission retry identity, server-database restoration, and
-  power-loss recovery remain release gates. Current-key
-  verification is now implemented in the experiment, not the production app.
+- At the end of the 2026-09-18 experiments, production publication and actual
+  phone/assistant onboarding were unimplemented; the 2026-09-21 entry above
+  supersedes the publication/preparation status. Submission retry identity,
+  server-database restoration, and power-loss recovery remain release gates.
 
 The publication SQL retention cases use the ordinary upload path for an import
 and a later causal REPAIR, then delete below the retention sweep's boundary.
@@ -1302,6 +1369,15 @@ through the test harness; response loss is simulated by ignoring the result,
 and restart coverage uses app reload, tab closure with the same storage, and a
 fresh harness instance. They do not
 exercise a real MCP request, an HTTP publication route, or process power loss.
+Keep `ENABLE_AGENT_CAPTURE_DELIVERY=false` for these manually orchestrated cases.
+
+The production delivery browser suite is
+[`agent-capture-delivery.spec.ts`](../../e2e/tests/sync/agent-capture-delivery.spec.ts).
+It uses the same database/server/frontend setup with
+`ENABLE_AGENT_CAPTURE_DELIVERY=true`. Only enqueueing uses the fixture; the app
+prepares and publishes through authenticated HTTP and receives ordinary sync
+operations. The capture publication and HTTP integration suites are both in
+`npm run test:integration:postgres`.
 
 Run the consume-on-accept server checks from `packages/super-sync-server`:
 

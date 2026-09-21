@@ -10,7 +10,7 @@ import {
   findAppliedFullStateBaseline,
   findCapturePreparationBlocker,
   readCapturePreparationClock,
-} from '../capture-preparation-clock';
+} from '../../sync/capture-preparation-clock';
 import { createMinimalTaskPayload } from './helpers/operation-factory.helper';
 
 /**

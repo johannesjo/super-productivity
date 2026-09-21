@@ -19,6 +19,8 @@ import {
   validateDevicesResponse,
   validateOpDownloadResponse,
   validateOpUploadResponse,
+  validatePendingCaptureResponse,
+  validateCapturePublicationResponse,
   validateReplaceTokenResponse,
   validateRestorePointsResponse,
   validateRestoreSnapshotResponse,
@@ -76,6 +78,8 @@ export const createSuperSyncProvider = (): PackageSuperSyncProvider => {
   const responseValidators: SuperSyncDeps['responseValidators'] = {
     validateOpUpload: validateOpUploadResponse,
     validateOpDownload: validateOpDownloadResponse,
+    validatePendingCapture: validatePendingCaptureResponse,
+    validateCapturePublication: validateCapturePublicationResponse,
     validateSnapshotUpload: validateSnapshotUploadResponse,
     validateRestorePoints: validateRestorePointsResponse,
     validateRestoreSnapshot: validateRestoreSnapshotResponse,

@@ -408,6 +408,7 @@ export interface DownloadOpsResponse {
   serverTime?: number;
   capabilities?: {
     causalRepairSnapshots: true;
+    captureDelivery?: boolean;
   };
 }
 

@@ -1,6 +1,8 @@
 import {
   validateOpUploadResponse,
   validateOpDownloadResponse,
+  validatePendingCaptureResponse,
+  validateCapturePublicationResponse,
   validateSnapshotUploadResponse,
   validateRestorePointsResponse,
   validateRestoreSnapshotResponse,
@@ -10,6 +12,34 @@ import {
 } from './response-validators';
 
 describe('response-validators', () => {
+  describe('capture delivery', () => {
+    it('validates pending capture and publication responses', () => {
+      const pending = {
+        capture: {
+          captureId: 'capture-1',
+          title: 'Task',
+          notes: null,
+          publisherClientId: 'agent-capture-1',
+          captureCounter: 0,
+          dataGeneration: 0,
+          encryptionBaseline: { opId: 'baseline-1', serverSeq: 1 },
+        },
+      };
+      expect(validatePendingCaptureResponse(pending)).toEqual(pending);
+      expect(() =>
+        validatePendingCaptureResponse({ capture: { ...pending.capture, title: 4 } }),
+      ).toThrow();
+      expect(
+        validateCapturePublicationResponse({
+          status: 'published',
+          receipt: { captureId: 'capture-1', opId: 'op-1', serverSeq: 2 },
+        }).status,
+      ).toBe('published');
+      expect(() =>
+        validateCapturePublicationResponse({ status: 'published', receipt: null }),
+      ).toThrow();
+    });
+  });
   describe('validateOpUploadResponse', () => {
     it('should accept valid response', () => {
       const response = {

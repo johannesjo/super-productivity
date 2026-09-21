@@ -18,8 +18,11 @@ import { isRetryableUploadError } from '../http/retryable-upload-error';
 import type { ProviderPlatformInfo } from '../platform/provider-platform-info';
 import type { WebFetchFactory } from '../platform/web-fetch-factory';
 import type {
+  CapturePublicationRequest,
+  CapturePublicationResponse,
   OpUploadResponse,
   OperationSyncCapable,
+  PendingAgentCapture,
   RestoreCapable,
   RestorePoint,
   RestoreSnapshotResponse,
@@ -151,6 +154,7 @@ export class SuperSyncProvider
 
   private _cachedServerSeqKey: string | null = null;
   private _causalRepairSnapshotsSupported = false;
+  private _captureDeliverySupported = false;
 
   constructor(private readonly _deps: SuperSyncDeps) {
     this.privateCfg = _deps.credentialStore;
@@ -207,6 +211,7 @@ export class SuperSyncProvider
   async setPrivateCfg(cfg: SuperSyncPrivateCfg): Promise<void> {
     this._cachedServerSeqKey = null;
     this._causalRepairSnapshotsSupported = false;
+    this._captureDeliverySupported = false;
     await this.privateCfg.setComplete(cfg);
   }
 
@@ -220,6 +225,7 @@ export class SuperSyncProvider
    */
   invalidateCredentialCache(): void {
     this._cachedServerSeqKey = null;
+    this._captureDeliverySupported = false;
     this.privateCfg.invalidateInMemoryCache?.();
   }
 
@@ -315,11 +321,40 @@ export class SuperSyncProvider
     const validated = this._deps.responseValidators.validateOpDownload(response);
     this._causalRepairSnapshotsSupported =
       validated.capabilities?.causalRepairSnapshots === true;
+    this._captureDeliverySupported = validated.capabilities?.captureDelivery === true;
     return validated;
   }
 
   supportsCausalRepairSnapshots(): boolean {
     return this._causalRepairSnapshotsSupported;
+  }
+
+  supportsCaptureDelivery(): boolean {
+    return this._captureDeliverySupported;
+  }
+
+  async readPendingCapture(): Promise<PendingAgentCapture | null> {
+    if (!this._captureDeliverySupported)
+      throw new Error('Capture delivery is unavailable');
+    const cfg = await this._cfgOrError();
+    const response = await this._fetchApi<unknown>(cfg, '/api/sync/captures/pending', {
+      method: 'GET',
+    });
+    return this._deps.responseValidators.validatePendingCapture(response).capture;
+  }
+
+  async publishCapture(
+    request: CapturePublicationRequest,
+  ): Promise<CapturePublicationResponse> {
+    if (!this._captureDeliverySupported)
+      throw new Error('Capture delivery is unavailable');
+    const cfg = await this._cfgOrError();
+    const response = await this._fetchApi<unknown>(cfg, '/api/sync/captures/publish', {
+      method: 'POST',
+      body: JSON.stringify(request),
+      noRetry: true,
+    });
+    return this._deps.responseValidators.validateCapturePublication(response);
   }
 
   async getLastServerSeq(): Promise<number> {

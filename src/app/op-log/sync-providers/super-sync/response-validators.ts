@@ -2,12 +2,18 @@ import {
   SuperSyncDeleteAllDataResponseSchema,
   SuperSyncDevicesResponseSchema,
   SuperSyncDownloadOpsResponseSchema,
+  SuperSyncPendingCaptureResponseSchema,
+  SuperSyncCapturePublicationResponseSchema,
   SuperSyncReplaceTokenResponseSchema,
   SuperSyncRestorePointsResponseSchema,
   SuperSyncRestoreSnapshotResponseSchema,
   SuperSyncSnapshotUploadResponseSchema,
   SuperSyncUploadOpsResponseSchema,
 } from '@sp/shared-schema';
+import type {
+  CapturePublicationResponse,
+  PendingAgentCapture,
+} from '@sp/sync-providers/provider-types';
 import type {
   SuperSyncDeviceListResponse,
   SuperSyncReplaceTokenResult,
@@ -94,6 +100,20 @@ export const validateOpDownloadResponse = (
 
   return response as SuperSyncOpDownloadResponse;
 };
+
+export const validatePendingCaptureResponse = (
+  data: unknown,
+): { capture: PendingAgentCapture | null } =>
+  parseResponse(SuperSyncPendingCaptureResponseSchema, data, 'PendingCaptureResponse');
+
+export const validateCapturePublicationResponse = (
+  data: unknown,
+): CapturePublicationResponse =>
+  parseResponse(
+    SuperSyncCapturePublicationResponseSchema,
+    data,
+    'CapturePublicationResponse',
+  );
 
 /**
  * Validates SnapshotUploadResponse from server.

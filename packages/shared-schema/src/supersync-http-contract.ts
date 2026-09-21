@@ -262,10 +262,52 @@ export const SuperSyncDownloadOpsResponseSchema = z
     capabilities: z
       .object({
         causalRepairSnapshots: z.boolean().optional(),
+        captureDelivery: z.boolean().optional(),
       })
       .optional(),
   })
   .passthrough();
+
+export const SuperSyncPendingCaptureResponseSchema = z.object({
+  capture: z
+    .object({
+      captureId: z.string(),
+      title: z.string(),
+      notes: z.string().nullable(),
+      publisherClientId: z.string(),
+      captureCounter: z.number().int().min(0),
+      dataGeneration: z.number().int().min(0),
+      encryptionBaseline: z
+        .object({ opId: z.string(), serverSeq: z.number().int().min(1) })
+        .optional(),
+    })
+    .nullable(),
+});
+
+export const SuperSyncCapturePublicationRequestSchema = z.object({
+  captureId: z.string().min(1).max(200),
+  candidate: SuperSyncUploadOperationSchema,
+  lastKnownServerSeq: z.number().int().min(0),
+  expectedCaptureCounter: z.number().int().min(0),
+  expectedDataGeneration: z.number().int().min(0),
+  verifiedEncryptionOpId: z.string().optional(),
+});
+
+export const SuperSyncCapturePublicationResponseSchema = z.discriminatedUnion('status', [
+  z.object({
+    status: z.enum(['published', 'already_published']),
+    receipt: z.object({
+      captureId: z.string(),
+      opId: z.string(),
+      serverSeq: z.number().int().min(1),
+    }),
+  }),
+  z.object({
+    status: z.literal('rejected'),
+    error: z.string(),
+    errorCode: z.string().optional(),
+  }),
+]);
 
 export const SuperSyncSnapshotResponseSchema = z
   .object({
@@ -364,6 +406,15 @@ export type SuperSyncUploadResult = z.infer<typeof SuperSyncUploadResultSchema>;
 export type SuperSyncUploadOpsResponse = z.infer<typeof SuperSyncUploadOpsResponseSchema>;
 export type SuperSyncDownloadOpsResponse = z.infer<
   typeof SuperSyncDownloadOpsResponseSchema
+>;
+export type SuperSyncPendingCaptureResponse = z.infer<
+  typeof SuperSyncPendingCaptureResponseSchema
+>;
+export type SuperSyncCapturePublicationRequest = z.infer<
+  typeof SuperSyncCapturePublicationRequestSchema
+>;
+export type SuperSyncCapturePublicationResponse = z.infer<
+  typeof SuperSyncCapturePublicationResponseSchema
 >;
 export type SuperSyncSnapshotResponse = z.infer<typeof SuperSyncSnapshotResponseSchema>;
 export type SuperSyncSnapshotUploadResponse = z.infer<

@@ -490,7 +490,10 @@ export const createServer = (
       });
 
       // Sync Routes (operation-based sync)
-      await fastifyServer.register(syncRoutes, { prefix: '/api/sync' });
+      await fastifyServer.register(syncRoutes, {
+        prefix: '/api/sync',
+        captureDeliveryEnabled: fullConfig.agentCaptureDeliveryEnabled,
+      });
 
       // WebSocket routes for real-time sync notifications
       await fastifyServer.register(wsRoutes, { prefix: '/api/sync' });

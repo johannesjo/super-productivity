@@ -80,6 +80,7 @@ import { RemoteTrackingAndroidNotifierService } from '../../features/tracking-pr
 import { IS_ELECTRON } from '../../app.constants';
 import { OperationLogStoreService } from '../../op-log/persistence/operation-log-store.service';
 import { OperationLogSyncService } from '../../op-log/sync/operation-log-sync.service';
+import { AgentCaptureDeliveryService } from '../../op-log/sync/agent-capture-delivery.service';
 import { SyncSessionValidationService } from '../../op-log/sync/sync-session-validation.service';
 import { SyncCycleGuardService } from '../../op-log/sync/sync-cycle-guard.service';
 import { WrappedProviderService } from '../../op-log/sync-providers/wrapped-provider.service';
@@ -133,6 +134,7 @@ export class SyncWrapperService {
   private _remoteTrackingNotifier = inject(RemoteTrackingAndroidNotifierService);
   private _opLogStore = inject(OperationLogStoreService);
   private _opLogSyncService = inject(OperationLogSyncService);
+  private _captureDelivery = inject(AgentCaptureDeliveryService);
   private _sessionValidation = inject(SyncSessionValidationService);
   private _syncCycleGuard = inject(SyncCycleGuardService);
   private _wrappedProvider = inject(WrappedProviderService);
@@ -233,12 +235,16 @@ export class SyncWrapperService {
 
   /**
    * Observable for UI: true when sync is confirmed fully in sync
-   * (no pending ops AND remote recently checked within 1 minute).
-   * Used for all sync providers to show the double checkmark indicator.
+   * (no pending ops, a recent remote check, and no deferred sync work).
    */
-  superSyncIsConfirmedInSync$: Observable<boolean> = toObservable(
-    this._superSyncStatusService.isConfirmedInSync,
-  ).pipe(distinctUntilChanged(), shareReplay(1));
+  superSyncIsConfirmedInSync$: Observable<boolean> = combineLatest([
+    toObservable(this._superSyncStatusService.isConfirmedInSync),
+    this.syncState$,
+  ]).pipe(
+    map(([confirmed, status]) => confirmed && status === 'IN_SYNC'),
+    distinctUntilChanged(),
+    shareReplay(1),
+  );
 
   isSyncInProgressSync(): boolean {
     return this._isSyncInProgress$.getValue();
@@ -617,15 +623,17 @@ export class SyncWrapperService {
       // never-synced guard reads its own just-written state and disarms itself.
       const isNeverSyncedAtSyncStart = !(await this._opLogSyncService.hasSyncedOps());
 
-      // 1. Download remote ops first (important for fresh clients to receive data)
-      const downloadResult = await this._opLogSyncService.downloadRemoteOps(
-        syncCapableProvider,
-        {
-          forceFromSeq0: isProviderSwitch || undefined,
-          isNeverSynced: isNeverSyncedAtSyncStart,
-          fenceEpoch,
-        },
-      );
+      // 1. Download, publish pending captures, then receive through ordinary replay.
+      const {
+        outcome: downloadResult,
+        localWinOpsCreated: downloadLwwOps,
+        didDownloadChanges,
+        captureDeliveryDeferred,
+      } = await this._captureDelivery.downloadRemoteOps(syncCapableProvider, {
+        forceFromSeq0: isProviderSwitch || undefined,
+        isNeverSynced: isNeverSyncedAtSyncStart,
+        fenceEpoch,
+      });
       // Auth is confirmed working if download didn't throw AuthFailSPError.
       // Reset here rather than only at InSync so early returns (cancelled,
       // LWW pending, payload rejected) also break the consecutive-failure chain.
@@ -741,8 +749,6 @@ export class SyncWrapperService {
       }
 
       // 3. If LWW created local-win ops, upload them (with retry limit to prevent infinite loops)
-      const downloadLwwOps =
-        downloadResult.kind === 'ops_processed' ? downloadResult.localWinOpsCreated : 0;
       const uploadLwwOps =
         uploadResult.kind === 'completed' ? uploadResult.localWinOpsCreated : 0;
       let lwwRetries = 0;
@@ -847,20 +853,12 @@ export class SyncWrapperService {
         return SyncStatus.UpdateRemote;
       }
 
-      // Mark as in-sync for all providers after successful sync
-      this._providerManager.setSyncStatus('IN_SYNC');
-      SyncLog.log('SyncWrapperService: Sync complete, status=IN_SYNC');
+      this._providerManager.setSyncStatus(
+        captureDeliveryDeferred ? 'UNKNOWN_OR_CHANGED' : 'IN_SYNC',
+      );
 
-      // Did this sync actually move any data (either direction)? Used by the
-      // sync button to show "Data successfully synced" vs "Already in sync"
-      // (discussion #7196). UpdateRemote is reused here as the generic
-      // "data changed this sync" status — the only consumer that inspects the
-      // return value (main-header) treats all UpdateLocal/UpdateRemote variants
-      // identically, so no new enum value is needed.
-      const didDownloadChanges =
-        downloadResult.kind === 'snapshot_hydrated' ||
-        downloadResult.kind === 'server_migration_handled' ||
-        (downloadResult.kind === 'ops_processed' && downloadResult.newOpsCount > 0);
+      // The main header treats UpdateRemote as the generic "data changed" status.
+      // Deferred capture work also requests another sync without blocking uploads.
       const didUploadChanges =
         uploadResult.kind === 'completed' && uploadResult.uploadedCount > 0;
       const didChange = didDownloadChanges || didUploadChanges;
@@ -886,7 +884,9 @@ export class SyncWrapperService {
         });
       }
 
-      return didChange ? SyncStatus.UpdateRemote : SyncStatus.InSync;
+      return captureDeliveryDeferred || didChange
+        ? SyncStatus.UpdateRemote
+        : SyncStatus.InSync;
     } catch (error) {
       // DecryptNoPasswordError is expected control flow, not a failure: it signals the
       // app to prompt for the encryption password (handled below). The download/upload

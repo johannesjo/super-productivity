@@ -124,6 +124,10 @@ const createStorageMock = (): {
 const createValidatorsPassthrough = (): SuperSyncResponseValidators => ({
   validateOpUpload: (data) => data as OpUploadResponse,
   validateOpDownload: (data) => data as SuperSyncOpDownloadResponse,
+  validatePendingCapture: (data) =>
+    data as ReturnType<SuperSyncResponseValidators['validatePendingCapture']>,
+  validateCapturePublication: (data) =>
+    data as ReturnType<SuperSyncResponseValidators['validateCapturePublication']>,
   validateSnapshotUpload: (data) => data as SnapshotUploadResponse,
   validateRestorePoints: (data) => data as RestorePointsResponse,
   validateRestoreSnapshot: (data) => data as RestoreSnapshotResponse,
@@ -393,16 +397,64 @@ describe('SuperSyncProvider', () => {
           ops: [],
           hasMore: false,
           latestSeq: 0,
-          capabilities: { causalRepairSnapshots: true },
+          capabilities: { causalRepairSnapshots: true, captureDelivery: true },
         }),
       );
 
       await provider.downloadOps(0);
       expect(provider.supportsCausalRepairSnapshots()).toBe(true);
+      expect(provider.supportsCaptureDelivery()).toBe(true);
 
       await provider.setPrivateCfg(testConfig);
 
       expect(provider.supportsCausalRepairSnapshots()).toBe(false);
+      expect(provider.supportsCaptureDelivery()).toBe(false);
+    });
+  });
+
+  describe('capture delivery', () => {
+    it('uses authenticated transport only after the server advertises support', async () => {
+      const { provider, cfgStore, fetchMock } = buildProvider();
+      cfgStore.load.mockResolvedValue(testConfig);
+      await expect(provider.readPendingCapture()).rejects.toThrow('unavailable');
+      expect(fetchMock).not.toHaveBeenCalled();
+
+      fetchMock.mockResolvedValueOnce(
+        okResponse({
+          ops: [],
+          hasMore: false,
+          latestSeq: 0,
+          capabilities: { captureDelivery: true },
+        }),
+      );
+      await provider.downloadOps(0);
+      const capture = {
+        captureId: 'capture-1',
+        title: 'Task',
+        notes: null,
+        publisherClientId: 'agent-capture-1',
+        captureCounter: 0,
+        dataGeneration: 0,
+      };
+      fetchMock.mockResolvedValueOnce(okResponse({ capture }));
+      expect(await provider.readPendingCapture()).toEqual(capture);
+      expect(String(fetchMock.mock.calls.at(-1)?.[0])).toContain('/captures/pending');
+
+      const request = {
+        captureId: 'capture-1',
+        candidate: createMockOperation(),
+        lastKnownServerSeq: 0,
+        expectedCaptureCounter: 0,
+        expectedDataGeneration: 0,
+      };
+      fetchMock.mockResolvedValueOnce(
+        okResponse({
+          status: 'published',
+          receipt: { captureId: 'capture-1', opId: 'op-123', serverSeq: 1 },
+        }),
+      );
+      expect((await provider.publishCapture(request)).status).toBe('published');
+      expect(String(fetchMock.mock.calls.at(-1)?.[0])).toContain('/captures/publish');
     });
   });
 

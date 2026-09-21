@@ -5,7 +5,7 @@ import {
   VectorClock,
 } from '../core/operation.types';
 import { OperationLogStoreService } from '../persistence/operation-log-store.service';
-import { VectorClockService } from '../sync/vector-clock.service';
+import { VectorClockService } from './vector-clock.service';
 
 export type CapturePreparationClockReader = Pick<
   VectorClockService,
@@ -15,6 +15,7 @@ export type CapturePreparationClockReader = Pick<
 export type CapturePreparationStore = Pick<
   OperationLogStoreService,
   | 'getOpsAfterSeq'
+  | 'getLatestFullStateOpEntry'
   | 'isRawRebuildIncomplete'
   | 'getPendingRemoteOps'
   | 'getFailedRemoteOps'
@@ -39,15 +40,16 @@ const isAppliedLocally = (entry: OperationLogEntry): boolean =>
 /**
  * Finds the newest full-state replacement this device actually applied.
  *
- * COST: scans the retained log, the same scan the previous `getFullVectorClock()`
- * reader did, so this is not a regression — but it is not the production home
- * either. That belongs behind the store's existing full-state metadata pointer
- * (`_getLatestFullStateOpEntryMatching`), which already walks refs newest-first;
- * it stays out of reach here only because the store service is at its line cap.
+ * The metadata pointer handles the ordinary case without scanning retained ops.
+ * A newest full-state op that has not applied can hide an older applied baseline;
+ * only that abnormal case falls back to the retained-log scan.
  */
 export const findAppliedFullStateBaseline = async (
   store: CapturePreparationStore,
 ): Promise<OperationLogEntry | undefined> => {
+  const newest = await store.getLatestFullStateOpEntry();
+  if (!newest || isAppliedLocally(newest)) return newest;
+
   const entries = await store.getOpsAfterSeq(0);
   let latest: OperationLogEntry | undefined;
   for (const entry of entries) {

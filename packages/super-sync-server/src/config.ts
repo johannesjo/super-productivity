@@ -85,6 +85,8 @@ export interface ServerConfig {
   port: number;
   host: string;
   dataDir: string;
+  /** Operator switch used to pause capture delivery before a database restore. */
+  agentCaptureDeliveryEnabled: boolean;
   /**
    * Publicly reachable base URL used for links in emails.
    * Should point to the reverse-proxied address users can access.
@@ -145,6 +147,7 @@ const DEFAULT_CONFIG: ServerConfig = {
   port: 1900,
   host: '0.0.0.0',
   dataDir: './data',
+  agentCaptureDeliveryEnabled: false,
   publicUrl: 'http://localhost:1900',
   cors: {
     enabled: true,
@@ -169,6 +172,13 @@ export const loadConfigFromEnv = (
   };
 
   // Override with environment variables
+  if (process.env.ENABLE_AGENT_CAPTURE_DELIVERY !== undefined) {
+    const value = process.env.ENABLE_AGENT_CAPTURE_DELIVERY;
+    if (value !== 'true' && value !== 'false') {
+      throw new Error('ENABLE_AGENT_CAPTURE_DELIVERY must be true or false');
+    }
+    config.agentCaptureDeliveryEnabled = value === 'true';
+  }
   if (process.env.PORT) {
     const parsedPort = parseInt(process.env.PORT, 10);
     if (Number.isInteger(parsedPort) && parsedPort > 0) {

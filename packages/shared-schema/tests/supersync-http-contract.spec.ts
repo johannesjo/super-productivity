@@ -4,6 +4,9 @@ import {
   SUPER_SYNC_MAX_OPS_PER_UPLOAD,
   SuperSyncDownloadOpsQuerySchema,
   SuperSyncDownloadOpsResponseSchema,
+  SuperSyncPendingCaptureResponseSchema,
+  SuperSyncCapturePublicationRequestSchema,
+  SuperSyncCapturePublicationResponseSchema,
   SuperSyncOperationSchema,
   SuperSyncRestorePointsResponseSchema,
   SuperSyncSnapshotUploadResponseSchema,
@@ -26,6 +29,36 @@ const createValidOperation = (clientId: string = 'client_1') => ({
 });
 
 describe('SuperSync HTTP contract schemas', () => {
+  it('validates capture delivery envelopes and rejects malformed receipts', () => {
+    expect(
+      SuperSyncPendingCaptureResponseSchema.parse({
+        capture: {
+          captureId: 'capture-1',
+          title: 'Task',
+          notes: null,
+          publisherClientId: 'agent-capture-1',
+          captureCounter: 0,
+          dataGeneration: 0,
+          encryptionBaseline: { opId: 'import-1', serverSeq: 1 },
+        },
+      }).capture?.encryptionBaseline?.opId,
+    ).toBe('import-1');
+    expect(
+      SuperSyncCapturePublicationRequestSchema.safeParse({
+        captureId: 'capture-1',
+        candidate: createValidOperation(),
+        lastKnownServerSeq: 1,
+        expectedCaptureCounter: 0,
+        expectedDataGeneration: 0,
+      }).success,
+    ).toBe(true);
+    expect(
+      SuperSyncCapturePublicationResponseSchema.safeParse({
+        status: 'published',
+        receipt: { captureId: 'capture-1', opId: 'op-1', serverSeq: '1' },
+      }).success,
+    ).toBe(false);
+  });
   it('preserves optional capture identity through the upload contract', () => {
     const parsed = SuperSyncUploadOpsRequestSchema.parse({
       ops: [{ ...createValidOperation(), captureId: 'capture-1' }],

@@ -111,6 +111,32 @@ export interface SyncOperation {
   captureId?: string;
 }
 
+export interface PendingAgentCapture {
+  captureId: string;
+  title: string;
+  notes: string | null;
+  publisherClientId: string;
+  captureCounter: number;
+  dataGeneration: number;
+  encryptionBaseline?: { opId: string; serverSeq: number };
+}
+
+export interface CapturePublicationRequest {
+  captureId: string;
+  candidate: SyncOperation;
+  lastKnownServerSeq: number;
+  expectedCaptureCounter: number;
+  expectedDataGeneration: number;
+  verifiedEncryptionOpId?: string;
+}
+
+export type CapturePublicationResponse =
+  | {
+      status: 'published' | 'already_published';
+      receipt: { captureId: string; opId: string; serverSeq: number };
+    }
+  | { status: 'rejected'; error: string; errorCode?: string };
+
 export interface ServerSyncOperation {
   serverSeq: number;
   op: SyncOperation;
@@ -143,6 +169,7 @@ export interface OpDownloadResponseBase {
   serverTime?: number;
   capabilities?: {
     causalRepairSnapshots?: boolean;
+    captureDelivery?: boolean;
   };
 }
 
@@ -210,6 +237,11 @@ export interface OperationSyncCapable<
   setLastServerSeq(seq: number): Promise<void>;
   /** True only after this provider has observed an explicit server capability. */
   supportsCausalRepairSnapshots?(): boolean;
+  supportsCaptureDelivery?(): boolean;
+  readPendingCapture?(): Promise<PendingAgentCapture | null>;
+  publishCapture?(
+    request: CapturePublicationRequest,
+  ): Promise<CapturePublicationResponse>;
   uploadSnapshot(
     state: unknown,
     clientId: string,

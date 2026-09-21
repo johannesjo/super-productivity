@@ -82,6 +82,7 @@ describe('SyncWrapperService', () => {
   let mockWsDownloadService: jasmine.SpyObj<WsTriggeredDownloadService>;
 
   let configSubject: BehaviorSubject<any>;
+  let mockSyncStatus: BehaviorSubject<'IN_SYNC' | 'UNKNOWN_OR_CHANGED'>;
   let mockSyncCapableProvider: any;
 
   const createMockSyncConfig = (
@@ -98,6 +99,7 @@ describe('SyncWrapperService', () => {
 
   beforeEach(() => {
     configSubject = new BehaviorSubject(createMockSyncConfig(SyncProviderId.SuperSync));
+    mockSyncStatus = new BehaviorSubject<'IN_SYNC' | 'UNKNOWN_OR_CHANGED'>('IN_SYNC');
 
     mockSyncCapableProvider = {
       uploadOperations: jasmine.createSpy('uploadOperations'),
@@ -119,7 +121,7 @@ describe('SyncWrapperService', () => {
         'assertSyncEpochUnchanged',
       ],
       {
-        syncStatus$: of('SYNCED'),
+        syncStatus$: mockSyncStatus.asObservable(),
         isProviderReady$: of(true),
         isSyncInProgress: false,
         syncEpoch: 0,
@@ -1074,6 +1076,34 @@ describe('SyncWrapperService', () => {
       await service.sync();
 
       expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('IN_SYNC');
+    });
+
+    it('keeps ordinary upload running and requests another sync when capture delivery defers', async () => {
+      mockSyncCapableProvider.providerMode = 'superSyncOps';
+      mockSyncCapableProvider.supportsCaptureDelivery = () => true;
+      mockSyncCapableProvider.readPendingCapture = jasmine
+        .createSpy('readPendingCapture')
+        .and.resolveTo({
+          captureId: 'capture-1',
+          title: 'Task',
+          notes: null,
+          publisherClientId: 'agent-capture-1',
+          captureCounter: 0,
+          dataGeneration: 0,
+          // No encrypted baseline yet: leave the queue item for a later cycle.
+        });
+      mockSyncCapableProvider.publishCapture = jasmine.createSpy('publishCapture');
+
+      const result = await service.sync();
+
+      expect(mockSyncCapableProvider.readPendingCapture).toHaveBeenCalledTimes(1);
+      expect(mockSyncCapableProvider.publishCapture).not.toHaveBeenCalled();
+      expect(mockSyncService.uploadPendingOps).toHaveBeenCalledTimes(1);
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith(
+        'UNKNOWN_OR_CHANGED',
+      );
+      expect(mockProviderManager.setSyncStatus).not.toHaveBeenCalledWith('IN_SYNC');
+      expect(result).toBe(SyncStatus.UpdateRemote);
     });
 
     it('should NOT set IN_SYNC when error occurs', async () => {
@@ -3145,6 +3175,16 @@ describe('SyncWrapperService', () => {
       it('should return false when SuperSyncStatusService.isConfirmedInSync is false', (done) => {
         signalService = createServiceWithSignal(false);
         signalConfigSubject.next(createSignalMockConfig(SyncProviderId.SuperSync));
+
+        signalService.superSyncIsConfirmedInSync$.subscribe((isConfirmed) => {
+          expect(isConfirmed).toBe(false);
+          done();
+        });
+      });
+
+      it('stays unconfirmed while capture delivery is deferred', (done) => {
+        mockSyncStatus.next('UNKNOWN_OR_CHANGED');
+        signalService = createServiceWithSignal(true);
 
         signalService.superSyncIsConfirmedInSync$.subscribe((isConfirmed) => {
           expect(isConfirmed).toBe(false);

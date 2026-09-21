@@ -36,6 +36,8 @@ model User {
   // migration for why a wipe needs its own fence.
   syncDataGeneration            Int      @default(0) @map("sync_data_generation")
 
+  agentCaptures               AgentCapture[]
+  agentCaptureAccount         AgentCaptureAccount?
   operations                  Operation[]
   syncState                   UserSyncState?
   devices                     SyncDevice[]
@@ -171,4 +173,32 @@ model SyncDevice {
 
   @@id([userId, clientId])
   @@map("sync_devices")
+}
+
+// Kept outside UserSyncState so account-data wipes cannot reset publication identity.
+model AgentCaptureAccount {
+  userId           Int @id @map("user_id")
+  publishedCounter Int @default(0) @map("published_counter")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("agent_capture_accounts")
+}
+
+// A published row is a terminal receipt: clear title/notes, retain op ID and seq.
+// No relation to Operation: deletion, imports and pruning must not erase receipts.
+// The migration also checks that both receipt fields are null or both are set;
+// Prisma cannot express CHECK constraints, so db-push setups omit that check.
+model AgentCapture {
+  userId             Int     @map("user_id")
+  captureId          String  @map("capture_id")
+  title              String
+  notes              String?
+  publishedOpId      String? @map("published_op_id")
+  publishedServerSeq Int?    @map("published_server_seq")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([userId, captureId])
+  @@map("agent_captures")
 }

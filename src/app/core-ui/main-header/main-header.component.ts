@@ -214,7 +214,7 @@ export class MainHeaderComponent implements OnDestroy {
     if (this.isSyncInProgress()) {
       return T.MH.SYNC_STATE.SYNCING;
     }
-    if (this.hasNoPendingOps()) {
+    if (this.hasNoPendingOps() && this.syncState() === 'IN_SYNC') {
       return T.MH.SYNC_STATE.IN_SYNC;
     }
     return T.MH.TRIGGER_SYNC;

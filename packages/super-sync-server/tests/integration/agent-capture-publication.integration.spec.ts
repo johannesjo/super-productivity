@@ -1,7 +1,7 @@
 /**
- * PostgreSQL feasibility coverage for the publication-first agent-capture
- * candidate. The queue tables are test-only raw SQL owned by the harness; task
- * operations are accepted by the ordinary SyncService upload path.
+ * PostgreSQL coverage for the production capture publication transaction.
+ * The harness seeds captures and injects faults; publication uses the production
+ * service and Prisma models through the ordinary SyncService upload path.
  *
  * Requires DATABASE_URL and the SuperSync schema, for example the isolated
  * capture spike database provisioned for this experiment.
@@ -23,7 +23,7 @@ const DATABASE_URL = process.env.DATABASE_URL;
 const describeWithDb = DATABASE_URL ? describe : describe.skip;
 const RUN_ID = `${Date.now()}-${process.pid}`;
 
-describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
+describeWithDb('Agent capture publication (PostgreSQL)', () => {
   const userIds: number[] = [];
   let counter = 0;
   const harness = createAgentCapturePublicationHarness(prisma);
@@ -97,7 +97,12 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
   it('recovers one terminal receipt after a lost response and a new helper instance', async () => {
     const userId = await createUser();
     const captureId = unique('lost-response');
-    await harness.enqueueCapture({ userId, captureId, title: 'Capture once' });
+    await harness.enqueueCapture({
+      userId,
+      captureId,
+      title: 'Capture once',
+      notes: 'Clear on publication',
+    });
     const candidate = makeTaskCandidate(userId, 0);
 
     const first = await publish(userId, captureId, candidate, 0);
@@ -117,6 +122,12 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
     });
     expect(retry).toEqual({ status: 'already_published', receipt: first.receipt });
     expect(await restarted.countCaptureActorOperations({ userId })).toBe(1);
+    expect(
+      await prisma.agentCapture.findUnique({
+        where: { userId_captureId: { userId, captureId } },
+      }),
+    ).toMatchObject({ title: '', notes: null, publishedOpId: first.receipt.opId });
+    expect(await restarted.readPendingCapture({ userId, captureId })).toBeNull();
   });
 
   /**
@@ -305,6 +316,23 @@ describeWithDb('Agent capture publication spike (PostgreSQL)', () => {
     expect(await harness.readCaptureReceipt({ userId, captureId })).toBeNull();
     expect(await harness.countCaptureActorOperations({ userId })).toBe(0);
     expect(await harness.readPublicationWatermark({ userId })).toBe(0);
+    expect(await harness.readPendingCapture({ userId, captureId })).toMatchObject({
+      title: 'Rollback',
+    });
+  });
+
+  it('removes capture data only when the owning account is deleted', async () => {
+    const userId = await createUser();
+    const captureId = unique('account-deletion');
+    await harness.enqueueCapture({ userId, captureId, title: 'Delete with account' });
+    expect(
+      (await publish(userId, captureId, makeTaskCandidate(userId, 0), 0)).status,
+    ).toBe('published');
+
+    await prisma.user.delete({ where: { id: userId } });
+
+    expect(await harness.readCaptureReceipt({ userId, captureId })).toBeNull();
+    expect(await prisma.agentCaptureAccount.findUnique({ where: { userId } })).toBeNull();
   });
 
   it('returns no receipt for a capture ID that was never queued', async () => {

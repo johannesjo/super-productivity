@@ -25,8 +25,12 @@ import {
 } from './sync.routes.payload';
 import { uploadOpsHandler } from './sync.routes.ops-handler';
 import { uploadSnapshotHandler } from './sync.routes.snapshot-handler';
+import { registerCaptureDeliveryRoutes } from './capture-delivery.routes';
 
-export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
+export const syncRoutes = async (
+  fastify: FastifyInstance,
+  options: { captureDeliveryEnabled?: boolean },
+): Promise<void> => {
   // Add content type parser for gzip-encoded JSON
   // This allows clients to send compressed request bodies with Content-Encoding: gzip
   fastify.addContentTypeParser(
@@ -70,6 +74,7 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
 
   // All sync routes require authentication
   fastify.addHook('preHandler', authenticate);
+  registerCaptureDeliveryRoutes(fastify, options.captureDeliveryEnabled === true);
 
   // POST /api/sync/ops - Upload operations
   // Route-level limiting is a pre-auth per-IP backstop for upload floods before
@@ -178,7 +183,10 @@ export const syncRoutes = async (fastify: FastifyInstance): Promise<void> => {
           gapDetected: gapDetected || undefined, // Only include if true
           snapshotVectorClock, // Aggregated clock from skipped ops for conflict resolution
           serverTime: Date.now(), // For client clock drift detection
-          capabilities: { causalRepairSnapshots: true },
+          capabilities: {
+            causalRepairSnapshots: true,
+            captureDelivery: options.captureDeliveryEnabled === true,
+          },
         };
 
         return reply.send(response);

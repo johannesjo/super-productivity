@@ -1,5 +1,7 @@
 import type {
+  CapturePublicationResponse,
   OpUploadResponse,
+  PendingAgentCapture,
   RestorePointsResponse,
   RestoreSnapshotResponse,
   SnapshotUploadResponse,
@@ -24,6 +26,8 @@ import type {
 export interface SuperSyncResponseValidators {
   validateOpUpload(data: unknown): OpUploadResponse;
   validateOpDownload(data: unknown): SuperSyncOpDownloadResponse;
+  validatePendingCapture(data: unknown): { capture: PendingAgentCapture | null };
+  validateCapturePublication(data: unknown): CapturePublicationResponse;
   validateSnapshotUpload(data: unknown): SnapshotUploadResponse;
   validateRestorePoints(data: unknown): RestorePointsResponse;
   validateRestoreSnapshot(data: unknown): RestoreSnapshotResponse;

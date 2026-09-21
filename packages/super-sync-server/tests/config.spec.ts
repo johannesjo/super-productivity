@@ -11,6 +11,22 @@ const importConfig = async () => {
   return await import('../src/config');
 };
 
+describe('agent capture delivery switch', () => {
+  afterEach(resetEnv);
+
+  it('defaults off and accepts only explicit booleans', async () => {
+    const { loadConfigFromEnv } = await importConfig();
+    delete process.env.ENABLE_AGENT_CAPTURE_DELIVERY;
+    expect(loadConfigFromEnv().agentCaptureDeliveryEnabled).toBe(false);
+    process.env.ENABLE_AGENT_CAPTURE_DELIVERY = 'true';
+    expect(loadConfigFromEnv().agentCaptureDeliveryEnabled).toBe(true);
+    process.env.ENABLE_AGENT_CAPTURE_DELIVERY = 'false';
+    expect(loadConfigFromEnv().agentCaptureDeliveryEnabled).toBe(false);
+    process.env.ENABLE_AGENT_CAPTURE_DELIVERY = 'yes';
+    expect(() => loadConfigFromEnv()).toThrow('ENABLE_AGENT_CAPTURE_DELIVERY');
+  });
+});
+
 describe('parseCorsOrigin', () => {
   beforeEach(() => {
     resetEnv();
