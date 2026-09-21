@@ -20,8 +20,8 @@ Probe source and reference: [`packages/super-sync-server/tests/experiments/agent
   transaction, authenticated app delivery routes, and encrypted app preparation
   followed by ordinary sync replay. `ENABLE_AGENT_CAPTURE_DELIVERY` defaults to
   false; older/disabled servers are not polled by the app.
-- **Validated locally:** two-device edit/delete, lost-response restart, and the
-  bounded sync batch. Release gate 4 still requires the remaining failure and
+- **Validated locally:** two-device edit/delete, lost-response restart, competing
+  app publishers, tab closure before submission, and the bounded sync batch. Release gate 4 still requires the remaining failure and
   restore-recovery evidence; local tests do not establish connector behavior.
 - **Externally blocked:** the real connector spike (gate 3) needs a publicly
   reachable deployment and an assistant account.
@@ -195,6 +195,8 @@ release gate 4.
   deferral or a full batch while ordinary uploads continue.
 - Browser validation uses real app sync and authenticated HTTP against seeded
   PostgreSQL rows, rather than calling a test-only publisher from the app.
+  Five scenarios cover edit/delete, response loss after commit, a bounded batch,
+  competing publishers, and tab closure before submission.
 
 **Needs an explicit submission contract, informed by Part 1 and later validated
 through the real connector:**

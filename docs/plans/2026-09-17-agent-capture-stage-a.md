@@ -1120,6 +1120,21 @@ actual supported workflow. A longer schedule does not by itself justify them.
 
 ## Validation record
 
+- 2026-09-21: two additional production HTTP-delivery browser tests pass against
+  disposable PostgreSQL and the real app/server. The first holds two independently
+  prepared publication requests until both arrive, proves neither task exists
+  optimistically, then releases both: one returns `published`, the other
+  `already_published`, both apps receive one task through ordinary replay, and
+  later sync retains the same receipt and single server operation. The second
+  closes a tab while its publication request is held before forwarding; no
+  receipt or operation exists, the queue remains pending, and reopening the same
+  browser storage delivers exactly once. These complement the existing response
+  loss after commit, edit/delete, and batch-limit cases, bringing the production
+  HTTP-delivery suite to five scenarios. The two new tests and their required
+  `checkFile` pass. This demonstrates tab interruption, not process power-loss
+  durability or assistant transport behavior; the submission contract, real
+  connector/OAuth, and restore reconciliation gates remain open.
+
 - 2026-09-21: the client delivery slice adds authenticated app-only pending/read
   and publication routes, an optional advertised provider capability, and a
   disabled-by-default deployment flag. Preparation reuses the canonical Inbox
