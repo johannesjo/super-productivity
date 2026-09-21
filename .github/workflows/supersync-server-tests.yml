@@ -108,4 +108,5 @@ jobs:
         working-directory: packages/super-sync-server
         env:
           DATABASE_URL: postgresql://supersync:superpassword@localhost:5432/supersync_db
+          BACKUP_TEST_DB_CONTAINER: ${{ job.services.postgres.id }}
         run: npm run test:integration:postgres

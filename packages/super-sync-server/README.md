@@ -279,11 +279,13 @@ All configuration is done via environment variables.
 `ENABLE_AGENT_CAPTURE_DELIVERY` defaults to `false`. Set it to `true` only after
 the capture delivery rollout and restore procedure are ready (Helm:
 `supersync.agentCaptureDeliveryEnabled`). Before restoring a database, stop
-delivery with this switch and restart the server so no capture can publish
-against restored rows. Keep it paused while reconciling pending captures with
+delivery with this switch and recreate containers with the updated environment
+so no capture can publish against restored rows. Keep it paused while reconciling pending captures with
 tasks already delivered to devices, resolving ambiguous items with the user.
 Do not silently discard accepted captures. Resume only after that reconciliation
-by deliberately setting the switch back to `true`.
+by deliberately setting the switch back to `true`. See
+[Capture restore hold](docs/backup-and-recovery.md#capture-restore-hold) for the
+procedure and the unresolved resumption gate.
 
 ### Legal pages
 

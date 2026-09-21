@@ -14,8 +14,9 @@ Probe source and reference: [`packages/super-sync-server/tests/experiments/agent
 - **Open, informed by Part 1:** who owns the stable submission identity across
   retries, and the endpoint response for a reused identity with conflicting
   content. The real connector path must validate the eventual contract.
-- **Open, needs Part 2:** how capture consumption pauses and resumes after a server
-  database restore. Restored database state alone cannot reveal the rollback.
+- **Open, needs Part 2:** reconciliation before capture consumption resumes after
+  a server database restore. The deployment pause exists; restored database state
+  alone cannot establish which pending captures already published.
 - **Delivery slice implemented:** Prisma capture storage, the publication
   transaction, authenticated app delivery routes, and encrypted app preparation
   followed by ordinary sync replay. `ENABLE_AGENT_CAPTURE_DELIVERY` defaults to
@@ -136,19 +137,20 @@ handling. Gate 3 stays open regardless of the outcome.
 
 ## Part 2 — decide the restore recovery policy
 
-Start with an operator runbook as the leanest policy, but release still needs an
-executable way to pause capture consumption before a restored server accepts
-work. If the deployment cannot guarantee that pause, add a durable control
-outside the restored database or another concrete startup procedure before
-release. A flag stored only in the database can be rolled back by the same
-restore and cannot detect that a restore occurred.
+Use the deployment pause and operator runbook before a restored server accepts
+capture work. The remaining decision is how to reconcile evidence and resume,
+not how to store a pause flag. The pause must remain outside the restored
+database: a database-only flag can roll back with the same restore.
 
 A point-in-time restore rolls back the queue row, the publication watermark, the
 account generation and the accepted operation together, while a device keeps the
 task it already downloaded. Every fence then agrees with a capture that was never
-published, so it publishes a second task. This is characterized by a passing test
-and cannot be detected from restored server rows — the evidence was in the rows
-the restore discarded.
+published, so it can accept another create operation for the same capture.
+Production fixes the task ID to `capture-${captureId}`; the effect on retained
+edits/deletions needs replay evidence, rather than assuming two distinct tasks.
+The older service-level test used distinct task IDs. The lost-publication history
+cannot be detected from restored server rows — the evidence was in the rows the
+restore discarded.
 
 The runbook must separately describe **pause** and **resolution/resumption**:
 keep consumption paused while the operator reconciles restored pending captures
@@ -158,8 +160,13 @@ that ambiguity is resolved and the pause is deliberately cleared. Record the
 selected mechanism and procedure in the Stage A plan's restore section and
 failure table. The deployment flag `ENABLE_AGENT_CAPTURE_DELIVERY=false` now provides the
 pause outside the restored database. Keep it false before starting a restored
-server. The reconciliation/resumption procedure remains undecided, so the
-restore gate stays open.
+server. The operator procedure is now documented in
+[Capture restore hold](../../packages/super-sync-server/docs/backup-and-recovery.md#capture-restore-hold).
+Accounts recovery backups now preserve pending captures, receipts and publisher
+counters in the same snapshot as credentials. A real dump/restore regression
+failed before this correction and passes afterward. Publications after backup
+time remain ambiguous; an evidence-backed reconciliation transaction and verified
+resumption remain release gates.
 
 ---
 

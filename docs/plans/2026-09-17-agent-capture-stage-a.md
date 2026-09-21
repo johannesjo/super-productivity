@@ -157,8 +157,8 @@ plaintext capture channel even when ordinary sync uses end-to-end encryption.
 Do not promise deletion from every copy on import. The server's
 [backup script](../../packages/super-sync-server/scripts/backup.sh) includes a
 full database dump and configurable retention (14 days by default); adding a
-queue table would include it unless the backup policy changes. Accounts-only
-recovery would not recover queued captures. Decide the live queue retention,
+queue table would include it unless the backup policy changes. Accounts recovery dumps now include the queue, terminal receipts and publisher
+counters; older accounts-only dumps contain no capture ledger. Decide the live queue retention,
 backup retention, restore behavior, and user-visible expiry treatment before
 production. Accepted captures awaiting a device must not disappear silently.
 
@@ -1030,10 +1030,12 @@ is the failure.
 
 Every existing fence then agrees with a capture that was never published. The
 restored generation matches, the watermark matches, the queue row is pending
-again, and the candidate's operation ID is unoccupied. Publication succeeds and
-creates a second task, so the device that kept the first one now holds two tasks
-for one capture. The server retains nothing that distinguishes this from a first
-publication, and no server-side check can, because the evidence was in the rows
+again, and the candidate's operation ID is unoccupied. The service-level test
+publishes a fresh task ID and demonstrates a second publication. Current production preparation and HTTP validation instead require
+`capture-${captureId}` as the task ID: another accepted create would target that
+same task. Its effect on retained edits/deletions needs ordinary replay evidence;
+the service-only test does not establish two distinct production tasks. The
+server retains nothing that distinguishes this from a first publication, and no server-side check can, because the evidence was in the rows
 the restore discarded.
 
 This is characterization of an unfixed gate, not an accepted outcome. It confirms
@@ -1042,14 +1044,20 @@ paused after a restore until recovery resolves the ambiguity, and that pause is
 an operational policy the maintainer owns rather than something publication can
 enforce. Detecting it at all would need evidence the restore cannot roll back —
 for example a device reporting its retained receipt, or a restore procedure that
-advances the data generation. Selecting the executable mechanism remains open. The initial recommendation is
-an operator runbook, with consumption paused before restored service resumes.
+advances the data generation to fence old preparations. Advancing generation
+alone cannot classify pending captures: a fresh preparation can still republish.
+The deployment-level pause now exists, and the
+[operator restore hold](../../packages/super-sync-server/docs/backup-and-recovery.md#capture-restore-hold)
+documents its use before restored service resumes.
 Pausing alone does not resolve ambiguous pending captures: reconcile retained
 device deliveries or explicitly resolve those items with the user before
 resuming, without silently discarding accepted work. A database-only pause flag
 can itself be rolled back; restore automation must set any such control after
-restoration or use a control outside that database. No pause/resumption mechanism
-is implemented by the internal publication service.
+restoration or use a control outside that database. The HTTP routes honor
+`ENABLE_AGENT_CAPTURE_DELIVERY=false`; the internal publication service does not
+detect restores. Accounts recovery backups now retain the capture ledger, but
+reconciliation of publications after the snapshot and verified resumption remain
+open. Do not infer non-delivery from an absent task, operation or pruned clock.
 
 ### Failure tests required before production
 
@@ -1119,6 +1127,21 @@ replicas, and encryption-key transfer remain separate scope decisions tied to an
 actual supported workflow. A longer schedule does not by itself justify them.
 
 ## Validation record
+
+- 2026-09-21: a real backup/restore regression reproduced loss of the entire
+  capture ledger in the recommended accounts-only recovery artifact: the
+  unmodified `backup.sh` dump restored only `users` and `passkeys`. The script now
+  includes `agent_capture_accounts` and `agent_captures` in that same `pg_dump`
+  snapshot, preserving server-only pending content, terminal receipts and
+  publisher counters while still excluding the operation log. The real restore
+  test passes after the change, including private artifact permissions, account
+  generation and passkeys; the three existing backup-script tests pass. The
+  PostgreSQL CI command includes the regression and passes its service-container
+  ID. Operator docs now require capture to remain paused, preserve terminal
+  receipts even without retained operations, distinguish missing evidence from
+  non-delivery, and explicitly gate resumption. This fixes backup omission, not
+  rollback ambiguity or automatic reconciliation. Production runtime sync and
+  publication code did not change in this slice.
 
 - 2026-09-21: two additional production HTTP-delivery browser tests pass against
   disposable PostgreSQL and the real app/server. The first holds two independently

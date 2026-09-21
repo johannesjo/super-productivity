@@ -4,16 +4,19 @@
 
 Super Productivity uses an append-only operation log for sync. Every client (desktop, mobile, web) keeps a full copy of its data in local IndexedDB. The server is a relay — **clients are the source of truth**, not the server.
 
-This means disaster recovery is simpler than in a traditional server-authoritative system: as long as one client device survives, all data can be recovered.
+Clients can recover ordinary task state when a complete device copy survives.
+Pending agent captures and their delivery ledger are server-only data; a device
+backup cannot reconstruct captures that never reached a device.
 
 ## What the Backup Protects
 
-| Data                                 | Where it lives             | Why back it up                             |
-| ------------------------------------ | -------------------------- | ------------------------------------------ |
-| User accounts (email, password hash) | Server only                | Users can't authenticate without this      |
-| Passkeys (WebAuthn credentials)      | Server only                | Can't be regenerated                       |
-| Operation log                        | Server + all clients       | Last resort if all client devices are lost |
-| Task/project/tag data                | Derived from operation log | Clients reconstruct from ops               |
+| Data                                           | Where it lives             | Why back it up                                   |
+| ---------------------------------------------- | -------------------------- | ------------------------------------------------ |
+| User accounts (email, password hash)           | Server only                | Users can't authenticate without this            |
+| Capture queue, receipts and publisher counters | Server only                | Preserve accepted captures and delivery identity |
+| Passkeys (WebAuthn credentials)                | Server only                | Can't be regenerated                             |
+| Operation log                                  | Server + all clients       | Last resort if all client devices are lost       |
+| Task/project/tag data                          | Derived from operation log | Clients reconstruct from ops                     |
 
 ## Backup Setup
 
@@ -22,7 +25,16 @@ This means disaster recovery is simpler than in a traditional server-authoritati
 The backup script creates two dumps:
 
 - **Full dump** (`supersync_*.sql.gz`) — complete database including all operations (~300MB+ for active instances)
-- **Accounts-only dump** (`supersync_accounts_*.sql.gz`) — just `users` and `passkeys` tables (tiny, <1MB)
+- **Accounts recovery dump** (`supersync_accounts_*.sql.gz`) — `users`, `passkeys`,
+  `agent_capture_accounts`, and `agent_captures` in one consistent snapshot. The
+  filename is retained for existing automation; this dump excludes operations
+  and snapshots. Its size also depends on the pending capture queue.
+
+Both dumps contain credentials and **plaintext capture titles/notes** pending
+publication. The script uses private file permissions; apply the same access and
+retention controls to off-site copies. Publication clears the live title/notes,
+not copies already in backups. Dumps made before this change contain only users
+and passkeys in the accounts file and cannot recover the capture ledger.
 
 ```bash
 # Run manually
@@ -69,32 +81,37 @@ This is the simplest and most reliable recovery method when at least one client 
 
 **How it works:**
 
-1. Restore the accounts-only dump (users + passkeys)
-2. Sync data (operations, snapshots) starts empty
-3. When clients reconnect, gap detection fires automatically
-4. Each client re-uploads its full state to the server
-5. All clients converge to a consistent state
+1. If capture has ever been used, follow [Capture restore hold](#capture-restore-hold)
+   before reconnecting clients.
+2. Restore the accounts recovery dump (credentials + capture ledger)
+3. Sync data (operations, snapshots) starts empty
+4. When clients reconnect, gap detection fires automatically
+5. Each client re-uploads its full state to the server
+6. Ordinary task state converges; capture delivery stays paused pending reconciliation
 
 **Steps:**
 
 ```bash
-# 1. Restore accounts from backup
+# Restore into the prepared recovery database while application servers are stopped.
+# For capture-enabled deployments, complete the capture restore hold below first.
 gunzip -c backups/supersync_accounts_YYYYMMDD_HHMMSS.sql.gz | \
   docker exec -i supersync-postgres psql -U supersync supersync
 
-# 2. That's it — clients will re-sync automatically when they connect
+# Reconnect clients only after verifying the restored schema and capture pause.
 ```
 
 **Why this is preferred:**
 
 - Avoids `SYNC_IMPORT_EXISTS` conflicts that occur with partial restores
-- Clients hold the complete data — they are the authoritative source
+- Clients hold ordinary task state; the dump preserves the server-only capture ledger
 - Produces a clean, consistent server state
 - Verified by e2e tests (`supersync-server-backup-revert.spec.ts`)
 
 ### Fallback: Full Database Restore
 
 Use this only if **all client devices are lost** (no client can re-upload data).
+If capture has ever been used, follow [Capture restore hold](#capture-restore-hold)
+before restarting the server.
 
 ```bash
 # 1. Stop the server
@@ -106,8 +123,8 @@ docker exec -i supersync-postgres psql -U supersync supersync \
 gunzip -c backups/supersync_YYYYMMDD_HHMMSS.sql.gz | \
   docker exec -i supersync-postgres psql -U supersync supersync
 
-# 3. Restart the server
-docker compose start supersync
+# 3. Recreate the server with the recovery environment (capture delivery disabled).
+docker compose up -d --force-recreate supersync
 ```
 
 > **Note:** The database name (`supersync` above) must match your deployment's
@@ -125,6 +142,66 @@ Server is down / data lost
 │   └── NO  → Use full database restore (fallback)
 │             Accept data loss since last backup
 ```
+
+## Capture restore hold
+
+This applies to full and accounts recovery, including per-user reconstruction.
+It prevents automatic capture publication while evidence is being reconciled;
+it is not an automatic reconciliation mechanism. The switch is deployment-wide,
+so unresolved accounts keep capture delivery paused for the whole deployment.
+Ordinary task sync may resume separately once its recovery is verified.
+
+1. Stop every application server/replica and exclude traffic **before** restoring.
+   Let in-flight requests stop; changing a setting cannot undo a committed request.
+   Preserve the pre-recovery database, available backups and device copies before
+   overwriting anything. Record the selected snapshot time and incident interval.
+2. Set `ENABLE_AGENT_CAPTURE_DELIVERY=false` in the deployment environment outside
+   the restored database (Helm: `supersync.agentCaptureDeliveryEnabled=false`).
+   Verify every replica uses it. With Compose, recreate containers after changing
+   the environment; `docker compose start` or `restart` retains their old environment.
+3. Restore into an isolated database and check the capture tables alongside the
+   account data. An older accounts-only dump lacks them: do not interpret missing
+   tables as an empty queue. Preserve an available full dump and determine what
+   capture evidence it contains before allowing capture to resume.
+4. Before opening traffic, use a disposable app account to verify authenticated
+   `/api/sync/ops` advertises `capabilities.captureDelivery=false` and both
+   `/api/sync/captures/pending` and `/api/sync/captures/publish` return `503`.
+   A client that cached the earlier capability must also be refused on publication.
+5. Inventory capture IDs and receipt metadata per account without copying titles,
+   notes, credentials or encryption keys into incident logs. Handle recovery
+   artifacts as private user data. Reconcile the interval after the chosen backup
+   against evidence retained outside the rollback and affected users' decisions.
+
+| Evidence                                             | Required handling                                                                                                                                                       |
+| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Restored terminal receipt                            | Keep it terminal even if its operation is absent or its sequence exceeds the recovered log. Pruning, imports and accounts recovery legitimately leave such receipts.    |
+| Restored pending row                                 | Treat delivery as unknown until independently established. Its title/notes are historical input, not proof that it was never delivered.                                 |
+| No task or capture actor on one device               | Insufficient evidence: the user may have edited/deleted/imported the task, and bounded clocks may have pruned the actor.                                                |
+| Confirmed publication after the backup               | Preserve the retained operation/receipt identity and resulting user changes; reconcile the account's publisher counter as well. Do not turn it into a fresh submission. |
+| Missing queue/receipt evidence or an unresolved item | Keep capture paused. Obtain the user's explicit resolution rather than silently deleting or replaying accepted work.                                                    |
+
+**Resumption remains a release gate.** Before enabling delivery, the maintainer
+must have an account-by-account recovery record covering all restored pending
+items, any accepted submissions absent from the snapshot, terminal receipts,
+publisher counters and relevant account/key generations. Restored counters and
+generations may also have rolled back; neither bumping them nor resetting the
+account determines whether an individual capture was delivered. Never fabricate
+receipt IDs or sequences to hide an unresolved item.
+
+The current tools do not reconstruct that missing evidence or implement an
+operator resolution transaction. Rehearse the chosen reconciliation on an
+isolated restore and verify ordinary replay on surviving and fresh clients before
+approving it for an incident. Resume only after all ambiguities are resolved and
+the deployment switch is deliberately enabled. If the required evidence cannot
+be recovered, keep delivery disabled; this procedure does not authorize data loss.
+
+The real dump/restore regression is
+`tests/integration/agent-capture-backup.integration.spec.ts`. It verifies that the
+accounts artifact restores pending content, terminal receipts, publisher counters,
+account generation and passkeys, excludes the operation log, and remains private.
+Run with `DATABASE_URL` and `BACKUP_TEST_DB_CONTAINER` pointing to the same isolated
+PostgreSQL container; the canonical PostgreSQL CI job supplies both. The delivery
+route suite separately verifies the pause responses.
 
 ## Per-User Recovery (single account wiped)
 

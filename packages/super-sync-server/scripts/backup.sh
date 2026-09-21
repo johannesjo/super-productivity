@@ -22,9 +22,9 @@
 #   3. Set RCLONE_REMOTE below
 
 set -eo pipefail
-# The full dump is the whole database and the accounts dump is users + passkeys — password
-# hashes and passkey credentials. Under root cron the default umask is 022, so without this
-# both land 0644 and every local account on the host can read them.
+# Both dumps contain credentials and plaintext pending captures. Under root cron
+# the default umask is 022: without this both land 0644 and every local account
+# on the host can read them.
 umask 077
 
 # Configuration
@@ -89,13 +89,15 @@ echo "    Date: $DATE"
 echo "    Output: $BACKUP_FILE"
 echo ""
 
-# Step 1: Create minimal accounts-only dump (users + passkeys)
-# This is tiny and sufficient for disaster recovery when clients still have data.
-# Recovery: restore accounts, wipe sync data, let clients re-upload.
+# Step 1: Preserve accounts and server-only capture state in one snapshot.
+# Keep the existing accounts filename, but include pending captures (which may
+# exist on no device), terminal receipts, and their publisher counters.
+# Recovery: keep capture delivery paused while clients re-upload ordinary data.
 # It runs BEFORE the 1-2 h full dump so a crash inside that window (#9695 hit the
 # dump window twice in five occurrences) cannot take both artifacts.
-echo "==> Creating accounts-only dump (users + passkeys)..."
-run_pg_dump --table=users --table=passkeys | gzip > "$ACCOUNTS_FILE.tmp"
+echo "==> Creating accounts recovery dump (credentials + capture ledger)..."
+run_pg_dump --table=users --table=passkeys \
+  --table=agent_capture_accounts --table=agent_captures | gzip > "$ACCOUNTS_FILE.tmp"
 mv "$ACCOUNTS_FILE.tmp" "$ACCOUNTS_FILE"
 
 ACCOUNTS_SIZE=$(du -h "$ACCOUNTS_FILE" | cut -f1)
