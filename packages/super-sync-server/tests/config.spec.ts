@@ -25,6 +25,34 @@ describe('agent capture delivery switch', () => {
     process.env.ENABLE_AGENT_CAPTURE_DELIVERY = 'yes';
     expect(() => loadConfigFromEnv()).toThrow('ENABLE_AGENT_CAPTURE_DELIVERY');
   });
+
+  it('narrows delivery to allowlisted accounts, never widening a paused switch', async () => {
+    const { loadConfigFromEnv, isCaptureDeliveryEnabledFor } = await importConfig();
+    delete process.env.AGENT_CAPTURE_DELIVERY_EMAILS;
+    process.env.ENABLE_AGENT_CAPTURE_DELIVERY = 'true';
+    expect(loadConfigFromEnv().agentCaptureDeliveryEmails).toBeNull();
+    expect(isCaptureDeliveryEnabledFor(loadConfigFromEnv(), 'anyone@test.local')).toBe(
+      true,
+    );
+
+    process.env.AGENT_CAPTURE_DELIVERY_EMAILS = ' Me@Test.local , other@test.local,';
+    const narrowed = loadConfigFromEnv();
+    expect(narrowed.agentCaptureDeliveryEmails).toEqual([
+      'me@test.local',
+      'other@test.local',
+    ]);
+    expect(isCaptureDeliveryEnabledFor(narrowed, 'ME@test.local')).toBe(true);
+    expect(isCaptureDeliveryEnabledFor(narrowed, 'anyone@test.local')).toBe(false);
+
+    process.env.ENABLE_AGENT_CAPTURE_DELIVERY = 'false';
+    expect(isCaptureDeliveryEnabledFor(loadConfigFromEnv(), 'me@test.local')).toBe(false);
+
+    // docker-compose substitutes an empty string for an unset variable.
+    process.env.AGENT_CAPTURE_DELIVERY_EMAILS = ' ';
+    expect(loadConfigFromEnv().agentCaptureDeliveryEmails).toBeNull();
+    process.env.AGENT_CAPTURE_DELIVERY_EMAILS = 'not-an-email';
+    expect(() => loadConfigFromEnv()).toThrow('AGENT_CAPTURE_DELIVERY_EMAILS');
+  });
 });
 
 describe('parseCorsOrigin', () => {

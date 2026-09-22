@@ -45,6 +45,7 @@ services:
       - MIGRATE_RECOVERY_RUNTIME=compose
       - JWT_SECRET=${JWT_SECRET}
       - ENABLE_AGENT_CAPTURE_DELIVERY=${ENABLE_AGENT_CAPTURE_DELIVERY:-false}
+      - AGENT_CAPTURE_DELIVERY_EMAILS=${AGENT_CAPTURE_DELIVERY_EMAILS:-}
       - PUBLIC_URL=${PUBLIC_URL:-http://localhost:1900}
       - CORS_ORIGINS=${CORS_ORIGINS:-https://app.super-productivity.com}
       - SMTP_HOST=${SMTP_HOST:-}

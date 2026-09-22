@@ -9,6 +9,9 @@ data:
   HOST: {{ .Values.supersync.host | quote }}
   NODE_ENV: {{ .Values.supersync.nodeEnv | quote }}
   ENABLE_AGENT_CAPTURE_DELIVERY: {{ .Values.supersync.agentCaptureDeliveryEnabled | quote }}
+  {{- if .Values.supersync.agentCaptureDeliveryEmails }}
+  AGENT_CAPTURE_DELIVERY_EMAILS: {{ .Values.supersync.agentCaptureDeliveryEmails | quote }}
+  {{- end }}
   {{- if .Values.supersync.publicUrl }}
   PUBLIC_URL: {{ .Values.supersync.publicUrl | quote }}
   {{- end }}

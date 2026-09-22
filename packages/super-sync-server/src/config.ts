@@ -81,12 +81,33 @@ export interface PrivacyConfig {
  */
 export const isConsentRequired = (config: ServerConfig): boolean => !!config.privacy;
 
+/**
+ * Whether this account may read and publish queued captures. The switch pauses
+ * delivery deployment-wide; the optional allowlist narrows it to named accounts.
+ */
+export const isCaptureDeliveryEnabledFor = (
+  config: Pick<
+    ServerConfig,
+    'agentCaptureDeliveryEnabled' | 'agentCaptureDeliveryEmails'
+  >,
+  email: string,
+): boolean =>
+  config.agentCaptureDeliveryEnabled &&
+  (config.agentCaptureDeliveryEmails === null ||
+    config.agentCaptureDeliveryEmails.includes(email.toLowerCase()));
+
 export interface ServerConfig {
   port: number;
   host: string;
   dataDir: string;
   /** Operator switch used to pause capture delivery before a database restore. */
   agentCaptureDeliveryEnabled: boolean;
+  /**
+   * Lower-cased exact account emails that may consume capture delivery while
+   * the switch is on. `null` means every account. Lets a rollout start with a
+   * single account: no other client sees the capability or polls the queue.
+   */
+  agentCaptureDeliveryEmails: string[] | null;
   /**
    * Publicly reachable base URL used for links in emails.
    * Should point to the reverse-proxied address users can access.
@@ -148,6 +169,7 @@ const DEFAULT_CONFIG: ServerConfig = {
   host: '0.0.0.0',
   dataDir: './data',
   agentCaptureDeliveryEnabled: false,
+  agentCaptureDeliveryEmails: null,
   publicUrl: 'http://localhost:1900',
   cors: {
     enabled: true,
@@ -178,6 +200,18 @@ export const loadConfigFromEnv = (
       throw new Error('ENABLE_AGENT_CAPTURE_DELIVERY must be true or false');
     }
     config.agentCaptureDeliveryEnabled = value === 'true';
+  }
+  // Compose passes an empty string when the variable is unset; treat it as unset.
+  if (process.env.AGENT_CAPTURE_DELIVERY_EMAILS?.trim()) {
+    const emails = process.env.AGENT_CAPTURE_DELIVERY_EMAILS.split(',')
+      .map((email) => email.trim().toLowerCase())
+      .filter((email) => email.length > 0);
+    if (emails.some((email) => !email.includes('@'))) {
+      throw new Error(
+        'AGENT_CAPTURE_DELIVERY_EMAILS must be a comma-separated list of email addresses',
+      );
+    }
+    config.agentCaptureDeliveryEmails = emails;
   }
   if (process.env.PORT) {
     const parsedPort = parseInt(process.env.PORT, 10);

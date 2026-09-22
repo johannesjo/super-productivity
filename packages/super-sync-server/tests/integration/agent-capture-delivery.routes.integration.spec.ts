@@ -35,6 +35,7 @@ describeWithDb('agent capture delivery routes (PostgreSQL)', () => {
     users.push(user.id);
     return {
       userId: user.id,
+      email,
       token: jwt.sign(
         { userId: user.id, email, tokenVersion: user.tokenVersion ?? 0 },
         process.env.JWT_SECRET!,
@@ -201,6 +202,46 @@ describeWithDb('agent capture delivery routes (PostgreSQL)', () => {
     expect(
       await harness.readCaptureReceipt({ userId: user.userId, captureId }),
     ).toBeNull();
+  });
+
+  it('gates the capability and both routes per allowlisted account', async () => {
+    const listed = await createUser();
+    const unlisted = await createUser();
+    const narrowed = createServer({
+      port: Number(process.env.CAPTURE_ALLOWLIST_HTTP_TEST_PORT ?? 1911),
+      host: '127.0.0.1',
+      dataDir,
+      agentCaptureDeliveryEnabled: true,
+      agentCaptureDeliveryEmails: [listed.email],
+    });
+    const narrowedAddress = await narrowed.start();
+    const capability = async (token: string): Promise<boolean> => {
+      const download = await fetch(`${narrowedAddress}/api/sync/ops?sinceSeq=0`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      return (await download.json()).capabilities.captureDelivery;
+    };
+    const pending = (token: string) =>
+      fetch(`${narrowedAddress}/api/sync/captures/pending`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+    try {
+      expect(await capability(listed.token)).toBe(true);
+      expect((await pending(listed.token)).status).toBe(200);
+      expect(await capability(unlisted.token)).toBe(false);
+      expect((await pending(unlisted.token)).status).toBe(503);
+      const publish = await fetch(`${narrowedAddress}/api/sync/captures/publish`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${unlisted.token}`,
+          'Content-Type': 'application/json',
+        },
+        body: '{}',
+      });
+      expect(publish.status).toBe(503);
+    } finally {
+      await narrowed.stop();
+    }
   });
 
   it('advertises no capability and refuses reads and publication while paused', async () => {

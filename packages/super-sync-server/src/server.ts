@@ -10,6 +10,7 @@ import {
   ServerConfig,
   PrivacyConfig,
   isConsentRequired,
+  isCaptureDeliveryEnabledFor,
 } from './config';
 import { Logger } from './logger';
 import { prisma, disconnectDb } from './db';
@@ -492,7 +493,8 @@ export const createServer = (
       // Sync Routes (operation-based sync)
       await fastifyServer.register(syncRoutes, {
         prefix: '/api/sync',
-        captureDeliveryEnabled: fullConfig.agentCaptureDeliveryEnabled,
+        captureDeliveryEnabledFor: (user) =>
+          isCaptureDeliveryEnabledFor(fullConfig, user.email),
       });
 
       // WebSocket routes for real-time sync notifications

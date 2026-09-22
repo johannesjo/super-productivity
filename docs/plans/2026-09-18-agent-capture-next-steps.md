@@ -22,6 +22,8 @@ Probe source and reference: [`packages/super-sync-server/tests/experiments/agent
   transaction, authenticated app delivery routes, and encrypted app preparation
   followed by ordinary sync replay. `ENABLE_AGENT_CAPTURE_DELIVERY` defaults to
   false; older/disabled servers are not polled by the app.
+  `AGENT_CAPTURE_DELIVERY_EMAILS` narrows an enabled deployment to named
+  accounts (Part 4).
 - **Validated locally:** two-device edit/delete, lost-response restart, competing
   app publishers, tab closure before submission, and the bounded sync batch. Release gate 4 still requires the remaining failure and
   restore-recovery evidence; local tests do not establish connector behavior.
@@ -285,6 +287,55 @@ sync-correctness rules and
 starting, and start from a reproducible failure rather than adding guards.
 
 ---
+
+## Part 4 — single-account production trial
+
+Delivery can be switched on for one account without any other client noticing:
+`AGENT_CAPTURE_DELIVERY_EMAILS` narrows the capability and both routes to the
+listed accounts, so every other client keeps receiving
+`capabilities.captureDelivery=false` and never issues a queue request.
+
+What the trial cannot exercise: submission. No endpoint enqueues captures, so a
+row is inserted by hand. Everything after that row — queue read, encrypted
+preparation, publication, replay on every device — is the production path.
+
+1. Deploy with the two variables set (Compose: `.env`; Helm:
+   `supersync.agentCaptureDeliveryEnabled` / `agentCaptureDeliveryEmails`) and
+   recreate the container so it picks up the environment:
+
+   ```sh
+   ENABLE_AGENT_CAPTURE_DELIVERY=true
+   AGENT_CAPTURE_DELIVERY_EMAILS=you@example.com
+   ```
+
+2. Enqueue one capture for your own account. Use an opaque ID: it becomes the
+   task ID `capture-<id>` on every device and cannot be reused.
+
+   ```sql
+   INSERT INTO agent_captures (user_id, capture_id, title, notes)
+   SELECT id, gen_random_uuid()::text, 'Capture trial', NULL
+   FROM users WHERE email = 'you@example.com';
+   ```
+
+3. Trigger a sync in the app. The account must be end-to-end encrypted and have
+   synced at least once (preparation verifies the current encrypted baseline).
+   The task appears in the Inbox after the same sync; other devices receive it
+   through ordinary download. `agent_captures` then holds a receipt with empty
+   `title`/`notes`.
+
+4. If the row stays pending, the client is deferring: the header stays on
+   "trigger sync" and every cycle retries the full prepare/publish sequence. The
+   cause is in the client log as `Capture delivery deferred`; the server
+   rejection reason is in the publish response. Close a stuck row instead of
+   leaving it retrying:
+
+   ```sh
+   npm run capture-restore -- resolve <userId> <captureId> discarded_by_user
+   ```
+
+5. Finish by setting `ENABLE_AGENT_CAPTURE_DELIVERY=false` again, or keep the
+   allowlist in place. Do not unset the allowlist while the switch is on unless
+   the whole deployment is meant to be enabled.
 
 ## What not to do
 

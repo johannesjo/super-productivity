@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { SuperSyncDownloadOpsQuerySchema } from '@sp/shared-schema';
-import { authenticate, getAuthUser } from '../middleware';
+import { authenticate, getAuthUser, type AuthUser } from '../middleware';
 import { getSyncService } from './sync.service';
 import { parseAppVersion } from './checkpoint-gate';
 import { Logger } from '../logger';
@@ -27,10 +27,16 @@ import { uploadOpsHandler } from './sync.routes.ops-handler';
 import { uploadSnapshotHandler } from './sync.routes.snapshot-handler';
 import { registerCaptureDeliveryRoutes } from './capture-delivery.routes';
 
+export interface SyncRoutesOptions {
+  /** Per-account capture delivery gate; absent means delivery is off. */
+  captureDeliveryEnabledFor?: (user: AuthUser) => boolean;
+}
+
 export const syncRoutes = async (
   fastify: FastifyInstance,
-  options: { captureDeliveryEnabled?: boolean },
+  options: SyncRoutesOptions,
 ): Promise<void> => {
+  const captureDeliveryEnabledFor = options.captureDeliveryEnabledFor ?? (() => false);
   // Add content type parser for gzip-encoded JSON
   // This allows clients to send compressed request bodies with Content-Encoding: gzip
   fastify.addContentTypeParser(
@@ -74,7 +80,7 @@ export const syncRoutes = async (
 
   // All sync routes require authentication
   fastify.addHook('preHandler', authenticate);
-  registerCaptureDeliveryRoutes(fastify, options.captureDeliveryEnabled === true);
+  registerCaptureDeliveryRoutes(fastify, captureDeliveryEnabledFor);
 
   // POST /api/sync/ops - Upload operations
   // Route-level limiting is a pre-auth per-IP backstop for upload floods before
@@ -185,7 +191,7 @@ export const syncRoutes = async (
           serverTime: Date.now(), // For client clock drift detection
           capabilities: {
             causalRepairSnapshots: true,
-            captureDelivery: options.captureDeliveryEnabled === true,
+            captureDelivery: captureDeliveryEnabledFor(getAuthUser(req)),
           },
         };
 

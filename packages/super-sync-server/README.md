@@ -278,7 +278,11 @@ All configuration is done via environment variables.
 
 `ENABLE_AGENT_CAPTURE_DELIVERY` defaults to `false`. Set it to `true` only after
 the capture delivery rollout and restore procedure are ready (Helm:
-`supersync.agentCaptureDeliveryEnabled`). Before restoring a database, stop
+`supersync.agentCaptureDeliveryEnabled`). `AGENT_CAPTURE_DELIVERY_EMAILS`
+(comma-separated exact account emails; Helm: `supersync.agentCaptureDeliveryEmails`)
+narrows delivery to those accounts while the switch is on: every other account
+keeps seeing `capabilities.captureDelivery=false` and never polls the queue. Use
+it to roll out to a single account first. Before restoring a database, stop
 delivery with this switch and recreate containers with the updated environment
 so no capture can publish against restored rows. Keep it paused while reconciling pending captures with
 tasks already delivered to devices, resolving ambiguous items with the user.

@@ -1,7 +1,7 @@
 import type { FastifyInstance } from 'fastify';
 import { SuperSyncCapturePublicationRequestSchema } from '@sp/shared-schema';
 import { prisma } from '../db';
-import { getAuthUser } from '../middleware';
+import { getAuthUser, type AuthUser } from '../middleware';
 import { Logger } from '../logger';
 import { createCapturePublicationService } from './capture-publication.service';
 import { getSyncService } from './sync.service';
@@ -25,11 +25,13 @@ const rateLimit = { max: 100, timeWindow: '1 minute' };
 /** Called inside syncRoutes, after its authentication hook is installed. */
 export const registerCaptureDeliveryRoutes = (
   fastify: FastifyInstance,
-  enabled: boolean,
+  enabledFor: (user: AuthUser) => boolean,
 ): void => {
   fastify.get('/captures/pending', { config: { rateLimit } }, async (req, reply) => {
-    if (!enabled) return reply.status(503).send({ error: 'Capture delivery is paused' });
-    const userId = getAuthUser(req).userId;
+    const user = getAuthUser(req);
+    if (!enabledFor(user))
+      return reply.status(503).send({ error: 'Capture delivery is paused' });
+    const userId = user.userId;
     const capture = await publication.readNextPendingCapture({ userId });
     return reply.send({ capture });
   });
@@ -41,9 +43,10 @@ export const registerCaptureDeliveryRoutes = (
       config: { rateLimit },
     },
     async (req, reply) => {
-      if (!enabled)
+      const user = getAuthUser(req);
+      if (!enabledFor(user))
         return reply.status(503).send({ error: 'Capture delivery is paused' });
-      const userId = getAuthUser(req).userId;
+      const userId = user.userId;
       const parsed = SuperSyncCapturePublicationRequestSchema.safeParse(req.body);
       if (!parsed.success) {
         return reply.status(400).send(createValidationErrorResponse(parsed.error.issues));

@@ -40,6 +40,8 @@ supersync:
   nodeEnv: production
   # -- Pause capture delivery before a database restore; default off until rollout.
   agentCaptureDeliveryEnabled: false
+  # -- Comma-separated account emails allowed to use capture delivery; empty means every account.
+  agentCaptureDeliveryEmails: ""
   # -- REQUIRED: Public URL of the sync server (e.g. https://sync.example.com)
   publicUrl: ""
   cors:
