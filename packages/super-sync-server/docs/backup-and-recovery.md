@@ -400,6 +400,10 @@ passphrase, and writes an importable `AppDataComplete` JSON file. It is
 > against a known account (e.g. your own): recover at the latest seq and confirm
 > the entity counts match the live app.
 
+In the deployed container the compiled script is the entry (`docker compose
+exec supersync npm run recover-user -- …`); from a source checkout use
+`npm run recover-user:dev` with the same arguments.
+
 **1. Inspect** — find the cutoff sequence (no encryption key needed):
 
 ```bash
