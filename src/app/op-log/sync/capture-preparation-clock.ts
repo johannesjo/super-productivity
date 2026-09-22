@@ -19,6 +19,7 @@ export type CapturePreparationStore = Pick<
   | 'isRawRebuildIncomplete'
   | 'getPendingRemoteOps'
   | 'getFailedRemoteOps'
+  | 'getUnsynced'
 >;
 
 /**
@@ -67,20 +68,35 @@ export const findAppliedFullStateBaseline = async (
  * clock is not enough: downloaded-but-unapplied state must not reach the task
  * either. This reuses the conditions the ordinary incomplete-remote sync gate
  * already refuses on rather than inventing a second notion of "ready".
+ *
+ * A local full-state replacement that has not been uploaded yet is the other
+ * direction of the same problem. The sync cycle publishes captures BEFORE it
+ * uploads local ops, and a BACKUP_IMPORT or forced SYNC_IMPORT uploads as a
+ * clean slate that wipes server history — including a capture published a
+ * moment earlier, whose receipt then blocks any re-delivery. A plain import
+ * lands above the capture as a replacement boundary with the same effect on
+ * every other device. Deferring one cycle lets the upload land first.
  */
 export const findCapturePreparationBlocker = async (
   store: CapturePreparationStore,
 ): Promise<string | undefined> => {
-  const [isRawRebuildIncomplete, pendingRemoteOps, failedRemoteOps] = await Promise.all([
-    store.isRawRebuildIncomplete(),
-    store.getPendingRemoteOps(),
-    store.getFailedRemoteOps(),
-  ]);
+  const [isRawRebuildIncomplete, pendingRemoteOps, failedRemoteOps, unsynced] =
+    await Promise.all([
+      store.isRawRebuildIncomplete(),
+      store.getPendingRemoteOps(),
+      store.getFailedRemoteOps(),
+      store.getUnsynced(),
+    ]);
   if (isRawRebuildIncomplete) return 'an interrupted state rebuild is incomplete';
   if (pendingRemoteOps.length > 0)
     return `${pendingRemoteOps.length} downloaded operation(s) have not been applied`;
   if (failedRemoteOps.length > 0)
     return `${failedRemoteOps.length} downloaded operation(s) failed to apply`;
+  const unsyncedReplacements = unsynced.filter(
+    (entry) => entry.source === 'local' && isFullStateOpType(entry.op.opType),
+  );
+  if (unsyncedReplacements.length > 0)
+    return `${unsyncedReplacements.length} local full-state replacement(s) have not been uploaded`;
   return undefined;
 };
 

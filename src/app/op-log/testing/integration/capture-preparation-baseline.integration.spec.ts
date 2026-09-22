@@ -215,4 +215,27 @@ describe('Capture preparation baseline (integration, real op-log store)', () => 
     expect(preparationClock[DEVICE_A]).toBe(3);
     expect(classifyAgainstLocalImport(buildCandidateClock(preparationClock))).toBeTrue();
   });
+
+  it('should refuse to prepare while a LOCAL replacement is still unsynced', async () => {
+    // The clock above is right, but the ORDER on the server is not yet: the
+    // cycle publishes captures before it uploads local ops, and a BACKUP_IMPORT
+    // uploads as a clean slate that deletes everything published before it. The
+    // capture's receipt would then survive the op it points at. Deferring until
+    // the replacement has uploaded is the only ordering that keeps both.
+    await store.setVectorClock({ [DEVICE_A]: 2 });
+    const localImport = createOp('local-backup-import', {
+      opType: OpType.BackupImport,
+      clientId: DEVICE_A,
+      vectorClock: { [DEVICE_A]: 3 },
+    });
+    const seq = await store.append(localImport, 'local');
+
+    expect(await findCapturePreparationBlocker(store)).toBe(
+      '1 local full-state replacement(s) have not been uploaded',
+    );
+
+    // Once uploaded it is ordinary applied history again and the gate reopens.
+    await store.markSynced([seq]);
+    expect(await findCapturePreparationBlocker(store)).toBeUndefined();
+  });
 });
