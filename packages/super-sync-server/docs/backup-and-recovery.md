@@ -205,7 +205,14 @@ evidence: nothing in the restored rows can tell delivery from non-delivery,
 which is why every resolution is an operator command rather than an automatic
 repair.
 
+In the deployed container the compiled script is the entry, since the image
+installs no development dependencies; from a source checkout use
+`npm run capture-restore:dev` with the same arguments.
+
 ```sh
+# Deployed container: prefix every command below with
+docker compose exec supersync npm run capture-restore -- status
+
 # Exits 1 while any restored pending capture is unresolved. Necessary, not sufficient.
 npm run capture-restore -- status
 

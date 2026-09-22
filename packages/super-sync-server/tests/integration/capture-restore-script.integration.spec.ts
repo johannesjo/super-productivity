@@ -22,7 +22,8 @@ describeWithDb('capture-restore operator CLI (PostgreSQL)', () => {
   ): { status: number | null; stdout: string; stderr: string } => {
     const result = spawnSync(
       'npm',
-      ['run', '--silent', 'capture-restore', '--', ...args],
+      // The production image runs the compiled entry; CI has no dist build.
+      ['run', '--silent', 'capture-restore:dev', '--', ...args],
       {
         cwd: packageDir,
         encoding: 'utf8',
