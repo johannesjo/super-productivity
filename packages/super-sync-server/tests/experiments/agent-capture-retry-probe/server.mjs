@@ -24,6 +24,15 @@
  *                         was lost after the server accepted the work)
  *   error-before-accept — return an error without accepting
  *   timeout             — stall past the client's patience
+ *
+ * CAPTURE_PROBE_HINT controls whether the tool ASKS for reuse:
+ *   reuse (default) — the descriptions instruct the assistant to resend the same
+ *                     submissionId on a retry. Observing reuse then measures
+ *                     compliance with that instruction, not a disposition.
+ *   none            — the descriptions say nothing about retries or reuse. This
+ *                     is the variant that can distinguish the two. Keep the
+ *                     default intact so earlier runs stay reproducible.
+ * Every log line carries the hint variant; a log without it predates this flag.
  */
 import { createHmac, randomBytes } from 'node:crypto';
 import { appendFileSync } from 'node:fs';
@@ -31,6 +40,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const MODE = process.env.CAPTURE_PROBE_MODE ?? 'fail-first';
+const HINT = process.env.CAPTURE_PROBE_HINT ?? 'reuse';
 const TIMEOUT_MS = Number(process.env.CAPTURE_PROBE_TIMEOUT_MS ?? 120_000);
 const LOG_PATH =
   process.env.CAPTURE_PROBE_LOG ??
@@ -63,13 +73,35 @@ const tally = (map, key) => {
 };
 
 const record = (entry) => {
-  appendFileSync(LOG_PATH, `${JSON.stringify(entry)}\n`);
+  appendFileSync(LOG_PATH, `${JSON.stringify({ ...entry, mode: MODE, hint: HINT })}\n`);
 };
+
+// Both strings carry the hint, not just the tool description; neutralising one
+// and leaving the other would still be telling the assistant what to do.
+const DESCRIPTIONS = {
+  reuse: {
+    tool: 'Capture a task into Super Productivity. If a call fails, retry it with the same submissionId so the task is not captured twice.',
+    submissionId:
+      'A stable identifier for this capture intent. Reuse the SAME value when retrying a failed call; use a new one for a genuinely new task.',
+  },
+  none: {
+    tool: 'Capture a task into Super Productivity.',
+    submissionId: 'An optional identifier for this capture.',
+  },
+};
+
+if (!Object.hasOwn(DESCRIPTIONS, HINT)) {
+  // Fail loudly: silently falling back to `reuse` would relabel a hint-free
+  // trial as a hinted one and quietly invalidate the result.
+  process.stderr.write(
+    `capture-probe: unknown CAPTURE_PROBE_HINT '${HINT}' (expected reuse|none)\n`,
+  );
+  process.exit(1);
+}
 
 const TOOL = {
   name: 'capture_task',
-  description:
-    'Capture a task into Super Productivity. If a call fails, retry it with the same submissionId so the task is not captured twice.',
+  description: DESCRIPTIONS[HINT].tool,
   inputSchema: {
     type: 'object',
     properties: {
@@ -77,8 +109,7 @@ const TOOL = {
       notes: { type: 'string', description: 'Optional details.' },
       submissionId: {
         type: 'string',
-        description:
-          'A stable identifier for this capture intent. Reuse the SAME value when retrying a failed call; use a new one for a genuinely new task.',
+        description: DESCRIPTIONS[HINT].submissionId,
       },
     },
     required: ['title'],
@@ -107,25 +138,24 @@ const handleToolCall = async (args) => {
   const failFirst = observation.seq === 1 && MODE !== 'ok';
 
   if (failFirst && MODE === 'timeout') {
-    record({ ...observation, mode: MODE, outcome: 'stalled', at: Date.now() });
+    record({ ...observation, outcome: 'stalled', at: Date.now() });
     await sleep(TIMEOUT_MS);
     return { error: 'Timed out' };
   }
   if (failFirst && MODE === 'error-before-accept') {
-    record({ ...observation, mode: MODE, outcome: 'rejected', at: Date.now() });
+    record({ ...observation, outcome: 'rejected', at: Date.now() });
     return { error: 'Capture service unavailable' };
   }
   if (failFirst && MODE === 'fail-first') {
     // Accepted, then the response is lost: the assistant believes it failed.
     record({
       ...observation,
-      mode: MODE,
       outcome: 'accepted_response_lost',
       at: Date.now(),
     });
     return { error: 'Upstream timeout' };
   }
-  record({ ...observation, mode: MODE, outcome: 'accepted', at: Date.now() });
+  record({ ...observation, outcome: 'accepted', at: Date.now() });
   return { ok: 'Captured. It will appear when Super Productivity next syncs.' };
 };
 

@@ -58,6 +58,29 @@ point is to observe what it does unprompted. Count the `timeout` mode as a clien
 timeout only if the client actually reaches its deadline before the delayed
 response; otherwise it is a delayed tool error.
 
+## The hint variant (`CAPTURE_PROBE_HINT`)
+
+The probe's own descriptions can tell the assistant what to do, so what they say
+decides what the result means:
+
+- `reuse` (default) — the tool description and the `submissionId` description
+  both instruct the assistant to resend the same value on a retry. Observing
+  reuse under this variant measures **compliance with that instruction**, not a
+  disposition to reuse identities. The 2026-09-22 run used this variant.
+- `none` — both strings drop every mention of retries and reuse. This is the
+  variant that can tell the two apart, and the one to use before the submission
+  contract leans on a required identity.
+
+Neutralising only the tool description would leave the field description still
+prescribing reuse, so both change together. Every log line records `hint`; a
+line without that field predates the flag and is a `reuse` run. An unrecognised
+value exits non-zero rather than falling back, so a mistyped variant cannot
+quietly relabel a hint-free trial as a hinted one.
+
+```sh
+CAPTURE_PROBE_MODE=fail-first CAPTURE_PROBE_HINT=none node server.mjs
+```
+
 ## Reading the result
 
 The summary prints to stderr on exit:
