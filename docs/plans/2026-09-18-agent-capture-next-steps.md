@@ -39,9 +39,11 @@ argument values and submission identity. It cannot establish wire-byte equality.
 unprompted with the same arguments and the same `submissionId`, across all three
 failure modes; the optional field was volunteered in only 2 of 3 successful
 calls. Full counts and limits in the Stage A validation record. The result is
-capped by the probe's own tool description, which instructs reuse — so it
-characterizes instruction compliance, and a second assistant is still worth
-running before the contract leans on it.
+capped by the probe's own tool description, which instructs reuse. Re-running
+hint-free the same day settled that: with no instruction, the client supplied no
+`submissionId` on any of 7 calls, and a retry became indistinguishable from a
+duplicate. Treat the hinted result as obedience, not disposition; a second
+assistant is still worth running before the contract leans on either.
 
 ### The validity rule, before anything else
 
@@ -252,6 +254,12 @@ through the real connector:**
   reuses one with different content — neither of which this probe can settle.
   Note the probe also separated retry-after-failure from repeat-after-success on
   its own, so a reused identity is a stronger signal of retry than expected.
+  The hint-free re-run sharpens this into a recommendation: **do not design an
+  endpoint that dedupes on an optional client key.** Unprompted the client sent
+  none at all, leaving retry and duplicate byte-identical. Either the tool
+  description demands an identity and the endpoint requires it, or the endpoint
+  must be safe for submitters that supply nothing — the middle option is the one
+  the evidence rules out.
 - **Whether `captureId` must be _minted_ opaque.** Partly addressed on
   2026-09-22: `SuperSyncCaptureIdSchema` bounds the inbound shape on both request
   paths (`[A-Za-z0-9._:-]{1,200}`), so a submitter can no longer pass a sentence

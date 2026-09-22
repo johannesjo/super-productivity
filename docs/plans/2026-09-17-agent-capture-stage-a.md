@@ -1132,6 +1132,31 @@ actual supported workflow. A longer schedule does not by itself justify them.
 
 ## Validation record
 
+- 2026-09-22 (retry probe, hint-free variant): the 2026-09-22 run above is
+  explained by the probe's own tool description. Re-run with
+  `CAPTURE_PROBE_HINT=none`, which strips every mention of retries and reuse from
+  BOTH the tool description and the `submissionId` field description:
+  `fail-first` n=3, Claude Code 2.1.278.
+  **`hasSubmissionId` was false on all 7 calls.** Unprompted, this client
+  supplies no submission identity at all — so the hinted run measured obedience,
+  exactly as suspected, and reuse is not a disposition to rely on.
+  **Retry autonomy was also hint-driven and is inconsistent without it:** trial 1
+  asked the user "Want me to retry?" and waited; trial 3 retried on its own. With
+  the hint, all five failures were retried unprompted.
+  **The decisive consequence — without an identity, a retry and a duplicate are
+  indistinguishable on the wire.** Trial 3 logged three calls with one identical
+  `argDigest` (`argRepeat` 1 -> 2 -> 3): an autonomous retry plus a user-driven
+  repeat, all byte-identical, because `argDigest` covers `submissionId` and there
+  was none to vary. Under the hinted variant the same repeat-after-success
+  produced a FRESH digest. A server receiving these cannot deduplicate on
+  content, and content is all it gets.
+  **What this settles and what it does not.** It settles that a submission
+  identity cannot be optional-and-hoped-for: an endpoint that dedupes on a
+  client-supplied key gets nothing unless the tool description demands one. It
+  does NOT establish that a REQUIRED field would be supplied correctly, that a
+  connector preserves it across transport retries, or anything about a second
+  assistant. Both variants remain reproducible: every log line records `hint`.
+
 - 2026-09-22 (retry probe, Part 1): Claude Code 2.1.278, one client, one day.
   Eight clean trials, each its own server process and session: `ok` n=3,
   `fail-first` n=3, `error-before-accept` n=1, `timeout` n=1. (An earlier
