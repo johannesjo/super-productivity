@@ -1132,6 +1132,36 @@ actual supported workflow. A longer schedule does not by itself justify them.
 
 ## Validation record
 
+- 2026-09-22 (retry probe, Part 1): Claude Code 2.1.278, one client, one day.
+  Eight clean trials, each its own server process and session: `ok` n=3,
+  `fail-first` n=3, `error-before-accept` n=1, `timeout` n=1. (An earlier
+  multi-call session was discarded: re-registering the MCP entry does not affect
+  a running session, so four calls landed in one process.)
+  **Retry identity, 5/5 across all three failure modes** — every failed call was
+  retried, unprompted, with `argRepeat: 2` and `idRepeat: 2` and byte-identical
+  digests. `error-before-accept` and `timeout` were indistinguishable from
+  `fail-first`; a failure before acceptance produced no different handling.
+  **The optional identity is not reliably volunteered on success:**
+  `hasSubmissionId` was true in only 2 of 3 `ok` trials.
+  **Repeat after success is not a retry** (n=1): asked to "try that again" after
+  a successful capture, the assistant minted a fresh `argDigest` and `idDigest`
+  and said it was creating a second task — it separated retry-after-failure from
+  repeat-after-success without being told to.
+  **Timeout was not a clean client abandonment:** the client backgrounded the
+  MCP call at its own ~120s threshold rather than dropping it, then surfaced the
+  probe's own error at ~124s and retried. Read it as a delayed tool error with
+  client-side backgrounding, not as a reached client deadline.
+  **What this does not establish — the binding limit is not sample size.** The
+  probe's tool description says "If a call fails, retry it with the same
+  submissionId so the task is not captured twice", and the assistant cited that
+  instruction. This measures compliance with an instruction in a tool
+  description, NOT a spontaneous disposition to reuse identities. It says nothing
+  about wire-byte equality, about a connector preserving a key across transport
+  retries, or about behavior when the field is REQUIRED rather than optional.
+  Running more trials against the same description cannot lift that ceiling; a
+  second assistant or gate 3 would. `error-before-accept` and `timeout` were cut
+  to n=1 deliberately for that reason, against the runbook's n=3.
+
 - 2026-09-22 (submission-contract guards): two decisions taken while they are
   still cheap. `SuperSyncCaptureIdSchema` bounds the inbound capture ID on both
   request paths, so a submitter cannot push free text into operator output; the

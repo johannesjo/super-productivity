@@ -30,10 +30,18 @@ Probe source and reference: [`packages/super-sync-server/tests/experiments/agent
 
 ---
 
-## Part 1 — run the retry probe
+## Part 1 — retry probe: run once (2026-09-22), open for a second assistant
 
 Observes whether an assistant retries a failed capture tool call with the same
 argument values and submission identity. It cannot establish wire-byte equality.
+
+**Run on 2026-09-22** against Claude Code 2.1.278: 5/5 failed calls retried
+unprompted with the same arguments and the same `submissionId`, across all three
+failure modes; the optional field was volunteered in only 2 of 3 successful
+calls. Full counts and limits in the Stage A validation record. The result is
+capped by the probe's own tool description, which instructs reuse — so it
+characterizes instruction compliance, and a second assistant is still worth
+running before the contract leans on it.
 
 ### The validity rule, before anything else
 
@@ -236,7 +244,14 @@ release gate 4.
 through the real connector:**
 
 - The HTTP/MCP surface: whether a submission identity is required, and the
-  response to a reused identity with conflicting content.
+  response to a reused identity with conflicting content. Part 1 (2026-09-22)
+  narrows this: an assistant told by the tool description to reuse its
+  `submissionId` did so on 5/5 failures, but supplied the optional field in only
+  2 of 3 successes. So a REQUIRED identity looks workable only if the description
+  demands it, and the endpoint must still answer for a submitter that omits it or
+  reuses one with different content — neither of which this probe can settle.
+  Note the probe also separated retry-after-failure from repeat-after-success on
+  its own, so a reused identity is a stronger signal of retry than expected.
 - **Whether `captureId` must be _minted_ opaque.** Partly addressed on
   2026-09-22: `SuperSyncCaptureIdSchema` bounds the inbound shape on both request
   paths (`[A-Za-z0-9._:-]{1,200}`), so a submitter can no longer pass a sentence
