@@ -3,7 +3,10 @@ import { SuperSyncCapturePublicationRequestSchema } from '@sp/shared-schema';
 import { prisma } from '../db';
 import { getAuthUser, type AuthUser } from '../middleware';
 import { Logger } from '../logger';
-import { createCapturePublicationService } from './capture-publication.service';
+import {
+  type CapturePublicationService,
+  createCapturePublicationService,
+} from './capture-publication.service';
 import { getSyncService } from './sync.service';
 import { getWsConnectionService } from './services/websocket-connection.service';
 import type { Operation } from './sync.types';
@@ -19,7 +22,12 @@ import {
   enforceStorageQuota,
 } from './sync.routes.quota';
 
-const publication = createCapturePublicationService(prisma);
+// Created on first use: the publication service subclasses SyncService at
+// construction, so building it at import time breaks every routes spec that
+// mocks the sync service module, and is wasted while delivery is off.
+let publicationService: CapturePublicationService | undefined;
+const getPublication = (): CapturePublicationService =>
+  (publicationService ??= createCapturePublicationService(prisma));
 const rateLimit = { max: 100, timeWindow: '1 minute' };
 
 /** Called inside syncRoutes, after its authentication hook is installed. */
@@ -32,7 +40,7 @@ export const registerCaptureDeliveryRoutes = (
     if (!enabledFor(user))
       return reply.status(503).send({ error: 'Capture delivery is paused' });
     const userId = user.userId;
-    const capture = await publication.readNextPendingCapture({ userId });
+    const capture = await getPublication().readNextPendingCapture({ userId });
     return reply.send({ capture });
   });
 
@@ -83,7 +91,10 @@ export const registerCaptureDeliveryRoutes = (
           opsCount: 1,
         });
       }
-      const existingReceipt = await publication.readCaptureReceipt({ userId, captureId });
+      const existingReceipt = await getPublication().readCaptureReceipt({
+        userId,
+        captureId,
+      });
       if (existingReceipt) {
         return reply.send({ status: 'already_published', receipt: existingReceipt });
       }
@@ -93,7 +104,7 @@ export const registerCaptureDeliveryRoutes = (
           candidate as Operation,
         ]);
         if (!(await enforceStorageQuota(userId, bytes, reply))) return null;
-        return publication.publishCapture({
+        return getPublication().publishCapture({
           userId,
           captureId,
           candidate: candidate as Operation,

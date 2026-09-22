@@ -184,6 +184,34 @@ export class SyncService {
     return prisma.$transaction(work, options);
   }
 
+  /**
+   * Device bookkeeping for the uploading client. Overridden by capture
+   * publication, whose synthetic publisher is not a device: it must not appear
+   * in the device list, the online count, or the checkpoint gate's fleet view.
+   */
+  protected async recordUploadingDevice(
+    tx: Prisma.TransactionClient,
+    userId: number,
+    clientId: string,
+    now: number,
+  ): Promise<void> {
+    await tx.syncDevice.upsert({
+      where: {
+        // Prisma composite key naming uses underscores; allow it here
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        userId_clientId: { userId, clientId },
+      },
+      create: {
+        userId,
+        clientId,
+        lastSeenAt: BigInt(now),
+        createdAt: BigInt(now),
+        lastAckedSeq: 0,
+      },
+      update: { lastSeenAt: BigInt(now) },
+    });
+  }
+
   /** Serializes destructive resets with uploads using the established lock order. */
   protected async lockUserSyncStateForUpdate(
     tx: Prisma.TransactionClient,
@@ -541,27 +569,7 @@ export class SyncService {
             );
           }
 
-          // Update device last seen
-          await tx.syncDevice.upsert({
-            where: {
-              // Prisma composite key naming uses underscores; allow it here
-              // eslint-disable-next-line @typescript-eslint/naming-convention
-              userId_clientId: {
-                userId,
-                clientId,
-              },
-            },
-            create: {
-              userId,
-              clientId,
-              lastSeenAt: BigInt(now),
-              createdAt: BigInt(now),
-              lastAckedSeq: 0,
-            },
-            update: {
-              lastSeenAt: BigInt(now),
-            },
-          });
+          await this.recordUploadingDevice(tx, userId, clientId, now);
           uploadDbRoundtrips++;
 
           // W1: write the storage counter as the LAST statement before COMMIT

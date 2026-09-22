@@ -199,6 +199,9 @@ export const createCapturePublicationService = (
       super();
     }
 
+    /** The capture actor is a clock entry, not a device; never register it. */
+    protected override async recordUploadingDevice(): Promise<void> {}
+
     protected override async runUploadTransaction<T>(
       work: (tx: Prisma.TransactionClient) => Promise<T>,
       transactionOptions?: {

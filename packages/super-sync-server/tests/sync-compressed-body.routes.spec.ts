@@ -56,6 +56,8 @@ vi.mock('../src/auth', () => ({
 
 vi.mock('../src/sync/sync.service', () => ({
   getSyncService: () => mocks.syncService,
+  // Capture publication subclasses it; the routes under test never construct it.
+  SyncService: class {},
 }));
 
 vi.mock('../src/sync/services/websocket-connection.service', () => ({

@@ -151,6 +151,12 @@ describeWithDb('agent capture delivery routes (PostgreSQL)', () => {
     const first = await request('publish', owner.token, publication);
     expect(first.status).toBe(200);
     expect((await first.json()).status).toBe('published');
+    // The synthetic publisher must not surface as an "unknown" device.
+    expect(
+      await prisma.syncDevice.findMany({
+        where: { userId: owner.userId, clientId: getAgentCaptureActorId(owner.userId) },
+      }),
+    ).toEqual([]);
     const retry = await request('publish', owner.token, publication);
     expect(retry.status).toBe(200);
     expect((await retry.json()).status).toBe('already_published');

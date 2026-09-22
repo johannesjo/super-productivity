@@ -1058,11 +1058,14 @@ describeWithDb('Agent capture publication (PostgreSQL)', () => {
         .latestStateReplacementSeq,
     ).toBe(reupload[0].serverSeq);
 
+    // The wipe keeps the account's sequence counter (#10145), so the re-upload
+    // lands above the pre-wipe cursor and the ordinary stale-cursor fence is
+    // the one that refuses; the causal check behind it would refuse as well.
     expect(
       await publish(userId, captureId, staleCandidate, 0, preWipeCursor, generation),
     ).toMatchObject({
       status: 'rejected',
-      error: 'Capture candidate does not include the latest state replacement',
+      error: 'Download the latest full-state replacement before retrying',
     });
     expect(await harness.countCaptureActorOperations({ userId })).toBe(0);
   });
