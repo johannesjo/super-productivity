@@ -1229,6 +1229,8 @@ describeWithDb('Agent capture publication (PostgreSQL)', () => {
       notes: string | null;
       publishedOpId: string | null;
       publishedServerSeq: number | null;
+      resolution: string | null;
+      resolvedAt: Date | null;
     }>;
   }> => {
     const [user, syncState, accountRows, queueRows] = await Promise.all([
@@ -1248,9 +1250,12 @@ describeWithDb('Agent capture publication (PostgreSQL)', () => {
           notes: string | null;
           publishedOpId: string | null;
           publishedServerSeq: number | null;
+          resolution: string | null;
+          resolvedAt: Date | null;
         }>
       >(
-        `SELECT capture_id AS "captureId", title, notes, published_op_id AS "publishedOpId", published_server_seq AS "publishedServerSeq"
+        `SELECT capture_id AS "captureId", title, notes, published_op_id AS "publishedOpId", published_server_seq AS "publishedServerSeq",
+                resolution, resolved_at AS "resolvedAt"
          FROM ${CAPTURE_QUEUE_TABLE} WHERE user_id = $1`,
         userId,
       ),
@@ -1308,14 +1313,16 @@ describeWithDb('Agent capture publication (PostgreSQL)', () => {
     }
     for (const row of snapshot.queueRows) {
       await prisma.$executeRawUnsafe(
-        `INSERT INTO ${CAPTURE_QUEUE_TABLE} (user_id, capture_id, title, notes, published_op_id, published_server_seq)
-         VALUES ($1, $2, $3, $4, $5, $6)`,
+        `INSERT INTO ${CAPTURE_QUEUE_TABLE} (user_id, capture_id, title, notes, published_op_id, published_server_seq, resolution, resolved_at)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
         userId,
         row.captureId,
         row.title,
         row.notes,
         row.publishedOpId,
         row.publishedServerSeq,
+        row.resolution,
+        row.resolvedAt,
       );
     }
   };
@@ -1371,5 +1378,257 @@ describeWithDb('Agent capture publication (PostgreSQL)', () => {
     );
     expect(await harness.countCaptureActorOperations({ userId })).toBe(1);
     expect(await harness.countPublishedCaptures({ userId })).toBe(1);
+  });
+  /**
+   * Recovery resolution. The restore case above proves the server cannot tell a
+   * rolled-back publication from a first one; only evidence retained outside the
+   * restored database can. An operator records that answer here, and the ledger
+   * must then be terminal without fabricating the operation identity the restore
+   * erased. Resolution is deliberately not automatic: nothing in these rows
+   * establishes delivery.
+   */
+  it('refuses to republish a capture the operator resolved as already delivered', async () => {
+    const userId = await createUser();
+    const captureId = unique('resolved-delivered');
+    await harness.enqueueCapture({
+      userId,
+      captureId,
+      title: 'Restored capture',
+      notes: 'Queued before the backup',
+    });
+    const beforePublication = await snapshotServerState(userId);
+    const published = await publish(userId, captureId, makeTaskCandidate(userId, 0), 0);
+    if (published.status === 'rejected') throw new Error(published.error);
+    await restoreServerState(beforePublication);
+
+    const resolved = await harness.resolveCapture({
+      userId,
+      captureId,
+      resolution: 'delivered_out_of_band',
+    });
+    expect(resolved).toEqual({
+      status: 'resolved',
+      resolution: 'delivered_out_of_band',
+      publicationWatermark: 1,
+    });
+
+    // Terminal for every consumer: no publisher is handed this capture, and a
+    // client that cached the pre-restore queue read is refused at publication.
+    expect(await harness.readPendingCapture({ userId, captureId })).toBeNull();
+    expect(await harness.readNextPendingCapture({ userId })).toBeNull();
+    const republished = await publish(userId, captureId, makeTaskCandidate(userId, 0), 0);
+    expect(republished).toMatchObject({ status: 'rejected' });
+    expect(await harness.countCaptureActorOperations({ userId })).toBe(0);
+
+    // No invented receipt, and the plaintext is cleared on the same terms as
+    // publication: a resolved row must not carry the submitted title into the
+    // backups taken after recovery.
+    expect(await harness.readCaptureReceipt({ userId, captureId })).toBeNull();
+    expect(
+      await prisma.agentCapture.findUniqueOrThrow({
+        where: { userId_captureId: { userId, captureId } },
+      }),
+    ).toMatchObject({
+      title: '',
+      notes: null,
+      publishedOpId: null,
+      publishedServerSeq: null,
+      resolution: 'delivered_out_of_band',
+    });
+  });
+
+  it('reclaims the consumed watermark so the next capture cannot reuse its clock value', async () => {
+    const userId = await createUser();
+    const deliveredId = unique('reclaim-delivered');
+    await harness.enqueueCapture({ userId, captureId: deliveredId, title: 'Delivered' });
+    const beforePublication = await snapshotServerState(userId);
+    const published = await publish(userId, deliveredId, makeTaskCandidate(userId, 0), 0);
+    if (published.status === 'rejected') throw new Error(published.error);
+    // The device that downloaded this operation keeps the publisher's entry at 1.
+    const deliveredClock = (
+      await prisma.operation.findUniqueOrThrow({
+        where: { id: published.receipt.opId },
+        select: { vectorClock: true },
+      })
+    ).vectorClock;
+    await restoreServerState(beforePublication);
+    await harness.resolveCapture({
+      userId,
+      captureId: deliveredId,
+      resolution: 'delivered_out_of_band',
+    });
+
+    // The rollback returned the counter to 0. Resuming from it would mint a
+    // second operation claiming the publisher clock value a device already holds.
+    expect(await harness.readPublicationWatermark({ userId })).toBe(1);
+    const nextId = unique('reclaim-next');
+    await harness.enqueueCapture({ userId, captureId: nextId, title: 'After recovery' });
+    expect(await harness.readPendingCapture({ userId, captureId: nextId })).toMatchObject(
+      { captureCounter: 1 },
+    );
+    const stale = await publish(userId, nextId, makeTaskCandidate(userId, 0), 0);
+    expect(stale).toMatchObject({ status: 'rejected' });
+
+    const next = await publish(userId, nextId, makeTaskCandidate(userId, 1), 1);
+    expect(next.status).toBe('published');
+    if (next.status === 'rejected') throw new Error(next.error);
+    const actor = getAgentCaptureActorId(userId);
+    expect(deliveredClock).toMatchObject({ [actor]: 1 });
+    expect(
+      await prisma.operation.findUniqueOrThrow({
+        where: { id: next.receipt.opId },
+        select: { vectorClock: true },
+      }),
+    ).toMatchObject({ vectorClock: { [actor]: 2 } });
+  });
+
+  it('keeps a discarded capture terminal without reclaiming a watermark', async () => {
+    const userId = await createUser();
+    const captureId = unique('resolved-discarded');
+    await harness.enqueueCapture({
+      userId,
+      captureId,
+      title: 'Never delivered',
+      notes: 'User chose to drop it',
+    });
+
+    const resolved = await harness.resolveCapture({
+      userId,
+      captureId,
+      resolution: 'discarded_by_user',
+    });
+    // Nothing was published, so no publisher clock value was consumed.
+    expect(resolved).toEqual({
+      status: 'resolved',
+      resolution: 'discarded_by_user',
+      publicationWatermark: 0,
+    });
+    expect(await harness.readPublicationWatermark({ userId })).toBe(0);
+    expect(await harness.readPendingCapture({ userId, captureId })).toBeNull();
+    expect(
+      await publish(userId, captureId, makeTaskCandidate(userId, 0), 0),
+    ).toMatchObject({ status: 'rejected' });
+    expect(
+      await prisma.agentCapture.findUniqueOrThrow({
+        where: { userId_captureId: { userId, captureId } },
+      }),
+    ).toMatchObject({ title: '', notes: null, resolution: 'discarded_by_user' });
+  });
+
+  it('refuses to resolve a capture that already carries a terminal receipt', async () => {
+    const userId = await createUser();
+    const captureId = unique('resolve-published');
+    await harness.enqueueCapture({ userId, captureId, title: 'Already published' });
+    const published = await publish(userId, captureId, makeTaskCandidate(userId, 0), 0);
+    if (published.status === 'rejected') throw new Error(published.error);
+
+    // A receipt is the stronger evidence; recovery must never overwrite it.
+    expect(
+      await harness.resolveCapture({
+        userId,
+        captureId,
+        resolution: 'delivered_out_of_band',
+      }),
+    ).toEqual({ status: 'already_published', receipt: published.receipt });
+    expect(await harness.readPublicationWatermark({ userId })).toBe(1);
+    expect(
+      await prisma.agentCapture.findUniqueOrThrow({
+        where: { userId_captureId: { userId, captureId } },
+      }),
+    ).toMatchObject({ publishedOpId: published.receipt.opId, resolution: null });
+  });
+
+  it('resolves once under repeated and concurrent operator commands', async () => {
+    const userId = await createUser();
+    const captureId = unique('resolve-idempotent');
+    await harness.enqueueCapture({ userId, captureId, title: 'Resolve once' });
+    const command = {
+      userId,
+      captureId,
+      resolution: 'delivered_out_of_band',
+    } as const;
+
+    const results = await Promise.all([
+      harness.resolveCapture(command),
+      harness.resolveCapture(command),
+      harness.resolveCapture(command),
+    ]);
+    expect(results.filter(({ status }) => status === 'resolved')).toHaveLength(1);
+    expect(results.filter(({ status }) => status === 'already_resolved')).toHaveLength(2);
+    // A retried command must not advance the watermark a second time.
+    expect(await harness.readPublicationWatermark({ userId })).toBe(1);
+    expect(await harness.resolveCapture(command)).toMatchObject({
+      status: 'already_resolved',
+    });
+    expect(await harness.readPublicationWatermark({ userId })).toBe(1);
+  });
+
+  it('reports no resolution for a capture ID that was never queued', async () => {
+    const userId = await createUser();
+    expect(
+      await harness.resolveCapture({
+        userId,
+        captureId: unique('absent'),
+        resolution: 'discarded_by_user',
+      }),
+    ).toEqual({ status: 'missing' });
+  });
+
+  /**
+   * The resumption gate. Enabling delivery on a restored deployment requires an
+   * empty backlog; this is the check an operator runs, not an automatic resume.
+   */
+  it('reports the unresolved backlog until every restored capture is resolved', async () => {
+    const firstUserId = await createUser();
+    const secondUserId = await createUser();
+    const userIds = [firstUserId, secondUserId];
+    const pendingId = unique('backlog-pending');
+    const resolvedId = unique('backlog-resolved');
+    const publishedId = unique('backlog-published');
+    await harness.enqueueCapture({
+      userId: firstUserId,
+      captureId: pendingId,
+      title: 'Still unresolved',
+    });
+    await harness.enqueueCapture({
+      userId: firstUserId,
+      captureId: resolvedId,
+      title: 'Resolved by the operator',
+    });
+    await harness.enqueueCapture({
+      userId: secondUserId,
+      captureId: publishedId,
+      title: 'Published before the incident',
+    });
+
+    expect(await harness.readUnresolvedCaptureBacklog({ userIds })).toEqual([
+      { userId: firstUserId, unresolved: 2 },
+      { userId: secondUserId, unresolved: 1 },
+    ]);
+
+    const published = await publish(
+      secondUserId,
+      publishedId,
+      makeTaskCandidate(secondUserId, 0),
+      0,
+    );
+    expect(published.status).toBe('published');
+    await harness.resolveCapture({
+      userId: firstUserId,
+      captureId: resolvedId,
+      resolution: 'discarded_by_user',
+    });
+    // A receipt and a resolution both close an item; only the truly unknown one
+    // keeps the deployment paused.
+    expect(await harness.readUnresolvedCaptureBacklog({ userIds })).toEqual([
+      { userId: firstUserId, unresolved: 1 },
+    ]);
+
+    await harness.resolveCapture({
+      userId: firstUserId,
+      captureId: pendingId,
+      resolution: 'delivered_out_of_band',
+    });
+    expect(await harness.readUnresolvedCaptureBacklog({ userIds })).toEqual([]);
   });
 });

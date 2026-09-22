@@ -1068,26 +1068,26 @@ open. Do not infer non-delivery from an absent task, operation or pruned clock.
 Use the real server database transaction, valid task operation envelopes, and
 the app's normal remote replay. An in-memory fake queue is not sufficient.
 
-| Failure or race                                                        | Required result                                                                                           |
-| ---------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| Device dies before publication                                         | Item remains pending; no optimistic task survives.                                                        |
-| Two devices prepare different candidates                               | One ordinary task operation is committed; both observe the same receipt.                                  |
-| Server commits but the response is lost                                | Retry observes publication; no second task operation.                                                     |
-| Server transaction fails                                               | Neither the operation nor a success receipt is committed.                                                 |
-| Download or local apply fails after publication                        | Normal sync retries/rebuilds; the capture is not republished.                                             |
-| User edits, moves, or deletes the imported task                        | Late queue retries leave those changes intact.                                                            |
-| Import/reset races with publication                                    | Existing replacement fence and explicit queue policy govern the result.                                   |
-| Operation is pruned after publication                                  | Receipt stays terminal; normal snapshot recovery supplies current state.                                  |
-| Device/account/encryption configuration changes                        | Fixed: the wipe advances a monotonic data generation; work prepared under the retired key is refused.     |
-| Candidate submitted to another account                                 | Refused: the capture actor is derived from the account, so publisher identity disagrees.                  |
-| Two devices prepare against the same watermark                         | Exactly one publishes; the loser stays pending. The watermark is claimed inside the transaction.          |
-| Retired-key device prepares inside the wipe window                     | Fixed in the experiment: authenticate the current encrypted baseline and bind its ID to publication.      |
-| Local write during baseline probe; tab closes during/after preparation | Covered: local task survives; no capture counter is consumed; retry publishes once.                       |
-| Server database backup restores old pending items                      | Open: fresh device recovers original task despite surviving edit/deletion; keep consumption paused.       |
-| Replacement row pruned by retention or quota recovery                  | Fixed: the boundary's causal identity is persisted beside its seq and outlives the row.                   |
-| Repair pruning drops the earlier import author's counter               | Fixed in the harness: use the newer causal repair, with the import sequence as a floor.                   |
-| Client pruning drops the capture publisher before a local edit         | Covered: ordinary conflict resolution recovers the edge; edits and deletion converge on both devices.     |
-| Boundary pruned on a pre-migration row, never backfilled               | Publication refuses: no causal identity anywhere, and a missing boundary is not an absent one.            |
+| Failure or race                                                        | Required result                                                                                                        |
+| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| Device dies before publication                                         | Item remains pending; no optimistic task survives.                                                                     |
+| Two devices prepare different candidates                               | One ordinary task operation is committed; both observe the same receipt.                                               |
+| Server commits but the response is lost                                | Retry observes publication; no second task operation.                                                                  |
+| Server transaction fails                                               | Neither the operation nor a success receipt is committed.                                                              |
+| Download or local apply fails after publication                        | Normal sync retries/rebuilds; the capture is not republished.                                                          |
+| User edits, moves, or deletes the imported task                        | Late queue retries leave those changes intact.                                                                         |
+| Import/reset races with publication                                    | Existing replacement fence and explicit queue policy govern the result.                                                |
+| Operation is pruned after publication                                  | Receipt stays terminal; normal snapshot recovery supplies current state.                                               |
+| Device/account/encryption configuration changes                        | Fixed: the wipe advances a monotonic data generation; work prepared under the retired key is refused.                  |
+| Candidate submitted to another account                                 | Refused: the capture actor is derived from the account, so publisher identity disagrees.                               |
+| Two devices prepare against the same watermark                         | Exactly one publishes; the loser stays pending. The watermark is claimed inside the transaction.                       |
+| Retired-key device prepares inside the wipe window                     | Fixed in the experiment: authenticate the current encrypted baseline and bind its ID to publication.                   |
+| Local write during baseline probe; tab closes during/after preparation | Covered: local task survives; no capture counter is consumed; retry publishes once.                                    |
+| Server database backup restores old pending items                      | Partly fixed: the deployment pause holds, and an operator records each outcome; an unpaused restore still republishes. |
+| Replacement row pruned by retention or quota recovery                  | Fixed: the boundary's causal identity is persisted beside its seq and outlives the row.                                |
+| Repair pruning drops the earlier import author's counter               | Fixed in the harness: use the newer causal repair, with the import sequence as a floor.                                |
+| Client pruning drops the capture publisher before a local edit         | Covered: ordinary conflict resolution recovers the edge; edits and deletion converge on both devices.                  |
+| Boundary pruned on a pre-migration row, never backfilled               | Publication refuses: no causal identity anywhere, and a missing boundary is not an absent one.                         |
 
 ## Implementation order and release gates
 
@@ -1131,6 +1131,36 @@ replicas, and encryption-key transfer remain separate scope decisions tied to an
 actual supported workflow. A longer schedule does not by itself justify them.
 
 ## Validation record
+
+- 2026-09-22: the restore ambiguity now has an operator resolution transaction
+  and a resumption gate, built after the 2026-09-21 characterization, not before
+  it. `agent_captures` gains additive `resolution`/`resolved_at` columns with
+  three CHECK constraints (paired, mutually exclusive with a receipt, closed
+  vocabulary); all three were verified to accept the three legitimate row shapes
+  and refuse all four malformed ones against a real PostgreSQL instance.
+  `resolveCapture` takes publication's own account -> capture lock order, clears
+  the plaintext on publication's terms, and records the outcome WITHOUT an
+  invented operation identity — the restore erased the real one. Every read path
+  and the publication transaction treat a resolution as terminal.
+  `delivered_out_of_band` also advances the publisher counter by one: the erased
+  publication already consumed that clock value on every device that downloaded
+  it, so resuming from the rolled-back counter would mint a second operation
+  claiming the same publisher entry. `discarded_by_user` moves nothing.
+  Seven new PostgreSQL cases were written first and failed first; the suite is
+  now 33/33. They cover refusing republication after resolution, reclaiming the
+  watermark (the next capture publishes at entry 2, not the delivered 1),
+  discard without reclamation, refusing to resolve over a terminal receipt,
+  concurrent/repeated commands resolving exactly once, an absent capture, and
+  the backlog gate emptying. `scripts/capture-restore.ts` (`status` exits 1
+  while anything is unresolved; `resolve` records one outcome) was exercised
+  end-to-end against PostgreSQL, including plaintext clearance. The backup
+  regression now asserts a recorded resolution survives the accounts artifact,
+  and was confirmed to fail when that value is wrong.
+  **What this does not establish:** an unpaused restored deployment still
+  republishes — the fix is the operator procedure, not automatic safety. Nothing
+  here reconstructs missing evidence; a resolution is only as good as the
+  evidence behind it. Browser-level recovery and verified resumption after a
+  real incident were not rerun, so release gate 4 stays open.
 
 - 2026-09-21: two production encrypted browser restore cases pass as
   characterization of an unresolved failure. Each snapshots the queue, receipts,

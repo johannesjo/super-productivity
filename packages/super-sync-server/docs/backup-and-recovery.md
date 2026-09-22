@@ -177,6 +177,9 @@ those changes across recovered clients.
    notes, credentials or encryption keys into incident logs. Handle recovery
    artifacts as private user data. Reconcile the interval after the chosen backup
    against evidence retained outside the rollback and affected users' decisions.
+6. Record each outcome with `npm run capture-restore -- resolve` and clear the
+   hold only once `npm run capture-restore -- status` exits 0. See
+   [Recording outcomes and clearing the hold](#recording-outcomes-and-clearing-the-hold).
 
 | Evidence                                             | Required handling                                                                                                                                                       |
 | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -194,17 +197,52 @@ generations may also have rolled back; neither bumping them nor resetting the
 account determines whether an individual capture was delivered. Never fabricate
 receipt IDs or sequences to hide an unresolved item.
 
-The current tools do not reconstruct that missing evidence or implement an
-operator resolution transaction. Rehearse the chosen reconciliation on an
-isolated restore and verify ordinary replay on surviving and fresh clients before
-approving it for an incident. Resume only after all ambiguities are resolved and
-the deployment switch is deliberately enabled. If the required evidence cannot
-be recovered, keep delivery disabled; this procedure does not authorize data loss.
+### Recording outcomes and clearing the hold
+
+`npm run capture-restore` records the outcomes you established in step 5 and
+gates resumption on them. It does **not** reconstruct missing evidence: nothing
+in the restored rows can tell delivery from non-delivery, which is why every
+resolution is an operator command rather than an automatic repair.
+
+```sh
+# The resumption gate. Exits 1 while any capture is unresolved.
+npm run capture-restore -- status
+
+# One recorded outcome per ambiguous item, after you established it.
+npm run capture-restore -- resolve <userId> <captureId> delivered_out_of_band
+npm run capture-restore -- resolve <userId> <captureId> discarded_by_user
+```
+
+- `delivered_out_of_band` — evidence outside the rolled-back database shows this
+  capture was published. It also advances the account's publisher counter by one,
+  reclaiming the clock value that the erased publication already consumed on
+  devices; resuming from the rolled-back counter would mint a second operation
+  claiming the same publisher entry.
+- `discarded_by_user` — the user decided this capture must not be published.
+  Nothing was consumed, so the counter does not move.
+
+Both clear the stored title and notes, exactly as publication does, and make the
+row terminal **without** an invented operation identity. Neither can be undone,
+and neither overwrites a recorded outcome or a terminal receipt: a repeated
+command reports what is already stored. The tool prints only user IDs, capture
+IDs and counts.
+
+The command does not verify that the hold is in place — that is step 2's job. A
+capture that publishes before you resolve it is safe (the row is locked and the
+receipt wins), but resolving a genuinely pending capture on a running deployment
+would drop real work. Run this only while delivery is paused.
+
+Rehearse the chosen reconciliation on an isolated restore and verify ordinary
+replay on surviving and fresh clients before approving it for an incident. Resume
+only after `status` is clean and the deployment switch is deliberately enabled.
+If the required evidence cannot be recovered, keep delivery disabled; this
+procedure does not authorize data loss.
 
 The real dump/restore regression is
 `tests/integration/agent-capture-backup.integration.spec.ts`. It verifies that the
-accounts artifact restores pending content, terminal receipts, publisher counters,
-account generation and passkeys, excludes the operation log, and remains private.
+accounts artifact restores pending content, terminal receipts, recorded
+resolutions, publisher counters, account generation and passkeys, excludes the
+operation log, and remains private.
 Run with `DATABASE_URL` and `BACKUP_TEST_DB_CONTAINER` pointing to the same isolated
 PostgreSQL container; the canonical PostgreSQL CI job supplies both. The delivery
 route suite separately verifies the pause responses.

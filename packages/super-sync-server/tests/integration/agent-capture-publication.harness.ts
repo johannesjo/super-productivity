@@ -7,6 +7,7 @@ import { Prisma, PrismaClient } from '@prisma/client';
 import { Operation } from '../../src/sync/sync.types';
 import {
   CapturePublicationReceipt,
+  CapturePublicationService,
   PendingCapture,
   PublishCaptureResult,
   createCapturePublicationService,
@@ -18,7 +19,10 @@ export type { CapturePublicationReceipt, PendingCapture, PublishCaptureResult };
 export const ACCOUNT_TABLE = 'agent_capture_accounts';
 export const QUEUE_TABLE = 'agent_captures';
 
-export interface CapturePublicationHarness {
+export interface CapturePublicationHarness extends Pick<
+  CapturePublicationService,
+  'readNextPendingCapture' | 'resolveCapture' | 'readUnresolvedCaptureBacklog'
+> {
   initialize(): Promise<void>;
   enqueueCapture(input: {
     userId: number;

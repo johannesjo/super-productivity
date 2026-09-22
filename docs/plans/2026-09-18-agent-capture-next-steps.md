@@ -2,8 +2,8 @@
 
 What remains on the Stage A agent-capture work. Parts 1 and 2 need a human.
 The server and app delivery slice in Part 3 is implemented internally as of
-2026-09-21, disabled by default. Assistant submission, the connector, and restore
-reconciliation remain release work.
+2026-09-21, disabled by default. Assistant submission, the connector, and
+verified restore resumption remain release work.
 
 Design record: [`2026-09-17-agent-capture-stage-a.md`](./2026-09-17-agent-capture-stage-a.md).
 Probe source and reference: [`packages/super-sync-server/tests/experiments/agent-capture-retry-probe/`](../../packages/super-sync-server/tests/experiments/agent-capture-retry-probe/).
@@ -14,9 +14,10 @@ Probe source and reference: [`packages/super-sync-server/tests/experiments/agent
 - **Open, informed by Part 1:** who owns the stable submission identity across
   retries, and the endpoint response for a reused identity with conflicting
   content. The real connector path must validate the eventual contract.
-- **Open, needs Part 2:** reconciliation before capture consumption resumes after
-  a server database restore. The deployment pause exists; restored database state
-  alone cannot establish which pending captures already published.
+- **Open, needs Part 2:** verified resumption after a server database restore.
+  The deployment pause, the operator resolution transaction and the backlog gate
+  now exist; restored database state alone still cannot establish which pending
+  captures already published, so each outcome stays an operator decision.
 - **Delivery slice implemented:** Prisma capture storage, the publication
   transaction, authenticated app delivery routes, and encrypted app preparation
   followed by ordinary sync replay. `ENABLE_AGENT_CAPTURE_DELIVERY` defaults to
@@ -135,12 +136,13 @@ handling. Gate 3 stays open regardless of the outcome.
 
 ---
 
-## Part 2 — decide the restore recovery policy
+## Part 2 — rehearse the restore recovery procedure
 
 Use the deployment pause and operator runbook before a restored server accepts
-capture work. The remaining decision is how to reconcile evidence and resume,
-not how to store a pause flag. The pause must remain outside the restored
-database: a database-only flag can roll back with the same restore.
+capture work. The pause, the resolution transaction and the backlog gate now
+exist; what remains is rehearsing them on an isolated restore and verifying
+resumption. The pause must remain outside the restored database: a database-only
+flag can roll back with the same restore.
 
 A point-in-time restore rolls back the queue row, the publication watermark, the
 account generation and the accepted operation together, while a device keeps the
@@ -167,9 +169,19 @@ server. The operator procedure is now documented in
 [Capture restore hold](../../packages/super-sync-server/docs/backup-and-recovery.md#capture-restore-hold).
 Accounts recovery backups now preserve pending captures, receipts and publisher
 counters in the same snapshot as credentials. A real dump/restore regression
-failed before this correction and passes afterward. Publications after backup
-time remain ambiguous; an evidence-backed reconciliation transaction and verified
-resumption remain release gates.
+failed before this correction and passes afterward.
+
+The reconciliation transaction and resumption gate now exist (2026-09-22).
+`agent_captures` carries an additive `resolution`/`resolved_at` pair; an operator
+records `delivered_out_of_band` or `discarded_by_user` per ambiguous item with
+`npm run capture-restore -- resolve`, and `status` exits non-zero while anything
+is unresolved. A resolution is terminal for every read path and for publication,
+clears the plaintext, and invents no operation identity. `delivered_out_of_band`
+also reclaims the publisher clock value the erased publication consumed on
+devices. **This is an operator procedure, not automatic safety:** an unpaused
+restored deployment still republishes, and nothing reconstructs missing evidence.
+Verified resumption after a real incident — rehearsed on an isolated restore,
+with browser replay on surviving and fresh clients — remains the release gate.
 
 ---
 
@@ -216,7 +228,7 @@ through the real connector:**
 
 Next, run Part 1 in fresh human-operated assistant sessions and settle the
 submission contract, then build capture-only authorization and submission.
-Decide the restore reconciliation/resumption procedure before enabling delivery
+Rehearse the restore procedure on an isolated restore before enabling delivery
 on a restored deployment. The real connector path, remaining delivery failure
 evidence, and restore recovery remain release gates. Every change here is production sync
 code — the highest-risk area in the repo. Re-read the

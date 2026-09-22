@@ -23,7 +23,34 @@ type CaptureQueueRow = {
   notes: string | null;
   publishedOpId: string | null;
   publishedServerSeq: number | null;
+  resolution: string | null;
 };
+
+/**
+ * Terminal outcomes an operator records during recovery, when a restored
+ * pending row's delivery cannot be read from the restored database itself.
+ * `delivered_out_of_band` reclaims the publisher clock value that the lost
+ * publication already consumed on devices; `discarded_by_user` consumed none.
+ */
+export const CAPTURE_RECOVERY_RESOLUTIONS = [
+  'delivered_out_of_band',
+  'discarded_by_user',
+] as const;
+export type CaptureRecoveryResolution = (typeof CAPTURE_RECOVERY_RESOLUTIONS)[number];
+
+export const isCaptureRecoveryResolution = (
+  value: unknown,
+): value is CaptureRecoveryResolution =>
+  CAPTURE_RECOVERY_RESOLUTIONS.includes(value as CaptureRecoveryResolution);
+
+export type ResolveCaptureResult =
+  | {
+      status: 'resolved' | 'already_resolved';
+      resolution: CaptureRecoveryResolution;
+      publicationWatermark: number;
+    }
+  | { status: 'already_published'; receipt: CapturePublicationReceipt }
+  | { status: 'missing' };
 
 export interface CapturePublicationReceipt {
   captureId: string;
@@ -82,6 +109,19 @@ export interface CapturePublicationService {
     userId: number;
     captureId: string;
   }): Promise<CapturePublicationReceipt | null>;
+  /**
+   * Operator recovery command, never called by delivery. It records an outcome
+   * established outside this database; it cannot derive one from these rows.
+   */
+  resolveCapture(input: {
+    userId: number;
+    captureId: string;
+    resolution: CaptureRecoveryResolution;
+  }): Promise<ResolveCaptureResult>;
+  /** The resumption gate: capture delivery stays paused while this is non-empty. */
+  readUnresolvedCaptureBacklog(input?: {
+    userIds?: number[];
+  }): Promise<Array<{ userId: number; unresolved: number }>>;
 }
 
 export const getAgentCaptureActorId = (userId: number): string =>
@@ -123,7 +163,7 @@ export const createCapturePublicationService = (
   ): Promise<CaptureQueueRow | null> => {
     const rows = await tx.$queryRaw<CaptureQueueRow[]>`
       SELECT capture_id AS "captureId", title, notes, published_op_id AS "publishedOpId",
-        published_server_seq AS "publishedServerSeq"
+        published_server_seq AS "publishedServerSeq", resolution
       FROM agent_captures
       WHERE user_id = ${userId} AND capture_id = ${captureId}
       FOR UPDATE
@@ -187,6 +227,15 @@ export const createCapturePublicationService = (
           this.publication.rejection = {
             status: 'rejected',
             error: 'Capture is missing or expired',
+          };
+          return undefined as T;
+        }
+        if (capture.resolution !== null) {
+          // Recovery already closed this item. Republishing would recreate work
+          // the operator established as delivered, or work the user discarded.
+          this.publication.rejection = {
+            status: 'rejected',
+            error: 'Capture was resolved during recovery and cannot be published',
           };
           return undefined as T;
         }
@@ -404,7 +453,8 @@ export const createCapturePublicationService = (
         user: { select: { syncDataGeneration: true, agentCaptureAccount: true } },
       },
     });
-    if (!capture || capture.publishedOpId !== null) return null;
+    if (!capture || capture.publishedOpId !== null || capture.resolution !== null)
+      return null;
     return {
       captureId: capture.captureId,
       title: capture.title,
@@ -417,7 +467,7 @@ export const createCapturePublicationService = (
   const readNextPendingCapture: CapturePublicationService['readNextPendingCapture'] =
     async ({ userId }) => {
       const capture = await prisma.agentCapture.findFirst({
-        where: { userId, publishedOpId: null },
+        where: { userId, publishedOpId: null, resolution: null },
         orderBy: { captureId: 'asc' },
         include: {
           user: { select: { syncDataGeneration: true, agentCaptureAccount: true } },
@@ -476,11 +526,98 @@ export const createCapturePublicationService = (
       : null;
   };
 
+  /**
+   * Recovery-only. Takes the same account -> capture lock order as publication,
+   * so a concurrent publisher and a concurrent operator command serialize
+   * against each other rather than racing for the row's terminal state.
+   */
+  const resolveCapture: CapturePublicationService['resolveCapture'] = async (input) => {
+    if (!isCaptureRecoveryResolution(input.resolution)) {
+      throw new Error(`Unknown capture resolution: ${String(input.resolution)}`);
+    }
+    return prisma.$transaction(async (tx) => {
+      await ensureAccountRow(tx, input.userId);
+      const account = await readAccountForUpdate(tx, input.userId);
+      const capture = await readQueueForUpdate(tx, input.userId, input.captureId);
+      if (!capture) return { status: 'missing' };
+      if (capture.publishedOpId !== null && capture.publishedServerSeq !== null) {
+        // A receipt is stronger evidence than anything recovery reconstructs.
+        return {
+          status: 'already_published',
+          receipt: {
+            captureId: capture.captureId,
+            opId: capture.publishedOpId,
+            serverSeq: capture.publishedServerSeq,
+          },
+        };
+      }
+      if (capture.resolution !== null) {
+        if (!isCaptureRecoveryResolution(capture.resolution)) {
+          throw new Error(
+            `Capture ${input.captureId} holds an unknown stored resolution`,
+          );
+        }
+        // Report what is stored, not what was asked: a retried or contradictory
+        // command must not silently replace a recorded outcome.
+        return {
+          status: 'already_resolved',
+          resolution: capture.resolution,
+          publicationWatermark: account.publishedCounter,
+        };
+      }
+
+      // A publication that the restore erased still consumed this clock value on
+      // every device that downloaded it. Resuming from the rolled-back counter
+      // would mint a second operation claiming the same publisher entry.
+      const publicationWatermark =
+        input.resolution === 'delivered_out_of_band'
+          ? account.publishedCounter + 1
+          : account.publishedCounter;
+      if (publicationWatermark !== account.publishedCounter) {
+        await tx.agentCaptureAccount.update({
+          where: { userId: input.userId },
+          data: { publishedCounter: publicationWatermark },
+        });
+      }
+      await tx.agentCapture.update({
+        where: {
+          userId_captureId: { userId: input.userId, captureId: input.captureId },
+        },
+        // Clear the plaintext on the same terms as publication: a resolved row
+        // must not carry submitted content into the backups taken after recovery.
+        data: {
+          title: '',
+          notes: null,
+          resolution: input.resolution,
+          resolvedAt: new Date(),
+        },
+      });
+      return { status: 'resolved', resolution: input.resolution, publicationWatermark };
+    });
+  };
+
+  const readUnresolvedCaptureBacklog: CapturePublicationService['readUnresolvedCaptureBacklog'] =
+    async ({ userIds } = {}) => {
+      const rows = await prisma.agentCapture.groupBy({
+        by: ['userId'],
+        where: {
+          publishedOpId: null,
+          resolution: null,
+          ...(userIds ? { userId: { in: userIds } } : {}),
+        },
+        _count: { _all: true },
+        orderBy: { userId: 'asc' },
+      });
+      return rows.map((row) => ({ userId: row.userId, unresolved: row._count._all }));
+    };
+
   return {
     readNextPendingCapture,
     readPendingCapture,
     readPublicationWatermark,
     publishCapture,
     readCaptureReceipt,
+    resolveCapture,
+    readUnresolvedCaptureBacklog,
   };
 };

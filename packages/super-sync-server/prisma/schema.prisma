@@ -187,8 +187,9 @@ model AgentCaptureAccount {
 
 // A published row is a terminal receipt: clear title/notes, retain op ID and seq.
 // No relation to Operation: deletion, imports and pruning must not erase receipts.
-// The migration also checks that both receipt fields are null or both are set;
-// Prisma cannot express CHECK constraints, so db-push setups omit that check.
+// The migration also checks that both receipt fields are null or both are set,
+// and the same for the recovery resolution pair; Prisma cannot express CHECK
+// constraints, so db-push setups omit those checks.
 model AgentCapture {
   userId             Int     @map("user_id")
   captureId          String  @map("capture_id")
@@ -196,6 +197,10 @@ model AgentCapture {
   notes              String?
   publishedOpId      String? @map("published_op_id")
   publishedServerSeq Int?    @map("published_server_seq")
+  // Operator recovery outcome, terminal without a receipt. See
+  // docs/backup-and-recovery.md#capture-restore-hold.
+  resolution         String?   @map("resolution")
+  resolvedAt         DateTime? @map("resolved_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

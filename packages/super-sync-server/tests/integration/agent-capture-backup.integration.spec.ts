@@ -75,6 +75,18 @@ describeWithDb('accounts backup capture recovery (PostgreSQL)', () => {
           publishedServerSeq: 42,
         },
       });
+      // An operator's recovery outcome must survive the very artifact that
+      // recovery restores; otherwise the resolved backlog reopens on restore.
+      const resolved = await source.agentCapture.create({
+        data: {
+          userId,
+          captureId: 'resolved-capture',
+          title: '',
+          notes: null,
+          resolution: 'delivered_out_of_band',
+          resolvedAt: new Date('2026-09-22T00:00:00.000Z'),
+        },
+      });
       await source.passkey.create({
         data: {
           userId,
@@ -119,7 +131,7 @@ describeWithDb('accounts backup capture recovery (PostgreSQL)', () => {
           where: { userId },
           orderBy: { captureId: 'asc' },
         }),
-      ).toEqual([pending, receipt]);
+      ).toEqual([pending, receipt, resolved]);
       expect(
         await restored.agentCaptureAccount.findUnique({ where: { userId } }),
       ).toEqual({ userId, publishedCounter: 7 });
