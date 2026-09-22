@@ -239,7 +239,10 @@ describe('TaskBulkActionService', () => {
       const otherDay = document.createElement('planner-day');
       otherDay.setAttribute('data-planner-selection-scope', '2026-09-11');
       const otherAddTask = document.createElement('add-task-inline');
-      otherAddTask.appendChild(document.createElement('button'));
+      const otherAdd = document.createElement('button');
+      // Mirrors the real template's marker on the collapsed add button.
+      otherAdd.setAttribute('data-add-task-btn', '');
+      otherAddTask.appendChild(otherAdd);
       otherDay.appendChild(otherAddTask);
       const day = document.createElement('planner-day');
       day.setAttribute('data-planner-selection-scope', '2026-09-12');
@@ -249,6 +252,7 @@ describe('TaskBulkActionService', () => {
       row.tabIndex = 0;
       const addTask = document.createElement('add-task-inline');
       const add = document.createElement('button');
+      add.setAttribute('data-add-task-btn', '');
       addTask.appendChild(add);
       day.append(row, addTask);
       const unrelatedTask = document.createElement('task');
@@ -269,6 +273,39 @@ describe('TaskBulkActionService', () => {
       otherDay.remove();
       day.remove();
       unrelatedTask.remove();
+    });
+
+    it('falls through to the next Planner section when overdue empties', async () => {
+      isConfirmBeforeDelete = false;
+      select([t('late')]);
+      const root = document.createElement('div');
+      // The overdue section is a plain div, not a planner-day, and has no add
+      // button of its own — it disappears once its last task leaves.
+      root.innerHTML = `
+        <div data-planner-selection-scope="overdue">
+          <planner-task data-task-selectable="true" data-task-id="late" tabindex="0"></planner-task>
+        </div>
+        <planner-day data-planner-selection-scope="2026-09-12">
+          <add-task-inline><button data-add-task-btn></button></add-task-inline>
+        </planner-day>`;
+      document.body.appendChild(root);
+      try {
+        const row = root.querySelector<HTMLElement>('[data-task-id="late"]')!;
+        const nextAdd = root.querySelector<HTMLElement>('[data-add-task-btn]')!;
+        spyOnProperty(document, 'activeElement', 'get').and.returnValue(row);
+        let isDestroyed = false;
+        multiSelect.isDestroyedHost = (el: Element) => isDestroyed && el === row;
+        taskService.remove.and.callFake(() => {
+          isDestroyed = true;
+        });
+        spyOn(nextAdd, 'focus');
+
+        await service.deleteSelected();
+
+        expect(nextAdd.focus).toHaveBeenCalled();
+      } finally {
+        root.remove();
+      }
     });
 
     it('restores focus in the originating board panel when the bulk menu had focus', async () => {

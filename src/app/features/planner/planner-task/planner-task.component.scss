@@ -55,7 +55,10 @@
 }
 
 // Keep the focused card distinct even when it is current or multi-selected.
-:host:focus {
+// Mouse intent plus `:focus-visible` — see _task-base.scss for why a bare
+// `:focus` would leave the ring stuck on a tapped card.
+:host-context(.isMousePrimary):focus,
+:host:focus-visible {
   outline: var(--focus-ring-width) solid var(--palette-primary-400) !important;
   outline-offset: calc(-1 * var(--focus-ring-width));
 }
@@ -101,7 +104,7 @@ done-toggle {
 }
 
 .title {
-  font-size: var(--font-size-lg);
+  font-size: var(--planner-font-size);
   padding-left: var(--s-half);
   padding-right: var(--s-half);
   // to have room for the coloured edit border
@@ -114,10 +117,6 @@ done-toggle {
   overflow-wrap: anywhere;
   flex-grow: 1;
   flex-shrink: 1;
-
-  @include mq(xs) {
-    font-size: var(--planner-font-size);
-  }
 }
 
 .parent-title {

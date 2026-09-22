@@ -186,6 +186,45 @@ describe('TaskMultiSelectService', () => {
       expect(service.selectionScope()).toBeNull();
     });
 
+    it('keeps the originating panel when the anchor row is deselected', () => {
+      const [, right] = boardRows();
+      const scope = right[0].parentElement;
+      stubActiveElement(right[0]);
+      service.toggle('shared');
+      stubActiveElement(right[1]);
+      service.toggle('middle');
+
+      // Deselecting the anchor while the rest of the selection stays put must
+      // not drop the scope: focus moves into the bulk menu after an action, so
+      // selectionScope() is what keeps the post-action focus search inside this
+      // panel instead of widening it to the whole document.
+      service.toggle('middle');
+      stubActiveElement(document.body);
+
+      expect(selected()).toEqual(['shared']);
+      expect(service.anchorId()).toBeNull();
+      expect(service.selectionScope()).toBe(scope);
+    });
+
+    it('re-points a retained scope that holds none of the remaining selection', () => {
+      const [left, right] = boardRows();
+      stubActiveElement(left[1]);
+      service.toggle('left');
+      stubActiveElement(right[1]);
+      service.toggle('middle');
+      expect(service.selectionScope()).toBe(right[1].parentElement);
+
+      // Deselecting the anchor leaves the selection entirely in the OTHER
+      // panel. Keeping the anchor's panel would scope the post-action focus
+      // search to a panel with nothing selected in it, and it would then find
+      // no target at all — worse than no scope, which at least widens.
+      service.toggle('middle');
+      stubActiveElement(document.body);
+
+      expect(selected()).toEqual(['left']);
+      expect(service.selectionScope()).toBe(left[1].parentElement);
+    });
+
     it('extends a moved selection from its original anchor in the destination', () => {
       const [left, right] = boardRows();
       left[1].dataset.taskId = 'middle';
@@ -245,6 +284,16 @@ describe('TaskMultiSelectService', () => {
       service.toggle('a');
       service.selectRange('e');
       expect(selected()).toEqual(['e']);
+      expect(service.anchorId()).toBe('e');
+    });
+
+    // No range can be built across lists, but the user still held Ctrl to ADD.
+    // Replacing the selection there threw away everything already picked.
+    it('keeps the existing selection when an additive target is in another list', () => {
+      service.toggle('a');
+      service.toggle('c');
+      service.selectRange('e', true);
+      expect(selected()).toEqual(['a', 'c', 'e']);
       expect(service.anchorId()).toBe('e');
     });
 

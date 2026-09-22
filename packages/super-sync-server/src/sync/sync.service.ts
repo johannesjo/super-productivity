@@ -988,9 +988,31 @@ export class SyncService {
   async deleteAllUserData(userId: number): Promise<void> {
     await prisma.$transaction(async (tx) => {
       // Serialize a destructive reset with capture publication before either
-      // path reads or removes account-scoped sync state. This must follow the
-      // ordinary upload's `user_sync_state` → `users` lock order.
+      // path reads or rewrites account-scoped sync state. This must follow the
+      // ordinary upload's `user_sync_state` → `users` lock order, and takes the
+      // row's write lock BEFORE any history is deleted. The upsert below cannot
+      // do that job on its own — it is read-then-write, so it can lose a
+      // concurrent first-row race; after this helper the row always exists.
       await this.lockUserSyncStateForUpdate(tx, userId);
+
+      // Keep the row's sequence counter so a peer that misses the empty
+      // interval still sees the replacement snapshot above its old cursor.
+      // Clear everything that described the history being deleted.
+      await tx.userSyncState.upsert({
+        where: { userId },
+        create: { userId, lastSeq: 0 },
+        update: {
+          lastSnapshotSeq: null,
+          snapshotData: null,
+          snapshotAt: null,
+          // Cleared with the blob, as every other cache-clear site does; a
+          // stale version left behind would describe data that no longer exists.
+          snapshotSchemaVersion: null,
+          latestFullStateSeq: null,
+          latestFullStateVectorClock: Prisma.DbNull,
+          latestStateReplacementSeq: null,
+        },
+      });
 
       // Delete all operations
       await tx.operation.deleteMany({ where: { userId } });
@@ -998,14 +1020,8 @@ export class SyncService {
       // Delete all devices
       await tx.syncDevice.deleteMany({ where: { userId } });
 
-      // Delete sync state entirely, resetting lastSeq to 0.
-      // Unlike uploadOps clean slate (which preserves lastSeq), account reset
-      // intentionally wipes everything. Clients detect the wipe via latestSeq=0
-      // and trigger a full state re-upload.
-      await tx.userSyncState.deleteMany({ where: { userId } });
-
       // Reset storage usage, and advance the data generation in the same
-      // transaction. The wipe removes the user_sync_state row, so the
+      // transaction. The wipe clears `latestStateReplacementSeq`, so the
       // state-replacement fence cannot survive it; this counter is what work
       // prepared against the pre-wipe account is checked against.
       await tx.user.update({

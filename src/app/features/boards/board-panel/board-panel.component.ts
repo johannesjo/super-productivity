@@ -72,6 +72,7 @@ import { TaskBulkActionService } from '../../tasks/task-bulk-action.service';
 import { reorderBoardTasks } from '../reorder-board-tasks';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { checkKeyCombo } from '../../../util/check-key-combo';
+import { ADD_TASK_INLINE_BTN_SELECTOR } from '../../planner/add-task-inline/add-task-inline.const';
 
 export interface BoardPanelNavigation {
   direction: -1 | 1 | 'up' | 'down';
@@ -131,7 +132,7 @@ export class BoardPanelComponent implements TaskCardList {
   }
 
   addButton(): HTMLElement | null {
-    return this._element.nativeElement.querySelector('add-task-inline button');
+    return this._element.nativeElement.querySelector(ADD_TASK_INLINE_BTN_SELECTOR);
   }
 
   focusRow(index: number, taskId?: string): void {
@@ -305,6 +306,13 @@ export class BoardPanelComponent implements TaskCardList {
     const panelCfg = this.panelCfg();
     const orderedTasks: TaskCopy[] = [];
     const nonOrderedTasks: TaskCopy[] = [];
+    const taskOrder = new Map<string, number>();
+    panelCfg.taskIds.forEach((id, index) => {
+      // Preserve indexOf's first-occurrence ordering for repeated IDs.
+      if (!taskOrder.has(id)) {
+        taskOrder.set(id, index);
+      }
+    });
 
     // Hoist the backlog predicate out of the filter callback so it's allocated
     // once per recompute, not once per task.
@@ -314,8 +322,8 @@ export class BoardPanelComponent implements TaskCardList {
     );
 
     allFilteredTasks.forEach((task) => {
-      const index = panelCfg.taskIds.indexOf(task.id);
-      if (index > -1) {
+      const index = taskOrder.get(task.id);
+      if (index !== undefined) {
         orderedTasks[index] = task;
       } else {
         nonOrderedTasks.push(task);

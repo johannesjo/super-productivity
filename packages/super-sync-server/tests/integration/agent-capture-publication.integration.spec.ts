@@ -690,9 +690,10 @@ describeWithDb('Agent capture publication (PostgreSQL)', () => {
    * encryption, disabling it, and importing data whose encryption settings
    * differ all run `SnapshotUploadService.deleteAndReuploadWithNewEncryption`:
    * `DELETE /api/sync/data` — that is `deleteAllUserData`, which drops every
-   * operation and the whole `user_sync_state` ROW — and only then a full-state
-   * re-upload under the NEW key. A password change does NOT take this route: it
-   * uses the clean-slate upload path, which keeps the row and writes a real
+   * operation and clears the replacement fence on `user_sync_state` (the row
+   * itself survives, so its sequence counter keeps advancing) — and only then a
+   * full-state re-upload under the NEW key. A password change does NOT take
+   * this route: it uses the clean-slate upload path, which writes a real
    * SYNC_IMPORT, so the existing replacement fence already covers it.
    *
    * This case is the WINDOW between the delete and the re-upload. There the
@@ -728,7 +729,10 @@ describeWithDb('Agent capture publication (PostgreSQL)', () => {
 
     // The wipe half of the encryption toggle, before its re-upload lands.
     await new SyncService().deleteAllUserData(userId);
-    expect(await prisma.userSyncState.findUnique({ where: { userId } })).toBeNull();
+    expect(await prisma.userSyncState.findUnique({ where: { userId } })).toMatchObject({
+      latestStateReplacementSeq: null,
+      latestFullStateSeq: null,
+    });
 
     const result = await publish(
       userId,

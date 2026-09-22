@@ -248,9 +248,23 @@
   outline-offset: -1px;
 }
 
-// A thicker outline marks the keyboard target inside a multi-selection.
-// :focus also covers the app's programmatic navigation and focus restoration.
-:host:focus > swipe-block ::ng-deep > .inner-wrapper > .inner-wrapper > .box {
+// Marks the row the user is on: the keyboard target inside a multi-selection,
+// and the clicked row when pointing. Two selectors, because a bare `:focus`
+// would leave the ring stuck on a tapped row for the rest of the session (the
+// host is `tabindex="0"`, so a tap focuses it):
+//   - `:focus` while mouse intent is active — covers clicks, and the scripted
+//     navigation and focus restoration this ring was restored for.
+//   - `:focus-visible` on its own — keyboard focus on a touch device, where no
+//     pointer other than a pen sets mouse intent.
+// Known edge: on a hybrid device, a row that was tapped and left focused picks
+// up the ring once the user moves the mouse and intent flips back.
+:host-context(.isMousePrimary):focus
+  > swipe-block
+  ::ng-deep
+  > .inner-wrapper
+  > .inner-wrapper
+  > .box,
+:host:focus-visible > swipe-block ::ng-deep > .inner-wrapper > .inner-wrapper > .box {
   outline: var(--focus-ring-width) solid var(--palette-primary-400);
   outline-offset: calc(-1 * var(--focus-ring-width));
 }

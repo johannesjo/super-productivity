@@ -44,6 +44,8 @@ import {
 import { isTouchActive } from '../../util/input-intent';
 import { LocaleDatePipe } from '../../ui/pipes/locale-date.pipe';
 import { msToString } from '../../ui/duration/ms-to-string.pipe';
+import { ADD_TASK_INLINE_BTN_SELECTOR } from '../planner/add-task-inline/add-task-inline.const';
+import { getNextPlannerAddButton } from '../planner/get-next-planner-add-button';
 
 interface DateTimePick {
   date: Date | null;
@@ -761,13 +763,19 @@ export class TaskBulkActionService {
     const selectedPlannerRow = rows.find(
       (row) => row.matches('planner-task') && selected.has(idOf(row)),
     );
-    return (
-      selectedPlannerRow
-        ?.closest<HTMLElement>(
-          'planner-day[data-planner-selection-scope], [data-board-selection-scope]',
-        )
-        ?.querySelector<HTMLElement>('add-task-inline button') ?? null
+    const rowScope = selectedPlannerRow?.closest<HTMLElement>(
+      '[data-planner-selection-scope], [data-board-selection-scope]',
     );
+    if (!rowScope) {
+      return null;
+    }
+    const inScope = rowScope.querySelector<HTMLElement>(ADD_TASK_INLINE_BTN_SELECTOR);
+    if (inScope || rowScope.matches('[data-board-selection-scope]')) {
+      // Board panels stop here even with nothing to offer: reaching into a
+      // sibling panel is the cross-panel jump this fallback exists to avoid.
+      return inScope ?? null;
+    }
+    return getNextPlannerAddButton(rowScope);
   }
 
   /**
