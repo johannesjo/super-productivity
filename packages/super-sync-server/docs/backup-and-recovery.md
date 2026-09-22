@@ -200,12 +200,13 @@ receipt IDs or sequences to hide an unresolved item.
 ### Recording outcomes and clearing the hold
 
 `npm run capture-restore` records the outcomes you established in step 5 and
-gates resumption on them. It does **not** reconstruct missing evidence: nothing
-in the restored rows can tell delivery from non-delivery, which is why every
-resolution is an operator command rather than an automatic repair.
+inventories what is still unresolved. It does **not** reconstruct missing
+evidence: nothing in the restored rows can tell delivery from non-delivery,
+which is why every resolution is an operator command rather than an automatic
+repair.
 
 ```sh
-# The resumption gate. Exits 1 while any capture is unresolved.
+# Exits 1 while any restored pending capture is unresolved. Necessary, not sufficient.
 npm run capture-restore -- status
 
 # One recorded outcome per ambiguous item, after you established it.
@@ -232,9 +233,20 @@ capture that publishes before you resolve it is safe (the row is locked and the
 receipt wins), but resolving a genuinely pending capture on a running deployment
 would drop real work. Run this only while delivery is paused.
 
+**An empty backlog is not authorization to resume.** `status` can only count rows
+the restore kept. A capture that was submitted **and** published after the backup
+leaves no row at all: nothing counts it, `resolve` has nothing to act on, and the
+publisher clock value it already consumed on devices stays unreclaimed. That case
+is what the account-by-account record above exists to catch, and reclaiming its
+counter currently requires a deliberate manual `UPDATE` of
+`agent_capture_accounts.published_counter` — decided per incident, never guessed.
+(No production path submits captures yet, so this case is unreachable today; the
+mechanism is an open decision recorded with the submission contract.)
+
 Rehearse the chosen reconciliation on an isolated restore and verify ordinary
 replay on surviving and fresh clients before approving it for an incident. Resume
-only after `status` is clean and the deployment switch is deliberately enabled.
+only when `status` is clean, the record accounts for submissions accepted after
+the snapshot, and the deployment switch is deliberately enabled.
 If the required evidence cannot be recovered, keep delivery disabled; this
 procedure does not authorize data loss.
 
@@ -247,7 +259,11 @@ Run with `DATABASE_URL` and `BACKUP_TEST_DB_CONTAINER` pointing to the same isol
 PostgreSQL container; the canonical PostgreSQL CI job supplies both. The delivery
 route suite separately verifies the pause responses.
 
-The browser characterization is `e2e/tests/sync/agent-capture-restore.spec.ts`.
+The browser suite is `e2e/tests/sync/agent-capture-restore.spec.ts`. It holds both
+halves: the `edit`/`delete` cases characterizing an **unresolved** restore with
+delivery left enabled, and one case verifying resumption **after** the operator
+resolves the restored capture — paused resume, `resolveCapture`, cleared pause,
+and a later capture publishing above the reclaimed watermark.
 From the repository root, with the E2E frontend running and an isolated PostgreSQL
 database already migrated, run:
 
@@ -261,8 +277,15 @@ E2E_BASE_URL=http://127.0.0.1:4242 E2E_REQUIRE_SUPERSYNC=true \
 Use an unused local backend port. The spec starts and restarts its own server,
 restores only its test accounts, and skips without the explicit opt-in. Its runner
 skips the normal pre-existing-backend health check and unrelated plugin build;
-shared packages and the Prisma client must already be built/generated. Passing
-records the unsafe behavior; it does not authorize resumption.
+shared packages and the Prisma client must already be built/generated.
+
+What passing means: an unresolved restore republishes, and a resolved one does
+not — no second operation, no recreated task on a fresh device, and the next
+capture minting its clock above the reclaimed watermark. It does not authorize
+resumption by itself: the release gate is still the account-by-account record of
+step 5, of which this suite only exercises one rehearsed account. It also does
+not recover the user's edit — the surviving device keeps that title locally only,
+and the fresh device ends up with no task at all for the resolved capture.
 
 ## Per-User Recovery (single account wiped)
 

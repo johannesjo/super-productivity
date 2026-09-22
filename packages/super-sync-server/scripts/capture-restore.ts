@@ -8,9 +8,12 @@
  * artifacts or the user, and records it here. See
  * docs/backup-and-recovery.md#capture-restore-hold for the full procedure.
  *
- * `status` is the resumption gate. It exits non-zero while any capture is
- * unresolved, so enabling ENABLE_AGENT_CAPTURE_DELIVERY stays a deliberate act
- * taken against an empty backlog.
+ * `status` inventories restored pending captures and exits non-zero while any
+ * is unresolved. It is necessary before resumption and never sufficient: it can
+ * only count rows the restore kept, so a capture submitted AND published after
+ * the backup leaves nothing here to count while still having consumed a
+ * publisher clock value on the devices that downloaded it. Clearing the hold is
+ * a judgement against the account-by-account recovery record, not an exit code.
  *
  * Prints only user IDs, capture IDs and counts — never titles, notes or keys.
  */
@@ -38,7 +41,13 @@ const publication = createCapturePublicationService(prisma);
 const runStatus = async (): Promise<number> => {
   const backlog = await publication.readUnresolvedCaptureBacklog();
   if (backlog.length === 0) {
-    console.log('No unresolved captures. The restore hold may be cleared.');
+    console.log('No restored pending capture is unresolved.');
+    console.log(
+      'This does not by itself authorize clearing the hold: a capture submitted\n' +
+        'and published after the backup left no row here to count, and its\n' +
+        'publisher clock value is still unreclaimed. Check the recovery record\n' +
+        'for submissions accepted after the snapshot before resuming.',
+    );
     return 0;
   }
   console.log(`Unresolved captures for ${backlog.length} account(s):`);
@@ -52,7 +61,9 @@ const runStatus = async (): Promise<number> => {
       `  user ${userId}: ${unresolved} -> ${captures.map((c) => c.captureId).join(', ')}`,
     );
   }
-  console.log('\nKeep ENABLE_AGENT_CAPTURE_DELIVERY=false until this list is empty.');
+  console.log(
+    '\nKeep ENABLE_AGENT_CAPTURE_DELIVERY=false at least until this list is empty.',
+  );
   return 1;
 };
 

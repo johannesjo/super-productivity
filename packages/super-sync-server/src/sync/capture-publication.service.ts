@@ -118,7 +118,12 @@ export interface CapturePublicationService {
     captureId: string;
     resolution: CaptureRecoveryResolution;
   }): Promise<ResolveCaptureResult>;
-  /** The resumption gate: capture delivery stays paused while this is non-empty. */
+  /**
+   * Inventory of restored pending captures. Necessary before resumption, never
+   * sufficient: it can only count rows the restore kept. A capture submitted
+   * AND published after the backup leaves no row here at all, yet still
+   * consumed a publisher clock value on the devices that downloaded it.
+   */
   readUnresolvedCaptureBacklog(input?: {
     userIds?: number[];
   }): Promise<Array<{ userId: number; unresolved: number }>>;
@@ -535,6 +540,18 @@ export const createCapturePublicationService = (
     if (!isCaptureRecoveryResolution(input.resolution)) {
       throw new Error(`Unknown capture resolution: ${String(input.resolution)}`);
     }
+    // Refuse before the transaction so a command that is about to fail writes
+    // nothing: `ensureAccountRow` would otherwise insert an account row for a
+    // mistyped capture or user ID, and an unknown user would surface as a raw
+    // foreign-key error instead of `missing`. The locked read below still
+    // decides the outcome; this only avoids the write on the refusal path.
+    const known = await prisma.agentCapture.findUnique({
+      where: {
+        userId_captureId: { userId: input.userId, captureId: input.captureId },
+      },
+      select: { captureId: true },
+    });
+    if (!known) return { status: 'missing' };
     return prisma.$transaction(async (tx) => {
       await ensureAccountRow(tx, input.userId);
       const account = await readAccountForUpdate(tx, input.userId);
