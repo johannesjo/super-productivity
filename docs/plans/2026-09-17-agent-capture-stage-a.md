@@ -9,6 +9,15 @@ implemented. Submission remains a test fixture; the consume-on-accept alternativ
 remains experimental. Earlier dated sections below record the experiments that
 led here, rather than the current implementation boundary.
 
+**Set aside (2026-09-22):** this design diverged from
+[`2026-09-16-work-api-mcp-and-headless-device.md`](2026-09-16-work-api-mcp-and-headless-device.md),
+which makes the agent endpoint a sync client and lists server-side MCP in
+SuperSync as a non-goal. The keyless endpoint here required a plaintext capture
+queue on the sync server and a publication protocol to bridge it, and cannot
+grow into read access. The branch stays unmerged as a reference. Direction and
+sequencing now live in
+[`2026-09-22-headless-client-handover.md`](2026-09-22-headless-client-handover.md).
+
 **Scope:** Turn the capture-first proposal into reviewable prerequisites before
 committing to a release. Full control remains a separate investment decision.
 
