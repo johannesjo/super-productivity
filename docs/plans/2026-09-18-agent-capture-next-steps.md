@@ -136,13 +136,15 @@ handling. Gate 3 stays open regardless of the outcome.
 
 ---
 
-## Part 2 — rehearse the restore recovery procedure
+## Part 2 — restore recovery: rehearsed, pending a real incident record
 
 Use the deployment pause and operator runbook before a restored server accepts
-capture work. The pause, the resolution transaction and the backlog gate now
-exist; what remains is rehearsing them on an isolated restore and verifying
-resumption. The pause must remain outside the restored database: a database-only
-flag can roll back with the same restore.
+capture work. The pause, the resolution transaction and the backlog inventory
+exist, and the pause -> resolve -> resume order is now rehearsed end to end in
+the browser (2026-09-22). What remains is the account-by-account record an
+actual incident requires, and the absent-row case below. The pause must remain
+outside the restored database: a database-only flag can roll back with the same
+restore.
 
 A point-in-time restore rolls back the queue row, the publication watermark, the
 account generation and the accepted operation together, while a device keeps the
@@ -180,8 +182,11 @@ clears the plaintext, and invents no operation identity. `delivered_out_of_band`
 also reclaims the publisher clock value the erased publication consumed on
 devices. **This is an operator procedure, not automatic safety:** an unpaused
 restored deployment still republishes, and nothing reconstructs missing evidence.
-Verified resumption after a real incident — rehearsed on an isolated restore,
-with browser replay on surviving and fresh clients — remains the release gate.
+The rehearsal now exists: `e2e/tests/sync/agent-capture-restore.spec.ts` holds
+both the unresolved characterization and a passing resolved-resumption case with
+browser replay on surviving and fresh clients. The release gate that remains is
+the account-by-account recovery record for a real incident, which one rehearsed
+account cannot stand in for.
 
 ---
 
@@ -225,6 +230,23 @@ through the real connector:**
 
 - The HTTP/MCP surface: whether a submission identity is required, and the
   response to a reused identity with conflicting content.
+- **Whether `captureId` must be opaque.** It is `z.string().min(1).max(200)`
+  free-form today and becomes the task ID `capture-${captureId}`. A submitter
+  that derives it from the capture text would put user content into operator
+  terminal output and incident notes — which the restore hold explicitly treats
+  as safe to inventory. Constrain the format at the contract boundary, or drop
+  that claim.
+- **How submission interacts with the restore hold.** The backlog inventory
+  cannot tell a restore-ambiguous pending row from a legitimately new one:
+  `agent_captures` has no creation timestamp. Once submission is live and is not
+  itself paused, `status` may never reach zero, and the only way to clear an item
+  is `resolve`, which destroys a genuinely new capture's content. Decide whether
+  submission pauses together with delivery, or add `created_at` — cheap while the
+  table is still empty everywhere.
+- **Reclaiming a clock value for a capture absent from the snapshot.** `resolve`
+  needs a row. A capture submitted AND published after the backup leaves none, so
+  its consumed publisher clock value cannot be reclaimed with the current tool,
+  and the backlog reports clean. Decide the mechanism alongside submission.
 
 Next, run Part 1 in fresh human-operated assistant sessions and settle the
 submission contract, then build capture-only authorization and submission.

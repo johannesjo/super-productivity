@@ -1068,26 +1068,26 @@ open. Do not infer non-delivery from an absent task, operation or pruned clock.
 Use the real server database transaction, valid task operation envelopes, and
 the app's normal remote replay. An in-memory fake queue is not sufficient.
 
-| Failure or race                                                        | Required result                                                                                                        |
-| ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| Device dies before publication                                         | Item remains pending; no optimistic task survives.                                                                     |
-| Two devices prepare different candidates                               | One ordinary task operation is committed; both observe the same receipt.                                               |
-| Server commits but the response is lost                                | Retry observes publication; no second task operation.                                                                  |
-| Server transaction fails                                               | Neither the operation nor a success receipt is committed.                                                              |
-| Download or local apply fails after publication                        | Normal sync retries/rebuilds; the capture is not republished.                                                          |
-| User edits, moves, or deletes the imported task                        | Late queue retries leave those changes intact.                                                                         |
-| Import/reset races with publication                                    | Existing replacement fence and explicit queue policy govern the result.                                                |
-| Operation is pruned after publication                                  | Receipt stays terminal; normal snapshot recovery supplies current state.                                               |
-| Device/account/encryption configuration changes                        | Fixed: the wipe advances a monotonic data generation; work prepared under the retired key is refused.                  |
-| Candidate submitted to another account                                 | Refused: the capture actor is derived from the account, so publisher identity disagrees.                               |
-| Two devices prepare against the same watermark                         | Exactly one publishes; the loser stays pending. The watermark is claimed inside the transaction.                       |
-| Retired-key device prepares inside the wipe window                     | Fixed in the experiment: authenticate the current encrypted baseline and bind its ID to publication.                   |
-| Local write during baseline probe; tab closes during/after preparation | Covered: local task survives; no capture counter is consumed; retry publishes once.                                    |
-| Server database backup restores old pending items                      | Partly fixed: the deployment pause holds, and an operator records each outcome; an unpaused restore still republishes. |
-| Replacement row pruned by retention or quota recovery                  | Fixed: the boundary's causal identity is persisted beside its seq and outlives the row.                                |
-| Repair pruning drops the earlier import author's counter               | Fixed in the harness: use the newer causal repair, with the import sequence as a floor.                                |
-| Client pruning drops the capture publisher before a local edit         | Covered: ordinary conflict resolution recovers the edge; edits and deletion converge on both devices.                  |
-| Boundary pruned on a pre-migration row, never backfilled               | Publication refuses: no causal identity anywhere, and a missing boundary is not an absent one.                         |
+| Failure or race                                                        | Required result                                                                                                                                         |
+| ---------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Device dies before publication                                         | Item remains pending; no optimistic task survives.                                                                                                      |
+| Two devices prepare different candidates                               | One ordinary task operation is committed; both observe the same receipt.                                                                                |
+| Server commits but the response is lost                                | Retry observes publication; no second task operation.                                                                                                   |
+| Server transaction fails                                               | Neither the operation nor a success receipt is committed.                                                                                               |
+| Download or local apply fails after publication                        | Normal sync retries/rebuilds; the capture is not republished.                                                                                           |
+| User edits, moves, or deletes the imported task                        | Late queue retries leave those changes intact.                                                                                                          |
+| Import/reset races with publication                                    | Existing replacement fence and explicit queue policy govern the result.                                                                                 |
+| Operation is pruned after publication                                  | Receipt stays terminal; normal snapshot recovery supplies current state.                                                                                |
+| Device/account/encryption configuration changes                        | Fixed: the wipe advances a monotonic data generation; work prepared under the retired key is refused.                                                   |
+| Candidate submitted to another account                                 | Refused: the capture actor is derived from the account, so publisher identity disagrees.                                                                |
+| Two devices prepare against the same watermark                         | Exactly one publishes; the loser stays pending. The watermark is claimed inside the transaction.                                                        |
+| Retired-key device prepares inside the wipe window                     | Fixed in the experiment: authenticate the current encrypted baseline and bind its ID to publication.                                                    |
+| Local write during baseline probe; tab closes during/after preparation | Covered: local task survives; no capture counter is consumed; retry publishes once.                                                                     |
+| Server database backup restores old pending items                      | Fixed for pause -> resolve -> resume, browser-verified; an unpaused restore still republishes, and a capture absent from the snapshot is unreclaimable. |
+| Replacement row pruned by retention or quota recovery                  | Fixed: the boundary's causal identity is persisted beside its seq and outlives the row.                                                                 |
+| Repair pruning drops the earlier import author's counter               | Fixed in the harness: use the newer causal repair, with the import sequence as a floor.                                                                 |
+| Client pruning drops the capture publisher before a local edit         | Covered: ordinary conflict resolution recovers the edge; edits and deletion converge on both devices.                                                   |
+| Boundary pruned on a pre-migration row, never backfilled               | Publication refuses: no causal identity anywhere, and a missing boundary is not an absent one.                                                          |
 
 ## Implementation order and release gates
 
@@ -1131,6 +1131,69 @@ replicas, and encryption-key transfer remain separate scope decisions tied to an
 actual supported workflow. A longer schedule does not by itself justify them.
 
 ## Validation record
+
+- 2026-09-22 (browser resumption): the restore spec now holds both outcomes and
+  all three cases pass together in 2.5 minutes against real PostgreSQL, a real
+  spawned backend and a real built frontend. The new case rehearses the runbook
+  order: restore, confirm the backlog is non-empty, restart with
+  `ENABLE_AGENT_CAPTURE_DELIVERY=false` and sync (no queue read, no publication,
+  backlog unchanged, no client runtime errors), resolve with the backend down,
+  then restart with delivery on and replay the two sync cycles that republished
+  in the characterization. Nothing publishes, no operation is accepted, no
+  receipt is invented, the queue read is terminal, and no zombie task appears. A
+  capture enqueued afterwards is handed `captureCounter: 1` and the REAL CLIENT
+  mints its operation at publisher clock entry 2, not the delivered 1 — the
+  strongest browser-only claim here, since the client is the party that mints the
+  entry. A fresh device recovers neither title, and the same interceptor that was
+  empty in the resolved phase does fire for that later capture, so the negative
+  assertion is structurally controlled rather than vacuous. The two
+  characterization cases in the same file are the other control: the identical
+  harness, without a resolution, still republishes.
+  **What this does not establish:** the user's edit is NOT recovered — the
+  surviving device keeps it locally only and the fresh device ends with no task
+  for that capture; resolution prevents a zombie, it does not undo the restore.
+  One rehearsed account, one surviving device, one fresh device, a single-process
+  backend, `edit` only (the `delete` variant is deliberately omitted: its
+  distinguishing evidence is identical). The operator CLI is not exercised there;
+  it has its own PostgreSQL spec.
+
+- 2026-09-22 (follow-up review): an adversarial review of the resolution commit
+  found that the backlog inventory reports clean for the one case the counter
+  reclamation exists to prevent. A capture submitted AND published after the
+  backup leaves NO row in the restored database, so nothing counts it, yet it
+  already consumed a publisher clock value on every device that downloaded it —
+  and `resolve` needs a row, so the value cannot be reclaimed. The CLI previously
+  printed "the restore hold may be cleared" on an empty backlog; it now states
+  what an empty backlog proves and names the evidence it cannot see. The
+  interface comment and script header were corrected the same way: this is a
+  necessary check, never a sufficient one. The mechanism for the absent-row case
+  is recorded as an open submission-contract decision, not built — no submission
+  path exists in production, so the case is currently unreachable.
+  The review also confirmed, by direct code trace, the concrete harm behind the
+  `+1`: `isOpCoveredByLocalClock` (`operation-log-download.service.ts`) makes a
+  client silently DROP an operation whose author counter it already holds, so a
+  reused `(capture actor, counter)` pair loses the new capture on exactly the
+  devices that saw the erased one. The drop is conditional — the call site also
+  requires `serverSeq <= deliveredUpToSeq` — which a restore makes reachable
+  precisely because it reuses sequence numbers. Read firsthand, not reproduced
+  in a browser. The `+1` arithmetic is correct for every case
+  the tool supports; `already_resolved` returns before the increment under the
+  row lock, and a row carrying a receipt short-circuits earlier.
+  Two defects were fixed: `resolveCapture` created an account row before
+  discovering the capture was missing (a refused operator command wrote, and an
+  unknown user surfaced as a raw foreign-key error), and the shipped CHECK
+  constraints were verified by no committed test, because CI provisions with
+  `prisma db push`, which omits them. The new
+  `agent-capture-constraints.integration.spec.ts` reads the constraint DDL out of
+  the migration file rather than restating it, applies it when absent, and
+  asserts the three legitimate row shapes and four malformed ones; it was
+  confirmed to fail when pointed at the wrong constraint. The operator CLI now
+  has `capture-restore-script.integration.spec.ts`, which runs the documented
+  commands end to end and asserts the exit codes, the refusal paths writing
+  nothing, and that no command echoes submitted content. Lock ordering, terminal
+  -state coverage across every reader of `agent_captures`, and the absence of a
+  schema-version bump were reviewed and found correct. The PostgreSQL suite is
+  128/128 with `tsc` clean.
 
 - 2026-09-22: the restore ambiguity now has an operator resolution transaction
   and a resumption gate, built after the 2026-09-21 characterization, not before
