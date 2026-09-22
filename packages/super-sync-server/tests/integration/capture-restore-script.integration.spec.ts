@@ -38,7 +38,9 @@ describeWithDb('capture-restore operator CLI (PostgreSQL)', () => {
   // no command may echo what the user submitted.
   const SUBMITTED_CONTENT = 'confidential submitted capture title';
 
-  const seedUser = async (captures: string[]): Promise<number> => {
+  const seedUser = async (
+    captures: Array<string | { captureId: string; createdAt: Date }>,
+  ): Promise<number> => {
     const user = await prisma.user.create({
       data: {
         email: `capture-cli-${RUN_ID}-${userIds.length}@test.local`,
@@ -47,10 +49,10 @@ describeWithDb('capture-restore operator CLI (PostgreSQL)', () => {
     });
     userIds.push(user.id);
     await prisma.agentCapture.createMany({
-      data: captures.map((captureId) => ({
+      data: captures.map((capture) => ({
         userId: user.id,
-        captureId,
         title: SUBMITTED_CONTENT,
+        ...(typeof capture === 'string' ? { captureId: capture } : capture),
       })),
     });
     return user.id;
@@ -129,6 +131,43 @@ describeWithDb('capture-restore operator CLI (PostgreSQL)', () => {
       await prisma.agentCaptureAccount.findUnique({ where: { userId } }),
     ).toMatchObject({ publishedCounter: 1 });
     // Each invocation pays an npm + ts-node cold start.
+  }, 60_000);
+
+  it('scopes the backlog to a snapshot so a live deployment can still clear', async () => {
+    const snapshot = new Date(Date.now() - 60 * 60 * 1000);
+    const userId = await seedUser([
+      { captureId: 'cli-restore-era', createdAt: new Date(snapshot.getTime() - 1000) },
+      { captureId: 'cli-after-snapshot', createdAt: new Date() },
+    ]);
+
+    const scoped = run('status', '--created-before', snapshot.toISOString());
+    expect(scoped.status).toBe(1);
+    expect(scoped.stdout).toContain('cli-restore-era');
+    // The post-snapshot submission is not the restore's problem and must not
+    // hold the gate, nor be offered to an operator as something to resolve.
+    expect(scoped.stdout).not.toContain('cli-after-snapshot');
+    expect(scoped.stdout).not.toContain(SUBMITTED_CONTENT);
+
+    expect(
+      run('resolve', String(userId), 'cli-restore-era', 'discarded_by_user').status,
+    ).toBe(0);
+
+    const cleared = run('status', '--created-before', snapshot.toISOString());
+    expect(cleared.status).toBe(0);
+    expect(cleared.stdout).toContain('does not by itself authorize');
+    // Unscoped, the live submission still shows up — the scope is the operator's
+    // explicit choice, never the default.
+    expect(run('status').status).toBe(1);
+
+    expect(run('status', '--created-before', 'not-a-timestamp').status).toBe(1);
+    expect(
+      await prisma.agentCapture.findUnique({
+        where: {
+          userId_captureId: { userId, captureId: 'cli-after-snapshot' },
+        },
+        select: { title: true, resolution: true },
+      }),
+    ).toEqual({ title: SUBMITTED_CONTENT, resolution: null });
   }, 60_000);
 
   it('refuses an unknown capture and a resolution outside the vocabulary', async () => {

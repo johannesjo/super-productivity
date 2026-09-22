@@ -25,7 +25,7 @@ import {
 } from '../src/sync/capture-publication.service';
 
 const USAGE = `Usage:
-  npm run capture-restore -- status
+  npm run capture-restore -- status [--created-before <ISO timestamp>]
   npm run capture-restore -- resolve <userId> <captureId> <${CAPTURE_RECOVERY_RESOLUTIONS.join('|')}>
 
   delivered_out_of_band  Evidence outside this database shows the capture was
@@ -33,15 +33,39 @@ const USAGE = `Usage:
                          clock value that publication already consumed.
   discarded_by_user      The user decided this capture must not be published.
 
+  --created-before       Count only captures stored before this instant, i.e.
+                         the snapshot the restore came from. Use it once the
+                         deployment accepts new submissions, or the backlog
+                         mixes restore-era rows with legitimately new ones and
+                         never empties.
+
 Resolution clears the stored title and notes and cannot be undone.
 Re-run \`status\` afterwards; it exits 1 while anything stays unresolved.`;
 
 const publication = createCapturePublicationService(prisma);
 
-const runStatus = async (): Promise<number> => {
-  const backlog = await publication.readUnresolvedCaptureBacklog();
+/** Reads `--created-before <iso>`; returns undefined when absent, null when unusable. */
+const parseCreatedBefore = (args: string[]): Date | undefined | null => {
+  const at = args.indexOf('--created-before');
+  if (at === -1) return undefined;
+  const raw = args[at + 1];
+  const parsed = raw ? new Date(raw) : new Date('');
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const runStatus = async (args: string[]): Promise<number> => {
+  const createdBefore = parseCreatedBefore(args);
+  if (createdBefore === null) {
+    console.log(USAGE);
+    return 1;
+  }
+  const backlog = await publication.readUnresolvedCaptureBacklog({ createdBefore });
   if (backlog.length === 0) {
-    console.log('No restored pending capture is unresolved.');
+    console.log(
+      createdBefore
+        ? `No pending capture stored before ${createdBefore.toISOString()} is unresolved.`
+        : 'No restored pending capture is unresolved.',
+    );
     console.log(
       'This does not by itself authorize clearing the hold: a capture submitted\n' +
         'and published after the backup left no row here to count, and its\n' +
@@ -53,13 +77,19 @@ const runStatus = async (): Promise<number> => {
   console.log(`Unresolved captures for ${backlog.length} account(s):`);
   for (const { userId, unresolved } of backlog) {
     const captures = await prisma.agentCapture.findMany({
-      where: { userId, publishedOpId: null, resolution: null },
-      select: { captureId: true },
+      where: {
+        userId,
+        publishedOpId: null,
+        resolution: null,
+        ...(createdBefore ? { createdAt: { lt: createdBefore } } : {}),
+      },
+      select: { captureId: true, createdAt: true },
       orderBy: { captureId: 'asc' },
     });
-    console.log(
-      `  user ${userId}: ${unresolved} -> ${captures.map((c) => c.captureId).join(', ')}`,
-    );
+    console.log(`  user ${userId}: ${unresolved}`);
+    for (const capture of captures) {
+      console.log(`    ${capture.createdAt.toISOString()}  ${capture.captureId}`);
+    }
   }
   console.log(
     '\nKeep ENABLE_AGENT_CAPTURE_DELIVERY=false at least until this list is empty.',
@@ -107,7 +137,7 @@ const runResolve = async (args: string[]): Promise<number> => {
 
 const main = async (): Promise<number> => {
   const [command, ...args] = process.argv.slice(2);
-  if (command === 'status') return runStatus();
+  if (command === 'status') return runStatus(args);
   if (command === 'resolve') return runResolve(args);
   console.log(USAGE);
   return 1;

@@ -209,6 +209,9 @@ repair.
 # Exits 1 while any restored pending capture is unresolved. Necessary, not sufficient.
 npm run capture-restore -- status
 
+# The same, counting only captures stored before the snapshot you restored from.
+npm run capture-restore -- status --created-before 2026-09-22T08:00:00Z
+
 # One recorded outcome per ambiguous item, after you established it.
 npm run capture-restore -- resolve <userId> <captureId> delivered_out_of_band
 npm run capture-restore -- resolve <userId> <captureId> discarded_by_user
@@ -226,7 +229,15 @@ Both clear the stored title and notes, exactly as publication does, and make the
 row terminal **without** an invented operation identity. Neither can be undone,
 and neither overwrites a recorded outcome or a terminal receipt: a repeated
 command reports what is already stored. The tool prints only user IDs, capture
-IDs and counts.
+IDs, creation times and counts — never titles, notes or keys. Capture IDs are
+shape-bounded at the request boundary (no whitespace, no free text), which keeps
+a submitted sentence out of this output; it does not make them opaque, so treat
+a capture ID as potentially meaningful when pasting operator output around.
+
+Once the deployment also accepts new submissions, an unscoped `status` mixes
+restore-era rows with legitimately new ones and can never reach zero. Pass
+`--created-before <snapshot instant>` so the gate covers only what the restore
+made ambiguous; resolving a genuinely new capture would destroy real work.
 
 The command does not verify that the hold is in place — that is step 2's job. A
 capture that publishes before you resolve it is safe (the row is locked and the

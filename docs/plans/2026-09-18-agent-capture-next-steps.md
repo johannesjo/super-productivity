@@ -182,6 +182,13 @@ clears the plaintext, and invents no operation identity. `delivered_out_of_band`
 also reclaims the publisher clock value the erased publication consumed on
 devices. **This is an operator procedure, not automatic safety:** an unpaused
 restored deployment still republishes, and nothing reconstructs missing evidence.
+`agent_captures.created_at` (2026-09-22) lets `status --created-before
+<snapshot>` scope the gate to rows the restore made ambiguous. Without it an
+unscoped backlog mixes restore-era rows with legitimately new submissions and can
+never reach zero once submission is live, leaving `resolve` — which destroys a
+genuine capture's content — as the only way to clear one. Added while the table
+is empty everywhere; after real rows exist it would mean inventing timestamps.
+
 The rehearsal now exists: `e2e/tests/sync/agent-capture-restore.spec.ts` holds
 both the unresolved characterization and a passing resolved-resumption case with
 browser replay on surviving and fresh clients. The release gate that remains is
@@ -230,19 +237,15 @@ through the real connector:**
 
 - The HTTP/MCP surface: whether a submission identity is required, and the
   response to a reused identity with conflicting content.
-- **Whether `captureId` must be opaque.** It is `z.string().min(1).max(200)`
-  free-form today and becomes the task ID `capture-${captureId}`. A submitter
-  that derives it from the capture text would put user content into operator
-  terminal output and incident notes — which the restore hold explicitly treats
-  as safe to inventory. Constrain the format at the contract boundary, or drop
-  that claim.
-- **How submission interacts with the restore hold.** The backlog inventory
-  cannot tell a restore-ambiguous pending row from a legitimately new one:
-  `agent_captures` has no creation timestamp. Once submission is live and is not
-  itself paused, `status` may never reach zero, and the only way to clear an item
-  is `resolve`, which destroys a genuinely new capture's content. Decide whether
-  submission pauses together with delivery, or add `created_at` — cheap while the
-  table is still empty everywhere.
+- **Whether `captureId` must be _minted_ opaque.** Partly addressed on
+  2026-09-22: `SuperSyncCaptureIdSchema` bounds the inbound shape on both request
+  paths (`[A-Za-z0-9._:-]{1,200}`), so a submitter can no longer pass a sentence
+  into operator output, and the restore hold's claim about its own output is now
+  true. It is **not** opaque — `BuyMilkForMum` still parses — and it still becomes
+  the task ID `capture-${captureId}`. Requiring a UUID/ULID belongs at the
+  submission boundary, which does not exist yet; retrofitting it onto the
+  publication request would only re-validate an ID the server already stored.
+  Response schemas stay loose so a stored ID cannot hard-fail a client.
 - **Reclaiming a clock value for a capture absent from the snapshot.** `resolve`
   needs a row. A capture submitted AND published after the backup leaves none, so
   its consumed publisher clock value cannot be reclaimed with the current tool,

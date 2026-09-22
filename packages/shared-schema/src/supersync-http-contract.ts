@@ -112,6 +112,22 @@ export const SuperSyncClientIdSchema = z
     'clientId must be alphanumeric with underscores/hyphens only',
   );
 
+/**
+ * Inbound capture identity. Bounded, and restricted to characters an ID can be
+ * built from: a submitter cannot pass a raw sentence, so operator output and
+ * incident notes stay free of whitespace-bearing user text. This does NOT make
+ * the ID opaque — `BuyMilkForMum` still parses. Whether submission must mint an
+ * opaque ID (UUID/ULID) is a submission-contract decision and belongs at that
+ * boundary, which does not exist yet; see the agent-capture next-steps runbook.
+ * Response schemas keep `captureId` loose so a stored legacy ID cannot hard-fail
+ * a client, matching the vocabulary convention above.
+ */
+export const SuperSyncCaptureIdSchema = z
+  .string()
+  .min(1)
+  .max(200)
+  .regex(/^[A-Za-z0-9._:-]+$/);
+
 export const SuperSyncOperationSchema = z.object({
   id: z.string().min(1).max(255),
   clientId: SuperSyncClientIdSchema,
@@ -134,7 +150,7 @@ export const SuperSyncOperationSchema = z.object({
   /** Server cursor proven to be included in a causally accepted REPAIR snapshot. */
   repairBaseServerSeq: z.number().int().min(0).optional(),
   /** Optional capture-delivery correlation; absent for ordinary task operations. */
-  captureId: z.string().min(1).max(200).optional(),
+  captureId: SuperSyncCaptureIdSchema.optional(),
 });
 
 // Upload requests are envelopes for independently validated operations. Keep
@@ -285,7 +301,7 @@ export const SuperSyncPendingCaptureResponseSchema = z.object({
 });
 
 export const SuperSyncCapturePublicationRequestSchema = z.object({
-  captureId: z.string().min(1).max(200),
+  captureId: SuperSyncCaptureIdSchema,
   candidate: SuperSyncUploadOperationSchema,
   lastKnownServerSeq: z.number().int().min(0),
   expectedCaptureCounter: z.number().int().min(0),

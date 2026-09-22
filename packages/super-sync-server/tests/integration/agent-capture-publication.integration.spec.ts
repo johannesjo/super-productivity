@@ -1601,7 +1601,11 @@ describeWithDb('Agent capture publication (PostgreSQL)', () => {
       title: 'Published before the incident',
     });
 
-    expect(await harness.readUnresolvedCaptureBacklog({ userIds })).toEqual([
+    expect(
+      (await harness.readUnresolvedCaptureBacklog({ userIds })).map(
+        ({ userId, unresolved }) => ({ userId, unresolved }),
+      ),
+    ).toEqual([
       { userId: firstUserId, unresolved: 2 },
       { userId: secondUserId, unresolved: 1 },
     ]);
@@ -1620,9 +1624,11 @@ describeWithDb('Agent capture publication (PostgreSQL)', () => {
     });
     // A receipt and a resolution both close an item; only the truly unknown one
     // keeps the deployment paused.
-    expect(await harness.readUnresolvedCaptureBacklog({ userIds })).toEqual([
-      { userId: firstUserId, unresolved: 1 },
-    ]);
+    expect(
+      (await harness.readUnresolvedCaptureBacklog({ userIds })).map(
+        ({ userId, unresolved }) => ({ userId, unresolved }),
+      ),
+    ).toEqual([{ userId: firstUserId, unresolved: 1 }]);
 
     await harness.resolveCapture({
       userId: firstUserId,
@@ -1630,5 +1636,63 @@ describeWithDb('Agent capture publication (PostgreSQL)', () => {
       resolution: 'delivered_out_of_band',
     });
     expect(await harness.readUnresolvedCaptureBacklog({ userIds })).toEqual([]);
+  });
+
+  /**
+   * Without a creation time the backlog cannot separate a restore-era row from
+   * one submitted afterwards, so a deployment that keeps accepting submissions
+   * could never reach an empty backlog and the hold could never clear.
+   */
+  it('scopes the backlog to captures stored before a restore snapshot', async () => {
+    const userId = await createUser();
+    const snapshot = new Date(Date.now() - 60 * 60 * 1000);
+    const beforeId = unique('backlog-before-snapshot');
+    const afterId = unique('backlog-after-snapshot');
+    await harness.enqueueCapture({
+      userId,
+      captureId: beforeId,
+      title: 'Ambiguous after the restore',
+      createdAt: new Date(snapshot.getTime() - 1000),
+    });
+    await harness.enqueueCapture({
+      userId,
+      captureId: afterId,
+      title: 'Submitted after the snapshot',
+    });
+
+    // Unscoped, the new submission keeps the account looking unresolved.
+    expect(
+      (await harness.readUnresolvedCaptureBacklog({ userIds: [userId] })).map(
+        ({ userId: id, unresolved }) => ({ userId: id, unresolved }),
+      ),
+    ).toEqual([{ userId, unresolved: 2 }]);
+
+    const scoped = await harness.readUnresolvedCaptureBacklog({
+      userIds: [userId],
+      createdBefore: snapshot,
+    });
+    expect(
+      scoped.map(({ userId: id, unresolved }) => ({ userId: id, unresolved })),
+    ).toEqual([{ userId, unresolved: 1 }]);
+    expect(scoped[0].oldestCreatedAt.getTime()).toBeLessThan(snapshot.getTime());
+
+    // Resolving only the restore-era row clears the scoped backlog and leaves
+    // the legitimately new capture untouched and publishable.
+    await harness.resolveCapture({
+      userId,
+      captureId: beforeId,
+      resolution: 'discarded_by_user',
+    });
+    expect(
+      await harness.readUnresolvedCaptureBacklog({
+        userIds: [userId],
+        createdBefore: snapshot,
+      }),
+    ).toEqual([]);
+    expect(
+      await harness.readPendingCapture({ userId, captureId: afterId }),
+    ).toMatchObject({
+      captureId: afterId,
+    });
   });
 });

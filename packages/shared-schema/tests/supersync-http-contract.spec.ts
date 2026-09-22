@@ -59,6 +59,60 @@ describe('SuperSync HTTP contract schemas', () => {
       }).success,
     ).toBe(false);
   });
+  it('rejects an inbound capture identity carrying free text, on both request paths', () => {
+    // The operator tool prints capture IDs, so a submitter must not be able to
+    // pass a sentence. This bounds the shape; it does not make the ID opaque.
+    const publish = (captureId: string): boolean =>
+      SuperSyncCapturePublicationRequestSchema.safeParse({
+        captureId,
+        candidate: createValidOperation(),
+        lastKnownServerSeq: 1,
+        expectedCaptureCounter: 0,
+        expectedDataGeneration: 0,
+      }).success;
+    const upload = (captureId: string): boolean =>
+      SuperSyncUploadOpsRequestSchema.safeParse({
+        ops: [{ ...createValidOperation(), captureId }],
+        clientId: 'client_1',
+      }).success;
+
+    for (const rejected of [
+      'Call the dentist about the crown',
+      'tab\tseparated',
+      'line\nbreak',
+      'emoji \u{1F600}',
+      '',
+      'a'.repeat(201),
+    ]) {
+      expect({ id: rejected, publish: publish(rejected) }).toEqual({
+        id: rejected,
+        publish: false,
+      });
+      expect({ id: rejected, upload: upload(rejected) }).toEqual({
+        id: rejected,
+        upload: false,
+      });
+    }
+
+    // ID-shaped values every existing caller and any real submitter would use.
+    for (const accepted of [
+      'capture-1',
+      'restore-edit-1790065855537',
+      '0f9c2b1e-5a77-4e1b-9d3a-6b0c1f2e3d44',
+      '01J8Z3QK9T0000000000000000',
+      'ns:capture.7_a',
+    ]) {
+      expect({ id: accepted, publish: publish(accepted) }).toEqual({
+        id: accepted,
+        publish: true,
+      });
+      expect({ id: accepted, upload: upload(accepted) }).toEqual({
+        id: accepted,
+        upload: true,
+      });
+    }
+  });
+
   it('preserves optional capture identity through the upload contract', () => {
     const parsed = SuperSyncUploadOpsRequestSchema.parse({
       ops: [{ ...createValidOperation(), captureId: 'capture-1' }],

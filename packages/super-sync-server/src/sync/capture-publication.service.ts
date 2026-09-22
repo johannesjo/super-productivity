@@ -123,10 +123,15 @@ export interface CapturePublicationService {
    * sufficient: it can only count rows the restore kept. A capture submitted
    * AND published after the backup leaves no row here at all, yet still
    * consumed a publisher clock value on the devices that downloaded it.
+   *
+   * `createdBefore` scopes the inventory to rows that predate a snapshot, so a
+   * deployment accepting new submissions can still reach an empty restore
+   * backlog. Without it the hold can never clear once submission is live.
    */
   readUnresolvedCaptureBacklog(input?: {
     userIds?: number[];
-  }): Promise<Array<{ userId: number; unresolved: number }>>;
+    createdBefore?: Date;
+  }): Promise<Array<{ userId: number; unresolved: number; oldestCreatedAt: Date }>>;
 }
 
 export const getAgentCaptureActorId = (userId: number): string =>
@@ -614,18 +619,26 @@ export const createCapturePublicationService = (
   };
 
   const readUnresolvedCaptureBacklog: CapturePublicationService['readUnresolvedCaptureBacklog'] =
-    async ({ userIds } = {}) => {
+    async ({ userIds, createdBefore } = {}) => {
       const rows = await prisma.agentCapture.groupBy({
         by: ['userId'],
         where: {
           publishedOpId: null,
           resolution: null,
           ...(userIds ? { userId: { in: userIds } } : {}),
+          ...(createdBefore ? { createdAt: { lt: createdBefore } } : {}),
         },
         _count: { _all: true },
+        _min: { createdAt: true },
         orderBy: { userId: 'asc' },
       });
-      return rows.map((row) => ({ userId: row.userId, unresolved: row._count._all }));
+      return rows.map((row) => ({
+        userId: row.userId,
+        unresolved: row._count._all,
+        // groupBy always yields a row only when at least one record matched, so
+        // the minimum is present; the fallback keeps the type honest.
+        oldestCreatedAt: row._min.createdAt ?? new Date(0),
+      }));
     };
 
   return {

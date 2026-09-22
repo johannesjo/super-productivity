@@ -29,6 +29,8 @@ export interface CapturePublicationHarness extends Pick<
     captureId: string;
     title: string;
     notes?: string | null;
+    /** Seeds a row on either side of a restore snapshot; defaults to now. */
+    createdAt?: Date;
   }): Promise<PendingCapture>;
   readPendingCapture(input: {
     userId: number;
@@ -131,6 +133,7 @@ export const createAgentCapturePublicationHarness = (
           captureId: input.captureId,
           title: input.title,
           notes: input.notes ?? null,
+          ...(input.createdAt ? { createdAt: input.createdAt } : {}),
         },
         skipDuplicates: true,
       });

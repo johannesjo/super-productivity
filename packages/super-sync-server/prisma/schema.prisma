@@ -201,6 +201,9 @@ model AgentCapture {
   // docs/backup-and-recovery.md#capture-restore-hold.
   resolution         String?   @map("resolution")
   resolvedAt         DateTime? @map("resolved_at")
+  // Lets the restore hold separate rows that predate a snapshot from ones
+  // submitted after it; without it the backlog cannot tell them apart.
+  createdAt          DateTime  @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

@@ -1132,6 +1132,21 @@ actual supported workflow. A longer schedule does not by itself justify them.
 
 ## Validation record
 
+- 2026-09-22 (submission-contract guards): two decisions taken while they are
+  still cheap. `SuperSyncCaptureIdSchema` bounds the inbound capture ID on both
+  request paths, so a submitter cannot push free text into operator output; the
+  contract spec asserts six rejected and five accepted shapes and was confirmed
+  falsifiable by dropping the regex (1 failed / 45 passed). It deliberately stops
+  short of requiring an opaque ID: that belongs at the unbuilt submission
+  boundary, and response schemas stay loose so a stored ID cannot hard-fail a
+  client. `agent_captures.created_at` plus `status --created-before` scopes the
+  restore gate to rows that predate the snapshot — without it the backlog can
+  never reach zero once a deployment accepts submissions. Verified against real
+  PostgreSQL: 34 publication cases (the new scoping case confirmed falsifiable by
+  removing the filter) and 3 operator-CLI cases, all passing. The column was
+  added while the table is empty on every deployment; afterwards it would mean
+  backfilling timestamps nobody knows.
+
 - 2026-09-22 (browser resumption): the restore spec now holds both outcomes and
   all three cases pass together in 2.5 minutes against real PostgreSQL, a real
   spawned backend and a real built frontend. The new case rehearses the runbook
