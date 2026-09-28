@@ -119,6 +119,8 @@ describe('patchCdkViewportForSafeArea', () => {
     document.documentElement.style.removeProperty('--safe-area-inset-bottom');
     document.body.classList.remove(BodyClass.isIOS, BodyClass.isKeyboardVisible);
     document.querySelectorAll('.cdk-overlay-container').forEach((el) => el.remove());
+    document.body.style.height = '';
+    window.scrollTo(0, 0);
   });
 
   // Android WebView >= 140: Capacitor SystemBars passes the native insets
@@ -202,6 +204,29 @@ describe('patchCdkViewportForSafeArea', () => {
     const { panelBottom, triggerTop } = await openMenuAndMeasure(undefined, 44);
 
     expect(panelBottom).toBeCloseTo(triggerTop, 0);
+  });
+
+  // `_viewportRect.top` from `_getNarrowedViewportRect` already includes the
+  // page's own scroll offset (the same reason CDK's `overflowTop` subtracts
+  // `scrollPosition.top` from it). A genuine bottom overflow here (the
+  // keyboard offset, same as the unscrolled test above) must push the panel
+  // by exactly that overflow regardless of scroll — comparing `start.y`
+  // against `viewport.top + viewport.height` instead of
+  // `viewport.top - scrollPosition.top + viewport.height` double-counts the
+  // scroll offset and can cancel a real push out entirely.
+  it('keeps the same iOS keyboard offset placement when the document is scrolled', async () => {
+    document.body.style.height = '3000px';
+    window.scrollTo(0, 500);
+    document.documentElement.style.setProperty('--safe-area-bottom', `${SAFE_BOTTOM}px`);
+    document.body.classList.add(BodyClass.isIOS, BodyClass.isKeyboardVisible);
+    overlayContainerEl().style.setProperty(
+      '--keyboard-overlay-offset',
+      `${KEYBOARD_OVERLAY_OFFSET}px`,
+    );
+
+    const { panelBottom, safeAreaTopEdge } = await openMenuAndMeasure();
+
+    expect(panelBottom).toBeCloseTo(safeAreaTopEdge - KEYBOARD_OVERLAY_OFFSET, 0);
   });
 
   it('does not stack insets when applied more than once', async () => {
