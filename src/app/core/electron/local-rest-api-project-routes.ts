@@ -138,6 +138,10 @@ export const handleProjectRoutes = async (
     return createSuccessResponse(requestId, 200, project);
   }
 
+  if (segments.length === 2 && method === 'DELETE') {
+    return handleDeleteProject(deps, requestId, projectId);
+  }
+
   if (segments.length === 2 && method === 'PATCH') {
     if (!isRecord(body)) {
       return invalidInput(requestId, 'PATCH body must be a JSON object');
@@ -216,6 +220,35 @@ const handleArchiveProject = async (
     isArchive ? archiveProject({ id: projectId }) : unarchiveProject({ id: projectId }),
   );
   return createSuccessResponse(requestId, 200, { id: projectId, archived: isArchive });
+};
+
+const INBOX_PROJECT_ID = 'INBOX_PROJECT';
+
+const handleDeleteProject = async (
+  deps: LocalRestApiProjectDeps,
+  requestId: string,
+  projectId: string,
+): Promise<LocalRestApiResponsePayload> => {
+  if (projectId === INBOX_PROJECT_ID) {
+    return createErrorResponse(
+      requestId,
+      400,
+      'UNSUPPORTED_FIELD',
+      'The Inbox project cannot be deleted',
+    );
+  }
+
+  const project = await getProjectById(deps.projectService, projectId);
+  if (!project) {
+    return projectNotFound(requestId);
+  }
+
+  // ProjectService.remove() deletes the project's tasks with it (backlog and
+  // subtasks included), exactly as the UI's own "Delete project" does. If the
+  // deleted project is the one on screen, the active context falls back to
+  // Today.
+  await deps.projectService.remove(project);
+  return createSuccessResponse(requestId, 200, { id: projectId, deleted: true });
 };
 
 export const handleCreateProject = async (

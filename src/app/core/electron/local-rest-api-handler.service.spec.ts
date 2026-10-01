@@ -3111,6 +3111,46 @@ describe('LocalRestApiHandlerService', () => {
       });
     });
 
+    describe('DELETE /projects/:id', () => {
+      it('should delete an existing project', async () => {
+        const project = createMockProject('p1');
+        setProjectStore([project]);
+
+        const response = await sendRequestAndWait(
+          createRequest('DELETE', '/projects/p1'),
+        );
+
+        expect(response.body.ok).toBe(true);
+        expect(response.status).toBe(200);
+        expect((response.body as any).data).toEqual({ id: 'p1', deleted: true });
+        expect(projectServiceMock.remove).toHaveBeenCalledWith(project);
+      });
+
+      it('should return 404 for a non-existent project', async () => {
+        setProjectStore([]);
+
+        const response = await sendRequestAndWait(
+          createRequest('DELETE', '/projects/missing'),
+        );
+
+        expect(response.body.ok).toBe(false);
+        expect(response.status).toBe(404);
+        expect((response.body as any).error.code).toBe('PROJECT_NOT_FOUND');
+        expect(projectServiceMock.remove).not.toHaveBeenCalled();
+      });
+
+      it('should reject deleting the Inbox', async () => {
+        const response = await sendRequestAndWait(
+          createRequest('DELETE', '/projects/INBOX_PROJECT'),
+        );
+
+        expect(response.body.ok).toBe(false);
+        expect(response.status).toBe(400);
+        expect((response.body as any).error.code).toBe('UNSUPPORTED_FIELD');
+        expect(projectServiceMock.remove).not.toHaveBeenCalled();
+      });
+    });
+
     describe('POST /projects/:id/archive and /unarchive', () => {
       it('should archive an active project via the dedicated action', async () => {
         setProjectStore([createMockProject('p1', { isArchived: false })]);
