@@ -15,6 +15,7 @@ import { MatIcon } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
+import { MatDivider } from '@angular/material/divider';
 import { TranslatePipe } from '@ngx-translate/core';
 import { TreeDndComponent } from '../../../ui/tree-dnd/tree.component';
 import { TreeNode } from '../../../ui/tree-dnd/tree.types';
@@ -63,6 +64,7 @@ const ARCHIVED_PROJECTS_NAV_ITEM: NavRouteItem = {
     MatIconButton,
     MatTooltip,
     MatMenuModule,
+    MatDivider,
     TranslatePipe,
     TreeDndComponent,
     NavItemComponent,
@@ -156,6 +158,10 @@ export class NavListTreeComponent {
     this._navConfigService.toggleProjectVisibility(projectId);
     // Close menu to prevent stale positioning after DOM update (#5955)
     this.visibilityMenuTrigger()?.closeMenu();
+  }
+
+  sortProjects(): void {
+    this._navConfigService.sortProjectTree();
   }
 
   onFolderMoreButton(event: MouseEvent, node: TreeNode<MenuTreeViewNode>): void {
