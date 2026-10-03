@@ -17,7 +17,7 @@ test.describe('Subtask inline input', () => {
     await draft.press('Escape');
     await expect(parent.locator('.subtask-progress')).toHaveText('0/1');
     await expect(parent.locator('.add-subtask-action button')).toHaveClass(
-      /mat-mdc-button/,
+      /task-list-add-action/,
     );
     await parent
       .locator('.add-subtask-action')

@@ -367,10 +367,11 @@
           ) {
             <div class="add-subtask-action">
               <button
-                mat-button
+                type="button"
+                class="task-list-add-action"
                 (click)="addSubTask()"
               >
-                <mat-icon>add</mat-icon>
+                <mat-icon aria-hidden="true">add</mat-icon>
                 {{ T.F.TASK.CMP.ADD_SUB_TASK | translate }}
               </button>
             </div>

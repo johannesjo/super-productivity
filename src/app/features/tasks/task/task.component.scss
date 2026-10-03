@@ -30,10 +30,6 @@
   }
 }
 
-.add-subtask-action {
-  text-align: center;
-}
-
 :host.isDragReady:not(.cdk-drag-placeholder) {
   background: var(--bg-lighter);
   box-shadow: var(--whiteframe-shadow-8dp);

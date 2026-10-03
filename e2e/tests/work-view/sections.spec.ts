@@ -194,6 +194,44 @@ test.describe('Sections', () => {
       .waitFor({ state: 'attached', timeout: 5000 });
   };
 
+  test('offers Add task beneath the Inbox list without named sections', async ({
+    page,
+    workViewPage,
+  }, testInfo) => {
+    await page.goto('/#/project/INBOX_PROJECT/tasks');
+    await workViewPage.waitForTaskList();
+    const inbox = page.locator('work-view-page');
+    const add = inbox.locator('add-task-inline').getByRole('button', {
+      name: 'Add task',
+      exact: true,
+    });
+    await expect(add).toBeVisible();
+    await add.click();
+    const input = inbox.locator('add-task-inline textarea.main-input');
+    await input.fill('Inbox inline task');
+    await input.press('Enter');
+    await input.fill('Another Inbox task');
+    await input.press('Enter');
+    await input.press('Escape');
+    await expect(
+      inbox.locator('task task-title').filter({ hasText: 'Inbox inline task' }),
+    ).toBeVisible();
+    await expect(
+      inbox.locator('task task-title').filter({ hasText: 'Another Inbox task' }),
+    ).toBeVisible();
+    await expect(add).toBeVisible();
+    await page.reload();
+    await workViewPage.waitForTaskList();
+    await expect(add).toBeVisible();
+    await expect(
+      inbox.locator('task task-title').filter({ hasText: 'Inbox inline task' }),
+    ).toBeVisible();
+    await expect(
+      inbox.locator('task task-title').filter({ hasText: 'Another Inbox task' }),
+    ).toBeVisible();
+    await page.screenshot({ path: testInfo.outputPath('inbox-add-task.png') });
+  });
+
   test('creates tasks directly beneath their section and preserves placement on reload', async ({
     page,
     workViewPage,
