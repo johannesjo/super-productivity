@@ -21,6 +21,7 @@ export class AddTaskInlineComponent {
   T: typeof T = T;
 
   readonly planForDay = input<string>();
+  readonly label = input<string>(T.G.ADD);
   readonly additionalFields = input<Partial<TaskCopy>>();
   readonly tagsToRemove = input<string[]>([]);
   readonly taskIdsToExclude = input<string[]>();

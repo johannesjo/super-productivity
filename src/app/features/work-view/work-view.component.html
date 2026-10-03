@@ -244,6 +244,10 @@
                         [listId]="'PARENT'"
                         [listModelId]="section.id"
                       ></task-list>
+                      <add-task-inline
+                        [label]="T.MH.ADD_NEW_TASK"
+                        (afterTaskAdd)="onTaskAddedToSection(section, $event)"
+                      ></add-task-inline>
                     </collapsible>
                   </div>
                 }

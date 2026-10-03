@@ -30,6 +30,8 @@ export type MiscConfig = Readonly<{
   // simple store), because a synced switch started the listener on every
   // desktop. Nothing reads or writes this anymore; kept optional so synced data
   // from older clients keeps validating.
+  /** Desktop only; absent in older persisted settings, defaults to off. */
+  isShowDueTaskBadge?: boolean;
   isLocalRestApiEnabled?: boolean;
   // Desktop-only daily check for a newer GitHub release (#5463). Optional
   // because it was added later; a missing key means ON (see UpdateCheckService).

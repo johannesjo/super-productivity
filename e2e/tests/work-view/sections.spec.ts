@@ -194,6 +194,38 @@ test.describe('Sections', () => {
       .waitFor({ state: 'attached', timeout: 5000 });
   };
 
+  test('creates tasks directly beneath their section and preserves placement on reload', async ({
+    page,
+    workViewPage,
+    projectPage,
+  }) => {
+    await setupTestProject(workViewPage, projectPage);
+    await openProjectContextMenu(page);
+    await clickAddSection(page);
+    await submitPromptDialog(page, 'Inline Section');
+    const section = sectionByTitle(page, 'Inline Section');
+    await section.locator('add-task-inline button').click();
+    const input = section.locator('add-task-bar textarea.main-input');
+    await input.fill('Task created in section');
+    await input.press('Enter');
+    await expect(section.locator('task task-title')).toContainText([
+      'Task created in section',
+    ]);
+    await input.fill('Second task in section');
+    await input.press('Enter');
+    await input.press('Escape');
+    await expect(section.locator('task task-title')).toContainText([
+      'Task created in section',
+      'Second task in section',
+    ]);
+    await page.reload();
+    await workViewPage.waitForTaskList();
+    await expect(section.locator('task task-title')).toContainText([
+      'Task created in section',
+      'Second task in section',
+    ]);
+  });
+
   test('creates a section via the project context menu', async ({
     page,
     workViewPage,
