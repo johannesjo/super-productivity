@@ -23,6 +23,7 @@ import {
 import { HydrationStateService } from '../../../op-log/apply/hydration-state.service';
 import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
 import { MiscConfig } from '../../config/global-config.model';
+import { IS_ELECTRON_TOKEN } from '../../../app.constants';
 
 /**
  * The OS progress bar (taskbar/dock) must only ever have one writer: a timed
@@ -72,12 +73,15 @@ describe('TaskElectronEffects', () => {
       updateCurrentTask: () => {},
       updateTodayTasks: () => {},
       setProgressBar: setProgressBarSpy,
-      setDueTaskBadge: () => {},
+      setDueTaskBadge: jasmine.createSpy('setDueTaskBadge'),
+      isMacOS: () => false,
+      isLinux: () => false,
     };
 
     TestBed.configureTestingModule({
       providers: [
         TaskElectronEffects,
+        { provide: IS_ELECTRON_TOKEN, useValue: true },
         provideMockActions(() => actions$),
         provideMockStore({
           selectors: [
@@ -135,11 +139,16 @@ describe('TaskElectronEffects', () => {
       const counts: number[] = [];
       const sub = effects.syncDueTaskBadge$.subscribe((count) => counts.push(count));
       expect(counts).toEqual([1]);
+      expect(window.ea.setDueTaskBadge).toHaveBeenCalledWith(
+        1,
+        jasmine.stringMatching(/^data:image\/png;base64,/),
+      );
       store.overrideSelector(selectTaskSchedulingSnapshot, [
         schedulingTask({ dueDay: '2026-10-03', isDone: true }),
       ]);
       store.refreshState();
       expect(counts).toEqual([1, 0]);
+      expect(window.ea.setDueTaskBadge).toHaveBeenCalledWith(0, undefined);
       store.overrideSelector(selectTaskSchedulingSnapshot, [
         schedulingTask({ dueDay: '2026-10-02' }),
       ]);

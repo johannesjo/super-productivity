@@ -31,9 +31,17 @@ const getRelaunchExecPath = (): string | undefined => {
 };
 
 export const initAppControlIpc = (): void => {
-  ipcMain.on(IPC.SET_DUE_TASK_BADGE, (_ev, count: unknown) => {
+  ipcMain.on(IPC.SET_DUE_TASK_BADGE, (_ev, count: unknown, iconDataUrl: unknown) => {
     if (typeof count === 'number' && Number.isSafeInteger(count) && count >= 0) {
-      setDueTaskBadge(count);
+      if (
+        iconDataUrl !== undefined &&
+        (typeof iconDataUrl !== 'string' ||
+          iconDataUrl.length > 8192 ||
+          !/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(iconDataUrl))
+      ) {
+        return;
+      }
+      setDueTaskBadge(count, iconDataUrl as string | undefined);
     }
   });
   ipcMain.on(IPC.SHUTDOWN_NOW, quitApp);

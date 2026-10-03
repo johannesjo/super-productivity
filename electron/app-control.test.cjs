@@ -194,6 +194,17 @@ test('badge IPC accepts counts and rejects malformed input', () => {
     handler({}, value);
   }
   assert.deepEqual(badgeCounts, [5, 0, 123]);
+  for (const image of [
+    42,
+    'data:image/svg+xml;base64,AAAA',
+    'data:image/png;base64,!invalid',
+    'data:image/png;base64,' + 'A'.repeat(8192),
+  ]) {
+    handler({}, 5, image);
+  }
+  assert.deepEqual(badgeCounts, [5, 0, 123]);
+  handler({}, 5, 'data:image/png;base64,AAAA');
+  assert.deepEqual(badgeCounts, [5, 0, 123, 5]);
 });
 
 test('settings update reads current task tray setting from tasks config', async () => {

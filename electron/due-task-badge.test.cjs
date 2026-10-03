@@ -10,7 +10,13 @@ Module._load = function (request, parent, isMain) {
   if (request === 'electron')
     return {
       app: { setBadgeCount: (count) => counts.push(count) },
-      nativeImage: { createFromBitmap: (pixels, options) => ({ pixels, options }) },
+      nativeImage: {
+        createFromDataURL: (dataUrl) => ({
+          dataUrl,
+          isEmpty: () => dataUrl === 'invalid',
+          getSize: () => ({ width: dataUrl === 'oversized' ? 256 : 64, height: 64 }),
+        }),
+      },
     };
   if (request === './main-window')
     return {
@@ -18,31 +24,24 @@ Module._load = function (request, parent, isMain) {
     };
   return originalLoad.call(this, request, parent, isMain);
 };
-const { createBadgeBitmap, setDueTaskBadge } = require('./due-task-badge.ts');
+const { setDueTaskBadge } = require('./due-task-badge.ts');
 Module._load = originalLoad;
 
-test('badge bitmaps fit 32px and cap visible counts at 99+', () => {
-  for (const count of [1, 5, 10, 99, 100, 1000]) {
-    const bitmap = createBadgeBitmap(count);
-    assert.equal(bitmap.length, 32 * 32 * 4);
-    assert.equal(bitmap[3], 0, 'outside the circle is transparent');
-    assert.ok(
-      bitmap.some((pixel) => pixel === 255),
-      'glyphs are visible',
-    );
-  }
-  assert.deepEqual(createBadgeBitmap(100), createBadgeBitmap(1000));
-  assert.notDeepEqual(createBadgeBitmap(5), createBadgeBitmap(6));
-});
-
 test('publishes the count and removes the native badge at zero', () => {
-  setDueTaskBadge(5);
+  setDueTaskBadge(5, 'test-png');
   setDueTaskBadge(0);
   if (process.platform === 'win32') {
     assert.equal(overlays[0][1], '5 tasks due today or overdue');
-    assert.deepEqual(overlays[0][0].options, { width: 32, height: 32 });
+    assert.equal(overlays[0][0].dataUrl, 'test-png');
     assert.deepEqual(overlays[1], [null, '']);
   } else {
     assert.deepEqual(counts, [5, 0]);
   }
+});
+
+test('rejects missing, undecodable or incorrectly sized Windows badge images', () => {
+  if (process.platform !== 'win32') return;
+  const previousCalls = overlays.length;
+  for (const image of [undefined, 'invalid', 'oversized']) setDueTaskBadge(5, image);
+  assert.equal(overlays.length, previousCalls);
 });

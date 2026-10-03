@@ -8,7 +8,8 @@ import {
   selectStartOfNextDayDiffMs,
 } from '../../../root-store/app-state/app-state.selectors';
 import { countDueTasks } from '../util/count-due-tasks';
-import { IS_ELECTRON } from '../../../app.constants';
+import { createDueTaskBadgeIcon } from '../util/create-due-task-badge-icon';
+import { IS_ELECTRON_TOKEN } from '../../../app.constants';
 import { skipDuringSyncWindow } from '../../../util/skip-during-sync-window.operator';
 import { HydrationStateService } from '../../../op-log/apply/hydration-state.service';
 import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
@@ -57,6 +58,7 @@ export class TaskElectronEffects {
   private _taskService = inject(TaskService);
   private _hydrationState = inject(HydrationStateService);
   private _syncTrigger = inject(SyncTriggerService);
+  private _isElectron = inject(IS_ELECTRON_TOKEN);
 
   // -----------------------------------------------------------------------------------
   // NOTE: IS_ELECTRON checks not necessary, since we check before importing this module
@@ -139,7 +141,13 @@ export class TaskElectronEffects {
         ),
         distinctUntilChanged(),
         tap((count) => {
-          if (IS_ELECTRON) window.ea.setDueTaskBadge(count);
+          if (this._isElectron) {
+            const iconDataUrl =
+              count && !window.ea.isMacOS() && !window.ea.isLinux()
+                ? createDueTaskBadgeIcon(count)
+                : undefined;
+            window.ea.setDueTaskBadge(count, iconDataUrl);
+          }
         }),
       ),
     { dispatch: false },
