@@ -8,12 +8,12 @@ export const createDueTaskBadgeIcon = (count: number): string | undefined => {
 
   context.fillStyle = '#373737';
   context.beginPath();
-  context.arc(size / 2, size / 2, 28, 0, Math.PI * 2);
+  context.arc(size / 2, size / 2, 31, 0, Math.PI * 2);
   context.fill();
 
   const text = count > 99 ? '99+' : String(count);
-  const fontSize = text.length === 1 ? 40 : text.length === 2 ? 32 : 24;
-  context.font = `400 ${fontSize}px "Segoe UI", sans-serif`;
+  const fontSize = text.length === 1 ? 44 : text.length === 2 ? 35 : 26;
+  context.font = `600 ${fontSize}px "Segoe UI", sans-serif`;
   context.fillStyle = '#ffffff';
   context.textAlign = 'center';
   const metrics = context.measureText(text);
