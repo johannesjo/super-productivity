@@ -5,6 +5,8 @@ import { map } from 'rxjs/operators';
 import { WorkViewComponent } from '../work-view/work-view.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TaskViewCustomizerService } from '../task-view-customizer/task-view-customizer.service';
+import { sortDoneTasksByDoneDate } from '../work-context/work-context.util';
+import { TaskWithSubTasks } from '../tasks/task.model';
 
 const ALL_TASKS_CONTEXT_KEY = 'ALL_TASKS';
 
@@ -38,10 +40,20 @@ export class AllTasksPageComponent {
     { initialValue: [] },
   );
 
+  // Newest-completed first, same ordering every other Done list uses. The
+  // selector yields the flat TaskCopy shape, so the shared sorter (typed for
+  // TaskWithSubTasks) is applied through a structural cast — it only reads
+  // `doneOn`.
   doneTasks = toSignal(
     this._store
       .select(selectAllTasksInActiveProjects)
-      .pipe(map((tasks) => tasks.filter((t) => t.isDone && !t.parentId))),
+      .pipe(
+        map((tasks) =>
+          sortDoneTasksByDoneDate(
+            tasks.filter((t) => t.isDone && !t.parentId) as unknown as TaskWithSubTasks[],
+          ),
+        ),
+      ),
     { initialValue: [] },
   );
 }
