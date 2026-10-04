@@ -296,17 +296,27 @@ test.describe('Sections', () => {
     ]);
     await input.fill('Second task in section');
     await input.press('Enter');
-    await input.press('Escape');
     await expect(section.locator('task task-title')).toContainText([
       'Task created in section',
       'Second task in section',
     ]);
+
+    await section
+      .getByRole('button', { name: 'Add to top', exact: true })
+      .click();
+    await input.fill('Task added to top');
+    await input.press('Enter');
+    await input.press('Escape');
+
+    const expectedOrder = [
+      'Task added to top',
+      'Task created in section',
+      'Second task in section',
+    ];
+    await expect(section.locator('task task-title')).toContainText(expectedOrder);
     await page.reload();
     await workViewPage.waitForTaskList();
-    await expect(section.locator('task task-title')).toContainText([
-      'Task created in section',
-      'Second task in section',
-    ]);
+    await expect(section.locator('task task-title')).toContainText(expectedOrder);
   });
 
   test('creates a section via the project context menu', async ({
