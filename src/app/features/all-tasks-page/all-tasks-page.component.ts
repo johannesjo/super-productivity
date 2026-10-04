@@ -1,12 +1,11 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
-import { selectAllTasksInActiveProjects } from '../tasks/store/task.selectors';
+import { selectAllTasksWithSubTasksInActiveProjects } from '../tasks/store/task.selectors';
 import { map } from 'rxjs/operators';
 import { WorkViewComponent } from '../work-view/work-view.component';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TaskViewCustomizerService } from '../task-view-customizer/task-view-customizer.service';
 import { sortDoneTasksByDoneDate } from '../work-context/work-context.util';
-import { TaskWithSubTasks } from '../tasks/task.model';
 
 const ALL_TASKS_CONTEXT_KEY = 'ALL_TASKS';
 
@@ -30,30 +29,22 @@ export class AllTasksPageComponent {
     });
   }
 
-  // selectAllTasksInActiveProjects — как во всех остальных top-level списках:
-  // задачи архивных проектов не должны показываться и быть редактируемыми
-  // здесь (rev. п.1).
+  // Tasks across active projects (archived ones excluded), parents carrying
+  // their nested subTasks — the shape <work-view> needs. The flat
+  // selectAllTasksInActiveProjects would drop the child rows and the
+  // per-subtask estimate.
   undoneTasks = toSignal(
     this._store
-      .select(selectAllTasksInActiveProjects)
-      .pipe(map((tasks) => tasks.filter((t) => !t.isDone && !t.parentId))),
+      .select(selectAllTasksWithSubTasksInActiveProjects)
+      .pipe(map((tasks) => tasks.filter((t) => !t.isDone))),
     { initialValue: [] },
   );
 
-  // Newest-completed first, same ordering every other Done list uses. The
-  // selector yields the flat TaskCopy shape, so the shared sorter (typed for
-  // TaskWithSubTasks) is applied through a structural cast — it only reads
-  // `doneOn`.
+  // Newest-completed first, same ordering every other Done list uses.
   doneTasks = toSignal(
     this._store
-      .select(selectAllTasksInActiveProjects)
-      .pipe(
-        map((tasks) =>
-          sortDoneTasksByDoneDate(
-            tasks.filter((t) => t.isDone && !t.parentId) as unknown as TaskWithSubTasks[],
-          ),
-        ),
-      ),
+      .select(selectAllTasksWithSubTasksInActiveProjects)
+      .pipe(map((tasks) => sortDoneTasksByDoneDate(tasks.filter((t) => t.isDone)))),
     { initialValue: [] },
   );
 }

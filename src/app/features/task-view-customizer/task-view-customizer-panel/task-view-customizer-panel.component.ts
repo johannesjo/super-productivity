@@ -89,7 +89,7 @@ export class TaskViewCustomizerPanelComponent {
   projectSearch = signal('');
 
   // Single source of truth: the checked ids live in the persisted filter
-  // itself (`projectIds`), the panel just derives from it (rev. п.6 — the
+  // itself (`projectIds`), the panel just derives from it (#8134 — the
   // signal+effect JSON round-trip is gone).
   selectedProjectIds = computed<string[]>(() => {
     if (!this.multiSelectProject) return [];

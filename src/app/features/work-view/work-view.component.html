@@ -99,7 +99,10 @@
         }
       } @else {
         <div class="task-list-wrapper">
-          @if (!(workContextService.isHasTasksToWorkOn$ | async)) {
+          <!-- On a page that supplies its own tasks (All Tasks) the empty state
+               has to come from that list; `isShowNoTasksPanel` picks the right
+               source. See its doc comment. -->
+          @if (isShowNoTasksPanel()) {
             <div
               @expandFade
               class="add-more-or-finish"
@@ -302,8 +305,8 @@
           }
 
           @if (
-            (laterTodayTasks().length > 0 || laterTodayCalendarEvents().length > 0) &&
-            isOnTodayList()
+            isLaterTodayPanelVisible() &&
+            (laterTodayTasks().length > 0 || laterTodayCalendarEvents().length > 0)
           ) {
             <div
               @expand

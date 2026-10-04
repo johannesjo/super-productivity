@@ -97,6 +97,20 @@ describe('getStartPageUrlPath', () => {
       ).toBe(TODAY_URL);
     });
 
+    it('keeps All Tasks off for config predating the flag (missing key)', () => {
+      // Persisted state written before the flag existed carries no such key.
+      // The feature is opt-in, so a missing key must behave like `false`.
+      const preFlagFeatures = {
+        isPlannerEnabled: true,
+        isSchedulerEnabled: true,
+        isBoardsEnabled: true,
+      } as AppFeaturesConfig;
+
+      expect(
+        getStartPageUrlPath(DefaultStartPage.AllTasks, preFlagFeatures, undefined),
+      ).toBe(TODAY_URL);
+    });
+
     it('treats an empty string as Today', () => {
       expect(getStartPageUrlPath('', features(), undefined)).toBe(TODAY_URL);
     });

@@ -273,7 +273,7 @@ export class WorkViewComponent implements OnInit, OnDestroy {
     { equal: fastArrayCompare },
   );
   undoneTasks = input.required<TaskWithSubTasks[]>();
-  // Rev. п.5: `toObservable` re-emits the input's initial value synchronously
+  // #8134: `toObservable` re-emits the input's initial value synchronously
   // on construction; combined with the selected-task deselect effect
   // downstream, that `[]` seed caused spurious deselects on slow context
   // switches. `observeOn(asapScheduler)` moves that seed off the synchronous
@@ -301,7 +301,7 @@ export class WorkViewComponent implements OnInit, OnDestroy {
   );
   // For contexts without a backing work-context service computation (All
   // Tasks), reuse mapEstimateRemainingFromTasks: per-task clamping and
-  // subtask estimates handled the same way as every other list (rev. п.2).
+  // subtask estimates handled the same way as every other list (#8134).
   estimateRemainingToday = computed(() => {
     if (this.isDisableTodayPanels()) {
       return mapEstimateRemainingFromTasks(this.customizedUndoneTasks().list);
@@ -399,6 +399,29 @@ export class WorkViewComponent implements OnInit, OnDestroy {
       !this.isDisableTodayPanels() &&
       this.isOnTodayList() &&
       this.overdueTasks().length > 0,
+  );
+
+  /** The Later Today panel is a Today-list affordance: All Tasks reuses this
+   *  view with its own task list, so scheduled tasks and calendar events of
+   *  unrelated projects must not leak into it. */
+  isLaterTodayPanelVisible = computed(
+    () => !this.isDisableTodayPanels() && this.isOnTodayList(),
+  );
+
+  /** Today's "has tasks to work on", as a signal, so the empty state can pick
+   *  between its two sources in one place (see `isShowNoTasksPanel`). */
+  private _isHasTasksToWorkOn = toSignal(this.workContextService.isHasTasksToWorkOn$, {
+    initialValue: false,
+  });
+
+  /** All Tasks renders its own task list, so its empty state has to come from
+   *  that list — the Today service list is unrelated to what is on screen, so
+   *  an empty Today next to an unscheduled project task would render both the
+   *  task and the "no tasks planned" panel. */
+  isShowNoTasksPanel = computed(() =>
+    this.isDisableTodayPanels()
+      ? this.undoneTasks().length === 0
+      : !this._isHasTasksToWorkOn(),
   );
 
   isShowTimeWorkedWithoutBreak: boolean = true;
@@ -833,7 +856,7 @@ export class WorkViewComponent implements OnInit, OnDestroy {
     ) {
       this.isOverdueHidden.set(false);
     } else if (
-      this.isOnTodayList() &&
+      this.isLaterTodayPanelVisible() &&
       this.isLaterTodayHidden() &&
       this._hasTaskInList(this.laterTodayTasks(), taskId)
     ) {

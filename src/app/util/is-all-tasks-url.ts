@@ -1,5 +1,5 @@
 /**
- * Single source of truth for "is this the All Tasks route?" (rev. п.8).
+ * Single source of truth for "is this the All Tasks route?" (#8134).
  *
  * The `/all-tasks` route already declares `data: { page: 'all-tasks' }`, but
  * three consumers (page title, the work-context effect that switches to the

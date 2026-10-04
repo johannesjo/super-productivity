@@ -99,9 +99,9 @@ export class MagicNavConfigService {
     () => this._configService.appFeatures().isSchedulerEnabled,
   );
   private readonly isAllTasksEnabled = computed(
-    // `?? true` matches DEFAULT_GLOBAL_CONFIG: state persisted before the All
-    // Tasks page existed has no such key, and the feature ships enabled.
-    () => this._configService.appFeatures().isAllTasksEnabled ?? true,
+    // Opt-in: matches DEFAULT_GLOBAL_CONFIG, and pre-All-Tasks persisted state
+    // (no key at all) therefore stays off until the user enables it.
+    () => this._configService.appFeatures().isAllTasksEnabled ?? false,
   );
   private readonly isPlannerEnabled = computed(
     () => this._configService.appFeatures().isPlannerEnabled,

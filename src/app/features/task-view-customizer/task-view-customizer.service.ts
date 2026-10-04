@@ -156,7 +156,7 @@ export class TaskViewCustomizerService {
     }
   }
 
-  /** Shared state-load for the constructor subscription and setContextKeyOverride (rev. п.7). */
+  /** Shared state-load for the constructor subscription and setContextKeyOverride (#8134). */
   private _loadStateForContext(
     contextKey: string,
     activeType: WorkContextType | null,
@@ -244,7 +244,16 @@ export class TaskViewCustomizerService {
     ) {
       preset = String(getTaskPriority(preset));
     }
-    return currentFilter ? { ...currentFilter, preset } : DEFAULT_OPTIONS.filter;
+    return currentFilter
+      ? {
+          ...currentFilter,
+          preset,
+          // The multi-select project filter keeps its ids here, not in
+          // `preset` — dropping them on reload would silently clear the
+          // selection and show every task again.
+          ...(stored.projectIds ? { projectIds: stored.projectIds } : {}),
+        }
+      : DEFAULT_OPTIONS.filter;
   }
 
   customizeUndoneTasks(
@@ -260,28 +269,20 @@ export class TaskViewCustomizerService {
       toObservable(this._tagOrderKey),
     ]).pipe(
       map(([tasks, sort, group, filter]) => {
-        // Multi-select project filter carries its ids in `projectIds`
-        // (rev. п.6); `preset` is null for it and the JSON-blob encoding is
-        // gone.
-        if (filter.type === FILTER_OPTION_TYPE.project && filter.projectIds) {
-          const ids = filter.projectIds;
-          if (ids.length === 0) {
-            return { result: { list: tasks }, isDefault: true };
-          }
-          return {
-            result: {
-              list: tasks.filter(
-                (task) => task.projectId && ids.includes(task.projectId),
-              ),
-            },
-            isDefault: false,
-          };
-        }
+        // Multi-select project filter: ids live in `projectIds` (#8134).
+        // The filtered list feeds the SAME sort/group pipeline below, so
+        // "Sort By" / "Group By" keep working while projects are selected.
+        const multiSelectIds =
+          filter.type === FILTER_OPTION_TYPE.project ? filter.projectIds : undefined;
+        const isMultiSelectFilter = multiSelectIds !== undefined;
+        const activeIds = multiSelectIds ?? [];
 
         const normalizedFilterVal = filter.preset?.trim();
         const filterValueToUse = normalizedFilterVal ?? '';
 
-        const isDefaultFilter = !filter.type || !filterValueToUse;
+        const isDefaultFilter = isMultiSelectFilter
+          ? activeIds.length === 0
+          : !filter.type || !filterValueToUse;
         const isDefaultSort = !sort.type;
         const isDefaultGroup = !group.type;
 
@@ -291,7 +292,11 @@ export class TaskViewCustomizerService {
 
         const filtered = isDefaultFilter
           ? tasks
-          : this.applyFilter(tasks, filter.type, filterValueToUse);
+          : isMultiSelectFilter
+            ? tasks.filter(
+                (task) => !!task.projectId && activeIds.includes(task.projectId),
+              )
+            : this.applyFilter(tasks, filter.type, filterValueToUse);
         const sorted = isDefaultSort
           ? filtered
           : this.applySort(filtered, sort.type, sort.order);

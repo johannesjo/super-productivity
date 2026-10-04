@@ -42,8 +42,8 @@ export const getStartPageUrlPath = (
     case DefaultStartPage.Boards:
       return appFeatures.isBoardsEnabled ? '/boards' : todayUrl;
     case DefaultStartPage.AllTasks:
-      // `?? true` matches DEFAULT_GLOBAL_CONFIG for pre-All-Tasks persisted state.
-      return (appFeatures.isAllTasksEnabled ?? true) ? '/all-tasks' : todayUrl;
+      // Opt-in, so a missing key (state predating the flag) means off.
+      return (appFeatures.isAllTasksEnabled ?? false) ? '/all-tasks' : todayUrl;
     case DefaultStartPage.Today:
     default:
       return todayUrl;

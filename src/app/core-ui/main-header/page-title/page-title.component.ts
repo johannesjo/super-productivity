@@ -415,7 +415,7 @@ export class PageTitleComponent {
   );
   isAllTasks = computed(() => isAllTasksUrl(this._url()));
   // `/all-tasks` already matches `/tasks$/`, so the extra isAllTasks() clause
-  // this used to carry was unreachable (rev. п.10).
+  // this used to carry was unreachable (#8134).
   isWorkViewPage = computed(() => /tasks$/.test(this._url()));
 
   displayTitle = computed(() => {

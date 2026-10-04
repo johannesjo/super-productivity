@@ -45,7 +45,7 @@ export interface FilterOption extends BaseOption<FILTER_OPTION_TYPE> {
   /**
    * Multi-select project filter (All Tasks): the checked project ids. Typed
    * instead of JSON-encoded inside `preset` so there is a single source of
-   * truth and no parse/stringify round-trips (rev. п.6). `preset` stays null
+   * truth and no parse/stringify round-trips (#8134). `preset` stays null
    * for this filter type.
    */
   projectIds?: string[];
