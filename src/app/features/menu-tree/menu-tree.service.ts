@@ -1,4 +1,4 @@
-import { Injectable, computed, inject } from '@angular/core';
+import { Injectable, Signal, computed, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
@@ -196,34 +196,52 @@ export class MenuTreeService {
   /**
    * One-time A–Z sort of the sidebar tree, persisted through the existing
    * `updateProjectTree`/`updateTagTree` op like a drag-reorder, so one click is
-   * one op. Returns false and dispatches nothing when the order already matches.
+   * one op. Returns null and dispatches nothing when the order already matches;
+   * otherwise returns an undo (see {@link _sortTreeByName}).
    */
-  sortProjectTreeByName(): boolean {
-    const current = this.projectTree();
-    const sorted = sortMenuTreeByName(
-      current,
+  sortProjectTreeByName(): (() => boolean) | null {
+    return this._sortTreeByName(
+      this.projectTree,
       MenuTreeKind.PROJECT,
       this._allProjects().filter((project) => project.id !== INBOX_PROJECT.id),
+      (tree) => this.setProjectTree(tree),
     );
-    if (JSON.stringify(sorted) === JSON.stringify(current)) {
-      return false;
-    }
-    this.setProjectTree(sorted);
-    return true;
   }
 
-  sortTagTreeByName(): boolean {
-    const current = this.tagTree();
-    const sorted = sortMenuTreeByName(
-      current,
+  sortTagTreeByName(): (() => boolean) | null {
+    return this._sortTreeByName(
+      this.tagTree,
       MenuTreeKind.TAG,
       this._allTags().filter((tag) => tag.id !== TODAY_TAG.id),
+      (tree) => this.setTagTree(tree),
     );
-    if (JSON.stringify(sorted) === JSON.stringify(current)) {
-      return false;
+  }
+
+  /**
+   * The returned undo restores the whole pre-sort tree, so it only does so
+   * while the stored tree is still the sorted one. Any later tree change (a new
+   * folder, a drag, a synced edit) replaces the stored tree reference, and undo
+   * then returns false instead of reverting that change along with the sort.
+   */
+  private _sortTreeByName(
+    tree: Signal<MenuTreeTreeNode[]>,
+    itemKind: MenuTreeKind.PROJECT | MenuTreeKind.TAG,
+    items: readonly { id: string; title: string }[],
+    setTree: (tree: MenuTreeTreeNode[]) => void,
+  ): (() => boolean) | null {
+    const previous = tree();
+    const sorted = sortMenuTreeByName(previous, itemKind, items);
+    if (JSON.stringify(sorted) === JSON.stringify(previous)) {
+      return null;
     }
-    this.setTagTree(sorted);
-    return true;
+    setTree(sorted);
+    return () => {
+      if (tree() !== sorted) {
+        return false;
+      }
+      setTree(previous);
+      return true;
+    };
   }
 
   createProjectFolder(name: string, parentFolderId?: string | null): void {

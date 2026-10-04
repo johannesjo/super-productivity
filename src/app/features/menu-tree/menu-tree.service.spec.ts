@@ -423,7 +423,7 @@ describe('MenuTreeService', () => {
       ]);
       store.refreshState();
 
-      expect(service.sortProjectTreeByName()).toBeTrue();
+      expect(service.sortProjectTreeByName()).not.toBeNull();
 
       expect(dispatchSpy).toHaveBeenCalledTimes(1);
       expect(lastAction().type).toBe('[MenuTree] Update Project Tree');
@@ -442,7 +442,7 @@ describe('MenuTreeService', () => {
       ]);
       store.refreshState();
 
-      expect(service.sortTagTreeByName()).toBeTrue();
+      expect(service.sortTagTreeByName()).not.toBeNull();
 
       expect(dispatchSpy).toHaveBeenCalledTimes(1);
       expect(lastAction().type).toBe('[MenuTree] Update Tag Tree');
@@ -460,8 +460,60 @@ describe('MenuTreeService', () => {
       ]);
       store.refreshState();
 
-      expect(service.sortTagTreeByName()).toBeFalse();
+      expect(service.sortTagTreeByName()).toBeNull();
       expect(dispatchSpy).not.toHaveBeenCalled();
+    });
+
+    describe('undo', () => {
+      const unsortedTree: MenuTreeTreeNode[] = [
+        { k: MenuTreeKind.TAG, id: 't-z' },
+        { k: MenuTreeKind.TAG, id: 't-a' },
+      ];
+
+      // MockStore ignores dispatches, so mirror the sort into the stored tree
+      // the way the real reducer would.
+      let sortedTree: MenuTreeTreeNode[];
+      const sortAndStore = (): (() => boolean) => {
+        store.overrideSelector(selectAllTags, [
+          { id: 't-z', title: 'zzz' },
+          { id: 't-a', title: 'aaa' },
+        ] as Tag[]);
+        store.overrideSelector(selectMenuTreeTagTree, unsortedTree);
+        store.refreshState();
+        const undo = service.sortTagTreeByName() as () => boolean;
+        sortedTree = lastAction().tree;
+        store.overrideSelector(selectMenuTreeTagTree, sortedTree);
+        store.refreshState();
+        dispatchSpy.calls.reset();
+        return undo;
+      };
+
+      it('restores the pre-sort tree while the tree is unchanged', () => {
+        const undo = sortAndStore();
+
+        expect(undo()).toBeTrue();
+        expect(dispatchSpy).toHaveBeenCalledTimes(1);
+        expect(lastAction().type).toBe('[MenuTree] Update Tag Tree');
+        expect(lastAction().tree).toBe(unsortedTree);
+      });
+
+      it('does not revert a folder created after the sort', () => {
+        const undo = sortAndStore();
+        store.overrideSelector(selectMenuTreeTagTree, [
+          ...sortedTree,
+          {
+            k: MenuTreeKind.FOLDER,
+            id: 'f-new',
+            name: 'New folder',
+            isExpanded: true,
+            children: [],
+          },
+        ]);
+        store.refreshState();
+
+        expect(undo()).toBeFalse();
+        expect(dispatchSpy).not.toHaveBeenCalled();
+      });
     });
   });
 });

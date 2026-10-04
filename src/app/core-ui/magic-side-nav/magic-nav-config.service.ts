@@ -577,25 +577,38 @@ export class MagicNavConfigService {
   // Lives in the project visibility menu: a fourth header button clips the
   // Projects header at the default sidebar width.
   sortProjectTree(): void {
-    const previousTree = this._menuTreeService.projectTree();
-    if (this._menuTreeService.sortProjectTreeByName()) {
-      this._snackService.open({
-        msg: T.F.PROJECT_FOLDER.S.SORTED,
-        actionStr: T.G.UNDO,
-        actionFn: () => this._menuTreeService.setProjectTree(previousTree),
-      });
-    }
+    this._openSortUndoSnack(
+      this._menuTreeService.sortProjectTreeByName(),
+      T.F.PROJECT_FOLDER.S.SORTED,
+      T.F.PROJECT_FOLDER.S.SORT_UNDO_STALE,
+    );
   }
 
   private _sortTagTree(): void {
-    const previousTree = this._menuTreeService.tagTree();
-    if (this._menuTreeService.sortTagTreeByName()) {
-      this._snackService.open({
-        msg: T.F.TAG_FOLDER.S.SORTED,
-        actionStr: T.G.UNDO,
-        actionFn: () => this._menuTreeService.setTagTree(previousTree),
-      });
+    this._openSortUndoSnack(
+      this._menuTreeService.sortTagTreeByName(),
+      T.F.TAG_FOLDER.S.SORTED,
+      T.F.TAG_FOLDER.S.SORT_UNDO_STALE,
+    );
+  }
+
+  private _openSortUndoSnack(
+    undo: (() => boolean) | null,
+    msg: string,
+    staleUndoMsg: string,
+  ): void {
+    if (!undo) {
+      return;
     }
+    this._snackService.open({
+      msg,
+      actionStr: T.G.UNDO,
+      actionFn: () => {
+        if (!undo()) {
+          this._snackService.open(staleUndoMsg);
+        }
+      },
+    });
   }
 
   private _createNewTag(): void {
