@@ -16,6 +16,15 @@ import {
   LocalRestApiResponsePayload,
 } from '../../../../electron/shared-with-frontend/local-rest-api.model';
 
+/**
+ * The Inbox is not a regular project: the project reducer ignores
+ * `archiveProject` for it (`project.reducer.ts`, `if (id === INBOX_PROJECT.id)
+ * return state`), and deleting it is rejected the same way the UI does. Both
+ * REST endpoints therefore have to refuse it up front — dispatching anyway
+ * would answer 200 for a change that never happens.
+ */
+const INBOX_PROJECT_ID = 'INBOX_PROJECT';
+
 /** Keep project REST writes to scalar/basic fields. Task and note lists are reducer-owned. */
 const ALLOWED_PROJECT_FIELDS = new Set<string>([
   'title',
@@ -201,6 +210,17 @@ const handleArchiveProject = async (
   projectId: string,
   isArchive: boolean,
 ): Promise<LocalRestApiResponsePayload> => {
+  // Refuse before the store lookup: the reducer ignores archiveProject for the
+  // Inbox, so a 200 here would report a change that never happens.
+  if (isArchive && projectId === INBOX_PROJECT_ID) {
+    return createErrorResponse(
+      requestId,
+      400,
+      'UNSUPPORTED_FIELD',
+      'The Inbox project cannot be archived',
+    );
+  }
+
   const project = await getProjectById(deps.projectService, projectId);
   if (!project) {
     return projectNotFound(requestId);
@@ -221,8 +241,6 @@ const handleArchiveProject = async (
   );
   return createSuccessResponse(requestId, 200, { id: projectId, archived: isArchive });
 };
-
-const INBOX_PROJECT_ID = 'INBOX_PROJECT';
 
 const handleDeleteProject = async (
   deps: LocalRestApiProjectDeps,

@@ -3188,6 +3188,23 @@ describe('LocalRestApiHandlerService', () => {
         expect((response.body as any).data).toEqual({ id: 'p1', archived: true });
       });
 
+      it('should reject archiving the Inbox and not dispatch the action', async () => {
+        // The project reducer ignores archiveProject for the Inbox, so the
+        // endpoint must refuse rather than answer 200 for a change that never
+        // happens. The Inbox is present in the store: this is a rejection, not
+        // a not-found.
+        setProjectStore([createMockProject('INBOX_PROJECT', { isArchived: false })]);
+
+        const response = await sendRequestAndWait(
+          createRequest('POST', '/projects/INBOX_PROJECT/archive'),
+        );
+
+        expect(response.body.ok).toBe(false);
+        expect(response.status).toBe(400);
+        expect((response.body as any).error.code).toBe('UNSUPPORTED_FIELD');
+        expect(dispatchSpy).not.toHaveBeenCalled();
+      });
+
       it('should return 404 for a non-existent project', async () => {
         setProjectStore([]);
 
