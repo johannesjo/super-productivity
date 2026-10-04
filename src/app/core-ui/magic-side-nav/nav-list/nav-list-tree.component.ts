@@ -100,8 +100,8 @@ export class NavListTreeComponent {
   // Access to service methods and data for visibility menu (includes Inbox for unhiding)
   readonly allUnarchivedProjects = this._navConfigService.allUnarchivedProjects;
 
-  // ViewChild for visibility menu trigger to close menu after toggling
-  visibilityMenuTrigger = viewChild('visibilityBtn', { read: MatMenuTrigger });
+  // ViewChild for the section menu trigger to close menu after toggling
+  moreMenuTrigger = viewChild('moreBtn', { read: MatMenuTrigger });
 
   readonly treeNodes = signal<TreeNode<MenuTreeViewNode>[]>([]);
   readonly treeKind = computed<MenuTreeKind>(() => this.item().treeKind);
@@ -157,11 +157,7 @@ export class NavListTreeComponent {
   toggleProjectVisibility(projectId: string): void {
     this._navConfigService.toggleProjectVisibility(projectId);
     // Close menu to prevent stale positioning after DOM update (#5955)
-    this.visibilityMenuTrigger()?.closeMenu();
-  }
-
-  sortProjects(): void {
-    this._navConfigService.sortProjectTree();
+    this.moreMenuTrigger()?.closeMenu();
   }
 
   onFolderMoreButton(event: MouseEvent, node: TreeNode<MenuTreeViewNode>): void {

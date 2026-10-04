@@ -1759,8 +1759,8 @@
         "SORTED": "Tags sorted A–Z",
         "SORT_UNDO_STALE": "Tags changed after sorting, so the sort can no longer be undone"
       },
+      "SORT": "Sort tags A–Z",
       "TOOLTIP_CREATE": "Create tag folder",
-      "TOOLTIP_SORT": "Sort tags A–Z",
       "ADD_SUBFOLDER": "Add subfolder",
       "ADD_TAG": "Add tag"
     },
