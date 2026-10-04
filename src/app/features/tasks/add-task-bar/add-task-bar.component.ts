@@ -161,6 +161,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   isGlobalBarVariant = input<boolean>(false);
   isDisableAutoFocus = input<boolean>(false);
   isNoDefaults = input<boolean>(false);
+  isAddToBottomInitially = input<boolean>();
   additionalFields = input<Partial<TaskCopy>>();
   taskIdsToExclude = input<string[]>();
   isHideTagTitles = input<boolean>(false);
@@ -354,6 +355,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private _defaultTagIds: string[] = [];
 
   ngOnInit(): void {
+    const isAddToBottomInitially = this.isAddToBottomInitially();
+    if (isAddToBottomInitially !== undefined) {
+      this.isAddToBottom.set(isAddToBottomInitially);
+    }
     this._setProjectInitially();
     this._setTagInitially();
     this._setupDefaultDate();

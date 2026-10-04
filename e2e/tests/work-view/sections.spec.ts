@@ -219,6 +219,10 @@ test.describe('Sections', () => {
     await expect(
       inbox.locator('task task-title').filter({ hasText: 'Another Inbox task' }),
     ).toBeVisible();
+    await expect(inbox.locator('task task-title')).toContainText([
+      'Inbox inline task',
+      'Another Inbox task',
+    ]);
     await expect(add).toBeVisible();
     await page.reload();
     await workViewPage.waitForTaskList();
@@ -229,8 +233,49 @@ test.describe('Sections', () => {
     await expect(
       inbox.locator('task task-title').filter({ hasText: 'Another Inbox task' }),
     ).toBeVisible();
+    await expect(inbox.locator('task task-title')).toContainText([
+      'Inbox inline task',
+      'Another Inbox task',
+    ]);
     await page.screenshot({ path: testInfo.outputPath('inbox-add-task.png') });
   });
+
+  for (const withNamedSection of [false, true]) {
+    test(`appends inline tasks after existing project tasks (${withNamedSection ? 'with' : 'without'} named sections)`, async ({
+      page,
+      workViewPage,
+      projectPage,
+    }) => {
+      await setupTestProject(workViewPage, projectPage);
+      await workViewPage.addTask('Existing project task');
+      if (withNamedSection) {
+        await openProjectContextMenu(page);
+        await clickAddSection(page);
+        await submitPromptDialog(page, 'Other Section');
+      }
+      const inline = page.locator('work-view-page add-task-inline').first();
+      await inline.getByRole('button', { name: 'Add task', exact: true }).click();
+      const input = inline.locator('textarea.main-input');
+      await input.fill('First appended task');
+      await input.press('Enter');
+      await input.fill('Second appended task');
+      await input.press('Enter');
+      await input.press('Escape');
+      const titles = page
+        .locator('work-view-page task-list')
+        .first()
+        .locator('task-title');
+      const expectedOrder = [
+        'Existing project task',
+        'First appended task',
+        'Second appended task',
+      ];
+      await expect(titles).toContainText(expectedOrder);
+      await page.reload();
+      await workViewPage.waitForTaskList();
+      await expect(titles).toContainText(expectedOrder);
+    });
+  }
 
   test('creates tasks directly beneath their section and preserves placement on reload', async ({
     page,

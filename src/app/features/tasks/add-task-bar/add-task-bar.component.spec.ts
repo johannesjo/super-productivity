@@ -26,7 +26,7 @@ import { DEFAULT_LOCALE } from 'src/app/core/locale.constants';
 import { DateService } from '../../../core/date/date.service';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { TaskRepeatCfgService } from '../../task-repeat-cfg/task-repeat-cfg.service';
-import { SS } from '../../../core/persistence/storage-keys.const';
+import { LS, SS } from '../../../core/persistence/storage-keys.const';
 import { BodyClass } from '../../../app.constants';
 import { IosKeyboardService } from '../../../core/theme/ios-keyboard.service';
 import { IS_ANDROID_WEB_VIEW_TOKEN } from '../../../util/is-android-web-view';
@@ -281,6 +281,56 @@ describe('AddTaskBarComponent', () => {
 
     fixture = TestBed.createComponent(AddTaskBarComponent);
     component = fixture.componentInstance;
+  });
+
+  describe('initial insertion position', () => {
+    let savedPreference: string | null;
+
+    beforeEach(() => {
+      savedPreference = localStorage.getItem(LS.IS_ADD_TO_BOTTOM);
+    });
+
+    afterEach(() => {
+      if (savedPreference === null) {
+        localStorage.removeItem(LS.IS_ADD_TO_BOTTOM);
+      } else {
+        localStorage.setItem(LS.IS_ADD_TO_BOTTOM, savedPreference);
+      }
+    });
+
+    it('appends successive inline tasks without changing the saved global preference', async () => {
+      localStorage.setItem(LS.IS_ADD_TO_BOTTOM, 'false');
+      component.isAddToBottom.set(false);
+      fixture.componentRef.setInput('isAddToBottomInitially', true);
+      fixture.detectChanges();
+
+      for (const title of ['First inline task', 'Second inline task']) {
+        component.stateService.updateInputTxt(title);
+        component.stateService.updateCleanText(title);
+        await component.addTask();
+        expect(mockTaskService.add.calls.mostRecent().args[3]).toBeTrue();
+      }
+      expect(localStorage.getItem(LS.IS_ADD_TO_BOTTOM)).toBe('false');
+    });
+
+    for (const isAddToBottom of [false, true]) {
+      it(`preserves the global placement preference (${isAddToBottom}) without an override`, () => {
+        localStorage.setItem(LS.IS_ADD_TO_BOTTOM, JSON.stringify(isAddToBottom));
+        const globalFixture = TestBed.createComponent(AddTaskBarComponent);
+        globalFixture.detectChanges();
+
+        expect(globalFixture.componentInstance.isAddToBottom()).toBe(isAddToBottom);
+        globalFixture.destroy();
+      });
+    }
+
+    it('still allows toggling the insertion position after opening', () => {
+      fixture.componentRef.setInput('isAddToBottomInitially', true);
+      fixture.detectChanges();
+      component.toggleIsAddToBottom();
+
+      expect(component.isAddToBottom()).toBeFalse();
+    });
   });
 
   describe('highlightSegments', () => {
