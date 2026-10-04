@@ -301,9 +301,7 @@ test.describe('Sections', () => {
       'Second task in section',
     ]);
 
-    await section
-      .getByRole('button', { name: 'Add to top', exact: true })
-      .click();
+    await section.getByRole('button', { name: /^Add to top/ }).click();
     await input.fill('Task added to top');
     await input.press('Enter');
     await input.press('Escape');
@@ -313,6 +311,58 @@ test.describe('Sections', () => {
       'Task created in section',
       'Second task in section',
     ];
+    await expect(section.locator('task task-title')).toContainText(expectedOrder);
+    await page.reload();
+    await workViewPage.waitForTaskList();
+    await expect(section.locator('task task-title')).toContainText(expectedOrder);
+  });
+
+  test('appends an existing task chosen from suggestions inside a section', async ({
+    page,
+    workViewPage,
+    projectPage,
+  }) => {
+    await setupTestProject(workViewPage, projectPage);
+    await workViewPage.addTask('Existing suggested task');
+    await page.evaluate(() => {
+      const store = (
+        window as unknown as {
+          __e2eTestHelpers: { store: { dispatch: (action: unknown) => void } };
+        }
+      ).__e2eTestHelpers.store;
+      store.dispatch({
+        type: '[Project] Update Project',
+        project: {
+          id: window.location.hash.split('/')[2],
+          changes: { isEnableBacklog: true },
+        },
+      });
+    });
+    await page
+      .locator('task')
+      .filter({ hasText: 'Existing suggested task' })
+      .first()
+      .focus();
+    await page.keyboard.press('Shift+B');
+    await expect(
+      page.locator('work-view-page task-list').first().locator('task'),
+    ).toHaveCount(0);
+    await openProjectContextMenu(page);
+    await clickAddSection(page);
+    await submitPromptDialog(page, 'Suggestion Section');
+    const section = sectionByTitle(page, 'Suggestion Section');
+    await section.locator('add-task-inline button').click();
+    const input = section.locator('add-task-bar textarea.main-input');
+    await input.fill('Section anchor task');
+    await input.press('Enter');
+    await expect(section.locator('task task-title')).toContainText([
+      'Section anchor task',
+    ]);
+    await input.press('Control+1');
+    await input.fill('Existing suggested task');
+    await page.getByRole('option').filter({ hasText: 'Existing suggested task' }).click();
+    await page.keyboard.press('Escape');
+    const expectedOrder = ['Section anchor task', 'Existing suggested task'];
     await expect(section.locator('task task-title')).toContainText(expectedOrder);
     await page.reload();
     await workViewPage.waitForTaskList();

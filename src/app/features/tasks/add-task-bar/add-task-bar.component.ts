@@ -748,6 +748,12 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       if (planForDay) {
         await this._planTaskForCurrentDay(suggestion.taskId);
         didPlanForDay = true;
+      } else if (
+        this._workContextService.activeWorkContextType === WorkContextType.PROJECT &&
+        suggestion.projectId &&
+        suggestion.projectId === this._workContextService.activeWorkContextId
+      ) {
+        this._projectService.moveTaskToTodayList(suggestion.taskId, suggestion.projectId);
       } else {
         this._taskService.getByIdOnce$(suggestion.taskId).subscribe((task) => {
           this._taskService.moveToCurrentWorkContext(task);
@@ -785,7 +791,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     if (taskId) {
       this.afterTaskAdd.emit({
         taskId,
-        isAddToBottom: false,
+        isAddToBottom: this.isAddToBottom(),
         isNewTask: !suggestion.taskId,
       });
     }

@@ -339,7 +339,7 @@ export class WorkViewComponent implements OnInit, OnDestroy {
     this.sectionService.addTaskToSection(
       section.id,
       event.taskId,
-      event.isAddToBottom ? section.taskIds.at(-1) ?? null : null,
+      event.isAddToBottom ? (section.taskIds.at(-1) ?? null) : null,
       source?.id ?? null,
     );
   }

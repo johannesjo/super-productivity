@@ -197,7 +197,7 @@ describe('AddTaskBarComponent', () => {
     });
     mockProjectService = jasmine.createSpyObj(
       'ProjectService',
-      [],
+      ['moveTaskToTodayList'],
       createProjectSignals(mockProjects),
     );
     mockTagService = jasmine.createSpyObj(
@@ -482,8 +482,70 @@ describe('AddTaskBarComponent', () => {
   });
 
   describe('onTaskSuggestionSelected', () => {
+    for (const projectId of ['project-1', 'project-2']) {
+      it(`uses the ${projectId === 'project-1' ? 'project backlog' : 'cross-project'} move for a suggestion from ${projectId}`, async () => {
+        Object.defineProperties(mockWorkContextService, {
+          activeWorkContextType: { value: WorkContextType.PROJECT },
+          activeWorkContextId: { value: 'project-1' },
+        });
+        const task = {
+          id: 'backlog-task',
+          title: 'Backlog task',
+          projectId,
+          subTaskIds: [],
+        } as Partial<TaskCopy> as TaskCopy;
+        mockTaskService.getByIdOnce$.and.returnValue(of(task));
+
+        await component.onTaskSuggestionSelected({
+          title: task.title,
+          taskId: task.id,
+          projectId,
+        });
+
+        if (projectId === 'project-1') {
+          expect(mockProjectService.moveTaskToTodayList).toHaveBeenCalledOnceWith(
+            task.id,
+            projectId,
+          );
+          expect(mockTaskService.getByIdOnce$).not.toHaveBeenCalled();
+          expect(mockTaskService.moveToCurrentWorkContext).not.toHaveBeenCalled();
+        } else {
+          expect(mockProjectService.moveTaskToTodayList).not.toHaveBeenCalled();
+          expect(mockTaskService.moveToCurrentWorkContext).toHaveBeenCalledOnceWith(task);
+        }
+      });
+    }
+
+    for (const isAddToBottom of [true, false]) {
+      it(`reports ${isAddToBottom ? 'bottom' : 'top'} placement for a selected existing task`, async () => {
+        component.isAddToBottom.set(isAddToBottom);
+        const task = {
+          id: 'task-1',
+          title: 'Existing task',
+          subTaskIds: [],
+        } as Partial<TaskCopy> as TaskCopy;
+        const suggestion: AddTaskSuggestion = {
+          title: task.title,
+          taskId: task.id,
+          projectId: 'project-1',
+        };
+        mockTaskService.getByIdOnce$.and.returnValue(of(task));
+        const emitSpy = spyOn(component.afterTaskAdd, 'emit');
+
+        await component.onTaskSuggestionSelected(suggestion);
+
+        expect(emitSpy).toHaveBeenCalledOnceWith({
+          taskId: task.id,
+          isAddToBottom,
+          isNewTask: false,
+        });
+        expect(mockTaskService.moveToCurrentWorkContext).toHaveBeenCalledOnceWith(task);
+      });
+    }
+
     it('leaves an existing task in place when defaults are disabled', async () => {
       fixture.componentRef.setInput('isNoDefaults', true);
+      component.isAddToBottom.set(false);
       fixture.detectChanges();
 
       const task = {
