@@ -45,10 +45,6 @@ test.describe('App Features', () => {
       label: 'Sync button',
       locator: (page: Page) => page.locator('.sync-btn'),
     },
-    {
-      label: 'All tasks',
-      locator: (page: Page) => page.getByRole('menuitem', { name: 'All Tasks' }),
-    },
   ].forEach((feature) => {
     test(`Element assigned with App feature ${feature.label} is only visible if feature is enabled`, async ({
       page,
@@ -94,6 +90,39 @@ test.describe('App Features', () => {
       await goToMainView(page);
       await expect(featureElement).toBeAttached();
     });
+  });
+
+  // All Tasks is opt-in, so unlike the toggles above it does not start enabled.
+  // Enabling it here also covers the sidebar entry appearing and disappearing,
+  // which the shared loop cannot express for an off-by-default feature.
+  test('All Tasks is off by default and its sidebar entry follows the switch', async ({
+    page,
+  }) => {
+    const featureElement = page.getByRole('menuitem', { name: 'All Tasks' });
+    const appFeaturesSection = page
+      .locator('collapsible', { hasText: 'App Features' })
+      .first();
+    const featureSwitch = page.getByRole('switch', {
+      name: 'All tasks',
+      exact: true,
+    });
+
+    await goToConfig(page);
+    await appFeaturesSection.click();
+    await expect(featureSwitch).toBeVisible();
+    // Opt-in: it starts switched off, unlike every other app feature.
+    await expect(featureSwitch).not.toBeChecked();
+
+    await goToMainView(page);
+    await expect(featureElement).not.toBeAttached();
+
+    await goToConfig(page);
+    await appFeaturesSection.click();
+    await featureSwitch.click();
+    await expect(featureSwitch).toBeChecked();
+
+    await goToMainView(page);
+    await expect(featureElement).toBeAttached();
   });
 
   test('Issues panel app feature hides the mobile bottom-nav panel option', async ({

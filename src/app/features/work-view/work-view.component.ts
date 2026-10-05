@@ -7,10 +7,12 @@ import {
   effect,
   ElementRef,
   afterNextRender,
+  Injector,
   inject,
   input,
   OnDestroy,
   OnInit,
+  runInInjectionContext,
   signal,
   ViewChild,
 } from '@angular/core';
@@ -169,6 +171,7 @@ export class WorkViewComponent implements OnInit, OnDestroy {
   private _globalConfigService = inject(GlobalConfigService);
   private _matDialog = inject(MatDialog);
   private _destroyRef = inject(DestroyRef);
+  private _injector = inject(Injector);
   private _dateService = inject(DateService);
   private _pluginBridge = inject(PluginBridgeService);
   private _calendarIntegrationService = inject(CalendarIntegrationService);
@@ -273,19 +276,10 @@ export class WorkViewComponent implements OnInit, OnDestroy {
     { equal: fastArrayCompare },
   );
   undoneTasks = input.required<TaskWithSubTasks[]>();
-  // #8134: `toObservable` re-emits the input's initial value synchronously
-  // on construction; combined with the selected-task deselect effect
-  // downstream, that `[]` seed caused spurious deselects on slow context
-  // switches. `observeOn(asapScheduler)` moves that seed off the synchronous
-  // tick so construction can't deselect anything, while the first real value
-  // still arrives in the same microtask-queue flush (no visible flicker) and
-  // single-emission sources keep working.
-  customizedUndoneTasks = toSignal(
-    this.customizerService.customizeUndoneTasks(
-      toObservable(this.undoneTasks).pipe(observeOn(asapScheduler)),
-    ),
-    { initialValue: INITIAL_CUSTOMIZED_UNDONE_TASKS },
-  );
+  // `toObservable` needs an injection context, so it is created here in a field
+  // initializer; which source is actually used is decided in ngOnInit, where the
+  // input bindings are already in place.
+  private _undoneTasksInput$ = toObservable(this.undoneTasks);
   doneTasks = input.required<TaskWithSubTasks[]>();
   backlogTasks = input.required<TaskWithSubTasks[]>();
   isShowBacklog = input<boolean>(false);
@@ -314,6 +308,14 @@ export class WorkViewComponent implements OnInit, OnDestroy {
   });
   selectedTaskId = this.taskService.selectedTaskId;
   isDisableTodayPanels = input<boolean>(false);
+  // Source is picked once in ngOnInit (below): non-All-Tasks hosts keep the
+  // work-context service stream — the source this view has always used, so
+  // their behaviour is untouched — while a page that supplies its own tasks
+  // (isDisableTodayPanels, i.e. All Tasks) uses the bound input. ngOnInit is
+  // the first point where input bindings are in place (a field initializer
+  // would only ever see the default `false`), and deciding once there keeps
+  // the synchronous wiring the focus/expansion logic and its specs rely on.
+  customizedUndoneTasks = signal(INITIAL_CUSTOMIZED_UNDONE_TASKS);
   isOnTodayList = toSignal(this.workContextService.isTodayList$, { initialValue: false });
   isDoneHidden = signal(!!localStorage.getItem(LS.DONE_TASKS_HIDDEN));
   isLaterTodayHidden = signal(!!localStorage.getItem(LS.LATER_TODAY_TASKS_HIDDEN));
@@ -553,6 +555,26 @@ export class WorkViewComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    // Pick the undone-task source once, before the first render. Only a page
+    // that supplies its own tasks (All Tasks) uses the bound input; every other
+    // host keeps the work-context service stream it has always used.
+    // #8134: `toObservable` re-emits the input's initial value synchronously on
+    // construction; combined with the selected-task deselect effect downstream,
+    // that `[]` seed caused spurious deselects on slow context switches.
+    // `observeOn(asapScheduler)` moves that seed off the synchronous tick, while
+    // the first real value still arrives in the same microtask-queue flush (no
+    // visible flicker) and single-emission sources keep working.
+    const undoneTasks$ = this.isDisableTodayPanels()
+      ? this._undoneTasksInput$.pipe(observeOn(asapScheduler))
+      : this.workContextService.undoneTasks$;
+    this._subs.add(
+      // customizeUndoneTasks builds its pipeline with toObservable(), which
+      // needs an injection context; ngOnInit is not one, so re-enter it.
+      runInInjectionContext(this._injector, () =>
+        this.customizerService.customizeUndoneTasks(undoneTasks$),
+      ).subscribe((customized) => this.customizedUndoneTasks.set(customized)),
+    );
+
     // preload
     // TODO check
     // this._subs.add(this.workContextService.backlogTasks$.subscribe());
