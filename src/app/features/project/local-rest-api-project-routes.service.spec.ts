@@ -110,7 +110,33 @@ describe('LocalRestApiProjectRoutesService', () => {
       expect(
         await service.handle(request('POST', '/projects/p1/unknown')),
       ).toBeUndefined();
-      expect(await service.handle(request('PUT', '/projects/p1'))).toBeUndefined();
+      expect(
+        await service.handle(request('GET', '/projects/p1/unknown')),
+      ).toBeUndefined();
+    });
+
+    it('answers 405 for a known path with an unsupported verb', async () => {
+      // Distinct from the core handler's 404: the route exists, the verb does
+      // not. `GET /projects` is core, so PUT here is the feature's to refuse.
+      const cases: [string, string, string][] = [
+        ['PUT', '/projects', 'GET, POST'],
+        ['DELETE', '/projects', 'GET, POST'],
+        ['PUT', '/projects/p1', 'GET, PATCH, DELETE'],
+        ['POST', '/projects/p1', 'GET, PATCH, DELETE'],
+        ['GET', '/projects/p1/archive', 'POST'],
+        ['DELETE', '/projects/p1/unarchive', 'POST'],
+      ];
+      for (const [method, path, allowed] of cases) {
+        const response = await service.handle(request(method, path));
+        expect(response?.status).toBe(405);
+        expect(response?.body.ok).toBe(false);
+        expect(response && !response.body.ok ? response.body.error.code : '').toBe(
+          'METHOD_NOT_ALLOWED',
+        );
+        expect(
+          response && !response.body.ok ? response.body.error.message : '',
+        ).toContain(allowed);
+      }
     });
   });
 
@@ -269,6 +295,19 @@ describe('LocalRestApiProjectRoutesService', () => {
         request('PATCH', '/projects/p1', { isHiddenFromMenu: 1 }),
       );
       expect(errorCode(wrongType)).toBe('INVALID_INPUT');
+      expect(projectServiceMock.update).not.toHaveBeenCalled();
+    });
+
+    it('returns 400 when nothing writable is sent, instead of a silent no-op', async () => {
+      // A body of only unknown fields (or none) would previously run
+      // update(id, {}) and answer 200, indistinguishable from a real update.
+      setProjectStore([createProject('p1')]);
+
+      for (const body of [{}, { unknownField: 'ignored' }]) {
+        const response = await handle(request('PATCH', '/projects/p1', body));
+        expect(response.status).toBe(400);
+        expect(errorCode(response)).toBe('INVALID_INPUT');
+      }
       expect(projectServiceMock.update).not.toHaveBeenCalled();
     });
   });

@@ -121,8 +121,15 @@ export class LocalRestApiProjectRoutesService implements LocalRestApiFeatureRout
     }
 
     if (segments.length === 1) {
-      // `GET /projects` (the list) is a core route; only creation is ours.
-      return method === 'POST' ? this._handleCreate(requestId, body) : undefined;
+      // `GET /projects` (the list) is a core route and never reaches here in the
+      // app; return undefined so the handler above keeps owning it. Creation is
+      // ours, and any other verb is a known path with an unsupported method.
+      if (method === 'GET') {
+        return undefined;
+      }
+      return method === 'POST'
+        ? this._handleCreate(requestId, body)
+        : this._methodNotAllowed(requestId, ['GET', 'POST']);
     }
 
     if (segments.length === 2) {
@@ -136,21 +143,19 @@ export class LocalRestApiProjectRoutesService implements LocalRestApiFeatureRout
       if (method === 'DELETE') {
         return this._handleDelete(requestId, projectId);
       }
-      return undefined;
+      return this._methodNotAllowed(requestId, ['GET', 'PATCH', 'DELETE']);
     }
 
     if (segments.length === 3) {
       const [, projectId, action] = segments;
-      if (method !== 'POST') {
+      if (action !== 'archive' && action !== 'unarchive') {
+        // Not a route this feature owns — let the core handler answer 404.
         return undefined;
       }
-      if (action === 'archive') {
-        return this._handleArchive(requestId, projectId, true);
+      if (method !== 'POST') {
+        return this._methodNotAllowed(requestId, ['POST']);
       }
-      if (action === 'unarchive') {
-        return this._handleArchive(requestId, projectId, false);
-      }
-      return undefined;
+      return this._handleArchive(requestId, projectId, action === 'archive');
     }
 
     return undefined;
@@ -222,6 +227,11 @@ export class LocalRestApiProjectRoutesService implements LocalRestApiFeatureRout
     }
 
     const changes = pickAllowedProjectFields(body);
+    if (Object.keys(changes).length === 0) {
+      // Every field was unknown or none was sent: nothing would change, and a
+      // 200 would be indistinguishable from a real update.
+      return invalidInput(requestId, 'Request body has no writable project fields');
+    }
     if (
       'title' in changes &&
       (typeof changes.title !== 'string' || !changes.title.trim())
@@ -311,6 +321,22 @@ export class LocalRestApiProjectRoutesService implements LocalRestApiFeatureRout
   private async _getProjectById(projectId: string): Promise<Project | undefined> {
     const project = await firstValueFrom(this._projectService.getByIdOnce$(projectId));
     return project?.id === projectId ? project : undefined;
+  }
+
+  /**
+   * The path exists but not for this verb. Distinct from the core handler's
+   * 404 so a client can tell "wrong method" from "no such route".
+   */
+  private _methodNotAllowed(
+    requestId: string,
+    allowed: readonly string[],
+  ): LocalRestApiResponsePayload {
+    return createErrorResponse(
+      requestId,
+      405,
+      'METHOD_NOT_ALLOWED',
+      `Method not allowed; allowed: ${allowed.join(', ')}`,
+    );
   }
 
   private _unsupportedField(
