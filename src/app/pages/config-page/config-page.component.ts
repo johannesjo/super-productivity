@@ -7,6 +7,7 @@ import {
   ElementRef,
   inject,
   OnInit,
+  viewChild,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { GlobalConfigService } from '../../features/config/global-config.service';
@@ -77,6 +78,7 @@ import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autoc
 import { MatOption } from '@angular/material/core';
 import {
   searchSettings,
+  SETTINGS_PLUGINS_TAB_INDEX,
   SettingsSearchTarget,
 } from '../../features/config/settings-search.util';
 
@@ -136,8 +138,6 @@ export class ConfigPageComponent implements OnInit {
   T: typeof T = T;
 
   selectedTabIndex = 0;
-  /** Index of the Plugins tab in the `mat-tab-group`, for the pointer under App Features. */
-  readonly PLUGINS_TAB_INDEX = 4;
   expandedSection: string | null = null;
 
   searchQuery = '';
@@ -194,6 +194,7 @@ export class ConfigPageComponent implements OnInit {
   isUpdateCheckPossible: boolean = isUpdateCheckPossible();
 
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _tabGroup = viewChild(MatTabGroup);
 
   constructor() {
     // Initialize tab-specific form configurations
@@ -423,7 +424,7 @@ export class ConfigPageComponent implements OnInit {
     // Tab order must match the `mat-tab-group` — the index is what we navigate to.
     this.searchResults = searchSettings(
       [
-        { labelKey: T.PS.TABS.PERSONALIZE, sections: this.generalFormCfg },
+        { labelKey: T.PS.TABS.GENERAL, sections: this.generalFormCfg },
         { labelKey: T.PS.TABS.TASKS, sections: this.globalTasksFormCfg },
         { labelKey: T.PS.TABS.TIME_TRACKING, sections: this.timeTrackingFormCfg },
         {
@@ -436,6 +437,15 @@ export class ConfigPageComponent implements OnInit {
       this.searchQuery,
       (key) => this._translateService.instant(key),
     );
+  }
+
+  /**
+   * The pointer under App Features. Moves focus to the Plugins tab header, since
+   * the button itself is detached with the outgoing tab body.
+   */
+  goToPluginsTab(): void {
+    this.selectedTabIndex = SETTINGS_PLUGINS_TAB_INDEX;
+    this._tabGroup()?.focusTab(SETTINGS_PLUGINS_TAB_INDEX);
   }
 
   /** Jumps to a hit: right tab, section expanded, scrolled into view. */

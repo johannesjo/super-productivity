@@ -15,6 +15,9 @@ export interface SettingsSearchTarget {
   matchedLabelKey?: string;
 }
 
+/** Index of the Plugins tab in the config page's `mat-tab-group`. */
+export const SETTINGS_PLUGINS_TAB_INDEX = 4;
+
 /** Tab order must mirror the `mat-tab-group` in `config-page.component.html`. */
 export interface SettingsSearchTab {
   labelKey: string;
@@ -30,25 +33,25 @@ export interface SettingsSearchTab {
 const CUSTOM_TARGETS: readonly SettingsSearchTarget[] = [
   {
     labelKey: T.GCF.MISC.APPEARANCE,
-    tabLabelKey: T.PS.TABS.PERSONALIZE,
+    tabLabelKey: T.PS.TABS.GENERAL,
     tabIndex: 0,
     scrollSelector: '.appearance-section',
   },
   {
     labelKey: T.GCF.MISC.DARK_MODE,
-    tabLabelKey: T.PS.TABS.PERSONALIZE,
+    tabLabelKey: T.PS.TABS.GENERAL,
     tabIndex: 0,
     scrollSelector: '.dark-mode-select',
   },
   {
     labelKey: T.GCF.MISC.THEME_EXPERIMENTAL,
-    tabLabelKey: T.PS.TABS.PERSONALIZE,
+    tabLabelKey: T.PS.TABS.GENERAL,
     tabIndex: 0,
     scrollSelector: '.theme-select',
   },
   {
     labelKey: T.GCF.MISC.WALLPAPER,
-    tabLabelKey: T.PS.TABS.PERSONALIZE,
+    tabLabelKey: T.PS.TABS.GENERAL,
     tabIndex: 0,
     scrollSelector: '.wallpaper-select',
   },
@@ -61,7 +64,7 @@ const CUSTOM_TARGETS: readonly SettingsSearchTarget[] = [
   {
     labelKey: T.PS.PLUGINS,
     tabLabelKey: T.PS.TABS.PLUGINS,
-    tabIndex: 4,
+    tabIndex: SETTINGS_PLUGINS_TAB_INDEX,
     scrollSelector: '.plugin-section',
   },
   {

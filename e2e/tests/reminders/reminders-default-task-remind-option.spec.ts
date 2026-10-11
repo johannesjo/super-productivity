@@ -11,7 +11,7 @@ test.describe('Default task reminder option', () => {
   // Any other option different to the default to test the settings change.
   // Use exact-cased label so we can target the mat-option / mat-select trigger
   // text precisely and not collide with substrings like the "...never run code..."
-  // tooltip on the theme upload button in the Personalize tab.
+  // tooltip on the theme upload button in the General tab.
   const changedOptionText = 'Never';
   const expandConfigSection = async (section: Locator): Promise<void> => {
     const collapsible = section.locator('collapsible').first();

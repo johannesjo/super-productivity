@@ -220,7 +220,7 @@ describe('ConfigPageComponent', () => {
     } as ConfigFormSection<unknown>;
     const TARGET = {
       labelKey: T.GCF.LANG.LABEL,
-      tabLabelKey: T.PS.TABS.PERSONALIZE,
+      tabLabelKey: T.PS.TABS.GENERAL,
       tabIndex: 0,
       sectionKey: 'localization',
       scrollSelector: '.section-localization',

@@ -27,7 +27,7 @@ const filterGlobalConfigForm = (cfg: ConfigFormSection<any>): boolean => {
   );
 };
 
-// Tab: Personalize - Theme (specified separately in html), App Features, Language, Misc,
+// Tab: General - Theme (specified separately in html), App Features, Language, Misc,
 // Task Widget, Keyboard, Clipboard Images. App Features leads so customizing the
 // app is the first thing the default tab offers.
 export const GLOBAL_GENERAL_FORM_CONFIG: ConfigFormConfig = [
