@@ -1,20 +1,7 @@
-<mat-card class="info-card">
-  <mat-card-content>
-    <div class="warning-content">
-      <p>⚠ {{ T.PLUGINS.SECURITY_WARNING | translate }}</p>
-      <ul>
-        <li>{{ T.PLUGINS.RISK_DATA_ACCESS | translate }}</li>
-        <li>{{ T.PLUGINS.RISK_MALICIOUS_CODE | translate }}</li>
-        <li>{{ T.PLUGINS.RISK_SYSTEM_ACCESS | translate }}</li>
-        <li>{{ T.PLUGINS.RISK_PERFORMANCE | translate }}</li>
-      </ul>
-      <p class="recommendation">
-        <mat-icon>security</mat-icon>
-        {{ T.PLUGINS.RECOMMENDATION | translate }}
-      </p>
-    </div>
-  </mat-card-content>
-</mat-card>
+<p class="intro">
+  <mat-icon>info</mat-icon>
+  <span>{{ T.PLUGINS.INTRO | translate }}</span>
+</p>
 
 @if (allPlugins().length === 0) {
   <mat-card>
@@ -25,57 +12,7 @@
   </mat-card>
 }
 
-<mat-card>
-  <mat-card-header>
-    <mat-card-title>{{ T.PLUGINS.INSTALL_PLUGIN | translate }}</mat-card-title>
-  </mat-card-header>
-  <mat-card-content>
-    <div class="install-warning">
-      <mat-icon>info</mat-icon>
-      <span>{{ T.PLUGINS.INSTALL_WARNING | translate }}</span>
-    </div>
-    <p>{{ T.PLUGINS.UPLOAD_PLUGIN_INSTRUCTION | translate }}</p>
-    <input
-      #fileInput
-      type="file"
-      accept=".zip"
-      (change)="onFileSelected($event)"
-      style="display: none"
-    />
-    <button
-      mat-raised-button
-      color="primary"
-      (click)="fileInput.click()"
-      [disabled]="isUploading()"
-    >
-      <mat-icon>upload</mat-icon>
-      {{
-        isUploading()
-          ? (T.PLUGINS.INSTALLING | translate)
-          : (T.PLUGINS.CHOOSE_PLUGIN_FILE | translate)
-      }}
-    </button>
-    @if (uploadError()) {
-      <mat-error style="margin-top: 8px; display: block">
-        {{ uploadError() }}
-      </mat-error>
-    }
-
-    <div style="margin-top: 16px">
-      <button
-        mat-button
-        color="warn"
-        (click)="clearPluginCache()"
-        [disabled]="isUploading()"
-      >
-        <mat-icon>delete_sweep</mat-icon>
-        {{ T.PLUGINS.CLEAR_PLUGIN_CACHE | translate }}
-      </button>
-    </div>
-  </mat-card-content>
-</mat-card>
-
-@for (plugin of allPlugins(); track plugin.manifest.id) {
+@for (plugin of sortedPlugins(); track plugin.manifest.id) {
   <mat-card>
     <mat-card-header>
       <div mat-card-avatar>
@@ -92,6 +29,9 @@
           <span class="plugin-author">
             {{ T.PLUGINS.AUTHORED_BY | translate: { author } }}
           </span>
+        }
+        @if (isUploadedPlugin(plugin)) {
+          <mat-chip>{{ T.PLUGINS.THIRD_PARTY | translate }}</mat-chip>
         }
         @if (isPluginLoading(plugin)) {
           <mat-chip color="accent">
@@ -149,61 +89,50 @@
         </mat-error>
       }
 
-      <table>
-        <tr>
-          <th>{{ T.PLUGINS.ID | translate }}</th>
-          <td>{{ plugin.manifest.id }}</td>
-        </tr>
-        <tr>
-          <th>{{ T.PLUGINS.LANGUAGES | translate }}</th>
-          <td>
-            <span>
-              {{ getPluginLanguages(plugin) }}
-            </span>
-          </td>
-        </tr>
-      </table>
-
-      @if (
-        (plugin.manifest.hooks && plugin.manifest.hooks.length > 0) ||
-        (plugin.manifest.permissions && plugin.manifest.permissions.length > 0) ||
-        getNetworkReachHosts(plugin).length > 0
-      ) {
-        <collapsible [title]="getPermissionsHooksTitle(plugin)">
-          @if (plugin.manifest.permissions && plugin.manifest.permissions.length > 0) {
+      <collapsible [title]="getDetailsTitle(plugin)">
+        <table>
+          <tr>
+            <th>{{ T.PLUGINS.ID | translate }}</th>
+            <td>{{ plugin.manifest.id }}</td>
+          </tr>
+          <tr>
+            <th>{{ T.PLUGINS.LANGUAGES | translate }}</th>
+            <td>{{ getPluginLanguages(plugin) }}</td>
+          </tr>
+        </table>
+        @if (plugin.manifest.permissions && plugin.manifest.permissions.length > 0) {
+          <div class="plugin-info-section">
+            <div class="label">{{ T.PLUGINS.PERMISSIONS | translate }}:</div>
+            <mat-chip-set>
+              @for (permission of plugin.manifest.permissions; track permission) {
+                <mat-chip>{{ permission }}</mat-chip>
+              }
+            </mat-chip-set>
+          </div>
+        }
+        @if (getNetworkReachHosts(plugin); as networkHosts) {
+          @if (networkHosts.length > 0) {
             <div class="plugin-info-section">
-              <div class="label">{{ T.PLUGINS.PERMISSIONS | translate }}:</div>
+              <div class="label">{{ T.PLUGINS.ALLOWED_HOSTS | translate }}:</div>
               <mat-chip-set>
-                @for (permission of plugin.manifest.permissions; track permission) {
-                  <mat-chip>{{ permission }}</mat-chip>
+                @for (host of networkHosts; track host) {
+                  <mat-chip>{{ host }}</mat-chip>
                 }
               </mat-chip-set>
             </div>
           }
-          @if (getNetworkReachHosts(plugin); as networkHosts) {
-            @if (networkHosts.length > 0) {
-              <div class="plugin-info-section">
-                <div class="label">{{ T.PLUGINS.ALLOWED_HOSTS | translate }}:</div>
-                <mat-chip-set>
-                  @for (host of networkHosts; track host) {
-                    <mat-chip>{{ host }}</mat-chip>
-                  }
-                </mat-chip-set>
-              </div>
-            }
-          }
-          @if (plugin.manifest.hooks && plugin.manifest.hooks.length > 0) {
-            <div class="plugin-info-section">
-              <div class="label">{{ T.PLUGINS.HOOKS | translate }}:</div>
-              <mat-chip-set>
-                @for (hook of plugin.manifest.hooks; track hook) {
-                  <mat-chip>{{ hook }}</mat-chip>
-                }
-              </mat-chip-set>
-            </div>
-          }
-        </collapsible>
-      }
+        }
+        @if (plugin.manifest.hooks && plugin.manifest.hooks.length > 0) {
+          <div class="plugin-info-section">
+            <div class="label">{{ T.PLUGINS.HOOKS | translate }}:</div>
+            <mat-chip-set>
+              @for (hook of plugin.manifest.hooks; track hook) {
+                <mat-chip>{{ hook }}</mat-chip>
+              }
+            </mat-chip-set>
+          </div>
+        }
+      </collapsible>
     </mat-card-content>
 
     @if (
@@ -239,17 +168,10 @@
 
 <mat-card class="community-plugins-card">
   <mat-card-header>
-    <mat-card-title>Community Plugins</mat-card-title>
+    <mat-card-title>{{ T.PLUGINS.COMMUNITY_PLUGINS | translate }}</mat-card-title>
   </mat-card-header>
   <mat-card-content>
-    <div class="install-warning">
-      <mat-icon>warning</mat-icon>
-      <span>
-        These plugins are developed by the community and are NOT reviewed or guaranteed by
-        the Super Productivity team. Install and use them at your own risk — they might
-        contain malicious code or break your application.
-      </span>
-    </div>
+    <p class="community-warning">{{ T.PLUGINS.COMMUNITY_WARNING | translate }}</p>
 
     <div class="community-plugins-list">
       @for (plugin of communityPlugins(); track plugin.name) {
@@ -262,22 +184,23 @@
             >
           </h3>
           <p class="plugin-author">
-            <span>
-              by
-              @if (plugin.authorUrl) {
-                <a
-                  [href]="plugin.authorUrl"
-                  target="_blank"
-                  >{{ plugin.author }}</a
-                >
-              } @else {
-                {{ plugin.author }}
-              }
-            </span>
+            @if (plugin.authorUrl) {
+              <a
+                [href]="plugin.authorUrl"
+                target="_blank"
+                >{{ T.PLUGINS.AUTHORED_BY | translate: { author: plugin.author } }}</a
+              >
+            } @else {
+              <span>{{
+                T.PLUGINS.AUTHORED_BY | translate: { author: plugin.author }
+              }}</span>
+            }
             @if (plugin.stars !== undefined) {
               <span
                 class="plugin-stars"
-                [attr.aria-label]="plugin.stars + ' stars'"
+                [attr.aria-label]="
+                  T.PLUGINS.COMMUNITY_STARS | translate: { count: plugin.stars }
+                "
               >
                 <mat-icon>star</mat-icon>
                 {{ plugin.stars }}
@@ -297,9 +220,53 @@
         color="primary"
       >
         <mat-icon>add</mat-icon>
-        Get your plugin to show up here
+        {{ T.PLUGINS.COMMUNITY_GET_LISTED | translate }}
       </a>
     </div>
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="install-card">
+  <mat-card-header>
+    <mat-card-title>{{ T.PLUGINS.INSTALL_PLUGIN | translate }}</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <p>{{ T.PLUGINS.UPLOAD_PLUGIN_INSTRUCTION | translate }}</p>
+    <input
+      #fileInput
+      type="file"
+      accept=".zip"
+      (change)="onFileSelected($event)"
+      style="display: none"
+    />
+    <div class="install-actions">
+      <button
+        mat-raised-button
+        color="primary"
+        (click)="fileInput.click()"
+        [disabled]="isUploading()"
+      >
+        <mat-icon>upload</mat-icon>
+        {{
+          isUploading()
+            ? (T.PLUGINS.INSTALLING | translate)
+            : (T.PLUGINS.CHOOSE_PLUGIN_FILE | translate)
+        }}
+      </button>
+      <button
+        mat-button
+        (click)="clearPluginCache()"
+        [disabled]="isUploading()"
+      >
+        <mat-icon>delete_sweep</mat-icon>
+        {{ T.PLUGINS.CLEAR_PLUGIN_CACHE | translate }}
+      </button>
+    </div>
+    @if (uploadError()) {
+      <mat-error style="margin-top: 8px; display: block">
+        {{ uploadError() }}
+      </mat-error>
+    }
   </mat-card-content>
 </mat-card>
 

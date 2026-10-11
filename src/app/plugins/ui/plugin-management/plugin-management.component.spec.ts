@@ -65,8 +65,9 @@ describe('PluginManagementComponent', () => {
           useValue: { localization: signal({ lng: 'en' }) },
         },
         {
+          // Confirms by default (e.g. the install warning); tests override via stubConfirmDialog.
           provide: MatDialog,
-          useValue: {},
+          useValue: { open: () => ({ afterClosed: () => of(true) }) },
         },
         {
           provide: Router,
@@ -189,6 +190,37 @@ describe('PluginManagementComponent', () => {
     expect(component.uploadError()).toBe('bad zip');
   });
 
+  it('shows the risk warning before installing and installs only when confirmed', async () => {
+    loadPluginFromZipSpy.and.returnValue(
+      Promise.resolve({ manifest: { name: 'My Plugin' } }),
+    );
+    const openSpy = stubConfirmDialog(true);
+
+    await component.onFileSelected(zipInputEvent());
+
+    expect(openSpy).toHaveBeenCalledOnceWith(DialogConfirmComponent, {
+      restoreFocus: true,
+      data: {
+        message: jasmine.stringContaining(T.PLUGINS.RISK_DATA_ACCESS),
+        okTxt: T.PLUGINS.INSTALL_PLUGIN,
+      },
+    });
+    expect(loadPluginFromZipSpy).toHaveBeenCalled();
+  });
+
+  it('installs nothing and clears the file input when the risk warning is cancelled', async () => {
+    stubConfirmDialog(undefined);
+    const event = zipInputEvent();
+    const input = event.target as HTMLInputElement;
+    const valueSetter = spyOnProperty(input, 'value', 'set');
+
+    await component.onFileSelected(event);
+
+    expect(loadPluginFromZipSpy).not.toHaveBeenCalled();
+    expect(valueSetter).toHaveBeenCalledWith('');
+    expect(component.isUploading()).toBe(false);
+  });
+
   const baseManifest: PluginManifest = {
     id: 'github-issue-provider',
     name: 'GitHub Issues',
@@ -294,6 +326,48 @@ describe('PluginManagementComponent', () => {
     Object.assign(TestBed.inject(MatDialog), { open: openSpy });
     return openSpy;
   };
+
+  it('lists uploaded plugins before built-in ones, keeping load order', () => {
+    const state = (id: string, type: PluginState['type']): PluginState => ({
+      manifest: { ...baseManifest, id, name: id },
+      status: 'not-loaded',
+      path: type === 'uploaded' ? `uploaded://${id}` : `assets/bundled-plugins/${id}`,
+      type,
+      isEnabled: false,
+    });
+    const pluginStates = TestBed.inject(PluginService).pluginStates as WritableSignal<
+      Map<string, PluginState>
+    >;
+    pluginStates.set(
+      new Map([
+        ['builtin-a', state('builtin-a', 'built-in')],
+        ['uploaded-a', state('uploaded-a', 'uploaded')],
+        ['builtin-b', state('builtin-b', 'built-in')],
+      ]),
+    );
+
+    expect(component.sortedPlugins().map((p) => p.manifest.id)).toEqual([
+      'uploaded-a',
+      'builtin-a',
+      'builtin-b',
+    ]);
+    // Empty again so the template (rendered on teardown) needs no further stubs.
+    pluginStates.set(new Map());
+  });
+
+  it('titles the details section with the permission summary when there is one', () => {
+    const withHooks = {
+      manifest: { ...baseManifest, hooks: [PluginHooks.TASK_COMPLETE] },
+      loaded: true,
+      isEnabled: true,
+    };
+    const plain = { manifest: baseManifest, loaded: true, isEnabled: true };
+
+    expect(component.getDetailsTitle(withHooks)).toBe(
+      'PLUGINS.DETAILS · PLUGINS.HOOKS (1)',
+    );
+    expect(component.getDetailsTitle(plain)).toBe('PLUGINS.DETAILS');
+  });
 
   describe('clearPluginCache', () => {
     let clearCacheSpy: jasmine.Spy;

@@ -3147,7 +3147,6 @@
     "INDEX_HTML_NOT_LOADED": "Plugin index.html not loaded",
     "INDEX_HTML_TOO_LARGE": "Plugin index.html is too large (max {{maxSize}}KB)",
     "INSTALL_PLUGIN": "Install Plugin",
-    "INSTALL_WARNING": "Before installing a plugin, ensure you trust its source and understand the permissions it requests.",
     "INSTALLING": "Installing...",
     "LANGUAGES": "Languages:",
     "LOADING_INTERFACE": "Loading plugin interface...",
@@ -3204,7 +3203,14 @@
     "UPLOAD_PLUGIN_INSTRUCTION": "Upload a plugin ZIP file to install it:",
     "VALIDATION_FAILED": "Validation failed: {{errors}}",
     "NODE_EXECUTION_BRIDGE_UNAVAILABLE": "Could not connect to the Node.js execution bridge. Please try disabling and re-enabling the plugin.",
-    "PLUGIN_LOAD_FAILED": "Plugin \"{{pluginName}}\" failed to load: {{error}}"
+    "PLUGIN_LOAD_FAILED": "Plugin \"{{pluginName}}\" failed to load: {{error}}",
+    "INTRO": "Built-in plugins are maintained by the Super Productivity team. Plugins you upload are not reviewed and can access all your data, so only install ones you trust.",
+    "THIRD_PARTY": "Third-party",
+    "DETAILS": "Details",
+    "COMMUNITY_PLUGINS": "Community Plugins",
+    "COMMUNITY_WARNING": "Community plugins are not reviewed by the Super Productivity team. Install them at your own risk.",
+    "COMMUNITY_STARS": "{{count}} stars",
+    "COMMUNITY_GET_LISTED": "Get your plugin to show up here"
   },
   "PM": {
     "ALL_TASKS_TITLE": "Metrics (all tasks)",
