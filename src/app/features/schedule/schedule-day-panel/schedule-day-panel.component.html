@@ -5,7 +5,7 @@
   (mousemove)="onDragMove($event)"
   (touchmove)="onDragMove($event)"
   swipeGesture
-  [swipeEnabled]="isInBottomSheet && !isDragging()"
+  [swipeEnabled]="isInBottomSheet && !isDragging() && !scheduleWeek.isDragging()"
   (swipeleft)="goToNextDay()"
   (swiperight)="goToPreviousDay()"
 >
