@@ -183,13 +183,13 @@ describe('MobileBottomNavComponent', () => {
   });
 
   it('lists a plugin side panel next to a built-in panel', async () => {
-    // The button's condition and the menu's contents are separate lists, so
-    // each has to hold on its own: a config that produces items must produce
-    // the trigger too.
-    await render({ ...ALL_OFF, isProjectNotesEnabled: true }, [
+    // Plugin buttons and built-in panels are counted separately; together
+    // they must add up to a menu, not a single direct button.
+    const cmp = await render({ ...ALL_OFF, isProjectNotesEnabled: true }, [
       { pluginId: 'p1', label: 'Doc Mode', icon: 'description' },
     ]);
 
+    expect(cmp.sidePanelItemCount()).toBe(2);
     expect(openPanelsMenu()).toEqual(['.e2e-toggle-notes-btn', 'plugin-icon']);
   });
 
