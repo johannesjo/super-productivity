@@ -241,9 +241,10 @@ user key`; AES-256-GCM, 12-byte random IV, 16-byte tag, AAD = version byte
   `sync-wrapper.service.ts` (2080 of 2084 allowed lines). SuperSync has no
   interval polling (`sync-trigger.service.ts:266`), so captures arrive when
   the app next syncs: opening or using it, or another device's change.
-- **Switch off:** clear `sync.captureKey` (one op), wait for the upload, then
-  `DELETE /api/capture/key`. A stale device that still has the key gets 409 on
-  re-register and stops; the synced op reaches it on its next sync.
+- **Switch off:** `DELETE /api/capture/key` first, so a failed request changes
+  nothing and can be retried, then clear `sync.captureKey` (one op). A stale
+  device that still has the key gets 409 on re-register and stops; the synced
+  op reaches it on its next sync.
 - **Settings:** a custom block in the SuperSync section of
   `sync-form.const.ts`: switch, URL with copy, "Create token", connect code,
   assistants list with Revoke, and the privacy note. Strings in `en.json` only.

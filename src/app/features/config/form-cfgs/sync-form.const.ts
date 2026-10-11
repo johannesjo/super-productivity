@@ -739,6 +739,15 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
             },
           },
         },
+        // Agent task capture: acts on the active, persisted provider (like
+        // the encryption buttons), so hidden until SuperSync is saved.
+        {
+          hideExpression: (m: any, v: any, field?: FormlyFieldConfig) =>
+            isNotSyncProvider(field, 2, SyncProviderId.SuperSync) ||
+            field?.parent?.parent?.model?._isInitialSetup === true ||
+            hasUnsavedProviderSwitch(field, 2),
+          type: 'agent-capture-settings',
+        },
         // Advanced settings for SuperSync
         {
           type: 'collapsible',

@@ -15,6 +15,9 @@ import { APP_WEB_FETCH } from '../platform/app-web-fetch';
 import { SyncProviderId } from '../provider.const';
 import { getAppSemver } from '../../../util/get-app-version-str';
 import {
+  validateCaptureClaimResponse,
+  validateCaptureGrantsResponse,
+  validateCaptureTokenResponse,
   validateDeleteAllDataResponse,
   validateDevicesResponse,
   validateOpDownloadResponse,
@@ -82,6 +85,9 @@ export const createSuperSyncProvider = (): PackageSuperSyncProvider => {
     validateDeleteAllData: validateDeleteAllDataResponse,
     validateDevices: validateDevicesResponse,
     validateReplaceToken: validateReplaceTokenResponse,
+    validateCaptureClaim: validateCaptureClaimResponse,
+    validateCaptureGrants: validateCaptureGrantsResponse,
+    validateCaptureToken: validateCaptureTokenResponse,
   };
 
   const deps: SuperSyncDeps = {

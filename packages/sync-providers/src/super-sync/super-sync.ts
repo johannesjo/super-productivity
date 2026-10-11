@@ -34,6 +34,10 @@ import type { SuperSyncResponseValidators } from './response-validators';
 import type { SuperSyncStorage } from './storage';
 import {
   PROVIDER_ID_SUPER_SYNC,
+  type SuperSyncCaptureClaimResult,
+  type SuperSyncCaptureGrantList,
+  type SuperSyncCaptureKeyResult,
+  type SuperSyncCaptureTokenResult,
   type SuperSyncDeviceListResponse,
   type SuperSyncPrivateCfg,
   type SuperSyncWebSocketAccess,
@@ -538,6 +542,108 @@ export class SuperSyncProvider
     if (oldSeqKey !== newSeqKey) {
       this._deps.storage.removeLastServerSeq(oldSeqKey);
     }
+  }
+
+  // === Agent Task Capture ===
+
+  /**
+   * Registers this account's capture public key (base64 SPKI). Replacing a
+   * different key drops every item sealed to the old one server-side.
+   * `disabled` means the user switched capture off; nothing re-enables it
+   * but a key the app explicitly sends after the user switches it on again.
+   */
+  async registerCaptureKey(publicKeySpki: string): Promise<SuperSyncCaptureKeyResult> {
+    const cfg = await this._cfgOrError();
+    try {
+      const response = await this._fetchApi<{ status?: unknown }>(
+        cfg,
+        '/api/capture/key',
+        { method: 'PUT', body: JSON.stringify({ publicKey: publicKeySpki }) },
+      );
+      return response?.status === 'unchanged' ? 'unchanged' : 'registered';
+    } catch (error) {
+      if (error instanceof SuperSyncHttpStatusError && error.status === 409) {
+        return 'disabled';
+      }
+      throw error;
+    }
+  }
+
+  /** Switches capture off server-side: revokes every grant, drops every item. */
+  async disableCaptureKey(): Promise<void> {
+    const cfg = await this._cfgOrError();
+    await this._fetchApi<unknown>(cfg, '/api/capture/key', { method: 'DELETE' });
+  }
+
+  /** Leases up to one batch of sealed captures to `deviceId`. */
+  async claimCaptures(
+    deviceId: string,
+    fingerprint: string,
+  ): Promise<SuperSyncCaptureClaimResult> {
+    const cfg = await this._cfgOrError();
+    const response = await this._fetchApi<unknown>(cfg, '/api/capture/claim', {
+      method: 'POST',
+      body: JSON.stringify({ deviceId, fingerprint }),
+    });
+    return this._deps.responseValidators.validateCaptureClaim(response);
+  }
+
+  /** Deletes items this device imported; the server ignores stale leases. */
+  async ackCaptures(
+    deviceId: string,
+    acks: ReadonlyArray<{ itemId: string; taskId: string }>,
+  ): Promise<void> {
+    const cfg = await this._cfgOrError();
+    await this._fetchApi<unknown>(cfg, '/api/capture/ack', {
+      method: 'POST',
+      body: JSON.stringify({ deviceId, acks }),
+    });
+  }
+
+  /**
+   * Creates a capture token for one assistant. noRetry: a retry after a lost
+   * response would leave a second, never-shown grant behind.
+   */
+  async createCaptureToken(clientName: string): Promise<SuperSyncCaptureTokenResult> {
+    const cfg = await this._cfgOrError();
+    const response = await this._fetchApi<unknown>(cfg, '/api/capture/tokens', {
+      method: 'POST',
+      body: JSON.stringify({ clientName }),
+      noRetry: true,
+    });
+    return this._deps.responseValidators.validateCaptureToken(response);
+  }
+
+  async listCaptureGrants(): Promise<SuperSyncCaptureGrantList> {
+    const cfg = await this._cfgOrError();
+    const response = await this._fetchApi<unknown>(cfg, '/api/capture/grants', {
+      method: 'GET',
+    });
+    return this._deps.responseValidators.validateCaptureGrants(response);
+  }
+
+  /**
+   * Revokes one assistant; `discardPending` also drops what it captured and
+   * no device imported yet. A grant that is already gone counts as revoked.
+   */
+  async revokeCaptureGrant(grantId: string, discardPending: boolean): Promise<void> {
+    const cfg = await this._cfgOrError();
+    const query = discardPending ? '?discard=1' : '';
+    try {
+      await this._fetchApi<unknown>(
+        cfg,
+        `/api/capture/grants/${encodeURIComponent(grantId)}${query}`,
+        { method: 'DELETE' },
+      );
+    } catch (error) {
+      if (error instanceof SuperSyncHttpStatusError && error.status === 404) return;
+      throw error;
+    }
+  }
+
+  /** The URL an assistant connects to: this server's MCP endpoint. */
+  async getCaptureMcpUrl(): Promise<string> {
+    return `${this._resolveBaseUrl(await this._cfgOrError())}/mcp`;
   }
 
   // === WebSocket Parameters ===

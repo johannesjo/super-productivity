@@ -1,0 +1,153 @@
+<section class="agent-capture">
+  <h3>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_TITLE | translate }}</h3>
+  <p>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_INFO | translate }}</p>
+
+  @if (!isAvailable) {
+    <p>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_SAVE_FIRST | translate }}</p>
+  } @else {
+    <div class="callout">
+      <mat-icon aria-hidden="true">privacy_tip</mat-icon>
+      <p>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_PRIVACY | translate }}</p>
+    </div>
+  }
+
+  @if (isAvailable && !isEnabled()) {
+    <button
+      mat-stroked-button
+      color="primary"
+      type="button"
+      [disabled]="isBusy()"
+      (click)="turnOn()"
+    >
+      {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_ON | translate }}
+    </button>
+  } @else if (isAvailable) {
+    @if (mcpUrl(); as url) {
+      <label>
+        {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_MCP_URL | translate }}
+        <input
+          class="value"
+          type="text"
+          readonly
+          [value]="url"
+          (focus)="$any($event.target).select()"
+        />
+      </label>
+      <button
+        mat-button
+        type="button"
+        (click)="copy(url, 'URL')"
+      >
+        {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_COPY | translate }}
+      </button>
+    }
+
+    <mat-form-field>
+      <mat-label>{{
+        T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_CLIENT_NAME | translate
+      }}</mat-label>
+      <input
+        matInput
+        maxlength="100"
+        [value]="clientName()"
+        (input)="clientName.set($any($event.target).value)"
+        (keydown.enter)="$event.preventDefault(); createToken()"
+      />
+    </mat-form-field>
+    <button
+      mat-stroked-button
+      color="primary"
+      type="button"
+      [disabled]="isBusy() || !clientName().trim()"
+      (click)="createToken()"
+    >
+      {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_CREATE_TOKEN | translate }}
+    </button>
+
+    @if (newToken(); as token) {
+      <p role="status">{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_TOKEN_ONCE | translate }}</p>
+      <label>
+        {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_TOKEN | translate }}
+        <input
+          class="value"
+          type="text"
+          readonly
+          [value]="token"
+          e2e="captureToken"
+          (focus)="$any($event.target).select()"
+        />
+      </label>
+      <button
+        mat-button
+        type="button"
+        (click)="copy(token, 'Token')"
+      >
+        {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_COPY | translate }}
+      </button>
+      <label>
+        {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_SETUP | translate }}
+        <input
+          class="value"
+          type="text"
+          readonly
+          [value]="setupCommand()"
+          (focus)="$any($event.target).select()"
+        />
+      </label>
+    }
+
+    <ul>
+      @for (grant of grants(); track grant.id) {
+        <li>
+          <strong>{{ grant.clientName }}</strong>
+          <span>
+            {{
+              T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_GRANT_INFO
+                | translate
+                  : {
+                      created: grant.createdAt | localeDate: 'shortDate',
+                      lastUsed: grant.lastUsedAt
+                        ? (grant.lastUsedAt | localeDate: 'shortDate')
+                        : (T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_GRANT_NEVER_USED | translate),
+                      count: grant.pendingCount,
+                    }
+            }}
+          </span>
+          <button
+            mat-button
+            type="button"
+            [disabled]="isBusy()"
+            (click)="revoke(grant, false)"
+          >
+            {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_REVOKE | translate }}
+          </button>
+          @if (grant.pendingCount > 0) {
+            <button
+              mat-button
+              type="button"
+              [disabled]="isBusy()"
+              (click)="revoke(grant, true)"
+            >
+              {{
+                T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_REVOKE_DISCARD
+                  | translate: { count: grant.pendingCount }
+              }}
+            </button>
+          }
+        </li>
+      } @empty {
+        <li>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_GRANTS_EMPTY | translate }}</li>
+      }
+    </ul>
+
+    <button
+      mat-button
+      color="warn"
+      type="button"
+      [disabled]="isBusy()"
+      (click)="turnOff()"
+    >
+      {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_OFF | translate }}
+    </button>
+  }
+</section>

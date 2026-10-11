@@ -15,7 +15,9 @@ import { parseCapturePublicKey, sealCapture } from './capture-seal';
  * another device's lease gets a fresh taskId; a device gets back the taskId
  * it was given for as long as it holds the lease. Two devices therefore never
  * create the same task id, and an ack from an old lease can't delete a newer
- * one. The app keys its receipts on itemId.
+ * one. The app uses taskId as its capture id, so its receipts follow the
+ * lease; a device that comes back after a takeover may duplicate the task
+ * (accepted in the plan's failure modes), but never diverges on one id.
  */
 
 export interface CapturePayload {

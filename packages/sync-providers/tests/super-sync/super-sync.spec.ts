@@ -35,6 +35,9 @@ import {
   SuperSyncProvider,
   type SuperSyncDeps,
   type SuperSyncDeviceListResponse,
+  type SuperSyncCaptureClaimResult,
+  type SuperSyncCaptureGrantList,
+  type SuperSyncCaptureTokenResult,
   type SuperSyncReplaceTokenResult,
   type SuperSyncPrivateCfg,
   type SuperSyncResponseValidators,
@@ -131,6 +134,9 @@ const createValidatorsPassthrough = (): SuperSyncResponseValidators => ({
   validateDeleteAllData: (data) => data as { success: boolean },
   validateDevices: (data) => data as SuperSyncDeviceListResponse,
   validateReplaceToken: (data) => data as SuperSyncReplaceTokenResult,
+  validateCaptureClaim: (data) => data as SuperSyncCaptureClaimResult,
+  validateCaptureGrants: (data) => data as SuperSyncCaptureGrantList,
+  validateCaptureToken: (data) => data as SuperSyncCaptureTokenResult,
 });
 
 const createLoggerSpy = (): {
@@ -772,6 +778,90 @@ describe('SuperSyncProvider', () => {
       expect(url).toBe('https://sync.example.com/api/sync/devices');
       // Read-only by design: the server offers no per-device revocation.
       expect(options.method).toBe('GET');
+    });
+  });
+
+  describe('agent task capture', () => {
+    const call = (
+      fetchMock: ReturnType<typeof vi.fn>,
+      index = 0,
+    ): { url: string; method?: string; body?: unknown } => {
+      const [url, options] = fetchMock.mock.calls[index] as [string, RequestInit];
+      return {
+        url,
+        method: options.method,
+        body: options.body ? JSON.parse(options.body as string) : undefined,
+      };
+    };
+
+    it('registers the key and reports a switched-off account as disabled', async () => {
+      const { provider, cfgStore, fetchMock } = buildProvider();
+      cfgStore.load.mockResolvedValue(testConfig);
+      fetchMock
+        .mockResolvedValueOnce(okResponse({ status: 'unchanged', discarded: 0 }))
+        .mockResolvedValueOnce(
+          errorResponse(409, 'Conflict', JSON.stringify({ error: 'capture_disabled' })),
+        );
+
+      expect(await provider.registerCaptureKey('spki')).toBe('unchanged');
+      expect(await provider.registerCaptureKey('spki')).toBe('disabled');
+      expect(call(fetchMock)).toEqual({
+        url: 'https://sync.example.com/api/capture/key',
+        method: 'PUT',
+        body: { publicKey: 'spki' },
+      });
+    });
+
+    it('claims and acks with the device id', async () => {
+      const { provider, cfgStore, fetchMock } = buildProvider();
+      cfgStore.load.mockResolvedValue(testConfig);
+      const claim = { status: 'ok', items: [] };
+      fetchMock
+        .mockResolvedValueOnce(okResponse(claim))
+        .mockResolvedValueOnce(okResponse({ deleted: 1 }));
+
+      expect(await provider.claimCaptures('dev-1', 'fp')).toEqual(claim);
+      await provider.ackCaptures('dev-1', [{ itemId: 'i', taskId: 't' }]);
+      expect(call(fetchMock, 0)).toEqual({
+        url: 'https://sync.example.com/api/capture/claim',
+        method: 'POST',
+        body: { deviceId: 'dev-1', fingerprint: 'fp' },
+      });
+      expect(call(fetchMock, 1).body).toEqual({
+        deviceId: 'dev-1',
+        acks: [{ itemId: 'i', taskId: 't' }],
+      });
+    });
+
+    it('creates a token without retrying a lost response', async () => {
+      const { provider, cfgStore, fetchMock } = buildProvider();
+      cfgStore.load.mockResolvedValue(testConfig);
+      fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
+
+      await expect(provider.createCaptureToken('Claude')).rejects.toThrow();
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(call(fetchMock).body).toEqual({ clientName: 'Claude' });
+    });
+
+    it('revokes with discard and treats an unknown grant as revoked', async () => {
+      const { provider, cfgStore, fetchMock } = buildProvider();
+      cfgStore.load.mockResolvedValue(testConfig);
+      fetchMock.mockResolvedValueOnce(
+        errorResponse(404, 'Not Found', JSON.stringify({ error: 'Not found' })),
+      );
+
+      await provider.revokeCaptureGrant('g/1', true);
+      expect(call(fetchMock)).toMatchObject({
+        url: 'https://sync.example.com/api/capture/grants/g%2F1?discard=1',
+        method: 'DELETE',
+      });
+    });
+
+    it('builds the MCP URL from the configured server, without a trailing slash', async () => {
+      const { provider, cfgStore } = buildProvider();
+      cfgStore.load.mockResolvedValue({ ...testConfig, baseUrl: 'https://own.example/' });
+
+      expect(await provider.getCaptureMcpUrl()).toBe('https://own.example/mcp');
     });
   });
 
