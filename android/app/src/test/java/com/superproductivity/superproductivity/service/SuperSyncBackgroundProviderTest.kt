@@ -155,6 +155,189 @@ class SuperSyncBackgroundProviderTest {
         }
     }
 
+    // --- Task-field payloads (actionPayload) ---------------------------------
+    // Plaintext payloads exercise the same parsing as decrypted E2EE ones.
+
+    private fun op(seq: Long, actionType: String, opType: String, entityId: String, payload: String) =
+        JSONObject(
+            """
+            {
+              "serverSeq": $seq,
+              "op": {
+                "id": "op-$seq",
+                "clientId": "client_desktop_1",
+                "actionType": "$actionType",
+                "opType": "$opType",
+                "entityType": "TASK",
+                "entityId": "$entityId",
+                "payload": $payload,
+                "vectorClock": { "client_desktop_1": $seq },
+                "timestamp": 1755700000000,
+                "schemaVersion": 6
+              }
+            }
+            """.trimIndent()
+        )
+
+    private fun parse(vararg ops: JSONObject): ReminderChangeResult =
+        SuperSyncBackgroundProvider(null).parseResponse(
+            JSONObject()
+                .put("ops", JSONArray(ops.toList()))
+                .put("latestSeq", ops.size.toLong())
+                .put("hasMore", false)
+                .toString()
+        )
+
+    @Test
+    fun `schedules a short-syntax time typed on another device`() {
+        // "Call mom @15:00" → applyShortSyntax with the cleaned title in taskChanges
+        val result = parse(
+            op(
+                1, "[Task Shared] applyShortSyntax", "UPD", "task-ss-1",
+                """{"actionPayload": {
+                    "task": {"id": "task-ss-1", "title": "Call mom @15:00"},
+                    "taskChanges": {"title": "Call mom", "dueWithTime": 4102444800000},
+                    "schedulingInfo": {"dueWithTime": 4102444800000, "remindAt": 4102444200000, "isMoveToBacklog": false}
+                  }, "entityChanges": []}"""
+            )
+        )
+
+        val reminder = result.remindersToSchedule.single()
+        assertEquals("task-ss-1", reminder.taskId)
+        assertEquals("Call mom", reminder.title)
+        assertEquals(4102444200000L, reminder.remindAt)
+        assertEquals(false, reminder.isDeadline)
+        assertTrue(result.taskIdsToCancel.isEmpty())
+    }
+
+    @Test
+    fun `short syntax planning for a day only cancels the time reminder`() {
+        val result = parse(
+            op(
+                1, "[Task Shared] applyShortSyntax", "UPD", "task-ss-2",
+                """{"actionPayload": {
+                    "task": {"id": "task-ss-2", "title": "Call mom @tomorrow"},
+                    "taskChanges": {"title": "Call mom"},
+                    "schedulingInfo": {"day": "2100-01-01", "remindAt": null}
+                  }, "entityChanges": []}"""
+            )
+        )
+
+        assertTrue(result.remindersToSchedule.isEmpty())
+        assertEquals(setOf("task-ss-2"), result.taskIdsToCancel)
+    }
+
+    @Test
+    fun `schedules a new reminder time set via updateTask`() {
+        val result = parse(
+            op(
+                1, "[Task Shared] updateTask", "UPD", "task-upd-1",
+                """{"actionPayload": {"task": {"id": "task-upd-1", "changes": {"remindAt": 4102444200000, "deadlineRemindAt": 4102444300000}}}, "entityChanges": []}"""
+            )
+        )
+
+        val byKey = result.remindersToSchedule.associateBy { Pair(it.taskId, it.isDeadline) }
+        assertEquals(4102444200000L, byKey[Pair("task-upd-1", false)]!!.remindAt)
+        assertEquals(4102444300000L, byKey[Pair("task-upd-1", true)]!!.remindAt)
+        assertEquals("Task reminder", byKey[Pair("task-upd-1", false)]!!.title)
+    }
+
+    @Test
+    fun `a later done op cancels a reminder scheduled earlier in the batch`() {
+        val result = parse(
+            op(
+                1, "[Task Shared] updateTask", "UPD", "task-upd-2",
+                """{"actionPayload": {"task": {"id": "task-upd-2", "changes": {"remindAt": 4102444200000}}}, "entityChanges": []}"""
+            ),
+            op(
+                2, "[Task Shared] updateTask", "UPD", "task-upd-2",
+                """{"actionPayload": {"task": {"id": "task-upd-2", "changes": {"isDone": true}}}, "entityChanges": []}"""
+            )
+        )
+
+        assertTrue(result.remindersToSchedule.isEmpty())
+        assertEquals(setOf("task-upd-2"), result.taskIdsToCancel)
+    }
+
+    @Test
+    fun `bulk updateTasks marking tasks done cancels each of them`() {
+        val result = parse(
+            op(
+                1, "[Task Shared] updateTasks", "UPD", "",
+                """{"actionPayload": {"tasks": [
+                    {"id": "task-bulk-1", "changes": {"isDone": true}},
+                    {"id": "task-bulk-2", "changes": {"isDone": true}},
+                    {"id": "task-bulk-3", "changes": {"title": "renamed"}}
+                  ]}, "entityChanges": []}"""
+            )
+        )
+
+        assertEquals(setOf("task-bulk-1", "task-bulk-2"), result.taskIdsToCancel)
+    }
+
+    @Test
+    fun `schedules a reminder carried by addTask`() {
+        val result = parse(
+            op(
+                1, "[Task Shared] addTask", "CRT", "task-add-1",
+                """{"actionPayload": {"task": {"id": "task-add-1", "title": "Dentist", "remindAt": 4102444200000, "isDone": false}, "workContextId": "INBOX"}, "entityChanges": []}"""
+            )
+        )
+
+        val reminder = result.remindersToSchedule.single()
+        assertEquals("Dentist", reminder.title)
+        assertEquals(4102444200000L, reminder.remindAt)
+    }
+
+    @Test
+    fun `LWW replace schedules the winning reminder and cancels a winner without one`() {
+        val result = parse(
+            op(
+                1, "[TASK] LWW Update", "UPD", "task-lww-1",
+                """{"actionPayload": {"id": "task-lww-1", "title": "Winner", "remindAt": 4102444200000}, "entityChanges": [], "lwwUpdateMode": "replace"}"""
+            ),
+            op(
+                2, "[TASK] LWW Update", "UPD", "task-lww-2",
+                """{"actionPayload": {"id": "task-lww-2", "title": "No reminder"}, "entityChanges": [], "lwwUpdateMode": "replace"}"""
+            )
+        )
+
+        val reminder = result.remindersToSchedule.single()
+        assertEquals("task-lww-1", reminder.taskId)
+        assertEquals("Winner", reminder.title)
+        assertEquals(setOf("task-lww-2"), result.taskIdsToCancel)
+    }
+
+    @Test
+    fun `LWW patch clearing the reminder out-of-band cancels it`() {
+        val result = parse(
+            op(
+                1, "[TASK] LWW Update", "UPD", "task-lww-3",
+                """{"actionPayload": {"id": "task-lww-3", "title": "Patched"}, "entityChanges": [], "lwwUpdateMode": "patch", "clearedFields": ["remindAt"]}"""
+            ),
+            op(
+                2, "[TASK] LWW Update", "UPD", "task-lww-4",
+                """{"actionPayload": {"id": "task-lww-4", "title": "Renamed only"}, "entityChanges": [], "lwwUpdateMode": "patch"}"""
+            )
+        )
+
+        assertTrue(result.remindersToSchedule.isEmpty())
+        assertEquals(setOf("task-lww-3"), result.taskIdsToCancel)
+    }
+
+    @Test
+    fun `past reminder times are not scheduled`() {
+        val result = parse(
+            op(
+                1, "[Task Shared] updateTask", "UPD", "task-past-1",
+                """{"actionPayload": {"task": {"id": "task-past-1", "changes": {"remindAt": 1000}}}, "entityChanges": []}"""
+            )
+        )
+
+        assertTrue(result.remindersToSchedule.isEmpty())
+        assertTrue(result.taskIdsToCancel.isEmpty())
+    }
+
     companion object {
         private val ENCRYPTED_DOWNLOAD_RESPONSE = """
             {
