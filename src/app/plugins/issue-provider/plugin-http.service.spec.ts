@@ -3,7 +3,7 @@ import {
   HttpTestingController,
   provideHttpClientTesting,
 } from '@angular/common/http/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import type { NativeHttpResponse } from '@sp/sync-providers/http';
 import {
   PluginHttpService,
@@ -17,7 +17,11 @@ describe('PluginHttpService', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [PluginHttpService, provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        PluginHttpService,
+        provideHttpClient(withXhr()),
+        provideHttpClientTesting(),
+      ],
     });
     service = TestBed.inject(PluginHttpService);
     httpMock = TestBed.inject(HttpTestingController);
@@ -210,7 +214,7 @@ describe('PluginHttpService - native WebDAV/CalDAV method routing (#8558)', () =
     TestBed.configureTestingModule({
       providers: [
         PluginHttpService,
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
         { provide: PLUGIN_HTTP_IS_NATIVE, useValue: true },
         { provide: PLUGIN_HTTP_NATIVE_EXECUTOR, useValue: nativeHttp },
@@ -292,7 +296,11 @@ describe('PluginHttpService - blockRedirects (PluginAPI.request path)', () => {
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [PluginHttpService, provideHttpClient(), provideHttpClientTesting()],
+      providers: [
+        PluginHttpService,
+        provideHttpClient(withXhr()),
+        provideHttpClientTesting(),
+      ],
     });
     service = TestBed.inject(PluginHttpService);
     httpMock = TestBed.inject(HttpTestingController);
@@ -462,7 +470,7 @@ describe('PluginHttpService - blockRedirects falls back to HttpClient on native'
     TestBed.configureTestingModule({
       providers: [
         PluginHttpService,
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
         { provide: PLUGIN_HTTP_IS_NATIVE, useValue: true },
       ],
