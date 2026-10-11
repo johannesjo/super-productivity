@@ -60,7 +60,8 @@ describe('capture routes (PGlite)', () => {
     app.inject({
       method,
       url: `/api/capture${url}`,
-      headers: { authorization: `Bearer ${token}` },
+      // Like the app's _fetchApi: JSON content type even on bodyless DELETEs.
+      headers: { authorization: `Bearer ${token}`, 'content-type': 'application/json' },
       ...(payload === undefined ? {} : { payload: payload as object }),
     });
 

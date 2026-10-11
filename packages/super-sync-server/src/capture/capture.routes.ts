@@ -119,6 +119,15 @@ const deleteGrant = async (
 };
 
 export const captureRoutes = async (fastify: FastifyInstance): Promise<void> => {
+  // The app's _fetchApi sends a JSON content type on bodyless DELETEs too,
+  // which Fastify's default parser rejects with 400. Encapsulated to this plugin.
+  const parseJson = fastify.getDefaultJsonParser('error', 'ignore');
+  fastify.addContentTypeParser(
+    'application/json',
+    { parseAs: 'string' },
+    (req, body, done) =>
+      body === '' ? done(null, undefined) : parseJson(req, body as string, done),
+  );
   fastify.addHook('preHandler', authenticate);
 
   fastify.put('/key', putKey);
