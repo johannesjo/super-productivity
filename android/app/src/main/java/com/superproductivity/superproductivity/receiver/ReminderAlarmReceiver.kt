@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.SystemClock
 import android.util.Log
+import com.superproductivity.superproductivity.service.BackgroundReminderSettingsStore
 import com.superproductivity.superproductivity.service.BackgroundSyncCredentialStore
 import com.superproductivity.superproductivity.service.QuickFetchCoalescer
 import com.superproductivity.superproductivity.service.ReminderChangeResult
@@ -60,6 +61,15 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
         val triggerAtMs = intent.getLongExtra(EXTRA_TRIGGER_AT_MS, 0L)
 
         Log.d(TAG, "Alarm triggered: id=$notificationId, triggerAt=$triggerAtMs")
+
+        // Reminders disabled (mirrored from the app): every app scheduling path
+        // stops then, but alarms SyncReminderWorker set before the setting
+        // reached this phone are not tracked by the app and would still ring.
+        if (BackgroundReminderSettingsStore.get(context).isDisabled) {
+            Log.d(TAG, "Reminders disabled, dropping alarm: id=$notificationId")
+            ReminderNotificationHelper.cancelReminder(context, notificationId)
+            return
+        }
 
         val pendingResult = goAsync()
 
