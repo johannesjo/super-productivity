@@ -165,7 +165,9 @@
                     [tasks]="customized.grouped[groupKey]"
                     listId="PARENT"
                     listModelId="UNDONE"
-                    [groupTagId]="customized.groupTagIdByKey?.[groupKey]"
+                    [groupTagId]="
+                      $safeNavigationMigration(customized.groupTagIdByKey?.[groupKey])
+                    "
                   ></task-list>
                 </collapsible>
               }
@@ -464,7 +466,7 @@
         <split
           (posChanged)="splitInputPos = $event"
           [containerEl]="containerEl"
-          [counter]="backlogTasks()?.length"
+          [counter]="$safeNavigationMigration(backlogTasks()?.length)"
           [isAnimateBtn]="isTriggerBacklogIconAni$ | async"
           [splitBottomEl]="splitBottomEl"
           [splitPos]="splitInputPos"

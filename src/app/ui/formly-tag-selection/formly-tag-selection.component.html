@@ -4,7 +4,7 @@ autocomplete) is only needed once a form with a tag field renders -->
   <tag-edit
     [isShowMyDayTag]="true"
     [tagIds]="value"
-    [excludedTagIds]="field.templateOptions?.excludedTagIds"
+    [excludedTagIds]="$safeNavigationMigration(field.templateOptions?.excludedTagIds)"
     (tagUpdate)="formControl.setValue($event)"
   ></tag-edit>
 }
