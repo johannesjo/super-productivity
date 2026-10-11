@@ -114,9 +114,12 @@ case "$smoke_status" in
   ok)
     # Echo the marker itself: on green the job log otherwise shows no evidence
     # of what the app actually reported, and the marker carries the permission
-    # state and the bridge version the minified build returned.
+    # state and the bridge version the minified build returned. Read it from
+    # the snapshot the loop matched: capture_diagnostics' `adb root` restarts
+    # adbd, so a fresh `adb logcat -d` can come back empty and, as the
+    # script's last command under pipefail, fail a passing smoke.
     echo "Minified launch smoke passed."
-    adb logcat -d | grep -F 'SP_SMOKE OK' | tail -1
+    printf '%s\n' "$log" | grep -F 'SP_SMOKE OK' | tail -1
     ;;
   fail)
     echo "::error::minified build reached the bridge but the smoke page reported a failure"
