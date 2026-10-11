@@ -569,10 +569,16 @@ export class SuperSyncProvider
     }
   }
 
-  /** Switches capture off server-side: revokes every grant, drops every item. */
+  /**
+   * Switches capture off server-side: revokes every grant, drops every item.
+   * A server without capture (404) has nothing to switch off, so the synced
+   * key can still be cleared after a rollback or a move to another server.
+   */
   async disableCaptureKey(): Promise<void> {
     const cfg = await this._cfgOrError();
-    await this._fetchApi<unknown>(cfg, '/api/capture/key', { method: 'DELETE' });
+    await this._ignoreNotFound(
+      this._fetchApi<unknown>(cfg, '/api/capture/key', { method: 'DELETE' }),
+    );
   }
 
   /** Leases up to one batch of sealed captures to `deviceId`. */
@@ -614,12 +620,15 @@ export class SuperSyncProvider
     return this._deps.responseValidators.validateCaptureToken(response);
   }
 
+  /** A server without capture (404) has no grants. */
   async listCaptureGrants(): Promise<SuperSyncCaptureGrantList> {
     const cfg = await this._cfgOrError();
-    const response = await this._fetchApi<unknown>(cfg, '/api/capture/grants', {
-      method: 'GET',
-    });
-    return this._deps.responseValidators.validateCaptureGrants(response);
+    const response = await this._ignoreNotFound(
+      this._fetchApi<unknown>(cfg, '/api/capture/grants', { method: 'GET' }),
+    );
+    return response === undefined
+      ? { grants: [] }
+      : this._deps.responseValidators.validateCaptureGrants(response);
   }
 
   /**
@@ -629,14 +638,23 @@ export class SuperSyncProvider
   async revokeCaptureGrant(grantId: string, discardPending: boolean): Promise<void> {
     const cfg = await this._cfgOrError();
     const query = discardPending ? '?discard=1' : '';
-    try {
-      await this._fetchApi<unknown>(
+    await this._ignoreNotFound(
+      this._fetchApi<unknown>(
         cfg,
         `/api/capture/grants/${encodeURIComponent(grantId)}${query}`,
         { method: 'DELETE' },
-      );
+      ),
+    );
+  }
+
+  /** Resolves undefined on a 404; capture routes 404 only for "nothing there". */
+  private async _ignoreNotFound<R>(request: Promise<R>): Promise<R | undefined> {
+    try {
+      return await request;
     } catch (error) {
-      if (error instanceof SuperSyncHttpStatusError && error.status === 404) return;
+      if (error instanceof SuperSyncHttpStatusError && error.status === 404) {
+        return undefined;
+      }
       throw error;
     }
   }

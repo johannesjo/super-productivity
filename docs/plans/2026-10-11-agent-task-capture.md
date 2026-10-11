@@ -221,7 +221,10 @@ user key`; AES-256-GCM, 12-byte random IV, 16-byte tag, AAD = version byte
 - The private key travels inside E2EE-encrypted sync data and sits in local
   storage like the sync password does today. It appears in JSON exports and,
   after a switch to another provider, in that provider's files. It only opens
-  captures held on the SuperSync server.
+  captures held on the SuperSync server. SuperSync still allows sync without
+  E2EE; then the server can read the key and the "stored encrypted" promise
+  is void. The privacy text says so; gating the switch on E2EE is the
+  stricter option if that proves too weak.
 
 ## App
 

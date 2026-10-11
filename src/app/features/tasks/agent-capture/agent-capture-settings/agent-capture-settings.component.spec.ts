@@ -2,7 +2,7 @@ import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { FormlyModule } from '@ngx-formly/core';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import type { SuperSyncCaptureGrantInfo } from '@sp/sync-providers/super-sync';
 import { of } from 'rxjs';
 import { DateTimeFormatService } from '../../../../core/date-time-format/date-time-format.service';
@@ -17,6 +17,8 @@ describe('AgentCaptureSettingsComponent', () => {
     clientName: 'Claude Code',
     createdAt: 1,
     lastUsedAt: null,
+    // Local midday: the same calendar day in every test timezone.
+    expiresAt: new Date(2027, 9, 11, 12).getTime(),
     pendingCount: 2,
   };
   let fixture: ComponentFixture<AgentCaptureSettingsComponent>;
@@ -93,6 +95,19 @@ describe('AgentCaptureSettingsComponent', () => {
       'https://sync.example/mcp',
     );
     expect(text()).toContain('Claude Code');
+  });
+
+  it('shows when each token expires', async () => {
+    const translate = TestBed.inject(TranslateService);
+    translate.setTranslation('en', {
+      F: {
+        SYNC: { FORM: { SUPER_SYNC: { CAPTURE_GRANT_INFO: 'expires {{expires}}' } } },
+      },
+    });
+    translate.use('en');
+    setup();
+    await render();
+    expect(text()).toContain('expires 10/11/27');
   });
 
   it('shows a new token once and adds its assistant to the list', async () => {

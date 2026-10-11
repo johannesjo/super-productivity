@@ -109,6 +109,7 @@
                       lastUsed: grant.lastUsedAt
                         ? (grant.lastUsedAt | localeDate: 'shortDate')
                         : (T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_GRANT_NEVER_USED | translate),
+                      expires: grant.expiresAt | localeDate: 'shortDate',
                       count: grant.pendingCount,
                     }
             }}

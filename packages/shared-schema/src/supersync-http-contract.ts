@@ -380,6 +380,7 @@ export const SuperSyncCaptureGrantSchema = z
     clientName: z.string(),
     createdAt: z.number(),
     lastUsedAt: z.number().nullable(),
+    expiresAt: z.number(),
     pendingCount: z.number(),
   })
   .passthrough();

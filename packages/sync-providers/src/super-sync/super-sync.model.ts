@@ -108,6 +108,7 @@ export interface SuperSyncCaptureGrantInfo {
   clientName: string;
   createdAt: number;
   lastUsedAt: number | null;
+  expiresAt: number;
   /** Captures from this assistant no device has imported yet. */
   pendingCount: number;
 }

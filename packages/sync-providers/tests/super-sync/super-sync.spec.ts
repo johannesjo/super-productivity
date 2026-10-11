@@ -857,6 +857,19 @@ describe('SuperSyncProvider', () => {
       });
     });
 
+    it('lets capture be switched off on a server without capture (404)', async () => {
+      const { provider, cfgStore, fetchMock } = buildProvider();
+      cfgStore.load.mockResolvedValue(testConfig);
+      fetchMock.mockResolvedValue(errorResponse(404, 'Not Found', ''));
+
+      expect(await provider.listCaptureGrants()).toEqual({ grants: [] });
+      await provider.disableCaptureKey();
+      expect(call(fetchMock, 1)).toMatchObject({
+        url: 'https://sync.example.com/api/capture/key',
+        method: 'DELETE',
+      });
+    });
+
     it('builds the MCP URL from the configured server, without a trailing slash', async () => {
       const { provider, cfgStore } = buildProvider();
       cfgStore.load.mockResolvedValue({ ...testConfig, baseUrl: 'https://own.example/' });
