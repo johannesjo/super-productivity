@@ -6,7 +6,11 @@ import {
   authenticateCaptureToken,
   touchCaptureGrant,
 } from './capture-grant.store';
-import { isGrantRateLimited } from './capture-rate-limit';
+import {
+  isAuthFailureLimited,
+  isGrantRateLimited,
+  recordAuthFailure,
+} from './capture-rate-limit';
 import { CREATE_TASK_TOOL, runCreateTask } from './create-task.tool';
 import {
   handleMcpMessage,
@@ -56,9 +60,13 @@ const handleMcpPost = async (
   req: FastifyRequest,
   reply: FastifyReply,
 ): Promise<FastifyReply> => {
+  if (isAuthFailureLimited(req.ip)) {
+    return reply.code(429).header('Retry-After', '60').send({ error: 'rate_limited' });
+  }
   const token = bearerToken(req);
   const grant = token ? await authenticateCaptureToken(token) : null;
   if (!grant) {
+    recordAuthFailure(req.ip);
     const challenge = token
       ? `Bearer error="invalid_token", scope="tasks:capture"`
       : WWW_AUTHENTICATE;
@@ -108,7 +116,7 @@ export const captureMcpRoutes = async (fastify: FastifyInstance): Promise<void> 
   );
 
   // The global per-IP limiter is off here: assistant vendors call from shared
-  // egress IPs. isGrantRateLimited applies after auth instead.
+  // egress IPs. capture-rate-limit.ts counts per grant and failed auths per IP.
   const config = { rateLimit: false as const };
   fastify.post(
     '/mcp',

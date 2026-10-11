@@ -30,6 +30,7 @@ import {
  */
 const DEVICE_ID_KEY = 'sp-agent-capture-device-id';
 const MIN_RUN_INTERVAL_MS = 60 * 1000;
+const CAPTURE_KEY_VERSION = 1;
 
 /**
  * Agent task capture on SuperSync: imports captures after each sync, and
@@ -75,8 +76,10 @@ export class AgentCaptureService {
   async switchOn(): Promise<void> {
     const provider = this._superSyncOrError();
     const captureKey = await generateCaptureKeyPair();
-    this._globalConfig.updateSection('sync', { captureKey }, true);
+    // Server first: on a server without capture (404) nothing is saved, so
+    // the switch does not stick on with no way to turn it off.
     await provider.registerCaptureKey(captureKey.publicKeySpki);
+    this._globalConfig.updateSection('sync', { captureKey }, true);
   }
 
   /**
@@ -140,6 +143,7 @@ export class AgentCaptureService {
     return {
       ...active,
       deviceId: this._deviceId(),
+      defaultEstimate: this._globalConfig.cfg()?.timeTracking.defaultEstimate || 0,
       assertUnchanged: (context) => {
         // The epoch bumps only after a provider swap completes; the identity
         // check covers the moment in between.
@@ -158,8 +162,13 @@ export class AgentCaptureService {
   private _activeCapture(): Pick<AgentCaptureRun, 'provider' | 'key'> | null {
     const provider = this._providerManager.getActiveProvider();
     const key = this._globalConfig.sync()?.captureKey;
-    // No WebCrypto (some Android WebViews): the captures wait for another device.
-    if (provider?.id !== SyncProviderId.SuperSync || !key || !isCryptoSubtleAvailable()) {
+    // No WebCrypto (some Android WebViews) or a key from a newer client: the
+    // captures wait for another device.
+    if (
+      provider?.id !== SyncProviderId.SuperSync ||
+      key?.v !== CAPTURE_KEY_VERSION ||
+      !isCryptoSubtleAvailable()
+    ) {
       return null;
     }
     return { provider: provider as SuperSyncProvider, key };

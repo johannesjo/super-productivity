@@ -225,9 +225,12 @@ export type SoundConfig = Readonly<{
   volume: number;
 }>;
 
-/** Base64 DER encodings; see sync-core `capture-open.ts` for the format. */
+/**
+ * Base64 DER encodings; see sync-core `capture-open.ts` for the format.
+ * `v` is open-ended so typia accepts a future version; clients skip it.
+ */
 export type CaptureKeyConfig = Readonly<{
-  v: 1;
+  v: number;
   privateKeyPkcs8: string;
   publicKeySpki: string;
 }>;

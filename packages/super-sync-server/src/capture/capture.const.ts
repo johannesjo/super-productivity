@@ -10,6 +10,8 @@ export const CAPTURE_NOTES_MAX_BYTES = 8 * 1024;
 export const CAPTURE_MCP_BODY_LIMIT_BYTES = 16 * 1024;
 
 export const CAPTURE_MCP_CALLS_PER_MINUTE = 30;
+/** Per IP; generous because a vendor egress IP serves many users. */
+export const CAPTURE_MCP_AUTH_FAILURES_PER_MINUTE = 120;
 export const CAPTURE_MAX_PENDING_PER_GRANT = 200;
 export const CAPTURE_MAX_PENDING_PER_USER = 500;
 

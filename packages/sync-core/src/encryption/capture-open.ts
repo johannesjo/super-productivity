@@ -3,6 +3,7 @@ import {
   encodeBase64,
   getRequiredSubtle,
   TEXT_DECODER,
+  TEXT_ENCODER,
 } from './web-crypto';
 
 /**
@@ -21,14 +22,21 @@ import {
  */
 
 export interface CaptureKeyPair {
-  v: 1;
+  /** 1 today. A number, not a literal: it is persisted and synced, and a
+   * future version must reach older clients as data they skip. */
+  v: number;
   /** Base64 PKCS#8 DER. */
   privateKeyPkcs8: string;
   /** Base64 SPKI DER; what the server stores and fingerprints. */
   publicKeySpki: string;
 }
 
-export type CaptureOpenErrorCode = 'version' | 'truncated' | 'decrypt' | 'json';
+export type CaptureOpenErrorCode =
+  | 'malformed'
+  | 'version'
+  | 'truncated'
+  | 'decrypt'
+  | 'json';
 
 export class CaptureOpenError extends Error {
   constructor(readonly code: CaptureOpenErrorCode) {
@@ -55,7 +63,7 @@ const concat = (...parts: Uint8Array[]): Uint8Array<ArrayBuffer> => {
   return out;
 };
 
-const utf8 = (text: string): Uint8Array => new TextEncoder().encode(text);
+const utf8 = (text: string): Uint8Array => TEXT_ENCODER.encode(text);
 
 export const generateCaptureKeyPair = async (): Promise<CaptureKeyPair> => {
   const subtle = getRequiredSubtle();
@@ -93,7 +101,13 @@ const deriveOpenKey = async (
     [],
   );
   const userPoint = new Uint8Array(await subtle.exportKey('raw', publicKey));
-  const ephemeral = await subtle.importKey('raw', ephemeralPoint, ECDH_P256, false, []);
+  // An invalid point is the item's fault, not the key's: one bad item must
+  // not fail the whole batch.
+  const ephemeral = await subtle
+    .importKey('raw', ephemeralPoint, ECDH_P256, false, [])
+    .catch(() => {
+      throw new CaptureOpenError('malformed');
+    });
   const shared = await subtle.deriveBits(
     { name: 'ECDH', public: ephemeral },
     privateKey,
@@ -124,7 +138,12 @@ export const openCapture = async (
   itemId: string,
   sealed: string,
 ): Promise<unknown> => {
-  const bytes = new Uint8Array(decodeBase64(sealed));
+  let bytes: Uint8Array<ArrayBuffer>;
+  try {
+    bytes = new Uint8Array(decodeBase64(sealed));
+  } catch {
+    throw new CaptureOpenError('malformed');
+  }
   if (bytes[0] !== SEAL_VERSION) throw new CaptureOpenError('version');
   if (bytes.length < HEADER_BYTES + TAG_BYTES) throw new CaptureOpenError('truncated');
 

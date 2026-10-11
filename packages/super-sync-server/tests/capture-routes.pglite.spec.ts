@@ -246,4 +246,14 @@ describe('capture routes (PGlite)', () => {
     expect(statuses.filter((s) => s === 429)).toHaveLength(1);
     expect(statuses[statuses.length - 1]).toBe(429);
   });
+
+  it('limits failed auths per IP before looking up the token', async () => {
+    const fake = `sp_cap_00000000-0000-4000-8000-000000000000_x`;
+    const statuses: number[] = [];
+    for (let i = 0; i < 121; i++) {
+      statuses.push((await mcp(fake, toolCall(i, 'x'))).statusCode);
+    }
+    expect(statuses.slice(0, 120).every((s) => s === 401)).toBe(true);
+    expect(statuses[120]).toBe(429);
+  });
 });

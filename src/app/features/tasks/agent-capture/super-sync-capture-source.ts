@@ -30,6 +30,8 @@ export interface AgentCaptureRun {
   provider: SuperSyncProvider;
   key: CaptureKeyConfig;
   deviceId: string;
+  /** Set in the addTask itself, so setDefaultEstimateIfNonGiven$ adds no second op. */
+  defaultEstimate: number;
   /** Throws SyncEpochChangedError once the account, provider or password changed. */
   assertUnchanged: (context: string) => void;
 }
@@ -70,8 +72,8 @@ export const createSuperSyncCaptureSource = (
     },
     isValid: (capture) => capture.task !== null,
     createTask: (capture) => {
-      currentRun('createTask');
-      deps.dispatch(addInboxTaskAction(capture));
+      const { defaultEstimate } = currentRun('createTask');
+      deps.dispatch(addInboxTaskAction(capture, defaultEstimate));
     },
     acknowledge: async (id) => {
       const { provider, deviceId } = currentRun('acknowledge');
@@ -130,6 +132,7 @@ const toTask = (payload: unknown): AgentCapture['task'] => {
 
 const addInboxTaskAction = (
   capture: AgentCapture,
+  defaultEstimate: number,
 ): ReturnType<typeof TaskSharedActions.addTask> => {
   const task = capture.task as NonNullable<AgentCapture['task']>;
   return TaskSharedActions.addTask({
@@ -140,6 +143,7 @@ const addInboxTaskAction = (
       notes: task.notes ?? '',
       projectId: INBOX_PROJECT.id,
       created: task.createdAt,
+      timeEstimate: defaultEstimate,
     },
     workContextId: INBOX_PROJECT.id,
     workContextType: WorkContextType.PROJECT,

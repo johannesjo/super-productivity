@@ -87,6 +87,19 @@ describe('openCapture', () => {
       openCapture(pair, 'item-1', badVersion.toString('base64')),
     ).rejects.toMatchObject({ code: 'version' });
   });
+
+  it('refuses an off-curve ephemeral key and invalid base64 as malformed', async () => {
+    const { pair } = fixedKeyPair(1);
+    const offCurve = Buffer.from(vectorSealed(), 'base64');
+    offCurve.fill(0x07, 2, 66);
+
+    await expect(
+      openCapture(pair, 'item-1', offCurve.toString('base64')),
+    ).rejects.toMatchObject({ code: 'malformed' });
+    await expect(openCapture(pair, 'item-1', '%%%')).rejects.toMatchObject({
+      code: 'malformed',
+    });
+  });
 });
 
 describe('capture keys', () => {

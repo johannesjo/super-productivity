@@ -209,7 +209,15 @@ user key`; AES-256-GCM, 12-byte random IV, 16-byte tag, AAD = version byte
 - Open (app): in `packages/sync-core`, WebCrypto.
 - What it doesn't cover: the server process and the assistant vendor see the
   text while the request is handled, and an operator could insert captures.
-  Consent page, settings and docs say so.
+  Consent page, settings and docs say so. A stolen sync login (JWT) can
+  register its own key and read captures queued after that, or mint a capture
+  token and insert tasks; the real device re-registers its key on its next
+  claim, so the two keys alternate unnoticed. Accepted for M2; a replacement
+  key signed by the current one, or a notice on key replace, would close it.
+- Versions are a contract with released clients: they skip a key `v`, seal
+  byte or payload `v` they do not know, and the item stays leased to them
+  until it expires. The hosted server must keep emitting version 1 while
+  released clients read only that.
 - The private key travels inside E2EE-encrypted sync data and sits in local
   storage like the sync password does today. It appears in JSON exports and,
   after a switch to another provider, in that provider's files. It only opens
@@ -229,7 +237,8 @@ user key`; AES-256-GCM, 12-byte random IV, 16-byte tag, AAD = version byte
     with its synced key. An item that fails to open stays un-acked and is
     logged by id and error code only.
   - `createTask`: one `TaskSharedActions.addTask` with `id = taskId`, Inbox,
-    `isIgnoreShortSyntax: true`, `defaultEstimate` in the same op.
+    `isIgnoreShortSyntax: true`, and `timeTracking.defaultEstimate` as its
+    `timeEstimate`, so `setDefaultEstimateIfNonGiven$` adds no second op.
   - **Epoch fence:** the source captures `(provider, syncEpoch)` from
     `SyncProviderManager` in one synchronous block when it claims, and throws
     in `createTask` and `acknowledge` if either changed. An account switch,
@@ -241,6 +250,9 @@ user key`; AES-256-GCM, 12-byte random IV, 16-byte tag, AAD = version byte
   `sync-wrapper.service.ts` (2080 of 2084 allowed lines). SuperSync has no
   interval polling (`sync-trigger.service.ts:266`), so captures arrive when
   the app next syncs: opening or using it, or another device's change.
+- **Switch on:** generate the key, `PUT /api/capture/key`, then write
+  `sync.captureKey` (one op). A server without capture refuses the PUT and
+  nothing is saved.
 - **Switch off:** `DELETE /api/capture/key` first, so a failed request changes
   nothing and can be retried, then clear `sync.captureKey` (one op). A stale
   device that still has the key gets 409 on re-register and stops; the synced
@@ -265,6 +277,7 @@ user key`; AES-256-GCM, 12-byte random IV, 16-byte tag, AAD = version byte
 | Full database restore                                                                             | Pending items, grants and codes from the snapshot dropped; devices re-register their key; assistants reconnect | Runbook                                                |
 | Leaked capture token                                                                              | At most 200 junk items; revoke can discard them                                                                | Per-grant cap, revoke with discard                     |
 | No device syncs within `RETENTION_DAYS` (45)                                                      | Items expire                                                                                                   | Documented                                             |
+| An item this device cannot open or validate                                                       | Stays leased to this device, renewed on each claim, until it expires; 50 such items fill its batch             | **Gap**: needs a lease-release endpoint                |
 
 ## Milestones
 

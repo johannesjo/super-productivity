@@ -41,7 +41,10 @@ describe('AgentCaptureService', () => {
     syncCfg = signal<Partial<SyncConfig> | undefined>({ captureKey: KEY });
     provider = {
       id: SyncProviderId.SuperSync,
-      registerCaptureKey: jasmine.createSpy().and.resolveTo('registered'),
+      registerCaptureKey: jasmine.createSpy().and.callFake(async () => {
+        calls.push('register');
+        return 'registered';
+      }),
       disableCaptureKey: jasmine.createSpy().and.callFake(record('disable')),
     };
     importer = jasmine.createSpyObj<NativeCaptureImporter>('Importer', ['importPending']);
@@ -125,9 +128,9 @@ describe('AgentCaptureService', () => {
     expect(importer.importPending).toHaveBeenCalledTimes(3);
   }));
 
-  it('switches on with a fresh key synced first, then registered', async () => {
+  it('switches on with a fresh key registered first, then synced', async () => {
     await service.switchOn();
-    expect(calls).toEqual(['update:key']);
+    expect(calls).toEqual(['register', 'update:key']);
     const [, cfg] = (
       TestBed.inject(GlobalConfigService).updateSection as jasmine.Spy
     ).calls.mostRecent().args;
@@ -140,6 +143,20 @@ describe('AgentCaptureService', () => {
     await service.switchOff();
     expect(calls).toEqual(['disable', 'update:null']);
   });
+
+  it('saves no key when the server refuses it (no capture on the server)', async () => {
+    provider.registerCaptureKey.and.rejectWith(new Error('404'));
+    await expectAsync(service.switchOn()).toBeRejected();
+    expect(calls).toEqual([]);
+  });
+
+  it('skips importing with a key from a newer client', fakeAsync(() => {
+    syncCfg.set({ captureKey: { ...KEY, v: 2 } });
+    service.start();
+    syncOnce();
+    tick(60_000);
+    expect(importer.importPending).not.toHaveBeenCalled();
+  }));
 
   it('keeps the synced key when the server could not be told', async () => {
     provider.disableCaptureKey.and.rejectWith(new Error('offline'));

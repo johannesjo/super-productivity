@@ -49,6 +49,7 @@ describe('createSuperSyncCaptureSource', () => {
       provider,
       key: KEY,
       deviceId: 'dev-1',
+      defaultEstimate: 0,
       assertUnchanged: (context) => {
         if (!isCurrent) throw new Error(`changed at ${context}`);
       },
@@ -80,11 +81,24 @@ describe('createSuperSyncCaptureSource', () => {
       }),
     );
     expect(action.isIgnoreShortSyntax).toBeTrue();
+    expect(action.task.timeEstimate).toBe(0);
 
     await src.acknowledge('task-1');
     expect(provider.ackCaptures).toHaveBeenCalledWith('dev-1', [
       { itemId: 'item-1', taskId: 'task-1' },
     ]);
+  });
+
+  it('puts the default estimate into the addTask itself (one op)', async () => {
+    provider.claimCaptures.and.resolveTo(ok());
+    run = { ...(run as AgentCaptureRun), defaultEstimate: 1500 };
+    const src = source();
+    const [capture] = await src.getPending();
+    src.createTask(capture);
+    const action = dispatch.calls.mostRecent().args[0] as ReturnType<
+      typeof TaskSharedActions.addTask
+    >;
+    expect(action.task.timeEstimate).toBe(1500);
   });
 
   it('registers the synced key when the server has none, then claims again', async () => {

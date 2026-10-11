@@ -139,8 +139,11 @@ export const touchCaptureGrant = async (
   grantId: string,
   now: number = Date.now(),
 ): Promise<void> => {
+  // Hourly precision is enough for "last used" and spares a write per call.
   await prisma.$executeRaw`
-    UPDATE capture_grants SET last_used_at = ${BigInt(now)} WHERE id = ${grantId}`;
+    UPDATE capture_grants SET last_used_at = ${BigInt(now)}
+    WHERE id = ${grantId}
+      AND (last_used_at IS NULL OR last_used_at < ${BigInt(now - 60 * 60 * 1000)})`;
 };
 
 /** Revoked and expired grants can never authenticate again. */
