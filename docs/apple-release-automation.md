@@ -158,18 +158,19 @@ release secrets and add the extension profile. They may remain repository
 secrets because only the protected publisher job references them; the unsigned
 PR workflow references none:
 
-| Secret                        | Purpose                                                     |
-| ----------------------------- | ----------------------------------------------------------- |
-| `APPLE_TEAM_ID`               | Team used in `ExportOptions.plist`                          |
-| `mac_certs`                   | Base64-encoded Apple Distribution `.p12`                    |
-| `mac_certs_password`          | Password for `mac_certs`                                    |
-| `IOS_PROVISION_PROFILE`       | Regenerated main-app profile with the App Group entitlement |
-| `IOS_SHARE_PROVISION_PROFILE` | Share-extension distribution profile                        |
-| `mac_api_key`                 | Raw App Store Connect API `.p8` contents                    |
-| `mac_api_key_id`              | App Store Connect API key ID                                |
-| `mac_api_key_issuer_id`       | App Store Connect API issuer ID                             |
-| `UNSPLASH_KEY`                | Existing frontend build-time Unsplash key                   |
-| `UNSPLASH_CLIENT_ID`          | Existing frontend build-time Unsplash client ID             |
+| Secret                             | Purpose                                                     |
+| ---------------------------------- | ----------------------------------------------------------- |
+| `APPLE_TEAM_ID`                    | Team used in `ExportOptions.plist`                          |
+| `APPLE_DISTRIBUTION_CERT`          | Base64-encoded Apple Distribution `.p12`                    |
+| `APPLE_DISTRIBUTION_CERT_PASSWORD` | Password for `APPLE_DISTRIBUTION_CERT`                      |
+| `IOS_APP_STORE_PROFILE`            | Regenerated main-app profile with the App Group entitlement |
+| `IOS_SHARE_APP_STORE_PROFILE`      | Share-extension distribution profile                        |
+| `IOS_WIDGET_APP_STORE_PROFILE`     | Widget distribution profile                                 |
+| `mac_api_key`                      | Raw App Store Connect API `.p8` contents                    |
+| `mac_api_key_id`                   | App Store Connect API key ID                                |
+| `mac_api_key_issuer_id`            | App Store Connect API issuer ID                             |
+| `UNSPLASH_KEY`                     | Existing frontend build-time Unsplash key                   |
+| `UNSPLASH_CLIENT_ID`               | Existing frontend build-time Unsplash client ID             |
 
 The API key needs the **App Manager** role to manage external TestFlight
 distribution and Beta App Review. The automatic `GITHUB_TOKEN` is not a setup
