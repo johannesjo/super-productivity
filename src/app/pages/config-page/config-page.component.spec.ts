@@ -257,4 +257,35 @@ describe('ConfigPageComponent', () => {
       expect(getCollapsible().isExpanded).toBe(true);
     });
   });
+
+  describe('App Features open by default', () => {
+    const APP_FEATURES = { title: '', key: 'appFeatures' } as ConfigFormSection<unknown>;
+    const OTHER = { title: '', key: 'localization' } as ConfigFormSection<unknown>;
+
+    it('starts expanded while other sections start collapsed', () => {
+      expect(component.isSectionExpanded(APP_FEATURES)).toBe(true);
+      expect(component.isSectionExpanded(OTHER)).toBe(false);
+    });
+
+    it('stays collapsed once collapsed by hand', () => {
+      component.onSectionExpandedChange(APP_FEATURES, false);
+
+      expect(component.isSectionExpanded(APP_FEATURES)).toBe(false);
+    });
+
+    it('keeps a search-expanded section open when App Features is collapsed', () => {
+      component.expandedSection = 'localization';
+
+      component.onSectionExpandedChange(APP_FEATURES, false);
+
+      expect(component.isSectionExpanded(OTHER)).toBe(true);
+    });
+
+    it('reopens via its search result after being collapsed', () => {
+      component.onSectionExpandedChange(APP_FEATURES, false);
+      component.expandedSection = 'appFeatures';
+
+      expect(component.isSectionExpanded(APP_FEATURES)).toBe(true);
+    });
+  });
 });

@@ -82,6 +82,13 @@ import {
   SettingsSearchTarget,
 } from '../../features/config/settings-search.util';
 
+/**
+ * Starts expanded so the feature toggles are visible on opening Settings —
+ * the point of leading the default tab with them. Collapsing it sticks until
+ * the page is left.
+ */
+const OPEN_BY_DEFAULT_SECTION_KEY = 'appFeatures';
+
 /** Kept in sync with `animationDuration` on the settings `mat-tab-group`. */
 const TAB_ANIMATION_DURATION_MS = 200;
 
@@ -139,6 +146,7 @@ export class ConfigPageComponent implements OnInit {
 
   selectedTabIndex = 0;
   expandedSection: string | null = null;
+  private _isDefaultSectionCollapsed = false;
 
   searchQuery = '';
   /** Flat, cross-tab search hits in tab order. Empty while not searching. */
@@ -469,7 +477,8 @@ export class ConfigPageComponent implements OnInit {
   isSectionExpanded(section: GenericConfigFormSection): boolean {
     return (
       section.key === this.expandedSection ||
-      section.customSection === this.expandedSection
+      section.customSection === this.expandedSection ||
+      (section.key === OPEN_BY_DEFAULT_SECTION_KEY && !this._isDefaultSectionCollapsed)
     );
   }
 
@@ -478,6 +487,15 @@ export class ConfigPageComponent implements OnInit {
    * search result again changes `[isExpanded]` and reopens it (#9643).
    */
   onSectionExpandedChange(section: GenericConfigFormSection, isExpanded: boolean): void {
+    if (section.key === OPEN_BY_DEFAULT_SECTION_KEY) {
+      this._isDefaultSectionCollapsed = !isExpanded;
+      // Only drop `expandedSection` if it points here — another section's
+      // search-driven expansion must survive collapsing this one.
+      if (!isExpanded && this.expandedSection === section.key) {
+        this.expandedSection = null;
+      }
+      return;
+    }
     if (!isExpanded && this.isSectionExpanded(section)) {
       this.expandedSection = null;
     }
