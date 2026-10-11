@@ -41,8 +41,12 @@
     border-radius: var(--radius-xl);
     transition: var(--transition-standard);
 
-    &:hover {
+    @include hoverWithPointer {
       background-color: var(--state-hover);
+    }
+
+    &:active {
+      background-color: var(--state-pressed);
     }
 
     &:focus-visible {
@@ -87,7 +91,7 @@
     box-shadow: var(--whiteframe-shadow-4dp);
     transition: var(--transition-standard);
 
-    &:hover {
+    @include hoverWithPointer {
       transform: scale(1.05);
       box-shadow: var(--whiteframe-shadow-6dp);
     }

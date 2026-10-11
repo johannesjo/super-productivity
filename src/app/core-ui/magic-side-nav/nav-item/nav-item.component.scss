@@ -133,8 +133,7 @@ button[mat-menu-item].nav-link.active {
   .additional-btn {
     color: var(--sidenav-text-secondary);
 
-    &:focus,
-    &:hover {
+    @include interactiveHighlight {
       background-color: var(--sidenav-hover-bg);
       color: var(--sidenav-text);
     }
@@ -225,8 +224,7 @@ button[mat-menu-item].nav-link.active {
     }
   }
 
-  &:focus,
-  &:hover {
+  @include interactiveHighlight {
     background: var(--sidenav-hover-bg);
     color: var(--sidenav-text-hover) !important;
 
@@ -243,9 +241,12 @@ button[mat-menu-item].nav-link.active {
   }
 
   // Route items (a.nav-link) should change icon color on hover
-  &:not(.active):is(a):hover .nav-icon,
-  &:not(.active):is(a):focus .nav-icon {
-    color: var(--sidenav-text-hover);
+  &:not(.active):is(a) {
+    @include interactiveHighlight {
+      .nav-icon {
+        color: var(--sidenav-text-hover);
+      }
+    }
   }
 
   &.active {
@@ -329,8 +330,7 @@ button[mat-menu-item].nav-link.active {
   .nav-link {
     justify-content: flex-start;
 
-    &:focus,
-    &:hover {
+    @include interactiveHighlight {
       background: var(--sidenav-hover-bg);
       color: var(--sidenav-text-hover);
     }
