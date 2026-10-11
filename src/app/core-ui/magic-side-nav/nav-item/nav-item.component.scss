@@ -219,6 +219,13 @@ button[mat-menu-item].nav-link.active {
   &[mat-menu-item] {
     color: var(--sidenav-text) !important;
 
+    // Unlike its buttons, Material does not gate the menu-item hover layer on
+    // `(hover: hover)`, so on touch it would bring back the highlight that
+    // `interactiveHighlight` keeps off a tapped row.
+    @media (hover: none) {
+      --mat-menu-item-hover-state-layer-color: transparent;
+    }
+
     .mat-mdc-menu-item-text {
       color: inherit !important;
     }

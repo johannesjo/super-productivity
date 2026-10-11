@@ -41,12 +41,10 @@
     border-radius: var(--radius-xl);
     transition: var(--transition-standard);
 
+    // No `:active` here: as a `mat-button` it already has Material's
+    // pressed state layer and ripple.
     @include hoverWithPointer {
       background-color: var(--state-hover);
-    }
-
-    &:active {
-      background-color: var(--state-pressed);
     }
 
     &:focus-visible {

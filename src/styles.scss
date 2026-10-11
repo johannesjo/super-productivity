@@ -36,14 +36,12 @@ pre,
 // Native touch UIs move faster than Material's web defaults, so motion is
 // shortened under touch intent. The shorthands are re-declared because a custom
 // property resolves its var() references where it is declared (:root), not
-// where it is used. `-l` stays as is: magic-side-nav.component.ts times its
-// collapse against it.
+// where it is used. Left as is: `-l` (magic-side-nav.component.ts times its
+// collapse against it) and `-enter`/`-leave` (focus-mode-main mirrors the
+// fixed-duration `fadeSwap` Angular animation with them).
 body.isTouchPrimary {
   --transition-duration-s: 120ms;
   --transition-duration-m: 175ms;
-  --transition-duration-enter: 175ms;
-  --transition-duration-leave: 150ms;
-  --page-transition-duration: 175ms;
   --transition-standard: all var(--transition-duration-m) var(--ani-standard-timing);
   --transition-enter: all var(--transition-duration-m) var(--ani-enter-timing);
   --transition-leave: all var(--transition-duration-m) var(--ani-leave-timing);
