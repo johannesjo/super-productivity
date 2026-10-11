@@ -121,10 +121,6 @@ jobs:
 
       - name: 'Dependency Review'
         uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4
-        with:
-          # GHSA-cp6q-959q-f8rh: @tiptap/core <3.30.4 (doc-mode); no 2.x fix exists.
-          # Remove once doc-mode is on tiptap >= 3.30.4.
-          allow-ghsas: GHSA-cp6q-959q-f8rh
 
   # Lint, unit tests, E2E and PWA/Lighthouse run in parallel instead of in one
   # serial job behind lint: the critical path is the slowest branch, not the sum.
