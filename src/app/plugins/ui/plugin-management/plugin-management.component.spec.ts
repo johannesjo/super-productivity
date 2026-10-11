@@ -65,8 +65,9 @@ describe('PluginManagementComponent', () => {
           useValue: { localization: signal({ lng: 'en' }) },
         },
         {
+          // Confirms by default (e.g. the install warning); tests override via stubConfirmDialog.
           provide: MatDialog,
-          useValue: {},
+          useValue: { open: () => ({ afterClosed: () => of(true) }) },
         },
         {
           provide: Router,
@@ -189,6 +190,37 @@ describe('PluginManagementComponent', () => {
     expect(component.uploadError()).toBe('bad zip');
   });
 
+  it('shows the risk warning before installing and installs only when confirmed', async () => {
+    loadPluginFromZipSpy.and.returnValue(
+      Promise.resolve({ manifest: { name: 'My Plugin' } }),
+    );
+    const openSpy = stubConfirmDialog(true);
+
+    await component.onFileSelected(zipInputEvent());
+
+    expect(openSpy).toHaveBeenCalledOnceWith(DialogConfirmComponent, {
+      restoreFocus: true,
+      data: {
+        message: jasmine.stringContaining(T.PLUGINS.RISK_DATA_ACCESS),
+        okTxt: T.PLUGINS.INSTALL_PLUGIN,
+      },
+    });
+    expect(loadPluginFromZipSpy).toHaveBeenCalled();
+  });
+
+  it('installs nothing and clears the file input when the risk warning is cancelled', async () => {
+    stubConfirmDialog(undefined);
+    const event = zipInputEvent();
+    const input = event.target as HTMLInputElement;
+    const valueSetter = spyOnProperty(input, 'value', 'set');
+
+    await component.onFileSelected(event);
+
+    expect(loadPluginFromZipSpy).not.toHaveBeenCalled();
+    expect(valueSetter).toHaveBeenCalledWith('');
+    expect(component.isUploading()).toBe(false);
+  });
+
   const baseManifest: PluginManifest = {
     id: 'github-issue-provider',
     name: 'GitHub Issues',
@@ -294,6 +326,58 @@ describe('PluginManagementComponent', () => {
     Object.assign(TestBed.inject(MatDialog), { open: openSpy });
     return openSpy;
   };
+
+  it('groups uploaded plugins, then built-in integrations, then other built-ins', () => {
+    const state = (
+      id: string,
+      type: PluginState['type'],
+      manifestType?: PluginManifest['type'],
+    ): PluginState => ({
+      manifest: { ...baseManifest, id, name: id, type: manifestType },
+      status: 'not-loaded',
+      path: type === 'uploaded' ? `uploaded://${id}` : `assets/bundled-plugins/${id}`,
+      type,
+      isEnabled: false,
+    });
+    const pluginStates = TestBed.inject(PluginService).pluginStates as WritableSignal<
+      Map<string, PluginState>
+    >;
+    pluginStates.set(
+      new Map([
+        ['builtin-a', state('builtin-a', 'built-in')],
+        ['github', state('github', 'built-in', 'issueProvider')],
+        ['uploaded-a', state('uploaded-a', 'uploaded', 'issueProvider')],
+        ['builtin-b', state('builtin-b', 'built-in')],
+      ]),
+    );
+
+    expect(
+      component
+        .pluginGroups()
+        .map((g) => [g.titleKey, g.plugins.map((p) => p.manifest.id)]),
+    ).toEqual([
+      [T.PLUGINS.GROUP_UPLOADED, ['uploaded-a']],
+      [T.PLUGINS.GROUP_INTEGRATIONS, ['github']],
+      [T.PLUGINS.GROUP_OTHER, ['builtin-a', 'builtin-b']],
+    ]);
+    // Empty again so the template (rendered on teardown) needs no further stubs.
+    pluginStates.set(new Map());
+    expect(component.pluginGroups()).toEqual([]);
+  });
+
+  it('titles the details section with the permission summary when there is one', () => {
+    const withHooks = {
+      manifest: { ...baseManifest, hooks: [PluginHooks.TASK_COMPLETE] },
+      loaded: true,
+      isEnabled: true,
+    };
+    const plain = { manifest: baseManifest, loaded: true, isEnabled: true };
+
+    expect(component.getDetailsTitle(withHooks)).toBe(
+      'PLUGINS.DETAILS · PLUGINS.HOOKS (1)',
+    );
+    expect(component.getDetailsTitle(plain)).toBe('PLUGINS.DETAILS');
+  });
 
   describe('clearPluginCache', () => {
     let clearCacheSpy: jasmine.Spy;
@@ -520,6 +604,63 @@ describe('PluginManagementComponent', () => {
 
       expect(openSpy).not.toHaveBeenCalled();
       expect(disableSpy).toHaveBeenCalledOnceWith(baseManifest.id);
+    });
+  });
+
+  describe('enabling a plugin that needs Node.js execution consent', () => {
+    let setPluginEnabledSpy: jasmine.Spy;
+    let activatePluginSpy: jasmine.Spy;
+    let checkConsentSpy: jasmine.Spy;
+
+    const plugin: PluginInstance = {
+      manifest: { ...baseManifest, permissions: ['nodeExecution'] },
+      loaded: false,
+      isEnabled: false,
+    };
+
+    // MatSlideToggle has already flipped itself on when (change) fires.
+    const toggleOnEvent = (): MatSlideToggleChange =>
+      ({ checked: true, source: { checked: true } }) as unknown as MatSlideToggleChange;
+
+    // onPluginToggle does not return the enable promise; let it settle.
+    const toggleOn = async (event: MatSlideToggleChange): Promise<void> => {
+      component.onPluginToggle(plugin, event);
+      await new Promise((resolve) => setTimeout(resolve));
+    };
+
+    beforeEach(() => {
+      checkConsentSpy = jasmine.createSpy('checkNodeExecutionPermission');
+      activatePluginSpy = jasmine.createSpy('activatePlugin').and.resolveTo(null);
+      setPluginEnabledSpy = jasmine.createSpy('setPluginEnabled').and.resolveTo();
+      Object.assign(TestBed.inject(PluginService), {
+        checkNodeExecutionPermission: checkConsentSpy,
+        activatePlugin: activatePluginSpy,
+      });
+      Object.assign(TestBed.inject(PluginMetaPersistenceService), {
+        setPluginEnabled: setPluginEnabledSpy,
+      });
+    });
+
+    it('turns the toggle back off and enables nothing when consent is denied', async () => {
+      checkConsentSpy.and.resolveTo(false);
+      const event = toggleOnEvent();
+
+      await toggleOn(event);
+
+      expect(setPluginEnabledSpy).not.toHaveBeenCalled();
+      expect(activatePluginSpy).not.toHaveBeenCalled();
+      expect(event.source.checked).toBe(false);
+    });
+
+    it('enables and activates the plugin when consent is granted', async () => {
+      checkConsentSpy.and.resolveTo(true);
+      const event = toggleOnEvent();
+
+      await toggleOn(event);
+
+      expect(setPluginEnabledSpy).toHaveBeenCalledOnceWith(baseManifest.id, true);
+      expect(activatePluginSpy).toHaveBeenCalledOnceWith(baseManifest.id, true);
+      expect(event.source.checked).toBe(true);
     });
   });
 
