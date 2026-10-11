@@ -327,9 +327,13 @@ describe('PluginManagementComponent', () => {
     return openSpy;
   };
 
-  it('lists uploaded plugins before built-in ones, keeping load order', () => {
-    const state = (id: string, type: PluginState['type']): PluginState => ({
-      manifest: { ...baseManifest, id, name: id },
+  it('groups uploaded plugins, then built-in integrations, then other built-ins', () => {
+    const state = (
+      id: string,
+      type: PluginState['type'],
+      manifestType?: PluginManifest['type'],
+    ): PluginState => ({
+      manifest: { ...baseManifest, id, name: id, type: manifestType },
       status: 'not-loaded',
       path: type === 'uploaded' ? `uploaded://${id}` : `assets/bundled-plugins/${id}`,
       type,
@@ -341,18 +345,24 @@ describe('PluginManagementComponent', () => {
     pluginStates.set(
       new Map([
         ['builtin-a', state('builtin-a', 'built-in')],
-        ['uploaded-a', state('uploaded-a', 'uploaded')],
+        ['github', state('github', 'built-in', 'issueProvider')],
+        ['uploaded-a', state('uploaded-a', 'uploaded', 'issueProvider')],
         ['builtin-b', state('builtin-b', 'built-in')],
       ]),
     );
 
-    expect(component.sortedPlugins().map((p) => p.manifest.id)).toEqual([
-      'uploaded-a',
-      'builtin-a',
-      'builtin-b',
+    expect(
+      component
+        .pluginGroups()
+        .map((g) => [g.titleKey, g.plugins.map((p) => p.manifest.id)]),
+    ).toEqual([
+      [T.PLUGINS.GROUP_UPLOADED, ['uploaded-a']],
+      [T.PLUGINS.GROUP_INTEGRATIONS, ['github']],
+      [T.PLUGINS.GROUP_OTHER, ['builtin-a', 'builtin-b']],
     ]);
     // Empty again so the template (rendered on teardown) needs no further stubs.
     pluginStates.set(new Map());
+    expect(component.pluginGroups()).toEqual([]);
   });
 
   it('titles the details section with the permission summary when there is one', () => {

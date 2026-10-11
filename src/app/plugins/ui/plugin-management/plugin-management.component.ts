@@ -167,14 +167,26 @@ export class PluginManagementComponent {
     return plugins;
   });
 
-  // Uploaded plugins first, then built-in ones, each in load order. Grouped by origin
-  // rather than enabled state so a card never moves while its toggle is used.
-  readonly sortedPlugins = computed(() => {
+  // Uploaded plugins, then built-in integrations (issue and calendar providers), then
+  // other built-ins, each in load order. Grouped by origin and type rather than enabled
+  // state, so a card never moves while its toggle is used.
+  readonly pluginGroups = computed(() => {
+    const plugins = this.allPlugins();
     const states = this._pluginService.pluginStates();
     const isUploaded = (p: PluginInstance): boolean =>
       states.get(p.manifest.id)?.type === 'uploaded';
-    const plugins = this.allPlugins();
-    return [...plugins.filter(isUploaded), ...plugins.filter((p) => !isUploaded(p))];
+    const builtIn = plugins.filter((p) => !isUploaded(p));
+    return [
+      { titleKey: T.PLUGINS.GROUP_UPLOADED, plugins: plugins.filter(isUploaded) },
+      {
+        titleKey: T.PLUGINS.GROUP_INTEGRATIONS,
+        plugins: builtIn.filter((p) => this.isIssueProviderPlugin(p)),
+      },
+      {
+        titleKey: T.PLUGINS.GROUP_OTHER,
+        plugins: builtIn.filter((p) => !this.isIssueProviderPlugin(p)),
+      },
+    ].filter((group) => group.plugins.length > 0);
   });
 
   // Upload state
