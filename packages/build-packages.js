@@ -286,13 +286,18 @@ async function buildAll() {
 
   const plugins = await getPlugins();
 
-  // Shared packages use the root install. Plugins share one plugin-dev
-  // workspace install; `npm ci` there leaves every lockfile untouched.
-  ensurePluginDeps({ log: (msg) => log(msg, colors.yellow) });
-
   // Build plugins sequentially to avoid conflicts
   const results = [];
+  let pluginDepsReady = false;
   for (const plugin of plugins) {
+    // Shared packages use the root install. Plugins share one plugin-dev
+    // workspace install (`npm ci`, so no lockfile is rewritten). Install it
+    // only after plugin-api and vite-plugin are built: npm < 9.4 copies their
+    // `file:` links instead of symlinking them, so they must have dist/.
+    if (!pluginDepsReady && plugin.path.startsWith('packages/plugin-dev/')) {
+      ensurePluginDeps({ log: (msg) => log(msg, colors.yellow) });
+      pluginDepsReady = true;
+    }
     const result = await buildPlugin(plugin);
     results.push(result);
   }
