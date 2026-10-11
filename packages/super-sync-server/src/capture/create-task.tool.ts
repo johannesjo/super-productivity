@@ -1,4 +1,5 @@
 import {
+  CAPTURE_DAILY_LIMIT_TEXT,
   CAPTURE_NOTES_MAX_BYTES,
   CAPTURE_QUEUE_FULL_TEXT,
   CAPTURE_REVOKED_TEXT,
@@ -8,6 +9,7 @@ import {
 } from './capture.const';
 import { enqueueCapture } from './capture-queue.store';
 import { AuthenticatedGrant } from './capture-grant.store';
+import { isGrantDailyCapReached, recordGrantCreate } from './capture-rate-limit';
 import { isRecentCapture, recordCapture, withGrantLock } from './capture-retry-window';
 import { McpToolDefinition, McpToolResult } from './mcp-protocol';
 
@@ -79,6 +81,9 @@ export const runCreateTask = async (
     if (isRecentCapture(grant.grantId, args.title, args.notes)) {
       return text(CAPTURE_SAVED_TEXT);
     }
+    if (isGrantDailyCapReached(grant.grantId)) {
+      return text(CAPTURE_DAILY_LIMIT_TEXT, true);
+    }
     const result = await enqueueCapture(grant.userId, grant.grantId, {
       v: 1,
       title: args.title,
@@ -90,6 +95,7 @@ export const runCreateTask = async (
     if (result === 'revoked') return text(CAPTURE_REVOKED_TEXT, true);
     if (result === 'queue_full') return text(CAPTURE_QUEUE_FULL_TEXT, true);
     recordCapture(grant.grantId, args.title, args.notes);
+    recordGrantCreate(grant.grantId);
     return text(CAPTURE_SAVED_TEXT);
   });
 };

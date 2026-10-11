@@ -15,7 +15,10 @@ import { MatInput } from '@angular/material/input';
 import { ConfigOption, FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
 import { FieldType } from '@ngx-formly/material';
 import { TranslatePipe } from '@ngx-translate/core';
-import type { SuperSyncCaptureGrantInfo } from '@sp/sync-providers/super-sync';
+import {
+  type SuperSyncCaptureGrantInfo,
+  SuperSyncCaptureUnsupportedError,
+} from '@sp/sync-providers/super-sync';
 import { firstValueFrom } from 'rxjs';
 import { Log } from '../../../../core/log';
 import { ShareService } from '../../../../core/share/share.service';
@@ -61,10 +64,11 @@ export class AgentCaptureSettingsComponent extends FieldType<FormlyFieldConfig> 
   readonly clientName = signal('');
   /** Shown once, held only by this component; never logged. */
   readonly newToken = signal<string | null>(null);
+  /** Ready to paste: the token is filled in, so setup is one copy. */
   readonly setupCommand = computed(
     () =>
-      `claude mcp add --transport http sp ${this.mcpUrl()} ` +
-      '--header "Authorization: Bearer $SP_CAPTURE_TOKEN"',
+      `claude mcp add --transport http super-productivity ${this.mcpUrl()} ` +
+      `--header "Authorization: Bearer ${this.newToken()}"`,
   );
 
   constructor() {
@@ -88,8 +92,10 @@ export class AgentCaptureSettingsComponent extends FieldType<FormlyFieldConfig> 
     return this._run(async () => {
       const grants = await this._capture.listGrants();
       const count = grants.reduce((sum, grant) => sum + grant.pendingCount, 0);
-      if (!(await this._confirm(T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_OFF_CONFIRM, { count })))
-        return;
+      const msg = count
+        ? T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_OFF_CONFIRM
+        : T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_OFF_CONFIRM_NONE;
+      if (!(await this._confirm(msg, { count }))) return;
       await this._capture.switchOff();
       this.grants.set([]);
       this.newToken.set(null);
@@ -151,7 +157,11 @@ export class AgentCaptureSettingsComponent extends FieldType<FormlyFieldConfig> 
       });
       this._snackService.open({
         type: 'ERROR',
-        msg: T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_S_ERROR,
+        // Retrying cannot help on a server without capture: say so.
+        msg:
+          e instanceof SuperSyncCaptureUnsupportedError
+            ? T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_S_UNSUPPORTED
+            : T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_S_ERROR,
       });
     } finally {
       this.isBusy.set(false);

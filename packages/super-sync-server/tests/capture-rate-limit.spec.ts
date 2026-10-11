@@ -1,12 +1,17 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import {
   ipLimitKey,
+  isGrantDailyCapReached,
   isAuthFailureLimited,
   recordAuthFailure,
   recordAuthSuccess,
+  recordGrantCreate,
   resetCaptureRateLimitForTests,
 } from '../src/capture/capture-rate-limit';
-import { CAPTURE_MCP_AUTH_FAILURES_PER_MINUTE } from '../src/capture/capture.const';
+import {
+  CAPTURE_MAX_CREATES_PER_GRANT_PER_DAY,
+  CAPTURE_MCP_AUTH_FAILURES_PER_MINUTE,
+} from '../src/capture/capture.const';
 
 const NOW = 1_000_000;
 const GRANT = '01890000-0000-7000-8000-000000000000';
@@ -47,5 +52,14 @@ describe('capture rate limit', () => {
       recordAuthFailure(`10.0.0.${i % 200}`, GRANT, NOW);
     }
     expect(isAuthFailureLimited('10.9.9.9', GRANT, NOW)).toBe(true);
+  });
+
+  it('caps new tasks per grant per day', () => {
+    for (let i = 0; i < CAPTURE_MAX_CREATES_PER_GRANT_PER_DAY; i++) {
+      expect(isGrantDailyCapReached(GRANT, NOW)).toBe(false);
+      recordGrantCreate(GRANT, NOW);
+    }
+    expect(isGrantDailyCapReached(GRANT, NOW + 60_000)).toBe(true);
+    expect(isGrantDailyCapReached(GRANT, NOW + 24 * 60 * 60 * 1000)).toBe(false);
   });
 });

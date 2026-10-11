@@ -36,6 +36,7 @@
       <button
         mat-button
         type="button"
+        [attr.aria-label]="T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_A_COPY_URL | translate"
         (click)="copy(url, 'URL')"
       >
         {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_COPY | translate }}
@@ -80,6 +81,7 @@
       <button
         mat-button
         type="button"
+        [attr.aria-label]="T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_A_COPY_TOKEN | translate"
         (click)="copy(token, 'Token')"
       >
         {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_COPY | translate }}
@@ -87,14 +89,22 @@
       @if (mcpUrl()) {
         <label>
           {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_SETUP | translate }}
-          <input
+          <textarea
             class="value"
-            type="text"
+            rows="3"
             readonly
             [value]="setupCommand()"
             (focus)="$any($event.target).select()"
-          />
+          ></textarea>
         </label>
+        <button
+          mat-button
+          type="button"
+          [attr.aria-label]="T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_A_COPY_SETUP | translate"
+          (click)="copy(setupCommand(), 'Command')"
+        >
+          {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_COPY | translate }}
+        </button>
       }
     }
 
@@ -112,14 +122,24 @@
                         ? (grant.lastUsedAt | localeDate: 'shortDate')
                         : (T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_GRANT_NEVER_USED | translate),
                       expires: grant.expiresAt | localeDate: 'shortDate',
-                      count: grant.pendingCount,
                     }
             }}
+            @if (grant.pendingCount > 0) {
+              ·
+              {{
+                T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_GRANT_WAITING
+                  | translate: { count: grant.pendingCount }
+              }}
+            }
           </span>
           <button
             mat-button
             type="button"
             [disabled]="isBusy()"
+            [attr.aria-label]="
+              T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_A_REVOKE
+                | translate: { name: grant.clientName }
+            "
             (click)="revoke(grant, false)"
           >
             {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_REVOKE | translate }}
@@ -129,6 +149,10 @@
               mat-button
               type="button"
               [disabled]="isBusy()"
+              [attr.aria-label]="
+                T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_A_REVOKE_DISCARD
+                  | translate: { name: grant.clientName }
+              "
               (click)="revoke(grant, true)"
             >
               {{

@@ -1,4 +1,6 @@
 import { signal, WritableSignal } from '@angular/core';
+import { SuperSyncCaptureUnsupportedError } from '@sp/sync-providers/super-sync';
+import { T } from '../../../../t.const';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { FormlyModule } from '@ngx-formly/core';
@@ -137,6 +139,25 @@ describe('AgentCaptureSettingsComponent', () => {
     expect(capture.createToken).toHaveBeenCalledWith('Cursor');
     expect(component.newToken()).toBe('sp_cap_secret');
     expect(component.grants().map((g) => g.id)).toEqual(['g1', 'g2']);
+    // Ready to paste: no environment variable the user has to set first.
+    expect(component.setupCommand()).toBe(
+      'claude mcp add --transport http super-productivity https://sync.example/mcp ' +
+        '--header "Authorization: Bearer sp_cap_secret"',
+    );
+  });
+
+  it('says so when the server does not support capture', async () => {
+    capture.switchOn.and.rejectWith(new SuperSyncCaptureUnsupportedError());
+    (capture.isEnabled as WritableSignal<boolean>).set(false);
+    setup();
+    await render();
+
+    await component.turnOn();
+
+    expect(snack.open).toHaveBeenCalledWith({
+      type: 'ERROR',
+      msg: T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_S_UNSUPPORTED,
+    });
   });
 
   it('revokes with discard only after the confirm', async () => {

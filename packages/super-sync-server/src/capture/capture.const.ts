@@ -14,6 +14,8 @@ export const CAPTURE_MCP_CALLS_PER_MINUTE = 30;
 /** Per IP; generous because a vendor egress IP serves many users. */
 export const CAPTURE_MCP_AUTH_FAILURES_PER_MINUTE = 120;
 export const CAPTURE_MAX_PENDING_PER_GRANT = 200;
+/** New tasks per grant per day; bounds what a leaked or misled assistant adds. */
+export const CAPTURE_MAX_CREATES_PER_GRANT_PER_DAY = 200;
 export const CAPTURE_MAX_PENDING_PER_USER = 500;
 
 export const CAPTURE_CLAIM_BATCH_SIZE = 50;
@@ -31,5 +33,7 @@ export const CAPTURE_SAVED_TEXT =
 export const CAPTURE_SWITCHED_OFF_TEXT =
   'AI capture is switched off in Super Productivity.';
 export const CAPTURE_REVOKED_TEXT = 'This connection was removed in Super Productivity.';
+export const CAPTURE_DAILY_LIMIT_TEXT =
+  'This connection reached its daily limit of new tasks. Try again tomorrow.';
 export const CAPTURE_QUEUE_FULL_TEXT =
   'Your capture queue is full. Open the app to sync.';

@@ -16,6 +16,7 @@ export {
 } from './super-sync/super-sync.model';
 export {
   SUPER_SYNC_CLIENT_UPDATE_REQUIRED_CODE,
+  SuperSyncCaptureUnsupportedError,
   SuperSyncProvider,
   type SuperSyncDeps,
 } from './super-sync/super-sync';

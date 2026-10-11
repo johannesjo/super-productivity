@@ -125,6 +125,18 @@ const openItem = async (
   }
 };
 
+// Raw HTML tags the note sanitizer keeps and the browser loads on render.
+const AUTOLOAD_TAG = /<(?=\/?(?:img|picture|source|video|audio|track|image|input)\b)/gi;
+
+/**
+ * Anyone who can steer an assistant (a web page it reads, a leaked token, the
+ * server) writes these notes. A remote image would load the moment the task
+ * is opened, telling the sender the user's IP and that it was read. Markdown
+ * images become plain links; media tags are shown as text.
+ */
+export const neutralizeAutoloadMedia = (notes: string): string =>
+  notes.replace(/!\[/g, '[').replace(AUTOLOAD_TAG, '&lt;');
+
 const toTask = (payload: unknown): AgentCapture['task'] => {
   const p = payload as Record<string, unknown> | null;
   if (!p || p.v !== 1 || typeof p.title !== 'string') return null;
@@ -134,7 +146,9 @@ const toTask = (payload: unknown): AgentCapture['task'] => {
   if (titleChars === 0 || titleChars > TITLE_MAX_CHARS) return null;
   // Code points, so a cut never splits a surrogate pair.
   const notes =
-    typeof p.notes === 'string' ? [...p.notes].slice(0, NOTES_MAX_CHARS).join('') : '';
+    typeof p.notes === 'string'
+      ? neutralizeAutoloadMedia([...p.notes].slice(0, NOTES_MAX_CHARS).join(''))
+      : '';
   const createdAt = typeof p.createdAt === 'number' ? p.createdAt : Date.now();
   return { title, ...(notes ? { notes } : {}), createdAt };
 };

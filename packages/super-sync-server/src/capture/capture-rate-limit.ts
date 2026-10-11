@@ -1,5 +1,6 @@
 import { isIPv6 } from 'net';
 import {
+  CAPTURE_MAX_CREATES_PER_GRANT_PER_DAY,
   CAPTURE_MCP_AUTH_FAILURES_PER_MINUTE,
   CAPTURE_MCP_CALLS_PER_MINUTE,
 } from './capture.const';
@@ -30,7 +31,7 @@ const isOverLimit = (key: string, max: number, now: number): boolean => {
   return !!counter && now < counter.resetAt && counter.count >= max;
 };
 
-const count = (key: string, now: number): void => {
+const count = (key: string, now: number, windowMs: number = WINDOW_MS): void => {
   const counter = counters.get(key);
   if (counter && now < counter.resetAt) {
     counter.count++;
@@ -40,7 +41,7 @@ const count = (key: string, now: number): void => {
     nextPruneAt = now + WINDOW_MS;
     for (const [k, c] of counters) if (now >= c.resetAt) counters.delete(k);
   }
-  counters.set(key, { count: 1, resetAt: now + WINDOW_MS });
+  counters.set(key, { count: 1, resetAt: now + windowMs });
 };
 
 /** Fixed one-minute window per grant; counts every authenticated /mcp call. */
@@ -53,6 +54,17 @@ export const isGrantRateLimited = (
   count(key, now);
   return false;
 };
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+/** Fixed one-day window per grant; counts only tasks actually queued. */
+export const isGrantDailyCapReached = (
+  grantId: string,
+  now: number = Date.now(),
+): boolean => isOverLimit(`day:${grantId}`, CAPTURE_MAX_CREATES_PER_GRANT_PER_DAY, now);
+
+export const recordGrantCreate = (grantId: string, now: number = Date.now()): void =>
+  count(`day:${grantId}`, now, DAY_MS);
 
 /**
  * One rotating IPv6 host must not get a fresh limit per address, and an

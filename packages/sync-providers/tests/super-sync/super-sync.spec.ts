@@ -32,6 +32,7 @@ import type {
 import {
   PROVIDER_ID_SUPER_SYNC,
   SUPER_SYNC_DEFAULT_BASE_URL,
+  SuperSyncCaptureUnsupportedError,
   SuperSyncProvider,
   type SuperSyncDeps,
   type SuperSyncDeviceListResponse,
@@ -866,8 +867,14 @@ describe('SuperSyncProvider', () => {
       expect(await provider.claimCaptures('dev-1', 'fp')).toEqual({
         status: 'unsupported',
       });
+      await expect(provider.registerCaptureKey('pub')).rejects.toBeInstanceOf(
+        SuperSyncCaptureUnsupportedError,
+      );
+      await expect(provider.createCaptureToken('Claude')).rejects.toBeInstanceOf(
+        SuperSyncCaptureUnsupportedError,
+      );
       await provider.disableCaptureKey();
-      expect(call(fetchMock, 2)).toMatchObject({
+      expect(call(fetchMock, 4)).toMatchObject({
         url: 'https://sync.example.com/api/capture/key',
         method: 'DELETE',
       });

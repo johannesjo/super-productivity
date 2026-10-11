@@ -136,7 +136,9 @@ JSON-escaped); 30 calls/min per grant, enforced after auth; 120 failed auths
 per minute per IP (an IPv6 /64 is one IP), checked before the token lookup,
 except for a grant id that authenticated in the last 24 h, whose failures
 count per grant instead, so others' bad tokens behind a shared egress IP
-cannot lock out a working connector;
+cannot lock out a working connector; 200 new tasks per grant per day
+(in-process, like the other counters), so a leaked token or an assistant
+steered by a web page cannot flood the Inbox;
 pending items 200 per grant and 500 per user ("Your capture queue is full.
 Open the app to sync."). `/mcp`, `/oauth/*` and `/.well-known/*` use these
 limits instead of the global per-IP limiter (`server.ts:417`), because vendor
@@ -252,6 +254,9 @@ user key`; AES-256-GCM, 12-byte random IV, 16-byte tag, AAD = version byte
     in `createTask` and `acknowledge` if either changed. An account switch,
     provider change or password change mid-import then creates nothing and acks
     nothing (contributor sync model, sync-epoch fence).
+- **Import:** the app turns markdown images in captured notes into links
+  and shows media tags as text, so opening a task loads nothing from whoever
+  steered the assistant (a remote image is a read receipt and IP beacon).
 - **Trigger:** a small service on the falling edge of the sync-in-progress
   signal, only when that sync ended `IN_SYNC`: after a failed
   sync the synced key may be stale, and its claim would replace a newer

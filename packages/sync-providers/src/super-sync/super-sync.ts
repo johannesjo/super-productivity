@@ -81,6 +81,11 @@ class SuperSyncHttpStatusError extends Error {
   }
 }
 
+/** The server has no capture routes (404): the feature is off there. */
+export class SuperSyncCaptureUnsupportedError extends Error {
+  override readonly name = 'SuperSyncCaptureUnsupportedError';
+}
+
 type ParsedServerErrorDetails = {
   reason?: string;
   errorCode?: string;
@@ -551,6 +556,7 @@ export class SuperSyncProvider
    * different key drops every item sealed to the old one server-side.
    * `disabled` means the user switched capture off; nothing re-enables it
    * but a key the app explicitly sends after the user switches it on again.
+   * Throws SuperSyncCaptureUnsupportedError on a server without capture.
    */
   async registerCaptureKey(publicKeySpki: string): Promise<SuperSyncCaptureKeyResult> {
     const cfg = await this._cfgOrError();
@@ -564,6 +570,9 @@ export class SuperSyncProvider
     } catch (error) {
       if (error instanceof SuperSyncHttpStatusError && error.status === 409) {
         return 'disabled';
+      }
+      if (error instanceof SuperSyncHttpStatusError && error.status === 404) {
+        throw new SuperSyncCaptureUnsupportedError();
       }
       throw error;
     }
@@ -619,11 +628,14 @@ export class SuperSyncProvider
    */
   async createCaptureToken(clientName: string): Promise<SuperSyncCaptureTokenResult> {
     const cfg = await this._cfgOrError();
-    const response = await this._fetchApi<unknown>(cfg, '/api/capture/tokens', {
-      method: 'POST',
-      body: JSON.stringify({ clientName }),
-      noRetry: true,
-    });
+    const response = await this._ignoreNotFound(
+      this._fetchApi<unknown>(cfg, '/api/capture/tokens', {
+        method: 'POST',
+        body: JSON.stringify({ clientName }),
+        noRetry: true,
+      }),
+    );
+    if (response === undefined) throw new SuperSyncCaptureUnsupportedError();
     return this._deps.responseValidators.validateCaptureToken(response);
   }
 

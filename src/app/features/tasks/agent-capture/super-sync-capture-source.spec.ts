@@ -9,6 +9,7 @@ import {
   AgentCaptureRun,
   CaptureUnsupportedError,
   createSuperSyncCaptureSource,
+  neutralizeAutoloadMedia,
 } from './super-sync-capture-source';
 
 /**
@@ -167,5 +168,24 @@ describe('createSuperSyncCaptureSource', () => {
     run = null;
     expect(await source().getPending()).toEqual([]);
     expect(provider.claimCaptures).not.toHaveBeenCalled();
+  });
+});
+
+describe('neutralizeAutoloadMedia', () => {
+  it('turns remote images into links and media tags into text', () => {
+    expect(neutralizeAutoloadMedia('see ![x](https://evil.example/p?u=1) ok')).toBe(
+      'see [x](https://evil.example/p?u=1) ok',
+    );
+    expect(neutralizeAutoloadMedia('![a][ref]\n\n[ref]: https://e.example/i')).toBe(
+      '[a][ref]\n\n[ref]: https://e.example/i',
+    );
+    expect(
+      neutralizeAutoloadMedia('<img src="https://e.example/i"> <VIDEO poster=x>'),
+    ).toBe('&lt;img src="https://e.example/i"> &lt;VIDEO poster=x>');
+  });
+
+  it('keeps links, other markup and comparisons as they are', () => {
+    const text = 'Read [docs](https://e.example), **now**; a < b and <b>bold</b>';
+    expect(neutralizeAutoloadMedia(text)).toBe(text);
   });
 });
