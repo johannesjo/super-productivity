@@ -1,9 +1,6 @@
 <div
   #dropZone
   class="schedule-day-drop-zone"
-  (pointerenter)="onDragMove($event)"
-  (mousemove)="onDragMove($event)"
-  (touchmove)="onDragMove($event)"
 >
   @if (currentPage(); as current) {
     <swipe-pager

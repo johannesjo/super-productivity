@@ -4,12 +4,14 @@ import {
   ChangeDetectorRef,
   Component,
   computed,
+  effect,
   ElementRef,
   inject,
   NgZone,
   OnDestroy,
   Signal,
   signal,
+  untracked,
   ViewChild,
   viewChildren,
 } from '@angular/core';
@@ -121,7 +123,10 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   private _pointerUpSubscription: Subscription | null = null;
   private _activeExternalTask: TaskWithSubTasks | null = null;
   private readonly _globalPointerEvents = ['mousemove', 'touchmove'] as const;
-  private readonly _globalPointerListenerOptions = { passive: true };
+  private _isTrackingExternalDrag = false;
+  // Capture phase: a task's swipe gesture (PanDirective) stops the propagation
+  // of the touchmoves it claims, which hid a quick touch drag from the panel.
+  private readonly _globalPointerListenerOptions = { passive: true, capture: true };
 
   // Drag preview properties
   dragPreviewTime = signal<string | null>(null);
@@ -200,6 +205,19 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     return Math.round(hoursToday * FH);
   });
 
+  constructor() {
+    // Follow the pointer on the whole document for as long as a task is dragged
+    // from a list, and hit-test the panel geometrically. Boundary events on the
+    // panel cannot be relied on: touch input is implicitly captured by the
+    // element the finger went down on, so the panel never sees its moves, and
+    // the one pointerenter Chrome sends once CDK re-parents the dragged element
+    // can come after the last move, leaving the preview at its initial row.
+    effect(() => {
+      const isExternalDragActive = !!this._externalDragService.activeTask();
+      untracked(() => this._toggleExternalDragTracking(isExternalDragActive));
+    });
+  }
+
   ngAfterViewInit(): void {
     // Listen for global pointer releases while a drag is active so we can finalize drops.
     this._pointerUpSubscription = this._dragDropRegistry.pointerUp.subscribe((event) => {
@@ -216,6 +234,7 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
       this._pointerUpSubscription.unsubscribe();
       this._pointerUpSubscription = null;
     }
+    this._toggleExternalDragTracking(false);
     // Ensure preview styling is cleaned up
     this._applySchedulePreviewStyling(false);
     this._activeExternalTask = null;
@@ -243,46 +262,6 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   private _currentScheduleWeekIndex(): number {
     const day = this.selectedDay();
     return this._scheduleWeeks().findIndex((cmp) => cmp.daysToShow()[0] === day);
-  }
-
-  onDragMove(event: MouseEvent | TouchEvent): void {
-    const activeTask = this._externalDragService.activeTask();
-    if (!activeTask) {
-      if (this.isDragging()) {
-        this._stopScheduleMode();
-      }
-      return;
-    }
-
-    this._activeExternalTask = activeTask;
-    if (!this.isDragging()) {
-      this._startScheduleMode();
-    }
-
-    // Try to use drag preview position, fallback to event coordinates for touch
-    const previewEl = this._getDragPreview();
-    const pointer = getPointerPosition(event);
-    if (previewEl) {
-      // Desktop: use drag preview top
-      const previewRect = previewEl.getBoundingClientRect();
-      const topY = this._resolveTopY(previewRect.top, pointer?.y ?? null);
-      const timestamp = topY != null ? this._calculateTimeFromYPosition(topY) : null;
-      this.lastCalculatedTimestamp = timestamp;
-      this._updateDragPreviewTime(previewEl, timestamp);
-    } else {
-      // Touch devices: use touch coordinates directly
-      if (pointer) {
-        const topY = this._resolveTopY(null, pointer.y);
-        const timestamp = topY != null ? this._calculateTimeFromYPosition(topY) : null;
-        this.lastCalculatedTimestamp = timestamp;
-        // Update preview time without preview element for touch
-        if (timestamp != null) {
-          this.dragPreviewTime.set(this._formatPreviewTime(timestamp));
-        } else {
-          this.dragPreviewTime.set(null);
-        }
-      }
-    }
   }
 
   private _targetDay(): string | undefined {
@@ -413,12 +392,11 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   }
 
   private _isPointerWithinDropZone(pointer: { x: number; y: number }): boolean {
-    const dropZoneEl = this.dropZoneRef?.nativeElement;
-    if (!dropZoneEl) {
+    const dropZoneRect = this._getVisibleDropZoneRect();
+    if (!dropZoneRect) {
       return false;
     }
 
-    const dropZoneRect = dropZoneEl.getBoundingClientRect();
     return (
       pointer.x >= dropZoneRect.left &&
       pointer.x <= dropZoneRect.right &&
@@ -431,12 +409,11 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     rect: DOMRect | null,
     pointer: { x: number; y: number } | null,
   ): boolean {
-    const dropZoneEl = this.dropZoneRef?.nativeElement;
-    if (!dropZoneEl) {
+    const dropZoneRect = this._getVisibleDropZoneRect();
+    if (!dropZoneRect) {
       return false;
     }
 
-    const dropZoneRect = dropZoneEl.getBoundingClientRect();
     const topY = this._resolveTopY(rect?.top ?? null, pointer?.y ?? null);
     if (topY == null) {
       return false;
@@ -449,6 +426,26 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
         : false;
 
     return horizontalOverlap && topY >= dropZoneRect.top && topY <= dropZoneRect.bottom;
+  }
+
+  // The part of the drop zone that is on screen. The drop zone spans the whole
+  // scrollable schedule (or, in the bottom sheet, one viewport height that
+  // scrolls away), so its own rect also covers what is scrolled out of view.
+  private _getVisibleDropZoneRect(): DOMRect | null {
+    const dropZoneEl = this.dropZoneRef?.nativeElement;
+    if (!dropZoneEl) {
+      return null;
+    }
+    const dz = dropZoneEl.getBoundingClientRect();
+    const sc = this._findScrollContainer()?.getBoundingClientRect();
+    if (!sc) {
+      return dz;
+    }
+    const left = Math.max(dz.left, sc.left);
+    const top = Math.max(dz.top, sc.top);
+    const right = Math.min(dz.right, sc.right);
+    const bottom = Math.min(dz.bottom, sc.bottom);
+    return new DOMRect(left, top, Math.max(0, right - left), Math.max(0, bottom - top));
   }
 
   private _withDragPreview<T>(handler: (preview: HTMLElement) => T): T | null {
@@ -596,9 +593,9 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     this._lastKnownTopY = null;
     this._applySchedulePreviewStyling(true);
     this._cdr.markForCheck();
-    this._toggleGlobalPointerListeners(true);
 
-    // Show custom drag preview in schedule-week component
+    // Show custom drag preview in schedule-week component. The caller moves it
+    // to the pointer's time right away.
     const task = this._activeExternalTask;
     if (task && this.scheduleWeekComponent) {
       const scheduleEvent = this._createScheduleEventFromTask(task);
@@ -618,7 +615,6 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     this._activeExternalTask = null;
     this._applySchedulePreviewStyling(false);
     this._cdr.markForCheck();
-    this._toggleGlobalPointerListeners(false);
 
     // Hide custom drag preview in schedule-week component
     if (this.scheduleWeekComponent) {
@@ -626,34 +622,50 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  private _toggleGlobalPointerListeners(isEnable: boolean): void {
+  private _toggleExternalDragTracking(isEnable: boolean): void {
+    if (isEnable === this._isTrackingExternalDrag) {
+      return;
+    }
+    this._isTrackingExternalDrag = isEnable;
     for (const eventName of this._globalPointerEvents) {
       if (isEnable) {
         document.addEventListener(
           eventName,
-          this._onGlobalPointerMove,
+          this._onExternalDragMove,
           this._globalPointerListenerOptions,
         );
       } else {
-        document.removeEventListener(eventName, this._onGlobalPointerMove);
+        document.removeEventListener(eventName, this._onExternalDragMove, {
+          capture: true,
+        });
       }
+    }
+    if (!isEnable && this.isDragging()) {
+      // The drag ended or was cancelled without a release over the panel.
+      this._ngZone.run(() => this._stopScheduleMode());
     }
   }
 
-  private _onGlobalPointerMove = (ev: MouseEvent | TouchEvent): void => {
+  private _onExternalDragMove = (ev: MouseEvent | TouchEvent): void => {
+    const activeTask = this._externalDragService.activeTask();
     const pointer = getPointerPosition(ev);
-    if (!pointer) {
+    if (!activeTask || !pointer) {
       return;
     }
 
-    const previewRect = this._getDragPreviewRect();
-    const isPointerInsideDropZone = this._isPointerWithinDropZone(pointer);
-
-    if (!isPointerInsideDropZone) {
+    if (!this._isPointerWithinDropZone(pointer)) {
       // If pointer is not over the side panel/drop zone anymore, leave schedule mode
-      this._ngZone.run(() => this._stopScheduleMode());
+      if (this.isDragging()) {
+        this._ngZone.run(() => this._stopScheduleMode());
+      }
       return;
     }
+
+    if (!this.isDragging()) {
+      this._activeExternalTask = activeTask;
+      this._ngZone.run(() => this._startScheduleMode());
+    }
+    const previewRect = this._getDragPreviewRect();
 
     // Update time calculation continuously while dragging over the drop zone
     // This is especially important for touch devices
