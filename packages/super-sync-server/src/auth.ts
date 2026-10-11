@@ -8,6 +8,7 @@ import { loadConfigFromEnv, isConsentRequired } from './config';
 import { Prisma } from '@prisma/client';
 import { authCache } from './auth-cache';
 import { getDefaultStorageQuotaBytes } from './sync/services/storage-quota.service';
+import { revokeAllCaptureGrants } from './capture/capture-grant.store';
 
 // Auth constants
 const MIN_JWT_SECRET_LENGTH = 32;
@@ -139,9 +140,12 @@ export const verifyEmail = async (token: string): Promise<boolean> => {
 export const revokeAllTokens = async (userId: number): Promise<void> => {
   // AUTH_CACHE_INVALIDATION: keep adjacent to tokenVersion writes.
   authCache.invalidate(userId);
-  await prisma.user.update({
-    where: { id: userId },
-    data: { tokenVersion: { increment: 1 } },
+  await prisma.$transaction(async (tx) => {
+    await tx.user.update({
+      where: { id: userId },
+      data: { tokenVersion: { increment: 1 } },
+    });
+    await revokeAllCaptureGrants(tx, userId);
   });
   // AUTH_CACHE_INVALIDATION: keep adjacent to tokenVersion writes.
   authCache.invalidate(userId);
@@ -166,6 +170,7 @@ export const replaceToken = async (
       data: { tokenVersion: { increment: 1 } },
       select: { tokenVersion: true },
     });
+    await revokeAllCaptureGrants(tx, userId);
     return user.tokenVersion;
   });
   // AUTH_CACHE_INVALIDATION: keep adjacent to tokenVersion writes.

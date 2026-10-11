@@ -172,6 +172,12 @@ export interface ServerConfig {
    */
   dataRegion?: string;
   /**
+   * Agent task capture: `/mcp` and `/api/capture/*`. Off by default, so a
+   * self-hosted server exposes no new public endpoint unless its operator opts
+   * in. Set CAPTURE_CONNECTOR_ENABLED=true.
+   */
+  captureConnectorEnabled: boolean;
+  /**
    * Test mode configuration. When enabled, provides endpoints for E2E testing.
    * NEVER enable in production!
    */
@@ -205,6 +211,7 @@ const DEFAULT_CONFIG: ServerConfig = {
     allowedOrigins: DEFAULT_CORS_ORIGINS,
   },
   trustProxy: SERVER_TRUST_PROXY,
+  captureConnectorEnabled: false,
 };
 
 /**
@@ -274,6 +281,10 @@ export const loadConfigFromEnv = (
   // Enforce HTTPS for PUBLIC_URL in production
   if (process.env.NODE_ENV === 'production' && !config.publicUrl.startsWith('https://')) {
     throw new Error('PUBLIC_URL must use HTTPS in production');
+  }
+
+  if (process.env.CAPTURE_CONNECTOR_ENABLED !== undefined) {
+    config.captureConnectorEnabled = process.env.CAPTURE_CONNECTOR_ENABLED === 'true';
   }
 
   // CORS configuration

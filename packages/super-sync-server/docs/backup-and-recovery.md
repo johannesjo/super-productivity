@@ -124,7 +124,13 @@ docker exec -i supersync-postgres psql -U supersync supersync \
 gunzip -c backups/supersync_YYYYMMDD_HHMMSS.sql.gz | \
   docker exec -i supersync-postgres psql -U supersync supersync
 
-# 3. Restart the server
+# 3. Empty the capture tables. Restored rows would re-import tasks users
+#    already have and revive revoked assistant connections. Devices register
+#    their key again on the next sync; assistants need a new token.
+docker exec -i supersync-postgres psql -U supersync supersync \
+  -c 'TRUNCATE capture_items, capture_grants, capture_keys'
+
+# 4. Restart the server
 docker compose start supersync
 ```
 

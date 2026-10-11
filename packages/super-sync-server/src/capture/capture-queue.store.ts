@@ -1,0 +1,162 @@
+import { uuidv7 } from 'uuidv7';
+import { prisma } from '../db';
+import {
+  CAPTURE_CLAIM_BATCH_SIZE,
+  CAPTURE_LEASE_MS,
+  CAPTURE_MAX_PENDING_PER_GRANT,
+  CAPTURE_MAX_PENDING_PER_USER,
+} from './capture.const';
+import { parseCapturePublicKey, sealCapture } from './capture-seal';
+
+/**
+ * The sealed capture queue: enqueue from /mcp, claim and ack from the app.
+ *
+ * `taskId` rule: an item starts with taskId = itemId. A device taking over
+ * another device's lease gets a fresh taskId; a device gets back the taskId
+ * it was given for as long as it holds the lease. Two devices therefore never
+ * create the same task id, and an ack from an old lease can't delete a newer
+ * one. The app keys its receipts on itemId.
+ */
+
+export interface CapturePayload {
+  v: 1;
+  title: string;
+  notes?: string;
+  createdAt: number;
+  client: string;
+}
+
+export type EnqueueResult = 'queued' | 'switched_off' | 'revoked' | 'queue_full';
+
+export interface ClaimedCapture {
+  itemId: string;
+  taskId: string;
+  ciphertext: string;
+  createdAt: number;
+}
+
+export type ClaimResult =
+  | { status: 'ok'; items: ClaimedCapture[] }
+  | { status: 'no_key' }
+  | { status: 'key_mismatch' };
+
+export const enqueueCapture = async (
+  userId: number,
+  grantId: string,
+  payload: CapturePayload,
+): Promise<EnqueueResult> =>
+  prisma.$transaction(async (tx) => {
+    // The key row lock serializes enqueue against key replacement and
+    // switch-off, so no item is ever sealed to a key that is being dropped,
+    // and makes the per-user cap exact.
+    const keys = await tx.$queryRaw<Array<{ public_key: string }>>`
+      SELECT public_key FROM capture_keys
+      WHERE user_id = ${userId} AND disabled_at IS NULL FOR UPDATE`;
+    if (keys.length === 0) return 'switched_off';
+    // Auth ran before this transaction. The share lock makes a concurrent
+    // revoke wait for this insert, so its discard sees the item.
+    const grants = await tx.$queryRaw<unknown[]>`
+      SELECT 1 FROM capture_grants
+      WHERE id = ${grantId} AND user_id = ${userId} AND revoked_at IS NULL FOR SHARE`;
+    if (grants.length === 0) return 'revoked';
+
+    const counts = await tx.$queryRaw<Array<{ for_grant: bigint; for_user: bigint }>>`
+      SELECT count(*) FILTER (WHERE grant_id = ${grantId}) AS for_grant,
+        count(*) AS for_user
+      FROM capture_items WHERE user_id = ${userId}`;
+    if (
+      Number(counts[0].for_grant) >= CAPTURE_MAX_PENDING_PER_GRANT ||
+      Number(counts[0].for_user) >= CAPTURE_MAX_PENDING_PER_USER
+    ) {
+      return 'queue_full';
+    }
+
+    const itemId = uuidv7();
+    const ciphertext = sealCapture(
+      parseCapturePublicKey(keys[0].public_key),
+      itemId,
+      payload as unknown as Record<string, unknown>,
+    );
+    await tx.$executeRaw`
+      INSERT INTO capture_items (id, user_id, grant_id, ciphertext, task_id, created_at)
+      VALUES (${itemId}, ${userId}, ${grantId}, ${ciphertext}, ${itemId},
+        ${BigInt(payload.createdAt)})`;
+    return 'queued';
+  });
+
+/**
+ * Leases up to one batch: every item already leased to this device first (so
+ * the importer keeps its receipts), then unleased and expired ones, oldest
+ * first. SKIP LOCKED keeps two devices claiming at once from sharing an item.
+ */
+export const claimCaptures = async (
+  userId: number,
+  deviceId: string,
+  fingerprint: string,
+  now: number = Date.now(),
+): Promise<ClaimResult> => {
+  const keys = await prisma.$queryRaw<Array<{ fingerprint: string }>>`
+    SELECT fingerprint FROM capture_keys
+    WHERE user_id = ${userId} AND disabled_at IS NULL`;
+  if (keys.length === 0) return { status: 'no_key' };
+  if (keys[0].fingerprint !== fingerprint) return { status: 'key_mismatch' };
+
+  const rows = await prisma.$queryRaw<
+    Array<{ id: string; task_id: string; ciphertext: string; created_at: bigint }>
+  >`
+    WITH picked AS (
+      SELECT id FROM capture_items
+      WHERE user_id = ${userId}
+        -- Re-checked here: a key replaced since the check above means the
+        -- items now belong to the new key.
+        AND EXISTS (SELECT 1 FROM capture_keys k WHERE k.user_id = ${userId}
+          AND k.fingerprint = ${fingerprint} AND k.disabled_at IS NULL)
+        AND (lease_device_id IS NULL OR lease_device_id = ${deviceId}
+          OR lease_until < ${BigInt(now)})
+      ORDER BY (lease_device_id IS NOT DISTINCT FROM ${deviceId}) DESC, created_at, id
+      LIMIT ${CAPTURE_CLAIM_BATCH_SIZE}
+      FOR UPDATE SKIP LOCKED
+    )
+    UPDATE capture_items c SET
+      task_id = CASE
+        WHEN c.lease_device_id IS NOT NULL AND c.lease_device_id <> ${deviceId}
+          THEN gen_random_uuid()::text
+        ELSE c.task_id
+      END,
+      lease_device_id = ${deviceId},
+      lease_until = ${BigInt(now + CAPTURE_LEASE_MS)}
+    FROM picked WHERE c.id = picked.id
+    RETURNING c.id, c.task_id, c.ciphertext, c.created_at`;
+
+  const items = rows
+    .map((row) => ({
+      itemId: row.id,
+      taskId: row.task_id,
+      ciphertext: row.ciphertext,
+      createdAt: Number(row.created_at),
+    }))
+    .sort((a, b) => a.createdAt - b.createdAt || a.itemId.localeCompare(b.itemId));
+  return { status: 'ok', items };
+};
+
+/** Deletes only rows still leased to this device under the given task id. */
+export const ackCaptures = async (
+  userId: number,
+  deviceId: string,
+  acks: ReadonlyArray<{ itemId: string; taskId: string }>,
+): Promise<number> => {
+  if (acks.length === 0) return 0;
+  const itemIds = acks.map((ack) => ack.itemId);
+  const taskIds = acks.map((ack) => ack.taskId);
+  return prisma.$executeRaw`
+    DELETE FROM capture_items c
+    USING unnest(${itemIds}::text[], ${taskIds}::text[]) AS a(item_id, task_id)
+    WHERE c.user_id = ${userId}
+      AND c.lease_device_id = ${deviceId}
+      AND c.id = a.item_id
+      AND c.task_id = a.task_id`;
+};
+
+/** Items no device claimed within the retention period. */
+export const deleteExpiredCaptures = async (cutoff: number): Promise<number> =>
+  prisma.$executeRaw`DELETE FROM capture_items WHERE created_at < ${BigInt(cutoff)}`;

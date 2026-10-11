@@ -30,6 +30,7 @@ import {
   resetWsConnectionService,
 } from './sync/services/websocket-connection.service';
 import { testRoutes } from './test-routes';
+import { captureMcpRoutes, captureRoutes } from './capture';
 
 // HTML escape to prevent XSS in generated HTML
 export const escapeHtml = (unsafe: string): string => {
@@ -499,6 +500,12 @@ export const createServer = (
 
       // WebSocket routes for real-time sync notifications
       await fastifyServer.register(wsRoutes, { prefix: '/api/sync' });
+
+      // Agent task capture: public /mcp for assistants, /api/capture for the app
+      if (fullConfig.captureConnectorEnabled) {
+        await fastifyServer.register(captureMcpRoutes);
+        await fastifyServer.register(captureRoutes, { prefix: '/api/capture' });
+      }
 
       // Test Routes (only in test mode)
       if (fullConfig.testMode?.enabled) {

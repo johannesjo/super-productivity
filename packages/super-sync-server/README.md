@@ -364,6 +364,7 @@ All configuration is done via environment variables.
 | `WEBAUTHN_RP_NAME`                      | value of `WEBAUTHN_RP_ID`            | Name shown in your users' OS passkey prompt.                                                                                                                                                                                 |
 | `ALLOWED_EMAILS`                        | - (anyone may register)              | Comma-separated exact addresses and/or `*@domain` rules. **Set it for a private install**; empty means open public registration.                                                                                             |
 | `SUPERSYNC_DEFAULT_STORAGE_QUOTA_BYTES` | `104857600` (100 MB)                 | Quota for accounts created from now on. Existing accounts keep the value stored on their row.                                                                                                                                |
+| `CAPTURE_CONNECTOR_ENABLED`             | `false`                              | Agent task capture: the `/mcp` endpoint and `/api/capture`. Single instance only (in-process retry window and per-grant limit).                                                                                              |
 
 ### Legal pages
 
