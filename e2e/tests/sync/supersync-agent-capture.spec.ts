@@ -24,8 +24,9 @@ import { waitForAppReady } from '../../utils/waits';
  * run after an earlier one can take up to a minute to start.
  */
 
-const CLAIM_ROUTE = '**/api/capture/claim';
-const ACK_ROUTE = '**/api/capture/ack';
+// Trailing `*`: requests carry an `?appVersion=` query, which a glob must match.
+const CLAIM_ROUTE = '**/api/capture/claim*';
+const ACK_ROUTE = '**/api/capture/ack*';
 const IMPORT_TIMEOUT = 120_000;
 
 const createTokenInSettings = async (client: SimulatedE2EClient): Promise<string> => {
