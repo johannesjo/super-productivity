@@ -19,7 +19,8 @@ cd my-plugin
 # in src/manifest.json: set a unique "id" and "name", delete
 # issueProvider.issueProviderKey (reserved for bundled providers; uploads using
 # it are rejected) and change humanReadableName/icon; rename package.json "name"
-npm install
+# (every folder here is an npm workspace; names must be unique)
+npm install        # installs into the shared plugin-dev workspace
 npm run build      # → dist/
 ```
 
