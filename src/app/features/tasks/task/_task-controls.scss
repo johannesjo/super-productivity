@@ -139,7 +139,12 @@ task-priority-indicator {
   &.isEditable {
     cursor: pointer;
 
-    &:hover,
+    @include hoverWithPointer {
+      .time {
+        color: var(--text-color);
+      }
+    }
+
     &:focus-visible {
       .time {
         color: var(--text-color);
@@ -367,8 +372,10 @@ done-toggle {
   box-shadow: none;
   background: var(--bg-lighter) !important;
 
-  :host:hover & {
-    opacity: 1;
+  @media (hover: hover) {
+    :host:hover & {
+      opacity: 1;
+    }
   }
 
   mat-icon {

@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
+import android.view.HapticFeedbackConstants
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.widget.Toast
@@ -112,6 +113,30 @@ class JavaScriptInterface(
         activity.runOnUiThread {
             InAppReview.request(activity)
         }
+    }
+
+    // Tactile confirmation for touch gestures. performHapticFeedback follows the
+    // system "touch feedback" setting and needs no VIBRATE permission. Unknown
+    // types are ignored so a newer bundle can't crash an older shell's mapping.
+    @Suppress("unused")
+    @JavascriptInterface
+    fun performHapticFeedback(type: String) {
+        val constant = when (type) {
+            "confirm" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                HapticFeedbackConstants.CONFIRM
+            } else {
+                HapticFeedbackConstants.VIRTUAL_KEY
+            }
+            "threshold" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE
+            } else {
+                HapticFeedbackConstants.CLOCK_TICK
+            }
+            "longPress" -> HapticFeedbackConstants.LONG_PRESS
+            else -> return
+        }
+        // JavascriptInterface calls arrive on a background thread.
+        webView.post { webView.performHapticFeedback(constant) }
     }
 
     @Suppress("unused")

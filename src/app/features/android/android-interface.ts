@@ -49,6 +49,9 @@ export interface AndroidInterface {
   // Absent on APKs whose snooze/tap events don't carry the reminder type.
   supportsTypedReminderActions?(): boolean;
 
+  // Absent on APKs that predate it; call via util/haptic-feedback.ts.
+  performHapticFeedback?(type: 'confirm' | 'threshold' | 'longPress'): void;
+
   showToast(s: string): void;
 
   // save
