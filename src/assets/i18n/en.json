@@ -3210,7 +3210,10 @@
     "COMMUNITY_PLUGINS": "Community Plugins",
     "COMMUNITY_WARNING": "Community plugins are not reviewed by the Super Productivity team. Install them at your own risk.",
     "COMMUNITY_STARS": "{{count}} stars",
-    "COMMUNITY_GET_LISTED": "Get your plugin to show up here"
+    "COMMUNITY_GET_LISTED": "Get your plugin to show up here",
+    "GROUP_UPLOADED": "Uploaded plugins",
+    "GROUP_INTEGRATIONS": "Integrations",
+    "GROUP_OTHER": "Other plugins"
   },
   "PM": {
     "ALL_TASKS_TITLE": "Metrics (all tasks)",

@@ -105,9 +105,14 @@ mat-error {
   }
 }
 
+.group-title,
 .community-plugins-card,
 .install-card {
   grid-column: 1 / -1;
+}
+
+.group-title {
+  margin: var(--s2) var(--s) 0;
 }
 
 .community-warning {
