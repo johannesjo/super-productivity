@@ -187,6 +187,10 @@ class SuperSyncBackgroundProvider(
             extractReminderRelevantTaskIds(op, payload, cancelIds)
             for (id in cancelIds) {
                 taskLastAction[id] = "cancel"
+                // A cancel clears every alarm slot of the task, so reminders
+                // collected from earlier ops are stale: drop them, or a later
+                // schedule of the other slot (e.g. setDeadline) would revive them.
+                reminderMap.keys.removeAll { it.first == id }
             }
         }
 
@@ -361,9 +365,16 @@ class SuperSyncBackgroundProvider(
                 if (id.isEmpty()) return emptyList()
                 // Copy so merging schedulingInfo never mutates the parsed payload
                 val changes = JSONObject(actionPayload.optJSONObject("taskChanges")?.toString() ?: "{}")
+                // Mirrors short-syntax-shared.reducer.ts: schedulingInfo.remindAt is
+                // applied only together with dueWithTime and only as a value
+                // (`remindAt ?? undefined`) — null or day-only planning never clears
+                // the task's reminder, so neither may cancel the alarm here.
                 val schedulingInfo = actionPayload.optJSONObject("schedulingInfo")
-                if (schedulingInfo != null && schedulingInfo.has("remindAt")) {
-                    changes.put("remindAt", schedulingInfo.opt("remindAt"))
+                if (schedulingInfo != null &&
+                    hasTimestamp(schedulingInfo, "dueWithTime") &&
+                    hasTimestamp(schedulingInfo, "remindAt")
+                ) {
+                    changes.put("remindAt", schedulingInfo.optLong("remindAt"))
                 }
                 val title = changes.optString("title", "").ifEmpty { task.optString("title", "") }
                 listOf(TaskPatch(id, changes, title))

@@ -211,20 +211,52 @@ class SuperSyncBackgroundProviderTest {
     }
 
     @Test
-    fun `short syntax planning for a day only cancels the time reminder`() {
+    fun `short syntax day planning or a null remindAt neither schedules nor cancels`() {
+        // short-syntax-shared.reducer.ts applies schedulingInfo.remindAt only with
+        // dueWithTime and as `remindAt ?? undefined`, so the task keeps its reminder.
         val result = parse(
             op(
                 1, "[Task Shared] applyShortSyntax", "UPD", "task-ss-2",
                 """{"actionPayload": {
                     "task": {"id": "task-ss-2", "title": "Call mom @tomorrow"},
                     "taskChanges": {"title": "Call mom"},
-                    "schedulingInfo": {"day": "2100-01-01", "remindAt": null}
+                    "schedulingInfo": {"day": "2100-01-01", "isAddToTop": false}
+                  }, "entityChanges": []}"""
+            ),
+            op(
+                2, "[Task Shared] applyShortSyntax", "UPD", "task-ss-3",
+                """{"actionPayload": {
+                    "task": {"id": "task-ss-3", "title": "Call dad @15:00"},
+                    "taskChanges": {"title": "Call dad"},
+                    "schedulingInfo": {"dueWithTime": 4102444800000, "remindAt": null}
                   }, "entityChanges": []}"""
             )
         )
 
         assertTrue(result.remindersToSchedule.isEmpty())
-        assertEquals(setOf("task-ss-2"), result.taskIdsToCancel)
+        assertTrue(result.taskIdsToCancel.isEmpty())
+    }
+
+    @Test
+    fun `a cancel drops reminders collected earlier so a later schedule cannot revive them`() {
+        val result = parse(
+            op(
+                1, "[Task Shared] updateTask", "UPD", "task-rev-1",
+                """{"actionPayload": {"task": {"id": "task-rev-1", "changes": {"remindAt": 4102444200000}}}, "entityChanges": []}"""
+            ),
+            op(
+                2, "[Task Shared] updateTask", "UPD", "task-rev-1",
+                """{"actionPayload": {"task": {"id": "task-rev-1", "changes": {"remindAt": null}}}, "entityChanges": []}"""
+            ),
+            op(
+                3, "[Task Shared] setDeadline", "UPD", "task-rev-1",
+                """{"actionPayload": {"taskId": "task-rev-1", "deadlineDay": "2100-01-01", "deadlineRemindAt": 4102444300000}, "entityChanges": []}"""
+            )
+        )
+
+        val reminder = result.remindersToSchedule.single()
+        assertEquals(true, reminder.isDeadline)
+        assertEquals(4102444300000L, reminder.remindAt)
     }
 
     @Test
