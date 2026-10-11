@@ -125,6 +125,14 @@ jobs:
               '.tmp/app-builds/# packaged app/superproductivity' \
             2>&1 | tee .tmp/smoke/launch.log
 
+      - name: Smoke test packaged assistant access
+        run: |
+          set -o pipefail
+          xvfb-run --auto-servernum --server-args="-screen 0 1280x720x24" \
+            node e2e/electron/assistant-access-smoke.cjs \
+              '.tmp/app-builds/# packaged app/superproductivity' \
+            2>&1 | tee .tmp/smoke/assistant-access.log
+
       - name: Upload logs on failure
         if: failure()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
