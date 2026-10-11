@@ -182,6 +182,14 @@ describe('neutralizeAutoloadMedia', () => {
     expect(
       neutralizeAutoloadMedia('<img src="https://e.example/i"> <VIDEO poster=x>'),
     ).toBe('&lt;img src="https://e.example/i"> &lt;VIDEO poster=x>');
+    // Removing one `!` must not leave another in front of the `[`.
+    expect(neutralizeAutoloadMedia('!![x](https://e.example/i)')).toBe(
+      '[x](https://e.example/i)',
+    );
+    // The sanitizer keeps `background` on table parts; browsers load it.
+    expect(
+      neutralizeAutoloadMedia('<table><tr><td background="https://e.example/i">'),
+    ).toBe('&lt;table>&lt;tr>&lt;td background="https://e.example/i">');
   });
 
   it('keeps links, other markup and comparisons as they are', () => {

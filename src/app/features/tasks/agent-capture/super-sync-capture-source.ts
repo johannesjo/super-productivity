@@ -126,7 +126,9 @@ const openItem = async (
 };
 
 // Raw HTML tags the note sanitizer keeps and the browser loads on render.
-const AUTOLOAD_TAG = /<(?=\/?(?:img|picture|source|video|audio|track|image|input)\b)/gi;
+// Table parts load their `background` attribute, which the sanitizer allows.
+const AUTOLOAD_TAG =
+  /<(?=\/?(?:img|picture|source|video|audio|track|image|input|table|thead|tbody|tfoot|tr|td|th)\b)/gi;
 
 /**
  * Anyone who can steer an assistant (a web page it reads, a leaked token, the
@@ -135,7 +137,8 @@ const AUTOLOAD_TAG = /<(?=\/?(?:img|picture|source|video|audio|track|image|input
  * images become plain links; media tags are shown as text.
  */
 export const neutralizeAutoloadMedia = (notes: string): string =>
-  notes.replace(/!\[/g, '[').replace(AUTOLOAD_TAG, '&lt;');
+  // `!+`: dropping one `!` of `!![` would leave a working `![`.
+  notes.replace(/!+\[/g, '[').replace(AUTOLOAD_TAG, '&lt;');
 
 const toTask = (payload: unknown): AgentCapture['task'] => {
   const p = payload as Record<string, unknown> | null;
