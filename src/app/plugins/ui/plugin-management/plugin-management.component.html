@@ -171,7 +171,12 @@
 
 <mat-card class="community-plugins-card">
   <mat-card-header>
-    <mat-card-title>{{ T.PLUGINS.COMMUNITY_PLUGINS | translate }}</mat-card-title>
+    <!-- A heading at the group level, so its items (h4) nest under it. -->
+    <mat-card-title
+      role="heading"
+      aria-level="3"
+      >{{ T.PLUGINS.COMMUNITY_PLUGINS | translate }}</mat-card-title
+    >
   </mat-card-header>
   <mat-card-content>
     <p class="community-warning">{{ T.PLUGINS.COMMUNITY_WARNING | translate }}</p>
@@ -179,13 +184,13 @@
     <div class="community-plugins-list">
       @for (plugin of communityPlugins(); track plugin.name) {
         <div class="community-plugin-item">
-          <h3 class="plugin-name">
+          <h4 class="plugin-name">
             <a
               [href]="plugin.url"
               target="_blank"
               >{{ plugin.name }}</a
             >
-          </h3>
+          </h4>
           <p class="plugin-author">
             @if (plugin.authorUrl) {
               <a
