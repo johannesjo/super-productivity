@@ -579,7 +579,9 @@ test.describe('@supersync CalDAV date baselines vs concurrent edit (#10099)', ()
             timeout: 30000,
           });
           const report = clientA.page.waitForResponse(
-            (r) => r.url().startsWith(CALDAV_ORIGIN) && r.request().method() === 'REPORT',
+            (r) =>
+              new URL(r.url()).origin === CALDAV_ORIGIN &&
+              r.request().method() === 'REPORT',
             { timeout: 30000 },
           );
           // Opening the project sets the active work context; the poll fires
