@@ -173,13 +173,16 @@ export class PluginManagementComponent {
 
   onPluginToggle(plugin: PluginInstance, event: MatSlideToggleChange): void {
     if (event.checked) {
-      this.enablePlugin(plugin);
+      this.enablePlugin(plugin, event);
     } else {
       this.disablePlugin(plugin, event);
     }
   }
 
-  private async enablePlugin(plugin: PluginInstance): Promise<void> {
+  private async enablePlugin(
+    plugin: PluginInstance,
+    event: MatSlideToggleChange,
+  ): Promise<void> {
     PluginLog.log('Enabling plugin:', plugin.manifest.id);
 
     try {
@@ -192,7 +195,8 @@ export class PluginManagementComponent {
           'User denied Node.js execution permission for plugin:',
           plugin.manifest.id,
         );
-        // Reset the toggle state
+        // The toggle switched itself on on click; turn it back off since nothing was enabled
+        event.source.checked = false;
         return;
       }
 

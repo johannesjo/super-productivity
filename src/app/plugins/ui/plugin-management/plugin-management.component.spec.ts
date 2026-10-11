@@ -523,6 +523,63 @@ describe('PluginManagementComponent', () => {
     });
   });
 
+  describe('enabling a plugin that needs Node.js execution consent', () => {
+    let setPluginEnabledSpy: jasmine.Spy;
+    let activatePluginSpy: jasmine.Spy;
+    let checkConsentSpy: jasmine.Spy;
+
+    const plugin: PluginInstance = {
+      manifest: { ...baseManifest, permissions: ['nodeExecution'] },
+      loaded: false,
+      isEnabled: false,
+    };
+
+    // MatSlideToggle has already flipped itself on when (change) fires.
+    const toggleOnEvent = (): MatSlideToggleChange =>
+      ({ checked: true, source: { checked: true } }) as unknown as MatSlideToggleChange;
+
+    // onPluginToggle does not return the enable promise; let it settle.
+    const toggleOn = async (event: MatSlideToggleChange): Promise<void> => {
+      component.onPluginToggle(plugin, event);
+      await new Promise((resolve) => setTimeout(resolve));
+    };
+
+    beforeEach(() => {
+      checkConsentSpy = jasmine.createSpy('checkNodeExecutionPermission');
+      activatePluginSpy = jasmine.createSpy('activatePlugin').and.resolveTo(null);
+      setPluginEnabledSpy = jasmine.createSpy('setPluginEnabled').and.resolveTo();
+      Object.assign(TestBed.inject(PluginService), {
+        checkNodeExecutionPermission: checkConsentSpy,
+        activatePlugin: activatePluginSpy,
+      });
+      Object.assign(TestBed.inject(PluginMetaPersistenceService), {
+        setPluginEnabled: setPluginEnabledSpy,
+      });
+    });
+
+    it('turns the toggle back off and enables nothing when consent is denied', async () => {
+      checkConsentSpy.and.resolveTo(false);
+      const event = toggleOnEvent();
+
+      await toggleOn(event);
+
+      expect(setPluginEnabledSpy).not.toHaveBeenCalled();
+      expect(activatePluginSpy).not.toHaveBeenCalled();
+      expect(event.source.checked).toBe(false);
+    });
+
+    it('enables and activates the plugin when consent is granted', async () => {
+      checkConsentSpy.and.resolveTo(true);
+      const event = toggleOnEvent();
+
+      await toggleOn(event);
+
+      expect(setPluginEnabledSpy).toHaveBeenCalledOnceWith(baseManifest.id, true);
+      expect(activatePluginSpy).toHaveBeenCalledOnceWith(baseManifest.id, true);
+      expect(event.source.checked).toBe(true);
+    });
+  });
+
   describe('openConfigDialog', () => {
     const plugin = { manifest: baseManifest, loaded: true, isEnabled: true };
     let loadSchemaSpy: jasmine.Spy;
