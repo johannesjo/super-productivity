@@ -19,7 +19,12 @@ describe('capture rate limit', () => {
     expect(ipLimitKey('2001:0db8:0001:0002:ffff:1:2:3')).toBe('ip:2001:db8:1:2::/64');
     expect(ipLimitKey('2001:db8::1')).toBe('ip:2001:db8:0:0::/64');
     expect(ipLimitKey('::1')).toBe('ip:0:0:0:0::/64');
-    expect(ipLimitKey('::ffff:10.0.0.1')).toBe('ip:::ffff:10.0.0.1');
+    expect(ipLimitKey('::ffff:10.0.0.1')).toBe('ip:10.0.0.1');
+    expect(ipLimitKey('::FFFF:10.0.0.1')).toBe('ip:10.0.0.1');
+    expect(ipLimitKey('0:0:0:0:0:ffff:10.0.0.1')).toBe('ip:10.0.0.1');
+    expect(ipLimitKey('::ffff:a00:1')).toBe('ip:10.0.0.1');
+    expect(ipLimitKey('2001:DB8:1:2::1')).toBe('ip:2001:db8:1:2::/64');
+    expect(ipLimitKey('fe80::1%eth0')).toBe('ip:fe80:0:0:0::/64');
     expect(ipLimitKey('10.0.0.1')).toBe('ip:10.0.0.1');
   });
 

@@ -34,6 +34,8 @@ describe('AgentCaptureService', () => {
   let calls: string[];
   /** Another tab holds the import lock. */
   let isLockHeld: boolean;
+  /** The Web Locks request itself fails, e.g. on an opaque origin. */
+  let lockError: Error | null;
 
   const syncOnce = (result: SyncStatusChangePayload = 'IN_SYNC'): void => {
     syncStatus$.next('SYNCING');
@@ -45,13 +47,17 @@ describe('AgentCaptureService', () => {
   beforeEach(() => {
     calls = [];
     isLockHeld = false;
+    lockError = null;
     // Native Web Locks resolve outside fakeAsync; this one stays in the zone.
     spyOnProperty(navigator, 'locks', 'get').and.returnValue({
       request: (
         name: string,
         _opts: LockOptions,
         cb: (lock: Lock | null) => Promise<void> | void,
-      ) => Promise.resolve(cb(isLockHeld ? null : ({ name } as Lock))),
+      ) =>
+        lockError
+          ? Promise.reject(lockError)
+          : Promise.resolve(cb(isLockHeld ? null : ({ name } as Lock))),
     } as unknown as LockManager);
     const record = (name: string) => async (): Promise<void> => {
       calls.push(name);
@@ -141,6 +147,21 @@ describe('AgentCaptureService', () => {
     syncOnce();
     tick(60_000);
     expect(importer.importPending).not.toHaveBeenCalled();
+  }));
+
+  it('keeps importing after the lock request fails', fakeAsync(() => {
+    lockError = new DOMException('opaque origin', 'SecurityError');
+    spyOn(Log, 'err');
+    service.start();
+    syncOnce();
+    tick(60_000);
+    expect(importer.importPending).not.toHaveBeenCalled();
+
+    lockError = null;
+    syncOnce();
+    flushMicrotasks();
+    expect(importer.importPending).toHaveBeenCalledTimes(1);
+    tick(60_000);
   }));
 
   it('treats a server without capture as nothing to import', fakeAsync(() => {

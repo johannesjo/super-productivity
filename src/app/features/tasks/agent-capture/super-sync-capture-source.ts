@@ -99,14 +99,14 @@ const claimWithKey = async (
 ): Promise<SuperSyncCaptureItemInfo[]> => {
   const fingerprint = await captureKeyFingerprint(run.key.publicKeySpki);
   let claim = await run.provider.claimCaptures(run.deviceId, fingerprint);
-  // Thrown, not an empty batch, so the importer keeps its receipts.
-  if (claim.status === 'unsupported') throw new CaptureUnsupportedError();
   if (claim.status === 'no_key' || claim.status === 'key_mismatch') {
     run.assertUnchanged('registerCaptureKey');
     const registered = await run.provider.registerCaptureKey(run.key.publicKeySpki);
     if (registered === 'disabled') return [];
     claim = await run.provider.claimCaptures(run.deviceId, fingerprint);
   }
+  // Thrown, not an empty batch, so the importer keeps its receipts.
+  if (claim.status === 'unsupported') throw new CaptureUnsupportedError();
   return claim.status === 'ok' ? (claim.items ?? []) : [];
 };
 

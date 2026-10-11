@@ -130,6 +130,18 @@ describe('createSuperSyncCaptureSource', () => {
     expect(provider.registerCaptureKey).not.toHaveBeenCalled();
   });
 
+  it('rejects when capture disappears between register and re-claim', async () => {
+    provider.claimCaptures.and.returnValues(
+      Promise.resolve({ status: 'no_key' }),
+      Promise.resolve({ status: 'unsupported' }),
+    );
+    provider.registerCaptureKey.and.resolveTo('registered');
+
+    await expectAsync(source().getPending()).toBeRejectedWithError(
+      CaptureUnsupportedError,
+    );
+  });
+
   it('keeps an item it cannot open as invalid, never as a task', async () => {
     provider.claimCaptures.and.resolveTo(ok([{ ...ITEM, itemId: 'other-item' }]));
     const src = source();

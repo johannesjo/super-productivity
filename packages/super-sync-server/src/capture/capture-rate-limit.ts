@@ -54,23 +54,39 @@ export const isGrantRateLimited = (
   return false;
 };
 
-/** One rotating IPv6 host must not get a fresh limit per address. */
+/**
+ * One rotating IPv6 host must not get a fresh limit per address, and an
+ * IPv4-mapped address (`::ffff:a.b.c.d`, in any spelling) is its IPv4 address.
+ */
 export const ipLimitKey = (ip: string): string => {
-  if (!isIPv6(ip) || ip.toLowerCase().startsWith('::ffff:')) return `ip:${ip}`;
-  const [head, tail] = ip.split('%')[0].split('::');
-  const headGroups = head ? head.split(':') : [];
-  const tailGroups = tail ? tail.split(':') : [];
-  const groups =
+  if (!isIPv6(ip)) return `ip:${ip}`;
+  const [head, tail] = ip.split('%')[0].toLowerCase().split('::');
+  const toGroups = (part: string | undefined): string[] =>
+    part
+      ? part.split(':').flatMap((g) => {
+          if (!g.includes('.')) return [g];
+          // An embedded IPv4 tail fills the last two groups.
+          const [a, b, c, d] = g.split('.').map(Number);
+          return [((a << 8) | b).toString(16), ((c << 8) | d).toString(16)];
+        })
+      : [];
+  const headGroups = toGroups(head);
+  const tailGroups = toGroups(tail);
+  const groups = (
     tail === undefined
       ? headGroups
       : [
           ...headGroups,
           ...Array<string>(8 - headGroups.length - tailGroups.length).fill('0'),
           ...tailGroups,
-        ];
+        ]
+  ).map((g) => parseInt(g, 16));
+  if (groups.slice(0, 5).every((g) => g === 0) && groups[5] === 0xffff) {
+    return `ip:${[groups[6] >> 8, groups[6] & 0xff, groups[7] >> 8, groups[7] & 0xff].join('.')}`;
+  }
   return `ip:${groups
     .slice(0, 4)
-    .map((g) => parseInt(g, 16).toString(16))
+    .map((g) => g.toString(16))
     .join(':')}::/64`;
 };
 

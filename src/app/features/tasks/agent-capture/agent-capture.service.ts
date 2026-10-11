@@ -17,11 +17,13 @@ import {
   throttleTime,
   withLatestFrom,
 } from 'rxjs';
+import { IS_ELECTRON } from '../../../app.constants';
 import { Log } from '../../../core/log';
 import { SyncWrapperService } from '../../../imex/sync/sync-wrapper.service';
 import { SyncEpochChangedError } from '../../../op-log/core/errors/sync-errors';
 import { SyncProviderId } from '../../../op-log/sync-providers/provider.const';
 import { SyncProviderManager } from '../../../op-log/sync-providers/provider-manager.service';
+import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { GlobalConfigService } from '../../config/global-config.service';
 import {
   getCaptureImportErrorReason,
@@ -134,14 +136,30 @@ export class AgentCaptureService {
     return this._superSyncOrError().revokeCaptureGrant(grantId, discardPending);
   }
 
-  /** Skips when another tab of this browser is importing: its run covers ours. */
+  /**
+   * Skips when another tab of this browser is importing: its run covers ours.
+   * Electron and the Android WebView are single-instance (as in LockService),
+   * and never reject: a rejection here would end the trigger pipeline.
+   */
   private async _importLogged(): Promise<void> {
-    if (typeof navigator === 'undefined' || !navigator.locks) {
+    if (
+      IS_ELECTRON ||
+      IS_ANDROID_WEB_VIEW ||
+      typeof navigator === 'undefined' ||
+      !navigator.locks
+    ) {
       return this._importLoggedUnlocked();
     }
-    await navigator.locks.request(IMPORT_LOCK_NAME, { ifAvailable: true }, (lock) =>
-      lock ? this._importLoggedUnlocked() : undefined,
-    );
+    try {
+      await navigator.locks.request(IMPORT_LOCK_NAME, { ifAvailable: true }, (lock) =>
+        lock ? this._importLoggedUnlocked() : undefined,
+      );
+    } catch (e) {
+      // The callback never throws, so the lock itself failed; captures stay queued.
+      Log.err('Agent capture import skipped: lock unavailable', {
+        reason: e instanceof Error ? e.name : 'unknown',
+      });
+    }
   }
 
   private async _importLoggedUnlocked(): Promise<void> {
