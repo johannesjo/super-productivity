@@ -16,7 +16,7 @@ import { PluginMetaPersistenceService } from '../../plugin-meta-persistence.serv
 import { PluginInstance, PluginManifest, PluginHooks } from '../../plugin-api.model';
 import { PluginService } from '../../plugin.service';
 import { PluginState } from '../../plugin-state.model';
-import { PluginManagementComponent } from './plugin-management.component';
+import { isPluginListed, PluginManagementComponent } from './plugin-management.component';
 import { T } from '../../../t.const';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 
@@ -694,5 +694,41 @@ describe('PluginManagementComponent', () => {
         expect(component.uploadError()).toBeNull();
       });
     });
+  });
+});
+
+describe('isPluginListed', () => {
+  const instance = (id: string, isEnabled: boolean): PluginInstance => ({
+    manifest: {
+      id,
+      name: id,
+      manifestVersion: 1,
+      version: '1.0.0',
+      minSupVersion: '1.0.0',
+      hooks: [],
+      permissions: [],
+    },
+    loaded: false,
+    isEnabled,
+  });
+
+  it('always lists regular plugins', () => {
+    expect(isPluginListed(instance('brain-dump', false), false, new Set())).toBe(true);
+  });
+
+  it('hides a disabled dev-only plugin unless dev plugins are shown', () => {
+    expect(isPluginListed(instance('api-test-plugin', false), false, new Set())).toBe(
+      false,
+    );
+    expect(isPluginListed(instance('api-test-plugin', false), true, new Set())).toBe(
+      true,
+    );
+  });
+
+  it('keeps listing a dev-only plugin seen enabled after it is disabled', () => {
+    const shown = new Set<string>();
+
+    expect(isPluginListed(instance('api-test-plugin', true), false, shown)).toBe(true);
+    expect(isPluginListed(instance('api-test-plugin', false), false, shown)).toBe(true);
   });
 });

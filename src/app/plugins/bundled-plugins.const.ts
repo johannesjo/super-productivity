@@ -61,3 +61,9 @@ export const BUNDLED_PLUGIN_IDS = new Set<string>([
   'voice-reminder',
   'yesterday-tasks',
 ]);
+
+// Bundled plugins that exist for development and E2E only. The plugins page hides them in
+// production builds unless they are already enabled. They still ship and load as before.
+export const DEV_ONLY_BUNDLED_PLUGIN_IDS: ReadonlySet<string> = new Set([
+  'api-test-plugin',
+]);
