@@ -398,6 +398,25 @@ describe('getNextRepeatOccurrence()', () => {
       testCase(cfg, fromDate, startDate, expected);
     });
 
+    it('uses calendar-year intervals for a leap-day repeat every 2 years', () => {
+      const cfg = dummyRepeatable('ID-10679', {
+        repeatCycle: 'YEARLY',
+        repeatEvery: 2,
+        startDate: '2024-02-29',
+        lastTaskCreationDay: '2024-02-29',
+      });
+
+      expect(getNextRepeatOccurrence(cfg, new Date(2024, 2, 1))).toEqual(
+        new Date(2026, 1, 28, 12),
+      );
+      expect(
+        getNextRepeatOccurrence(
+          { ...cfg, lastTaskCreationDay: '2026-02-28' },
+          new Date(2026, 2, 1),
+        ),
+      ).toEqual(new Date(2028, 1, 29, 12));
+    });
+
     it('should handle leap year date (Feb 29)', () => {
       const startDate = new Date(2024, 1, 29);
       const lastCreation = new Date(2024, 1, 29);
