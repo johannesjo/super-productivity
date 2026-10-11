@@ -1,5 +1,10 @@
 :host {
   display: block;
+  --schedule-panel-header-bg: var(--bg);
+
+  :host-context(.bottom-panel-sheet) & {
+    --schedule-panel-header-bg: var(--bottom-panel-bg);
+  }
 
   > * {
     inset: 4px;
@@ -10,6 +15,12 @@
 .schedule-day-drop-zone {
   position: relative;
   height: 100%;
+}
+
+// Block-level, so the sticky date header is bounded by the whole schedule and
+// not by the viewport-high drop zone (it scrolled away on mobile otherwise).
+schedule-week {
+  display: block;
 }
 
 .empty-state {

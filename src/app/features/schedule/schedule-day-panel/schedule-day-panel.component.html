@@ -4,6 +4,10 @@
   (pointerenter)="onDragMove($event)"
   (mousemove)="onDragMove($event)"
   (touchmove)="onDragMove($event)"
+  swipeGesture
+  [swipeEnabled]="isInBottomSheet && !isDragging()"
+  (swipeleft)="goToNextDay()"
+  (swiperight)="goToPreviousDay()"
 >
   @if (hasNoEvents()) {
     <div class="empty-state">
@@ -18,8 +22,29 @@
     [events]="events()"
     [beyondBudget]="beyondBudget()"
     [daysToShow]="daysToShow()"
+    [todayDateStr]="todayDateStr()"
     [workStartEnd]="workStartEnd() || null"
     [currentTimeRow]="currentTimeRow()"
     [isTaskDragActive]="isDragging()"
-  ></schedule-week>
+  >
+    <button
+      weekHeaderStart
+      mat-icon-button
+      [disabled]="isViewingToday()"
+      [attr.aria-label]="T.F.SCHEDULE.PREVIOUS_DAY | translate"
+      [matTooltip]="T.F.SCHEDULE.PREVIOUS_DAY | translate"
+      (click)="goToPreviousDay()"
+    >
+      <mat-icon>chevron_left</mat-icon>
+    </button>
+    <button
+      weekHeaderEnd
+      mat-icon-button
+      [attr.aria-label]="T.F.SCHEDULE.NEXT_DAY | translate"
+      [matTooltip]="T.F.SCHEDULE.NEXT_DAY | translate"
+      (click)="goToNextDay()"
+    >
+      <mat-icon>chevron_right</mat-icon>
+    </button>
+  </schedule-week>
 </div>

@@ -35,6 +35,13 @@ import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const'
 import { remindOptionToMilliseconds } from '../../tasks/util/remind-option-to-milliseconds';
 import { TranslatePipe } from '@ngx-translate/core';
 import { T } from '../../../t.const';
+import { MatBottomSheetRef } from '@angular/material/bottom-sheet';
+import { MatIconButton } from '@angular/material/button';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { SwipeDirective } from '../../../ui/swipe-gesture/swipe.directive';
+import { parseDbDateStr } from '../../../util/parse-db-date-str';
+import { getDbDateStr } from '../../../util/get-db-date-str';
 
 const DEFAULT_MIN_DURATION = 15 * 60 * 1000;
 const SCROLL_DELAY_MS = 100;
@@ -58,7 +65,14 @@ interface DropTimeCalculation {
 @Component({
   selector: 'schedule-day-panel',
   standalone: true,
-  imports: [ScheduleWeekComponent, TranslatePipe],
+  imports: [
+    ScheduleWeekComponent,
+    TranslatePipe,
+    MatIconButton,
+    MatIcon,
+    MatTooltip,
+    SwipeDirective,
+  ],
   styleUrl: './schedule-day-panel.component.scss',
   templateUrl: './schedule-day-panel.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -80,6 +94,9 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   private _ngZone = inject(NgZone);
   private _scheduleService = inject(ScheduleService);
   private _globalConfigService = inject(GlobalConfigService);
+  // Only the mobile bottom sheet gets swipe navigation: in the right panel a
+  // right swipe already closes the panel (see RightPanelComponent).
+  readonly isInBottomSheet = !!inject(MatBottomSheetRef, { optional: true });
   private _pointerUpSubscription: Subscription | null = null;
   private _activeExternalTask: TaskWithSubTasks | null = null;
   private readonly _globalPointerEvents = ['mousemove', 'touchmove'] as const;
@@ -92,12 +109,25 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   private _dragPointerOffsetY: number | null = null;
   private _lastKnownTopY: number | null = null;
 
-  private _todayDateStr = toSignal(this._globalTrackingIntervalService.todayDateStr$, {
+  todayDateStr = toSignal(this._globalTrackingIntervalService.todayDateStr$, {
     initialValue: this._dateService.todayStr(Date.now()),
   });
 
+  // null = follow (logical) today. A picked day that today has caught up with
+  // (midnight rollover while the panel stays open) falls back to today, so the
+  // panel never shows a past day.
+  private _selectedDay = signal<string | null>(null);
+
+  selectedDay = computed<string | undefined>(() => {
+    const today = this.todayDateStr();
+    const selected = this._selectedDay();
+    return selected && today && selected > today ? selected : today;
+  });
+
+  isViewingToday = computed(() => this.selectedDay() === this.todayDateStr());
+
   daysToShow = computed(() => {
-    const d = this._todayDateStr();
+    const d = this.selectedDay();
     return d ? [d] : [];
   });
 
@@ -136,6 +166,9 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   currentTimeRow = computed(() => {
     // Trigger re-computation every 2 minutes
     this._scheduleService.scheduleRefreshTick();
+    if (!this.isViewingToday()) {
+      return null;
+    }
     const now = new Date();
     const hours = now.getHours();
     const minutes = now.getMinutes();
@@ -163,6 +196,31 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     // Ensure preview styling is cleaned up
     this._applySchedulePreviewStyling(false);
     this._activeExternalTask = null;
+  }
+
+  goToPreviousDay(): void {
+    // Like the schedule view, never navigate into the past.
+    const day = this.selectedDay();
+    if (!day || this.isViewingToday()) {
+      return;
+    }
+    const previousDay = this._shiftDay(day, -1);
+    const today = this.todayDateStr();
+    this._selectedDay.set(today && previousDay > today ? previousDay : null);
+  }
+
+  goToNextDay(): void {
+    const day = this.selectedDay();
+    if (!day) {
+      return;
+    }
+    this._selectedDay.set(this._shiftDay(day, 1));
+  }
+
+  private _shiftDay(day: string, deltaDays: number): string {
+    const date = parseDbDateStr(day);
+    date.setDate(date.getDate() + deltaDays);
+    return getDbDateStr(date);
   }
 
   onDragMove(event: MouseEvent | TouchEvent): void {
