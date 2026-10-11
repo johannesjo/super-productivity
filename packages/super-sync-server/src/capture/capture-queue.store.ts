@@ -20,10 +20,35 @@ import { parseCapturePublicKey, sealCapture } from './capture-seal';
  * (accepted in the plan's failure modes), but never diverges on one id.
  */
 
+export const CAPTURE_REPEAT_CYCLES = ['daily', 'weekly', 'monthly', 'yearly'] as const;
+export const CAPTURE_WEEKDAYS = [
+  'mon',
+  'tue',
+  'wed',
+  'thu',
+  'fri',
+  'sat',
+  'sun',
+] as const;
+
+export interface CaptureRepeat {
+  cycle: (typeof CAPTURE_REPEAT_CYCLES)[number];
+  /** 2 to 99; absent means every cycle. */
+  every?: number;
+  /** Weekly only; in Monday-first order, no duplicates. */
+  weekdays?: (typeof CAPTURE_WEEKDAYS)[number][];
+}
+
 export interface CapturePayload {
   v: 1;
   title: string;
   notes?: string;
+  /** `YYYY-MM-DD`; optional within v1, ignored by apps that predate it. */
+  dueDate?: string;
+  /** `HH:MM`, local to the importing device; only with `dueDate`. */
+  dueTime?: string;
+  /** Optional within v1; apps that predate it add a one-off task. */
+  repeat?: CaptureRepeat;
   createdAt: number;
   client: string;
 }
