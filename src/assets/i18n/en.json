@@ -2339,6 +2339,9 @@
         "TRACKING_ON": "Tracking on {{device}}",
         "WAS_TRACKING_ON": "Was tracking on {{device}}"
       },
+      "B": {
+        "MOVED_TO": "Tracking moved to {{device}} – stopped “{{title}}” here"
+      },
       "S": {
         "MOVED_TO": "Tracking moved to {{device}}",
         "STOPPED_FROM": "Tracking stopped from {{device}}",
