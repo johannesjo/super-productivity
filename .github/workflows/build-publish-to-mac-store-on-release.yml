@@ -110,9 +110,11 @@ jobs:
                   continue
               pem = block[block.index("-----BEGIN CERTIFICATE-----"):] + "-----END CERTIFICATE-----\n"
               subject = subprocess.check_output(
-                  ["openssl", "x509", "-noout", "-subject", "-nameopt", "RFC2253"],
+                  ["openssl", "x509", "-noout", "-subject", "-issuer", "-enddate",
+                   "-fingerprint", "-sha1", "-nameopt", "RFC2253"],
                   input=pem, text=True,
               )
+              print(subject, flush=True)
               if "CN=3rd Party Mac Developer Installer:" in subject:
                   fingerprint = hashlib.sha1(ssl.PEM_cert_to_DER_cert(pem)).hexdigest()
                   subprocess.run(["security", "delete-certificate", "-Z", fingerprint, keychain], check=True)
