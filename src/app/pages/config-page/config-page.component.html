@@ -75,19 +75,19 @@
         [(selectedIndex)]="selectedTabIndex"
         animationDuration="200ms"
       >
-        <!-- Tab: General -->
+        <!-- Tab: Personalize -->
         <mat-tab>
           <ng-template mat-tab-label>
             <ng-container
               *ngTemplateOutlet="
                 tabLabel;
-                context: { $implicit: 'settings', labelKey: 'PS.TABS.GENERAL' }
+                context: { $implicit: 'settings', labelKey: 'PS.TABS.PERSONALIZE' }
               "
             ></ng-container>
           </ng-template>
           <div class="tab-content">
             <h2 class="mat-h2 section-title">
-              {{ 'PS.TABS.GENERAL' | translate }}
+              {{ 'PS.TABS.PERSONALIZE' | translate }}
             </h2>
             <section class="config-section appearance-section">
               <theme-selector></theme-selector>
@@ -102,6 +102,18 @@
                   [section]="section"
                 ></config-section>
               </section>
+              @if (section.key === 'appFeatures') {
+                <section class="config-section plugins-pointer">
+                  <button
+                    mat-button
+                    type="button"
+                    (click)="selectedTabIndex = PLUGINS_TAB_INDEX"
+                  >
+                    <mat-icon>extension</mat-icon>
+                    {{ T.GCF.APP_FEATURES.EXTEND_WITH_PLUGINS | translate }}
+                  </button>
+                </section>
+              }
             }
           </div>
         </mat-tab>

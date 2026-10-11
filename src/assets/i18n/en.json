@@ -2451,6 +2451,7 @@
     "APP_FEATURES": {
       "BOARDS": "Boards",
       "DONATE_PAGE": "Donate page",
+      "EXTEND_WITH_PLUGINS": "Find more features in Plugins",
       "FINISH_DAY": "Finish day",
       "FOCUS_MODE": "Focus mode",
       "HABITS": "Habits",
@@ -3235,7 +3236,7 @@
     },
     "SYNC_EXPORT": "Sync & Export",
     "TABS": {
-      "GENERAL": "General",
+      "PERSONALIZE": "Personalize",
       "PLUGINS": "Plugins",
       "PRODUCTIVITY": "Productivity",
       "SYNC_BACKUP": "Sync & Backup",

@@ -2,7 +2,7 @@ import { expect } from '@playwright/test';
 import type { Page } from '@playwright/test';
 
 /**
- * Navigate to Misc Settings section in the config page (General tab)
+ * Navigate to Misc Settings section in the config page (Personalize tab)
  * and expand it if collapsed.
  *
  * When `forceReload` is true, navigates away first then back to ensure the
@@ -20,7 +20,7 @@ export const navigateToMiscSettings = async (
   await page.goto('/#/config');
   await page.waitForURL(/config/);
 
-  // "Misc Settings" is a collapsible section in the General tab (default tab).
+  // "Misc Settings" is a collapsible section in the Personalize tab (default tab).
   const miscCollapsible = page.locator(
     'collapsible:has(.collapsible-title:has-text("Misc"))',
   );

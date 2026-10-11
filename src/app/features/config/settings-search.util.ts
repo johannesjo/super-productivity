@@ -30,25 +30,25 @@ export interface SettingsSearchTab {
 const CUSTOM_TARGETS: readonly SettingsSearchTarget[] = [
   {
     labelKey: T.GCF.MISC.APPEARANCE,
-    tabLabelKey: T.PS.TABS.GENERAL,
+    tabLabelKey: T.PS.TABS.PERSONALIZE,
     tabIndex: 0,
     scrollSelector: '.appearance-section',
   },
   {
     labelKey: T.GCF.MISC.DARK_MODE,
-    tabLabelKey: T.PS.TABS.GENERAL,
+    tabLabelKey: T.PS.TABS.PERSONALIZE,
     tabIndex: 0,
     scrollSelector: '.dark-mode-select',
   },
   {
     labelKey: T.GCF.MISC.THEME_EXPERIMENTAL,
-    tabLabelKey: T.PS.TABS.GENERAL,
+    tabLabelKey: T.PS.TABS.PERSONALIZE,
     tabIndex: 0,
     scrollSelector: '.theme-select',
   },
   {
     labelKey: T.GCF.MISC.WALLPAPER,
-    tabLabelKey: T.PS.TABS.GENERAL,
+    tabLabelKey: T.PS.TABS.PERSONALIZE,
     tabIndex: 0,
     scrollSelector: '.wallpaper-select',
   },
