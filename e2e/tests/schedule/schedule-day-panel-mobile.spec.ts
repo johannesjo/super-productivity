@@ -1,6 +1,10 @@
 import type { Locator, Page } from '@playwright/test';
 import { expect, test } from '../../fixtures/test.fixture';
 import { waitForAngularStability } from '../../utils/waits';
+import { touchPan } from '../../utils/touch-pan';
+
+// The swipe pager also renders the neighbouring days (inert) once touched.
+const CURRENT_PAGE = '.page:not([inert])';
 
 const openDayPanelInBottomSheet = async (page: Page): Promise<Locator> => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -13,31 +17,6 @@ const openDayPanelInBottomSheet = async (page: Page): Promise<Locator> => {
   const dayPanel = page.locator('bottom-panel-container schedule-day-panel');
   await expect(dayPanel).toBeVisible();
   return dayPanel;
-};
-
-// Fast horizontal touch swipe, as SwipeDirective detects it.
-const swipe = async (target: Locator, deltaX: number): Promise<void> => {
-  await target.evaluate((el, dx) => {
-    const rect = el.getBoundingClientRect();
-    const x = (rect.left + rect.right) / 2;
-    const y = (rect.top + rect.bottom) / 2;
-    const touchAt = (clientX: number): Touch =>
-      new Touch({ identifier: 1, target: el, clientX, clientY: y });
-    el.dispatchEvent(
-      new TouchEvent('touchstart', {
-        bubbles: true,
-        touches: [touchAt(x)],
-        changedTouches: [touchAt(x)],
-      }),
-    );
-    el.dispatchEvent(
-      new TouchEvent('touchend', {
-        bubbles: true,
-        touches: [],
-        changedTouches: [touchAt(x + dx)],
-      }),
-    );
-  }, deltaX);
 };
 
 const dayStr = (deltaDays: number): string => {
@@ -69,36 +48,51 @@ test.describe('Schedule day panel on mobile', () => {
       .toBe(true);
   });
 
-  test('keeps the date visible and navigates days by button and swipe', async ({
-    page,
-  }) => {
+  test('keeps the date visible and pages days by swipe and buttons', async ({ page }) => {
     const dayPanel = await openDayPanelInBottomSheet(page);
-    const header = dayPanel.locator('.week-header');
-    const col = dayPanel.locator('.grid-container .col').first();
-    const prevBtn = dayPanel.getByRole('button', { name: 'Previous Day' });
-    const nextBtn = dayPanel.getByRole('button', { name: 'Next Day' });
+    const currentPage = dayPanel.locator(CURRENT_PAGE);
+    const header = currentPage.locator('.week-header');
+    const col = currentPage.locator('.grid-container .col').first();
+    const dayPage = (day: string): Locator =>
+      dayPanel.locator(`.page:has(.col[data-day="${day}"])`);
+    const prevBtn = currentPage.getByRole('button', { name: 'Previous Day' });
+    const nextBtn = currentPage.getByRole('button', { name: 'Next Day' });
 
     // The panel opens scrolled to now; the sticky date must stay in view.
-    await expect(dayPanel.locator('.current-time')).toBeInViewport();
+    await expect(currentPage.locator('.current-time')).toBeInViewport();
     await expect(header).toBeInViewport();
     await expect(col).toHaveAttribute('data-day', dayStr(0));
     await expect(prevBtn).toBeDisabled();
 
-    await nextBtn.click();
+    // Mid-pan, tomorrow follows the finger in from the right.
+    await touchPan(page, dayPanel, -220, {
+      beforeRelease: async () => {
+        await expect(dayPage(dayStr(1))).toBeInViewport();
+        await expect(dayPage(dayStr(0))).toBeInViewport();
+      },
+    });
     await expect(col).toHaveAttribute('data-day', dayStr(1));
-    await expect(dayPanel.locator('.current-time')).toHaveCount(0);
+    await expect(currentPage.locator('.current-time')).toHaveCount(0);
+    await expect(header).toBeInViewport();
 
-    const dropZone = dayPanel.locator('.schedule-day-drop-zone');
-    await swipe(dropZone, -150);
+    await touchPan(page, dayPanel, -220);
     await expect(col).toHaveAttribute('data-day', dayStr(2));
 
-    await swipe(dropZone, 150);
+    // A mostly vertical move scrolls instead of paging.
+    await touchPan(page, dayPanel, -40, { deltaY: -200 });
+    await expect(col).toHaveAttribute('data-day', dayStr(2));
+
+    await touchPan(page, dayPanel, 220);
+    await expect(col).toHaveAttribute('data-day', dayStr(1));
+    await prevBtn.click();
+    await expect(col).toHaveAttribute('data-day', dayStr(0));
+    await nextBtn.click();
     await expect(col).toHaveAttribute('data-day', dayStr(1));
     await prevBtn.click();
     await expect(col).toHaveAttribute('data-day', dayStr(0));
 
-    // Never navigates into the past.
-    await swipe(dropZone, 150);
+    // Never pages into the past: the pan springs back.
+    await touchPan(page, dayPanel, 220);
     await expect(col).toHaveAttribute('data-day', dayStr(0));
     await expect(header).toBeInViewport();
   });

@@ -6,6 +6,7 @@ import {
   effect,
   ElementRef,
   inject,
+  Signal,
   signal,
   viewChild,
 } from '@angular/core';
@@ -46,6 +47,17 @@ import { DateTimeFormatService } from '../../../core/date-time-format/date-time-
 import { getWeekNumber } from '../../../util/get-week-number';
 import { parseDbDateStr } from '../../../util/parse-db-date-str';
 import { anchorContextNow } from '../anchor-context-now';
+import {
+  SwipePagerComponent,
+  SwipePagerPageDirective,
+} from '../../../ui/swipe-pager/swipe-pager.component';
+import { SwipePagerDirection } from '../../../ui/swipe-pager/swipe-pager-gesture';
+import {
+  ScheduleDayPage,
+  scheduleDayPageKey,
+  shiftDayStr,
+  toScheduleDayPage,
+} from '../schedule-day-page';
 import { DateService } from '../../../core/date/date.service';
 
 @Component({
@@ -53,6 +65,8 @@ import { DateService } from '../../../core/date/date.service';
   imports: [
     ScheduleWeekComponent,
     ScheduleMonthComponent,
+    SwipePagerComponent,
+    SwipePagerPageDirective,
     MatIconButton,
     MatIcon,
     MatTooltip,
@@ -314,12 +328,7 @@ export class ScheduleComponent {
   beyondBudget = computed(() => this._eventsAndBeyondBudget().beyondBudgetDays);
   monthEvents = computed(() => this.events().concat(...this.beyondBudget()));
 
-  currentTimeRow = computed(() => {
-    // Only show current time indicator when viewing today
-    if (!this.isViewingToday()) {
-      return null;
-    }
-
+  nowRow = computed(() => {
     // Trigger re-computation every 2 minutes
     this.scheduleService.scheduleRefreshTick();
     const now = new Date();
@@ -329,6 +338,86 @@ export class ScheduleComponent {
     const hoursToday = hours + minutes / 60;
     return Math.round(hoursToday * FH);
   });
+
+  // Only show current time indicator when viewing today
+  currentTimeRow = computed(() => (this.isViewingToday() ? this.nowRow() : null));
+
+  // Day view pages through days by swiping (SwipePagerComponent). Neighbouring
+  // days are only computed once the pager is warm: on first touch or when the
+  // prev/next buttons animate through it.
+  isPagerWarm = signal(false);
+  readonly dayPageKey = scheduleDayPageKey;
+  private _dayPager = viewChild(SwipePagerComponent);
+
+  currentDayPage = computed<ScheduleDayPage | undefined>(() => {
+    const day = this.daysToShow()[0];
+    return day ? toScheduleDayPage(day, this.scheduleDays()) : undefined;
+  });
+  // Like goToPreviousPeriod, never pages into the past.
+  prevDayPage = this._createDayPage(
+    computed(() => {
+      const day = this.daysToShow()[0];
+      return day && this.isDayView() && this.isPagerWarm() && !this.isViewingToday()
+        ? shiftDayStr(day, -1)
+        : undefined;
+    }),
+  );
+  nextDayPage = this._createDayPage(
+    computed(() => {
+      const day = this.daysToShow()[0];
+      return day && this.isDayView() && this.isPagerWarm()
+        ? shiftDayStr(day, 1)
+        : undefined;
+    }),
+  );
+
+  onDayPagerNavigate(direction: SwipePagerDirection): void {
+    if (direction === 1) {
+      this.goToNextPeriod();
+    } else {
+      this.goToPreviousPeriod();
+    }
+  }
+
+  // The nav buttons slide the day view like a swipe does.
+  navigatePrevious(): void {
+    const pager = this._dayPager();
+    if (this.isDayView() && pager) {
+      pager.go(-1);
+    } else {
+      this.goToPreviousPeriod();
+    }
+  }
+
+  navigateNext(): void {
+    const pager = this._dayPager();
+    if (this.isDayView() && pager) {
+      pager.go(1);
+    } else {
+      this.goToNextPeriod();
+    }
+  }
+
+  // Same inputs as scheduleDays for a single day: _contextNow anchors to the
+  // first shown day the same way, so a neighbour renders exactly what the
+  // view shows once it becomes the current day.
+  private _createDayPage(
+    day: Signal<string | undefined>,
+  ): Signal<ScheduleDayPage | undefined> {
+    return computed(() => {
+      const d = day();
+      if (!d) {
+        return undefined;
+      }
+      const scheduleDays = this.scheduleService.createScheduleDaysWithContext({
+        daysToShow: [d],
+        contextNow: anchorContextNow(d, Date.now()),
+        realNow: Date.now(),
+        currentTaskId: this.taskService.currentTaskId() ?? null,
+      });
+      return toScheduleDayPage(d, scheduleDays);
+    });
+  }
 
   goToPreviousPeriod(): void {
     // Never navigate into the past — the displayed range must include today or later
@@ -425,11 +514,12 @@ export class ScheduleComponent {
   // is in flight overshoots by the animation's current scale.
   //
   // The lookup is scoped to this component's own element: the right panel
-  // embeds a second schedule-week that renders its own #current-time.
+  // embeds a second schedule-week that renders its own #current-time. The day
+  // view's swipe pager renders neighbouring days too; those are inert.
   private _scrollAnchorToTop(elementId: string): void {
-    const element = this._elRef.nativeElement.querySelector(
-      `#${elementId}`,
-    ) as HTMLElement | null;
+    const element = Array.from(
+      this._elRef.nativeElement.querySelectorAll<HTMLElement>(`#${elementId}`),
+    ).find((el) => !el.closest('[inert]'));
 
     element?.scrollIntoView({ block: 'start', inline: 'start', behavior: 'instant' });
   }

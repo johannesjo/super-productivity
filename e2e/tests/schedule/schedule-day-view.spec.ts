@@ -1,4 +1,5 @@
 import { expect, test } from '../../fixtures/test.fixture';
+import { touchPan } from '../../utils/touch-pan';
 
 /** Format a Date as the app's day key (YYYY-MM-DD in local time). */
 const dbDate = (d: Date): string => {
@@ -10,8 +11,11 @@ const dbDate = (d: Date): string => {
 
 // schedule-week draws two [data-day] cells per day (main + end-of-day) and
 // schedule-month also uses [data-day], so scope day counting to the main
-// week columns only.
-const DAY_COL = 'schedule-week .col:not(.end-of-day)[data-day]';
+// week columns only. Day view's swipe pager keeps the neighbouring days
+// rendered but inert, so those are left out too.
+const DAY_COL = 'schedule-week:not([inert] *) .col:not(.end-of-day)[data-day]';
+
+const PHONE_VIEWPORT = { width: 390, height: 844 };
 
 const DESKTOP_VIEWPORT = { width: 1280, height: 720 };
 
@@ -92,6 +96,41 @@ test.describe('Schedule day view', () => {
     await dayBtn.click(); // month -> day: back to a single day column
     await expect(dayBtn).toHaveAttribute('aria-pressed', 'true');
     await expect(scheduleMonth).toHaveCount(0);
+    await expect(dayCols).toHaveCount(1);
+  });
+
+  test('pages a day at a time by swiping on a phone', async ({ page, workViewPage }) => {
+    await workViewPage.waitForTaskList();
+    await page.getByRole('menuitem', { name: 'Schedule' }).click();
+    await page.getByRole('button', { name: 'View Day' }).click();
+    await page.setViewportSize(PHONE_VIEWPORT);
+
+    const dayCols = page.locator(DAY_COL);
+    const scrollWrapper = page.locator('schedule .scroll-wrapper');
+    const today = dbDate(new Date());
+    const tomorrowDate = new Date();
+    tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+    const tomorrow = dbDate(tomorrowDate);
+    await expect(dayCols).toHaveCount(1);
+    await expect(dayCols.first()).toHaveAttribute('data-day', today);
+
+    // Mid-pan, tomorrow follows the finger in from the right.
+    await touchPan(page, scrollWrapper, -220, {
+      beforeRelease: async () => {
+        await expect(
+          page.locator(`swipe-pager .page:has(.col[data-day="${tomorrow}"])`),
+        ).toBeInViewport();
+      },
+    });
+    await expect(dayCols.first()).toHaveAttribute('data-day', tomorrow);
+    await expect(page.getByRole('button', { name: 'Previous Day' })).toBeEnabled();
+
+    await touchPan(page, scrollWrapper, 220);
+    await expect(dayCols.first()).toHaveAttribute('data-day', today);
+
+    // Never pages into the past.
+    await touchPan(page, scrollWrapper, 220);
+    await expect(dayCols.first()).toHaveAttribute('data-day', today);
     await expect(dayCols).toHaveCount(1);
   });
 });

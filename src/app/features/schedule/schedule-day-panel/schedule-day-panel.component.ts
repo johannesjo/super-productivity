@@ -8,8 +8,10 @@ import {
   inject,
   NgZone,
   OnDestroy,
+  Signal,
   signal,
   ViewChild,
+  viewChildren,
 } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { ScheduleWeekComponent } from '../schedule-week/schedule-week.component';
@@ -18,7 +20,6 @@ import { getPointerPosition } from '../../../util/get-pointer-position';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { selectTimelineWorkStartEndHours } from '../../config/store/global-config.reducer';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
-import { mapScheduleDaysToScheduleEvents } from '../map-schedule-data/map-schedule-days-to-schedule-events';
 import { FH, SVEType } from '../schedule.const';
 import { calculateTimeFromYPosition } from '../schedule-utils';
 import { DragDropRegistry } from '@angular/cdk/drag-drop';
@@ -39,9 +40,17 @@ import { MatBottomSheetRef } from '@angular/material/bottom-sheet';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { MatTooltip } from '@angular/material/tooltip';
-import { SwipeDirective } from '../../../ui/swipe-gesture/swipe.directive';
-import { parseDbDateStr } from '../../../util/parse-db-date-str';
-import { getDbDateStr } from '../../../util/get-db-date-str';
+import {
+  SwipePagerComponent,
+  SwipePagerPageDirective,
+} from '../../../ui/swipe-pager/swipe-pager.component';
+import { SwipePagerDirection } from '../../../ui/swipe-pager/swipe-pager-gesture';
+import {
+  ScheduleDayPage,
+  scheduleDayPageKey,
+  shiftDayStr,
+  toScheduleDayPage,
+} from '../schedule-day-page';
 
 const DEFAULT_MIN_DURATION = 15 * 60 * 1000;
 const SCROLL_DELAY_MS = 100;
@@ -71,7 +80,8 @@ interface DropTimeCalculation {
     MatIconButton,
     MatIcon,
     MatTooltip,
-    SwipeDirective,
+    SwipePagerComponent,
+    SwipePagerPageDirective,
   ],
   styleUrl: './schedule-day-panel.component.scss',
   templateUrl: './schedule-day-panel.component.html',
@@ -80,10 +90,22 @@ interface DropTimeCalculation {
 export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   T: typeof T = T;
 
-  @ViewChild('scheduleWeek', { read: ElementRef }) scheduleWeekRef!: ElementRef;
-  @ViewChild('scheduleWeek', { read: ScheduleWeekComponent })
-  scheduleWeekComponent!: ScheduleWeekComponent;
   @ViewChild('dropZone', { read: ElementRef }) dropZoneRef!: ElementRef<HTMLElement>;
+
+  // The pager also renders the neighbouring days while swiping; drops, the
+  // drag preview and scrolling all target the day that is shown.
+  private _scheduleWeekEls = viewChildren(ScheduleWeekComponent, { read: ElementRef });
+  private _scheduleWeeks = viewChildren(ScheduleWeekComponent);
+
+  get scheduleWeekRef(): ElementRef<HTMLElement> | undefined {
+    const i = this._currentScheduleWeekIndex();
+    return i === -1 ? undefined : this._scheduleWeekEls()[i];
+  }
+
+  get scheduleWeekComponent(): ScheduleWeekComponent | undefined {
+    const i = this._currentScheduleWeekIndex();
+    return i === -1 ? undefined : this._scheduleWeeks()[i];
+  }
 
   private _store = inject(Store);
   private _dateService = inject(DateService);
@@ -94,8 +116,8 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   private _ngZone = inject(NgZone);
   private _scheduleService = inject(ScheduleService);
   private _globalConfigService = inject(GlobalConfigService);
-  // Only the mobile bottom sheet gets swipe navigation: in the right panel a
-  // right swipe already closes the panel (see RightPanelComponent).
+  // Only the mobile bottom sheet pages by swiping: in the right panel a right
+  // swipe already closes the panel (see RightPanelComponent).
   readonly isInBottomSheet = !!inject(MatBottomSheetRef, { optional: true });
   private _pointerUpSubscription: Subscription | null = null;
   private _activeExternalTask: TaskWithSubTasks | null = null;
@@ -131,23 +153,27 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     return d ? [d] : [];
   });
 
-  scheduleDays = this._scheduleService.createScheduleDaysComputed(this.daysToShow);
+  // Set by the pager on first touch (or button use): neighbouring days are only
+  // computed from then on, so mouse users pay for the shown day alone.
+  isPagerWarm = signal(false);
+  readonly pageKey = scheduleDayPageKey;
 
-  private _eventsAndBeyondBudget = computed(() => {
-    const days = this.scheduleDays();
-    return mapScheduleDaysToScheduleEvents(days, FH);
-  });
-
-  events = computed(() => this._eventsAndBeyondBudget().eventsFlat);
-  beyondBudget = computed(() => this._eventsAndBeyondBudget().beyondBudgetDays);
-
-  hasNoEvents = computed(() => {
-    const hasVisibleEvents = this.events().some((ev) => ev.type !== SVEType.LunchBreak);
-    const hasBeyondBudgetEvents = this.beyondBudget().some(
-      (beyondBudgetDay) => beyondBudgetDay.length > 0,
-    );
-    return !hasVisibleEvents && !hasBeyondBudgetEvents;
-  });
+  currentPage = this._createPage(this.selectedDay);
+  // Like the schedule view, never page into the past.
+  prevPage = this._createPage(
+    computed(() => {
+      const day = this.selectedDay();
+      return day && this.isPagerWarm() && !this.isViewingToday()
+        ? shiftDayStr(day, -1)
+        : undefined;
+    }),
+  );
+  nextPage = this._createPage(
+    computed(() => {
+      const day = this.selectedDay();
+      return day && this.isPagerWarm() ? shiftDayStr(day, 1) : undefined;
+    }),
+  );
 
   private _workStartEndHours = toSignal(
     this._store.select(selectTimelineWorkStartEndHours),
@@ -166,9 +192,6 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   currentTimeRow = computed(() => {
     // Trigger re-computation every 2 minutes
     this._scheduleService.scheduleRefreshTick();
-    if (!this.isViewingToday()) {
-      return null;
-    }
     const now = new Date();
     const hours = now.getHours();
     const minutes = now.getMinutes();
@@ -198,29 +221,32 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     this._activeExternalTask = null;
   }
 
-  goToPreviousDay(): void {
-    // Like the schedule view, never navigate into the past.
-    const day = this.selectedDay();
-    if (!day || this.isViewingToday()) {
-      return;
-    }
-    const previousDay = this._shiftDay(day, -1);
+  onPagerNavigate(direction: SwipePagerDirection): void {
+    const page = direction === 1 ? this.nextPage() : this.prevPage();
     const today = this.todayDateStr();
-    this._selectedDay.set(today && previousDay > today ? previousDay : null);
-  }
-
-  goToNextDay(): void {
-    const day = this.selectedDay();
-    if (!day) {
+    if (!page) {
       return;
     }
-    this._selectedDay.set(this._shiftDay(day, 1));
+    this._selectedDay.set(today && page.day > today ? page.day : null);
   }
 
-  private _shiftDay(day: string, deltaDays: number): string {
-    const date = parseDbDateStr(day);
-    date.setDate(date.getDate() + deltaDays);
-    return getDbDateStr(date);
+  private _createPage(
+    day: Signal<string | undefined>,
+  ): Signal<ScheduleDayPage | undefined> {
+    const days = computed(() => {
+      const d = day();
+      return d ? [d] : [];
+    });
+    const scheduleDays = this._scheduleService.createScheduleDaysComputed(days);
+    return computed(() => {
+      const d = day();
+      return d ? toScheduleDayPage(d, scheduleDays()) : undefined;
+    });
+  }
+
+  private _currentScheduleWeekIndex(): number {
+    const day = this.selectedDay();
+    return this._scheduleWeeks().findIndex((cmp) => cmp.daysToShow()[0] === day);
   }
 
   onDragMove(event: MouseEvent | TouchEvent): void {
@@ -502,7 +528,10 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
       '.bottom-panel-content > *',
       '[class*="panel"]',
     ];
-    const el = this.scheduleWeekRef.nativeElement;
+    const el = this.scheduleWeekRef?.nativeElement;
+    if (!el) {
+      return null;
+    }
 
     for (const selector of selectors) {
       const container = el.closest(selector);
@@ -520,13 +549,13 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
   // (slideInFromRightAni) is translateX only, so it does not hit the transform
   // overshoot that fix had.
   private _scrollToCurrentTime(): void {
-    if (!this.scheduleWeekRef?.nativeElement) {
+    const scheduleWeekEl = this.scheduleWeekRef?.nativeElement;
+    if (!scheduleWeekEl) {
       Log.warn('[ScheduleDayPanel] No scheduleWeekRef available');
       return;
     }
 
-    const currentTimeElement =
-      this.scheduleWeekRef.nativeElement.querySelector('.current-time');
+    const currentTimeElement = scheduleWeekEl.querySelector('.current-time');
     if (!currentTimeElement) {
       Log.warn('[ScheduleDayPanel] Current time element not found');
       return;

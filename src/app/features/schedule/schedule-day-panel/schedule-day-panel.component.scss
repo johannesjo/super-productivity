@@ -23,15 +23,21 @@ schedule-week {
   display: block;
 }
 
-.empty-state {
+// Zero-height, so the hint takes no space in the flow: it would otherwise push
+// an empty day's grid down against the neighbouring day while swiping.
+.empty-state-anchor {
   position: sticky;
   top: 50%;
+  height: 0;
+  z-index: 100;
+  pointer-events: none;
+}
+
+.empty-state {
   margin-left: var(--s5);
   margin-right: var(--s);
   transform: translate(0, -50%);
   text-align: center;
-  pointer-events: none;
-  z-index: 100;
   border-radius: var(--card-border-radius);
   border: 1px solid var(--separator-color);
   background: var(--bg-lightest);

@@ -4,47 +4,63 @@
   (pointerenter)="onDragMove($event)"
   (mousemove)="onDragMove($event)"
   (touchmove)="onDragMove($event)"
-  swipeGesture
-  [swipeEnabled]="isInBottomSheet && !isDragging() && !scheduleWeek.isDragging()"
-  (swipeleft)="goToNextDay()"
-  (swiperight)="goToPreviousDay()"
 >
-  @if (hasNoEvents()) {
-    <div class="empty-state">
-      <div class="empty-state-text">
-        {{ T.F.SCHEDULE.DROP_TASKS_HERE_TO_SCHEDULE | translate }}
-      </div>
-    </div>
+  @if (currentPage(); as current) {
+    <swipe-pager
+      #pager
+      [prev]="prevPage() ?? null"
+      [current]="current"
+      [next]="nextPage() ?? null"
+      [trackKey]="pageKey"
+      [isEnabled]="isInBottomSheet && !isDragging()"
+      [(isWarm)]="isPagerWarm"
+      (navigate)="onPagerNavigate($event)"
+    >
+      <ng-template
+        [swipePagerPage]="current"
+        let-page
+        let-isCurrent="isCurrent"
+      >
+        @if (page.hasNoEvents) {
+          <div class="empty-state-anchor">
+            <div class="empty-state">
+              <div class="empty-state-text">
+                {{ T.F.SCHEDULE.DROP_TASKS_HERE_TO_SCHEDULE | translate }}
+              </div>
+            </div>
+          </div>
+        }
+        <schedule-week
+          [isInPanel]="true"
+          [events]="page.events"
+          [beyondBudget]="page.beyondBudget"
+          [daysToShow]="page.daysToShow"
+          [todayDateStr]="todayDateStr()"
+          [workStartEnd]="workStartEnd() || null"
+          [currentTimeRow]="page.day === todayDateStr() ? currentTimeRow() : null"
+          [isTaskDragActive]="isCurrent && isDragging()"
+        >
+          <button
+            weekHeaderStart
+            mat-icon-button
+            [disabled]="page.day === todayDateStr()"
+            [attr.aria-label]="T.F.SCHEDULE.PREVIOUS_DAY | translate"
+            [matTooltip]="T.F.SCHEDULE.PREVIOUS_DAY | translate"
+            (click)="pager.go(-1)"
+          >
+            <mat-icon>chevron_left</mat-icon>
+          </button>
+          <button
+            weekHeaderEnd
+            mat-icon-button
+            [attr.aria-label]="T.F.SCHEDULE.NEXT_DAY | translate"
+            [matTooltip]="T.F.SCHEDULE.NEXT_DAY | translate"
+            (click)="pager.go(1)"
+          >
+            <mat-icon>chevron_right</mat-icon>
+          </button>
+        </schedule-week>
+      </ng-template>
+    </swipe-pager>
   }
-  <schedule-week
-    #scheduleWeek
-    [isInPanel]="true"
-    [events]="events()"
-    [beyondBudget]="beyondBudget()"
-    [daysToShow]="daysToShow()"
-    [todayDateStr]="todayDateStr()"
-    [workStartEnd]="workStartEnd() || null"
-    [currentTimeRow]="currentTimeRow()"
-    [isTaskDragActive]="isDragging()"
-  >
-    <button
-      weekHeaderStart
-      mat-icon-button
-      [disabled]="isViewingToday()"
-      [attr.aria-label]="T.F.SCHEDULE.PREVIOUS_DAY | translate"
-      [matTooltip]="T.F.SCHEDULE.PREVIOUS_DAY | translate"
-      (click)="goToPreviousDay()"
-    >
-      <mat-icon>chevron_left</mat-icon>
-    </button>
-    <button
-      weekHeaderEnd
-      mat-icon-button
-      [attr.aria-label]="T.F.SCHEDULE.NEXT_DAY | translate"
-      [matTooltip]="T.F.SCHEDULE.NEXT_DAY | translate"
-      (click)="goToNextDay()"
-    >
-      <mat-icon>chevron_right</mat-icon>
-    </button>
-  </schedule-week>
 </div>
