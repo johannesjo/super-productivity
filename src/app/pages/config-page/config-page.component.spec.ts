@@ -281,6 +281,17 @@ describe('ConfigPageComponent', () => {
       expect(component.isSectionExpanded(OTHER)).toBe(true);
     });
 
+    it('carries a plugins action that switches to the Plugins tab', async () => {
+      const action = component.generalFormCfg
+        .find((s) => s.key === 'appFeatures')
+        ?.actions?.find((a) => a.label === T.GCF.APP_FEATURES.EXTEND_WITH_PLUGINS);
+
+      await action?.onClick();
+
+      expect(action).toBeDefined();
+      expect(component.selectedTabIndex).toBe(4);
+    });
+
     it('reopens via its search result after being collapsed', () => {
       component.onSectionExpandedChange(APP_FEATURES, false);
       component.expandedSection = 'appFeatures';

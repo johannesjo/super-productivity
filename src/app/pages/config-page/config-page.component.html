@@ -102,18 +102,6 @@
                   [section]="section"
                 ></config-section>
               </section>
-              @if (section.key === 'appFeatures') {
-                <div class="plugins-pointer">
-                  <button
-                    mat-button
-                    type="button"
-                    (click)="goToPluginsTab()"
-                  >
-                    <mat-icon>extension</mat-icon>
-                    {{ T.GCF.APP_FEATURES.EXTEND_WITH_PLUGINS | translate }}
-                  </button>
-                </div>
-              }
             }
           </div>
         </mat-tab>

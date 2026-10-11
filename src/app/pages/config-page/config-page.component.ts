@@ -206,7 +206,22 @@ export class ConfigPageComponent implements OnInit {
 
   constructor() {
     // Initialize tab-specific form configurations
-    this.generalFormCfg = GLOBAL_GENERAL_FORM_CONFIG.slice();
+    // The pointer to plugins sits inside App Features, below its switches.
+    this.generalFormCfg = GLOBAL_GENERAL_FORM_CONFIG.map((section) =>
+      section.key === 'appFeatures'
+        ? {
+            ...section,
+            actions: [
+              ...(section.actions ?? []),
+              {
+                label: T.GCF.APP_FEATURES.EXTEND_WITH_PLUGINS,
+                icon: 'extension',
+                onClick: () => this.goToPluginsTab(),
+              },
+            ],
+          }
+        : section,
+    );
     this.timeTrackingFormCfg = GLOBAL_TIME_TRACKING_FORM_CONFIG.slice();
     this.pluginsShortcutsFormCfg = GLOBAL_PLUGINS_FORM_CONFIG.slice();
     // "Browse backups" lives on the Import/Export section so every platform
@@ -448,8 +463,8 @@ export class ConfigPageComponent implements OnInit {
   }
 
   /**
-   * The pointer under App Features. Moves focus to the Plugins tab header, since
-   * the button itself is detached with the outgoing tab body.
+   * The plugins action inside App Features. Moves focus to the Plugins tab
+   * header, since the button itself is detached with the outgoing tab body.
    */
   goToPluginsTab(): void {
     this.selectedTabIndex = SETTINGS_PLUGINS_TAB_INDEX;
