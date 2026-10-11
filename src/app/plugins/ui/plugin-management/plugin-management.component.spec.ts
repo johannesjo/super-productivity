@@ -249,56 +249,55 @@ describe('PluginManagementComponent', () => {
     ).toBe(false);
   });
 
-  it('surfaces allowedHosts (with count) only when the "http" capability is declared', () => {
+  it('counts every declared permission and hook in the details title', () => {
+    // instant() echoes the key here (no translations loaded).
+    expect(
+      component.getPermissionsHooksTitle({
+        manifest: {
+          ...baseManifest,
+          permissions: ['http', 'getTasks'],
+          allowedHosts: ['api.example.com'],
+          hooks: [PluginHooks.TASK_COMPLETE],
+        },
+        loaded: true,
+        isEnabled: true,
+      }),
+    ).toBe('PLUGINS.PERMISSIONS (2) / PLUGINS.HOOKS (1)');
+    expect(
+      component.getPermissionsHooksTitle({
+        manifest: { ...baseManifest, hooks: [PluginHooks.TASK_COMPLETE] },
+        loaded: true,
+        isEnabled: true,
+      }),
+    ).toBe('PLUGINS.HOOKS (1)');
+  });
+
+  it('lists every declared permission exactly once, as checked access or as other', () => {
     const plugin = {
       manifest: {
         ...baseManifest,
-        permissions: ['http'],
-        allowedHosts: ['api.example.com', 'auth.example.com'],
-        hooks: [PluginHooks.TASK_COMPLETE],
+        permissions: ['http', 'getTasks', 'nodeExecution'],
+        allowedHosts: ['api.example.com'],
       },
       loaded: true,
       isEnabled: true,
     };
 
-    expect(component.getNetworkReachHosts(plugin)).toEqual([
-      'api.example.com',
-      'auth.example.com',
+    expect(component.getApiAccess(plugin).map((a) => a.permission)).toEqual([
+      'nodeExecution',
+      'http',
     ]);
-    // instant() echoes the key here (no translations loaded); the allowedHosts part
-    // appears with its count, between permissions and hooks.
-    expect(component.getPermissionsHooksTitle(plugin)).toBe(
-      'PLUGINS.PERMISSIONS (1) / PLUGINS.ALLOWED_HOSTS (2) / PLUGINS.HOOKS (1)',
-    );
+    expect(component.getOtherPermissions(plugin)).toEqual(['getTasks']);
   });
 
-  it('hides allowedHosts when the plugin lacks the "http" capability (bridge would reject request)', () => {
-    const plugin = {
-      manifest: {
-        ...baseManifest,
-        permissions: ['nodeExecution'],
-        allowedHosts: ['api.example.com', 'auth.example.com'],
-        hooks: [PluginHooks.TASK_COMPLETE],
-      },
-      loaded: true,
-      isEnabled: true,
-    };
-
-    expect(component.getNetworkReachHosts(plugin)).toEqual([]);
-    // No "ALLOWED_HOSTS" segment — network reach is not advertised without "http".
-    expect(component.getPermissionsHooksTitle(plugin)).toBe(
-      'PLUGINS.PERMISSIONS (1) / PLUGINS.HOOKS (1)',
-    );
-  });
-
-  it('omits allowedHosts from the title when none are declared', () => {
-    const title = component.getPermissionsHooksTitle({
-      manifest: { ...baseManifest, hooks: [PluginHooks.TASK_COMPLETE] },
-      loaded: true,
-      isEnabled: true,
-    });
-
-    expect(title).toBe('PLUGINS.HOOKS (1)');
+  it('lists "http" without allowed hosts as an other permission', () => {
+    expect(
+      component.getOtherPermissions({
+        manifest: { ...baseManifest, permissions: ['http'] },
+        loaded: true,
+        isEnabled: true,
+      }),
+    ).toEqual(['http']);
   });
 
   it('navigates to the work view and opens the issue panel', async () => {
