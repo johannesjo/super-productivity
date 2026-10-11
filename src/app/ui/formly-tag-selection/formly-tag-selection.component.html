@@ -1,7 +1,7 @@
 <tag-edit
   [isShowMyDayTag]="true"
   [tagIds]="value"
-  [excludedTagIds]="field.templateOptions?.excludedTagIds"
+  [excludedTagIds]="$safeNavigationMigration(field.templateOptions?.excludedTagIds)"
   (tagUpdate)="formControl.setValue($event)"
 ></tag-edit>
 

@@ -35,7 +35,7 @@
     </mat-form-field>
     <mat-slide-toggle
       class="width100"
-      [checked]="this.config?.isIncreaseDoneSoundPitch"
+      [checked]="$safeNavigationMigration(this.config?.isIncreaseDoneSoundPitch)"
       formControlName="isIncreaseDoneSoundPitch"
       >{{ T.GCF.SOUND.IS_INCREASE_DONE_PITCH | translate }}</mat-slide-toggle
     >

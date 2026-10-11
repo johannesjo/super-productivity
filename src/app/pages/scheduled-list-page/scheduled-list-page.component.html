@@ -9,7 +9,7 @@
         <p class="no-scheduled-tasks">{{ T.SCHEDULE.NO_REPEATABLE_TASKS | translate }}</p>
       }
       <div
-        [@standardList]="taskRepeatCfgs?.length"
+        [@standardList]="$safeNavigationMigration(taskRepeatCfgs?.length)"
         class="repeat-task-cfgs"
       >
         @for (taskRepeatCfg of taskRepeatCfgs; track taskRepeatCfg.id) {
@@ -69,7 +69,7 @@
         </p>
       }
       <div
-        [@standardList]="allScheduledTasks?.length"
+        [@standardList]="$safeNavigationMigration(allScheduledTasks?.length)"
         class="tasks"
       >
         @for (task of allScheduledTasks; track task.id) {
@@ -117,7 +117,7 @@
         </p>
       }
       <div
-        [@standardList]="allScheduledTasks?.length"
+        [@standardList]="$safeNavigationMigration(allScheduledTasks?.length)"
         class="tasks"
       >
         @for (task of allScheduledTasks; track task.id) {

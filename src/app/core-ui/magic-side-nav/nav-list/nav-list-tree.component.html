@@ -89,7 +89,7 @@
           class="nav-child-item"
           [class.draggable]="node.data?.k !== MenuTreeKind.TAG"
         >
-          @switch (node.data?.k) {
+          @switch ($safeNavigationMigration(node.data?.k)) {
             @case (MenuTreeKind.PROJECT) {
               <nav-item
                 [workContext]="node.data.project"

@@ -167,19 +167,44 @@ export class PluginManagementComponent {
     return plugins;
   });
 
+  // Uploaded plugins, then built-in integrations (issue and calendar providers), then
+  // other built-ins, each in load order. Grouped by origin and type rather than enabled
+  // state, so a card never moves while its toggle is used.
+  readonly pluginGroups = computed(() => {
+    const plugins = this.allPlugins();
+    const states = this._pluginService.pluginStates();
+    const isUploaded = (p: PluginInstance): boolean =>
+      states.get(p.manifest.id)?.type === 'uploaded';
+    const builtIn = plugins.filter((p) => !isUploaded(p));
+    return [
+      { titleKey: T.PLUGINS.GROUP_UPLOADED, plugins: plugins.filter(isUploaded) },
+      {
+        titleKey: T.PLUGINS.GROUP_INTEGRATIONS,
+        plugins: builtIn.filter((p) => this.isIssueProviderPlugin(p)),
+      },
+      {
+        titleKey: T.PLUGINS.GROUP_OTHER,
+        plugins: builtIn.filter((p) => !this.isIssueProviderPlugin(p)),
+      },
+    ].filter((group) => group.plugins.length > 0);
+  });
+
   // Upload state
   readonly isUploading = signal<boolean>(false);
   readonly uploadError = signal<string | null>(null);
 
   onPluginToggle(plugin: PluginInstance, event: MatSlideToggleChange): void {
     if (event.checked) {
-      this.enablePlugin(plugin);
+      this.enablePlugin(plugin, event);
     } else {
       this.disablePlugin(plugin, event);
     }
   }
 
-  private async enablePlugin(plugin: PluginInstance): Promise<void> {
+  private async enablePlugin(
+    plugin: PluginInstance,
+    event: MatSlideToggleChange,
+  ): Promise<void> {
     PluginLog.log('Enabling plugin:', plugin.manifest.id);
 
     try {
@@ -192,7 +217,8 @@ export class PluginManagementComponent {
           'User denied Node.js execution permission for plugin:',
           plugin.manifest.id,
         );
-        // Reset the toggle state
+        // The toggle switched itself on on click; turn it back off since nothing was enabled
+        event.source.checked = false;
         return;
       }
 
@@ -299,8 +325,13 @@ export class PluginManagementComponent {
       return;
     }
 
-    this.isUploading.set(true);
     this.uploadError.set(null);
+    if (!(await this._confirmInstall())) {
+      input.value = '';
+      return;
+    }
+
+    this.isUploading.set(true);
 
     try {
       const plugin = await this._pluginService.loadPluginFromZip(file);
@@ -406,6 +437,31 @@ export class PluginManagementComponent {
   }
 
   /** Resolves true only for the OK button; Cancel, Esc and backdrop resolve false. */
+  // Uploaded code is unreviewed, so the full risk list is shown here, right before it
+  // is installed, instead of above every plugin on the page.
+  private async _confirmInstall(): Promise<boolean> {
+    const t = (key: string): string => escapeHtml(this._translateService.instant(key));
+    const risks = [
+      T.PLUGINS.RISK_DATA_ACCESS,
+      T.PLUGINS.RISK_MALICIOUS_CODE,
+      T.PLUGINS.RISK_SYSTEM_ACCESS,
+      T.PLUGINS.RISK_PERFORMANCE,
+    ];
+    const message =
+      `<p>${t(T.PLUGINS.SECURITY_WARNING)}</p>` +
+      `<ul>${risks.map((risk) => `<li>${t(risk)}</li>`).join('')}</ul>` +
+      `<p>${t(T.PLUGINS.RECOMMENDATION)}</p>`;
+    const result = await firstValueFrom(
+      this._dialog
+        .open(DialogConfirmComponent, {
+          restoreFocus: true,
+          data: { message, okTxt: T.PLUGINS.INSTALL_PLUGIN },
+        })
+        .afterClosed(),
+    );
+    return result === true;
+  }
+
   private async _confirmInDialog(
     message: string,
     translateParams: Record<string, string | number>,
@@ -468,6 +524,12 @@ export class PluginManagementComponent {
   getNetworkReachHosts(plugin: PluginInstance): string[] {
     const hosts = plugin.manifest.allowedHosts;
     return plugin.manifest.permissions?.includes('http') && hosts?.length ? hosts : [];
+  }
+
+  getDetailsTitle(plugin: PluginInstance): string {
+    const details = this._translateService.instant(T.PLUGINS.DETAILS);
+    const summary = this.getPermissionsHooksTitle(plugin);
+    return summary ? `${details} · ${summary}` : details;
   }
 
   getPermissionsHooksTitle(plugin: PluginInstance): string {

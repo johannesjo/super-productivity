@@ -232,7 +232,7 @@
           }
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "main": "src/test.ts",
             "polyfills": ["zone.js", "zone.js/testing", "src/polyfills.ts"],
