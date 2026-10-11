@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { PlainspaceSyncAdapterService } from './plainspace-sync-adapter.service';
 import { PlainspaceApiService } from './plainspace-api.service';
 import { PlainspaceCfg } from './plainspace.model';
@@ -25,6 +25,7 @@ describe('PlainspaceSyncAdapterService', () => {
       'getById$',
       'patchTask$',
       'createTask$',
+      'deleteTask$',
     ]);
     TestBed.configureTestingModule({
       providers: [
@@ -148,6 +149,17 @@ describe('PlainspaceSyncAdapterService', () => {
     });
     // No numeric issue number -> the SP title keeps no '#123' prefix.
     expect((res as { issueNumber?: number }).issueNumber).toBeUndefined();
+  });
+
+  it('deleteIssue deletes the task in Plainspace', async () => {
+    api.deleteTask$.and.returnValue(of(undefined));
+    await adapter.deleteIssue('t1', cfg);
+    expect(api.deleteTask$).toHaveBeenCalledWith('t1', cfg);
+  });
+
+  it('deleteIssue rejects when the delete fails', async () => {
+    api.deleteTask$.and.returnValue(throwError(() => new Error('boom')));
+    await expectAsync(adapter.deleteIssue('t1', cfg)).toBeRejected();
   });
 
   it('fetchIssue returns the issue, or {} when it is missing', async () => {

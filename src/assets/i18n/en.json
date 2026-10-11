@@ -1835,6 +1835,7 @@
       },
       "D_CONFIRM_DELETE": {
         "MSG": "Are you sure you want to delete the task \"{{title}}\"?",
+        "MSG_PLAINSPACE": "Delete the task \"{{title}}\"? It is also deleted in Plainspace for everyone in the Space.",
         "OK": "Delete"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
@@ -1938,6 +1939,10 @@
           "MSG": {
             "ONE": "Delete <strong>{{count}}</strong> task? Its subtasks are deleted too.",
             "OTHER": "Delete <strong>{{count}}</strong> tasks? Subtasks are deleted too."
+          },
+          "MSG_PLAINSPACE": {
+            "ONE": "Delete <strong>{{count}}</strong> task? Its subtasks are deleted too. It is also deleted in Plainspace for everyone in the Space.",
+            "OTHER": "Delete <strong>{{count}}</strong> tasks? Subtasks are deleted too. Plainspace tasks among them are also deleted for everyone in their Space."
           },
           "OK": "Delete"
         },

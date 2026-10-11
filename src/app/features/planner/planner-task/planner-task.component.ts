@@ -49,6 +49,10 @@ import { combineDateAndTime } from '../../../util/combine-date-and-time';
 import { millisecondsDiffToRemindOption } from '../../tasks/util/remind-option-to-milliseconds';
 import { PlannerActions } from '../store/planner.actions';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import {
+  getTaskDeleteConfirmData,
+  isTaskDeleteConfirmRequired,
+} from '../../tasks/util/get-task-delete-confirm';
 import { first } from 'rxjs/operators';
 import { isInputElement, isLinkTarget } from '../../../util/dom-element';
 import { isMultiSelectModifierEvent } from '../../../util/is-multi-select-modifier-event';
@@ -574,15 +578,15 @@ export class PlannerTaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this._isTaskDeleteTriggered) {
       return;
     }
-    if (this._configService.cfg()?.tasks?.isConfirmBeforeDelete ?? true) {
+    if (
+      isTaskDeleteConfirmRequired(
+        this.task(),
+        this._configService.cfg()?.tasks?.isConfirmBeforeDelete ?? true,
+      )
+    ) {
       this._matDialog
         .open(DialogConfirmComponent, {
-          data: {
-            okTxt: T.F.TASK.D_CONFIRM_DELETE.OK,
-            message: T.F.TASK.D_CONFIRM_DELETE.MSG,
-            isFocusConfirm: true,
-            translateParams: { title: this.task().title },
-          },
+          data: getTaskDeleteConfirmData(this.task()),
         })
         .afterClosed()
         .pipe(takeUntilDestroyed(this._destroyRef))
