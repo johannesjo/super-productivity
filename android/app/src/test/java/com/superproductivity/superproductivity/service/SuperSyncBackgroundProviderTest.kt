@@ -9,6 +9,7 @@ import com.superproductivity.superproductivity.crypto.OpPayloadDecryptor
 import org.json.JSONArray
 import org.json.JSONObject
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -355,6 +356,50 @@ class SuperSyncBackgroundProviderTest {
 
         assertTrue(result.remindersToSchedule.isEmpty())
         assertEquals(setOf("task-lww-3"), result.taskIdsToCancel)
+    }
+
+    @Test
+    fun `a time-preserving LWW snapshot keeps the reminder it sets while clearing the absent deadline`() {
+        // preserveTaskSnapshotTime (time-preserving-task-snapshot.util.ts) turns a
+        // replace snapshot into a patch listing EVERY absent optional field in
+        // clearedFields — deadlineRemindAt included for a task without a deadline.
+        val result = parse(
+            op(
+                1, "[TASK] LWW Update", "UPD", "task-tp-1",
+                """{"actionPayload": {"id": "task-tp-1", "title": "Renamed", "isDone": false, "remindAt": 4102444200000},
+                    "entityChanges": [], "lwwUpdateMode": "patch",
+                    "clearedFields": ["notes", "dueDay", "deadlineDay", "deadlineWithTime", "deadlineRemindAt"]}"""
+            )
+        )
+
+        val reminder = result.remindersToSchedule.single()
+        assertEquals("task-tp-1", reminder.taskId)
+        assertEquals(4102444200000L, reminder.remindAt)
+        assertEquals(false, reminder.isDeadline)
+        // The worker cancels first (clearing a stale deadline alarm), then reschedules
+        assertEquals(setOf("task-tp-1"), result.taskIdsToCancel)
+        // At fire time the task alarm at that time is current, a deadline alarm is stale
+        assertFalse(result.isAlarmStale("task-tp-1", 4102444200000L, "TASK"))
+        assertTrue(result.isAlarmStale("task-tp-1", 4102444100000L, "TASK"))
+        assertTrue(result.isAlarmStale("task-tp-1", 4102444300000L, "DEADLINE"))
+    }
+
+    @Test
+    fun `a schedule after an earlier op's cancel supersedes it`() {
+        val result = parse(
+            op(
+                1, "[Task Shared] dismissReminderOnly", "UPD", "task-dr-1",
+                """{"actionPayload": {"id": "task-dr-1"}, "entityChanges": []}"""
+            ),
+            op(
+                2, "[Task Shared] updateTask", "UPD", "task-dr-1",
+                """{"actionPayload": {"task": {"id": "task-dr-1", "changes": {"remindAt": 4102444200000}}}, "entityChanges": []}"""
+            )
+        )
+
+        assertEquals(4102444200000L, result.remindersToSchedule.single().remindAt)
+        assertTrue(result.taskIdsToCancel.isEmpty())
+        assertFalse(result.isAlarmStale("task-dr-1", 4102444200000L, "TASK"))
     }
 
     @Test

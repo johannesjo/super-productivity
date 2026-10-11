@@ -118,26 +118,6 @@ class ReminderAlarmReceiver : BroadcastReceiver() {
             )
         } ?: return false  // Error -> fail-open
 
-        // Stale if explicitly cancelled (deleted/done/dismissed/unscheduled)
-        if (taskId in result.taskIdsToCancel) return true
-
-        // Check if the task was rescheduled to a DIFFERENT time on another device.
-        // If the schedule op's remindAt matches this alarm's triggerAtMs, this IS
-        // the current schedule — not stale. Only suppress if times differ.
-        // Match on the kind too: a task can have both a standard reminder and a
-        // deadline reminder with different times — don't let one suppress the other.
-        // DUE_DATE alarms are skipped: sync never carries a due-day reminder to compare.
-        if (triggerAtMs > 0L && reminderType != "DUE_DATE") {
-            val isDeadline = reminderType == "DEADLINE"
-            val rescheduled = result.remindersToSchedule.any {
-                it.taskId == taskId && it.isDeadline == isDeadline && it.remindAt != triggerAtMs
-            }
-            if (rescheduled) {
-                Log.d(TAG, "Task $taskId was rescheduled (trigger=$triggerAtMs), suppressing")
-                return true
-            }
-        }
-
-        return false
+        return result.isAlarmStale(taskId, triggerAtMs, reminderType)
     }
 }

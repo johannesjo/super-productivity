@@ -164,10 +164,10 @@ class SuperSyncBackgroundProvider(
 
         // Keyed by (taskId, isDeadline) so later ops naturally overwrite earlier ones
         val reminderMap = mutableMapOf<Pair<String, Boolean>, ReminderToSchedule>()
-        // Per-task: tracks whether the LAST op affecting this task was a cancel or a schedule.
-        // Ops are in server sequence order, so processing forward ensures the latest op wins.
-        // This handles dismiss-then-reschedule: the reschedule (later op) takes precedence.
-        val taskLastAction = mutableMapOf<String, String>()
+        // Tasks whose alarms are all cancelled before their collected reminders
+        // are scheduled. Ops are in server sequence order, so processing forward
+        // ensures the latest op wins: dismiss-then-reschedule keeps only the reschedule.
+        val taskIdsToCancel = mutableSetOf<String>()
 
         for (i in 0 until ops.length()) {
             val serverOp = ops.getJSONObject(i)
@@ -175,34 +175,31 @@ class SuperSyncBackgroundProvider(
             // Lazy so envelope-only ops (e.g. DEL) never pay for decryption
             val payload = lazy(LazyThreadSafetyMode.NONE) { resolvePayload(op) }
 
-            // Process schedules first so that within the same op, cancels take precedence
             val tempMap = mutableMapOf<Pair<String, Boolean>, ReminderToSchedule>()
             extractRemindersToSchedule(op, payload, tempMap, now)
-            for ((key, reminder) in tempMap) {
-                reminderMap[key] = reminder
-                taskLastAction[reminder.taskId] = "schedule"
-            }
-
             val cancelIds = mutableSetOf<String>()
             extractReminderRelevantTaskIds(op, payload, cancelIds)
+
             for (id in cancelIds) {
-                taskLastAction[id] = "cancel"
+                taskIdsToCancel.add(id)
                 // A cancel clears every alarm slot of the task, so reminders
                 // collected from earlier ops are stale: drop them, or a later
                 // schedule of the other slot (e.g. setDeadline) would revive them.
                 reminderMap.keys.removeAll { it.first == id }
             }
+            for ((key, reminder) in tempMap) {
+                reminderMap[key] = reminder
+                // A schedule supersedes an EARLIER op's cancel. The same op's
+                // cancel stays: it clears the slot this op does not set, e.g. an
+                // LWW snapshot that sets remindAt and lists the absent
+                // deadlineRemindAt in clearedFields. Done ops schedule nothing.
+                if (reminder.taskId !in cancelIds) taskIdsToCancel.remove(reminder.taskId)
+            }
         }
-
-        val taskIdsToCancel = taskLastAction
-            .filter { it.value == "cancel" }
-            .keys
-            .toSet()
-        val reminders = reminderMap.values.filter { taskLastAction[it.taskId] == "schedule" }
 
         return ReminderChangeResult(
             taskIdsToCancel = taskIdsToCancel,
-            remindersToSchedule = reminders,
+            remindersToSchedule = reminderMap.values.toList(),
             latestSeq = latestSeq,
             hasMore = hasMore
         )
@@ -488,6 +485,8 @@ class SuperSyncBackgroundProvider(
                 if (entityId.isEmpty()) continue
 
                 val changes = entry.optJSONObject("changes") ?: continue
+                // A done task gets no alarm; its cancel comes from the same op
+                if (changes.optBoolean("isDone", false)) continue
 
                 val title = changes.optString("title", "").ifEmpty {
                     payload.optJSONObject("actionPayload")
