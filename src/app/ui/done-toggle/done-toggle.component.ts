@@ -39,6 +39,8 @@ export class DoneToggleComponent {
   readonly isMultiSelectAware = input<boolean>(false);
   readonly toggled = output<void>();
 
+  readonly isTouchActive = isTouchActive;
+
   onClick(ev: MouseEvent): void {
     // A modifier click selects the task row instead of toggling done; let it
     // bubble to the row.
@@ -47,7 +49,7 @@ export class DoneToggleComponent {
     }
     // Confirm completing a task by tap, like a native checkbox. Not on undo,
     // and not for keyboard or mouse toggles.
-    if (isTouchActive() && !this.isDone()) {
+    if (this.isTouchActive() && !this.isDone()) {
       performHapticFeedback('confirm');
     }
     this.toggled.emit();

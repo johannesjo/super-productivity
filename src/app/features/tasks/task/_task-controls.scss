@@ -146,15 +146,13 @@ task-priority-indicator {
     }
 
     &:focus-visible {
-      .time {
-        color: var(--text-color);
-      }
-    }
-
-    &:focus-visible {
       outline: var(--focus-ring-width) solid var(--focus-ring-color);
       outline-offset: var(--focus-ring-offset);
       border-radius: var(--radius-xs);
+
+      .time {
+        color: var(--text-color);
+      }
     }
   }
 
