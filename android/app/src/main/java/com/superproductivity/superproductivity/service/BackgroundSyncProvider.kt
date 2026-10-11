@@ -49,18 +49,18 @@ fun cancelRemindersForTask(context: Context, taskId: String) {
 
 /**
  * Schedule an AlarmManager alarm from a sync-detected reminder.
- * Uses conservative defaults (no alarm style, not ongoing) since user
- * preferences are not available in the background context.
+ * [useAlarmStyle] mirrors the user's setting; like the app
+ * (capacitor-reminder.service.ts), alarm-style reminders are also ongoing.
  * No-op on failure — logs and continues.
  */
-fun scheduleReminderFromSync(context: Context, reminder: ReminderToSchedule) {
+fun scheduleReminderFromSync(context: Context, reminder: ReminderToSchedule, useAlarmStyle: Boolean) {
     try {
         val reminderId = if (reminder.isDeadline) reminder.taskId + DEADLINE_SUFFIX else reminder.taskId
         val notificationId = SuperSyncBackgroundProvider.generateNotificationId(reminderId)
         val reminderType = if (reminder.isDeadline) "DEADLINE" else "TASK"
         ReminderNotificationHelper.scheduleReminder(
             context, notificationId, reminderId, reminder.taskId, reminder.title,
-            reminderType, reminder.remindAt, useAlarmStyle = false, isOngoing = false
+            reminderType, reminder.remindAt, useAlarmStyle = useAlarmStyle, isOngoing = useAlarmStyle
         )
     } catch (e: Exception) {
         Log.w(TAG, "Failed to schedule reminder for task=${reminder.taskId}", e)
