@@ -47,14 +47,33 @@
       class="custom-form"
     ></ng-template>
 
-    @if (section?.actions?.length) {
+    @for (action of rowActions(); track action.label) {
+      <button
+        class="action-row"
+        type="button"
+        (click)="onAction(action)"
+        [disabled]="isActionPending(action)"
+      >
+        @if (action.icon) {
+          <mat-icon
+            class="action-row__icon"
+            aria-hidden="true"
+            >{{ action.icon }}</mat-icon
+          >
+        }
+        <span class="action-row__label">{{ action.label | translate }}</span>
+        <mat-icon aria-hidden="true">chevron_right</mat-icon>
+      </button>
+    }
+
+    @if (buttonActions().length) {
       <div class="section-actions">
-        @for (action of section?.actions || []; track action.label) {
+        @for (action of buttonActions(); track action.label) {
           <button
             (click)="onAction(action)"
             [disabled]="isActionPending(action)"
-            [matButton]="action.isProminent ? 'filled' : 'outlined'"
             color="primary"
+            mat-stroked-button
             type="button"
           >
             @if (action.icon) {

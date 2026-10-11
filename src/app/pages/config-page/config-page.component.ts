@@ -216,7 +216,7 @@ export class ConfigPageComponent implements OnInit {
               {
                 label: T.GCF.APP_FEATURES.EXTEND_WITH_PLUGINS,
                 icon: 'extension',
-                isProminent: true,
+                isRow: true,
                 onClick: () => this.goToPluginsTab(),
               },
             ],
