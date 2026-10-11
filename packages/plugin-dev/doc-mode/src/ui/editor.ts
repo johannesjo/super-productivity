@@ -9,8 +9,8 @@ import { Editor } from '@tiptap/core';
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
 import { NodeSelection } from '@tiptap/pm/state';
 import StarterKit from '@tiptap/starter-kit';
-import Placeholder from '@tiptap/extension-placeholder';
-import BubbleMenu from '@tiptap/extension-bubble-menu';
+import { Placeholder } from '@tiptap/extensions';
+import { BubbleMenu } from '@tiptap/extension-bubble-menu';
 import {
   PluginHooks,
   type ActiveWorkContext,
@@ -523,7 +523,7 @@ const setActiveContext = async (ctx: ActiveWorkContext | null): Promise<void> =>
   try {
     editor.commands.setContent(
       docJson as Parameters<typeof editor.commands.setContent>[0],
-      false,
+      { emitUpdate: false },
     );
   } catch (err) {
     // Parsing the stored blob failed. Don't auto-save the fallback —
@@ -533,7 +533,7 @@ const setActiveContext = async (ctx: ActiveWorkContext | null): Promise<void> =>
     isDocCorrupt = true;
     editor.commands.setContent(
       buildSeedDoc(ctx, lookupTask) as Parameters<typeof editor.commands.setContent>[0],
-      false,
+      { emitUpdate: false },
     );
   }
   updateDocStatusBanner();
@@ -1923,7 +1923,8 @@ const mount = async (): Promise<void> => {
     <button type="button" data-action="strike" title="Strikethrough" aria-label="Strikethrough"><s>S</s></button>
     <button type="button" data-action="code" title="Inline code" aria-label="Inline code"><code>{}</code></button>
   `;
-  document.body.appendChild(bubbleEl);
+  // Not attached here: BubbleMenu appends it (via `appendTo`) while shown
+  // and detaches it while hidden.
 
   // Editor-side collaborators handed to both task-ref node variants.
   // `getEditor` is late-bound — the nodes are constructed before the
@@ -1940,7 +1941,15 @@ const mount = async (): Promise<void> => {
   editor = new Editor({
     element: root,
     extensions: [
-      StarterKit,
+      // TipTap 3's StarterKit adds Link, Underline, ListKeymap and
+      // TrailingNode. Keep them off so the stored-doc schema and the
+      // editing/keyboard behaviour stay what the 2.x editor shipped.
+      StarterKit.configure({
+        link: false,
+        underline: false,
+        listKeymap: false,
+        trailingNode: false,
+      }),
       Placeholder.configure({
         placeholder: "Press '/' to add tasks, headings and more…",
       }),
@@ -1948,6 +1957,8 @@ const mount = async (): Promise<void> => {
       createTaskRefNode('subTaskRef', taskRefDeps),
       BubbleMenu.configure({
         element: bubbleEl,
+        // Body-level, as the 2.x tippy popup was.
+        appendTo: () => document.body,
         shouldShow: ({ from, to, state }) => {
           if (from === to) return false;
           // A selection that *crosses* an atom (e.g. paragraph → divider
