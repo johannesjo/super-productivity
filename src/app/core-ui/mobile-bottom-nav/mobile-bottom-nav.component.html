@@ -43,6 +43,7 @@
         mat-button
         class="nav-button"
         [class.active]="activePluginId() === button.pluginId && isShowPluginPanel()"
+        [attr.aria-pressed]="activePluginId() === button.pluginId && isShowPluginPanel()"
         (click)="onPluginButtonClick(button)"
         [attr.aria-label]="button.label"
       >
@@ -56,6 +57,7 @@
         mat-button
         class="nav-button e2e-toggle-schedule-day-panel"
         [class.active]="isShowScheduleDayPanel()"
+        [attr.aria-pressed]="isShowScheduleDayPanel()"
         (click)="toggleScheduleDayPanel()"
         [attr.aria-label]="T.BN.SHOW_SCHEDULE | translate"
       >
@@ -66,6 +68,7 @@
         mat-button
         class="nav-button e2e-toggle-issue-provider-panel"
         [class.active]="isShowIssuePanel()"
+        [attr.aria-pressed]="isShowIssuePanel()"
         (click)="toggleIssuePanel()"
         [attr.aria-label]="T.BN.SHOW_ISSUE_PANEL | translate"
       >
@@ -76,6 +79,7 @@
         mat-button
         class="nav-button e2e-toggle-notes-btn"
         [class.active]="isShowNotes()"
+        [attr.aria-pressed]="isShowNotes()"
         (click)="toggleNotes()"
         [attr.aria-label]="T.BN.SHOW_NOTES | translate"
       >

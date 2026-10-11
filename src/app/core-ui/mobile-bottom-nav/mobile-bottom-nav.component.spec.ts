@@ -4,7 +4,7 @@ import { TranslateModule } from '@ngx-translate/core';
 import { provideRouter } from '@angular/router';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { Store } from '@ngrx/store';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 
 import { MobileBottomNavComponent } from './mobile-bottom-nav.component';
 import { LayoutService } from '../layout/layout.service';
@@ -13,6 +13,10 @@ import { PluginIconComponent } from '../../plugins/ui/plugin-icon/plugin-icon.co
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { togglePluginPanel } from '../layout/store/layout.actions';
+import {
+  selectActivePluginId,
+  selectIsShowPluginPanel,
+} from '../layout/store/layout.reducer';
 import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
 import { AppFeaturesConfig } from '../../features/config/global-config.model';
 
@@ -75,6 +79,8 @@ describe('MobileBottomNavComponent', () => {
     toggleScheduleDayPanel: jasmine.Spy;
   };
   let dispatch: jasmine.Spy;
+  let activePluginId$: BehaviorSubject<string | null>;
+  let isShowPluginPanel$: BehaviorSubject<boolean>;
 
   const render = async (
     over: Partial<AppFeaturesConfig>,
@@ -95,6 +101,14 @@ describe('MobileBottomNavComponent', () => {
       toggleScheduleDayPanel: jasmine.createSpy('toggleScheduleDayPanel'),
     };
     dispatch = jasmine.createSpy('dispatch');
+    activePluginId$ = new BehaviorSubject<string | null>(null);
+    isShowPluginPanel$ = new BehaviorSubject(false);
+    const select = (selector: unknown): unknown =>
+      selector === selectActivePluginId
+        ? activePluginId$
+        : selector === selectIsShowPluginPanel
+          ? isShowPluginPanel$
+          : of(null);
 
     TestBed.resetTestingModule();
     await TestBed.configureTestingModule({
@@ -110,7 +124,7 @@ describe('MobileBottomNavComponent', () => {
           provide: PluginBridgeService,
           useValue: { sidePanelButtons: signal(sidePanelButtons) },
         },
-        { provide: Store, useValue: { select: () => of(null), dispatch } },
+        { provide: Store, useValue: { select, dispatch } },
         {
           provide: WorkContextService,
           useValue: { activeWorkContext$: of({ isEnableBacklog: false }) },
@@ -201,6 +215,7 @@ describe('MobileBottomNavComponent', () => {
       expect(menuTrigger()).toBeFalsy();
       expect(btn).toBeTruthy();
       expect(btn?.classList).not.toContain('active');
+      expect(btn?.getAttribute('aria-pressed')).toBe('false');
 
       btn?.click();
       expect(layout[toggle]).toHaveBeenCalledTimes(1);
@@ -208,6 +223,7 @@ describe('MobileBottomNavComponent', () => {
       layout[isShow].set(true);
       fixture.detectChanges();
       expect(btn?.classList).toContain('active');
+      expect(btn?.getAttribute('aria-pressed')).toBe('true');
     });
   });
 
@@ -220,10 +236,21 @@ describe('MobileBottomNavComponent', () => {
     const btn = nav().querySelector<HTMLElement>('button[aria-label="Doc Mode"]');
     expect(menuTrigger()).toBeFalsy();
     expect(btn?.querySelector('plugin-icon')).toBeTruthy();
+    expect(btn?.getAttribute('aria-pressed')).toBe('false');
 
     btn?.click();
     expect(dispatch).toHaveBeenCalledWith(togglePluginPanel('p1'));
     expect(onClick).toHaveBeenCalledTimes(1);
+
+    // Active only while this plugin's panel is the one shown.
+    activePluginId$.next('p1');
+    fixture.detectChanges();
+    expect(btn?.classList).not.toContain('active');
+
+    isShowPluginPanel$.next(true);
+    fixture.detectChanges();
+    expect(btn?.classList).toContain('active');
+    expect(btn?.getAttribute('aria-pressed')).toBe('true');
   });
 
   it('shows no panels button when nothing at all is enabled', async () => {
