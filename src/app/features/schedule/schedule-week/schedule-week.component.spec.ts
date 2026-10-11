@@ -13,6 +13,8 @@ import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const'
 import { ScheduleEvent } from '../schedule.model';
 import { SVEType } from '../schedule.const';
 import { CalendarEventActionsService } from '../../calendar-integration/calendar-event-actions.service';
+import { PlannerDeadlineTaskComponent } from '../../planner/planner-deadline-task/planner-deadline-task.component';
+import { DEFAULT_TASK, TaskCopy } from '../../tasks/task.model';
 
 describe('ScheduleWeekComponent', () => {
   let fixture: ComponentFixture<ScheduleWeekComponent>;
@@ -48,8 +50,8 @@ describe('ScheduleWeekComponent', () => {
       ],
     })
       .overrideComponent(ScheduleWeekComponent, {
-        remove: { imports: [ScheduleEventComponent] },
-        add: { imports: [ScheduleEventStubComponent] },
+        remove: { imports: [ScheduleEventComponent, PlannerDeadlineTaskComponent] },
+        add: { imports: [ScheduleEventStubComponent, PlannerDeadlineTaskStubComponent] },
       })
       .compileComponents();
 
@@ -122,6 +124,50 @@ describe('ScheduleWeekComponent', () => {
     expect(fixture.nativeElement.querySelector('.deadline-badge')).toBeTruthy();
     expect(fixture.nativeElement.querySelector('.deadline-icon')).toBeTruthy();
   });
+
+  it('should render the deadline count as part of the badge', () => {
+    fixture.componentRef.setInput('daysToShow', ['2026-05-11']);
+    fixture.componentRef.setInput('deadlineTasksByDay', {
+      ['2026-05-11']: [createDeadlineTask('task-1'), createDeadlineTask('task-2')],
+    });
+
+    fixture.detectChanges();
+
+    expect(
+      fixture.nativeElement.querySelector('.deadline-count')?.textContent.trim(),
+    ).toBe('2');
+  });
+
+  it('should position a timed deadline card at its deadline time', () => {
+    fixture.componentRef.setInput('daysToShow', ['2026-05-11']);
+    fixture.componentRef.setInput('deadlineTasksByDay', {
+      ['2026-05-11']: [
+        createDeadlineTask('task-1', new Date(2026, 4, 11, 9, 15).getTime()),
+      ],
+    });
+
+    fixture.detectChanges();
+
+    const card = fixture.nativeElement.querySelector('planner-deadline-task');
+    expect(card.style.gridColumn).toBe('2');
+    expect(card.style.gridRow).toBe('112 / span 4');
+  });
+
+  it('should position an all-day deadline card at the configured work end', () => {
+    fixture.componentRef.setInput('daysToShow', ['2026-05-11']);
+    fixture.componentRef.setInput('workStartEnd', {
+      workStartRow: 109,
+      workEndRow: 205,
+    });
+    fixture.componentRef.setInput('deadlineTasksByDay', {
+      ['2026-05-11']: [createDeadlineTask('task-1')],
+    });
+
+    fixture.detectChanges();
+
+    const card = fixture.nativeElement.querySelector('planner-deadline-task');
+    expect(card.style.gridRow).toBe('205 / span 4');
+  });
 });
 
 @Component({
@@ -140,6 +186,15 @@ class ScheduleEventStubComponent {
   @Output() cdkDragReleased = new EventEmitter<unknown>();
 }
 
+@Component({
+  selector: 'planner-deadline-task',
+  standalone: true,
+  template: '',
+})
+class PlannerDeadlineTaskStubComponent {
+  @Input({ required: true }) task!: TaskCopy;
+}
+
 const createTaskEvent = (
   id: string,
   plannedForDay: string,
@@ -155,4 +210,13 @@ const createTaskEvent = (
   } as ScheduleEvent['data'],
   plannedForDay,
   isBeyondBudget,
+});
+
+const createDeadlineTask = (id: string, deadlineWithTime?: number): TaskCopy => ({
+  ...DEFAULT_TASK,
+  id,
+  projectId: 'project-1',
+  title: `Deadline ${id}`,
+  deadlineWithTime,
+  deadlineDay: deadlineWithTime ? undefined : '2026-05-11',
 });

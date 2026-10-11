@@ -36,6 +36,7 @@ import { truncate } from '../../../util/truncate';
 import { LS } from '../../../core/persistence/storage-keys.const';
 import { CalendarEventActionsService } from '../../calendar-integration/calendar-event-actions.service';
 import { TaskCopy } from '../../tasks/task.model';
+import { PlannerDeadlineTaskComponent } from '../../planner/planner-deadline-task/planner-deadline-task.component';
 
 const D_HOURS = 24;
 const DEFAULT_ROW_HEIGHT_PX = 9;
@@ -44,6 +45,8 @@ const MIN_ROW_HEIGHT_PX = 5;
 const MAX_ROW_HEIGHT_PX = 24;
 const ROW_HEIGHT_STEP_PX = 1;
 const MOBILE_ROW_HEIGHT_FACTOR = DEFAULT_MOBILE_ROW_HEIGHT_PX / DEFAULT_ROW_HEIGHT_PX;
+const DEADLINE_CARD_ROW_SPAN = 4;
+const DEFAULT_DEADLINE_HOUR = 17;
 
 interface ScheduleTaskDataLike {
   id?: string;
@@ -59,6 +62,7 @@ interface ScheduleTaskDataLike {
     MatIcon,
     TranslatePipe,
     MatTooltip,
+    PlannerDeadlineTaskComponent,
   ],
   templateUrl: './schedule-week.component.html',
   styleUrl: './schedule-week.component.scss',
@@ -235,11 +239,61 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
     }),
   );
 
+  deadlineCards = computed(() => {
+    const deadlinesByDay = this.deadlineTasksByDay() || {};
+    const defaultDeadlineRow = DEFAULT_DEADLINE_HOUR * FH;
+    const fallbackRow = this.workStartEnd()?.workEndRow ?? defaultDeadlineRow + 1;
+
+    return this.daysToShow().flatMap((day, dayIndex) => {
+      const occupiedRows = new Set<number>();
+
+      return (deadlinesByDay[day] || []).map((task) => {
+        const maxRow = this.totalRows - DEADLINE_CARD_ROW_SPAN + 1;
+        let row = Math.min(this._getDeadlineRow(task, fallbackRow), maxRow);
+        while (
+          this._isDeadlineRowOccupied(row, occupiedRows) &&
+          row + DEADLINE_CARD_ROW_SPAN <= maxRow
+        ) {
+          row += DEADLINE_CARD_ROW_SPAN;
+        }
+        while (this._isDeadlineRowOccupied(row, occupiedRows) && row > 1) {
+          row = Math.max(1, row - DEADLINE_CARD_ROW_SPAN);
+        }
+        for (let offset = 0; offset < DEADLINE_CARD_ROW_SPAN; offset++) {
+          occupiedRows.add(row + offset);
+        }
+
+        return {
+          task,
+          style: `grid-column: ${dayIndex + 2}; grid-row: ${row} / span ${DEADLINE_CARD_ROW_SPAN}`,
+        };
+      });
+    });
+  });
+
   // Split projections (RepeatProjectionSplit, SplitTaskContinued, …) share the
   // task/repeat-cfg id across segments. Combine day + start hour so each visual
   // segment has a unique @for track key and Angular can reconcile them.
   trackEventKey(ev: ScheduleEvent): string {
     return `${ev.id}_${ev.plannedForDay ?? ''}_${ev.startHours}`;
+  }
+
+  private _getDeadlineRow(task: TaskCopy, fallbackRow: number): number {
+    if (typeof task.deadlineWithTime !== 'number') {
+      return fallbackRow;
+    }
+
+    const deadline = new Date(task.deadlineWithTime);
+    const deadlineHourInMinutes = deadline.getHours() * 60;
+    const minutesSinceMidnight = deadlineHourInMinutes + deadline.getMinutes();
+    return Math.floor((minutesSinceMidnight * FH) / 60) + 1;
+  }
+
+  private _isDeadlineRowOccupied(row: number, occupiedRows: Set<number>): boolean {
+    for (let offset = 0; offset < DEADLINE_CARD_ROW_SPAN; offset++) {
+      if (occupiedRows.has(row + offset)) return true;
+    }
+    return false;
   }
 
   canDragEvent(ev: ScheduleEvent): boolean {

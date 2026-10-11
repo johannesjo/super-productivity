@@ -13,8 +13,10 @@ import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-f
 import { parseDbDateStr } from 'src/app/util/parse-db-date-str';
 import { TranslatePipe, TranslateService, TranslateStore } from '@ngx-translate/core';
 import { getPluralKey } from '../../../util/get-plural-key';
-import { PlannerDeadlineTaskComponent } from '../../planner/planner-deadline-task/planner-deadline-task.component';
 import { TaskCopy } from '../../tasks/task.model';
+import { MatIcon } from '@angular/material/icon';
+import { MatTooltip } from '@angular/material/tooltip';
+import { T } from '../../../t.const';
 
 // `grid-template-rows` repeats `var(--nr-of-weeks)`, which otherwise resolves to
 // the static 6 declared on `schedule`. At 5 weeks that leaves a sixth, empty row
@@ -27,7 +29,7 @@ const HOST_BINDINGS = {
 
 @Component({
   selector: 'schedule-month',
-  imports: [ScheduleEventComponent, PlannerDeadlineTaskComponent, TranslatePipe],
+  imports: [ScheduleEventComponent, TranslatePipe, MatIcon, MatTooltip],
   templateUrl: './schedule-month.component.html',
   styleUrl: './schedule-month.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -85,6 +87,33 @@ export class ScheduleMonthComponent {
     return map;
   });
 
+  readonly deadlineBadgesByDay = computed<
+    Record<string, { count: number; tooltip: string }>
+  >(() => {
+    const deadlinesByDay = this.deadlineTasksByDay() || {};
+    const badges: Record<string, { count: number; tooltip: string }> = {};
+
+    for (const day of this.daysToShow()) {
+      const tasks = deadlinesByDay[day] || [];
+      if (tasks.length === 0) continue;
+
+      badges[day] = {
+        count: tasks.length,
+        tooltip: this._translateService.instant(
+          tasks.length === 1
+            ? T.F.SCHEDULE.DEADLINE_TASKS_TOOLTIP_ONE
+            : T.F.SCHEDULE.DEADLINE_TASKS_TOOLTIP,
+          {
+            count: tasks.length,
+            titles: tasks.map((task) => task.title).join(', '),
+          },
+        ),
+      };
+    }
+
+    return badges;
+  });
+
   // Determine the reference month from the displayed days
   // Find the first day that's actually in the target month (not padding days)
   readonly referenceMonth = computed(() => {
@@ -111,11 +140,6 @@ export class ScheduleMonthComponent {
 
   getEventsForDay(day: string): ScheduleEvent[] {
     return this._scheduleService.getEventsForDay(day, this.events() || []);
-  }
-
-  getDeadlineTasksForDay(day: string): TaskCopy[] {
-    const deadlinesByDay = this.deadlineTasksByDay() || {};
-    return deadlinesByDay[day] || [];
   }
 
   getMoreEventsKey(count: number): string {

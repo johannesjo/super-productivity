@@ -712,7 +712,7 @@ const createTaskScheduleEvent = (id: string, plannedForDay: string): ScheduleEve
   plannedForDay,
 });
 
-describe('ScheduleMonthComponent deadline tasks', () => {
+describe('ScheduleMonthComponent deadline badges', () => {
   let component: ScheduleMonthComponent;
   let fixture: ComponentFixture<ScheduleMonthComponent>;
   let mockScheduleService: jasmine.SpyObj<ScheduleService>;
@@ -741,39 +741,62 @@ describe('ScheduleMonthComponent deadline tasks', () => {
       ],
     }).compileComponents();
 
+    const translateService = TestBed.inject(TranslateService);
+    translateService.setTranslation('en', {
+      F: {
+        SCHEDULE: {
+          DEADLINE_TASKS_TOOLTIP_ONE: '{{count}} deadline: {{titles}}',
+          DEADLINE_TASKS_TOOLTIP: '{{count}} deadlines: {{titles}}',
+        },
+      },
+    });
+    translateService.use('en');
+
     fixture = TestBed.createComponent(ScheduleMonthComponent);
     component = fixture.componentInstance;
   });
 
-  it('should get deadline tasks for a specific day', () => {
+  it('should compute the count and tooltip for a day with deadlines', () => {
     const deadlineTasks: TaskCopy[] = [
       { ...DEFAULT_TASK, id: 'task-1', projectId: 'project-1', title: 'Deadline 1' },
       { ...DEFAULT_TASK, id: 'task-2', projectId: 'project-1', title: 'Deadline 2' },
     ];
+    fixture.componentRef.setInput('daysToShow', ['2026-01-15']);
     fixture.componentRef.setInput('deadlineTasksByDay', {
       ['2026-01-15']: deadlineTasks,
     });
 
-    const result = component.getDeadlineTasksForDay('2026-01-15');
-    expect(result).toEqual(deadlineTasks);
-    expect(result.length).toBe(2);
+    expect(component.deadlineBadgesByDay()['2026-01-15']).toEqual({
+      count: 2,
+      tooltip: '2 deadlines: Deadline 1, Deadline 2',
+    });
   });
 
-  it('should return empty array for day with no deadline tasks', () => {
+  it('should render an icon and subscript count instead of deadline cards', () => {
+    fixture.componentRef.setInput('daysToShow', ['2026-01-15']);
     fixture.componentRef.setInput('deadlineTasksByDay', {
       ['2026-01-15']: [
         { ...DEFAULT_TASK, id: 'task-1', projectId: 'project-1', title: 'Deadline 1' },
+        { ...DEFAULT_TASK, id: 'task-2', projectId: 'project-1', title: 'Deadline 2' },
       ],
     });
 
-    const result = component.getDeadlineTasksForDay('2026-01-16');
-    expect(result).toEqual([]);
+    fixture.detectChanges();
+
+    expect(fixture.nativeElement.querySelector('.deadline-icon')).toBeTruthy();
+    expect(
+      fixture.nativeElement.querySelector('.deadline-count')?.textContent.trim(),
+    ).toBe('2');
+    expect(fixture.nativeElement.querySelector('planner-deadline-task')).toBeNull();
   });
 
-  it('should return empty array when deadlineTasksByDay is null', () => {
+  it('should not create a badge when deadlineTasksByDay is null', () => {
+    fixture.componentRef.setInput('daysToShow', ['2026-01-15']);
     fixture.componentRef.setInput('deadlineTasksByDay', null);
 
-    const result = component.getDeadlineTasksForDay('2026-01-15');
-    expect(result).toEqual([]);
+    fixture.detectChanges();
+
+    expect(component.deadlineBadgesByDay()).toEqual({});
+    expect(fixture.nativeElement.querySelector('.deadline-badge')).toBeNull();
   });
 });

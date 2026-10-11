@@ -13,7 +13,9 @@
   padding-top: var(--s-quarter);
   padding-bottom: var(--s-quarter);
   border: var(--task-border);
+  border-left: var(--deadline-task-border, var(--task-border));
   border-radius: var(--task-border-radius);
+  background: var(--deadline-task-bg, transparent);
   opacity: 0.9;
   cursor: pointer;
   min-height: var(--planner-item-height);
@@ -21,7 +23,7 @@
   border-color: var(--extra-border-color);
 
   &:hover {
-    border-color: var(--c-primary);
+    border-color: var(--deadline-task-accent, var(--c-primary));
   }
 
   mat-icon {
@@ -33,6 +35,7 @@
     width: var(--planner-item-ico-size);
     min-width: var(--planner-item-ico-size);
     max-width: var(--planner-item-ico-size);
+    color: var(--deadline-task-accent, currentColor);
   }
 }
 

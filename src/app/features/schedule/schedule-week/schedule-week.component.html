@@ -11,38 +11,46 @@
         }
         <div class="day-num">{{ dayHeaderLabels()[day].num }}</div>
         <div class="day-day">{{ dayHeaderLabels()[day].day }}</div>
-        @if (beyondBudgetStats()[$index].count > 0) {
-          <span
-            class="over-budget-badge"
-            tabindex="0"
-            [matTooltipPosition]="'below'"
-            [matTooltip]="beyondBudgetTooltips()[$index]"
-            [attr.aria-label]="beyondBudgetTooltips()[$index]"
-          >
-            <span
-              class="over-budget-symbol"
-              aria-hidden="true"
-              >!</span
-            >
-            @if (beyondBudgetStats()[$index].count > 1) {
-              <span class="over-budget-count">
-                {{ beyondBudgetStats()[$index].count }}
+        @if (beyondBudgetStats()[$index].count > 0 || deadlineStats()[$index].count > 0) {
+          <span class="day-badges">
+            @if (beyondBudgetStats()[$index].count > 0) {
+              <span
+                class="over-budget-badge"
+                tabindex="0"
+                [matTooltipPosition]="'below'"
+                [matTooltip]="beyondBudgetTooltips()[$index]"
+                [attr.aria-label]="beyondBudgetTooltips()[$index]"
+              >
+                <span
+                  class="over-budget-symbol"
+                  aria-hidden="true"
+                  >!</span
+                >
+                @if (beyondBudgetStats()[$index].count > 1) {
+                  <span class="over-budget-count">
+                    {{ beyondBudgetStats()[$index].count }}
+                  </span>
+                }
               </span>
             }
-          </span>
-        }
-        @if (deadlineStats()[$index].count > 0) {
-          <span
-            class="deadline-badge"
-            tabindex="0"
-            [matTooltipPosition]="'below'"
-            [matTooltip]="deadlineTooltips()[$index]"
-            [attr.aria-label]="deadlineTooltips()[$index]"
-          >
-            <mat-icon class="deadline-icon">flag</mat-icon>
-            @if (deadlineStats()[$index].count > 1) {
-              <span class="deadline-count">
-                {{ deadlineStats()[$index].count }}
+            @if (deadlineStats()[$index].count > 0) {
+              <span
+                class="deadline-badge"
+                tabindex="0"
+                [matTooltipPosition]="'below'"
+                [matTooltip]="deadlineTooltips()[$index]"
+                [attr.aria-label]="deadlineTooltips()[$index]"
+              >
+                <mat-icon
+                  class="deadline-icon"
+                  aria-hidden="true"
+                  >flag</mat-icon
+                >
+                @if (deadlineStats()[$index].count > 1) {
+                  <span class="deadline-count">
+                    {{ deadlineStats()[$index].count }}
+                  </span>
+                }
               </span>
             }
           </span>
@@ -153,6 +161,15 @@
         [cdkDragDisabled]="true"
       ></schedule-event>
     }
+  }
+
+  <!-- Deadline cards -->
+  @for (deadline of deadlineCards(); track deadline.task.id) {
+    <planner-deadline-task
+      class="deadline-card"
+      [task]="deadline.task"
+      [style]="deadline.style"
+    ></planner-deadline-task>
   }
 
   @if (
