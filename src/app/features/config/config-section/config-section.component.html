@@ -53,8 +53,8 @@
           <button
             (click)="onAction(action)"
             [disabled]="isActionPending(action)"
+            [matButton]="action.isProminent ? 'filled' : 'outlined'"
             color="primary"
-            mat-stroked-button
             type="button"
           >
             @if (action.icon) {

@@ -418,6 +418,8 @@ export type CustomCfgSection =
 export interface ConfigSectionAction {
   label: string;
   icon?: string;
+  /** Renders filled instead of outlined, for an action the section should point people to. */
+  isProminent?: boolean;
   onClick: () => void | Promise<void>;
 }
 
