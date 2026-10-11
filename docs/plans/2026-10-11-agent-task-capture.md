@@ -131,7 +131,12 @@ large existing services. All tables `userId` + `onDelete: Cascade`.
   `mcp-protocol.ts` (which has no imports). No shared package until a second
   user exists.
 
-**Limits.** 16 KiB body; 30 calls/min per grant, enforced after auth;
+**Limits.** 64 KiB body (8 KiB of notes can more than double when
+JSON-escaped); 30 calls/min per grant, enforced after auth; 120 failed auths
+per minute per IP (an IPv6 /64 is one IP), checked before the token lookup,
+except for a grant id that authenticated in the last 24 h, whose failures
+count per grant instead, so others' bad tokens behind a shared egress IP
+cannot lock out a working connector;
 pending items 200 per grant and 500 per user ("Your capture queue is full.
 Open the app to sync."). `/mcp`, `/oauth/*` and `/.well-known/*` use these
 limits instead of the global per-IP limiter (`server.ts:417`), because vendor
@@ -248,8 +253,13 @@ user key`; AES-256-GCM, 12-byte random IV, 16-byte tag, AAD = version byte
     provider change or password change mid-import then creates nothing and acks
     nothing (contributor sync model, sync-epoch fence).
 - **Trigger:** a small service on the falling edge of the sync-in-progress
-  signal. It runs only if the provider is SuperSync and `sync.captureKey`
-  exists, at most once per minute, one run at a time, detached. No change to
+  signal, only when that sync ended `IN_SYNC`: after a failed
+  sync the synced key may be stale, and its claim would replace a newer
+  server key and drop that key's captures. It runs only if the provider is
+  SuperSync and `sync.captureKey` exists, at most once per minute, one run
+  at a time (a Web Lock across tabs, which share the device id), detached.
+  A server without capture routes (404) is logged once per session, not as
+  an error each sync. No change to
   `sync-wrapper.service.ts` (2080 of 2084 allowed lines). SuperSync has no
   interval polling (`sync-trigger.service.ts:266`), so captures arrive when
   the app next syncs: opening or using it, or another device's change.

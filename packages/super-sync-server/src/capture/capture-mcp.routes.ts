@@ -10,7 +10,9 @@ import {
   isAuthFailureLimited,
   isGrantRateLimited,
   recordAuthFailure,
+  recordAuthSuccess,
 } from './capture-rate-limit';
+import { parseCaptureToken } from './capture-token';
 import { CREATE_TASK_TOOL, runCreateTask } from './create-task.tool';
 import {
   handleMcpMessage,
@@ -60,13 +62,14 @@ const handleMcpPost = async (
   req: FastifyRequest,
   reply: FastifyReply,
 ): Promise<FastifyReply> => {
-  if (isAuthFailureLimited(req.ip)) {
+  const token = bearerToken(req);
+  const claimedGrantId = (token && parseCaptureToken(token)?.grantId) || null;
+  if (isAuthFailureLimited(req.ip, claimedGrantId)) {
     return reply.code(429).header('Retry-After', '60').send({ error: 'rate_limited' });
   }
-  const token = bearerToken(req);
   const grant = token ? await authenticateCaptureToken(token) : null;
   if (!grant) {
-    recordAuthFailure(req.ip);
+    recordAuthFailure(req.ip, claimedGrantId);
     const challenge = token
       ? `Bearer error="invalid_token", scope="tasks:capture"`
       : WWW_AUTHENTICATE;
@@ -75,6 +78,7 @@ const handleMcpPost = async (
       .header('WWW-Authenticate', challenge)
       .send({ error: 'invalid_token' });
   }
+  recordAuthSuccess(grant.grantId);
   if (isGrantRateLimited(grant.grantId)) {
     return reply.code(429).header('Retry-After', '60').send({ error: 'rate_limited' });
   }

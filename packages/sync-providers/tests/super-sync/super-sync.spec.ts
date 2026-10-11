@@ -863,8 +863,11 @@ describe('SuperSyncProvider', () => {
       fetchMock.mockResolvedValue(errorResponse(404, 'Not Found', ''));
 
       expect(await provider.listCaptureGrants()).toEqual({ grants: [] });
+      expect(await provider.claimCaptures('dev-1', 'fp')).toEqual({
+        status: 'unsupported',
+      });
       await provider.disableCaptureKey();
-      expect(call(fetchMock, 1)).toMatchObject({
+      expect(call(fetchMock, 2)).toMatchObject({
         url: 'https://sync.example.com/api/capture/key',
         method: 'DELETE',
       });

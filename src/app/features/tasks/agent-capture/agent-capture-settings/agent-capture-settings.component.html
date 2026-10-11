@@ -84,16 +84,18 @@
       >
         {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_COPY | translate }}
       </button>
-      <label>
-        {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_SETUP | translate }}
-        <input
-          class="value"
-          type="text"
-          readonly
-          [value]="setupCommand()"
-          (focus)="$any($event.target).select()"
-        />
-      </label>
+      @if (mcpUrl()) {
+        <label>
+          {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_SETUP | translate }}
+          <input
+            class="value"
+            type="text"
+            readonly
+            [value]="setupCommand()"
+            (focus)="$any($event.target).select()"
+          />
+        </label>
+      }
     }
 
     <ul>

@@ -94,7 +94,8 @@ export interface SuperSyncCaptureItemInfo {
 
 /**
  * `no_key`: the server has no active key; `key_mismatch`: it holds another
- * key than the one claimed with. Any status this client does not know is
+ * key than the one claimed with; `unsupported`: the server has no capture
+ * routes (client-side, from a 404). Any status this client does not know is
  * passed through and treated as "nothing to import".
  */
 export interface SuperSyncCaptureClaimResult {

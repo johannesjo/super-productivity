@@ -7,6 +7,7 @@ import { INBOX_PROJECT } from '../../project/project.const';
 import {
   AgentCapture,
   AgentCaptureRun,
+  CaptureUnsupportedError,
   createSuperSyncCaptureSource,
 } from './super-sync-capture-source';
 
@@ -118,6 +119,15 @@ describe('createSuperSyncCaptureSource', () => {
 
     expect(await source().getPending()).toEqual([]);
     expect(provider.claimCaptures).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects on a server without capture, so receipts are not pruned', async () => {
+    provider.claimCaptures.and.resolveTo({ status: 'unsupported' });
+
+    await expectAsync(source().getPending()).toBeRejectedWithError(
+      CaptureUnsupportedError,
+    );
+    expect(provider.registerCaptureKey).not.toHaveBeenCalled();
   });
 
   it('keeps an item it cannot open as invalid, never as a task', async () => {

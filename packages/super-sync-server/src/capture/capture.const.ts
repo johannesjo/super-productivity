@@ -7,7 +7,8 @@ import { MS_PER_DAY } from '../sync/sync.types';
  */
 export const CAPTURE_TITLE_MAX_CHARS = 500;
 export const CAPTURE_NOTES_MAX_BYTES = 8 * 1024;
-export const CAPTURE_MCP_BODY_LIMIT_BYTES = 16 * 1024;
+/** Room for JSON escaping: 8 KiB of notes can more than double as `\uXXXX`. */
+export const CAPTURE_MCP_BODY_LIMIT_BYTES = 64 * 1024;
 
 export const CAPTURE_MCP_CALLS_PER_MINUTE = 30;
 /** Per IP; generous because a vendor egress IP serves many users. */

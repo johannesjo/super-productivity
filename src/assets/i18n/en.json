@@ -1463,7 +1463,7 @@
           "CAPTURE_L_SETUP": "Claude Code setup",
           "CAPTURE_L_TOKEN": "Token",
           "CAPTURE_OFF_CONFIRM": "Turn off AI assistants? Every assistant loses access and {{count}} tasks that haven't arrived yet are deleted.",
-          "CAPTURE_PRIVACY": "Privacy: each task is encrypted for your devices before it is stored on the server. The server and the assistant's provider still see the text while they handle it. The key that opens it is part of your synced settings, backups and exports; without sync encryption, the server can read that key too.",
+          "CAPTURE_PRIVACY": "Privacy: the server and the assistant's provider see each task while they handle it. The server then stores it encrypted for your devices, but the key that opens it is part of your synced settings, backups and exports, so this keeps stored tasks from the server only when sync encryption is on.",
           "CAPTURE_REVOKE_CONFIRM": "Revoke access for \"{{name}}\"? Tasks it already sent will still arrive.",
           "CAPTURE_REVOKE_DISCARD_CONFIRM": "Revoke access for \"{{name}}\" and delete its {{count}} tasks that haven't arrived yet?",
           "CAPTURE_SAVE_FIRST": "Save and enable SuperSync first to let AI assistants add tasks.",

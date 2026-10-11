@@ -233,7 +233,7 @@ describe('capture routes (PGlite)', () => {
     expect(badVersion.statusCode).toBe(400);
     const badJson = await mcp(token, '{nope');
     expect(badJson.json().error.code).toBe(-32700);
-    const tooBig = await mcp(token, toolCall(1, 'x'.repeat(17 * 1024)));
+    const tooBig = await mcp(token, toolCall(1, 'x'.repeat(65 * 1024)));
     expect(tooBig.statusCode).toBe(413);
 
     // 30 per minute per grant. The version and parse errors count; the
@@ -256,5 +256,18 @@ describe('capture routes (PGlite)', () => {
     }
     expect(statuses.slice(0, 120).every((s) => s === 401)).toBe(true);
     expect(statuses[120]).toBe(429);
+  });
+
+  it('does not let failed auths behind a shared IP lock out a working token', async () => {
+    const token = await newToken();
+    expect((await mcp(token, { jsonrpc: '2.0', id: 0, method: 'ping' })).statusCode).toBe(
+      200,
+    );
+    const fake = `sp_cap_00000000-0000-4000-8000-000000000000_x`;
+    for (let i = 0; i < 121; i++) await mcp(fake, toolCall(i, 'x'));
+    expect((await mcp(fake, toolCall(0, 'x'))).statusCode).toBe(429);
+    expect((await mcp(token, { jsonrpc: '2.0', id: 1, method: 'ping' })).statusCode).toBe(
+      200,
+    );
   });
 });

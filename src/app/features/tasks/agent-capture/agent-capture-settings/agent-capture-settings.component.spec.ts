@@ -1,4 +1,4 @@
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { FormlyModule } from '@ngx-formly/core';
@@ -38,7 +38,7 @@ describe('AgentCaptureSettingsComponent', () => {
   };
   const render = async (): Promise<void> => {
     fixture.detectChanges();
-    // Lets ngOnInit's chained loads settle; whenStable does not track them.
+    // Lets the load effect's chained loads settle; whenStable does not track them.
     await new Promise((resolve) => setTimeout(resolve));
     fixture.detectChanges();
   };
@@ -95,6 +95,19 @@ describe('AgentCaptureSettingsComponent', () => {
       'https://sync.example/mcp',
     );
     expect(text()).toContain('Claude Code');
+  });
+
+  it('loads once capture is switched on from another device', async () => {
+    (capture.isEnabled as WritableSignal<boolean>).set(false);
+    setup();
+    await render();
+    expect(capture.getMcpUrl).not.toHaveBeenCalled();
+
+    (capture.isEnabled as WritableSignal<boolean>).set(true);
+    await render();
+    expect(fixture.nativeElement.querySelector('input.value').value).toBe(
+      'https://sync.example/mcp',
+    );
   });
 
   it('shows when each token expires', async () => {

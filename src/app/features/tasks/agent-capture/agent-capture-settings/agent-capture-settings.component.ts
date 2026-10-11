@@ -2,9 +2,10 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  effect,
   inject,
-  OnInit,
   signal,
+  untracked,
 } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
@@ -45,10 +46,7 @@ import { AgentCaptureService } from '../agent-capture.service';
     LocaleDatePipe,
   ],
 })
-export class AgentCaptureSettingsComponent
-  extends FieldType<FormlyFieldConfig>
-  implements OnInit
-{
+export class AgentCaptureSettingsComponent extends FieldType<FormlyFieldConfig> {
   readonly T = T;
   private readonly _capture = inject(AgentCaptureService);
   private readonly _matDialog = inject(MatDialog);
@@ -69,8 +67,14 @@ export class AgentCaptureSettingsComponent
       '--header "Authorization: Bearer $SP_CAPTURE_TOKEN"',
   );
 
-  ngOnInit(): void {
-    if (this.isAvailable && this.isEnabled()) void this._run(() => this._load());
+  constructor() {
+    super();
+    // Also when capture is switched on from another device while this is open.
+    effect(() => {
+      if (this.isAvailable && this.isEnabled()) {
+        untracked(() => void this._run(() => this._load()));
+      }
+    });
   }
 
   turnOn(): Promise<void> {

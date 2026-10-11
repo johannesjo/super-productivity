@@ -18,6 +18,11 @@ export const AGENT_CAPTURE_RECEIPTS_KEY = 'sp-agent-capture-receipts';
 const TITLE_MAX_CHARS = 500;
 const NOTES_MAX_CHARS = 8 * 1024;
 
+/** The server has no capture routes (feature off, rollback, other server). */
+export class CaptureUnsupportedError extends Error {
+  override name = 'CaptureUnsupportedError';
+}
+
 export interface AgentCapture {
   /** The server-issued task id; also the importer's dedupe and receipt id. */
   id: string;
@@ -94,6 +99,8 @@ const claimWithKey = async (
 ): Promise<SuperSyncCaptureItemInfo[]> => {
   const fingerprint = await captureKeyFingerprint(run.key.publicKeySpki);
   let claim = await run.provider.claimCaptures(run.deviceId, fingerprint);
+  // Thrown, not an empty batch, so the importer keeps its receipts.
+  if (claim.status === 'unsupported') throw new CaptureUnsupportedError();
   if (claim.status === 'no_key' || claim.status === 'key_mismatch') {
     run.assertUnchanged('registerCaptureKey');
     const registered = await run.provider.registerCaptureKey(run.key.publicKeySpki);
@@ -125,7 +132,9 @@ const toTask = (payload: unknown): AgentCapture['task'] => {
   // Code points, as the server counts them.
   const titleChars = [...title].length;
   if (titleChars === 0 || titleChars > TITLE_MAX_CHARS) return null;
-  const notes = typeof p.notes === 'string' ? p.notes.slice(0, NOTES_MAX_CHARS) : '';
+  // Code points, so a cut never splits a surrogate pair.
+  const notes =
+    typeof p.notes === 'string' ? [...p.notes].slice(0, NOTES_MAX_CHARS).join('') : '';
   const createdAt = typeof p.createdAt === 'number' ? p.createdAt : Date.now();
   return { title, ...(notes ? { notes } : {}), createdAt };
 };

@@ -5,19 +5,25 @@ import { BehaviorSubject } from 'rxjs';
 import { SyncWrapperService } from '../../../imex/sync/sync-wrapper.service';
 import { SyncEpochChangedError } from '../../../op-log/core/errors/sync-errors';
 import { SyncProviderId } from '../../../op-log/sync-providers/provider.const';
-import { SyncProviderManager } from '../../../op-log/sync-providers/provider-manager.service';
+import {
+  SyncProviderManager,
+  SyncStatusChangePayload,
+} from '../../../op-log/sync-providers/provider-manager.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { CaptureKeyConfig, SyncConfig } from '../../config/global-config.model';
 import {
   NativeCaptureImporter,
   NativeCaptureImportResult,
 } from '../native-capture/native-capture-importer.service';
+import { Log } from '../../../core/log';
 import { AgentCaptureService } from './agent-capture.service';
+import { CaptureUnsupportedError } from './super-sync-capture-source';
 
 describe('AgentCaptureService', () => {
   const KEY: CaptureKeyConfig = { v: 1, privateKeyPkcs8: 'priv', publicKeySpki: 'pub' };
   let service: AgentCaptureService;
   let syncing$: BehaviorSubject<boolean>;
+  let syncStatus$: BehaviorSubject<SyncStatusChangePayload>;
   let syncCfg: ReturnType<typeof signal<Partial<SyncConfig> | undefined>>;
   let provider: {
     id: SyncProviderId;
@@ -26,18 +32,32 @@ describe('AgentCaptureService', () => {
   };
   let importer: jasmine.SpyObj<NativeCaptureImporter>;
   let calls: string[];
+  /** Another tab holds the import lock. */
+  let isLockHeld: boolean;
 
-  const syncOnce = (): void => {
+  const syncOnce = (result: SyncStatusChangePayload = 'IN_SYNC'): void => {
+    syncStatus$.next('SYNCING');
     syncing$.next(true);
+    syncStatus$.next(result);
     syncing$.next(false);
   };
 
   beforeEach(() => {
     calls = [];
+    isLockHeld = false;
+    // Native Web Locks resolve outside fakeAsync; this one stays in the zone.
+    spyOnProperty(navigator, 'locks', 'get').and.returnValue({
+      request: (
+        name: string,
+        _opts: LockOptions,
+        cb: (lock: Lock | null) => Promise<void> | void,
+      ) => Promise.resolve(cb(isLockHeld ? null : ({ name } as Lock))),
+    } as unknown as LockManager);
     const record = (name: string) => async (): Promise<void> => {
       calls.push(name);
     };
     syncing$ = new BehaviorSubject(false);
+    syncStatus$ = new BehaviorSubject<SyncStatusChangePayload>('UNKNOWN_OR_CHANGED');
     syncCfg = signal<Partial<SyncConfig> | undefined>({ captureKey: KEY });
     provider = {
       id: SyncProviderId.SuperSync,
@@ -69,6 +89,7 @@ describe('AgentCaptureService', () => {
           provide: SyncProviderManager,
           useValue: {
             getActiveProvider: () => provider,
+            syncStatus$,
             syncEpoch: 1,
             assertSyncEpochUnchanged: () => undefined,
           },
@@ -96,6 +117,40 @@ describe('AgentCaptureService', () => {
     tick(60_000);
     expect(importer.importPending).toHaveBeenCalledTimes(2);
     tick(60_000);
+  }));
+
+  it('does not import after a failed sync: its key may be stale', fakeAsync(() => {
+    service.start();
+    syncOnce('ERROR');
+    syncOnce('UNKNOWN_OR_CHANGED');
+    // A cycle skipped right after a failure keeps the failed status.
+    syncing$.next(true);
+    syncing$.next(false);
+    tick(60_000);
+    expect(importer.importPending).not.toHaveBeenCalled();
+
+    syncOnce();
+    flushMicrotasks();
+    expect(importer.importPending).toHaveBeenCalledTimes(1);
+    tick(60_000);
+  }));
+
+  it('skips the run while another tab imports', fakeAsync(() => {
+    isLockHeld = true;
+    service.start();
+    syncOnce();
+    tick(60_000);
+    expect(importer.importPending).not.toHaveBeenCalled();
+  }));
+
+  it('treats a server without capture as nothing to import', fakeAsync(() => {
+    importer.importPending.and.rejectWith(new CaptureUnsupportedError());
+    const err = spyOn(Log, 'err');
+    service.start();
+    syncOnce();
+    tick(60_000);
+    expect(importer.importPending).toHaveBeenCalledTimes(1);
+    expect(err).not.toHaveBeenCalled();
   }));
 
   it('does not import while capture is off or another provider is active', fakeAsync(() => {

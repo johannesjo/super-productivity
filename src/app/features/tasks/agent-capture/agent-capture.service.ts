@@ -8,7 +8,15 @@ import type {
   SuperSyncProvider,
 } from '@sp/sync-providers/super-sync';
 import { nanoid } from 'nanoid';
-import { asyncScheduler, exhaustMap, filter, pairwise, throttleTime } from 'rxjs';
+import {
+  asyncScheduler,
+  exhaustMap,
+  filter,
+  map,
+  pairwise,
+  throttleTime,
+  withLatestFrom,
+} from 'rxjs';
 import { Log } from '../../../core/log';
 import { SyncWrapperService } from '../../../imex/sync/sync-wrapper.service';
 import { SyncEpochChangedError } from '../../../op-log/core/errors/sync-errors';
@@ -21,6 +29,7 @@ import {
 } from '../native-capture/native-capture-importer.service';
 import {
   AgentCaptureRun,
+  CaptureUnsupportedError,
   createSuperSyncCaptureSource,
 } from './super-sync-capture-source';
 
@@ -30,6 +39,8 @@ import {
  */
 const DEVICE_ID_KEY = 'sp-agent-capture-device-id';
 const MIN_RUN_INTERVAL_MS = 60 * 1000;
+/** Web Locks name: tabs share the device id, so only one may claim at a time. */
+const IMPORT_LOCK_NAME = 'sp-agent-capture-import';
 const CAPTURE_KEY_VERSION = 1;
 
 /**
@@ -50,16 +61,25 @@ export class AgentCaptureService {
   });
 
   readonly isEnabled = computed(() => !!this._globalConfig.sync()?.captureKey);
+  private _hasLoggedUnsupported = false;
 
   /**
-   * Imports on the falling edge of every sync. SuperSync has no interval
-   * polling, so captures arrive when the app next syncs for any reason.
+   * Imports on the falling edge of every sync that left the app IN_SYNC.
+   * SuperSync has no interval polling, so captures arrive when the app next
+   * syncs for any reason. After a failed sync the synced key may be stale,
+   * and the claim would re-register it over a newer one, dropping that key's
+   * captures.
    */
   start(): void {
     this._syncWrapper.isSyncInProgress$
       .pipe(
         pairwise(),
-        filter(([wasSyncing, isSyncing]) => wasSyncing && !isSyncing),
+        withLatestFrom(this._providerManager.syncStatus$),
+        filter(
+          ([[wasSyncing, isSyncing], status]) =>
+            wasSyncing && !isSyncing && status === 'IN_SYNC',
+        ),
+        map(() => undefined),
         // Before the throttle, so syncs while capture is off use no slot.
         filter(() => !!this._activeCapture()),
         throttleTime(MIN_RUN_INTERVAL_MS, asyncScheduler, {
@@ -114,7 +134,17 @@ export class AgentCaptureService {
     return this._superSyncOrError().revokeCaptureGrant(grantId, discardPending);
   }
 
+  /** Skips when another tab of this browser is importing: its run covers ours. */
   private async _importLogged(): Promise<void> {
+    if (typeof navigator === 'undefined' || !navigator.locks) {
+      return this._importLoggedUnlocked();
+    }
+    await navigator.locks.request(IMPORT_LOCK_NAME, { ifAvailable: true }, (lock) =>
+      lock ? this._importLoggedUnlocked() : undefined,
+    );
+  }
+
+  private async _importLoggedUnlocked(): Promise<void> {
     // Checked again: it can change during the throttle, and an empty run
     // would prune the importer's receipts.
     if (!this._activeCapture()) return;
@@ -126,6 +156,14 @@ export class AgentCaptureService {
     } catch (e) {
       if (e instanceof SyncEpochChangedError) {
         Log.log('Agent capture import abandoned: sync target changed');
+        return;
+      }
+      if (e instanceof CaptureUnsupportedError) {
+        // Expected after a move to a server without capture; once per session.
+        if (!this._hasLoggedUnsupported) {
+          this._hasLoggedUnsupported = true;
+          Log.log('Agent capture: this server does not support capture');
+        }
         return;
       }
       Log.err('Agent capture import failed; captures stay queued', {

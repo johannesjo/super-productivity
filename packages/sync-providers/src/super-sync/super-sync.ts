@@ -581,17 +581,24 @@ export class SuperSyncProvider
     );
   }
 
-  /** Leases up to one batch of sealed captures to `deviceId`. */
+  /**
+   * Leases up to one batch of sealed captures to `deviceId`. A server without
+   * capture (404) yields `unsupported` rather than an error on every sync.
+   */
   async claimCaptures(
     deviceId: string,
     fingerprint: string,
   ): Promise<SuperSyncCaptureClaimResult> {
     const cfg = await this._cfgOrError();
-    const response = await this._fetchApi<unknown>(cfg, '/api/capture/claim', {
-      method: 'POST',
-      body: JSON.stringify({ deviceId, fingerprint }),
-    });
-    return this._deps.responseValidators.validateCaptureClaim(response);
+    const response = await this._ignoreNotFound(
+      this._fetchApi<unknown>(cfg, '/api/capture/claim', {
+        method: 'POST',
+        body: JSON.stringify({ deviceId, fingerprint }),
+      }),
+    );
+    return response === undefined
+      ? { status: 'unsupported' }
+      : this._deps.responseValidators.validateCaptureClaim(response);
   }
 
   /** Deletes items this device imported; the server ignores stale leases. */
