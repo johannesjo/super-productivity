@@ -418,6 +418,11 @@ export type CustomCfgSection =
 export interface ConfigSectionAction {
   label: string;
   icon?: string;
+  /**
+   * Renders as a full-width row styled like the section's fields (icon, label,
+   * chevron) instead of a button below them — for navigating somewhere else.
+   */
+  isRow?: boolean;
   onClick: () => void | Promise<void>;
 }
 
