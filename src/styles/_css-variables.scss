@@ -171,9 +171,9 @@
   --mat-mini-fab-size: 48px;
   --mac-title-bar-padding: 20px;
   --vertical-action-bar-width: 48px;
-  // Matches WCO_HEIGHT in electron/main-window.ts. Keep in sync so the
-  // vertical action strip clears the WCO band by exactly this much on
-  // Win/Linux with custom title bar.
+  // Fallback for env(titlebar-area-height), which reports the real WCO band
+  // (WCO_HEIGHT in electron/main-window.ts: 24px Windows, 32px Linux) and is
+  // unset while the overlay is hidden, e.g. in fullscreen.
   --wco-height: 24px;
 
   // Radius scale — use tokens below; legacy aliases kept for existing rules.
