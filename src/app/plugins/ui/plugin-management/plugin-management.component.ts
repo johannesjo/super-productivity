@@ -46,6 +46,8 @@ import { Router } from '@angular/router';
 import { selectAll as selectAllIssueProviders } from '../../../features/issue/store/issue-provider.selectors';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
 import COMMUNITY_PLUGINS_DATA from '../../../../assets/community-plugins.json';
+import { DEV_ONLY_BUNDLED_PLUGIN_IDS } from '../../bundled-plugins.const';
+import { environment } from '../../../../environments/environment';
 
 interface CommunityPlugin {
   name: string;
@@ -167,11 +169,18 @@ export class PluginManagementComponent {
     return plugins;
   });
 
+  // Development and E2E builds (plain `ng build`) are not `production`, so they list them.
+  private readonly _isShowDevPlugins = !environment.production;
+  // Dev-only plugins seen enabled stay listed, so disabling one does not make it vanish.
+  // Filled from inside pluginGroups (via isPluginListed); it only ever grows while this
+  // page is open, so re-running the computed gives the same result.
+  private readonly _shownDevPluginIds = new Set<string>();
+
   // Uploaded plugins, then built-in integrations (issue and calendar providers), then
   // other built-ins, each in load order. Grouped by origin and type rather than enabled
   // state, so a card never moves while its toggle is used.
   readonly pluginGroups = computed(() => {
-    const plugins = this.allPlugins();
+    const plugins = this.allPlugins().filter((p) => this._isListed(p));
     const states = this._pluginService.pluginStates();
     const isUploaded = (p: PluginInstance): boolean =>
       states.get(p.manifest.id)?.type === 'uploaded';
@@ -273,6 +282,10 @@ export class PluginManagementComponent {
     } catch (error) {
       PluginLog.err('Failed to disable plugin:', error);
     }
+  }
+
+  private _isListed(plugin: PluginInstance): boolean {
+    return isPluginListed(plugin, this._isShowDevPlugins, this._shownDevPluginIds);
   }
 
   isPluginLoading(plugin: PluginInstance): boolean {
@@ -659,3 +672,22 @@ export class PluginManagementComponent {
     return languages.includes(currentLang);
   }
 }
+
+/**
+ * Whether the plugins page lists `plugin`. Dev-only bundled plugins are listed only when
+ * `isShowDevPlugins` is set or once seen enabled; `shownDevPluginIds` remembers the latter.
+ */
+export const isPluginListed = (
+  plugin: PluginInstance,
+  isShowDevPlugins: boolean,
+  shownDevPluginIds: Set<string>,
+): boolean => {
+  const id = plugin.manifest.id;
+  if (isShowDevPlugins || !DEV_ONLY_BUNDLED_PLUGIN_IDS.has(id)) {
+    return true;
+  }
+  if (plugin.isEnabled) {
+    shownDevPluginIds.add(id);
+  }
+  return shownDevPluginIds.has(id);
+};
