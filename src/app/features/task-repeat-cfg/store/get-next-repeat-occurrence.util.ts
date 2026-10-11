@@ -1,7 +1,6 @@
 import { TASK_REPEAT_WEEKDAY_MAP, TaskRepeatCfg } from '../task-repeat-cfg.model';
 import { getDiffInDays } from '../../../util/get-diff-in-days';
 import { getDiffInMonth } from '../../../util/get-diff-in-month';
-import { getDiffInYears } from '../../../util/get-diff-in-years';
 import { getDiffInWeeks } from '../../../util/get-diff-in-weeks';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { getEffectiveLastTaskCreationDay } from './get-effective-last-task-creation-day.util';
@@ -198,7 +197,7 @@ export const getNextRepeatOccurrence = (
       }
 
       for (let i = 0; i < maxYearsToCheck; i++) {
-        const diffInYears = getDiffInYears(startDateDate, checkDate);
+        const diffInYears = checkDate.getFullYear() - startDateDate.getFullYear();
 
         if (
           diffInYears >= 0 &&
