@@ -77,7 +77,7 @@ describe('capture seal', () => {
   });
 
   it('accepts only P-256 SPKI keys', () => {
-    const rsa = generateKeyPairSync('rsa', { modulusLength: 1024 })
+    const rsa = generateKeyPairSync('rsa', { modulusLength: 2048 })
       .publicKey.export({ format: 'der', type: 'spki' })
       .toString('base64');
     const p384 = generateKeyPairSync('ec', { namedCurve: 'secp384r1' })
