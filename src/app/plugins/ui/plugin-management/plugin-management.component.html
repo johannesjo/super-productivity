@@ -102,23 +102,25 @@
               <td>{{ getPluginLanguages(plugin) }}</td>
             </tr>
           </table>
-          @if (plugin.manifest.permissions && plugin.manifest.permissions.length > 0) {
-            <div class="plugin-info-section">
-              <div class="label">{{ T.PLUGINS.PERMISSIONS | translate }}:</div>
-              <mat-chip-set>
-                @for (permission of plugin.manifest.permissions; track permission) {
-                  <mat-chip>{{ permission }}</mat-chip>
-                }
-              </mat-chip-set>
-            </div>
-          }
-          @if (getNetworkReachHosts(plugin); as networkHosts) {
-            @if (networkHosts.length > 0) {
+          @if (getApiAccess(plugin); as apiAccess) {
+            @if (apiAccess.length > 0) {
               <div class="plugin-info-section">
-                <div class="label">{{ T.PLUGINS.ALLOWED_HOSTS | translate }}:</div>
+                <div class="label">{{ T.PLUGINS.DECLARED_ACCESS | translate }}:</div>
+                <ul class="api-access">
+                  @for (access of apiAccess; track access.permission) {
+                    <li>{{ access.key | translate: access.params }}</li>
+                  }
+                </ul>
+              </div>
+            }
+          }
+          @if (getOtherPermissions(plugin); as otherPermissions) {
+            @if (otherPermissions.length > 0) {
+              <div class="plugin-info-section">
+                <div class="label">{{ T.PLUGINS.OTHER_PERMISSIONS | translate }}:</div>
                 <mat-chip-set>
-                  @for (host of networkHosts; track host) {
-                    <mat-chip>{{ host }}</mat-chip>
+                  @for (permission of otherPermissions; track permission) {
+                    <mat-chip>{{ permission }}</mat-chip>
                   }
                 </mat-chip-set>
               </div>

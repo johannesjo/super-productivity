@@ -46,6 +46,9 @@ import { Router } from '@angular/router';
 import { selectAll as selectAllIssueProviders } from '../../../features/issue/store/issue-provider.selectors';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
 import COMMUNITY_PLUGINS_DATA from '../../../../assets/community-plugins.json';
+import { PluginApiAccess, PluginSecurityService } from '../../plugin-security';
+import { DEV_ONLY_BUNDLED_PLUGIN_IDS } from '../../bundled-plugins.const';
+import { environment } from '../../../../environments/environment';
 
 interface CommunityPlugin {
   name: string;
@@ -97,6 +100,7 @@ export class PluginManagementComponent {
   private readonly _router = inject(Router);
   private readonly _layoutService = inject(LayoutService);
   private readonly _pluginBridge = inject(PluginBridgeService);
+  private readonly _pluginSecurity = inject(PluginSecurityService);
   private readonly _snackService = inject(SnackService);
   private readonly _allIssueProviders = this._store.selectSignal(selectAllIssueProviders);
 
@@ -167,11 +171,18 @@ export class PluginManagementComponent {
     return plugins;
   });
 
+  // Development and E2E builds (plain `ng build`) are not `production`, so they list them.
+  private readonly _isShowDevPlugins = !environment.production;
+  // Dev-only plugins seen enabled stay listed, so disabling one does not make it vanish.
+  // Filled from inside pluginGroups (via isPluginListed); it only ever grows while this
+  // page is open, so re-running the computed gives the same result.
+  private readonly _shownDevPluginIds = new Set<string>();
+
   // Uploaded plugins, then built-in integrations (issue and calendar providers), then
   // other built-ins, each in load order. Grouped by origin and type rather than enabled
   // state, so a card never moves while its toggle is used.
   readonly pluginGroups = computed(() => {
-    const plugins = this.allPlugins();
+    const plugins = this.allPlugins().filter((p) => this._isListed(p));
     const states = this._pluginService.pluginStates();
     const isUploaded = (p: PluginInstance): boolean =>
       states.get(p.manifest.id)?.type === 'uploaded';
@@ -273,6 +284,10 @@ export class PluginManagementComponent {
     } catch (error) {
       PluginLog.err('Failed to disable plugin:', error);
     }
+  }
+
+  private _isListed(plugin: PluginInstance): boolean {
+    return isPluginListed(plugin, this._isShowDevPlugins, this._shownDevPluginIds);
   }
 
   isPluginLoading(plugin: PluginInstance): boolean {
@@ -521,9 +536,14 @@ export class PluginManagementComponent {
    * effect when the plugin also declares the `http` capability — the bridge rejects `request`
    * without it — so the UI must not advertise "network access" for `allowedHosts` alone.
    */
-  getNetworkReachHosts(plugin: PluginInstance): string[] {
-    const hosts = plugin.manifest.allowedHosts;
-    return plugin.manifest.permissions?.includes('http') && hosts?.length ? hosts : [];
+  getApiAccess(plugin: PluginInstance): PluginApiAccess[] {
+    return this._pluginSecurity.getDeclaredApiAccess(plugin.manifest);
+  }
+
+  /** Declared permissions not described by getApiAccess (nothing checks them). */
+  getOtherPermissions(plugin: PluginInstance): string[] {
+    const described = new Set(this.getApiAccess(plugin).map((a) => a.permission));
+    return (plugin.manifest.permissions ?? []).filter((p) => !described.has(p));
   }
 
   getDetailsTitle(plugin: PluginInstance): string {
@@ -536,15 +556,9 @@ export class PluginManagementComponent {
     const parts: string[] = [];
     const pCount = plugin.manifest.permissions?.length || 0;
     const hCount = plugin.manifest.hooks?.length || 0;
-    const aCount = this.getNetworkReachHosts(plugin).length;
 
     if (pCount > 0) {
       parts.push(`${this._translateService.instant(T.PLUGINS.PERMISSIONS)} (${pCount})`);
-    }
-    if (aCount > 0) {
-      parts.push(
-        `${this._translateService.instant(T.PLUGINS.ALLOWED_HOSTS)} (${aCount})`,
-      );
     }
     if (hCount > 0) {
       parts.push(`${this._translateService.instant(T.PLUGINS.HOOKS)} (${hCount})`);
@@ -659,3 +673,22 @@ export class PluginManagementComponent {
     return languages.includes(currentLang);
   }
 }
+
+/**
+ * Whether the plugins page lists `plugin`. Dev-only bundled plugins are listed only when
+ * `isShowDevPlugins` is set or once seen enabled; `shownDevPluginIds` remembers the latter.
+ */
+export const isPluginListed = (
+  plugin: PluginInstance,
+  isShowDevPlugins: boolean,
+  shownDevPluginIds: Set<string>,
+): boolean => {
+  const id = plugin.manifest.id;
+  if (isShowDevPlugins || !DEV_ONLY_BUNDLED_PLUGIN_IDS.has(id)) {
+    return true;
+  }
+  if (plugin.isEnabled) {
+    shownDevPluginIds.add(id);
+  }
+  return shownDevPluginIds.has(id);
+};

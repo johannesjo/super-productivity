@@ -3112,7 +3112,6 @@
   },
   "PLUGINS": {
     "ACTION_TYPE_NOT_ALLOWED": "Action type \"{{type}}\" is not allowed",
-    "ALLOWED_HOSTS": "Network access",
     "ALREADY_INITIALIZED": "Plugin is already initialized",
     "AUTHORED_BY": "by {{author}}",
     "CANNOT_DELETE_INBOX": "The Inbox project cannot be deleted",
@@ -3204,7 +3203,7 @@
     "VALIDATION_FAILED": "Validation failed: {{errors}}",
     "NODE_EXECUTION_BRIDGE_UNAVAILABLE": "Could not connect to the Node.js execution bridge. Please try disabling and re-enabling the plugin.",
     "PLUGIN_LOAD_FAILED": "Plugin \"{{pluginName}}\" failed to load: {{error}}",
-    "INTRO": "Built-in plugins are maintained by the Super Productivity team. Plugins you upload are not reviewed and can access all your data, so only install ones you trust.",
+    "INTRO": "Plugins run inside the app without a sandbox. Built-in plugins are maintained by the Super Productivity team; plugins you upload are not reviewed and can access all your data, so only install ones you trust.",
     "THIRD_PARTY": "Third-party",
     "DETAILS": "Details",
     "COMMUNITY_PLUGINS": "Community Plugins",
@@ -3213,7 +3212,12 @@
     "COMMUNITY_GET_LISTED": "Get your plugin to show up here",
     "GROUP_UPLOADED": "Uploaded plugins",
     "GROUP_INTEGRATIONS": "Integrations",
-    "GROUP_OTHER": "Other plugins"
+    "GROUP_OTHER": "Other plugins",
+    "DECLARED_ACCESS": "Checked permissions",
+    "CAN_RUN_SYSTEM_COMMANDS": "Run system commands and access your files (desktop app only)",
+    "CAN_REQUEST_HOSTS": "Send plugin API requests to {{hosts}}",
+    "CAN_DELETE_PROJECTS": "Delete projects through the plugin API",
+    "OTHER_PERMISSIONS": "Other declared permissions"
   },
   "PM": {
     "ALL_TASKS_TITLE": "Metrics (all tasks)",
