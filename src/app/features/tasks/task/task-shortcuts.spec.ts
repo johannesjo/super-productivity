@@ -32,6 +32,7 @@ import { PlannerService } from '../../planner/planner.service';
 import { AddSubtaskInputService } from '../add-subtask-input/add-subtask-input.service';
 import { TaskDuplicateService } from '../task-duplicate.service';
 import { TaskMultiSelectService } from '../task-multi-select.service';
+import { SectionService } from '../../section/section.service';
 
 describe('TaskComponent shortcut handling', () => {
   let fixture: import('@angular/core/testing').ComponentFixture<TaskComponent>;
@@ -151,6 +152,13 @@ describe('TaskComponent shortcut handling', () => {
 
         { provide: TaskService, useValue: taskServiceSpy },
         { provide: TaskDuplicateService, useValue: taskDuplicateServiceSpy },
+        {
+          provide: SectionService,
+          useValue: jasmine.createSpyObj('SectionService', [
+            'moveTaskToTop',
+            'moveTaskToBottom',
+          ]),
+        },
         {
           provide: TaskRepeatCfgService,
           useValue: jasmine.createSpyObj('TaskRepeatCfgService', [
@@ -948,6 +956,37 @@ describe('TaskComponent shortcut handling', () => {
       component.moveToBacklogWithFocus();
 
       expect(projectService.moveTaskToBacklog).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('move to top/bottom in a section', () => {
+    let sectionService: jasmine.SpyObj<SectionService>;
+
+    beforeEach(() => {
+      sectionService = TestBed.inject(SectionService) as jasmine.SpyObj<SectionService>;
+      fixture.componentRef.setInput('task', createTopLevelTask('Move me'));
+      fixture.componentRef.setInput('isInSubTaskList', false);
+    });
+
+    it('moves within the rendered section', () => {
+      fixture.componentRef.setInput('sectionId', 'sec-2');
+
+      component.moveTaskToTop();
+      component.moveTaskToBottom();
+
+      expect(sectionService.moveTaskToTop).toHaveBeenCalledWith('sec-2', 'top-1');
+      expect(sectionService.moveTaskToBottom).toHaveBeenCalledWith('sec-2', 'top-1');
+      expect(taskServiceSpy.moveToTop).not.toHaveBeenCalled();
+      expect(taskServiceSpy.moveToBottom).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the work-context move when not rendered in a section', () => {
+      component.moveTaskToTop();
+      component.moveTaskToBottom();
+
+      expect(taskServiceSpy.moveToTop).toHaveBeenCalledWith('top-1', undefined, false);
+      expect(taskServiceSpy.moveToBottom).toHaveBeenCalledWith('top-1', undefined, false);
+      expect(sectionService.moveTaskToTop).not.toHaveBeenCalled();
     });
   });
 
