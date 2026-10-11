@@ -68,7 +68,8 @@
               "sourceMap": true,
               "namedChunks": false,
               "aot": false,
-              "serviceWorker": "ngsw-config.json"
+              "serviceWorker": "ngsw-config.json",
+              "externalDependencies": ["marked-katex-extension"]
             },
             "production": {
               "baseHref": "",

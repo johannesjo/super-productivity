@@ -27,7 +27,11 @@ import { DataInitStateService } from './app/core/data-init/data-init-state.servi
 // Type definitions for window.ea are in ./app/core/window-ea.d.ts
 import { App as CapacitorApp } from '@capacitor/app';
 import { GlobalErrorHandler } from './app/core/error-handler/global-error-handler.class';
-import { bootstrapApplication, BrowserModule } from '@angular/platform-browser';
+import {
+  bootstrapApplication,
+  BrowserModule,
+  REMOVE_STYLES_ON_COMPONENT_DESTROY,
+} from '@angular/platform-browser';
 import {
   HTTP_INTERCEPTORS,
   provideHttpClient,
@@ -274,6 +278,13 @@ bootstrapApplication(AppComponent, {
       ? [{ provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: { autoFocus: false } }]
       : []),
     provideAnimationsAsync(),
+    // Keep component <style> elements once added. Removing them when the last
+    // instance is destroyed means every snack and dialog adds its stylesheets on
+    // open and removes them on close; each change makes the browser rebuild its
+    // style rules and recalc styles, which stutters the open/close animations.
+    // Component styles must therefore never rely on being removed: no unscoped
+    // `::ng-deep` rules.
+    { provide: REMOVE_STYLES_ON_COMPONENT_DESTROY, useValue: false },
     {
       provide: MATERIAL_ANIMATIONS,
       deps: [GlobalConfigService],
