@@ -272,12 +272,12 @@ describe('NavListTreeComponent row indent (#10472)', () => {
     expect(getIndent('project-nested')).toBe('32px');
   });
 
-  it('leaves the top-level rows unindented in the compact rail', () => {
+  it('indents no row in the compact rail, so every icon stays in its column', () => {
     fixture.componentInstance.showLabels.set(false);
     fixture.detectChanges();
 
     expect(getIndent('project-top')).toBe('0px');
     expect(getIndent('folder-folder')).toBe('0px');
-    expect(getIndent('project-nested')).toBe('16px');
+    expect(getIndent('project-nested')).toBe('0px');
   });
 });

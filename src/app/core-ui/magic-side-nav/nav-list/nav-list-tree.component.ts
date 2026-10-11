@@ -101,11 +101,11 @@ export class NavListTreeComponent {
   // Off for the first render, so the lists and folders that are already open
   // appear without animating in on app start.
   readonly isAnimationEnabled = signal(false);
-  readonly treeIndent = TREE_INDENT;
-  // The top-level rows take one nesting step under the section header, the
-  // way folder contents sit under their folder (#10472). The compact rail
-  // centers the icons and has no room for it.
-  readonly treeBaseIndent = computed(() => (this.showLabels() ? TREE_INDENT : 0));
+  // One nesting step, used for each folder level and for the top-level rows,
+  // which sit under the section header the way folder contents sit under
+  // their folder (#10472). The compact rail centers every icon in one column,
+  // so it indents no row at all.
+  readonly treeIndent = computed(() => (this.showLabels() ? TREE_INDENT : 0));
 
   constructor() {
     effect(() => {

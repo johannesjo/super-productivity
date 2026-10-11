@@ -51,8 +51,8 @@
     <tree-dnd
       [nodes]="treeNodes()"
       (nodesChange)="onTreeUpdated($event)"
-      [indent]="treeIndent"
-      [baseIndent]="treeBaseIndent()"
+      [indent]="treeIndent()"
+      [baseIndent]="treeIndent()"
     >
       <!-- Template for folder nodes -->
       <ng-template
