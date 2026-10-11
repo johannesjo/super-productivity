@@ -13,7 +13,6 @@ import { DateService } from '../../../core/date/date.service';
 import { FocusModeMode } from '../../../features/focus-mode/focus-mode.model';
 import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-circle.component';
 import { MatDialog } from '@angular/material/dialog';
-import { DialogFocusSessionEditComponent } from '../../../features/metric/dialog-focus-session-edit/dialog-focus-session-edit.component';
 import { LongPressDirective } from '../../../ui/longpress/longpress.directive';
 import { first } from 'rxjs/operators';
 
@@ -118,7 +117,9 @@ export class FocusButtonComponent {
     this._metricService
       .getMetricForDay$(dayStr)
       .pipe(first())
-      .subscribe((metric) => {
+      .subscribe(async (metric) => {
+        const { DialogFocusSessionEditComponent } =
+          await import('../../../features/metric/dialog-focus-session-edit/dialog-focus-session-edit.component');
         this._matDialog.open(DialogFocusSessionEditComponent, {
           restoreFocus: true,
           data: {
