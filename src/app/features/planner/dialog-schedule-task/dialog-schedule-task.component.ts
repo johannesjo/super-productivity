@@ -56,6 +56,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { selectTaskRepeatCfgByIdAllowUndefined } from '../../task-repeat-cfg/store/task-repeat-cfg.selectors';
 import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 import { getTaskRepeatInfoText } from '../../tasks/task-detail-panel/get-task-repeat-info-text.util';
+import { ExactAlarmHintComponent } from '../../reminder/exact-alarm-hint/exact-alarm-hint.component';
 
 @Component({
   selector: 'dialog-schedule-task',
@@ -67,6 +68,7 @@ import { getTaskRepeatInfoText } from '../../tasks/task-detail-panel/get-task-re
     MatDialogActions,
     MatDialogContent,
     DateTimePickerComponent,
+    ExactAlarmHintComponent,
   ],
   templateUrl: './dialog-schedule-task.component.html',
   styleUrl: './dialog-schedule-task.component.scss',
@@ -107,6 +109,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   );
 
   T: typeof T = T;
+  readonly DO_NOT_REMIND = TaskReminderOptionId.DoNotRemind;
   minDate = this.data.minDate === undefined ? new Date() : this.data.minDate;
 
   remindAvailableOptions: TaskReminderOption[] = TASK_REMINDER_OPTIONS;
@@ -353,41 +356,50 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       return;
     }
 
-    if (this.data.task.remindAt) {
-      this._store.dispatch(
-        TaskSharedActions.unscheduleTask({
-          id: this.data.task.id,
-        }),
-      );
-    } else if (this.plannedDayForTask === this._dateService.todayStr()) {
-      // to cover edge cases
-      this._store.dispatch(
-        TaskSharedActions.unscheduleTask({
-          id: this.data.task.id,
-          isSkipToast: true,
-        }),
-      );
+    // apply live task data for snapshot
+    const task = this._liveTask() ?? this.data.task;
+    const { dueDay, dueWithTime, remindAt } = task;
 
-      this._snackService.open({
-        type: 'SUCCESS',
-        msg: T.F.PLANNER.S.REMOVED_PLAN_DATE,
-        translateParams: { taskTitle: truncate(this.data.task.title) },
-      });
-    } else {
-      this._store.dispatch(
-        TaskSharedActions.unscheduleTask({
-          id: this.data.task.id,
-          isSkipToast: true,
-        }),
-      );
+    this._store.dispatch(
+      TaskSharedActions.unscheduleTask({
+        id: task.id,
+        isSkipToast: true,
+      }),
+    );
 
-      this._snackService.open({
-        type: 'SUCCESS',
-        msg: T.F.PLANNER.S.REMOVED_PLAN_DATE,
-        translateParams: { taskTitle: truncate(this.data.task.title) },
-      });
-    }
+    this._snackService.open({
+      type: 'SUCCESS',
+      msg: T.F.PLANNER.S.REMOVED_PLAN_DATE,
+      translateParams: { taskTitle: truncate(task.title) },
+      actionStr: T.G.UNDO,
+      actionFn: () => this._restorePlanDate(task, dueDay, dueWithTime, remindAt),
+    });
     this.close(true);
+  }
+
+  private _restorePlanDate(
+    task: Task,
+    dueDay?: string | null,
+    dueWithTime?: number | null,
+    remindAt?: number | null,
+  ): void {
+    if (dueWithTime) {
+      this._store.dispatch(
+        TaskSharedActions.reScheduleTaskWithTime({
+          task,
+          dueWithTime,
+          remindAt: remindAt ?? undefined,
+          isMoveToBacklog: false,
+        }),
+      );
+    } else if (dueDay) {
+      this._store.dispatch(
+        PlannerActions.planTaskForDay({
+          task,
+          day: dueDay,
+        }),
+      );
+    }
   }
 
   async submit(): Promise<void> {

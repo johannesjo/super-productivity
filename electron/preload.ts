@@ -56,8 +56,6 @@ const ea: ElectronAPI = {
       dataStr: string | undefined;
     }>,
   fileSyncRemove: (args) => _invoke('FILE_SYNC_REMOVE', args) as Promise<void>,
-  fileSyncListFiles: (args) =>
-    _invoke('FILE_SYNC_LIST_FILES', args) as Promise<string[] | Error>,
   checkDirExists: (args) => _invoke('CHECK_DIR_EXISTS', args) as Promise<true | Error>,
 
   pickDirectory: () => _invoke('PICK_DIRECTORY') as Promise<string | Error | undefined>,
@@ -167,7 +165,7 @@ const ea: ElectronAPI = {
   relaunch: () => _send('RELAUNCH'),
   exit: () => _send('EXIT'),
   flashFrame: () => _send('FLASH_FRAME'),
-  showOrFocus: () => _send('SHOW_OR_FOCUS'),
+  showOrFocus: (opts?: { isReminder?: boolean }) => _send('SHOW_OR_FOCUS', opts),
   lockScreen: () => _send('LOCK_SCREEN'),
   shutdownNow: () => _send('SHUTDOWN_NOW'),
   reloadMainWin: () => _send('RELOAD_MAIN_WIN'),

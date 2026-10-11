@@ -39,10 +39,25 @@ export const skipOnboardingForE2E = (): void => {
  * that must be dismissed before the app shell becomes interactive.
  */
 const dismissBlockingDialogs = async (page: Page, maxAttempts = 3): Promise<void> => {
+  const dialogConfirmBtn = page.locator('dialog-confirm button[e2e="confirmBtn"]');
+  // A rendered route without a loader or confirmation dialog needs no grace period.
+  // Require routed content: the empty shell can appear before startup dialogs.
+  const readyRoute = page.locator(
+    'body:not(:has(.loading-full-page-wrapper:visible)):not(:has(dialog-confirm:visible)) ' +
+      '.route-wrapper > :not(router-outlet):visible',
+  );
   for (let i = 0; i < maxAttempts; i++) {
     try {
-      const dialogConfirmBtn = page.locator('dialog-confirm button[e2e="confirmBtn"]');
-      await dialogConfirmBtn.waitFor({ state: 'visible', timeout: 2000 });
+      // After dismissing a dialog, preserve the grace period for chained dialogs.
+      const nextReadyElement =
+        i === 0
+          ? dialogConfirmBtn.filter({ visible: true }).or(readyRoute)
+          : dialogConfirmBtn;
+      await nextReadyElement.first().waitFor({
+        state: 'visible',
+        timeout: 2000,
+      });
+      if (!(await dialogConfirmBtn.isVisible())) return;
       await dialogConfirmBtn.click();
       await page.waitForTimeout(500);
     } catch {
@@ -71,27 +86,6 @@ export const waitForAngularStability = async (
 };
 
 /**
- * Dismisses the onboarding preset selection screen if present.
- * Sets the localStorage flag to skip it without altering app feature config.
- */
-const dismissOnboardingPresets = async (page: Page): Promise<void> => {
-  try {
-    const isVisible = await page
-      .locator('onboarding-preset-selection')
-      .waitFor({ state: 'visible', timeout: 2000 })
-      .then(() => true)
-      .catch(() => false);
-    if (isVisible) {
-      await page.evaluate(skipOnboardingForE2E);
-      await page.reload({ waitUntil: 'domcontentloaded' });
-      await page.waitForTimeout(500);
-    }
-  } catch {
-    // Preset selection not present, ignore
-  }
-};
-
-/**
  * Shared helper to wait until the application shell and Angular are ready.
  * Optimized for speed - removed networkidle wait and redundant checks.
  *
@@ -110,9 +104,6 @@ export const waitForAppReady = async (
   // Handle any blocking dialogs (pre-migration, confirmation, etc.)
   // These dialogs block app until dismissed
   await dismissBlockingDialogs(page);
-
-  // Dismiss onboarding preset selection if present (blocks entire UI)
-  await dismissOnboardingPresets(page);
 
   // Wait for the loading screen to disappear (if visible).
   // The app shows `.loading-full-page-wrapper` while syncing/importing data.
@@ -185,25 +176,6 @@ export const waitForAppReady = async (
   // Check if page is still open before waiting (handles test timeout scenarios)
   if (!page.isClosed()) {
     await page.waitForTimeout(200);
-  }
-};
-
-/**
- * Wait for UI to settle after an action (e.g., adding a task).
- * Uses Angular stability as the primary signal rather than fixed timeouts.
- * Falls back to a minimal timeout if Angular stability check fails.
- */
-export const waitForUISettle = async (page: Page): Promise<void> => {
-  if (page.isClosed()) {
-    return;
-  }
-  try {
-    await waitForAngularStability(page, 2000);
-  } catch {
-    // Fall back to minimal fixed timeout if stability check fails
-    if (!page.isClosed()) {
-      await page.waitForTimeout(200);
-    }
   }
 };
 

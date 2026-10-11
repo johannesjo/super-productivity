@@ -49,6 +49,7 @@ import { DateTimeFormatService } from '../../../core/date-time-format/date-time-
 import { getWeekNumber } from '../../../util/get-week-number';
 import { parseDbDateStr } from '../../../util/parse-db-date-str';
 import { anchorContextNow } from '../anchor-context-now';
+import { DateService } from '../../../core/date/date.service';
 
 @Component({
   selector: 'schedule',
@@ -82,6 +83,7 @@ export class ScheduleComponent {
   private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
   private _globalConfigService = inject(GlobalConfigService);
   private _dateTimeFormatService = inject(DateTimeFormatService);
+  private _dateService = inject(DateService);
   private _translate = inject(TranslateService);
   private _hiddenCalendarProviders = inject(HiddenCalendarProvidersService);
   private _elRef = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -121,9 +123,20 @@ export class ScheduleComponent {
   // True when today falls within the currently displayed range.
   // Disables the "today" reset button and suppresses navigation jumps.
   isViewingToday = computed(() => {
-    if (this._selectedDate() === null) return true;
+    const selectedDate = this._selectedDate();
+    if (selectedDate === null) return true;
     const todayStr = this._todayDateStr();
-    return todayStr ? this.daysToShow().includes(todayStr) : false;
+    if (!todayStr) return false;
+    if (this.isMonthView()) {
+      // Compare the month, not the grid: the grid's padding days can include
+      // today while showing the next month, which locked navigation (#10451)
+      const today = parseDbDateStr(todayStr);
+      return (
+        selectedDate.getFullYear() === today.getFullYear() &&
+        selectedDate.getMonth() === today.getMonth()
+      );
+    }
+    return this.daysToShow().includes(todayStr);
   });
 
   protected _todayDateStr = toSignal(this._globalTrackingIntervalService.todayDateStr$);
@@ -352,8 +365,9 @@ export class ScheduleComponent {
       previousPeriod.setDate(currentDate.getDate() - daysToSkip);
       previousPeriod.setHours(0, 0, 0, 0);
 
-      // If going back would land on or before today, snap to "today view" (null)
-      const todayMidnight = new Date();
+      // If going back would land on or before today, snap to "today view" (null).
+      // Today is the logical day the today view shows, as in goToNextPeriod.
+      const todayMidnight = this._dateService.getLogicalTodayDate();
       todayMidnight.setHours(0, 0, 0, 0);
       if (previousPeriod.getTime() <= todayMidnight.getTime()) {
         this._selectedDate.set(null);
@@ -364,7 +378,7 @@ export class ScheduleComponent {
   }
 
   goToNextPeriod(): void {
-    const currentDate = this._selectedDate() || new Date();
+    const currentDate = this._selectedDate() || this._dateService.getLogicalTodayDate();
     const selectedView = this._currentTimeViewMode();
 
     if (selectedView === 'month') {

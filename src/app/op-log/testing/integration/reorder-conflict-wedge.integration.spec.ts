@@ -20,6 +20,7 @@ import {
 } from '../../../features/boards/store/boards.reducer';
 import {
   addNote,
+  deleteNote,
   updateNote,
   updateNoteOrder,
 } from '../../../features/note/store/note.actions';
@@ -74,6 +75,7 @@ import {
   OpType,
 } from '../../core/operation.types';
 import { UnsupportedMultiEntityConflictError } from '../../core/errors/sync-errors';
+import { toLwwUpdateActionType } from '../../core/lww-update-action-types';
 import { PersistentAction } from '../../core/persistent-action.interface';
 import { OperationLogStoreService } from '../../persistence/operation-log-store.service';
 import { ConflictResolutionService } from '../../sync/conflict-resolution.service';
@@ -99,6 +101,7 @@ const OTHER_DATE = '2026-09-24';
 const families = [
   'project notes',
   'Today notes',
+  'tag notes',
   'habits',
   'habit date counts',
   'boards',
@@ -148,7 +151,12 @@ const actionsFor = (
         ids: IDS,
         activeContextType:
           family === 'project notes' ? WorkContextType.PROJECT : WorkContextType.TAG,
-        activeContextId: family === 'project notes' ? PROJECT : 'TODAY',
+        activeContextId:
+          family === 'project notes'
+            ? PROJECT
+            : family === 'tag notes'
+              ? 'tag1'
+              : 'TODAY',
       }),
       edit: updateNote({
         note: { id: IDS[0], changes: { content: 'preserved content' } },
@@ -398,25 +406,24 @@ describe('reorder conflicts: real store, applier, reducers and durable replay (#
     edit: PersistentAction;
     mutate?: (op: Operation) => Operation;
   }[] = [
-    {
-      name: 'note pinning',
-      family: 'project notes' as const,
+    ...(['Today notes', 'tag notes'] as const).map((family) => ({
+      name: family + ' order vs unpin',
+      family,
       edit: updateNote({
         note: {
           id: IDS[0],
           changes: { content: 'content plus membership', isPinnedToToday: false },
         },
       }),
-    },
-    {
-      name: 'competing note order',
+    })),
+    ...[
+      { name: 'note project move', changes: { projectId: 'other-project' } },
+      { name: 'note identity change', changes: { id: 'renamed' } },
+    ].map(({ name, changes }) => ({
+      name,
       family: 'project notes' as const,
-      edit: updateNoteOrder({
-        ids: [...IDS].reverse(),
-        activeContextId: PROJECT,
-        activeContextType: WorkContextType.PROJECT,
-      }),
-    },
+      edit: updateNote({ note: { id: IDS[0], changes } }),
+    })),
     {
       name: 'section context change',
       family: 'sections' as const,
@@ -425,16 +432,17 @@ describe('reorder conflicts: real store, applier, reducers and durable replay (#
       }),
     },
     {
-      name: 'habit settings',
-      family: 'habits' as const,
-      edit: updateSimpleCounter({
-        simpleCounter: { id: IDS[0], changes: { isEnabled: false } },
+      name: 'section task placement',
+      family: 'sections' as const,
+      edit: updateSection({
+        section: { id: IDS[0], changes: { taskIds: ['placed-task'] } },
       }),
     },
     {
-      name: 'competing habit order',
+      // Each order fills the slots of its own habits: they differ per side.
+      name: 'competing habit order over a different habit set',
       family: 'habits' as const,
-      edit: updateSimpleCounterOrder({ ids: [...IDS].reverse() }),
+      edit: updateSimpleCounterOrder({ ids: ['other-habit', ...IDS].reverse() }),
     },
     {
       name: 'habit deletion',
@@ -532,6 +540,357 @@ describe('reorder conflicts: real store, applier, reducers and durable replay (#
       ).toBeRejectedWithError(UnsupportedMultiEntityConflictError);
       expect(await state()).toEqual(before);
       expect((await db.getUnsynced()).map((row) => row.op.id)).toEqual([local.id]);
+    });
+  }
+
+  // #10377: a competing order of the same list, or the delete of a listed
+  // entity, applies; the pending reorder is then reissued from current state.
+  const listOf = (value: TestState, family: 'notes' | 'Today' | 'habits'): string[] =>
+    family === 'notes'
+      ? value.projects.entities[PROJECT]!.noteIds
+      : family === 'Today'
+        ? value.note.todayOrder
+        : value.simpleCounter.ids;
+  const noteOrder = (
+    ids: string[],
+    context: 'project' | 'TODAY' | 'tag1',
+  ): PersistentAction =>
+    updateNoteOrder({
+      ids,
+      activeContextType:
+        context === 'project' ? WorkContextType.PROJECT : WorkContextType.TAG,
+      activeContextId: context === 'project' ? PROJECT : context,
+    });
+  const reissuedCrossings: {
+    name: string;
+    family: 'notes' | 'Today' | 'habits';
+    order: PersistentAction;
+    other: PersistentAction;
+    deleted?: string;
+  }[] = [
+    {
+      name: 'competing project note orders',
+      family: 'notes',
+      order: noteOrder(IDS, 'project'),
+      other: noteOrder([IDS[1], IDS[2], IDS[0]], 'project'),
+    },
+    {
+      name: 'a Today note order and a tag note order',
+      family: 'Today',
+      order: noteOrder(IDS, 'TODAY'),
+      other: noteOrder([IDS[2], IDS[0], IDS[1]], 'tag1'),
+    },
+    {
+      name: 'a project note order and a Today note order',
+      family: 'notes',
+      order: noteOrder(IDS, 'project'),
+      other: noteOrder([IDS[2], IDS[0], IDS[1]], 'TODAY'),
+    },
+    {
+      name: 'competing habit orders',
+      family: 'habits',
+      order: updateSimpleCounterOrder({ ids: IDS }),
+      other: updateSimpleCounterOrder({ ids: [IDS[1], IDS[2], IDS[0]] }),
+    },
+    {
+      name: 'a project note order and a note deletion',
+      family: 'notes',
+      order: noteOrder(IDS, 'project'),
+      other: deleteNote({ id: IDS[1], projectId: PROJECT, isPinnedToToday: true }),
+      deleted: IDS[1],
+    },
+    {
+      name: 'a Today note order and a note deletion',
+      family: 'Today',
+      order: noteOrder(IDS, 'TODAY'),
+      other: deleteNote({ id: IDS[1], projectId: PROJECT, isPinnedToToday: true }),
+      deleted: IDS[1],
+    },
+  ];
+  for (const crossing of reissuedCrossings) {
+    for (const [pendingOrder, via] of [
+      [true, 'download'],
+      [true, 'server rejection'],
+      ...(crossing.deleted ? [[false, 'download']] : []),
+    ] as const) {
+      const pendingSide = pendingOrder ? 'order' : 'other';
+      it(`converges ${crossing.name} (pending ${pendingSide}, via ${via})`, async () => {
+        const localAction = pendingOrder ? crossing.order : crossing.other;
+        const remoteAction = pendingOrder ? crossing.other : crossing.order;
+        const local = capture(localAction, 'local', 2000);
+        const remote = capture(remoteAction, 'remote', 1000);
+        store.dispatch(localAction);
+        await db.append(local, 'local');
+        const resolver = TestBed.inject(ConflictResolutionService);
+        const detected = await resolver.checkOpForConflicts(remote, {
+          localPendingOpsByEntity: await db.getUnsyncedByEntity(),
+          appliedFrontierByEntity: new Map(),
+          retainedOpsByEntity: new Map(),
+          snapshotVectorClock: undefined,
+          snapshotEntityKeys: undefined,
+          hasNoSnapshotClock: true,
+        });
+        expect(detected).toEqual({ isSupersededOrDuplicate: false, conflicts: [] });
+        await resolver.autoResolveConflictsLWW([], [remote]);
+        const superseded = TestBed.inject(SupersededOperationResolverService);
+        const created =
+          via === 'download'
+            ? (await superseded.reissueCrossedPendingReorders()).created
+            : await superseded.resolveSupersededLocalOps([
+                { opId: local.id, op: local, existingClock: remote.vectorClock },
+              ]);
+        const after = await state();
+        const list = listOf(after, crossing.family);
+        if (crossing.deleted) {
+          // The delete wins; the order keeps its positions of the others.
+          expect(list).not.toContain(crossing.deleted);
+          const ordered = IDS.filter((id) => id !== crossing.deleted);
+          expect(list.filter((id) => IDS.includes(id))).toEqual(ordered);
+        }
+
+        const pendingOps = (await db.getUnsynced()).map((row) => row.op);
+        const received: Operation[] = [remote];
+        if (pendingOrder) {
+          expect(created).toBe(1);
+          expect((await db.getOpById(local.id))?.rejectedAt).toBeDefined();
+          expect(pendingOps.length).toBe(1);
+          const [replacement] = pendingOps;
+          expect(replacement.actionType).toBe(local.actionType);
+          expect(replacement.entityIds).toEqual(
+            (actionPayloadOf(replacement) as { ids: string[] }).ids,
+          );
+          for (const clock of [local.vectorClock, remote.vectorClock]) {
+            expect(compareVectorClocks(replacement.vectorClock, clock)).toBe(
+              VectorClockComparison.GREATER_THAN,
+            );
+          }
+          received.push(replacement);
+        } else {
+          // The pending delete uploads as it is; nothing to reissue.
+          expect(created).toBe(0);
+          expect(pendingOps.map((op) => op.id)).toEqual([local.id]);
+          received.push(local);
+        }
+
+        // Restart replay, and the device that sent `remote` receiving the
+        // upload, reach the same list.
+        const applier = TestBed.inject(OperationApplierService);
+        const durable = (await db.getOpsAfterSeq(0)).map((row) => row.op);
+        for (const history of [durable, received]) {
+          resetProjection(initial);
+          await applier.applyOperations(history, { isLocalHydration: true });
+          expect(listOf(await state(), crossing.family)).toEqual(list);
+        }
+      });
+    }
+  }
+
+  for (const ordersAdded of [true, false]) {
+    it(`keeps a note added ${ordersAdded ? 'and ordered' : 'after the order'} beside a crossed project order in every list`, async () => {
+      const add = addNote({
+        note: {
+          id: 'added',
+          content: 'added',
+          projectId: PROJECT,
+          created: 100,
+          modified: 100,
+          isPinnedToToday: false,
+        },
+      });
+      const addOp = capture(add, 'local', 1500);
+      const orderAction = noteOrder(
+        ordersAdded ? ['added', ...IDS] : [...IDS],
+        'project',
+      );
+      const local = {
+        ...capture(orderAction, 'local', 2000),
+        vectorClock: { ...addOp.vectorClock, local: 2 },
+      };
+      const remote = capture(
+        noteOrder([IDS[1], IDS[2], IDS[0]], 'project'),
+        'remote',
+        1000,
+      );
+      for (const [action, op] of [
+        [add, addOp],
+        [orderAction, local],
+      ] as const) {
+        store.dispatch(action);
+        await db.append(op, 'local');
+      }
+      await TestBed.inject(ConflictResolutionService).autoResolveConflictsLWW(
+        [],
+        [remote],
+      );
+      expect(
+        await TestBed.inject(
+          SupersededOperationResolverService,
+        ).reissueCrossedPendingReorders(),
+      ).toEqual({ created: 1, deferredOpIds: [] });
+      const list = (await state()).projects.entities[PROJECT]!.noteIds;
+      expect(list).toContain('added');
+
+      // The device that sent `remote` receives the add and the reissue.
+      const reissue = (await db.getUnsynced())
+        .map((row) => row.op)
+        .find((op) => op.actionType === local.actionType)!;
+      resetProjection(initial);
+      await TestBed.inject(OperationApplierService).applyOperations(
+        [remote, addOp, reissue],
+        { isLocalHydration: true },
+      );
+      expect((await state()).projects.entities[PROJECT]!.noteIds).toEqual(list);
+    });
+  }
+
+  it('leaves a crossed order pending when compaction removed the proof', async () => {
+    const localAction = noteOrder(IDS, 'project');
+    const local = capture(localAction, 'local', 2000);
+    const remote = capture(
+      noteOrder([IDS[1], IDS[2], IDS[0]], 'project'),
+      'remote',
+      1000,
+    );
+    store.dispatch(localAction);
+    await db.append(local, 'local');
+    await TestBed.inject(ConflictResolutionService).autoResolveConflictsLWW([], [remote]);
+    await db.deleteOpsWhere((row) => row.op.id === remote.id);
+
+    // Nothing shows the crossing any more; the server-rejection path keeps
+    // its safety stop for it.
+    expect(
+      await TestBed.inject(
+        SupersededOperationResolverService,
+      ).reissueCrossedPendingReorders(),
+    ).toEqual({ created: 0, deferredOpIds: [] });
+    expect((await db.getUnsynced()).map((row) => row.op.id)).toEqual([local.id]);
+  });
+
+  it('defers a crossed order while a local change awaits persistence', async () => {
+    const localAction = noteOrder(IDS, 'project');
+    const local = capture(localAction, 'local', 2000);
+    const remote = capture(
+      noteOrder([IDS[1], IDS[2], IDS[0]], 'project'),
+      'remote',
+      1000,
+    );
+    store.dispatch(localAction);
+    await db.append(local, 'local');
+    await TestBed.inject(ConflictResolutionService).autoResolveConflictsLWW([], [remote]);
+    const pendingWrites = spyOn(
+      TestBed.inject(OperationCaptureService),
+      'getPendingCount',
+    ).and.returnValue(1);
+    const resolver = TestBed.inject(SupersededOperationResolverService);
+
+    // The upload must hold it back until the reissue can run.
+    expect(await resolver.reissueCrossedPendingReorders()).toEqual({
+      created: 0,
+      deferredOpIds: [local.id],
+    });
+    expect((await db.getUnsynced()).map((row) => row.op.id)).toEqual([local.id]);
+
+    // The next download or upload reissues it from the retained remote row.
+    pendingWrites.and.returnValue(0);
+    expect(await resolver.reissueCrossedPendingReorders()).toEqual({
+      created: 1,
+      deferredOpIds: [],
+    });
+    expect((await db.getOpById(local.id))?.rejectedAt).toBeDefined();
+  });
+
+  it('keeps the safety stop when one note has two pending membership writes', async () => {
+    // Both would be reissued as pins, which released receivers prepend twice.
+    const edits = [false, true].map((isPinnedToToday) =>
+      updateNote({ note: { id: IDS[0], changes: { isPinnedToToday } } }),
+    );
+    const locals = edits.map((edit, index) => ({
+      ...capture(edit, 'local', 1000 + index),
+      vectorClock: { local: index + 1 },
+    }));
+    for (const [index, edit] of edits.entries()) {
+      store.dispatch(edit);
+      await db.append(locals[index], 'local');
+    }
+    const before = await state();
+    const remote = capture(actionsFor('project notes').order, 'remote', 2000);
+    const resolver = TestBed.inject(ConflictResolutionService);
+    const detected = await resolver.checkOpForConflicts(remote, {
+      localPendingOpsByEntity: await db.getUnsyncedByEntity(),
+      appliedFrontierByEntity: new Map(),
+      retainedOpsByEntity: new Map(),
+      snapshotVectorClock: undefined,
+      snapshotEntityKeys: undefined,
+      hasNoSnapshotClock: true,
+    });
+    expect(detected.conflicts.length).toBeGreaterThan(0);
+    await expectAsync(
+      resolver.autoResolveConflictsLWW(detected.conflicts),
+    ).toBeRejectedWithError(UnsupportedMultiEntityConflictError);
+    expect(await state()).toEqual(before);
+    expect((await db.getUnsynced()).map((row) => row.op.id)).toEqual(
+      locals.map((op) => op.id),
+    );
+  });
+
+  // Without causal proof a pin keeps the whole-note snapshot fallback: stopping
+  // sync would leave the whole-dataset replacement as the only way out. The
+  // snapshot carries isPinnedToToday but not receivers' Today list write (a
+  // documented gap). Proof is missing after compaction, and on clock-gap
+  // rejections against a retained row that is no commuting reorder.
+  for (const evidence of ['compacted order row', 'unrelated retained edit'] as const) {
+    it(`falls back to the note snapshot for an unpin without causal proof (${evidence})`, async () => {
+      const unpin = updateNote({
+        note: { id: IDS[0], changes: { isPinnedToToday: false } },
+      });
+      const local = capture(unpin, 'local', 1000);
+      const remote = capture(
+        evidence === 'compacted order row'
+          ? actionsFor('project notes').order
+          : updateNote({ note: { id: IDS[0], changes: { content: 'remote content' } } }),
+        'remote',
+        2000,
+      );
+      store.dispatch(unpin);
+      await db.append(local, 'local');
+      await TestBed.inject(ConflictResolutionService).autoResolveConflictsLWW(
+        [],
+        [remote],
+      );
+      const before = await state();
+      expect(before.note.todayOrder).not.toContain(IDS[0]);
+      const snapshotClock = { ...local.vectorClock, ...remote.vectorClock };
+      if (evidence === 'compacted order row') {
+        await db.saveStateCache({
+          state: { ...before, project: before.projects } as unknown as AppDataComplete,
+          lastAppliedOpSeq: await db.getLastSeq(),
+          vectorClock: snapshotClock,
+          compactedAt: Date.now(),
+          schemaVersion: local.schemaVersion,
+        });
+        await db.deleteOpsWhere((row) => row.op.id === remote.id);
+      }
+      const created = await TestBed.inject(
+        SupersededOperationResolverService,
+      ).resolveSupersededLocalOps(
+        [{ opId: local.id, op: local, existingClock: remote.vectorClock }],
+        [remote.vectorClock],
+        snapshotClock,
+      );
+      expect(created).toBe(1);
+      expect((await db.getOpById(local.id))?.rejectedAt).toBeDefined();
+      const unsynced = (await db.getUnsynced()).map((row) => row.op);
+      expect(unsynced.length).toBe(1);
+      const [replacement] = unsynced;
+      expect(replacement.actionType).toBe(toLwwUpdateActionType('NOTE'));
+      expect(replacement.entityId).toBe(IDS[0]);
+      expect(actionPayloadOf(replacement)).toEqual(
+        jasmine.objectContaining({ id: IDS[0], isPinnedToToday: false }),
+      );
+      expect(compareVectorClocks(replacement.vectorClock, remote.vectorClock)).toBe(
+        VectorClockComparison.GREATER_THAN,
+      );
+      expect(await state()).toEqual(before);
     });
   }
 
@@ -856,8 +1215,60 @@ describe('reorder conflicts: real store, applier, reducers and durable replay (#
     name: string;
     seed?: IssueProvider;
     changes?: Partial<IssueProvider>;
+    /** Applied to the shared baseline first. */
+    prepare?: PersistentAction;
+    edit?: PersistentAction;
   }[] = [
     ...families.map((family) => ({ family, name: family })),
+    {
+      family: 'project notes',
+      name: 'project notes: unpin with content',
+      edit: updateNote({
+        note: {
+          id: IDS[0],
+          changes: { content: 'content plus membership', isPinnedToToday: false },
+        },
+      }),
+    },
+    {
+      family: 'project notes',
+      name: 'project notes: pin',
+      prepare: updateNote({ note: { id: IDS[0], changes: { isPinnedToToday: false } } }),
+      edit: updateNote({ note: { id: IDS[0], changes: { isPinnedToToday: true } } }),
+    },
+    ...(['project notes', 'Today notes', 'tag notes'] as const).map((family) => ({
+      family,
+      name: family + ': lock',
+      edit: updateNote({ note: { id: IDS[0], changes: { isLock: true } } }),
+    })),
+    {
+      family: 'sections',
+      name: 'sections: collapse',
+      edit: updateSection({ section: { id: IDS[0], changes: { isExpanded: false } } }),
+    },
+    {
+      family: 'habits',
+      name: 'habits: settings dialog disables',
+      // The dialog submits its whole normalized model, never a flag delta.
+      edit: updateSimpleCounter({
+        simpleCounter: {
+          id: IDS[0],
+          changes: {
+            title: 'renamed',
+            isEnabled: false,
+            isHideButton: true,
+            icon: 'timer',
+            type: SimpleCounterType.StopWatch,
+            isTrackStreaks: false,
+            streakMinValue: undefined,
+            streakMode: undefined,
+            streakWeekDays: undefined,
+            streakWeeklyFrequency: undefined,
+            countdownDuration: undefined,
+          },
+        },
+      }),
+    },
     {
       family: 'issue providers',
       name: 'issue providers: partial pinned search',
@@ -905,7 +1316,12 @@ describe('reorder conflicts: real store, applier, reducers and durable replay (#
               };
               resetProjection(initial);
             }
+            if (scenario.prepare) {
+              initial = reducer(initial, scenario.prepare);
+              resetProjection(initial);
+            }
             const pair = actionsFor(scenario.family);
+            if (scenario.edit) pair.edit = scenario.edit;
             if (scenario.changes) {
               pair.edit = IssueProviderActions.updateIssueProvider({
                 issueProvider: { id: IDS[0], changes: scenario.changes },
@@ -977,6 +1393,20 @@ describe('reorder conflicts: real store, applier, reducers and durable replay (#
               issueProvider: s.issueProvider,
             });
             expect(projection(converged)).toEqual(projection(expected));
+            for (const list of [
+              converged.note.todayOrder,
+              converged.projects.entities[PROJECT]!.noteIds,
+              converged.simpleCounter.ids,
+              converged.section.ids,
+              converged.boards.boardCfgs.map((board) => board.id),
+              converged.issueProvider.ids,
+            ])
+              expect(new Set(list).size).toBe(list.length);
+            if (scenario.family === 'habits') {
+              expect(converged.simpleCounter.entities[IDS[0]]!.type).toBe(
+                SimpleCounterType.StopWatch,
+              );
+            }
             if (scenario.family === 'habit date counts') {
               const habit = converged.simpleCounter.entities[IDS[0]]!;
               expect(habit.countOnDay).toEqual({ [EDIT_DATE]: 3, [OTHER_DATE]: 7 });

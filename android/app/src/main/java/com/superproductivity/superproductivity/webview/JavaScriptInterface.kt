@@ -87,6 +87,13 @@ class JavaScriptInterface(
         return "${versionName}_L$launchMode"
     }
 
+    // Tells the web bundle that snooze/tap events carry the reminder type, so it
+    // may schedule native deadline alarms (online-only mode can pair a newer
+    // bundle with an older APK that lacks this).
+    @Suppress("unused")
+    @JavascriptInterface
+    fun supportsTypedReminderActions(): Boolean = true
+
     @Suppress("unused")
     @JavascriptInterface
     fun getTextZoom(): Int {
@@ -206,10 +213,16 @@ class JavaScriptInterface(
                     Log.d(TAG, "stopTrackingService: app backgrounded, falling back to stopService()", e)
                     if (!TrackingForegroundService.isStartPending) {
                         activity.stopService(Intent(activity, TrackingForegroundService::class.java))
+                        // onDestroy never runs if no instance is alive: clear
+                        // the persisted session directly so it is never recovered.
+                        TrackingForegroundService.clearState(activity)
                     }
                 }
             } else {
                 activity.stopService(intent)
+                // In a fresh process after a kill nothing is in memory, but the
+                // session may still be persisted with no service to clear it.
+                TrackingForegroundService.clearState(activity)
             }
         }
     }
@@ -222,6 +235,9 @@ class JavaScriptInterface(
                 action = TrackingForegroundService.ACTION_UPDATE
                 putExtra(TrackingForegroundService.EXTRA_TIME_SPENT, timeSpentMs)
             }
+            // Plain startService is safe: the service is either already started
+            // (exempt from the background-start ban) or, after a restore in a new
+            // process, this comes from the JS recovery at launch or onResume.
             activity.startService(intent)
         }
     }
@@ -229,14 +245,15 @@ class JavaScriptInterface(
     @Suppress("unused")
     @JavascriptInterface
     fun getTrackingElapsed(): String {
-        val taskId = TrackingForegroundService.currentTaskId
-        val elapsedMs = TrackingForegroundService.getElapsedMs()
-        val isTracking = TrackingForegroundService.isTracking
-        return if (isTracking && taskId != null) {
-            """{"taskId":"$taskId","elapsedMs":$elapsedMs}"""
-        } else {
-            "null"
-        }
+        // After a process kill the companion is empty but the session may be
+        // persisted; restoring it here is what lets the JS cold-start recovery
+        // credit the time tracked while the process was gone (#7390).
+        val snapshot = TrackingForegroundService.snapshotForBridge(activity) ?: return "null"
+        return JSONObject()
+            .put("taskId", snapshot.taskId)
+            .put("elapsedMs", snapshot.elapsedMs)
+            .put("resume", snapshot.resume)
+            .toString()
     }
 
     @Suppress("unused")

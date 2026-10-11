@@ -40,10 +40,15 @@ export const SUPERSYNC_BASE_URL =
   process.env.SUPERSYNC_E2E_URL || 'http://localhost:1901';
 
 /**
- * Matches both `/api/sync/ops` uploads and `/api/sync/ops?...` downloads.
+ * Matches `/api/sync/ops` uploads and downloads. Every SuperSync request
+ * carries query parameters (downloads their cursor, all requests
+ * `appVersion`), so a glob without the trailing `*` matches nothing.
  * Do not add a trailing slash: the production endpoint has none.
  */
 const SUPERSYNC_OPS_ROUTE = '**/api/sync/ops*';
+
+/** Matches `/api/sync/snapshot` uploads, query parameters included. */
+export const SUPERSYNC_SNAPSHOT_ROUTE = '**/api/sync/snapshot*';
 
 export const routeSuperSyncOps = async (
   page: Page,
@@ -140,20 +145,6 @@ export const createTestUser = async (
   }
 
   throw new Error(`Max retries (${maxRetries}) exceeded for createTestUser`);
-};
-
-/**
- * Clean up all test data on the server.
- * Call this in test teardown if needed.
- */
-export const cleanupTestData = async (): Promise<void> => {
-  const response = await fetch(`${SUPERSYNC_BASE_URL}/api/test/cleanup`, {
-    method: 'POST',
-  });
-
-  if (!response.ok) {
-    console.warn(`Cleanup failed: ${response.status}`);
-  }
 };
 
 /**
@@ -371,6 +362,12 @@ export const createSimulatedClient = async (
   testPrefix: string,
   options: {
     allowExampleTasks?: boolean;
+    /**
+     * Start with the calm new-install app features (`NEW_INSTALL_APP_FEATURES`)
+     * instead of the all-features-on set the E2E suite otherwise uses. The tour
+     * stays hidden: the app never shows it to a Playwright user agent.
+     */
+    isNewInstallAppFeatures?: boolean;
     /** Released bundles register service workers; block them when switching builds. */
     serviceWorkers?: 'allow' | 'block';
     /**
@@ -380,7 +377,11 @@ export const createSimulatedClient = async (
     seedBeforeBoot?: (page: Page) => Promise<void>;
   } = {},
 ): Promise<SimulatedE2EClient> => {
-  const { allowExampleTasks = false, seedBeforeBoot } = options;
+  const {
+    allowExampleTasks = false,
+    isNewInstallAppFeatures = false,
+    seedBeforeBoot,
+  } = options;
   // Use provided baseURL or fall back to localhost:4242 (Playwright fixture may be undefined)
   const effectiveBaseURL = baseURL || 'http://localhost:4242';
 
@@ -410,14 +411,21 @@ export const createSimulatedClient = async (
   // This runs before any page JavaScript, so Angular sees the flags immediately.
   // Tests of the example-task sync gate opt back in via { allowExampleTasks: true }
   // so first-run onboarding tasks are actually created.
-  await page.addInitScript((allowExamples) => {
-    localStorage.setItem('SUP_ONBOARDING_PRESET_DONE', 'true');
-    localStorage.setItem('SUP_ONBOARDING_HINTS_DONE', 'true');
-    localStorage.setItem('SUP_IS_SHOW_TOUR', 'true');
-    if (!allowExamples) {
-      localStorage.setItem('SUP_EXAMPLE_TASKS_CREATED', 'true');
-    }
-  }, allowExampleTasks);
+  await page.addInitScript(
+    ({ allowExamples, isNewInstall }) => {
+      localStorage.setItem('SUP_ONBOARDING_PRESET_DONE', 'true');
+      localStorage.setItem('SUP_ONBOARDING_HINTS_DONE', 'true');
+      // getInitialAppFeatures() starts E2E clients with every feature on only
+      // while this flag is set.
+      if (!isNewInstall) {
+        localStorage.setItem('SUP_IS_SHOW_TOUR', 'true');
+      }
+      if (!allowExamples) {
+        localStorage.setItem('SUP_EXAMPLE_TASKS_CREATED', 'true');
+      }
+    },
+    { allowExamples: allowExampleTasks, isNewInstall: isNewInstallAppFeatures },
+  );
 
   page.on('console', (msg) => {
     if (msg.type() === 'error') {
@@ -585,17 +593,6 @@ export const waitForTask = async (
 };
 
 /**
- * Count tasks matching a pattern on the page.
- */
-export const countTasks = async (page: Page, pattern?: string): Promise<number> => {
-  if (pattern) {
-    const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    return page.locator(`task:has-text("${escapedPattern}")`).count();
-  }
-  return page.locator('task').count();
-};
-
-/**
  * Check if a task exists on the page.
  */
 export const hasTask = async (page: Page, taskName: string): Promise<boolean> => {
@@ -626,19 +623,6 @@ const escapeForSelector = (text: string): string => {
 export const getTaskElement = (client: SimulatedE2EClient, taskName: string): Locator => {
   const escapedName = escapeForSelector(taskName);
   return client.page.locator(`task:has-text("${escapedName}")`);
-};
-
-/**
- * Get a task element locator from a page by task name.
- * Use this when you have a page but not a client.
- *
- * @param page - The Playwright page
- * @param taskName - The task name to search for
- * @returns Locator for the task element
- */
-export const getTaskElementFromPage = (page: Page, taskName: string): Locator => {
-  const escapedName = escapeForSelector(taskName);
-  return page.locator(`task:has-text("${escapedName}")`);
 };
 
 /**
@@ -926,10 +910,18 @@ export const startTimeTracking = async (
   taskName: string,
 ): Promise<void> => {
   const task = getTaskElement(client, taskName);
-  await task.hover();
   const startBtn = task.locator('.start-task-btn');
-  await startBtn.waitFor({ state: 'visible', timeout: UI_VISIBLE_TIMEOUT });
-  await startBtn.click();
+  // The button exists only while the first line is hovered; a re-render or
+  // layout shift between hover and click detaches it, and click never re-hovers.
+  // Re-hover each attempt, and skip the click once tracking runs so a retry
+  // cannot toggle it back off.
+  await expect(async () => {
+    if (!(await task.evaluate((el) => el.classList.contains('isCurrent')))) {
+      await task.hover();
+      await startBtn.click({ timeout: 2000 });
+    }
+    await expect(task).toHaveClass(/\bisCurrent\b/, { timeout: 1000 });
+  }).toPass({ timeout: UI_VISIBLE_TIMEOUT });
 };
 
 /**
@@ -972,70 +964,22 @@ export const getTaskCount = async (client: SimulatedE2EClient): Promise<number> 
  * Get all task titles as an array.
  * Useful for comparing task order between clients.
  *
+ * Reads every row in one in-page evaluation. `count()` followed by a per-row
+ * `nth(i).innerText()` is not a snapshot: each read re-resolves the locator and
+ * auto-waits, so a re-render in between (a sync applying ops, a view swap) leaves
+ * `nth(i)` pointing past the new end of the list and the read waits out its whole
+ * timeout on a row that no longer exists.
+ *
+ * The result is still whatever the DOM showed at that instant, so callers that
+ * assert on the list after a sync should poll it (`expect.poll`) rather than
+ * trust one read.
+ *
  * @param client - The simulated E2E client
  * @returns Array of task titles in order
  */
 export const getTaskTitles = async (client: SimulatedE2EClient): Promise<string[]> => {
-  const tasks = client.page.locator('task .task-title');
-  const count = await tasks.count();
-  const titles: string[] = [];
-  for (let i = 0; i < count; i++) {
-    const text = await tasks.nth(i).innerText();
-    titles.push(text.trim());
-  }
-  return titles;
-};
-
-/**
- * Get the tracked time display text for a task.
- *
- * @param client - The simulated E2E client
- * @param taskName - The task name
- * @returns The time display text or null if not present
- */
-export const getTaskTimeDisplay = async (
-  client: SimulatedE2EClient,
-  taskName: string,
-): Promise<string | null> => {
-  const task = getTaskElement(client, taskName);
-  const timeVal = task.locator('.time-wrapper .time-val').first();
-  if ((await timeVal.count()) > 0) {
-    return timeVal.textContent();
-  }
-  return null;
-};
-
-/**
- * Wait for a task's tracked time text to be present.
- *
- * The task row intentionally hides `.time-wrapper` while hover controls are mounted,
- * so time-tracking assertions should read the rendered text instead of requiring
- * visual visibility.
- *
- * @param client - The simulated E2E client
- * @param taskName - The task name
- * @param timeout - Maximum time to wait for non-empty time text
- * @returns The trimmed time display text
- */
-export const waitForTaskTimeDisplay = async (
-  client: SimulatedE2EClient,
-  taskName: string,
-  timeout = UI_VISIBLE_TIMEOUT,
-): Promise<string> => {
-  await expect
-    .poll(
-      async () => {
-        const text = await getTaskTimeDisplay(client, taskName);
-        return text?.trim() ?? '';
-      },
-      {
-        timeout,
-        intervals: [250, 500, 1000],
-      },
-    )
-    .not.toBe('');
-
-  return (await getTaskTimeDisplay(client, taskName))!.trim();
+  const titles = await client.page.locator('task .task-title').allInnerTexts();
+  return titles.map((title) => title.trim());
 };
 
 /**
@@ -1116,7 +1060,7 @@ export const getTaskTitleFromState = async (
   }, titleSubstring);
 
 export const getTaskTimeSpentFromState = async (
-  client: SimulatedE2EClient,
+  client: Pick<SimulatedE2EClient, 'page'>,
   taskName: string,
 ): Promise<number | null> =>
   client.page.evaluate(async (name) => {
@@ -1239,7 +1183,7 @@ export const waitForTaskTimeSpent = async (
  * @param expectedTimeSpent - The expected timeSpent in milliseconds
  */
 export const expectExactTaskTime = async (
-  client: SimulatedE2EClient,
+  client: Pick<SimulatedE2EClient, 'page'>,
   taskName: string,
   expectedTimeSpent: number,
 ): Promise<void> => {
@@ -1261,7 +1205,7 @@ export const expectExactTaskTime = async (
  * @param duration - The time delta in milliseconds
  */
 export const recordTaskTimeDelta = async (
-  client: SimulatedE2EClient,
+  client: Pick<SimulatedE2EClient, 'page'>,
   taskName: string,
   date: string,
   duration: number,
@@ -1601,56 +1545,6 @@ export const expectTaskInWorklog = async (
   if (!found) {
     throw new Error(`Expected task "${taskName}" to be in worklog, but it was not found`);
   }
-};
-
-/**
- * Assert that a task does NOT appear in the worklog.
- *
- * @param client - The simulated E2E client
- * @param taskName - The task name that should NOT be in worklog
- */
-export const expectTaskNotInWorklog = async (
-  client: SimulatedE2EClient,
-  taskName: string,
-): Promise<void> => {
-  const found = await hasTaskInWorklog(client, taskName);
-  if (found) {
-    throw new Error(`Expected task "${taskName}" NOT to be in worklog, but it was found`);
-  }
-};
-
-/**
- * Get the count of worklog entries (archived tasks).
- *
- * @param client - The simulated E2E client
- * @returns The number of task entries in worklog
- */
-export const getWorklogTaskCount = async (
-  client: SimulatedE2EClient,
-): Promise<number> => {
-  // Navigate to worklog
-  await client.page.goto('/#/tag/TODAY/history');
-  await client.page.waitForLoadState('networkidle');
-  await client.page.waitForTimeout(UI_SETTLE_STANDARD);
-
-  // Expand week rows
-  const weekRows = client.page.locator('.week-row');
-  const weekCount = await weekRows.count();
-  for (let i = 0; i < Math.min(weekCount, 3); i++) {
-    const row = weekRows.nth(i);
-    if (await row.isVisible()) {
-      await row.click().catch(() => {});
-      await client.page.waitForTimeout(UI_SETTLE_SMALL);
-    }
-  }
-
-  // Count task entries
-  const taskEntries = await client.page
-    .locator('.task-summary-table .task-title, .worklog-task, worklog-task')
-    .count()
-    .catch(() => 0);
-
-  return taskEntries;
 };
 
 /**

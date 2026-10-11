@@ -19,7 +19,9 @@ import {
 /**
  * #10264: real app reducers, capture, encrypted transport and conflict recovery.
  * Dispatch the same persistent actions as the UI. Never select a side in the
- * whole-dataset dialog: syncAndWait() would silently hide this regression.
+ * whole-dataset dialog: it replaces one device's entire dataset and would hide
+ * this regression. The strict `sync` helper below fails on it, and so does
+ * syncAndWait() unless it is given `conflictDialog`.
  */
 const PROJECT_ID = 'INBOX_PROJECT';
 type Family = 'project notes' | 'Today notes' | 'habits' | 'boards' | 'sections';
@@ -712,6 +714,14 @@ test.describe('@supersync reorder crossing content (#10264)', () => {
             const a = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
             clients.push(a);
             await a.sync.setupSuperSync(config);
+            // setupSuperSync's background-sync blocks do not survive A's reloads;
+            // a startup sync would take the rejection instead of the sync click.
+            await a.page.addInitScript(() => {
+              const flags = window as unknown as Record<string, unknown>;
+              flags.__SP_E2E_BLOCK_AUTO_SYNC = true;
+              flags.__SP_E2E_BLOCK_IMMEDIATE_UPLOAD = true;
+              flags.__SP_E2E_BLOCK_WS_DOWNLOAD = true;
+            });
             if (datedHabit) {
               const dates = await habitDates(a.page);
               (data.seeds[0].simpleCounter as Record<string, unknown>).countOnDay = {

@@ -59,6 +59,21 @@ describe('noteReducer Today ordering', () => {
     expect(new Set(once.todayOrder).size).toBe(4);
   });
 
+  it('pins idempotently, so a replayed pin and its reissue keep one entry', () => {
+    const pinned = noteReducer(baseline, pin);
+    expect(pinned.todayOrder).toEqual(['target', ...baseline.todayOrder]);
+    expect(noteReducer(pinned, pin)).toEqual(pinned);
+    const projectOrder = updateNoteOrder({
+      ids: ['witness', 'target', 'sibling'],
+      activeContextType: WorkContextType.PROJECT,
+      activeContextId: 'project',
+    });
+    // Restart replays the rejected original, the remote order, then the reissue.
+    const replayed = [pin, projectOrder, pin].reduce(noteReducer, baseline);
+    expect(replayed.todayOrder).toEqual(pinned.todayOrder);
+    expect(replayed.entities).toEqual(pinned.entities);
+  });
+
   it('leaves Today unchanged for project-note ordering', () => {
     expect(
       noteReducer(

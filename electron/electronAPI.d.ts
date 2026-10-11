@@ -57,8 +57,6 @@ export interface ElectronAPI {
 
   fileSyncRemove(args: { relativePath: string }): Promise<unknown | Error>;
 
-  fileSyncListFiles(args: { relativePath?: string }): Promise<string[] | Error>;
-
   checkDirExists(args: { relativePath?: string }): Promise<true | Error>;
 
   /**
@@ -221,7 +219,7 @@ export interface ElectronAPI {
 
   flashFrame(): void;
 
-  showOrFocus(): void;
+  showOrFocus(opts?: { isReminder?: boolean }): void;
 
   lockScreen(): void;
 
