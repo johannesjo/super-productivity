@@ -44,21 +44,37 @@ describe('AgentCaptureService', () => {
     syncing$.next(false);
   };
 
+  let ownLocksDescriptor: PropertyDescriptor | undefined;
+
+  afterEach(() => {
+    if (ownLocksDescriptor) {
+      Object.defineProperty(navigator, 'locks', ownLocksDescriptor);
+    } else {
+      delete (navigator as { locks?: LockManager }).locks;
+    }
+  });
+
   beforeEach(() => {
     calls = [];
     isLockHeld = false;
     lockError = null;
     // Native Web Locks resolve outside fakeAsync; this one stays in the zone.
-    spyOnProperty(navigator, 'locks', 'get').and.returnValue({
-      request: (
-        name: string,
-        _opts: LockOptions,
-        cb: (lock: Lock | null) => Promise<void> | void,
-      ) =>
-        lockError
-          ? Promise.reject(lockError)
-          : Promise.resolve(cb(isLockHeld ? null : ({ name } as Lock))),
-    } as unknown as LockManager);
+    // An own property, as lock.service.spec does: other specs may have left
+    // `locks` as a plain value, which spyOnProperty cannot replace.
+    ownLocksDescriptor = Object.getOwnPropertyDescriptor(navigator, 'locks');
+    Object.defineProperty(navigator, 'locks', {
+      configurable: true,
+      value: {
+        request: (
+          name: string,
+          _opts: LockOptions,
+          cb: (lock: Lock | null) => Promise<void> | void,
+        ) =>
+          lockError
+            ? Promise.reject(lockError)
+            : Promise.resolve(cb(isLockHeld ? null : ({ name } as Lock))),
+      } as unknown as LockManager,
+    });
     const record = (name: string) => async (): Promise<void> => {
       calls.push(name);
     };
