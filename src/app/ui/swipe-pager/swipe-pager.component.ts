@@ -7,6 +7,7 @@ import {
   contentChild,
   DestroyRef,
   Directive,
+  effect,
   ElementRef,
   inject,
   Injector,
@@ -14,6 +15,7 @@ import {
   model,
   output,
   TemplateRef,
+  untracked,
   viewChild,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
@@ -27,6 +29,7 @@ import {
   VELOCITY_WINDOW_MS,
 } from './swipe-pager-gesture';
 import { isTouchActive } from '../../util/input-intent';
+import { BodyClass } from '../../app.constants';
 
 export interface SwipePagerPageContext<T> {
   $implicit: T;
@@ -66,12 +69,17 @@ const SETTLE_FALLBACK_SLACK_MS = 50;
 const PREWARM_TIMEOUT_MS = 2000;
 /** Where requestIdleCallback is missing (older Safari): after the open settles. */
 const PREWARM_FALLBACK_DELAY_MS = 500;
+/** Button presses arriving mid-animation are played after it, up to this many. */
+const MAX_QUEUED_STEPS = 3;
+const FOCUSABLE =
+  'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), ' +
+  'textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
 
 /**
  * Horizontally paged content that follows the finger: a pan drags the current
  * page aside with its neighbour sliding in, and the release settles on one of
- * them. The pager only moves pages; the host changes `current` in response to
- * `navigate`.
+ * them. The pager only moves pages; the host sets `current` to the page that
+ * `navigate` emits.
  *
  * Neighbour pages are rendered only once `isWarm` is true. The pager sets it
  * when idle after the first render while touch is the active input (so the
@@ -99,7 +107,8 @@ export class SwipePagerComponent<T> {
   readonly trackKey = input<(item: T) => unknown>((item) => item);
   readonly isEnabled = input<boolean>(true);
   readonly isWarm = model<boolean>(false);
-  readonly navigate = output<SwipePagerDirection>();
+  /** The page settled on; the host makes it `current`. */
+  readonly navigate = output<T>();
 
   readonly pageTpl = contentChild.required(SwipePagerPageDirective<T>);
 
@@ -107,9 +116,6 @@ export class SwipePagerComponent<T> {
   private readonly _host: HTMLElement = inject(ElementRef).nativeElement;
   private readonly _injector = inject(Injector);
   private readonly _cdr = inject(ChangeDetectorRef);
-  private readonly _prefersReducedMotion =
-    typeof window !== 'undefined' &&
-    !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 
   readonly slots = computed<PageSlot<T>[]>(() => {
     const keyOf = this.trackKey();
@@ -129,14 +135,21 @@ export class SwipePagerComponent<T> {
     return slots;
   });
 
+  private readonly _currentKey = computed(() => this.trackKey()(this.current()));
+
   private _state: 'idle' | 'pending' | 'panning' | 'ignored' | 'settling' = 'idle';
   private _touchId: number | null = null;
   private _startX = 0;
   private _startY = 0;
+  /** Event timestamps, not Date.now(): a busy main thread must not age a touch. */
   private _startTime = 0;
   private _offsetX = 0;
   private _samples: { x: number; t: number }[] = [];
-  private _settleTimeout?: number;
+  private _queuedSteps: SwipePagerDirection[] = [];
+  /** Bumped by every settle and reset, so callbacks of a superseded one no-op. */
+  private _settleId = 0;
+  private _settleFromKey: unknown;
+  private _cancelSettleListeners?: () => void;
   private _prewarmHandle?: number;
 
   constructor() {
@@ -151,7 +164,7 @@ export class SwipePagerComponent<T> {
       host.removeEventListener('touchmove', this._onTouchMove);
       host.removeEventListener('touchend', this._onTouchEnd);
       host.removeEventListener('touchcancel', this._onTouchCancel);
-      window.clearTimeout(this._settleTimeout);
+      this._cancelSettleListeners?.();
       if (this._prewarmHandle !== undefined) {
         if (typeof cancelIdleCallback === 'function') {
           cancelIdleCallback(this._prewarmHandle);
@@ -161,6 +174,43 @@ export class SwipePagerComponent<T> {
       }
     });
     afterNextRender(() => this._schedulePrewarm());
+
+    // The host changed the page under a running settle (e.g. a "today" button
+    // or a midnight rollover): the animation is towards a page that is no
+    // longer the neighbour, so drop it instead of navigating from the new one.
+    effect(() => {
+      const key = this._currentKey();
+      untracked(() => {
+        if (this._state === 'settling' && key !== this._settleFromKey) {
+          this._queuedSteps = [];
+          this._resetTrack();
+        }
+      });
+    });
+  }
+
+  /** Animates to a neighbour page, e.g. from a prev/next button. */
+  go(direction: SwipePagerDirection): void {
+    if (this._state === 'settling') {
+      if (this._queuedSteps.length < MAX_QUEUED_STEPS) {
+        this._queuedSteps.push(direction);
+      }
+      return;
+    }
+    if (this._state !== 'idle') {
+      return;
+    }
+    if (!this.isWarm()) {
+      this.isWarm.set(true);
+      afterNextRender(() => this.go(direction), { injector: this._injector });
+      return;
+    }
+    if (!this._hasPage(direction)) {
+      this._queuedSteps = [];
+      return;
+    }
+    this._offsetX = 0;
+    this._settle(direction, 0);
   }
 
   private _schedulePrewarm(): void {
@@ -176,31 +226,17 @@ export class SwipePagerComponent<T> {
         : window.setTimeout(prewarm, PREWARM_FALLBACK_DELAY_MS);
   }
 
-  /** Animates to a neighbour page, e.g. from a prev/next button. */
-  go(direction: SwipePagerDirection): void {
-    if (this._state !== 'idle') {
-      return;
-    }
-    if (!this.isWarm()) {
-      this.isWarm.set(true);
-      afterNextRender(() => this.go(direction), { injector: this._injector });
-      return;
-    }
-    if (!this._hasPage(direction)) {
-      return;
-    }
-    this._offsetX = 0;
-    this._settle(direction, 0);
-  }
-
   private _onTouchStart = (ev: TouchEvent): void => {
     if (this._state === 'settling') {
       return;
     }
     if (ev.touches.length > 1) {
       // A second finger (pinch) is never a page swipe.
-      this._cancelPan();
-      this._state = 'ignored';
+      if (this._state === 'panning') {
+        this._settle(0, 0);
+      } else {
+        this._state = 'ignored';
+      }
       return;
     }
     const touch = ev.touches[0];
@@ -213,7 +249,7 @@ export class SwipePagerComponent<T> {
     this._touchId = touch.identifier;
     this._startX = touch.clientX;
     this._startY = touch.clientY;
-    this._startTime = Date.now();
+    this._startTime = ev.timeStamp;
     this._samples = [];
     this._state = 'pending';
   };
@@ -226,17 +262,26 @@ export class SwipePagerComponent<T> {
     if (!touch) {
       return;
     }
+    if (!this.isEnabled()) {
+      // E.g. a task drag started into the host: let go of the page.
+      if (this._state === 'panning') {
+        this._settle(0, 0);
+      } else {
+        this._state = 'ignored';
+      }
+      return;
+    }
 
     if (this._state === 'pending') {
       const claim = classifyGesture(
         touch.clientX - this._startX,
         touch.clientY - this._startY,
-        Date.now() - this._startTime,
+        ev.timeStamp - this._startTime,
       );
       if (claim === null) {
         return;
       }
-      if (claim === 'other' || !this.isEnabled()) {
+      if (claim === 'other') {
         this._state = 'ignored';
         return;
       }
@@ -251,11 +296,7 @@ export class SwipePagerComponent<T> {
     if (ev.cancelable) {
       ev.preventDefault();
     }
-    const now = Date.now();
-    this._samples.push({ x: touch.clientX, t: now });
-    while (this._samples.length > 2 && now - this._samples[0].t > VELOCITY_WINDOW_MS) {
-      this._samples.shift();
-    }
+    this._addSample(touch.clientX, ev.timeStamp);
     this._offsetX = getPanOffset(
       touch.clientX - this._startX,
       this._hasPage(-1),
@@ -276,7 +317,7 @@ export class SwipePagerComponent<T> {
       }
       return;
     }
-    this._samples.push({ x: touch.clientX, t: Date.now() });
+    this._addSample(touch.clientX, ev.timeStamp);
     const velocityX = getVelocityX(this._samples);
     const direction = getReleaseDirection({
       deltaX: this._offsetX,
@@ -290,68 +331,94 @@ export class SwipePagerComponent<T> {
 
   private _onTouchCancel = (): void => {
     this._touchId = null;
-    this._cancelPan();
-  };
-
-  private _cancelPan(): void {
     if (this._state === 'panning') {
       this._settle(0, 0);
     } else if (this._state !== 'settling') {
       this._state = 'idle';
     }
-  }
+  };
 
   private _settle(direction: SwipePagerDirection | 0, velocityX: number): void {
+    this._cancelSettleListeners?.();
+    const settleId = ++this._settleId;
     this._state = 'settling';
+    this._settleFromKey = this._currentKey();
+    // Read now, not when the release happens later: the neighbour that slides
+    // in is the page to navigate to.
+    const targetItem =
+      direction === 1 ? this.next() : direction === -1 ? this.prev() : null;
     const width = this._host.clientWidth;
     const target = -direction * width;
-    const duration = this._prefersReducedMotion
+    const duration = this._isMotionReduced()
       ? 0
       : getSettleDurationMs(target - this._offsetX, velocityX);
-    const track = this._track().nativeElement;
+    const finish = (): void => {
+      if (settleId === this._settleId) {
+        this._finishSettle(targetItem);
+      }
+    };
 
     if (duration === 0) {
-      this._finishSettle(direction);
+      finish();
       return;
     }
 
-    let isDone = false;
-    const done = (): void => {
-      if (isDone) {
-        return;
-      }
-      isDone = true;
-      track.removeEventListener('transitionend', onTransitionEnd);
-      window.clearTimeout(this._settleTimeout);
-      this._finishSettle(direction);
-    };
+    const track = this._track().nativeElement;
     const onTransitionEnd = (ev: TransitionEvent): void => {
       if (ev.target === track && ev.propertyName === 'transform') {
-        done();
+        this._cancelSettleListeners?.();
+        finish();
       }
     };
+    const timeout = window.setTimeout(() => {
+      this._cancelSettleListeners?.();
+      finish();
+    }, duration + SETTLE_FALLBACK_SLACK_MS);
     track.addEventListener('transitionend', onTransitionEnd);
-    this._settleTimeout = window.setTimeout(done, duration + SETTLE_FALLBACK_SLACK_MS);
+    this._cancelSettleListeners = () => {
+      track.removeEventListener('transitionend', onTransitionEnd);
+      window.clearTimeout(timeout);
+      this._cancelSettleListeners = undefined;
+    };
 
     track.style.willChange = 'transform';
     track.style.transition = `transform ${duration}ms ${SETTLE_EASING}`;
     this._applyOffset(target);
   }
 
-  private _finishSettle(direction: SwipePagerDirection | 0): void {
-    if (direction === 0) {
+  private _finishSettle(targetItem: T | null): void {
+    if (targetItem === null || targetItem === undefined) {
       this._resetTrack();
       return;
     }
+    const settleId = this._settleId;
+    const focusIndex = this._focusIndexInCurrentPage();
+    // The page change below is this settle's own, not one to abort for.
+    this._settleFromKey = this.trackKey()(targetItem);
     // The host swaps `current`; the pages are keyed, so the neighbour's view is
     // moved into the centre slot. Reset the track only once that has rendered,
     // otherwise the old page flashes back for a frame.
-    this.navigate.emit(direction);
+    this.navigate.emit(targetItem);
     this._cdr.markForCheck();
-    afterNextRender(() => this._resetTrack(), { injector: this._injector });
+    afterNextRender(
+      () => {
+        if (settleId !== this._settleId) {
+          return;
+        }
+        this._resetTrack();
+        this._restoreFocus(focusIndex);
+        const queued = this._queuedSteps.shift();
+        if (queued) {
+          this.go(queued);
+        }
+      },
+      { injector: this._injector },
+    );
   }
 
   private _resetTrack(): void {
+    this._cancelSettleListeners?.();
+    this._settleId++;
     const track = this._track().nativeElement;
     track.style.transition = 'none';
     track.style.transform = '';
@@ -359,6 +426,45 @@ export class SwipePagerComponent<T> {
     this._offsetX = 0;
     this._samples = [];
     this._state = 'idle';
+  }
+
+  // The old page turns inert once the new one is current, which drops focus to
+  // the document. Keep keyboard users on the matching control of the new page.
+  private _focusIndexInCurrentPage(): number {
+    const page = this._currentPageEl();
+    const active = document.activeElement;
+    if (!page || !active || !page.contains(active)) {
+      return -1;
+    }
+    return Array.from(page.querySelectorAll(FOCUSABLE)).indexOf(active);
+  }
+
+  private _restoreFocus(index: number): void {
+    if (index === -1) {
+      return;
+    }
+    const focusables = this._currentPageEl()?.querySelectorAll<HTMLElement>(FOCUSABLE);
+    if (focusables?.length) {
+      focusables[Math.min(index, focusables.length - 1)].focus({ preventScroll: true });
+    }
+  }
+
+  private _currentPageEl(): HTMLElement | null {
+    return this._track().nativeElement.querySelector(':scope > .page:not([inert])');
+  }
+
+  private _isMotionReduced(): boolean {
+    return (
+      !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ||
+      document.body.classList.contains(BodyClass.isDisableAnimations)
+    );
+  }
+
+  private _addSample(x: number, t: number): void {
+    this._samples.push({ x, t });
+    while (this._samples.length > 2 && t - this._samples[0].t > VELOCITY_WINDOW_MS) {
+      this._samples.shift();
+    }
   }
 
   private _applyOffset(offsetX: number): void {

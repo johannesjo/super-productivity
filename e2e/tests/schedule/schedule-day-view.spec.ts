@@ -1,5 +1,6 @@
 import { expect, test } from '../../fixtures/test.fixture';
 import { touchPan } from '../../utils/touch-pan';
+import { waitForStatePersistence } from '../../utils/waits';
 
 /** Format a Date as the app's day key (YYYY-MM-DD in local time). */
 const dbDate = (d: Date): string => {
@@ -132,5 +133,70 @@ test.describe('Schedule day view', () => {
     await touchPan(page, scrollWrapper, 220);
     await expect(dayCols.first()).toHaveAttribute('data-day', today);
     await expect(dayCols).toHaveCount(1);
+  });
+});
+
+test.describe('Schedule day view on a touch phone', () => {
+  // isMobile makes Chromium report `pointer: coarse`, which starts the app in
+  // touch intent: the long-press drag delay only applies then (see #9675).
+  test.use({
+    viewport: { width: 1024, height: 900 },
+    hasTouch: true,
+    isMobile: true,
+  });
+
+  test('a long-press drag moves an event instead of paging the day', async ({
+    page,
+    workViewPage,
+  }) => {
+    await workViewPage.waitForTaskList();
+    await page.goto('/#/schedule');
+    await page.getByRole('button', { name: 'View Day' }).click();
+    // Tomorrow: the event lands at a fixed row whatever hour the run starts.
+    await page.getByRole('button', { name: 'Next Day' }).click();
+    const dayCols = page.locator(DAY_COL);
+    const tomorrowDate = new Date();
+    tomorrowDate.setDate(tomorrowDate.getDate() + 1);
+    const tomorrow = dbDate(tomorrowDate);
+    await expect(dayCols.first()).toHaveAttribute('data-day', tomorrow);
+
+    const col = dayCols.first();
+    await col.click({
+      position: {
+        x: await col.evaluate((el) => el.clientWidth / 2),
+        y: await col.evaluate((el) => el.clientHeight / 2),
+      },
+    });
+    const newTaskInput = page.getByRole('combobox', { name: 'Schedule task...' });
+    await newTaskInput.fill('Long press task 2h');
+    await newTaskInput.press('Enter');
+    const event = page
+      .locator('schedule-week:not([inert] *) schedule-event:not(.custom-drag-preview)')
+      .filter({ hasText: 'Long press task' });
+    await expect(event).toBeVisible();
+    await waitForStatePersistence(page);
+
+    // Back to touch intent, as on a real phone (the seeding used the mouse).
+    await page.setViewportSize(PHONE_VIEWPORT);
+    await page.reload();
+    await page.getByRole('button', { name: 'Next Day' }).tap();
+    await expect(dayCols.first()).toHaveAttribute('data-day', tomorrow);
+    await event.scrollIntoViewIfNeeded();
+    const styleBefore = await event.getAttribute('style');
+    const box = (await event.boundingBox())!;
+
+    // Mostly sideways, so it would page if the pager claimed it; the bit of
+    // vertical travel moves the event to another time. Two things keep the
+    // pager out: it ignores moves after a long press, and once CDK starts the
+    // drag it moves the element under <body>, out of the pager's reach.
+    await touchPan(page, event, 160, {
+      deltaY: 40,
+      holdMs: 700,
+      start: { x: box.x + 20, y: box.y + 15 },
+    });
+
+    await expect(dayCols.first()).toHaveAttribute('data-day', tomorrow);
+    await expect(event).not.toHaveClass(/cdk-drag-dragging/);
+    await expect.poll(() => event.getAttribute('style')).not.toBe(styleBefore);
   });
 });

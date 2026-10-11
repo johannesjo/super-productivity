@@ -44,7 +44,6 @@ import {
   SwipePagerComponent,
   SwipePagerPageDirective,
 } from '../../../ui/swipe-pager/swipe-pager.component';
-import { SwipePagerDirection } from '../../../ui/swipe-pager/swipe-pager-gesture';
 import {
   ScheduleDayPage,
   scheduleDayPageKey,
@@ -153,8 +152,9 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     return d ? [d] : [];
   });
 
-  // Set by the pager on first touch (or button use): neighbouring days are only
-  // computed from then on, so mouse users pay for the shown day alone.
+  // Set by the pager when idle on a touch device, on first touch or on button
+  // use: neighbouring days are only computed from then on, so mouse users who
+  // never page pay for the shown day alone.
   isPagerWarm = signal(false);
   readonly pageKey = scheduleDayPageKey;
 
@@ -221,12 +221,8 @@ export class ScheduleDayPanelComponent implements AfterViewInit, OnDestroy {
     this._activeExternalTask = null;
   }
 
-  onPagerNavigate(direction: SwipePagerDirection): void {
-    const page = direction === 1 ? this.nextPage() : this.prevPage();
+  onPagerNavigate(page: ScheduleDayPage): void {
     const today = this.todayDateStr();
-    if (!page) {
-      return;
-    }
     this._selectedDay.set(today && page.day > today ? page.day : null);
   }
 

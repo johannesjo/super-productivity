@@ -51,7 +51,6 @@ import {
   SwipePagerComponent,
   SwipePagerPageDirective,
 } from '../../../ui/swipe-pager/swipe-pager.component';
-import { SwipePagerDirection } from '../../../ui/swipe-pager/swipe-pager-gesture';
 import {
   ScheduleDayPage,
   scheduleDayPageKey,
@@ -343,8 +342,8 @@ export class ScheduleComponent {
   currentTimeRow = computed(() => (this.isViewingToday() ? this.nowRow() : null));
 
   // Day view pages through days by swiping (SwipePagerComponent). Neighbouring
-  // days are only computed once the pager is warm: on first touch or when the
-  // prev/next buttons animate through it.
+  // days are only computed once the pager is warm: when idle on a touch device,
+  // on first touch, or when the prev/next buttons animate through it.
   isPagerWarm = signal(false);
   readonly dayPageKey = scheduleDayPageKey;
   private _dayPager = viewChild(SwipePagerComponent);
@@ -371,12 +370,10 @@ export class ScheduleComponent {
     }),
   );
 
-  onDayPagerNavigate(direction: SwipePagerDirection): void {
-    if (direction === 1) {
-      this.goToNextPeriod();
-    } else {
-      this.goToPreviousPeriod();
-    }
+  onDayPagerNavigate(page: ScheduleDayPage): void {
+    // Like goToPreviousPeriod, landing on (logical) today is the "today" mode.
+    const today = this._todayDateStr();
+    this._selectedDate.set(today && page.day > today ? parseDbDateStr(page.day) : null);
   }
 
   // The nav buttons slide the day view like a swipe does.
@@ -398,9 +395,9 @@ export class ScheduleComponent {
     }
   }
 
-  // Same inputs as scheduleDays for a single day: _contextNow anchors to the
-  // first shown day the same way, so a neighbour renders exactly what the
-  // view shows once it becomes the current day.
+  // Same inputs as scheduleDays for a single day, anchored to the day the same
+  // way _contextNow is. Only the "now" for today's page can differ, by up to
+  // the 2-minute refresh tick that _contextNow is cached for.
   private _createDayPage(
     day: Signal<string | undefined>,
   ): Signal<ScheduleDayPage | undefined> {
