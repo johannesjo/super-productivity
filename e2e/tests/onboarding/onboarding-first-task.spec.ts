@@ -287,20 +287,27 @@ test.describe('First-run onboarding', () => {
         'Tap + to add your first task',
       );
 
+      const addBtn = page.locator('.add-task-button');
+      const expectHintClearOfAddBtn = (): Promise<void> =>
+        expect
+          .poll(
+            async () => {
+              const btn = await addBtn.boundingBox();
+              const chip = await page.locator('onboarding-hint .hint-chip').boundingBox();
+              return btn && chip ? btn.y - (chip.y + chip.height) : -1;
+            },
+            { timeout: 6000 },
+          )
+          .toBeGreaterThanOrEqual(16);
+      // AppComponent drops the entrance class after 1.5s, cutting the stretched
+      // slide short (animationcancel, no animationend); the hint must follow.
+      await expect(page.locator('.mobile-bottom-nav')).not.toHaveClass(/entrance/);
+      await expectHintClearOfAddBtn();
+
       await page.mouse.move(10, 10);
       await expect(page.locator('body')).toHaveClass(/isMousePrimary/);
       // Once the nav has settled, the hint must sit clear above the + button again.
-      const addBtn = page.locator('.add-task-button');
-      await expect
-        .poll(
-          async () => {
-            const btn = await addBtn.boundingBox();
-            const chip = await page.locator('onboarding-hint .hint-chip').boundingBox();
-            return btn && chip ? btn.y - (chip.y + chip.height) : -1;
-          },
-          { timeout: 6000 },
-        )
-        .toBeGreaterThanOrEqual(16);
+      await expectHintClearOfAddBtn();
       await addBtn.click();
       await expect(page.locator('add-task-bar.global')).toBeVisible();
       await page.close();
