@@ -47,7 +47,7 @@ const turnOffInSettings = async (client: SimulatedE2EClient): Promise<void> => {
   const dialog = await client.sync.openSuperSyncSettings();
   const capture = dialog.locator('agent-capture-settings');
   await capture.getByRole('button', { name: 'Turn off' }).click();
-  await client.page.locator('[e2e="confirmBtn"]').click();
+  await client.page.locator('dialog-confirm [e2e="confirmBtn"]').click();
   await expect(
     capture.getByRole('button', { name: 'Let AI assistants add tasks' }),
   ).toBeVisible();
@@ -117,13 +117,17 @@ const expireCaptureLeases = async (user: TestUser): Promise<void> => {
   expect(response.ok).toBe(true);
 };
 
-/** Aborts every ack, like a connection lost after the task was created. */
+/**
+ * Fails every ack, like a connection lost after the task was created. A 503,
+ * not an abort: the provider retries network errors, so an abort could let a
+ * later retry through once unrouted and the run would ack after all.
+ */
 const blockAcks = async (page: Page): Promise<{ tried: Promise<void> }> => {
   let tried: () => void = () => undefined;
   const firstAttempt = new Promise<void>((resolve) => (tried = resolve));
   await page.route(ACK_ROUTE, async (route) => {
     tried();
-    await route.abort();
+    await route.fulfill({ status: 503, json: { error: 'unavailable' } });
   });
   return { tried: firstAttempt };
 };
