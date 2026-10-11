@@ -114,7 +114,7 @@ describe('PluginService', () => {
           useValue: jasmine.createSpyObj<PluginSecurityService>('PluginSecurityService', [
             'analyzePluginCode',
             'hasElevatedPermissions',
-            'getPermissionDescriptions',
+            'getDeclaredApiAccess',
             'sanitizeHtml',
           ]),
         },
