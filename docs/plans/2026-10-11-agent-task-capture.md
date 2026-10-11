@@ -73,9 +73,10 @@ renaming is not. If #10251 lands, it uses the same limits.
    (one op) and registers the public key with the server.
 2. Connect an assistant:
    - **Token:** "Create token" shows `sp_cap_…` once (expires after 1 year),
-     with setup lines for Claude Code (`claude mcp add --transport http sp
-<url> --header "Authorization: Bearer $SP_CAPTURE_TOKEN"`, or repo
-     `.mcp.json` with `${SP_CAPTURE_TOKEN}` for cloud sessions) and curl.
+     with a ready-to-copy Claude Code command (`claude mcp add --transport
+http super-productivity <url> --header "Authorization: Bearer <token>"`,
+     token filled in; the wiki covers repo `.mcp.json` with
+     `${SP_CAPTURE_TOKEN}` for cloud sessions, and curl).
    - **OAuth:** add `https://sync.super-productivity.com/mcp` as a custom
      connector in claude.ai or ChatGPT. The authorize page names the client and
      its redirect host, states the permission ("Add tasks to your Inbox. It
@@ -293,7 +294,7 @@ user key`; AES-256-GCM, 12-byte random IV, 16-byte tag, AAD = version byte
 | Two devices enable at once                                                                         | Synced key converges by LWW; the first claim fixes the server key; items sealed to the losing key dropped                                                             | `key_mismatch` → replace                                                         |
 | Backup import restores a config without the key                                                    | Feature reads off on all devices                                                                                                                                      | Synced state                                                                     |
 | Full database restore                                                                              | Pending items, grants and codes from the snapshot dropped; devices re-register their key; assistants reconnect                                                        | Runbook                                                                          |
-| Leaked capture token                                                                               | At most 200 junk items; revoke can discard them                                                                                                                       | Per-grant cap, revoke with discard                                               |
+| Leaked capture token                                                                               | At most 200 junk items per day; revoke can discard them                                                                                                               | Per-grant cap, revoke with discard                                               |
 | No device syncs within `RETENTION_DAYS` (45)                                                       | Items expire                                                                                                                                                          | Documented                                                                       |
 | An item this device cannot open or validate                                                        | Stays leased to this device, renewed on each claim, until it expires; 50 such items fill its batch                                                                    | **Gap**: needs a lease-release endpoint                                          |
 | Turn off while the server has no capture (flag off, rollback, other server); capture returns later | Key cleared locally, but server tokens were never revoked and work again: captures go to a key no device holds and expire, or reach the Inbox after a later switch-on | 404 counts as off. **Accepted**: needs an operator flip; revoke server-side then |
