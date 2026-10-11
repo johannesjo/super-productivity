@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
+  ErrorHandler,
   inject,
   input,
   OnDestroy,
@@ -55,6 +56,7 @@ import { ProgressCircleComponent } from '../../../ui/progress-circle/progress-ci
 export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
   private _simpleCounterService = inject(SimpleCounterService);
   private _matDialog = inject(MatDialog);
+  private _errorHandler = inject(ErrorHandler);
   private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
   private _dateService = inject(DateService);
   private _bannerService = inject(BannerService);
@@ -232,7 +234,7 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
     this._simpleCounterService.setCounterToday(c.id, 0);
   }
 
-  async edit(ev?: Event): Promise<void> {
+  edit(ev?: Event): void {
     if (ev) {
       ev.preventDefault();
     }
@@ -241,13 +243,16 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
       throw new Error('No simple counter model');
     }
 
-    const { DialogSimpleCounterEditComponent } =
-      await import('../dialog-simple-counter-edit/dialog-simple-counter-edit.component');
-    this._matDialog.open(DialogSimpleCounterEditComponent, {
-      restoreFocus: true,
-      data: {
-        simpleCounter: c,
-      },
-    });
+    // Loaded on demand; the pages barrel is already a preloaded chunk.
+    import('../../../routes/pages.routes')
+      .then(({ DialogSimpleCounterEditComponent }) => {
+        this._matDialog.open(DialogSimpleCounterEditComponent, {
+          restoreFocus: true,
+          data: {
+            simpleCounter: c,
+          },
+        });
+      })
+      .catch((err) => this._errorHandler.handleError(err));
   }
 }
