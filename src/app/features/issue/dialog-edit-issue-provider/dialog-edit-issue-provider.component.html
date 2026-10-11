@@ -21,7 +21,9 @@
     @if (configFormSection?.help || configFormSection?.helpArr) {
       <help-section>
         @if (configFormSection?.help) {
-          <div [innerHtml]="configFormSection?.help | translate"></div>
+          <div
+            [innerHtml]="$safeNavigationMigration(configFormSection?.help) | translate"
+          ></div>
         }
         @if (configFormSection?.helpArr) {
           @for (helpSection of configFormSection?.helpArr; track helpSection) {

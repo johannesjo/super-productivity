@@ -31,7 +31,9 @@
   (cdkDropListDropped)="drop($event)"
   [attr.data-list-id]="listId()"
   [@taskList]="
-    (dropListService.isBlockAniAfterDrop$ | async) ? 'BLOCK' : filteredTasks()?.length
+    (dropListService.isBlockAniAfterDrop$ | async)
+      ? 'BLOCK'
+      : $safeNavigationMigration(filteredTasks()?.length)
   "
   [attr.data-id]="listModelId()"
   [class.is-multi-dragging]="multiDrag.isListGroupDrag()"
