@@ -11,7 +11,6 @@ import {
 import { SimpleCounter, SimpleCounterType } from '../simple-counter.model';
 import { SimpleCounterService } from '../simple-counter.service';
 import { MatDialog } from '@angular/material/dialog';
-import { DialogSimpleCounterEditComponent } from '../dialog-simple-counter-edit/dialog-simple-counter-edit.component';
 import { T } from 'src/app/t.const';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { merge, of, Subject, Subscription } from 'rxjs';
@@ -233,7 +232,7 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
     this._simpleCounterService.setCounterToday(c.id, 0);
   }
 
-  edit(ev?: Event): void {
+  async edit(ev?: Event): Promise<void> {
     if (ev) {
       ev.preventDefault();
     }
@@ -242,6 +241,8 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
       throw new Error('No simple counter model');
     }
 
+    const { DialogSimpleCounterEditComponent } =
+      await import('../dialog-simple-counter-edit/dialog-simple-counter-edit.component');
     this._matDialog.open(DialogSimpleCounterEditComponent, {
       restoreFocus: true,
       data: {
