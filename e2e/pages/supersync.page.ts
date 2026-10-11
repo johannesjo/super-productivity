@@ -1725,6 +1725,15 @@ export class SuperSyncPage extends BasePage {
   }
 
   /**
+   * Starts a sync and waits for a successful ops response, but not for the
+   * in-sync check: work that adds ops as soon as a sync ends (the agent
+   * capture import) keeps the check hidden until the next sync.
+   */
+  async startSync(): Promise<void> {
+    await this._triggerSuperSyncCycle(30000);
+  }
+
+  /**
    * Wait for an ongoing sync operation to complete.
    * Useful when sync is triggered automatically (e.g., after data changes).
    * Fails if the whole-dataset conflict dialog appears, like triggerSync().
