@@ -3214,6 +3214,83 @@ describe('shortSyntax nth weekday (@2monday)', () => {
     expect(nth?.taskChanges.hasPlannedTime).toBe(false);
   });
 
+  for (const trigger of ['@', '!']) {
+    for (const hour of [10, 12, 17]) {
+      it(`should match plain ${trigger}monday without a time at ${hour}:00 on Monday`, async () => {
+        const now = new Date(2024, 0, 22, hour, 0, 0, 0);
+        const nth = await shortSyntax(
+          { ...TASK, title: `Task ${trigger}1monday` },
+          DEADLINE_CONFIG,
+          [],
+          [],
+          now,
+        );
+        const plain = await shortSyntax(
+          { ...TASK, title: `Task ${trigger}monday` },
+          DEADLINE_CONFIG,
+          [],
+          [],
+          now,
+        );
+        const expected = new Date(2024, 0, hour > 12 ? 29 : 22, 12);
+
+        expect(nth?.taskChanges.title).toBe('Task');
+        if (trigger === '@') {
+          expect(nth?.taskChanges.dueWithTime).toBe(expected.getTime());
+          expect(nth?.taskChanges.dueWithTime).toBe(plain?.taskChanges.dueWithTime);
+          expect(nth?.taskChanges.hasPlannedTime).toBe(false);
+        } else {
+          expect(nth?.taskChanges.deadlineWithTime).toBe(expected.getTime());
+          expect(nth?.taskChanges.deadlineWithTime).toBe(
+            plain?.taskChanges.deadlineWithTime,
+          );
+          expect(nth?.taskChanges.hasDeadlineTime).toBe(false);
+        }
+      });
+    }
+
+    it(`should keep ${trigger}2monday's future all-day date after noon on Monday`, async () => {
+      const r = await shortSyntax(
+        { ...TASK, title: `Task ${trigger}2monday` },
+        DEADLINE_CONFIG,
+        [],
+        [],
+        new Date(2024, 0, 22, 17),
+      );
+      expect(
+        trigger === '@' ? r?.taskChanges.dueWithTime : r?.taskChanges.deadlineWithTime,
+      ).toBe(new Date(2024, 0, 29, 12).getTime());
+    });
+
+    it(`should keep ${trigger}1monday's explicitly timed occurrence exactly at now`, async () => {
+      const now = new Date(2024, 0, 22, 15, 0, 0, 0);
+      const nth = await shortSyntax(
+        { ...TASK, title: `Task ${trigger}1monday 3pm` },
+        DEADLINE_CONFIG,
+        [],
+        [],
+        now,
+      );
+      const plain = await shortSyntax(
+        { ...TASK, title: `Task ${trigger}monday 3pm` },
+        DEADLINE_CONFIG,
+        [],
+        [],
+        now,
+      );
+      const timestamp =
+        trigger === '@'
+          ? nth?.taskChanges.dueWithTime
+          : nth?.taskChanges.deadlineWithTime;
+      expect(timestamp).toBe(now.getTime());
+      expect(timestamp).toBe(
+        trigger === '@'
+          ? plain?.taskChanges.dueWithTime
+          : plain?.taskChanges.deadlineWithTime,
+      );
+    });
+  }
+
   it('should support weekday abbreviations, plurals and casing', async () => {
     for (const title of ['Task @2mon', 'Task @2mondays', 'Task @2MON', 'Task @2Mon']) {
       const r = await parse(title);
@@ -3267,16 +3344,133 @@ describe('shortSyntax nth weekday (@2monday)', () => {
     // The typed time is on a normal day, but the resolved day is the transition
     // Sunday: the timestamp cannot hold the wall-clock time, so it travels as
     // dueTimeStr, exactly like "@every friday 3pm".
-    const nth = (gap.sunday.getDate() - 1 + 6) / 7;
-    if (!Number.isInteger(nth) || nth < 1 || nth > 5) {
-      return;
-    }
     const wednesday = new Date(gap.sunday);
     wednesday.setDate(wednesday.getDate() - 4);
     wednesday.setHours(10, 0);
-    const r = await parse(`Backup @${nth}sunday ${gap.missingHour}:30am`, wednesday);
+    const r = await parse(`Backup @1sunday ${gap.missingHour}:30am`, wednesday);
+    expect(formatDateToISO(dueOf(r))).toBe(formatDateToISO(gap.sunday));
     expect(dueOf(r).getDay()).toBe(0);
     expect(r?.taskChanges.dueTimeStr).toBe(`0${gap.missingHour}:30`);
+  });
+
+  for (const trigger of ['@', '!']) {
+    for (const suffix of ['', 'am']) {
+      it(`should retain ${trigger}1monday's valid time when today has a DST gap (${suffix || '24-hour'})`, async () => {
+        const gap = findSpringForwardSunday(2026);
+        if (!gap) {
+          return;
+        }
+        const now = new Date(gap.sunday);
+        now.setHours(0, 30);
+        const token = `${trigger}1monday ${gap.missingHour}:30${suffix}`;
+        const title = `Task ${token}`;
+        const r = await shortSyntax({ ...TASK, title }, DEADLINE_CONFIG, [], [], now);
+        const expected = new Date(gap.sunday);
+        expected.setDate(expected.getDate() + 1);
+        expected.setHours(gap.missingHour, 30, 0, 0);
+
+        expect(r?.taskChanges.title).toBe('Task');
+        expect(r?.parsedRanges).toEqual(
+          expectedRanges(title, [[trigger === '@' ? 'due' : 'deadline', token]]),
+        );
+        if (trigger === '@') {
+          expect(r?.taskChanges.dueWithTime).toBe(expected.getTime());
+          expect(r?.taskChanges.hasPlannedTime).toBeUndefined();
+          expect(r?.taskChanges.dueTimeStr).toBe(`0${gap.missingHour}:30`);
+        } else {
+          expect(r?.taskChanges.deadlineWithTime).toBe(expected.getTime());
+          expect(r?.taskChanges.hasDeadlineTime).toBe(true);
+        }
+      });
+    }
+
+    it(`should normalize ${trigger}1sunday's missing time on the target DST day`, async () => {
+      const gap = findSpringForwardSunday(2026);
+      if (!gap) {
+        return;
+      }
+      const now = new Date(gap.sunday);
+      now.setHours(0, 30);
+      const r = await shortSyntax(
+        { ...TASK, title: `Task ${trigger}1sunday ${gap.missingHour}:30am` },
+        DEADLINE_CONFIG,
+        [],
+        [],
+        now,
+      );
+      const expected = new Date(gap.sunday);
+      expected.setHours(gap.missingHour, 30, 0, 0);
+
+      expect(r?.taskChanges.title).toBe('Task');
+      if (trigger === '@') {
+        expect(r?.taskChanges.dueWithTime).toBe(expected.getTime());
+        expect(r?.taskChanges.hasPlannedTime).toBeUndefined();
+        expect(r?.taskChanges.dueTimeStr).toBe(`0${gap.missingHour}:30`);
+      } else {
+        expect(r?.taskChanges.deadlineWithTime).toBe(expected.getTime());
+        expect(r?.taskChanges.hasDeadlineTime).toBe(true);
+      }
+    });
+
+    it(`should restore ${trigger}1sunday's typed time after advancing past a DST gap`, async () => {
+      const gap = findSpringForwardSunday(2026);
+      if (!gap) {
+        return;
+      }
+      const now = new Date(gap.sunday);
+      now.setHours(gap.missingHour + 2, 0);
+      const r = await shortSyntax(
+        { ...TASK, title: `Task ${trigger}1sunday ${gap.missingHour}:30am` },
+        DEADLINE_CONFIG,
+        [],
+        [],
+        now,
+      );
+      const expected = new Date(gap.sunday);
+      expected.setDate(expected.getDate() + 7);
+      expected.setHours(gap.missingHour, 30, 0, 0);
+
+      expect(r?.taskChanges.title).toBe('Task');
+      expect(
+        trigger === '@' ? r?.taskChanges.dueWithTime : r?.taskChanges.deadlineWithTime,
+      ).toBe(expected.getTime());
+    });
+  }
+
+  it('should retain the clock time on the second Sunday when today has a DST gap', async () => {
+    const gap = findSpringForwardSunday(2026);
+    if (!gap) {
+      return;
+    }
+    const now = new Date(gap.sunday);
+    now.setHours(0, 30);
+    const r = await parse(`Task @2sunday ${gap.missingHour}:30am`, now);
+    const expected = new Date(gap.sunday);
+    expected.setDate(expected.getDate() + 7);
+    expected.setHours(gap.missingHour, 30, 0, 0);
+
+    expect(r?.taskChanges.title).toBe('Task');
+    expect(r?.taskChanges.dueWithTime).toBe(expected.getTime());
+    expect(r?.taskChanges.dueTimeStr).toBe(`0${gap.missingHour}:30`);
+  });
+
+  it('should not reinterpret a rejected relative date during the clock-time retry', async () => {
+    const gap = findSpringForwardSunday(2026);
+    if (!gap) {
+      return;
+    }
+    const saturday = new Date(gap.sunday);
+    saturday.setDate(saturday.getDate() - 1);
+    saturday.setHours(0, 30);
+    const remainder = `tomorrow ${gap.missingHour}:30am`;
+    const r = await parse(`Task @1monday ${remainder}`, saturday);
+    const expected = new Date(gap.sunday);
+    expected.setDate(expected.getDate() + 1);
+    expected.setHours(12, 0, 0, 0);
+
+    expect(r?.taskChanges.title).toBe(`Task ${remainder}`);
+    expect(r?.taskChanges.dueWithTime).toBe(expected.getTime());
+    expect(r?.taskChanges.hasPlannedTime).toBe(false);
   });
 
   it('should not leave the weekday in the title (regression for #10285)', async () => {
@@ -3415,5 +3609,95 @@ describe('shortSyntax nth weekday (@2monday)', () => {
     expect(deadline.getDate()).toBe(29);
     expect(deadline.getHours()).toBe(15);
     expect(r?.taskChanges.hasDeadlineTime).toBe(true);
+  });
+
+  it('should advance one week when the explicitly typed time today is already past', async () => {
+    // Mon Jan 22 2024, 17:00 local: the typed 15:00 is two hours in the past,
+    // so today no longer counts as the first occurrence.
+    const mondayEvening = new Date(2024, 0, 22, 17, 0, 0, 0);
+    const r = await parse('Team call @1monday 3pm', mondayEvening);
+    expect(r?.taskChanges.title).toBe('Team call');
+    const due = dueOf(r);
+    expect(due.getDay()).toBe(1);
+    expect(formatDateToISO(due)).toBe('2024-01-29');
+    expect(due.getHours()).toBe(15);
+    expect(due.getMinutes()).toBe(0);
+    expect(r?.taskChanges.hasPlannedTime).toBeUndefined();
+  });
+
+  it('should keep "@1monday 3pm" equivalent to "@monday 3pm" when the same-day time is past', async () => {
+    const mondayEvening = new Date(2024, 0, 22, 17, 0, 0, 0);
+    const nth = await parse('Team call @1monday 3pm', mondayEvening);
+    const plain = await parse('Team call @monday 3pm', mondayEvening);
+    expect(nth?.taskChanges.dueWithTime).toBe(plain?.taskChanges.dueWithTime);
+  });
+
+  it('should not shift a nth>1 count whose base occurrence is already in the future', async () => {
+    // Mon Jan 22 2024, 17:00: the 2nd Monday (Jan 29) with 15:00 is still ahead
+    const mondayEvening = new Date(2024, 0, 22, 17, 0, 0, 0);
+    const r = await parse('Team call @2monday 3pm', mondayEvening);
+    expect(formatDateToISO(dueOf(r))).toBe('2024-01-29');
+    expect(dueOf(r).getHours()).toBe(15);
+  });
+
+  it('should keep today when the typed time is still ahead of now', async () => {
+    const mondayAfternoon = new Date(2024, 0, 22, 14, 0, 0, 0);
+    const r = await parse('Team call @1monday 3pm', mondayAfternoon);
+    expect(formatDateToISO(dueOf(r))).toBe('2024-01-22');
+    expect(dueOf(r).getHours()).toBe(15);
+    expect(r?.taskChanges.hasPlannedTime).toBeUndefined();
+  });
+
+  it('should advance a deadline one week when the explicitly typed time is already past', async () => {
+    const mondayEvening = new Date(2024, 0, 22, 17, 0, 0, 0);
+    const r = await shortSyntax(
+      { ...TASK, title: 'Taxes !1monday 3pm' },
+      DEADLINE_CONFIG,
+      [],
+      [],
+      mondayEvening,
+    );
+    expect(r?.taskChanges.title).toBe('Taxes');
+    const deadline = new Date(r?.taskChanges.deadlineWithTime as number);
+    expect(deadline.getDay()).toBe(1);
+    expect(formatDateToISO(deadline)).toBe('2024-01-29');
+    expect(deadline.getHours()).toBe(15);
+    expect(r?.taskChanges.hasDeadlineTime).toBe(true);
+  });
+
+  it('should keep a deadline today when its typed time is still ahead', async () => {
+    const mondayAfternoon = new Date(2024, 0, 22, 14, 0, 0, 0);
+    const r = await shortSyntax(
+      { ...TASK, title: 'Taxes !1monday 3pm' },
+      DEADLINE_CONFIG,
+      [],
+      [],
+      mondayAfternoon,
+    );
+    const deadline = new Date(r?.taskChanges.deadlineWithTime as number);
+    expect(formatDateToISO(deadline)).toBe('2024-01-22');
+    expect(deadline.getHours()).toBe(15);
+    expect(r?.taskChanges.hasDeadlineTime).toBe(true);
+  });
+
+  it('should remove the selected deadline token, not an earlier duplicate', async () => {
+    // Regression: the deadline scanner skips the "!" glued to "wow" and
+    // selects the second token. Removal and highlighting must target that
+    // exact span — an unanchored text search would consume the first copy
+    // and leave the title as "wow !2monday".
+    const r = await shortSyntax(
+      { ...TASK, title: 'wow!2monday !2monday' },
+      DEADLINE_CONFIG,
+      [],
+      [],
+      NOW,
+    );
+    expect(r?.taskChanges.title).toBe('wow!2monday');
+    const deadline = new Date(r?.taskChanges.deadlineWithTime as number);
+    expect(deadline.getDay()).toBe(1);
+    expect(deadline.getDate()).toBe(29);
+    // Literal positions: expectedRanges() would find the first copy of the
+    // token text, which is exactly the ambiguity under test.
+    expect(r?.parsedRanges).toEqual([{ type: 'deadline', start: 12, end: 20 }]);
   });
 });

@@ -867,6 +867,7 @@ const parseShortSyntaxDate = async (
         tracked,
         now,
         rr[0],
+        triggerIndex,
         nthWeekdayResult,
         isDeadline,
       );
@@ -1170,19 +1171,43 @@ const applyRepeatSyntax = async (
 // date itself is computed from the weekday and n; the remainder is fed to chrono
 // only for an optional trailing time, mirroring applyRepeatSyntax's DST-safe
 // handling: when the resolved day is a spring-forward day the typed time does
-// not exist and only dueTimeStr can carry it.
+// not exist and only dueTimeStr can carry it. An occurrence whose explicit time
+// or implied noon anchor has passed advances to the next matching weekday,
+// keeping nth = 1 equivalent to chrono's forwardDate behavior for plain weekdays.
 const applyNthWeekdaySyntax = async (
   tracked: TrackedTitle,
   now: Date,
   dueMatch: string,
+  triggerIndex: number,
   nthWeekdayResult: NthWeekdaySyntaxResult,
   isDeadline: boolean,
 ): Promise<DateStageResult> => {
   const { nth, weekday, chronoText, consumedLength } = nthWeekdayResult;
   const dateParser = await loadCustomDateParser();
-  const parsedDateArr = chronoText
+  let parsedDateArr = chronoText
     ? dateParser.parse(chronoText, now, { forwardDate: true })
     : [];
+  if (chronoText && !parsedDateArr.length) {
+    // Chrono rejects a clock time that falls in today's DST gap, even when
+    // the nth weekday is a different day on which that time exists. Recover
+    // only a time-only match on the previous day; the actual target date and
+    // any DST normalization are handled below. Disable forwardDate here so a
+    // past clock time cannot slide back onto today's gap during this retry.
+    const timeReference = new Date(now);
+    timeReference.setDate(timeReference.getDate() - 1);
+    timeReference.setHours(12, 0, 0, 0);
+    const fallback = dateParser.parse(chronoText, timeReference, {
+      forwardDate: false,
+    })[0];
+    if (
+      fallback?.start.isCertain('hour') &&
+      !(['day', 'month', 'year', 'weekday'] as const).some((component) =>
+        fallback.start.isCertain(component),
+      )
+    ) {
+      parsedDateArr = [fallback];
+    }
+  }
   // Only absorb a chrono match that directly follows the phrase ("@2monday
   // 3pm"); anything further into the remainder belongs to the title.
   const parsedDateResult =
@@ -1194,7 +1219,14 @@ const applyNthWeekdaySyntax = async (
     consumedLength +
     (parsedDateResult ? parsedDateResult.index + parsedDateResult.text.length : 0);
   const textToReplace = dueMatch.substring(0, consumedTotal);
-  const tokenStart = tracked.text.indexOf(textToReplace);
+  // Anchor at the selected match, like the chrono branch's consume(): the same
+  // token text can appear earlier in the title ("wow!2monday !2monday"), where
+  // the deadline scanner skips a "!" glued to a word — an unanchored indexOf
+  // would remove and highlight that earlier copy instead of the selected one.
+  const tokenStart = tracked.text.indexOf(textToReplace, triggerIndex);
+  if (tokenStart === -1) {
+    return { changes: {}, ranges: [] };
+  }
   const tokenEnd = tokenStart + textToReplace.length;
   const ranges = tracked.rawRanges(tokenStart, tokenEnd);
   const head = tracked.text.slice(0, tokenStart);
@@ -1224,13 +1256,24 @@ const applyNthWeekdaySyntax = async (
 
   const hasTime = !!parsedDateResult && parsedDateResult.start.isCertain('hour');
   const dueDate = getNthWeekdayDate(now, weekday, nth);
+  const parsedTime = hasTime && parsedDateResult ? parsedDateResult.start.date() : null;
   let typedTimeStr: string | undefined;
-  if (hasTime && parsedDateResult) {
-    const parsed = parsedDateResult.start.date();
+  if (parsedTime) {
     // Captured before setHours: on a spring-forward day the wall-clock time does
     // not exist and the Date can only hold the shifted hour (see dueTimeStr).
-    typedTimeStr = formatTimeHHmm(parsed);
-    dueDate.setHours(parsed.getHours(), parsed.getMinutes(), 0, 0);
+    typedTimeStr = formatTimeHHmm(parsedTime);
+    dueDate.setHours(parsedTime.getHours(), parsedTime.getMinutes(), 0, 0);
+  }
+  // Match chrono's strict forwardDate comparison for both explicit times and
+  // the implied noon anchor of all-day dates. Future nth>1 dates stay put, and
+  // an occurrence exactly at now still counts as today.
+  if (dueDate.getTime() < now.getTime()) {
+    dueDate.setDate(dueDate.getDate() + 7);
+    if (parsedTime) {
+      // setDate retains the normalized hour from a DST gap. The next weekday
+      // must use the original clock time when that time exists again.
+      dueDate.setHours(parsedTime.getHours(), parsedTime.getMinutes(), 0, 0);
+    }
   }
   if (isDeadline) {
     return {
