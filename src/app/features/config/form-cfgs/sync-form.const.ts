@@ -739,14 +739,14 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
             },
           },
         },
-        // Agent task capture: acts on the active, persisted provider (like
-        // the encryption buttons), so hidden until SuperSync is saved.
+        // Agent task capture: shown during setup too, so the option is
+        // discoverable. It acts only on the active, persisted provider and
+        // asks to save SuperSync first until then (isSuperSyncActive).
         {
           hideExpression: (m: any, v: any, field?: FormlyFieldConfig) =>
-            isNotSyncProvider(field, 2, SyncProviderId.SuperSync) ||
-            field?.parent?.parent?.model?._isInitialSetup === true ||
-            hasUnsavedProviderSwitch(field, 2),
+            isNotSyncProvider(field, 2, SyncProviderId.SuperSync),
           type: 'agent-capture-settings',
+          className: 'e2e-agent-capture',
         },
         // Advanced settings for SuperSync
         {

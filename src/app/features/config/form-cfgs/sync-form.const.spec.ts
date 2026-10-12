@@ -213,6 +213,22 @@ describe('SYNC_FORM encryption action visibility (#9268)', () => {
     ).toBeFalse();
   });
 
+  it('shows the optional AI assistants block during SuperSync setup', () => {
+    const setup: EncryptionVisibilityModel = {
+      syncProvider: SyncProviderId.SuperSync,
+      isEncryptionEnabled: false,
+      _isInitialSetup: true,
+      _activeProviderId: null,
+    };
+    expect(isFieldHidden('e2e-agent-capture', setup)).toBeFalse();
+    expect(
+      isFieldHidden('e2e-agent-capture', {
+        ...setup,
+        syncProvider: SyncProviderId.WebDAV,
+      }),
+    ).toBeTrue();
+  });
+
   it('hides active-provider encryption actions during an unsaved switch', () => {
     const switchedFileProvider: EncryptionVisibilityModel = {
       syncProvider: SyncProviderId.Dropbox,
