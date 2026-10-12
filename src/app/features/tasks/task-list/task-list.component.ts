@@ -1,11 +1,14 @@
 import { TaskMultiDragService } from '../task-multi-drag.service';
 import {
+  afterNextRender,
   AfterViewInit,
+  AnimationCallbackEvent,
   ChangeDetectionStrategy,
   Component,
   computed,
   forwardRef,
   inject,
+  Injector,
   input,
   NgZone,
   OnDestroy,
@@ -13,10 +16,14 @@ import {
 } from '@angular/core';
 import { DropListModelSource, Task, TaskCopy, TaskWithSubTasks } from '../task.model';
 import { TaskService } from '../task.service';
-import { expandFadeFastAnimation } from '../../../ui/animations/expand.ani';
+import {
+  animateExpandFadeEnter,
+  animateExpandFadeLeave,
+  animateListItemEnter,
+  animateListItemLeave,
+} from '../../../ui/animations/list-item.ani';
 import { filterDoneTasks } from '../filter-done-tasks.pipe';
 import { T } from '../../../t.const';
-import { taskListAnimation } from './task-list-ani';
 import { toSignal } from '@angular/core/rxjs-interop';
 import {
   CdkDrag,
@@ -58,6 +65,7 @@ import { DEFAULT_OPTIONS, NO_TAG_GROUP_ID } from '../../task-view-customizer/typ
 import { dragDelayForTouch, isTouchActive } from '../../../util/input-intent';
 import { performHapticFeedback } from '../../../util/haptic-feedback';
 import { DateService } from '../../../core/date/date.service';
+import { GlobalConfigService } from '../../config/global-config.service';
 import { canConvertTaskToSubTask } from '../util/can-convert-task-to-sub-task';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { TaskMultiSelectService } from '../task-multi-select.service';
@@ -103,7 +111,6 @@ export interface DropModelDataForList {
   templateUrl: './task-list.component.html',
   styleUrls: ['./task-list.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  animations: [taskListAnimation, expandFadeFastAnimation],
   imports: [
     MatButton,
     MatIcon,
@@ -128,6 +135,13 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   private _ngZone = inject(NgZone);
   dropListService = inject(DropListService);
   private _layoutService = inject(LayoutService);
+  private _globalConfigService = inject(GlobalConfigService);
+  private _injector = inject(Injector);
+  private _isBlockAniAfterDrop = toSignal(this.dropListService.isBlockAniAfterDrop$, {
+    initialValue: false,
+  });
+  // Rows rendered with the list itself appear without an enter animation.
+  private _isEnterAniReady = false;
   protected readonly dragDelayForTouch = dragDelayForTouch;
   private readonly _taskMultiSelectService = inject(TaskMultiSelectService);
   protected readonly isTouchSelectionMode =
@@ -187,6 +201,41 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
 
   ngAfterViewInit(): void {
     this.dropListService.registerDropList(this.dropList()!, this.listId() === 'SUB');
+    // Angular flushes the first render's enter animations in its own
+    // afterNextRender; flip the flag only after that pass has finished.
+    afterNextRender(
+      () => {
+        setTimeout(() => (this._isEnterAniReady = true));
+      },
+      { injector: this._injector },
+    );
+  }
+
+  onRowEnter(ev: AnimationCallbackEvent, isExpandFade = false): void {
+    if (!this._isEnterAniReady || !this._isAnimationAllowed()) {
+      ev.animationComplete();
+    } else if (isExpandFade) {
+      animateExpandFadeEnter(ev);
+    } else {
+      animateListItemEnter(ev);
+    }
+  }
+
+  onRowLeave(ev: AnimationCallbackEvent, isExpandFade = false): void {
+    if (!this._isAnimationAllowed()) {
+      ev.animationComplete();
+    } else if (isExpandFade) {
+      animateExpandFadeLeave(ev);
+    } else {
+      animateListItemLeave(ev);
+    }
+  }
+
+  private _isAnimationAllowed(): boolean {
+    return (
+      !this._isBlockAniAfterDrop() &&
+      !this._globalConfigService.misc()?.isDisableAnimations
+    );
   }
 
   ngOnDestroy(): void {

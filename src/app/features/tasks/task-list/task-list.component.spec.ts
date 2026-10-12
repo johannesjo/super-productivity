@@ -11,7 +11,7 @@ import { NO_TAG_GROUP_ID } from '../../task-view-customizer/types';
 import { ScheduleExternalDragService } from '../../schedule/schedule-week/schedule-external-drag.service';
 import { DropListService } from '../../../core-ui/drop-list/drop-list.service';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { TaskWithSubTasks } from '../task.model';
 import { SectionService } from '../../section/section.service';
 import { moveSubTask } from '../store/task.actions';
@@ -33,6 +33,7 @@ describe('TaskListComponent', () => {
     markSubTaskDragStarting: jasmine.Spy;
     hitTestPointerSubTaskList: jasmine.Spy;
     blockAniTrigger$: { next: jasmine.Spy };
+    isBlockAniAfterDrop$: Observable<boolean>;
   };
   let store: MockStore;
 
@@ -63,6 +64,7 @@ describe('TaskListComponent', () => {
       'removeTaskFromSection',
     ]);
     dropListServiceMock = {
+      isBlockAniAfterDrop$: of(false),
       registerDropList: jasmine.createSpy('registerDropList'),
       unregisterDropList: jasmine.createSpy('unregisterDropList'),
       activeDragPointer: jasmine.createSpy('activeDragPointer').and.returnValue(null),

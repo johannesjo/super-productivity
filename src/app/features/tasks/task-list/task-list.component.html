@@ -1,6 +1,7 @@
 @if (isHideDone() || isHideAll()) {
   <div
-    @expandFadeFast
+    (animate.enter)="onRowEnter($event, true)"
+    (animate.leave)="onRowLeave($event, true)"
     class="done-task-box"
   >
     <button
@@ -30,17 +31,14 @@
   [cdkDropListData]="dropModelDataForList()"
   (cdkDropListDropped)="drop($event)"
   [attr.data-list-id]="listId()"
-  [@taskList]="
-    (dropListService.isBlockAniAfterDrop$ | async)
-      ? 'BLOCK'
-      : $safeNavigationMigration(filteredTasks()?.length)
-  "
   [attr.data-id]="listModelId()"
   [class.is-multi-dragging]="multiDrag.isListGroupDrag()"
   class="task-list-inner"
 >
   @for (task of filteredTasks(); track trackByFn($index, task); let i = $index) {
     <task
+      (animate.enter)="onRowEnter($event)"
+      (animate.leave)="onRowLeave($event)"
       [isInSubTaskList]="isSubTaskList()"
       [isBacklog]="isBacklog()"
       [task]="task"
