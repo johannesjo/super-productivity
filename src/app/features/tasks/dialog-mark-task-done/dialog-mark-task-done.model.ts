@@ -4,6 +4,7 @@ export interface MarkTaskDoneDialogData {
   timeSpent: number;
   timeEstimate: number;
   currentScheduledTime: number | null;
+  dueDay?: string | null;
 }
 
 export type SchedulePlacementType = 'ALL_DAY' | 'CUSTOM_TIME';

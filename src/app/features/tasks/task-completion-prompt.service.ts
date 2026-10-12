@@ -11,6 +11,11 @@ import {
   MarkTaskDoneDialogResult,
 } from './dialog-mark-task-done/dialog-mark-task-done.model';
 
+export interface TaskCompletionPromptOptions {
+  isFromSchedule?: boolean;
+  forcePrompt?: boolean;
+}
+
 @Injectable({
   providedIn: 'root',
 })
@@ -25,15 +30,19 @@ export class TaskCompletionPromptService {
    * 1. Subtask (parentId != null)
    * 2. Recurring task (repeatCfgId != null) in MVP
    * 3. Config disabled (isPromptOnTaskDoneSchedule is false)
-   * 4. Already scheduled task (dueWithTime exists) with matching or zero tracked time:
-   *    (timeSpent === 0 || timeSpent === timeEstimate)
+   * 4. Already scheduled task (dueWithTime exists) with matching or zero tracked time
+   *    (unless completing from schedule view context where placement/duration confirmation is requested)
    *
    * Otherwise, opens DialogMarkTaskDoneComponent.
    * If confirmed, applies updates (dueWithTime, dueDay: undefined, timeEstimate) and calls taskService.setDone.
    * If cancelled, calls onCancel to revert any UI checkmark animation.
    */
-  completeTask(task: Task, onCancel?: () => void): Observable<boolean> {
-    if (this._shouldBypassPrompt(task)) {
+  completeTask(
+    task: Task,
+    onCancel?: () => void,
+    options?: TaskCompletionPromptOptions,
+  ): Observable<boolean> {
+    if (this._shouldBypassPrompt(task, options)) {
       this._taskService.setDone(task.id);
       return of(true);
     }
@@ -44,6 +53,7 @@ export class TaskCompletionPromptService {
       timeSpent: task.timeSpent || 0,
       timeEstimate: task.timeEstimate || 0,
       currentScheduledTime: task.dueWithTime ?? null,
+      dueDay: task.dueDay ?? null,
     };
 
     const dialogRef = this._matDialog.open(DialogMarkTaskDoneComponent, {
@@ -77,7 +87,10 @@ export class TaskCompletionPromptService {
     return result$;
   }
 
-  private _shouldBypassPrompt(task: Task): boolean {
+  private _shouldBypassPrompt(
+    task: Task,
+    options?: TaskCompletionPromptOptions,
+  ): boolean {
     if (task.isDone) {
       return true;
     }
@@ -102,6 +115,14 @@ export class TaskCompletionPromptService {
 
     // 4. Already scheduled tasks
     if (task.dueWithTime != null) {
+      if (options?.isFromSchedule) {
+        // From schedule view: bypass only if tracked time matches non-zero estimate
+        if (task.timeSpent > 0 && task.timeSpent === task.timeEstimate) {
+          return true;
+        }
+        return false;
+      }
+
       const timeSpent = task.timeSpent || 0;
       const timeEstimate = task.timeEstimate || 0;
       // Zero time tracked (US 26) or tracked matches estimate (US 27)

@@ -58,9 +58,14 @@ export class DialogMarkTaskDoneComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.data.currentScheduledTime != null) {
-      this.selectedPlacement = 'CUSTOM_TIME';
       const d = new Date(this.data.currentScheduledTime);
-      this.customTime = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      if (d.getHours() === 0 && d.getMinutes() === 0) {
+        this.selectedPlacement = 'ALL_DAY';
+        this.customTime = '12:00';
+      } else {
+        this.selectedPlacement = 'CUSTOM_TIME';
+        this.customTime = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+      }
     } else {
       this.selectedPlacement = 'ALL_DAY';
       const now = new Date();
@@ -220,7 +225,9 @@ export class DialogMarkTaskDoneComponent implements OnInit {
   submit(): void {
     const baseDate = this.data.currentScheduledTime
       ? new Date(this.data.currentScheduledTime)
-      : new Date();
+      : this.data.dueDay
+        ? new Date(`${this.data.dueDay}T00:00:00`)
+        : new Date();
 
     let dueWithTime: number;
     if (this.selectedPlacement === 'ALL_DAY') {

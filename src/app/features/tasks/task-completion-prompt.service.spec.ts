@@ -158,6 +158,73 @@ describe('TaskCompletionPromptService', () => {
     });
   });
 
+  describe('Schedule Context Completion', () => {
+    it('should open dialog when completed from schedule view even if timeSpent is 0', () => {
+      dialogRefSpy.afterClosed.and.returnValue(of(undefined));
+      const scheduledTime = 1770030000000;
+      const task = createMockTask({
+        id: 't-sched-zero',
+        title: 'Zero Spent Scheduled Task',
+        timeSpent: 0,
+        timeEstimate: 3600000,
+        dueWithTime: scheduledTime,
+      });
+
+      service.completeTask(task, undefined, { isFromSchedule: true });
+
+      expect(matDialogSpy.open).toHaveBeenCalledTimes(1);
+      expect(matDialogSpy.open).toHaveBeenCalledWith(DialogMarkTaskDoneComponent, {
+        data: {
+          taskId: 't-sched-zero',
+          taskTitle: 'Zero Spent Scheduled Task',
+          timeSpent: 0,
+          timeEstimate: 3600000,
+          currentScheduledTime: scheduledTime,
+          dueDay: null,
+        },
+      });
+    });
+
+    it('should open dialog when completing unscheduled task from schedule view', () => {
+      dialogRefSpy.afterClosed.and.returnValue(of(undefined));
+      const task = createMockTask({
+        id: 't-unsched-sched-view',
+        title: 'Unscheduled Task on Schedule View',
+        timeSpent: 0,
+        timeEstimate: 1800000,
+        dueWithTime: null,
+        dueDay: '2026-10-12',
+      });
+
+      service.completeTask(task, undefined, { isFromSchedule: true });
+
+      expect(matDialogSpy.open).toHaveBeenCalledTimes(1);
+      expect(matDialogSpy.open).toHaveBeenCalledWith(DialogMarkTaskDoneComponent, {
+        data: {
+          taskId: 't-unsched-sched-view',
+          taskTitle: 'Unscheduled Task on Schedule View',
+          timeSpent: 0,
+          timeEstimate: 1800000,
+          currentScheduledTime: null,
+          dueDay: '2026-10-12',
+        },
+      });
+    });
+
+    it('should bypass dialog from schedule view when timeSpent matches positive timeEstimate', () => {
+      const task = createMockTask({
+        dueWithTime: 1770000000000,
+        timeSpent: 3600000,
+        timeEstimate: 3600000,
+      });
+
+      service.completeTask(task, undefined, { isFromSchedule: true });
+
+      expect(matDialogSpy.open).not.toHaveBeenCalled();
+      expect(taskServiceSpy.setDone).toHaveBeenCalledWith('task-1');
+    });
+  });
+
   describe('Dialog Invocation', () => {
     it('should open DialogMarkTaskDoneComponent for unscheduled tasks', () => {
       dialogRefSpy.afterClosed.and.returnValue(of(undefined));
@@ -179,6 +246,7 @@ describe('TaskCompletionPromptService', () => {
           timeSpent: 1800000,
           timeEstimate: 3600000,
           currentScheduledTime: null,
+          dueDay: null,
         },
       });
     });
@@ -204,6 +272,7 @@ describe('TaskCompletionPromptService', () => {
           timeSpent: 5400000,
           timeEstimate: 3600000,
           currentScheduledTime: scheduledTime,
+          dueDay: null,
         },
       });
     });
@@ -259,21 +328,17 @@ describe('TaskCompletionPromptService', () => {
         },
       };
       dialogRefSpy.afterClosed.and.returnValue(of(dialogResult));
-      const onCancelSpy = jasmine.createSpy('onCancel');
-      let resultValue: boolean | undefined;
 
       const task = createMockTask({
         id: 't-confirm',
         dueWithTime: null,
-        timeSpent: 1800000,
-        timeEstimate: 3600000,
       });
 
-      service.completeTask(task, onCancelSpy).subscribe((res) => {
+      let resultValue: boolean | undefined;
+      service.completeTask(task).subscribe((res) => {
         resultValue = res;
       });
 
-      expect(onCancelSpy).not.toHaveBeenCalled();
       expect(taskServiceSpy.update).toHaveBeenCalledTimes(1);
       expect(taskServiceSpy.update).toHaveBeenCalledWith('t-confirm', {
         dueWithTime: midnightTimestamp,
