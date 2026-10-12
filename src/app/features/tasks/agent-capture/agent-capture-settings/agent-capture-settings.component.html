@@ -1,223 +1,252 @@
-<section class="agent-capture">
-  <h3>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_TITLE | translate }}</h3>
-  <p>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_INFO | translate }}</p>
+<details class="agent-capture">
+  <summary>
+    <span class="heading">{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_TITLE | translate }}</span>
+    <span class="state">{{
+      (isEnabled()
+        ? T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_STATE_ON
+        : T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_STATE_OFF
+      ) | translate
+    }}</span>
+    <span class="summary-note">{{
+      T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_OPTIONAL | translate
+    }}</span>
+  </summary>
+  <div class="capture-content">
+    <p>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_INFO | translate }}</p>
+    <p>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_ACCESS | translate }}</p>
 
-  @if (!isAvailable) {
-    <p>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_SAVE_FIRST | translate }}</p>
-  } @else {
-    <div class="callout">
-      <mat-icon aria-hidden="true">privacy_tip</mat-icon>
-      <p>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_PRIVACY | translate }}</p>
-    </div>
-  }
-
-  @if (isAvailable && !isEnabled()) {
-    <button
-      mat-stroked-button
-      color="primary"
-      type="button"
-      [disabled]="isBusy()"
-      (click)="turnOn()"
-    >
-      {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_ON | translate }}
-    </button>
-  } @else if (isAvailable) {
-    @if (mcpUrl(); as url) {
-      <label>
-        {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_MCP_URL | translate }}
-        <input
-          class="value"
-          type="text"
-          readonly
-          [value]="url"
-          (focus)="$any($event.target).select()"
-        />
-      </label>
-      <button
-        mat-button
-        type="button"
-        [attr.aria-label]="T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_A_COPY_URL | translate"
-        (click)="copy(url, 'URL')"
-      >
-        {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_COPY | translate }}
-      </button>
+    @if (!isAvailable) {
+      <p>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_SAVE_FIRST | translate }}</p>
+    } @else {
+      <div class="callout">
+        <mat-icon aria-hidden="true">privacy_tip</mat-icon>
+        <p>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_PRIVACY | translate }}</p>
+      </div>
     }
 
-    <p>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_OAUTH_HINT | translate }}</p>
-    <button
-      mat-stroked-button
-      type="button"
-      [disabled]="isBusy()"
-      (click)="createConnectCode()"
-    >
-      {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_CONNECT_CODE | translate }}
-    </button>
-    @if (connectCode(); as connection) {
-      <p>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_CONNECT_CODE_WARNING | translate }}</p>
-      <label>
-        {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_CONNECT_CODE | translate }}
-        <input
-          class="value"
-          type="text"
-          readonly
-          [value]="connection.code"
-          e2e="captureConnectCode"
-          (focus)="$any($event.target).select()"
-        />
-      </label>
-      <p>
-        {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_CODE_EXPIRES | translate }}
-        {{ connection.expiresAt | localeDate: 'shortTime' }}
-      </p>
+    @if (isAvailable && !isEnabled()) {
       <button
-        mat-button
+        mat-stroked-button
+        color="primary"
         type="button"
-        (click)="copy(connection.code, 'Code')"
+        [disabled]="isBusy()"
+        (click)="turnOn()"
       >
-        {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_COPY | translate }}
+        {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_ON | translate }}
       </button>
-    }
-
-    <mat-form-field>
-      <mat-label>{{
-        T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_CLIENT_NAME | translate
-      }}</mat-label>
-      <input
-        matInput
-        maxlength="100"
-        [value]="clientName()"
-        (input)="clientName.set($any($event.target).value)"
-        (keydown.enter)="$event.preventDefault(); createToken()"
-      />
-    </mat-form-field>
-    <button
-      mat-stroked-button
-      color="primary"
-      type="button"
-      [disabled]="isBusy() || !clientName().trim()"
-      (click)="createToken()"
-    >
-      {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_CREATE_TOKEN | translate }}
-    </button>
-
-    @if (newToken(); as token) {
-      <p role="status">{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_TOKEN_ONCE | translate }}</p>
-      <label>
-        {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_TOKEN | translate }}
-        <input
-          class="value"
-          type="text"
-          readonly
-          [value]="token"
-          e2e="captureToken"
-          (focus)="$any($event.target).select()"
-        />
-      </label>
-      <button
-        mat-button
-        type="button"
-        [attr.aria-label]="T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_A_COPY_TOKEN | translate"
-        (click)="copy(token, 'Token')"
-      >
-        {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_COPY | translate }}
-      </button>
-      @if (mcpUrl()) {
+    } @else if (isAvailable) {
+      @if (mcpUrl(); as url) {
         <label>
-          {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_SETUP | translate }}
-          <textarea
+          {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_MCP_URL | translate }}
+          <input
             class="value"
-            rows="3"
+            type="text"
             readonly
-            [value]="setupCommand()"
+            [value]="url"
             (focus)="$any($event.target).select()"
-          ></textarea>
+          />
         </label>
         <button
           mat-button
           type="button"
-          [attr.aria-label]="T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_A_COPY_SETUP | translate"
-          (click)="copy(setupCommand(), 'Command')"
+          [attr.aria-label]="T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_A_COPY_URL | translate"
+          (click)="copy(url, 'URL')"
         >
           {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_COPY | translate }}
         </button>
       }
-    }
 
-    <button
-      mat-button
-      type="button"
-      [disabled]="isBusy()"
-      (click)="refreshGrants()"
-    >
-      {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_REFRESH_CONNECTIONS | translate }}
-    </button>
-    <ul>
-      @for (grant of grants(); track grant.id) {
-        <li>
-          <strong>{{ grant.clientName }}</strong>
-          <span>
-            {{
-              T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_GRANT_INFO
-                | translate
-                  : {
-                      created: grant.createdAt | localeDate: 'shortDate',
-                      lastUsed: grant.lastUsedAt
-                        ? (grant.lastUsedAt | localeDate: 'shortDate')
-                        : (T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_GRANT_NEVER_USED | translate),
-                      expires: grant.expiresAt | localeDate: 'shortDate',
-                    }
-            }}
-            @if (grant.pendingCount > 0) {
-              ·
-              {{
-                T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_GRANT_WAITING
-                  | translate: { count: grant.pendingCount }
-              }}
-            }
-          </span>
+      <p>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_OAUTH_HINT | translate }}</p>
+      <button
+        mat-stroked-button
+        type="button"
+        [disabled]="isBusy()"
+        (click)="createConnectCode()"
+      >
+        {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_CONNECT_CODE | translate }}
+      </button>
+      @if (connectCode(); as connection) {
+        <p>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_CONNECT_CODE_WARNING | translate }}</p>
+        <label>
+          {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_CONNECT_CODE | translate }}
+          <input
+            class="value"
+            type="text"
+            readonly
+            [value]="connection.code"
+            e2e="captureConnectCode"
+            (focus)="$any($event.target).select()"
+          />
+        </label>
+        <p>
+          {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_CODE_EXPIRES | translate }}
+          {{ connection.expiresAt | localeDate: 'shortTime' }}
+        </p>
+        <button
+          mat-button
+          type="button"
+          [attr.aria-label]="T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_A_COPY_CODE | translate"
+          (click)="copy(connection.code, 'Code')"
+        >
+          {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_COPY | translate }}
+        </button>
+      }
+
+      <details class="manual-tokens">
+        <summary>
+          {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_MANUAL_TOKENS | translate }}
+        </summary>
+        <div class="capture-content">
+          <mat-form-field>
+            <mat-label>{{
+              T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_CLIENT_NAME | translate
+            }}</mat-label>
+            <input
+              matInput
+              maxlength="100"
+              [value]="clientName()"
+              (input)="clientName.set($any($event.target).value)"
+              (keydown.enter)="$event.preventDefault(); createToken()"
+            />
+          </mat-form-field>
           <button
-            mat-button
+            mat-stroked-button
+            color="primary"
             type="button"
-            [disabled]="isBusy()"
-            [attr.aria-label]="
-              T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_A_REVOKE
-                | translate: { name: grant.clientName }
-            "
-            (click)="revoke(grant, false)"
+            [disabled]="isBusy() || !clientName().trim()"
+            (click)="createToken()"
           >
-            {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_REVOKE | translate }}
+            {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_CREATE_TOKEN | translate }}
           </button>
-          @if (grant.pendingCount > 0) {
+
+          @if (newToken(); as token) {
+            <p role="status">
+              {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_TOKEN_ONCE | translate }}
+            </p>
+            <label>
+              {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_TOKEN | translate }}
+              <input
+                class="value"
+                type="text"
+                readonly
+                [value]="token"
+                e2e="captureToken"
+                (focus)="$any($event.target).select()"
+              />
+            </label>
+            <button
+              mat-button
+              type="button"
+              [attr.aria-label]="
+                T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_A_COPY_TOKEN | translate
+              "
+              (click)="copy(token, 'Token')"
+            >
+              {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_COPY | translate }}
+            </button>
+            @if (mcpUrl()) {
+              <label>
+                {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_SETUP | translate }}
+                <textarea
+                  class="value"
+                  rows="3"
+                  readonly
+                  [value]="setupCommand()"
+                  (focus)="$any($event.target).select()"
+                ></textarea>
+              </label>
+              <button
+                mat-button
+                type="button"
+                [attr.aria-label]="
+                  T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_A_COPY_SETUP | translate
+                "
+                (click)="copy(setupCommand(), 'Command')"
+              >
+                {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_COPY | translate }}
+              </button>
+            }
+          }
+        </div>
+      </details>
+      <h4>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_CONNECTIONS | translate }}</h4>
+      <button
+        mat-button
+        type="button"
+        [disabled]="isBusy()"
+        (click)="refreshGrants()"
+      >
+        {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_REFRESH_CONNECTIONS | translate }}
+      </button>
+      <ul>
+        @for (grant of grants(); track grant.id) {
+          <li>
+            <strong>{{ grant.clientName }}</strong>
+            <span class="grant-info">
+              {{
+                T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_GRANT_INFO
+                  | translate
+                    : {
+                        created: grant.createdAt | localeDate: 'shortDate',
+                        lastUsed: grant.lastUsedAt
+                          ? (grant.lastUsedAt | localeDate: 'shortDate')
+                          : (T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_GRANT_NEVER_USED
+                            | translate),
+                        expires: grant.expiresAt | localeDate: 'shortDate',
+                      }
+              }}
+              @if (grant.pendingCount > 0) {
+                ·
+                {{
+                  T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_GRANT_WAITING
+                    | translate: { count: grant.pendingCount }
+                }}
+              }
+            </span>
             <button
               mat-button
               type="button"
               [disabled]="isBusy()"
               [attr.aria-label]="
-                T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_A_REVOKE_DISCARD
+                T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_A_REVOKE
                   | translate: { name: grant.clientName }
               "
-              (click)="revoke(grant, true)"
+              (click)="revoke(grant, false)"
             >
-              {{
-                T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_REVOKE_DISCARD
-                  | translate: { count: grant.pendingCount }
-              }}
+              {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_REVOKE | translate }}
             </button>
-          }
-        </li>
-      } @empty {
-        <li>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_GRANTS_EMPTY | translate }}</li>
-      }
-    </ul>
+            @if (grant.pendingCount > 0) {
+              <button
+                mat-button
+                type="button"
+                [disabled]="isBusy()"
+                [attr.aria-label]="
+                  T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_A_REVOKE_DISCARD
+                    | translate: { name: grant.clientName }
+                "
+                (click)="revoke(grant, true)"
+              >
+                {{
+                  T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_REVOKE_DISCARD
+                    | translate: { count: grant.pendingCount }
+                }}
+              </button>
+            }
+          </li>
+        } @empty {
+          <li>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_GRANTS_EMPTY | translate }}</li>
+        }
+      </ul>
 
-    <button
-      mat-button
-      color="warn"
-      type="button"
-      [disabled]="isBusy()"
-      (click)="turnOff()"
-    >
-      {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_OFF | translate }}
-    </button>
-  }
-</section>
+      <button
+        mat-button
+        color="warn"
+        type="button"
+        [disabled]="isBusy()"
+        (click)="turnOff()"
+      >
+        {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_OFF | translate }}
+      </button>
+    }
+  </div>
+</details>

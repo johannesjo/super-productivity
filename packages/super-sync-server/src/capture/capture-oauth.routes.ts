@@ -67,24 +67,39 @@ const consentPage = (
   return `<!doctype html><html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Connect to Super Productivity</title><link rel="stylesheet" href="/style.css">
-<script src="/capture-oauth.js" defer></script></head><body><main class="container">
-<h1>Connect ${htmlEscape(client.name)} to Super Productivity</h1>
-<p>This assistant can add tasks to your Inbox. It cannot read your tasks or sync data.</p>
-<p>Returning to <strong>${htmlEscape(url.hostname)}</strong>.</p>
-${local ? '<p>This assistant runs on your computer. Continue only if you started this connection yourself.</p>' : ''}
-<p>Your assistant and sync server see submitted text. Waiting tasks are stored encrypted; enable sync encryption to keep the capture key private.</p>
-<p>In Super Productivity, open Settings → Sync → SuperSync → AI assistants, enable task capture, then click Create connection code.</p>
-<form id="capture-consent" class="card" data-auth-id="${id}">
+<link rel="stylesheet" href="/capture-oauth.css">
+<script src="/capture-oauth.js" defer></script></head><body><main class="container capture-consent">
+<p class="consent-brand">Super Productivity</p>
+<section class="card" aria-labelledby="consent-title">
+<h1 id="consent-title">Connect ${htmlEscape(client.name)}</h1>
+<p class="consent-subtitle">Send tasks straight to your Inbox.</p>
+<div class="consent-permissions">
+<strong>Allow this assistant to add tasks</strong>
+<p>It cannot read your existing tasks or sync data.</p>
+<p class="consent-note">Your assistant and sync server see the task text you send.</p>
+</div>
+${local ? '<p class="consent-note">This assistant runs on your computer. Continue only if you started this connection yourself.</p>' : ''}
+<form id="capture-consent" data-auth-id="${id}">
 <div class="form-group">
 <label for="connect-code">Connection code</label>
-<input id="connect-code" name="code" required maxlength="32" autocomplete="off" spellcheck="false" autofocus>
+<input id="connect-code" name="code" required maxlength="32" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="XXXXX-XXXXX" aria-describedby="code-help code-safety" autofocus>
+<p id="code-help" class="consent-note">In Super Productivity, go to <strong>Settings → Sync → SuperSync → AI assistants</strong>. Enable task capture if it is off, then select <strong>Create connection code</strong>.</p>
 </div>
-<p>Only enter a code from your own account. You can revoke this connection in Super Productivity at any time.</p>
+<p id="code-safety" class="consent-note">Only use a code from your own account.</p>
+<p id="status" role="alert"></p>
 <div class="action-buttons">
-<button type="submit" class="btn primary">Allow adding tasks</button>
+<button type="submit" class="btn primary">Connect ${htmlEscape(client.name)}</button>
 <button type="button" id="cancel" class="btn text-only">Cancel</button>
 </div>
-<p id="status" role="status"></p></form></main></body></html>`;
+</form>
+<details class="consent-privacy">
+<summary>Privacy and access</summary>
+<p>Waiting tasks are stored encrypted. Enable sync encryption to keep the capture key private.</p>
+<p>You can remove this connection at any time in Super Productivity’s AI assistants settings.</p>
+</details>
+</section>
+<p class="consent-return">After connecting, you’ll return to <strong>${htmlEscape(url.hostname)}</strong>.</p>
+</main></body></html>`;
 };
 
 export const captureOAuthRoutes = async (

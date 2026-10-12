@@ -33,7 +33,9 @@ const IMPORT_TIMEOUT = 120_000;
 const createTokenInSettings = async (client: SimulatedE2EClient): Promise<string> => {
   const dialog = await client.sync.openSuperSyncSettings();
   const capture = dialog.locator('agent-capture-settings');
+  await capture.locator('details.agent-capture > summary').click();
   await capture.getByRole('button', { name: 'Let AI assistants add tasks' }).click();
+  await capture.locator('details.manual-tokens > summary').click();
   await capture.getByLabel('Assistant name').fill('E2E assistant');
   await capture.getByRole('button', { name: 'Create token' }).click();
   const tokenInput = capture.locator('[e2e="captureToken"]');
@@ -48,6 +50,7 @@ const createTokenInSettings = async (client: SimulatedE2EClient): Promise<string
 const turnOffInSettings = async (client: SimulatedE2EClient): Promise<void> => {
   const dialog = await client.sync.openSuperSyncSettings();
   const capture = dialog.locator('agent-capture-settings');
+  await capture.locator('details.agent-capture > summary').click();
   await capture.getByRole('button', { name: 'Turn off' }).click();
   await client.page.locator('dialog-confirm [e2e="confirmBtn"]').click();
   await expect(
@@ -222,6 +225,7 @@ test.describe('@supersync Agent task capture', () => {
     await a.sync.setupSuperSync(getSuperSyncConfig(user));
     const dialog = await a.sync.openSuperSyncSettings();
     const capture = dialog.locator('agent-capture-settings');
+    await capture.locator('details.agent-capture > summary').click();
     await capture.getByRole('button', { name: 'Let AI assistants add tasks' }).click();
     await capture.getByRole('button', { name: 'Create connection code' }).click();
     const codeInput = capture.locator('[e2e="captureConnectCode"]');
@@ -248,11 +252,9 @@ test.describe('@supersync Agent task capture', () => {
         code_challenge: createHash('sha256').update(verifier).digest('base64url'),
       })}`,
     );
-    await expect(consent.getByRole('heading')).toHaveText(
-      'Connect Claude to Super Productivity',
-    );
+    await expect(consent.getByRole('heading')).toHaveText('Connect Claude');
     await consent.getByLabel('Connection code').fill(code);
-    await consent.getByRole('button', { name: 'Allow adding tasks' }).click();
+    await consent.getByRole('button', { name: 'Connect Claude', exact: true }).click();
     await consent.waitForURL(`${callback}**`);
     const redirect = new URL(consent.url());
     expect(redirect.searchParams.get('state')).toBe('e2e-state');
@@ -474,6 +476,7 @@ test.describe('@supersync Agent task capture', () => {
     await a.sync.syncAndWait();
     await b.sync.syncAndWait();
     const dialog = await b.sync.openSuperSyncSettings();
+    await dialog.locator('details.agent-capture > summary').click();
     await expect(
       dialog
         .locator('agent-capture-settings')

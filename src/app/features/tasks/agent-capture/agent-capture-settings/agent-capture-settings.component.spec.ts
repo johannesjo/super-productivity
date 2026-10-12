@@ -84,6 +84,35 @@ describe('AgentCaptureSettingsComponent', () => {
     }).compileComponents();
   });
 
+  it('starts collapsed and opening it never enables assistant access', async () => {
+    capture.isEnabled.set(false);
+    setup();
+    await render();
+    const details: HTMLDetailsElement = fixture.nativeElement.querySelector(
+      'details.agent-capture',
+    );
+    expect(details.open).toBeFalse();
+    expect(details.querySelector('summary')!.textContent).toContain('CAPTURE_STATE_OFF');
+    details.querySelector('summary')!.click();
+    await render();
+    expect(details.open).toBeTrue();
+    expect(capture.switchOn).not.toHaveBeenCalled();
+    expect(capture.createConnectCode).not.toHaveBeenCalled();
+    expect(capture.createToken).not.toHaveBeenCalled();
+    expect(capture.listGrants).not.toHaveBeenCalled();
+  });
+
+  it('keeps the enabled state visible while connection controls stay collapsed', async () => {
+    setup();
+    await render();
+    const details: HTMLDetailsElement = fixture.nativeElement.querySelector(
+      'details.agent-capture',
+    );
+    expect(details.open).toBeFalse();
+    expect(details.querySelector('summary')!.textContent).toContain('CAPTURE_STATE_ON');
+    expect(fixture.nativeElement.querySelector('details.manual-tokens').open).toBeFalse();
+  });
+
   it('shows a one-time connection code and clears it when capture is disabled', async () => {
     capture.createConnectCode.and.resolveTo({
       code: 'ABCDE-FGHJK',

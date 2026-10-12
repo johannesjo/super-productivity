@@ -2,15 +2,22 @@
 const form = document.getElementById('capture-consent');
 const status = document.getElementById('status');
 const submit = form.querySelector('button[type="submit"]');
-document.getElementById('cancel').addEventListener('click', () => {
-  form.remove();
+const cancel = document.getElementById('cancel');
+const submitLabel = submit.textContent;
+cancel.addEventListener('click', () => {
   const message = document.createElement('p');
   message.textContent = 'Connection cancelled. You can close this window.';
-  document.querySelector('main').append(message);
+  message.setAttribute('role', 'status');
+  message.tabIndex = -1;
+  form.replaceWith(message);
+  message.focus();
 });
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   submit.disabled = true;
+  cancel.disabled = true;
+  submit.textContent = 'Connecting…';
+  form.setAttribute('aria-busy', 'true');
   status.textContent = '';
   try {
     const response = await fetch('/oauth/authorize/approve', {
@@ -35,5 +42,8 @@ form.addEventListener('submit', async (event) => {
     status.textContent = 'Could not connect. Please check your connection and try again.';
   } finally {
     submit.disabled = false;
+    cancel.disabled = false;
+    submit.textContent = submitLabel;
+    form.removeAttribute('aria-busy');
   }
 });
