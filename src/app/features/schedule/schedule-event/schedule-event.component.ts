@@ -244,6 +244,10 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
       addClass += ' is-beyond-budget';
     }
 
+    if (this.task()?.isDone) {
+      addClass += ' isDone';
+    }
+
     return evt.type + '  ' + addClass;
   });
 
