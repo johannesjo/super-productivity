@@ -130,6 +130,22 @@ describe('AgentCaptureSettingsComponent', () => {
     expect(component.connectCode()).toBeNull();
   });
 
+  it('says what access means in the summary and the privacy note before enabling', async () => {
+    (capture.isEnabled as WritableSignal<boolean>).set(false);
+    setup();
+    await render();
+    const summary = fixture.nativeElement.querySelector(
+      'details.agent-capture > summary',
+    );
+    expect(summary.textContent).toContain('CAPTURE_INFO');
+    expect(text()).toContain('CAPTURE_PRIVACY');
+
+    (capture.isEnabled as WritableSignal<boolean>).set(true);
+    await render();
+    expect(summary.textContent).toContain('CAPTURE_INFO');
+    expect(text()).not.toContain('CAPTURE_PRIVACY');
+  });
+
   it('asks to save SuperSync first when it is not the active provider', async () => {
     setup(false);
     await render();

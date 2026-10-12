@@ -1,78 +1,158 @@
+// Mirrors the formly "Advanced" collapsible below it (chevron + title), but
+// keeps native <details> for keyboard and screen-reader support.
 .agent-capture {
   margin-bottom: var(--s2);
-  border-block: 1px solid var(--extra-border-color);
 }
 
 summary {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  column-gap: var(--s);
   cursor: pointer;
-  padding-block: var(--s);
+  user-select: none;
+  list-style: none;
+  padding-bottom: var(--s);
+
+  &::-webkit-details-marker {
+    display: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--c-primary);
+    outline-offset: 2px;
+  }
 }
 
-summary:focus-visible {
-  outline: 2px solid var(--c-primary);
-  outline-offset: 2px;
+.expand-icon {
+  transition: var(--transition-standard);
+
+  details[open] > summary > & {
+    transform: rotate(180deg);
+  }
 }
 
-.heading {
-  font-weight: var(--font-weight-semibold);
+.optional {
+  margin-left: var(--s-half);
+  padding: 0 var(--s-half);
+  font-size: var(--font-size-sm);
+  color: var(--text-color-muted);
+  border: 1px solid var(--extra-border-color);
+  border-radius: var(--radius-xs);
+  vertical-align: middle;
 }
 
 .state {
-  float: right;
   font-size: var(--font-size-md);
-  color: var(--text-color-muted);
 }
 
-.summary-note {
+// Always visible, so the first glance says what access this grants.
+.intro {
+  grid-column: 2 / 4;
+}
+
+.hint {
   display: block;
+  margin: 0;
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-normal);
   color: var(--text-color-muted);
-  font-size: var(--font-size-md);
-  margin-top: var(--s-quarter);
-}
-
-.manual-tokens {
-  width: 100%;
-  border-block: 1px solid var(--extra-border-color);
 }
 
 .capture-content {
+  font-size: var(--font-size-md);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--s);
-  margin-bottom: var(--s2);
+  gap: var(--s2);
+  padding-left: var(--s4);
+  padding-block: var(--s) var(--s2);
 }
 
-.capture-content > p,
-.capture-content > h4,
-.capture-content > ul {
+.manual-tokens .capture-content {
+  padding-left: var(--s4);
+  padding-bottom: 0;
+}
+
+.callout {
   margin: 0;
 }
 
-.grant-info {
-  display: block;
-  color: var(--text-color-muted);
-  font-size: var(--font-size-md);
-}
-
-li + li {
-  margin-top: var(--s);
-}
-
-label,
-.value {
+.field,
+.connections,
+.manual-tokens {
   width: 100%;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s-half);
+}
+
+.field-label {
+  font-size: var(--font-size-sm);
+  color: var(--text-color-muted);
+}
+
+.copy-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s);
+  width: 100%;
+
+  > .value,
+  > mat-form-field {
+    flex: 1;
+    min-width: 0;
+  }
 }
 
 .value {
   padding: var(--s);
   font-family: var(--font-mono-stack);
+  font-size: var(--font-size-sm);
   border: 1px solid var(--extra-border-color);
   border-radius: var(--radius-xs);
   background: transparent;
   color: inherit;
+  resize: none;
+}
+
+.connections-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  h4 {
+    margin: 0;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+  }
 }
 
 ul {
-  padding-left: var(--s2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s);
+  padding-block: var(--s);
+  border-top: 1px solid var(--extra-border-color);
+}
+
+.grant-text {
+  min-width: 0;
+}
+
+.grant-actions {
+  display: flex;
+  flex-wrap: wrap;
+  margin-left: auto;
 }
