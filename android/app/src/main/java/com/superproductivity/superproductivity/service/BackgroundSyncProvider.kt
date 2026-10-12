@@ -49,18 +49,18 @@ fun cancelRemindersForTask(context: Context, taskId: String) {
 
 /**
  * Schedule an AlarmManager alarm from a sync-detected reminder.
- * Uses conservative defaults (no alarm style, not ongoing) since user
- * preferences are not available in the background context.
+ * [useAlarmStyle] mirrors the user's setting; like the app
+ * (capacitor-reminder.service.ts), alarm-style reminders are also ongoing.
  * No-op on failure — logs and continues.
  */
-fun scheduleReminderFromSync(context: Context, reminder: ReminderToSchedule) {
+fun scheduleReminderFromSync(context: Context, reminder: ReminderToSchedule, useAlarmStyle: Boolean) {
     try {
         val reminderId = if (reminder.isDeadline) reminder.taskId + DEADLINE_SUFFIX else reminder.taskId
         val notificationId = SuperSyncBackgroundProvider.generateNotificationId(reminderId)
         val reminderType = if (reminder.isDeadline) "DEADLINE" else "TASK"
         ReminderNotificationHelper.scheduleReminder(
             context, notificationId, reminderId, reminder.taskId, reminder.title,
-            reminderType, reminder.remindAt, useAlarmStyle = false, isOngoing = false
+            reminderType, reminder.remindAt, useAlarmStyle = useAlarmStyle, isOngoing = useAlarmStyle
         )
     } catch (e: Exception) {
         Log.w(TAG, "Failed to schedule reminder for task=${reminder.taskId}", e)
@@ -80,7 +80,32 @@ data class ReminderChangeResult(
     val remindersToSchedule: List<ReminderToSchedule>,
     val latestSeq: Long,
     val hasMore: Boolean
-)
+) {
+    /**
+     * Fire-time stale check for one alarm: was it cancelled (deleted/done/
+     * dismissed/unscheduled) or rescheduled to a different time by these ops?
+     *
+     * A reminder these ops (re)schedule for the alarm's own slot decides first:
+     * an op may cancel a task's alarms and set one slot again (an LWW snapshot
+     * that sets remindAt and clears the absent deadlineRemindAt), and the alarm
+     * matching that slot's time is the current schedule, not a stale one.
+     * Match on the kind: a task can have both a standard and a deadline
+     * reminder with different times — don't let one suppress the other.
+     * DUE_DATE alarms skip that step: sync never carries a due-day reminder.
+     *
+     * @param triggerAtMs the alarm's scheduled trigger time, 0 when unknown
+     */
+    fun isAlarmStale(taskId: String, triggerAtMs: Long, reminderType: String): Boolean {
+        if (reminderType != "DUE_DATE") {
+            val isDeadline = reminderType == "DEADLINE"
+            val current = remindersToSchedule.firstOrNull {
+                it.taskId == taskId && it.isDeadline == isDeadline
+            }
+            if (current != null) return triggerAtMs > 0L && current.remindAt != triggerAtMs
+        }
+        return taskId in taskIdsToCancel
+    }
+}
 
 /**
  * Interface for background sync providers that can detect reminder-relevant changes.

@@ -92,21 +92,9 @@
     "INTRO_2": "If you value this approach and want to keep the project healthy and evolving, a voluntary donation is greatly appreciated."
   },
   "EXAMPLE_TASKS": {
-    "LEARN_KEYBOARD_SHORTCUTS": {
-      "TITLE": "Learn the keyboard shortcuts",
-      "NOTES": "Super Productivity is designed to be used with the keyboard. Learn the shortcuts to work faster.\n\n**How to start:**\n1. Open the **sidebar menu**\n2. Go to **Help**\n3. Click **How to: Keyboard Navigation**"
-    },
-    "CREATE_PROJECT": {
-      "TITLE": "Create your first project",
-      "NOTES": "Projects help you organize your tasks by topic. Each project has its own task list and backlog.\n\n**How to create a project:**\n1. Click the **+** button next to **Projects** in the sidebar\n2. Give it a name and pick a color\n3. Start adding tasks to it"
-    },
-    "SET_UP_SYNC": {
-      "TITLE": "Set up Sync",
-      "NOTES": "Keep your data safe and accessible across devices.\n\n**How to set up:**\n1. Open **Settings** (gear icon in the sidebar)\n2. Go to **Sync**\n3. Choose a provider: SuperSync, Nextcloud, Dropbox, or local file sync\n4. Follow the setup instructions"
-    },
-    "GO_FURTHER": {
-      "TITLE": "Go further",
-      "NOTES": "There is much more to discover!\n\n**App Features** (in Settings) — Enable integrations, habits, and other features. Go to **Settings → App Features** to see what's available.\n\n**Boards** — Visualize your tasks in customizable Kanban-style boards. Enable them in **App Features**, then find them in the **sidebar menu**.\n\n**Schedule** — Plan your day by scheduling tasks at specific times. Enable it in **App Features**, then drag tasks onto the **Schedule** view in the sidebar to organize your timeline.\n\n**Integrations** — Once enabled in App Features, import tasks from Jira, GitHub, GitLab, Gitea, OpenProject, CalDAV, and many more. You can also integrate your calendar. Configure them in the **Issue Provider Panel**.\n\n**Habits** — Track recurring habits and routines. Find them in the **sidebar menu** once enabled.\n\n**Focus mode & Finish Day** — Work in distraction-free focus sessions and wrap up your day with a short review. Enable them in **App Features**.\n\n**Plugins** — Add features like the Procrastination Buster, Automations, or Voice Reminders. Go to **Settings → Plugins**.\n\n**Customize** — Themes, dark mode, keyboard shortcuts, language, and productivity helpers are all in **Settings**."
+    "GETTING_STARTED": {
+      "TITLE": "Optional: getting started tips",
+      "NOTES": "Nothing here is required. Delete this task whenever you like.\n\n- **Projects**: group tasks by topic with the **+** next to **Projects** in the sidebar.\n- **Sync**: keep your data on several devices under **Settings → Sync & Backup**.\n- **Keyboard**: open **Help → How to: Keyboard Navigation** in the sidebar menu.\n- **Make it yours**: pick a theme or dark mode, and switch features like boards, schedule, habits, focus mode or integrations on or off under **Settings → General**. Plugins add even more."
     }
   },
   "F": {
@@ -1104,6 +1092,8 @@
           "OTHER": "<strong>{{title}}</strong> starts at <strong>{{start}}</strong>!<br> (and {{nrOfOtherBanners}} other tasks are due)"
         }
       },
+      "EXACT_ALARM_HINT": "Reminders may be delayed because \"Alarms & reminders\" is turned off for this app in Android settings.",
+      "EXACT_ALARM_OPEN_SETTINGS": "Open settings",
       "S_ACTIVE_TASK_DUE": "The task you are currently working on is now due!<br/> ({{title}})",
       "S_REMINDER_ERR": "Error for reminder interface"
     },
@@ -2461,6 +2451,7 @@
     "APP_FEATURES": {
       "BOARDS": "Boards",
       "DONATE_PAGE": "Donate page",
+      "EXTEND_WITH_PLUGINS": "Find more features in Plugins",
       "FINISH_DAY": "Finish day",
       "FOCUS_MODE": "Focus mode",
       "HABITS": "Habits",
@@ -3009,7 +3000,6 @@
     "SUCCESS": "Migration done! Restarting app now..."
   },
   "NOTIFICATION": {
-    "EXACT_ALARM_DENIED": "Exact alarm permission denied. Reminders may be delayed by up to 15 minutes.",
     "TASK_ALREADY_COMPLETED": "Task already completed",
     "TASK_MARKED_DONE": "Task marked as done"
   },
@@ -3021,7 +3011,7 @@
       "EXPLORE_INBOX": "Some optional tips are waiting in your Inbox. Try them or delete them, whenever you like.",
       "GOT_IT": "Got it",
       "TASK_SWIPE_LEFT_TOUCH": "Swipe task left for more actions",
-      "TASK_SWIPE_RIGHT_TOUCH": "Swipe task right to mark it as done",
+      "TASK_SWIPE_RIGHT_TOUCH": "When you've finished a task, swipe it right to mark it done",
       "OR_PRESS": "or press",
       "SKIP_ARIA": "Close tip"
     }
@@ -3122,7 +3112,6 @@
   },
   "PLUGINS": {
     "ACTION_TYPE_NOT_ALLOWED": "Action type \"{{type}}\" is not allowed",
-    "ALLOWED_HOSTS": "Network access",
     "ALREADY_INITIALIZED": "Plugin is already initialized",
     "AUTHORED_BY": "by {{author}}",
     "CANNOT_DELETE_INBOX": "The Inbox project cannot be deleted",
@@ -3130,10 +3119,6 @@
     "CHOOSE_PLUGIN_FILE": "Choose Plugin File",
     "CLEAR_PLUGIN_CACHE": "Clear Plugin Cache",
     "CODE_TOO_LARGE": "Plugin code is too large (max {{maxSize}}MB)",
-    "COMMUNITY_PLUGINS_ADD_YOURS": "Get your plugin to show up here",
-    "COMMUNITY_PLUGINS_STARS": "{{count}} stars",
-    "COMMUNITY_PLUGINS_TITLE": "Community Plugins",
-    "COMMUNITY_PLUGINS_WARNING": "These plugins are developed by the community and are NOT reviewed or guaranteed by the Super Productivity team. Install and use them at your own risk — they might contain malicious code or break your application.",
     "CONFIGURATION": "Configuration",
     "CONFIGURE": "Configure",
     "CONFIRM_CLEAR_CACHE": "Remove uploaded plugins ({{count}})? Their saved secrets, connected accounts and Node.js execution permissions will be deleted too. Bundled plugins are not affected.",
@@ -3161,7 +3146,6 @@
     "INDEX_HTML_NOT_LOADED": "Plugin index.html not loaded",
     "INDEX_HTML_TOO_LARGE": "Plugin index.html is too large (max {{maxSize}}KB)",
     "INSTALL_PLUGIN": "Install Plugin",
-    "INSTALL_WARNING": "Before installing a plugin, ensure you trust its source and understand the permissions it requests.",
     "INSTALLING": "Installing...",
     "LANGUAGES": "Languages:",
     "LOADING_INTERFACE": "Loading plugin interface...",
@@ -3218,7 +3202,22 @@
     "UPLOAD_PLUGIN_INSTRUCTION": "Upload a plugin ZIP file to install it:",
     "VALIDATION_FAILED": "Validation failed: {{errors}}",
     "NODE_EXECUTION_BRIDGE_UNAVAILABLE": "Could not connect to the Node.js execution bridge. Please try disabling and re-enabling the plugin.",
-    "PLUGIN_LOAD_FAILED": "Plugin \"{{pluginName}}\" failed to load: {{error}}"
+    "PLUGIN_LOAD_FAILED": "Plugin \"{{pluginName}}\" failed to load: {{error}}",
+    "INTRO": "Plugins run inside the app without a sandbox. Built-in plugins are maintained by the Super Productivity team; plugins you upload are not reviewed and can access all your data, so only install ones you trust.",
+    "THIRD_PARTY": "Third-party",
+    "DETAILS": "Details",
+    "COMMUNITY_PLUGINS": "Community Plugins",
+    "COMMUNITY_WARNING": "Community plugins are not reviewed by the Super Productivity team. Install them at your own risk.",
+    "COMMUNITY_STARS": "{{count}} stars",
+    "COMMUNITY_GET_LISTED": "Get your plugin to show up here",
+    "GROUP_UPLOADED": "Uploaded plugins",
+    "GROUP_INTEGRATIONS": "Integrations",
+    "GROUP_OTHER": "Other plugins",
+    "DECLARED_ACCESS": "Checked permissions",
+    "CAN_RUN_SYSTEM_COMMANDS": "Run system commands and access your files (desktop app only)",
+    "CAN_REQUEST_HOSTS": "Send plugin API requests to {{hosts}}",
+    "CAN_DELETE_PROJECTS": "Delete projects through the plugin API",
+    "OTHER_PERMISSIONS": "Other declared permissions"
   },
   "PM": {
     "ALL_TASKS_TITLE": "Metrics (all tasks)",

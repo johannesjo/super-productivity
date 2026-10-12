@@ -5,7 +5,7 @@ import {
   attachPageErrorCollector,
   installDevErrorDialogHandler,
 } from '../../utils/runtime-errors';
-import { waitForStatePersistence } from '../../utils/waits';
+import { waitForMenuSettled, waitForStatePersistence } from '../../utils/waits';
 
 const pixel5TestOptions = { ...devices['Pixel 5'] };
 // Browser type is worker-scoped and cannot be overridden inside a describe block.
@@ -85,7 +85,9 @@ test.describe('First-run onboarding', () => {
 
     await inboxNavItem.click();
     await expect(hint).toHaveCount(0);
-    await expect(page.locator('task').filter({ hasText: 'Go further' })).toBeVisible();
+    await expect(
+      page.locator('task').filter({ hasText: 'Optional: getting started tips' }),
+    ).toBeVisible();
     assertNoRuntimeBrowserErrors(runtimeErrors, 'onboarding inbox');
     await page.close();
   });
@@ -226,6 +228,47 @@ test.describe('First-run onboarding', () => {
       await page.close();
     });
 
+    test('deleting the first task from its menu ends the swipe tips', async ({
+      isolatedContext,
+    }) => {
+      const page = await isolatedContext.newPage();
+      const runtimeErrors = attachPageErrorCollector(page, 'onboarding delete');
+      installDevErrorDialogHandler(page, 'onboarding delete');
+
+      await openFreshApp(page, { withExamples: false });
+      await expect(page.locator('onboarding-hint')).toContainText(
+        'Tap + to add your first task',
+      );
+      await page.getByRole('button', { name: 'Add new task' }).tap();
+      const input = page.locator('add-task-bar.global .main-input');
+      await input.fill('Task to delete');
+      await input.press('Enter');
+      await expect(page.locator('add-task-bar.global')).toBeHidden();
+
+      const hint = page.locator('onboarding-hint');
+      await expect(hint).toContainText('Swipe task left for more actions');
+      const task = page.locator('task').filter({ hasText: 'Task to delete' }).first();
+      // The keyboard route to the menu that swipe-left opens.
+      await task.focus();
+      await page.keyboard.press('q');
+      await waitForMenuSettled(page);
+      await page
+        .locator('.mat-mdc-menu-content button', { hasText: 'Delete task' })
+        .tap();
+      await page.getByRole('button', { name: 'Delete', exact: true }).click();
+      await expect(page.locator('task')).toHaveCount(0);
+
+      // Nothing is left to swipe: guidance ends instead of waiting unseen.
+      await expect(hint).toHaveCount(0);
+      await expect
+        .poll(() =>
+          page.evaluate(() => localStorage.getItem('SUP_ONBOARDING_HINTS_DONE')),
+        )
+        .toBe('true');
+      assertNoRuntimeBrowserErrors(runtimeErrors, 'onboarding delete');
+      await page.close();
+    });
+
     test('re-anchors the hint after the nav slides in under mouse input', async ({
       isolatedContext,
     }) => {
@@ -244,20 +287,27 @@ test.describe('First-run onboarding', () => {
         'Tap + to add your first task',
       );
 
+      const addBtn = page.locator('.add-task-button');
+      const expectHintClearOfAddBtn = (): Promise<void> =>
+        expect
+          .poll(
+            async () => {
+              const btn = await addBtn.boundingBox();
+              const chip = await page.locator('onboarding-hint .hint-chip').boundingBox();
+              return btn && chip ? btn.y - (chip.y + chip.height) : -1;
+            },
+            { timeout: 6000 },
+          )
+          .toBeGreaterThanOrEqual(16);
+      // AppComponent drops the entrance class after 1.5s, cutting the stretched
+      // slide short (animationcancel, no animationend); the hint must follow.
+      await expect(page.locator('.mobile-bottom-nav')).not.toHaveClass(/entrance/);
+      await expectHintClearOfAddBtn();
+
       await page.mouse.move(10, 10);
       await expect(page.locator('body')).toHaveClass(/isMousePrimary/);
       // Once the nav has settled, the hint must sit clear above the + button again.
-      const addBtn = page.locator('.add-task-button');
-      await expect
-        .poll(
-          async () => {
-            const btn = await addBtn.boundingBox();
-            const chip = await page.locator('onboarding-hint .hint-chip').boundingBox();
-            return btn && chip ? btn.y - (chip.y + chip.height) : -1;
-          },
-          { timeout: 6000 },
-        )
-        .toBeGreaterThanOrEqual(16);
+      await expectHintClearOfAddBtn();
       await addBtn.click();
       await expect(page.locator('add-task-bar.global')).toBeVisible();
       await page.close();

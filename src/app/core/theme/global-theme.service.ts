@@ -363,6 +363,9 @@ export class GlobalThemeService {
   }
 
   private _initIcons(): void {
+    // Material v22 infers the ligature class from the loaded fonts and would pick
+    // `material-symbols-outlined`; our icon styles are bound to `.material-icons`.
+    this._matIconRegistry.setDefaultFontSetClass('material-icons', 'mat-ligature-font');
     // todo test if can be removed with airplane mode and wifi without internet
     BUILT_IN_SVG_ICONS.forEach(([name, path]) => {
       this._matIconRegistry.addSvgIcon(

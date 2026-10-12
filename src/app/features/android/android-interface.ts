@@ -49,6 +49,9 @@ export interface AndroidInterface {
   // Absent on APKs whose snooze/tap events don't carry the reminder type.
   supportsTypedReminderActions?(): boolean;
 
+  // Absent on APKs that predate it; call via util/haptic-feedback.ts.
+  performHapticFeedback?(type: 'confirm' | 'threshold' | 'longPress'): void;
+
   showToast(s: string): void;
 
   // save
@@ -203,6 +206,9 @@ export interface AndroidInterface {
   // Mirrors the E2EE password so the background worker can decrypt op payloads;
   // '' clears it. Optional: older APKs don't have it.
   setSuperSyncEncryptionPassword?(password: string): void;
+  // Mirrors the reminder settings the background worker must honor when it
+  // schedules alarms from synced ops. Optional: older APKs don't have it.
+  setBackgroundReminderSettings?(isDisabled: boolean, useAlarmStyle: boolean): void;
 }
 
 export type ForegroundServiceStartFailure = {

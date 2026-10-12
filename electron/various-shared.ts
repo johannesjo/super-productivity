@@ -39,11 +39,7 @@ export function showOrFocus(passedWin: BrowserWindow): void {
   win.show();
   if (wasMaximized) win.maximize();
 
-  // Hide task widget when main window is shown, unless the user explicitly
-  // pinned it visible via the global shortcut.
-  if (!getIsTaskWidgetAlwaysShow() && !getIsTaskWidgetUserForcedVisible()) {
-    hideTaskWidget();
-  }
+  _hideTaskWidgetUnlessPinned();
 
   // focus window afterwards always
   setTimeout(() => {
@@ -56,23 +52,46 @@ export function showOrFocus(passedWin: BrowserWindow): void {
   }, 60);
 }
 
+// eslint-disable-next-line prefer-arrow/prefer-arrow-functions
+function _hideTaskWidgetUnlessPinned(): void {
+  // Hide task widget when main window is shown, unless the user explicitly
+  // pinned it visible via the global shortcut.
+  if (!getIsTaskWidgetAlwaysShow() && !getIsTaskWidgetUserForcedVisible()) {
+    hideTaskWidget();
+  }
+}
+
 /**
  * Bring the window to the front for a reminder when the user enabled
- * "focus window on reminder". Windows' focus-stealing prevention ignores a plain
- * focus() from a background app (#10410), so briefly toggling always-on-top
- * raises the window and lets it take focus. If Windows still refuses, flash the
- * taskbar button until the user switches to the app.
+ * "focus window on reminder", without taking keyboard focus so typing in another
+ * app doesn't land in SP. Windows' focus-stealing prevention ignores a plain
+ * raise from a background app (#10410); a brief always-on-top toggle lifts the
+ * window above others, and the taskbar button flashes until the user switches in.
+ * macOS/Linux keep the regular showOrFocus behavior.
  */
 // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
-export function focusForReminder(passedWin: BrowserWindow): void {
+export function raiseForReminder(passedWin: BrowserWindow): void {
   const win = passedWin || getWin();
-  showOrFocus(win);
-  if (!win || win.isDestroyed() || process.platform !== 'win32') {
+  if (process.platform !== 'win32') {
+    showOrFocus(win);
+    return;
+  }
+  if (!win || win.isDestroyed()) {
     return;
   }
 
+  // restore() (SC_RESTORE) is the only call that brings a minimized window back
+  // in its pre-minimize state, maximized included; it may try to activate, but a
+  // minimized window is in the background, where Windows' foreground lock blocks
+  // activation. Otherwise showInactive() shows without activating (SW_SHOWNA
+  // keeps a maximized window maximized); no maximize(), its SC_MAXIMIZE activates.
+  if (win.isMinimized()) {
+    win.restore();
+  }
+  win.showInactive();
+  _hideTaskWidgetUnlessPinned();
   win.setAlwaysOnTop(true);
-  win.focus();
+  win.moveTop();
   win.setAlwaysOnTop(false);
 
   if (!win.isFocused()) {

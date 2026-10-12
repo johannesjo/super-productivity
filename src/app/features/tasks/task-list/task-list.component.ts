@@ -55,7 +55,8 @@ import { TaskViewCustomizerService } from '../../task-view-customizer/task-view-
 import { TaskLog } from '../../../core/log';
 import { ScheduleExternalDragService } from '../../schedule/schedule-week/schedule-external-drag.service';
 import { DEFAULT_OPTIONS, NO_TAG_GROUP_ID } from '../../task-view-customizer/types';
-import { dragDelayForTouch } from '../../../util/input-intent';
+import { dragDelayForTouch, isTouchActive } from '../../../util/input-intent';
+import { performHapticFeedback } from '../../../util/haptic-feedback';
 import { DateService } from '../../../core/date/date.service';
 import { canConvertTaskToSubTask } from '../util/can-convert-task-to-sub-task';
 import { TODAY_TAG } from '../../tag/tag.const';
@@ -212,6 +213,10 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   }
 
   onDragStarted(task: TaskWithSubTasks, event: CdkDragStart): void {
+    // On touch, drag starts after a long-press delay; confirm the pickup.
+    if (isTouchActive()) {
+      performHapticFeedback('longPress');
+    }
     this.multiDrag.start(task);
     // External schedule/tag drops remain single-task paths.
     this._scheduleExternalDragService.setActiveTask(

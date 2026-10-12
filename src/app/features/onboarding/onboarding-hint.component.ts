@@ -29,6 +29,13 @@ const HINT_GAP_PX = 12;
 /** Must match the glow spread in styles/components/onboarding-pulse.scss */
 const PULSE_GLOW_PX = 8;
 
+const ANIMATION_DONE_EVENTS = [
+  'animationend',
+  'animationcancel',
+  'transitionend',
+  'transitioncancel',
+] as const;
+
 const UNDONE_TASK_ROW_SELECTOR = 'task-list .task-list-inner > task:not(.isDone)';
 
 const swipeTargetSelector = (swipeTargetTaskId: string | null): string =>
@@ -191,14 +198,18 @@ export class OnboardingHintComponent {
       window.addEventListener('resize', onViewportChange, { passive: true });
       // Transforms (e.g. the bottom nav sliding in on startup) move the target
       // without resizing it, so re-anchor once animations and transitions end.
-      document.addEventListener('animationend', onViewportChange, { passive: true });
-      document.addEventListener('transitionend', onViewportChange, { passive: true });
+      // Cancelled ones count too: AppComponent drops the nav's entrance class on
+      // a timer, which cuts a slide that started late short (no animationend).
+      for (const type of ANIMATION_DONE_EVENTS) {
+        document.addEventListener(type, onViewportChange, { passive: true });
+      }
     });
     inject(DestroyRef).onDestroy(() => {
       document.removeEventListener('scroll', onViewportChange, { capture: true });
       window.removeEventListener('resize', onViewportChange);
-      document.removeEventListener('animationend', onViewportChange);
-      document.removeEventListener('transitionend', onViewportChange);
+      for (const type of ANIMATION_DONE_EVENTS) {
+        document.removeEventListener(type, onViewportChange);
+      }
       if (this._repositionFrame !== null) {
         cancelAnimationFrame(this._repositionFrame);
       }

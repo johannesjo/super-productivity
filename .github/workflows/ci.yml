@@ -77,13 +77,26 @@ jobs:
           persist-credentials: false
       - name: Reject non-standard registry URLs
         run: |
-          BAD_COUNT=$(grep '"resolved": "https\?://' package-lock.json | grep -cv 'registry.npmjs.org' || true)
-          if [ "$BAD_COUNT" -gt 0 ]; then
-            echo "::error::package-lock.json contains $BAD_COUNT resolved URLs pointing to a non-standard registry."
-            echo "Examples:"
-            grep '"resolved": "https\?://' package-lock.json | grep -v 'registry.npmjs.org' | head -5
-            echo ""
-            echo "Please delete node_modules and package-lock.json, then run 'npm install' with the default registry (https://registry.npmjs.org/)."
+          # The plugin-dev workspace has its own lockfile, installed by release builds.
+          for LOCKFILE in package-lock.json packages/plugin-dev/package-lock.json; do
+            BAD_COUNT=$(grep '"resolved": "https\?://' "$LOCKFILE" | grep -cv 'registry.npmjs.org' || true)
+            if [ "$BAD_COUNT" -gt 0 ]; then
+              echo "::error::$LOCKFILE contains $BAD_COUNT resolved URLs pointing to a non-standard registry."
+              echo "Examples:"
+              grep '"resolved": "https\?://' "$LOCKFILE" | grep -v 'registry.npmjs.org' | head -5
+              echo ""
+              echo "Rewrite those 'resolved' URLs to https://registry.npmjs.org/ (or run 'npm install --registry=https://registry.npmjs.org/' next to it). Deleting the lockfile would re-resolve every dependency."
+              exit 1
+            fi
+          done
+      # npm reads no parent .npmrc inside packages/plugin-dev (its own npm
+      # project), so it carries a copy; keep the settings identical.
+      - name: Check plugin-dev .npmrc mirrors the root one
+        run: |
+          # Compare settings only: skip comments (# or ;) and blank lines.
+          settings() { grep -Ev '^[[:space:]]*([#;]|$)' "$1" | sed 's/[[:space:]]*=[[:space:]]*/=/'; }
+          if ! diff <(settings .npmrc) <(settings packages/plugin-dev/.npmrc); then
+            echo "::error::packages/plugin-dev/.npmrc settings differ from the root .npmrc (diff above). Keep them identical."
             exit 1
           fi
 

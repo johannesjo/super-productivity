@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withXhr } from '@angular/common/http';
 import {
   HttpTestingController,
   provideHttpClientTesting,
@@ -21,7 +21,7 @@ describe('PluginLoaderService', () => {
     TestBed.configureTestingModule({
       providers: [
         PluginLoaderService,
-        provideHttpClient(),
+        provideHttpClient(withXhr()),
         provideHttpClientTesting(),
         { provide: PluginCacheService, useValue: cacheService },
       ],

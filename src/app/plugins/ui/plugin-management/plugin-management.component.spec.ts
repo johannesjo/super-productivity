@@ -16,7 +16,7 @@ import { PluginMetaPersistenceService } from '../../plugin-meta-persistence.serv
 import { PluginInstance, PluginManifest, PluginHooks } from '../../plugin-api.model';
 import { PluginService } from '../../plugin.service';
 import { PluginState } from '../../plugin-state.model';
-import { PluginManagementComponent } from './plugin-management.component';
+import { isPluginListed, PluginManagementComponent } from './plugin-management.component';
 import { T } from '../../../t.const';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 
@@ -66,8 +66,9 @@ describe('PluginManagementComponent', () => {
           useValue: { localization: signal({ lng: 'en' }) },
         },
         {
+          // Confirms by default (e.g. the install warning); tests override via stubConfirmDialog.
           provide: MatDialog,
-          useValue: {},
+          useValue: { open: () => ({ afterClosed: () => of(true) }) },
         },
         {
           provide: Router,
@@ -191,6 +192,37 @@ describe('PluginManagementComponent', () => {
     expect(component.uploadError()).toBe('bad zip');
   });
 
+  it('shows the risk warning before installing and installs only when confirmed', async () => {
+    loadPluginFromZipSpy.and.returnValue(
+      Promise.resolve({ manifest: { name: 'My Plugin' } }),
+    );
+    const openSpy = stubConfirmDialog(true);
+
+    await component.onFileSelected(zipInputEvent());
+
+    expect(openSpy).toHaveBeenCalledOnceWith(DialogConfirmComponent, {
+      restoreFocus: true,
+      data: {
+        message: jasmine.stringContaining(T.PLUGINS.RISK_DATA_ACCESS),
+        okTxt: T.PLUGINS.INSTALL_PLUGIN,
+      },
+    });
+    expect(loadPluginFromZipSpy).toHaveBeenCalled();
+  });
+
+  it('installs nothing and clears the file input when the risk warning is cancelled', async () => {
+    stubConfirmDialog(undefined);
+    const event = zipInputEvent();
+    const input = event.target as HTMLInputElement;
+    const valueSetter = spyOnProperty(input, 'value', 'set');
+
+    await component.onFileSelected(event);
+
+    expect(loadPluginFromZipSpy).not.toHaveBeenCalled();
+    expect(valueSetter).toHaveBeenCalledWith('');
+    expect(component.isUploading()).toBe(false);
+  });
+
   const baseManifest: PluginManifest = {
     id: 'github-issue-provider',
     name: 'GitHub Issues',
@@ -219,56 +251,55 @@ describe('PluginManagementComponent', () => {
     ).toBe(false);
   });
 
-  it('surfaces allowedHosts (with count) only when the "http" capability is declared', () => {
+  it('counts every declared permission and hook in the details title', () => {
+    // instant() echoes the key here (no translations loaded).
+    expect(
+      component.getPermissionsHooksTitle({
+        manifest: {
+          ...baseManifest,
+          permissions: ['http', 'getTasks'],
+          allowedHosts: ['api.example.com'],
+          hooks: [PluginHooks.TASK_COMPLETE],
+        },
+        loaded: true,
+        isEnabled: true,
+      }),
+    ).toBe('PLUGINS.PERMISSIONS (2) / PLUGINS.HOOKS (1)');
+    expect(
+      component.getPermissionsHooksTitle({
+        manifest: { ...baseManifest, hooks: [PluginHooks.TASK_COMPLETE] },
+        loaded: true,
+        isEnabled: true,
+      }),
+    ).toBe('PLUGINS.HOOKS (1)');
+  });
+
+  it('lists every declared permission exactly once, as checked access or as other', () => {
     const plugin = {
       manifest: {
         ...baseManifest,
-        permissions: ['http'],
-        allowedHosts: ['api.example.com', 'auth.example.com'],
-        hooks: [PluginHooks.TASK_COMPLETE],
+        permissions: ['http', 'getTasks', 'nodeExecution'],
+        allowedHosts: ['api.example.com'],
       },
       loaded: true,
       isEnabled: true,
     };
 
-    expect(component.getNetworkReachHosts(plugin)).toEqual([
-      'api.example.com',
-      'auth.example.com',
+    expect(component.getApiAccess(plugin).map((a) => a.permission)).toEqual([
+      'nodeExecution',
+      'http',
     ]);
-    // instant() echoes the key here (no translations loaded); the allowedHosts part
-    // appears with its count, between permissions and hooks.
-    expect(component.getPermissionsHooksTitle(plugin)).toBe(
-      'PLUGINS.PERMISSIONS (1) / PLUGINS.ALLOWED_HOSTS (2) / PLUGINS.HOOKS (1)',
-    );
+    expect(component.getOtherPermissions(plugin)).toEqual(['getTasks']);
   });
 
-  it('hides allowedHosts when the plugin lacks the "http" capability (bridge would reject request)', () => {
-    const plugin = {
-      manifest: {
-        ...baseManifest,
-        permissions: ['nodeExecution'],
-        allowedHosts: ['api.example.com', 'auth.example.com'],
-        hooks: [PluginHooks.TASK_COMPLETE],
-      },
-      loaded: true,
-      isEnabled: true,
-    };
-
-    expect(component.getNetworkReachHosts(plugin)).toEqual([]);
-    // No "ALLOWED_HOSTS" segment — network reach is not advertised without "http".
-    expect(component.getPermissionsHooksTitle(plugin)).toBe(
-      'PLUGINS.PERMISSIONS (1) / PLUGINS.HOOKS (1)',
-    );
-  });
-
-  it('omits allowedHosts from the title when none are declared', () => {
-    const title = component.getPermissionsHooksTitle({
-      manifest: { ...baseManifest, hooks: [PluginHooks.TASK_COMPLETE] },
-      loaded: true,
-      isEnabled: true,
-    });
-
-    expect(title).toBe('PLUGINS.HOOKS (1)');
+  it('lists "http" without allowed hosts as an other permission', () => {
+    expect(
+      component.getOtherPermissions({
+        manifest: { ...baseManifest, permissions: ['http'] },
+        loaded: true,
+        isEnabled: true,
+      }),
+    ).toEqual(['http']);
   });
 
   describe('community plugins card', () => {
@@ -284,16 +315,15 @@ describe('PluginManagementComponent', () => {
     };
 
     beforeEach(() => {
-      // A non-English language whose AUTHORED_BY puts the author first, so the
-      // test also covers translations that do not start with "by".
+      // A non-English language, so the test fails if a string stays hardcoded.
       const translateService = TestBed.inject(TranslateService);
       translateService.setTranslation('tr', {
         PLUGINS: {
           AUTHORED_BY: '{{author}} tarafından',
-          COMMUNITY_PLUGINS_ADD_YOURS: 'Eklentinizi burada listeleyin',
-          COMMUNITY_PLUGINS_STARS: '{{count}} yıldız',
-          COMMUNITY_PLUGINS_TITLE: 'Topluluk eklentileri',
-          COMMUNITY_PLUGINS_WARNING: 'Topluluk eklentileri incelenmez.',
+          COMMUNITY_GET_LISTED: 'Eklentinizi burada listeleyin',
+          COMMUNITY_PLUGINS: 'Topluluk eklentileri',
+          COMMUNITY_STARS: '{{count}} yıldız',
+          COMMUNITY_WARNING: 'Topluluk eklentileri incelenmez.',
         },
       });
       translateService.use('tr');
@@ -310,7 +340,7 @@ describe('PluginManagementComponent', () => {
       expect(normalize(card().querySelector('mat-card-title')?.textContent)).toBe(
         'Topluluk eklentileri',
       );
-      expect(normalize(card().querySelector('.install-warning span')?.textContent)).toBe(
+      expect(normalize(card().querySelector('.community-warning')?.textContent)).toBe(
         'Topluluk eklentileri incelenmez.',
       );
       const addYoursLink = card().querySelector<HTMLAnchorElement>(
@@ -321,15 +351,11 @@ describe('PluginManagementComponent', () => {
       );
     });
 
-    it('renders the translated author line with the author as a link', () => {
-      const authorLine = card().querySelector(
-        '.community-plugin-item .plugin-author > span',
-      );
-      const authorLink = authorLine?.querySelector('a');
+    it('links the translated author line to the author', () => {
+      const authorLink = card().querySelector('.community-plugin-item .plugin-author a');
 
-      expect(normalize(authorLine?.textContent)).toBe(`${plugin.author} tarafından`);
+      expect(normalize(authorLink?.textContent)).toBe(`${plugin.author} tarafından`);
       expect(authorLink?.getAttribute('href')).toBe(plugin.authorUrl);
-      expect(normalize(authorLink?.textContent)).toBe(plugin.author);
     });
 
     it('translates the stars label', () => {
@@ -364,6 +390,58 @@ describe('PluginManagementComponent', () => {
     Object.assign(TestBed.inject(MatDialog), { open: openSpy });
     return openSpy;
   };
+
+  it('groups uploaded plugins, then built-in integrations, then other built-ins', () => {
+    const state = (
+      id: string,
+      type: PluginState['type'],
+      manifestType?: PluginManifest['type'],
+    ): PluginState => ({
+      manifest: { ...baseManifest, id, name: id, type: manifestType },
+      status: 'not-loaded',
+      path: type === 'uploaded' ? `uploaded://${id}` : `assets/bundled-plugins/${id}`,
+      type,
+      isEnabled: false,
+    });
+    const pluginStates = TestBed.inject(PluginService).pluginStates as WritableSignal<
+      Map<string, PluginState>
+    >;
+    pluginStates.set(
+      new Map([
+        ['builtin-a', state('builtin-a', 'built-in')],
+        ['github', state('github', 'built-in', 'issueProvider')],
+        ['uploaded-a', state('uploaded-a', 'uploaded', 'issueProvider')],
+        ['builtin-b', state('builtin-b', 'built-in')],
+      ]),
+    );
+
+    expect(
+      component
+        .pluginGroups()
+        .map((g) => [g.titleKey, g.plugins.map((p) => p.manifest.id)]),
+    ).toEqual([
+      [T.PLUGINS.GROUP_UPLOADED, ['uploaded-a']],
+      [T.PLUGINS.GROUP_INTEGRATIONS, ['github']],
+      [T.PLUGINS.GROUP_OTHER, ['builtin-a', 'builtin-b']],
+    ]);
+    // Empty again so the template (rendered on teardown) needs no further stubs.
+    pluginStates.set(new Map());
+    expect(component.pluginGroups()).toEqual([]);
+  });
+
+  it('titles the details section with the permission summary when there is one', () => {
+    const withHooks = {
+      manifest: { ...baseManifest, hooks: [PluginHooks.TASK_COMPLETE] },
+      loaded: true,
+      isEnabled: true,
+    };
+    const plain = { manifest: baseManifest, loaded: true, isEnabled: true };
+
+    expect(component.getDetailsTitle(withHooks)).toBe(
+      'PLUGINS.DETAILS · PLUGINS.HOOKS (1)',
+    );
+    expect(component.getDetailsTitle(plain)).toBe('PLUGINS.DETAILS');
+  });
 
   describe('clearPluginCache', () => {
     let clearCacheSpy: jasmine.Spy;
@@ -593,6 +671,63 @@ describe('PluginManagementComponent', () => {
     });
   });
 
+  describe('enabling a plugin that needs Node.js execution consent', () => {
+    let setPluginEnabledSpy: jasmine.Spy;
+    let activatePluginSpy: jasmine.Spy;
+    let checkConsentSpy: jasmine.Spy;
+
+    const plugin: PluginInstance = {
+      manifest: { ...baseManifest, permissions: ['nodeExecution'] },
+      loaded: false,
+      isEnabled: false,
+    };
+
+    // MatSlideToggle has already flipped itself on when (change) fires.
+    const toggleOnEvent = (): MatSlideToggleChange =>
+      ({ checked: true, source: { checked: true } }) as unknown as MatSlideToggleChange;
+
+    // onPluginToggle does not return the enable promise; let it settle.
+    const toggleOn = async (event: MatSlideToggleChange): Promise<void> => {
+      component.onPluginToggle(plugin, event);
+      await new Promise((resolve) => setTimeout(resolve));
+    };
+
+    beforeEach(() => {
+      checkConsentSpy = jasmine.createSpy('checkNodeExecutionPermission');
+      activatePluginSpy = jasmine.createSpy('activatePlugin').and.resolveTo(null);
+      setPluginEnabledSpy = jasmine.createSpy('setPluginEnabled').and.resolveTo();
+      Object.assign(TestBed.inject(PluginService), {
+        checkNodeExecutionPermission: checkConsentSpy,
+        activatePlugin: activatePluginSpy,
+      });
+      Object.assign(TestBed.inject(PluginMetaPersistenceService), {
+        setPluginEnabled: setPluginEnabledSpy,
+      });
+    });
+
+    it('turns the toggle back off and enables nothing when consent is denied', async () => {
+      checkConsentSpy.and.resolveTo(false);
+      const event = toggleOnEvent();
+
+      await toggleOn(event);
+
+      expect(setPluginEnabledSpy).not.toHaveBeenCalled();
+      expect(activatePluginSpy).not.toHaveBeenCalled();
+      expect(event.source.checked).toBe(false);
+    });
+
+    it('enables and activates the plugin when consent is granted', async () => {
+      checkConsentSpy.and.resolveTo(true);
+      const event = toggleOnEvent();
+
+      await toggleOn(event);
+
+      expect(setPluginEnabledSpy).toHaveBeenCalledOnceWith(baseManifest.id, true);
+      expect(activatePluginSpy).toHaveBeenCalledOnceWith(baseManifest.id, true);
+      expect(event.source.checked).toBe(true);
+    });
+  });
+
   describe('openConfigDialog', () => {
     const plugin = { manifest: baseManifest, loaded: true, isEnabled: true };
     let loadSchemaSpy: jasmine.Spy;
@@ -623,5 +758,41 @@ describe('PluginManagementComponent', () => {
         expect(component.uploadError()).toBeNull();
       });
     });
+  });
+});
+
+describe('isPluginListed', () => {
+  const instance = (id: string, isEnabled: boolean): PluginInstance => ({
+    manifest: {
+      id,
+      name: id,
+      manifestVersion: 1,
+      version: '1.0.0',
+      minSupVersion: '1.0.0',
+      hooks: [],
+      permissions: [],
+    },
+    loaded: false,
+    isEnabled,
+  });
+
+  it('always lists regular plugins', () => {
+    expect(isPluginListed(instance('brain-dump', false), false, new Set())).toBe(true);
+  });
+
+  it('hides a disabled dev-only plugin unless dev plugins are shown', () => {
+    expect(isPluginListed(instance('api-test-plugin', false), false, new Set())).toBe(
+      false,
+    );
+    expect(isPluginListed(instance('api-test-plugin', false), true, new Set())).toBe(
+      true,
+    );
+  });
+
+  it('keeps listing a dev-only plugin seen enabled after it is disabled', () => {
+    const shown = new Set<string>();
+
+    expect(isPluginListed(instance('api-test-plugin', true), false, shown)).toBe(true);
+    expect(isPluginListed(instance('api-test-plugin', false), false, shown)).toBe(true);
   });
 });

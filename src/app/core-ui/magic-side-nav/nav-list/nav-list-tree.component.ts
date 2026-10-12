@@ -39,6 +39,8 @@ import { expandCollapseAni } from '../../../ui/tree-dnd/tree.animations';
 import { Router } from '@angular/router';
 import { Log } from '../../../core/log';
 
+const TREE_INDENT = 16;
+
 export const getProjectVisibilityIconColor = (project: Project): string | null =>
   isSingleEmoji(project.icon || DEFAULT_PROJECT_ICON)
     ? null
@@ -99,6 +101,11 @@ export class NavListTreeComponent {
   // Off for the first render, so the lists and folders that are already open
   // appear without animating in on app start.
   readonly isAnimationEnabled = signal(false);
+  // One nesting step, used for each folder level and for the top-level rows,
+  // which sit under the section header the way folder contents sit under
+  // their folder (#10472). The compact rail centers every icon in one column,
+  // so it indents no row at all.
+  readonly treeIndent = computed(() => (this.showLabels() ? TREE_INDENT : 0));
 
   constructor() {
     effect(() => {
