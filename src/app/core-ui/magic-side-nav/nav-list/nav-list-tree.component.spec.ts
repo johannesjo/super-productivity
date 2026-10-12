@@ -294,6 +294,7 @@ describe('NavListTreeComponent row indent (#10472)', () => {
   template: `<nav-list-tree
     [item]="item()"
     [isExpanded]="isExpanded()"
+    [showLabels]="showLabels()"
     (itemClick)="clickedItems.push($event)"
   ></nav-list-tree>`,
 })
@@ -307,6 +308,7 @@ class ArchivedProjectsLinkHostComponent {
     tree: [],
   });
   readonly isExpanded = signal(true);
+  readonly showLabels = signal(true);
   readonly clickedItems: NavItem[] = [];
 }
 
@@ -343,7 +345,7 @@ describe('NavListTreeComponent archived projects link (#10473)', () => {
 
     const translateService = TestBed.inject(TranslateService);
     translateService.setTranslation('en', {
-      F: { PROJECT: { ARCHIVED_PROJECTS: { LINK_LABEL: 'Archived projects' } } },
+      F: { PROJECT: { ARCHIVED_PROJECTS: { NAV_LABEL: 'Archived' } } },
     });
     translateService.use('en');
 
@@ -356,14 +358,28 @@ describe('NavListTreeComponent archived projects link (#10473)', () => {
 
     expect(link).not.toBeNull();
     expect(link!.getAttribute('href')).toBe('/archived-projects');
-    expect(getLabel()).toBe('Archived projects (2)');
+    expect(getLabel()).toBe('Archived (2)');
   });
 
   it('updates the count when another project is archived', () => {
     archivedProjectsCount.set(3);
     fixture.detectChanges();
 
-    expect(getLabel()).toBe('Archived projects (3)');
+    expect(getLabel()).toBe('Archived (3)');
+  });
+
+  // The tree indents its top-level rows by the same step (#10472).
+  it('lines up with the top-level project rows', () => {
+    const getRowIndent = (): string =>
+      (fixture.nativeElement.querySelector('.archived-projects-link') as HTMLElement)
+        .style.paddingLeft;
+
+    expect(getRowIndent()).toBe('16px');
+
+    fixture.componentInstance.showLabels.set(false);
+    fixture.detectChanges();
+
+    expect(getRowIndent()).toBe('0px');
   });
 
   it('is not shown while no project is archived', () => {

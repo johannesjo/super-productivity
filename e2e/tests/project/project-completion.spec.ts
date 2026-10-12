@@ -61,7 +61,7 @@ test.describe('Project completion', () => {
     await expect(celebration).toBeHidden();
 
     // The sidebar links to the archived projects below the project list (#10473).
-    await expect(projectPage.archivedProjectsLink).toContainText('Archived projects (1)');
+    await expect(projectPage.archivedProjectsLink).toContainText('Archived (1)');
     await projectPage.archivedProjectsLink.click();
     await expect(page).toHaveURL(/\/#\/archived-projects$/);
     await expect(projectPage.archivedProjectRow('Test Project')).toBeVisible();

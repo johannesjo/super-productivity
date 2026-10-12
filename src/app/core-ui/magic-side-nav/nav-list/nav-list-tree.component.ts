@@ -47,7 +47,7 @@ export const getProjectVisibilityIconColor = (project: Project): string | null =
 const ARCHIVED_PROJECTS_NAV_ITEM: NavRouteItem = {
   type: 'route',
   id: 'archived-projects',
-  label: T.F.PROJECT.ARCHIVED_PROJECTS.LINK_LABEL,
+  label: T.F.PROJECT.ARCHIVED_PROJECTS.NAV_LABEL,
   icon: 'archive',
   route: '/archived-projects',
 };

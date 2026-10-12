@@ -157,15 +157,19 @@
 
     <!-- Outside the tree: it cannot be dragged, and nothing about it is persisted -->
     @if (isArchivedProjectsLinkShown()) {
-      <nav-item
+      <div
         class="archived-projects-link"
-        [container]="'route'"
-        [navRoute]="ARCHIVED_PROJECTS_NAV_ITEM.route"
-        [icon]="ARCHIVED_PROJECTS_NAV_ITEM.icon"
-        [label]="`${(ARCHIVED_PROJECTS_NAV_ITEM.label | translate)} (${archivedProjectsCount()})`"
-        [showLabels]="showLabels()"
-        (clicked)="itemClick.emit(ARCHIVED_PROJECTS_NAV_ITEM)"
-      ></nav-item>
+        [style.padding-left.px]="treeIndent()"
+      >
+        <nav-item
+          [container]="'route'"
+          [navRoute]="ARCHIVED_PROJECTS_NAV_ITEM.route"
+          [icon]="ARCHIVED_PROJECTS_NAV_ITEM.icon"
+          [label]="`${(ARCHIVED_PROJECTS_NAV_ITEM.label | translate)} (${archivedProjectsCount()})`"
+          [showLabels]="showLabels()"
+          (clicked)="itemClick.emit(ARCHIVED_PROJECTS_NAV_ITEM)"
+        ></nav-item>
+      </div>
     }
   </div>
 }
