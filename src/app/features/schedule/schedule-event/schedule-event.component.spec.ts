@@ -44,6 +44,7 @@ const makeTaskScheduleEvent = (overlap?: ScheduleEvent['overlap']): ScheduleEven
 
 const makeDoneTaskScheduleEvent = (
   type: SVEType = SVEType.ScheduledTask,
+  dataOverrides?: Record<string, any>,
 ): ScheduleEvent => ({
   id: 'task-done-1',
   type,
@@ -56,6 +57,7 @@ const makeDoneTaskScheduleEvent = (
     timeEstimate: 3600000,
     isDone: true,
     dueWithTime: 1700000000000,
+    ...dataOverrides,
   } as any,
 });
 
@@ -577,6 +579,60 @@ describe('ScheduleEventComponent – isReferenceCalendar', () => {
       fixture.detectChanges();
 
       expect(component.icoType()).toBe('FLOW');
+    });
+  });
+
+  describe('completed task resizing (Ticket 02)', () => {
+    it('should allow resizing for completed task even with timeEstimate = 0', () => {
+      const event = makeDoneTaskScheduleEvent(SVEType.ScheduledTask, { timeEstimate: 0 });
+      fixture.componentRef.setInput('event', event);
+      fixture.detectChanges();
+
+      expect(component.isResizable()).toBe(true);
+    });
+
+    it('should set remindAt: undefined when resizing a completed task', () => {
+      const gridContainer = document.createElement('div');
+      gridContainer.classList.add('grid-container');
+      spyOn(gridContainer, 'getBoundingClientRect').and.returnValue({
+        height: 24 * 12 * 10,
+      } as DOMRect);
+      fixture.nativeElement.parentElement?.insertBefore(
+        gridContainer,
+        fixture.nativeElement,
+      );
+      gridContainer.appendChild(fixture.nativeElement);
+
+      const store = TestBed.inject(MockStore);
+      spyOn(store, 'dispatch');
+
+      const event = makeDoneTaskScheduleEvent(SVEType.ScheduledTask, {
+        timeEstimate: 3600000,
+        remindAt: 1700000000000,
+      });
+      fixture.componentRef.setInput('event', event);
+      fixture.detectChanges();
+
+      const handle = fixture.nativeElement.querySelector('.resize-handle');
+      expect(handle).toBeTruthy();
+
+      handle.dispatchEvent(
+        new MouseEvent('mousedown', { bubbles: true, cancelable: true, clientY: 100 }),
+      );
+      document.dispatchEvent(new MouseEvent('mousemove', { clientY: 220 }));
+      document.dispatchEvent(new MouseEvent('mouseup'));
+
+      expect(store.dispatch).toHaveBeenCalledWith(
+        TaskSharedActions.updateTask({
+          task: {
+            id: 'task-done-1',
+            changes: {
+              timeEstimate: 7200000,
+              remindAt: undefined,
+            },
+          },
+        }),
+      );
     });
   });
 });

@@ -568,7 +568,7 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
         evt.type === SVEType.Task ||
         evt.type === SVEType.TaskPlannedForDay ||
         evt.type === SVEType.SplitTaskPlannedForDay) &&
-      t.timeEstimate > 0
+      (t.timeEstimate > 0 || t.isDone)
     );
   }
 
@@ -644,7 +644,13 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
     const t = this.task();
     if (t && Math.abs(timeChangeInMs) > 30000) {
       // Only update if change is more than 30 seconds (to be more responsive)
-      const rawEstimate = t.timeEstimate + timeChangeInMs;
+      const currentEstimate =
+        t.timeEstimate > 0
+          ? t.timeEstimate
+          : t.isDone
+            ? SCHEDULE_TASK_MIN_DURATION_IN_MS
+            : 0;
+      const rawEstimate = currentEstimate + timeChangeInMs;
       const roundedEstimate = Math.max(
         FIVE_MINUTES_IN_MS,
         Math.round(rawEstimate / FIVE_MINUTES_IN_MS) * FIVE_MINUTES_IN_MS,
@@ -657,6 +663,7 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
               id: t.id,
               changes: {
                 timeEstimate: roundedEstimate,
+                ...(t.isDone ? { remindAt: undefined } : {}),
               },
             },
           }),
