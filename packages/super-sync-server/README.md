@@ -464,11 +464,16 @@ When `CAPTURE_CONNECTOR_ENABLED=true`, `/mcp` advertises OAuth discovery. Set
 `PUBLIC_URL` to the externally reachable server origin (HTTPS in production).
 The pinned clients are Claude (`https://claude.ai/oauth/mcp-oauth-client-metadata`)
 and Claude Code (`https://claude.ai/oauth/claude-code-client-metadata`), verified
-against Anthropic's public metadata on 2026-10-12. The web callback is exactly
-`https://claude.ai/api/mcp/auth_callback`; Code uses `/callback` on HTTP
-`localhost` or `127.0.0.1`, with any port. `CAPTURE_OAUTH_CLIENTS` replaces this
-list for operators who need another client. Redirects require HTTPS except
-loopback callbacks; unknown clients and redirects are rejected without a redirect.
+against Anthropic's public metadata on 2026-10-12, and ChatGPT
+(`https://chatgpt.com/oauth/client.json`), taken from OpenAI's connector auth
+docs. The Claude web callback is exactly `https://claude.ai/api/mcp/auth_callback`;
+Code uses `/callback` on HTTP `localhost` or `127.0.0.1`, with any port.
+ChatGPT's callback is exactly `https://chatgpt.com/connector_platform_oauth_redirect`,
+which ChatGPT uses because authorization responses carry `iss` (RFC 9207);
+per-connection `chatgpt.com/connector/oauth/…` callbacks are rejected.
+`CAPTURE_OAUTH_CLIENTS` replaces this list for operators who need another
+client. Redirects require HTTPS except loopback callbacks; unknown clients and
+redirects are rejected without a redirect.
 
 Users enable capture in the app, create a connection code in AI assistants
 settings, and enter it on the consent page their assistant opens. Access is

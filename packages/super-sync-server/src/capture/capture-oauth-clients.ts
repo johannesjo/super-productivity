@@ -27,7 +27,8 @@ export const CaptureOAuthClientsSchema = z
 
 export type CaptureOAuthClient = z.infer<typeof CaptureOAuthClientsSchema>[number];
 
-// Pinned public metadata, verified 2026-10-12. No client-controlled network fetches.
+// Pinned client identities; no client-controlled network fetches. Claude entries
+// verified against Anthropic's public metadata on 2026-10-12.
 export const DEFAULT_CAPTURE_OAUTH_CLIENTS: CaptureOAuthClient[] = [
   {
     clientId: 'https://claude.ai/oauth/mcp-oauth-client-metadata',
@@ -38,6 +39,15 @@ export const DEFAULT_CAPTURE_OAUTH_CLIENTS: CaptureOAuthClient[] = [
     clientId: 'https://claude.ai/oauth/claude-code-client-metadata',
     name: 'Claude Code',
     redirectUris: ['http://localhost/callback', 'http://127.0.0.1/callback'],
+  },
+  // ChatGPT's stable identity, used with servers that declare RFC 9207 `iss`.
+  // Taken from OpenAI's connector auth docs, not fetched live. Its metadata
+  // prefers private_key_jwt but it uses `none` + PKCE when that is all the
+  // server advertises.
+  {
+    clientId: 'https://chatgpt.com/oauth/client.json',
+    name: 'ChatGPT',
+    redirectUris: ['https://chatgpt.com/connector_platform_oauth_redirect'],
   },
 ];
 

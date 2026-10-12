@@ -216,6 +216,7 @@ describe('capture OAuth (real routes and SQL)', () => {
     const metadata = (await app.inject('/.well-known/oauth-authorization-server')).json();
     expect(metadata).toMatchObject({
       client_id_metadata_document_supported: true,
+      authorization_response_iss_parameter_supported: true,
       token_endpoint_auth_methods_supported: ['none'],
       code_challenge_methods_supported: ['S256'],
     });
@@ -260,6 +261,21 @@ describe('capture OAuth (real routes and SQL)', () => {
     expect(res.statusCode).toBe(400);
     expect(res.headers.location).toBeUndefined();
     expect((await db.query('SELECT * FROM capture_auth')).rows).toHaveLength(0);
+  });
+
+  it('accepts the pinned ChatGPT client only on its stable callback', async () => {
+    const chatGpt = DEFAULT_CAPTURE_OAUTH_CLIENTS.find((c) => c.name === 'ChatGPT')!;
+    const overrides = {
+      client_id: chatGpt.clientId,
+      redirect_uri: 'https://chatgpt.com/connector_platform_oauth_redirect',
+    };
+    const code = await authorizationCode(overrides);
+    expect((await exchange(code, overrides)).statusCode).toBe(200);
+    const perConnection = await authorize({
+      ...overrides,
+      redirect_uri: 'https://chatgpt.com/connector/oauth/abc123',
+    });
+    expect(perConnection.statusCode).toBe(400);
   });
 
   it.each(['localhost', '127.0.0.1'])(
