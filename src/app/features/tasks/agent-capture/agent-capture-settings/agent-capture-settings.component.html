@@ -17,12 +17,10 @@
         : T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_STATE_OFF
       ) | translate
     }}</span>
-    <span class="hint intro">{{
-      T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_INFO | translate
-    }}</span>
   </summary>
 
   <div class="capture-content">
+    <p class="intro">{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_INFO | translate }}</p>
     @if (!isAvailable) {
       <p class="hint">{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_SAVE_FIRST | translate }}</p>
     } @else if (!isEnabled()) {

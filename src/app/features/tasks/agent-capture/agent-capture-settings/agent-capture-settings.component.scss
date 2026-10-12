@@ -46,9 +46,8 @@ summary {
   font-size: var(--font-size-md);
 }
 
-// Always visible, so the first glance says what access this grants.
 .intro {
-  grid-column: 2 / 4;
+  margin: 0;
 }
 
 .hint {

@@ -666,6 +666,13 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
               window.open(baseUrl, '_blank');
             },
           },
+          // First step of setup: filled. Later only for a replacement token,
+          // so outlined to leave Save as the main action. Fixed per dialog
+          // session, so the button is never swapped while typing.
+          expressions: {
+            'props.btnStyle': (field: FormlyFieldConfig) =>
+              field.parent?.parent?.model?._isInitialSetup === true ? 'flat' : 'stroked',
+          },
         },
         {
           hideExpression: (m, v, field) =>
