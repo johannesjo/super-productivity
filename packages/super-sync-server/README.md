@@ -482,8 +482,9 @@ clients to reconnect. Only hashes of codes and bearer secrets are stored.
 
 Discovery and token requests bypass the shared-IP request quota. Failed token
 requests use the MCP authentication limiter; authorization pages allow 20 per
-hour per IP, and code approvals allow 10 per minute per IP and 300 per hour
-across the instance. This remains a single-instance feature. Sign-out everywhere
+hour per IP, and code approvals allow 10 per minute per IP. There is no global
+approval quota: invalid guesses must not block other users from connecting.
+This remains a single-instance feature. Sign-out everywhere
 and switching capture off revoke grants and invalidate unconsumed codes in one
 transaction. Apply the Prisma migration before starting the updated server.
 

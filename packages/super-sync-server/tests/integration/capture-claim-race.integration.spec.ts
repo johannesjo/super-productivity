@@ -186,27 +186,63 @@ describeWithDb('capture races (real PostgreSQL)', () => {
       { ...oauthInput, code: await approvedCode() },
       signingKey,
     );
-    const [refreshed] = await Promise.all([
-      refreshCaptureAuthorization(
+    let release: () => void = () => undefined;
+    let locked: () => void = () => undefined;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const ready = new Promise<void>((resolve) => {
+      locked = resolve;
+    });
+    const blocker = prisma.$transaction(
+      async (tx) => {
+        await tx.$queryRaw`SELECT user_id FROM capture_keys WHERE user_id = ${userId} FOR UPDATE`;
+        locked();
+        await held;
+      },
+      { timeout: 10000 },
+    );
+    const waitForKeyLock = async (queryPattern: string): Promise<void> => {
+      await expect
+        .poll(
+          async () => {
+            const rows = await prisma.$queryRaw<Array<{ count: bigint }>>`
+              SELECT count(*) FROM pg_stat_activity WHERE datname = current_database()
+                AND wait_event_type = 'Lock' AND query LIKE ${queryPattern}`;
+            return Number(rows[0].count);
+          },
+          { timeout: 1500 },
+        )
+        .toBeGreaterThan(0);
+    };
+    await ready;
+    const disabled = disableCaptureKey(userId);
+    let refreshing: ReturnType<typeof refreshCaptureAuthorization> | undefined;
+    try {
+      await waitForKeyLock('%UPDATE capture_keys SET disabled_at%');
+      refreshing = refreshCaptureAuthorization(
+        first!.refresh_token!,
+        oauthInput.clientId,
+        oauthInput.resource,
+        signingKey,
+      );
+      // Both operations are in flight; PostgreSQL queues refresh behind feature-off.
+      await waitForKeyLock('%SELECT user_id FROM capture_keys%FOR SHARE%');
+    } finally {
+      release();
+      await blocker;
+      await disabled;
+    }
+    expect(await refreshing).toBeNull();
+    expect(await authenticateCaptureToken(first!.access_token)).toBeNull();
+    expect(
+      await refreshCaptureAuthorization(
         first!.refresh_token!,
         oauthInput.clientId,
         oauthInput.resource,
         signingKey,
       ),
-      disableCaptureKey(userId),
-    ]);
-    expect(await authenticateCaptureToken(first!.access_token)).toBeNull();
-    if (refreshed) {
-      expect(await authenticateCaptureToken(refreshed.access_token)).toBeNull();
-      expect(
-        await refreshCaptureAuthorization(
-          refreshed.refresh_token!,
-          oauthInput.clientId,
-          oauthInput.resource,
-          signingKey,
-        ),
-      ).toBeNull();
-    }
+    ).toBeNull();
   });
 
   it('never leases one item to two devices claiming at once', async () => {

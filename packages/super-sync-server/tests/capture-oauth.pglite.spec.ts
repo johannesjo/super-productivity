@@ -397,9 +397,14 @@ describe('capture OAuth (real routes and SQL)', () => {
     expect((await db.query('SELECT * FROM capture_connect_codes')).rows).toHaveLength(0);
   });
 
-  it('limits authorization creation and approval guesses per IP and globally', async () => {
+  it('limits authorization creation per IP', async () => {
     for (let i = 0; i < 20; i++) expect((await authorize()).statusCode).toBe(200);
     expect((await authorize()).statusCode).toBe(429);
+  });
+
+  it('limits approval guesses per IP without blocking other users', async () => {
+    const pendingId = await authId();
+    const connect = await connectCode();
     for (let ip = 1; ip <= 30; ip++) {
       for (let i = 0; i < 10; i++)
         expect((await approve('a'.repeat(43), 'WRONG', `192.0.2.${ip}`)).statusCode).toBe(
@@ -409,7 +414,7 @@ describe('capture OAuth (real routes and SQL)', () => {
         429,
       );
     }
-    expect((await approve('a'.repeat(43), 'WRONG', '192.0.2.31')).statusCode).toBe(429);
+    expect((await approve(pendingId, connect, '192.0.2.31')).statusCode).toBe(200);
   });
 
   it('rejects insecure allowlist configuration', () => {

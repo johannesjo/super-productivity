@@ -197,8 +197,9 @@ op-log client id, so it survives the new client id a password change creates.
   `application/x-www-form-urlencoded` parser (none exists today).
   `invalid_grant` for dead codes and tokens.
 - **Connect code:** 10 characters Crockford base32 (50 bits), single use,
-  10 minutes. Approve is limited to 10 tries per minute per IP and 300 per
-  hour in total; new authorizations to 20 per hour per IP. Guessing is
+  10 minutes. Approve is limited to 10 tries per minute per IP; new
+  authorizations to 20 per hour per IP. No global approval quota, because
+  unauthenticated guesses could exhaust it and block other users. Guessing is
   infeasible at these rates. **Phishing remains:** an attacker can start their
   own authorization and ask the user for the code. The app shows: "Only enter
   this code on a page you opened from your assistant." Damage is limited to
