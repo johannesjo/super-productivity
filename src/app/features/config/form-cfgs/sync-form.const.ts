@@ -482,6 +482,9 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
       fieldGroup: [
         {
           type: 'tpl',
+          // Custom app registration steps: noise with the built-in sign-in.
+          hideExpression: (m: any) =>
+            HAS_OFFICIAL_ONEDRIVE_CLIENT_ID && !m?.oneDrive?.useCustomApp,
           templateOptions: {
             tag: 'p',
             text: T.F.SYNC.FORM.ONEDRIVE.INFO_TEXT,
@@ -656,10 +659,8 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           type: 'btn',
           templateOptions: {
             text: T.F.SYNC.FORM.SUPER_SYNC.BTN_GET_TOKEN,
-            tooltip: T.F.SYNC.FORM.SUPER_SYNC.LOGIN_INSTRUCTIONS,
             btnType: 'primary',
             btnStyle: 'stroked',
-            centerBtn: true,
             onClick: (field: any) => {
               const baseUrl = field.model.baseUrl || SUPER_SYNC_DEFAULT_BASE_URL;
               window.open(baseUrl, '_blank');
@@ -670,12 +671,12 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           hideExpression: (m, v, field) =>
             isNotSyncProvider(field, 2, SyncProviderId.SuperSync),
           key: 'accessToken',
-          type: 'textarea',
+          type: 'input',
           className: 'e2e-accessToken',
           templateOptions: {
             label: T.F.SYNC.FORM.SUPER_SYNC.L_ACCESS_TOKEN,
             description: T.F.SYNC.FORM.SUPER_SYNC.ACCESS_TOKEN_DESCRIPTION,
-            rows: 3,
+            attributes: { autocomplete: 'off', spellcheck: 'false' },
           },
           expressions: {
             'props.required': (field: FormlyFieldConfig) =>
