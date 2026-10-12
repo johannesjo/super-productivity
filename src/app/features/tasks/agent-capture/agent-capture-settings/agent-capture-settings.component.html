@@ -41,13 +41,16 @@
       </button>
     } @else {
       @if (mcpUrl(); as url) {
-        <label class="field">
-          <span class="field-label">{{
-            T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_MCP_URL | translate
-          }}</span>
+        <div class="field">
+          <label
+            class="field-label"
+            for="agentCaptureUrl"
+            >{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_MCP_URL | translate }}</label
+          >
           <span class="copy-row">
             <input
               class="value"
+              id="agentCaptureUrl"
               type="text"
               readonly
               [value]="url"
@@ -62,7 +65,7 @@
               <mat-icon>content_copy</mat-icon>
             </button>
           </span>
-        </label>
+        </div>
       }
 
       <p class="hint">{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_OAUTH_HINT | translate }}</p>
@@ -75,13 +78,17 @@
         {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_CONNECT_CODE | translate }}
       </button>
       @if (connectCode(); as connection) {
-        <label class="field">
-          <span class="field-label">{{
-            T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_CONNECT_CODE | translate
-          }}</span>
+        <div class="field">
+          <label
+            class="field-label"
+            for="agentCaptureCode"
+            >{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_CONNECT_CODE | translate }}</label
+          >
           <span class="copy-row">
             <input
               class="value"
+              id="agentCaptureCode"
+              aria-describedby="agentCaptureCodeHint"
               type="text"
               readonly
               [value]="connection.code"
@@ -97,12 +104,15 @@
               <mat-icon>content_copy</mat-icon>
             </button>
           </span>
-          <span class="hint">
+          <span
+            class="hint"
+            id="agentCaptureCodeHint"
+          >
             {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_CONNECT_CODE_WARNING | translate }}
             {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_CODE_EXPIRES | translate }}
             {{ connection.expiresAt | localeDate: 'shortTime' }}
           </span>
-        </label>
+        </div>
       }
 
       <section class="connections">
@@ -224,13 +234,17 @@
           </div>
 
           @if (newToken(); as token) {
-            <label class="field">
-              <span class="field-label">{{
-                T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_TOKEN | translate
-              }}</span>
+            <div class="field">
+              <label
+                class="field-label"
+                for="agentCaptureToken"
+                >{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_TOKEN | translate }}</label
+              >
               <span class="copy-row">
                 <input
                   class="value"
+                  id="agentCaptureToken"
+                  aria-describedby="agentCaptureTokenHint"
                   type="text"
                   readonly
                   [value]="token"
@@ -250,18 +264,22 @@
               </span>
               <span
                 class="hint"
+                id="agentCaptureTokenHint"
                 role="status"
                 >{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_TOKEN_ONCE | translate }}</span
               >
-            </label>
+            </div>
             @if (mcpUrl()) {
-              <label class="field">
-                <span class="field-label">{{
-                  T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_SETUP | translate
-                }}</span>
+              <div class="field">
+                <label
+                  class="field-label"
+                  for="agentCaptureSetup"
+                  >{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_SETUP | translate }}</label
+                >
                 <span class="copy-row">
                   <textarea
                     class="value"
+                    id="agentCaptureSetup"
                     rows="3"
                     readonly
                     [value]="setupCommand()"
@@ -278,7 +296,7 @@
                     <mat-icon>content_copy</mat-icon>
                   </button>
                 </span>
-              </label>
+              </div>
             }
           }
         </div>
