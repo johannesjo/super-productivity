@@ -470,6 +470,20 @@ against Anthropic's public metadata on 2026-10-12. The web callback is exactly
 list for operators who need another client. Redirects require HTTPS except
 loopback callbacks; unknown clients and redirects are rejected without a redirect.
 
+To allow ChatGPT, copy its client ID (a metadata document URL) and redirect
+URI from the connector's settings in ChatGPT and keep the Claude entries, since
+the variable replaces the whole list. Authorization responses carry `iss`
+(RFC 9207), so ChatGPT should offer a stable redirect URI rather than a
+per-connection one:
+
+```bash
+CAPTURE_OAUTH_CLIENTS='[
+  {"clientId":"https://claude.ai/oauth/mcp-oauth-client-metadata","name":"Claude","redirectUris":["https://claude.ai/api/mcp/auth_callback"]},
+  {"clientId":"https://claude.ai/oauth/claude-code-client-metadata","name":"Claude Code","redirectUris":["http://localhost/callback","http://127.0.0.1/callback"]},
+  {"clientId":"<ChatGPT client ID>","name":"ChatGPT","redirectUris":["<ChatGPT redirect URI>"]}
+]'
+```
+
 Users enable capture in the app, create a connection code in AI assistants
 settings, and enter it on the consent page their assistant opens. Access is
 limited to `tasks:capture`; `offline_access` enables refresh. Access lasts an

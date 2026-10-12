@@ -216,6 +216,7 @@ describe('capture OAuth (real routes and SQL)', () => {
     const metadata = (await app.inject('/.well-known/oauth-authorization-server')).json();
     expect(metadata).toMatchObject({
       client_id_metadata_document_supported: true,
+      authorization_response_iss_parameter_supported: true,
       token_endpoint_auth_methods_supported: ['none'],
       code_challenge_methods_supported: ['S256'],
     });
