@@ -102,7 +102,9 @@ const isModernEraRequest = (
   message: Record<string, unknown>,
   mcpMethodHeader: string | undefined,
 ): boolean => {
-  if (mcpMethodHeader !== undefined || message.method === 'server/discover') {
+  // Claude retains Mcp-Method on legacy initialize and subsequent requests.
+  // The header's presence alone does not identify a modern-era request.
+  if (mcpMethodHeader === 'server/discover' || message.method === 'server/discover') {
     return true;
   }
   const params = message.params;

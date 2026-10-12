@@ -168,6 +168,43 @@ describe('capture OAuth (real routes and SQL)', () => {
     expect((await api('PUT', '/key', { publicKey: key.publicKey })).statusCode).toBe(200);
   });
 
+  it('accepts Claude initialization fallback with Mcp-Method after modern discovery', async () => {
+    const tokens = await pair();
+    const request = (method: string, version?: string) =>
+      app.inject({
+        method: 'POST',
+        url: '/mcp',
+        headers: {
+          authorization: `Bearer ${tokens.access_token}`,
+          'mcp-method': method,
+          ...(version ? { 'mcp-protocol-version': version } : {}),
+        },
+        payload: {
+          jsonrpc: '2.0',
+          id: 1,
+          method,
+          ...(method === 'initialize'
+            ? {
+                params: {
+                  protocolVersion: '2025-11-25',
+                  capabilities: {},
+                  clientInfo: { name: 'Claude', version: '1' },
+                },
+              }
+            : {}),
+        },
+      });
+    expect((await request('server/discover', '2026-07-28')).statusCode).toBe(400);
+    const initialized = await request('initialize');
+    expect(initialized.statusCode).toBe(200);
+    expect(initialized.json().result.protocolVersion).toBe('2025-11-25');
+    const listed = await request('tools/list', '2025-11-25');
+    expect(listed.statusCode).toBe(200);
+    expect(listed.json().result.tools.map((tool: { name: string }) => tool.name)).toEqual(
+      ['create_task'],
+    );
+  });
+
   it('discovers OAuth and authorizes encrypted, write-only capture', async () => {
     const unauthorized = await app.inject({ method: 'POST', url: '/mcp', payload: {} });
     expect(unauthorized.statusCode).toBe(401);

@@ -76,7 +76,7 @@ describe('handleMcpMessage', () => {
 
   it('answers a modern-era request with a plain 400 so the client falls back', async () => {
     const modern = [
-      handle({ jsonrpc: '2.0', id: 1, method: 'tools/list' }, 'tools/list'),
+      handle({ jsonrpc: '2.0', id: 1, method: 'server/discover' }, 'server/discover'),
       handle({ jsonrpc: '2.0', id: 2, method: 'server/discover' }),
       handle({
         jsonrpc: '2.0',

@@ -7,7 +7,7 @@ import {
   ACCESS_TTL_MS,
   REFRESH_TTL_MS,
   REFRESH_GRACE_MS,
-  oauthSecret,
+  randomOAuthSecret,
   pkceChallenge,
   newRefreshSecret,
   nextRefreshSecret,
@@ -76,7 +76,7 @@ export const createCaptureAuthorization = async (
   auth: CaptureAuthorization,
   now = Date.now(),
 ): Promise<string> => {
-  const id = oauthSecret();
+  const id = randomOAuthSecret();
   await prisma.$executeRaw`
     INSERT INTO capture_auth
       (id, client_id, client_name, redirect_uri, code_challenge, resource, state, scope, expires_at)
@@ -108,7 +108,7 @@ export const approveCaptureAuthorization = async (
       DELETE FROM capture_connect_codes WHERE user_id = ${connect.user_id}
         AND code_hash = ${codeHash} AND expires_at > ${BigInt(now)}`;
     if (!consumed) return null;
-    const authCode = oauthSecret();
+    const authCode = randomOAuthSecret();
     await tx.$executeRaw`
       UPDATE capture_auth SET user_id = ${connect.user_id}, token_version = ${version},
         code_hash = ${hashCaptureSecret(authCode)}, expires_at = ${BigInt(now + 60_000)}

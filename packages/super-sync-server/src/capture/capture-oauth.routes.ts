@@ -74,12 +74,16 @@ const consentPage = (
 ${local ? '<p>This assistant runs on your computer. Continue only if you started this connection yourself.</p>' : ''}
 <p>Your assistant and sync server see submitted text. Waiting tasks are stored encrypted; enable sync encryption to keep the capture key private.</p>
 <p>In Super Productivity, open Settings → Sync → SuperSync → AI assistants, enable task capture, then click Create connection code.</p>
-<form id="capture-consent" data-auth-id="${id}">
+<form id="capture-consent" class="card" data-auth-id="${id}">
+<div class="form-group">
 <label for="connect-code">Connection code</label>
 <input id="connect-code" name="code" required maxlength="32" autocomplete="off" spellcheck="false" autofocus>
+</div>
 <p>Only enter a code from your own account. You can revoke this connection in Super Productivity at any time.</p>
-<button type="submit">Allow adding tasks</button>
-<button type="button" id="cancel">Cancel</button>
+<div class="action-buttons">
+<button type="submit" class="btn primary">Allow adding tasks</button>
+<button type="button" id="cancel" class="btn text-only">Cancel</button>
+</div>
 <p id="status" role="status"></p></form></main></body></html>`;
 };
 

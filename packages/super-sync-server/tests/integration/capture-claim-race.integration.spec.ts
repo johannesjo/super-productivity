@@ -85,7 +85,7 @@ describeWithDb('capture races (real PostgreSQL)', () => {
   });
 
   const signingKey = 'integration-test-jwt-secret-at-least-32-characters';
-  const oauthInput = {
+  const authorizationInput = {
     clientId: 'https://client.example/metadata',
     clientName: 'race',
     redirectUri: 'https://client.example/callback',
@@ -94,10 +94,10 @@ describeWithDb('capture races (real PostgreSQL)', () => {
   };
   const approvedCode = async (): Promise<string> => {
     const id = await createCaptureAuthorization({
-      ...oauthInput,
+      ...authorizationInput,
       state: 'race',
       scope: 'tasks:capture offline_access',
-      codeChallenge: pkceChallenge(oauthInput.verifier),
+      codeChallenge: pkceChallenge(authorizationInput.verifier),
     });
     const connect = await createCaptureConnectCode(userId, 0);
     const redirect = await approveCaptureAuthorization(
@@ -112,7 +112,7 @@ describeWithDb('capture races (real PostgreSQL)', () => {
     const code = await approvedCode();
     const results = await Promise.all(
       Array.from({ length: 4 }, () =>
-        exchangeCaptureAuthorization({ ...oauthInput, code }, signingKey),
+        exchangeCaptureAuthorization({ ...authorizationInput, code }, signingKey),
       ),
     );
     const issued = results.filter((r) => r !== null);
@@ -122,8 +122,8 @@ describeWithDb('capture races (real PostgreSQL)', () => {
       Array.from({ length: 4 }, () =>
         refreshCaptureAuthorization(
           refresh,
-          oauthInput.clientId,
-          oauthInput.resource,
+          authorizationInput.clientId,
+          authorizationInput.resource,
           signingKey,
         ),
       ),
@@ -157,7 +157,10 @@ describeWithDb('capture races (real PostgreSQL)', () => {
       { timeout: 10000 },
     );
     await ready;
-    const exchange = exchangeCaptureAuthorization({ ...oauthInput, code }, signingKey);
+    const exchange = exchangeCaptureAuthorization(
+      { ...authorizationInput, code },
+      signingKey,
+    );
     try {
       // Observe the real exchange waiting on our user lock, not a mocked store seam.
       await expect
@@ -177,13 +180,13 @@ describeWithDb('capture races (real PostgreSQL)', () => {
     }
     expect(await exchange).toBeNull();
     expect(
-      await exchangeCaptureAuthorization({ ...oauthInput, code }, signingKey),
+      await exchangeCaptureAuthorization({ ...authorizationInput, code }, signingKey),
     ).toBeNull();
   });
 
   it('feature-off racing refresh leaves no usable access or refresh token', async () => {
     const first = await exchangeCaptureAuthorization(
-      { ...oauthInput, code: await approvedCode() },
+      { ...authorizationInput, code: await approvedCode() },
       signingKey,
     );
     let release: () => void = () => undefined;
@@ -222,8 +225,8 @@ describeWithDb('capture races (real PostgreSQL)', () => {
       await waitForKeyLock('%UPDATE capture_keys SET disabled_at%');
       refreshing = refreshCaptureAuthorization(
         first!.refresh_token!,
-        oauthInput.clientId,
-        oauthInput.resource,
+        authorizationInput.clientId,
+        authorizationInput.resource,
         signingKey,
       );
       // Both operations are in flight; PostgreSQL queues refresh behind feature-off.
@@ -238,8 +241,8 @@ describeWithDb('capture races (real PostgreSQL)', () => {
     expect(
       await refreshCaptureAuthorization(
         first!.refresh_token!,
-        oauthInput.clientId,
-        oauthInput.resource,
+        authorizationInput.clientId,
+        authorizationInput.resource,
         signingKey,
       ),
     ).toBeNull();

@@ -4,7 +4,9 @@ import { hashCaptureSecret } from './capture-token';
 export const ACCESS_TTL_MS = 60 * 60 * 1000;
 export const REFRESH_TTL_MS = 90 * 24 * ACCESS_TTL_MS;
 export const REFRESH_GRACE_MS = 2 * 60 * 1000;
-export const oauthSecret = (): string => randomBytes(32).toString('base64url');
+/** Random 256-bit tokens, not user-chosen passwords. */
+export const randomOAuthSecret = (): string => randomBytes(32).toString('base64url');
+/** PKCE S256 requires SHA-256 of the verifier. */
 export const pkceChallenge = (verifier: string): string =>
   createHash('sha256').update(verifier).digest('base64url');
 
@@ -17,7 +19,7 @@ const signRefresh = (key: string, grantId: string, nonce: string): string =>
   `${nonce}.${mac(key, 'sign', grantId, nonce)}`;
 
 export const newRefreshSecret = (key: string, grantId: string): string =>
-  signRefresh(key, grantId, oauthSecret());
+  signRefresh(key, grantId, randomOAuthSecret());
 
 /**
  * A previous token deterministically reproduces the same successor during the
