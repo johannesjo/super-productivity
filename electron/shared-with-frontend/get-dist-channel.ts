@@ -13,6 +13,14 @@ export type ElectronDistChannel =
   | 'linux-flatpak'
   | 'linux-native';
 
+// Channels where app.setLoginItemSettings() registers a working login item (#5572).
+// Linux has no such API, portable builds run from a temporary copy, and Store builds
+// are left out until their registration is verified.
+export const LOGIN_ITEM_CHANNELS: readonly ElectronDistChannel[] = [
+  'mac-dmg',
+  'win-nsis',
+];
+
 /**
  * Detects which distribution channel the running Electron app belongs to.
  * Returns `null` on unknown platforms.

@@ -14,6 +14,8 @@ let sharedState;
 let refreshIndicatorCalls;
 let localRestApiConfig;
 let focusCalls;
+let loginItemCalls;
+let nextDistChannel;
 
 const resetModule = () => {
   delete require.cache[appControlModulePath];
@@ -26,6 +28,9 @@ const installMocks = () => {
         app: {
           exit: () => {},
           relaunch: () => {},
+          setLoginItemSettings: (settings) => {
+            loginItemCalls.push(settings);
+          },
         },
         ipcMain: {
           on: (eventName, handler) => {
@@ -132,6 +137,13 @@ const installMocks = () => {
       };
     }
 
+    if (request === '../shared-with-frontend/get-dist-channel') {
+      return {
+        ...originalModuleLoad.call(this, request, parent, isMain),
+        getDistChannel: () => nextDistChannel,
+      };
+    }
+
     if (request === '../local-rest-api') {
       return {
         updateLocalRestApiConfig: (cfg) => {
@@ -160,6 +172,8 @@ test.beforeEach(() => {
   refreshIndicatorCalls = 0;
   localRestApiConfig = undefined;
   focusCalls = [];
+  loginItemCalls = [];
+  nextDistChannel = 'mac-dmg';
 
   installMocks();
 });
@@ -217,6 +231,46 @@ test('settings update falls back to legacy misc tray task setting', async () => 
   assert.equal(sharedState.isTrayShowCurrentTask, true);
   assert.equal(sharedState.isTrayShowCurrentCountdown, true);
   assert.equal(refreshIndicatorCalls, 1);
+});
+
+test('settings update applies start on login on supported builds (#5572)', async () => {
+  const { initAppControlIpc } = loadAppControlModule();
+  initAppControlIpc();
+  const updateSettings = ipcHandlers.get('UPDATE_SETTINGS');
+
+  await updateSettings({}, { misc: { isAutoStartOnSystemStartup: true } });
+  nextDistChannel = 'win-nsis';
+  await updateSettings({}, { misc: { isAutoStartOnSystemStartup: false } });
+
+  assert.deepEqual(loginItemCalls, [{ openAtLogin: true }, { openAtLogin: false }]);
+});
+
+test('settings update leaves the login item alone while start on login is unset (#5572)', async () => {
+  const { initAppControlIpc } = loadAppControlModule();
+  initAppControlIpc();
+
+  await ipcHandlers.get('TRANSFER_SETTINGS_TO_ELECTRON')({}, { misc: {} });
+
+  assert.deepEqual(loginItemCalls, []);
+});
+
+test('settings update skips start on login on unsupported builds (#5572)', async () => {
+  const { initAppControlIpc } = loadAppControlModule();
+  initAppControlIpc();
+  const updateSettings = ipcHandlers.get('UPDATE_SETTINGS');
+
+  for (const channel of [
+    'linux-native',
+    'win-portable',
+    'win-store',
+    'mac-store',
+    null,
+  ]) {
+    nextDistChannel = channel;
+    await updateSettings({}, { misc: { isAutoStartOnSystemStartup: true } });
+  }
+
+  assert.deepEqual(loginItemCalls, []);
 });
 
 test('SHOW_OR_FOCUS routes reminder requests to the raise-only path (#10410)', () => {
