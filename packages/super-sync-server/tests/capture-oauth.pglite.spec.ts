@@ -306,6 +306,41 @@ describe('capture OAuth (real routes and SQL)', () => {
     expect((await refresh(rotated.refresh_token)).json().error).toBe('invalid_grant');
   });
 
+  it('revokes an older issued token even within the latest rotation grace window', async () => {
+    const first = await pair();
+    const second = (await refresh(first.refresh_token)).json();
+    const third = (await refresh(second.refresh_token)).json();
+    expect(await authenticateCaptureToken(third.access_token)).not.toBeNull();
+    expect((await refresh(first.refresh_token)).json().error).toBe('invalid_grant');
+    expect(await authenticateCaptureToken(third.access_token)).toBeNull();
+    expect((await refresh(third.refresh_token)).json().error).toBe('invalid_grant');
+  });
+
+  it('returns a conflict when creating a connection code with capture disabled', async () => {
+    await api('DELETE', '/key');
+    const response = await api('POST', '/connect-code');
+    expect(response.statusCode).toBe(409);
+    expect(response.json()).toEqual({ error: 'capture_disabled' });
+    expect((await db.query('SELECT * FROM capture_connect_codes')).rows).toHaveLength(0);
+  });
+
+  it('keeps known-grant failures out of the shared IP quota for new exchanges', async () => {
+    const first = await pair();
+    const code = await authorizationCode();
+    await db.exec('UPDATE capture_grants SET expires_at = 0');
+    for (let i = 0; i < 120; i++) {
+      const response = await app.inject({
+        method: 'POST',
+        url: '/mcp',
+        headers: { authorization: `Bearer ${first.access_token}` },
+        payload: {},
+      });
+      expect(response.statusCode).toBe(401);
+    }
+    expect((await exchange(code)).statusCode).toBe(200);
+    expect((await refresh(first.refresh_token)).statusCode).toBe(429);
+  });
+
   it('does not revoke for a forged refresh token or wrong resource/client', async () => {
     const first = await pair();
     expect((await refresh(first.refresh_token.slice(0, -2) + 'xx')).statusCode).toBe(400);

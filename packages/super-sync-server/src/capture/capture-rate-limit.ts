@@ -126,8 +126,8 @@ export const recordAuthFailure = (
   grantId: string | null,
   now: number = Date.now(),
 ): void => {
-  count(ipLimitKey(ip), now);
   if (isRecentGrant(grantId, now)) count(`fail:${grantId}`, now);
+  else count(ipLimitKey(ip), now);
 };
 
 export const recordAuthSuccess = (grantId: string, now: number = Date.now()): void => {
