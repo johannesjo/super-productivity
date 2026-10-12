@@ -263,6 +263,21 @@ describe('capture OAuth (real routes and SQL)', () => {
     expect((await db.query('SELECT * FROM capture_auth')).rows).toHaveLength(0);
   });
 
+  it('accepts the pinned ChatGPT client only on its stable callback', async () => {
+    const chatGpt = DEFAULT_CAPTURE_OAUTH_CLIENTS.find((c) => c.name === 'ChatGPT')!;
+    const overrides = {
+      client_id: chatGpt.clientId,
+      redirect_uri: 'https://chatgpt.com/connector_platform_oauth_redirect',
+    };
+    const code = await authorizationCode(overrides);
+    expect((await exchange(code, overrides)).statusCode).toBe(200);
+    const perConnection = await authorize({
+      ...overrides,
+      redirect_uri: 'https://chatgpt.com/connector/oauth/abc123',
+    });
+    expect(perConnection.statusCode).toBe(400);
+  });
+
   it.each(['localhost', '127.0.0.1'])(
     'accepts a pinned Claude Code callback on any port (%s)',
     async (host) => {

@@ -39,6 +39,14 @@ export const DEFAULT_CAPTURE_OAUTH_CLIENTS: CaptureOAuthClient[] = [
     name: 'Claude Code',
     redirectUris: ['http://localhost/callback', 'http://127.0.0.1/callback'],
   },
+  // ChatGPT's stable identity, used with servers that declare RFC 9207 `iss`
+  // (OpenAI connector auth docs). Its metadata prefers private_key_jwt but it
+  // uses `none` + PKCE when that is all the server advertises.
+  {
+    clientId: 'https://chatgpt.com/oauth/client.json',
+    name: 'ChatGPT',
+    redirectUris: ['https://chatgpt.com/connector_platform_oauth_redirect'],
+  },
 ];
 
 export const isAllowedCaptureRedirect = (
