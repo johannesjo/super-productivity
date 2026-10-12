@@ -47,8 +47,7 @@ const SENSITIVE_FIELDS = [
   'userName',
   // User-typed presence device name: log history is exportable (rule 9).
   'deviceName',
-  // Agent capture private key (sync.captureKey). Listed before the field
-  // ships: this client logs the synced section as received, unknown fields too.
+  // Agent capture private key (sync.captureKey).
   'captureKey',
 ];
 

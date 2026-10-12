@@ -1,3 +1,5 @@
+import { getJwtSecret } from './auth';
+import { captureOAuthRoutes } from './capture/capture-oauth.routes';
 import * as fs from 'fs';
 import Fastify, { FastifyError, FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
@@ -30,6 +32,7 @@ import {
   resetWsConnectionService,
 } from './sync/services/websocket-connection.service';
 import { testRoutes } from './test-routes';
+import { captureMcpRoutes, captureRoutes } from './capture';
 
 // HTML escape to prevent XSS in generated HTML
 export const escapeHtml = (unsafe: string): string => {
@@ -499,6 +502,19 @@ export const createServer = (
 
       // WebSocket routes for real-time sync notifications
       await fastifyServer.register(wsRoutes, { prefix: '/api/sync' });
+
+      // Agent task capture: public /mcp for assistants, /api/capture for the app
+      if (fullConfig.captureConnectorEnabled) {
+        await fastifyServer.register(captureMcpRoutes, {
+          publicUrl: fullConfig.publicUrl,
+        });
+        await fastifyServer.register(captureOAuthRoutes, {
+          publicUrl: fullConfig.publicUrl,
+          signingKey: getJwtSecret(),
+          clients: fullConfig.captureOAuthClients,
+        });
+        await fastifyServer.register(captureRoutes, { prefix: '/api/capture' });
+      }
 
       // Test Routes (only in test mode)
       if (fullConfig.testMode?.enabled) {

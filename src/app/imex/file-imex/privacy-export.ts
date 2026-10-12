@@ -45,7 +45,7 @@ const KEY_TO_REPLACE = [
   'filterIncludeRegex',
   'filterExcludeRegex',
 
-  // Agent capture private key (sync.captureKey), listed before the field ships
+  // Agent capture private key (sync.captureKey)
   'privateKeyPkcs8',
 ];
 

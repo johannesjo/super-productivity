@@ -1365,6 +1365,14 @@ export class SuperSyncPage extends BasePage {
    *
    * Prerequisites: SuperSync must already be configured without encryption
    */
+  /** Opens the sync settings dialog with the saved SuperSync config loaded. */
+  async openSuperSyncSettings(): Promise<Locator> {
+    await this.clickSyncBtn({ button: 'right', noWaitAfter: true });
+    await this.providerSelect.waitFor({ state: 'visible', timeout: 10000 });
+    await this.selectSuperSyncProviderWithRetry();
+    return this.page.locator('dialog-sync-cfg');
+  }
+
   async enableEncryption(password: string): Promise<void> {
     const enableEncryptionDialog = this.page.locator('dialog-enable-encryption');
 
@@ -1714,6 +1722,15 @@ export class SuperSyncPage extends BasePage {
       timeout: remainingTimeout(started, 30000),
       useLocal: false,
     });
+  }
+
+  /**
+   * Starts a sync and waits for a successful ops response, but not for the
+   * in-sync check: work that adds ops as soon as a sync ends (the agent
+   * capture import) keeps the check hidden until the next sync.
+   */
+  async startSync(): Promise<void> {
+    await this._triggerSuperSyncCycle(30000);
   }
 
   /**

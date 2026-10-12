@@ -225,6 +225,16 @@ export type SoundConfig = Readonly<{
   volume: number;
 }>;
 
+/**
+ * Base64 DER encodings; see sync-core `capture-open.ts` for the format.
+ * `v` is open-ended so typia accepts a future version; clients skip it.
+ */
+export type CaptureKeyConfig = Readonly<{
+  v: number;
+  privateKeyPkcs8: string;
+  publicKeySpki: string;
+}>;
+
 export type SyncConfig = Readonly<{
   isEnabled: boolean;
   isEncryptionEnabled?: boolean;
@@ -238,6 +248,12 @@ export type SyncConfig = Readonly<{
   syncProvider: SyncProviderId | null;
   syncInterval: number;
   isManualSyncOnly?: boolean;
+  /**
+   * Agent task capture key pair (SuperSync). Synced on purpose: every device
+   * opens captures sealed to it. Absent or null means capture is off; null is
+   * what switching off writes, since an absent field does not travel.
+   */
+  captureKey?: CaptureKeyConfig | null;
 
   /* NOTE: view model for form only*/
   encryptKey?: string | null;

@@ -54,6 +54,7 @@ import { MatDatepickerIntl } from '@angular/material/datepicker';
 import { FormlyConfigModule } from './app/ui/formly-config.module';
 import { provideFormlyConfig } from '@ngx-formly/core';
 import { PRIORITY_ICON_PRESET_SELECT_FORMLY_CONFIG } from './app/features/config/priority-icon-preset-select/priority-icon-preset-select.component';
+import { AGENT_CAPTURE_SETTINGS_FORMLY_CONFIG } from './app/features/tasks/agent-capture/agent-capture-settings/agent-capture-settings.component';
 import { markedOptionsFactory } from './app/ui/marked-options-factory';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { DEFAULT_TODAY_TAG_COLOR } from './app/features/work-context/work-context.const';
@@ -149,9 +150,10 @@ bootstrapApplication(AppComponent, {
     // timeout, so a failed or stalled chunk load degrades to the default locale
     // instead of failing bootstrap or holding up first render indefinitely.
     provideAppInitializer(() => registerNavigatorLocale()),
-    // Feature-owned formly type, registered here rather than in ui/'s
+    // Feature-owned formly types, registered here rather than in ui/'s
     // FormlyConfigModule so ui/ does not import from features/.
     provideFormlyConfig(PRIORITY_ICON_PRESET_SELECT_FORMLY_CONFIG),
+    provideFormlyConfig(AGENT_CAPTURE_SETTINGS_FORMLY_CONFIG),
     // Provide configuration for TranslateHttpLoader
     {
       provide: TRANSLATE_HTTP_LOADER_CONFIG,
