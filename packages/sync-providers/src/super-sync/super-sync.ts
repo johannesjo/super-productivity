@@ -646,6 +646,7 @@ export class SuperSyncProvider
     const response = await this._ignoreNotFound(
       this._fetchApi<unknown>(cfg, '/api/capture/connect-code', {
         method: 'POST',
+        body: '{}',
         noRetry: true,
       }),
     );

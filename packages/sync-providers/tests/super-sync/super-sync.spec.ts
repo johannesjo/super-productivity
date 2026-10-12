@@ -845,6 +845,7 @@ describe('SuperSyncProvider', () => {
       expect(call(fetchMock).url).toBe(
         'https://sync.example.com/api/capture/connect-code',
       );
+      expect(call(fetchMock).body).toEqual({});
     });
 
     it('reports connection-code support missing on an older server', async () => {
