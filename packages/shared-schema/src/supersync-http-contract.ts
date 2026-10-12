@@ -446,3 +446,13 @@ export type SuperSyncCaptureGrantsResponse = z.infer<
 export type SuperSyncCaptureTokenResponse = z.infer<
   typeof SuperSyncCaptureTokenResponseSchema
 >;
+
+export const SuperSyncCaptureConnectCodeResponseSchema = z
+  .object({
+    code: z.string().regex(/^[0-9A-HJKMNP-TV-Z]{5}-[0-9A-HJKMNP-TV-Z]{5}$/),
+    expiresAt: z.number().int().positive(),
+  })
+  .loose();
+export type SuperSyncCaptureConnectCodeResponse = z.infer<
+  typeof SuperSyncCaptureConnectCodeResponseSchema
+>;

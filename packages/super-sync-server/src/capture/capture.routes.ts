@@ -1,3 +1,4 @@
+import { createCaptureConnectCode } from './capture-oauth.store';
 import { FastifyInstance, FastifyReply, FastifyRequest } from 'fastify';
 import { z } from 'zod';
 import { authenticate, getAuthUser } from '../middleware';
@@ -139,6 +140,17 @@ export const captureRoutes = async (fastify: FastifyInstance): Promise<void> => 
     '/tokens',
     { config: { rateLimit: { max: 10, timeWindow: '15 minutes' } } },
     createToken,
+  );
+  fastify.post(
+    '/connect-code',
+    { config: { rateLimit: { max: 10, timeWindow: '15 minutes' } } },
+    async (req, reply) => {
+      const user = getAuthUser(req);
+      const result = await createCaptureConnectCode(user.userId, user.tokenVersion);
+      return result
+        ? reply.header('Cache-Control', 'no-store').send(result)
+        : reply.code(409).send({ error: 'capture_disabled' });
+    },
   );
   fastify.get('/grants', listGrants);
   fastify.delete('/grants/:id', deleteGrant);

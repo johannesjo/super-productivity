@@ -5,6 +5,7 @@ import { generateCaptureKeyPair, isCryptoSubtleAvailable } from '@sp/sync-core';
 import type {
   SuperSyncCaptureGrantInfo,
   SuperSyncCaptureTokenResult,
+  SuperSyncCaptureConnectCodeResult,
   SuperSyncProvider,
 } from '@sp/sync-providers/super-sync';
 import { nanoid } from 'nanoid';
@@ -122,6 +123,10 @@ export class AgentCaptureService {
 
   getMcpUrl(): Promise<string> {
     return this._superSyncOrError().getCaptureMcpUrl();
+  }
+
+  createConnectCode(): Promise<SuperSyncCaptureConnectCodeResult> {
+    return this._superSyncOrError().createCaptureConnectCode();
   }
 
   createToken(clientName: string): Promise<SuperSyncCaptureTokenResult> {

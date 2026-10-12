@@ -18,6 +18,7 @@ import {
   validateCaptureClaimResponse,
   validateCaptureGrantsResponse,
   validateCaptureTokenResponse,
+  validateCaptureConnectCodeResponse,
   validateDeleteAllDataResponse,
   validateDevicesResponse,
   validateOpDownloadResponse,
@@ -87,6 +88,7 @@ export const createSuperSyncProvider = (): PackageSuperSyncProvider => {
     validateReplaceToken: validateReplaceTokenResponse,
     validateCaptureClaim: validateCaptureClaimResponse,
     validateCaptureGrants: validateCaptureGrantsResponse,
+    validateCaptureConnectCode: validateCaptureConnectCodeResponse,
     validateCaptureToken: validateCaptureTokenResponse,
   };
 

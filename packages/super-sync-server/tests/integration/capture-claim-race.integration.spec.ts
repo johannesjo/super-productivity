@@ -20,8 +20,23 @@ vi.hoisted(() => {
 import { createECDH } from 'crypto';
 import { disconnectDb, prisma } from '../../src/db';
 import { captureKeyFingerprint } from '../../src/capture/capture-seal';
-import { registerCaptureKey } from '../../src/capture/capture-key.store';
-import { createCaptureTokenGrant } from '../../src/capture/capture-grant.store';
+import {
+  disableCaptureKey,
+  registerCaptureKey,
+} from '../../src/capture/capture-key.store';
+import {
+  authenticateCaptureToken,
+  createCaptureTokenGrant,
+  revokeAllCaptureGrants,
+} from '../../src/capture/capture-grant.store';
+import {
+  approveCaptureAuthorization,
+  createCaptureAuthorization,
+  createCaptureConnectCode,
+  exchangeCaptureAuthorization,
+  refreshCaptureAuthorization,
+} from '../../src/capture/capture-oauth.store';
+import { pkceChallenge } from '../../src/capture/capture-oauth-token';
 import {
   CapturePayload,
   claimCaptures,
@@ -57,7 +72,7 @@ describeWithDb('capture races (real PostgreSQL)', () => {
 
   beforeEach(async () => {
     await prisma.user.deleteMany({ where: { email: EMAIL } });
-    userId = (await prisma.user.create({ data: { email: EMAIL } })).id;
+    userId = (await prisma.user.create({ data: { email: EMAIL, isVerified: 1 } })).id;
     const publicKey = newPublicKey();
     fingerprint = captureKeyFingerprint(publicKey);
     await registerCaptureKey(userId, publicKey);
@@ -67,6 +82,131 @@ describeWithDb('capture races (real PostgreSQL)', () => {
   afterAll(async () => {
     await prisma.user.deleteMany({ where: { email: EMAIL } });
     await disconnectDb();
+  });
+
+  const signingKey = 'integration-test-jwt-secret-at-least-32-characters';
+  const oauthInput = {
+    clientId: 'https://client.example/metadata',
+    clientName: 'race',
+    redirectUri: 'https://client.example/callback',
+    resource: 'https://sync.example/mcp',
+    verifier: 'v'.repeat(43),
+  };
+  const approvedCode = async (): Promise<string> => {
+    const id = await createCaptureAuthorization({
+      ...oauthInput,
+      state: 'race',
+      scope: 'tasks:capture offline_access',
+      codeChallenge: pkceChallenge(oauthInput.verifier),
+    });
+    const connect = await createCaptureConnectCode(userId, 0);
+    const redirect = await approveCaptureAuthorization(
+      id,
+      connect!.code,
+      'https://sync.example',
+    );
+    return new URL(redirect!).searchParams.get('code')!;
+  };
+
+  it('issues one grant for concurrent exchanges and one successor for concurrent refreshes', async () => {
+    const code = await approvedCode();
+    const results = await Promise.all(
+      Array.from({ length: 4 }, () =>
+        exchangeCaptureAuthorization({ ...oauthInput, code }, signingKey),
+      ),
+    );
+    const issued = results.filter((r) => r !== null);
+    expect(issued).toHaveLength(1);
+    const refresh = issued[0]!.refresh_token!;
+    const refreshed = await Promise.all(
+      Array.from({ length: 4 }, () =>
+        refreshCaptureAuthorization(
+          refresh,
+          oauthInput.clientId,
+          oauthInput.resource,
+          signingKey,
+        ),
+      ),
+    );
+    expect(refreshed.every((r) => r !== null)).toBe(true);
+    expect(new Set(refreshed.map((r) => r!.refresh_token)).size).toBe(1);
+    expect(new Set(refreshed.map((r) => r!.access_token)).size).toBe(1);
+  });
+
+  it('rejects an in-flight exchange after sign-out commits', async () => {
+    const code = await approvedCode();
+    let release: () => void = () => undefined;
+    let locked: () => void = () => undefined;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const ready = new Promise<void>((resolve) => {
+      locked = resolve;
+    });
+    const blocker = prisma.$transaction(
+      async (tx) => {
+        await tx.$queryRaw`SELECT id FROM users WHERE id = ${userId} FOR UPDATE`;
+        locked();
+        await held;
+        await tx.user.update({
+          where: { id: userId },
+          data: { tokenVersion: { increment: 1 } },
+        });
+        await revokeAllCaptureGrants(tx, userId);
+      },
+      { timeout: 10000 },
+    );
+    await ready;
+    const exchange = exchangeCaptureAuthorization({ ...oauthInput, code }, signingKey);
+    try {
+      // Observe the real exchange waiting on our user lock, not a mocked store seam.
+      await expect
+        .poll(
+          async () => {
+            const rows = await prisma.$queryRaw<Array<{ count: bigint }>>`
+          SELECT count(*) FROM pg_stat_activity WHERE datname = current_database()
+            AND wait_event_type = 'Lock' AND query LIKE '%SELECT token_version FROM users%FOR SHARE%'`;
+            return Number(rows[0].count);
+          },
+          { timeout: 3000 },
+        )
+        .toBeGreaterThan(0);
+    } finally {
+      release();
+      await blocker;
+    }
+    expect(await exchange).toBeNull();
+    expect(
+      await exchangeCaptureAuthorization({ ...oauthInput, code }, signingKey),
+    ).toBeNull();
+  });
+
+  it('feature-off racing refresh leaves no usable access or refresh token', async () => {
+    const first = await exchangeCaptureAuthorization(
+      { ...oauthInput, code: await approvedCode() },
+      signingKey,
+    );
+    const [refreshed] = await Promise.all([
+      refreshCaptureAuthorization(
+        first!.refresh_token!,
+        oauthInput.clientId,
+        oauthInput.resource,
+        signingKey,
+      ),
+      disableCaptureKey(userId),
+    ]);
+    expect(await authenticateCaptureToken(first!.access_token)).toBeNull();
+    if (refreshed) {
+      expect(await authenticateCaptureToken(refreshed.access_token)).toBeNull();
+      expect(
+        await refreshCaptureAuthorization(
+          refreshed.refresh_token!,
+          oauthInput.clientId,
+          oauthInput.resource,
+          signingKey,
+        ),
+      ).toBeNull();
+    }
   });
 
   it('never leases one item to two devices claiming at once', async () => {

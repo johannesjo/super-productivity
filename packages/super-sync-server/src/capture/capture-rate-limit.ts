@@ -145,3 +145,21 @@ export const resetCaptureRateLimitForTests = (): void => {
   recentGrants.clear();
   nextPruneAt = 0;
 };
+
+/** Browser authorization and short-code guessing limits, separate from MCP egress. */
+export const isCaptureOAuthLimited = (
+  action: 'authorize' | 'approve',
+  ip: string,
+  now = Date.now(),
+): boolean => {
+  const key = `oauth:${action}:${ipLimitKey(ip)}`;
+  const hour = 60 * 60 * 1000;
+  if (
+    isOverLimit(key, action === 'authorize' ? 20 : 10, now) ||
+    (action === 'approve' && isOverLimit('oauth:approve:global', 300, now))
+  )
+    return true;
+  count(key, now, action === 'authorize' ? hour : WINDOW_MS);
+  if (action === 'approve') count('oauth:approve:global', now, hour);
+  return false;
+};

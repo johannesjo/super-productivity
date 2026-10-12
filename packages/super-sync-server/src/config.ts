@@ -1,3 +1,8 @@
+import {
+  CaptureOAuthClient,
+  CaptureOAuthClientsSchema,
+  DEFAULT_CAPTURE_OAUTH_CLIENTS,
+} from './capture/capture-oauth-clients';
 import { isIP } from 'net';
 import * as path from 'path';
 import { Logger } from './logger';
@@ -177,6 +182,7 @@ export interface ServerConfig {
    * in. Set CAPTURE_CONNECTOR_ENABLED=true.
    */
   captureConnectorEnabled: boolean;
+  captureOAuthClients: CaptureOAuthClient[];
   /**
    * Test mode configuration. When enabled, provides endpoints for E2E testing.
    * NEVER enable in production!
@@ -212,6 +218,7 @@ const DEFAULT_CONFIG: ServerConfig = {
   },
   trustProxy: SERVER_TRUST_PROXY,
   captureConnectorEnabled: false,
+  captureOAuthClients: DEFAULT_CAPTURE_OAUTH_CLIENTS,
 };
 
 /**
@@ -283,6 +290,11 @@ export const loadConfigFromEnv = (
     throw new Error('PUBLIC_URL must use HTTPS in production');
   }
 
+  if (process.env.CAPTURE_OAUTH_CLIENTS) {
+    config.captureOAuthClients = CaptureOAuthClientsSchema.parse(
+      JSON.parse(process.env.CAPTURE_OAUTH_CLIENTS),
+    );
+  }
   if (process.env.CAPTURE_CONNECTOR_ENABLED !== undefined) {
     config.captureConnectorEnabled = process.env.CAPTURE_CONNECTOR_ENABLED === 'true';
   }

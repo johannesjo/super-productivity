@@ -25,7 +25,7 @@ const MIGRATION = join(
 
 export const createCaptureSchema = async (db: PGlite): Promise<void> => {
   await db.exec(`
-    DROP TABLE IF EXISTS capture_items, capture_grants, capture_keys, users;
+    DROP TABLE IF EXISTS capture_auth, capture_connect_codes, capture_items, capture_grants, capture_keys, users;
     CREATE TABLE users (
       id serial PRIMARY KEY,
       email text NOT NULL UNIQUE,
@@ -33,6 +33,12 @@ export const createCaptureSchema = async (db: PGlite): Promise<void> => {
       token_version integer NOT NULL DEFAULT 0
     );`);
   await db.exec(readFileSync(MIGRATION, 'utf8'));
+  await db.exec(
+    readFileSync(
+      join(dirname(MIGRATION), '../20261012000000_capture_oauth/migration.sql'),
+      'utf8',
+    ),
+  );
 };
 
 export const addUser = async (db: PGlite, email: string): Promise<number> => {

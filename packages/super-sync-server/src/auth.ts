@@ -186,7 +186,7 @@ export const replaceToken = async (
 };
 
 export type TokenVerificationResult =
-  | { valid: true; userId: number; email: string }
+  | { valid: true; userId: number; email: string; tokenVersion: number }
   | { valid: false; reason: string };
 
 export const verifyToken = async (token: string): Promise<TokenVerificationResult> => {
@@ -205,7 +205,7 @@ export const verifyToken = async (token: string): Promise<TokenVerificationResul
     const tokenVersion = payload.tokenVersion ?? 0;
     const cachedUser = authCache.get(payload.userId);
     if (cachedUser && cachedUser.isVerified && cachedUser.tokenVersion === tokenVersion) {
-      return { valid: true, userId: payload.userId, email: payload.email };
+      return { valid: true, userId: payload.userId, email: payload.email, tokenVersion };
     }
     const cacheVersionBeforeRead = authCache.getInvalidationVersion(payload.userId);
 
@@ -246,7 +246,7 @@ export const verifyToken = async (token: string): Promise<TokenVerificationResul
     }
 
     authCache.setIfCurrent(payload.userId, currentVersion, true, cacheVersionBeforeRead);
-    return { valid: true, userId: payload.userId, email: payload.email };
+    return { valid: true, userId: payload.userId, email: payload.email, tokenVersion };
   } catch (err) {
     if (err instanceof TokenExpiredError) {
       return {

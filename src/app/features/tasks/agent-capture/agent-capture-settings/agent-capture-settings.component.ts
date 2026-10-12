@@ -63,6 +63,7 @@ export class AgentCaptureSettingsComponent extends FieldType<FormlyFieldConfig> 
   readonly grants = signal<SuperSyncCaptureGrantInfo[]>([]);
   readonly clientName = signal('');
   /** Shown once, held only by this component; never logged. */
+  readonly connectCode = signal<{ code: string; expiresAt: number } | null>(null);
   readonly newToken = signal<string | null>(null);
   /** Ready to paste: the token is filled in, so setup is one copy. */
   readonly setupCommand = computed(
@@ -99,7 +100,18 @@ export class AgentCaptureSettingsComponent extends FieldType<FormlyFieldConfig> 
       await this._capture.switchOff();
       this.grants.set([]);
       this.newToken.set(null);
+      this.connectCode.set(null);
     });
+  }
+
+  createConnectCode(): Promise<void> {
+    return this._run(async () => {
+      this.connectCode.set(await this._capture.createConnectCode());
+    });
+  }
+
+  refreshGrants(): Promise<void> {
+    return this._run(() => this._load());
   }
 
   createToken(): Promise<void> {

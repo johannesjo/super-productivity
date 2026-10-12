@@ -43,6 +43,41 @@
       </button>
     }
 
+    <p>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_OAUTH_HINT | translate }}</p>
+    <button
+      mat-stroked-button
+      type="button"
+      [disabled]="isBusy()"
+      (click)="createConnectCode()"
+    >
+      {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_CONNECT_CODE | translate }}
+    </button>
+    @if (connectCode(); as connection) {
+      <p>{{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_CONNECT_CODE_WARNING | translate }}</p>
+      <label>
+        {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_CONNECT_CODE | translate }}
+        <input
+          class="value"
+          type="text"
+          readonly
+          [value]="connection.code"
+          e2e="captureConnectCode"
+          (focus)="$any($event.target).select()"
+        />
+      </label>
+      <p>
+        {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_CODE_EXPIRES | translate }}
+        {{ connection.expiresAt | localeDate: 'shortTime' }}
+      </p>
+      <button
+        mat-button
+        type="button"
+        (click)="copy(connection.code, 'Code')"
+      >
+        {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_COPY | translate }}
+      </button>
+    }
+
     <mat-form-field>
       <mat-label>{{
         T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_L_CLIENT_NAME | translate
@@ -108,6 +143,14 @@
       }
     }
 
+    <button
+      mat-button
+      type="button"
+      [disabled]="isBusy()"
+      (click)="refreshGrants()"
+    >
+      {{ T.F.SYNC.FORM.SUPER_SYNC.CAPTURE_BTN_REFRESH_CONNECTIONS | translate }}
+    </button>
     <ul>
       @for (grant of grants(); track grant.id) {
         <li>

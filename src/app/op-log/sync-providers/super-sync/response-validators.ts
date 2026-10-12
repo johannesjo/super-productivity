@@ -2,6 +2,7 @@ import {
   SuperSyncCaptureClaimResponseSchema,
   SuperSyncCaptureGrantsResponseSchema,
   SuperSyncCaptureTokenResponseSchema,
+  SuperSyncCaptureConnectCodeResponseSchema,
   SuperSyncDeleteAllDataResponseSchema,
   SuperSyncDevicesResponseSchema,
   SuperSyncDownloadOpsResponseSchema,
@@ -15,6 +16,7 @@ import type {
   SuperSyncCaptureClaimResult,
   SuperSyncCaptureGrantList,
   SuperSyncCaptureTokenResult,
+  SuperSyncCaptureConnectCodeResult,
   SuperSyncDeviceListResponse,
   SuperSyncReplaceTokenResult,
 } from '@sp/sync-providers/super-sync';
@@ -195,3 +197,12 @@ export const validateCaptureTokenResponse = (
     data,
     'CaptureTokenResponse',
   ) as SuperSyncCaptureTokenResult;
+
+export const validateCaptureConnectCodeResponse = (
+  data: unknown,
+): SuperSyncCaptureConnectCodeResult =>
+  parseResponse(
+    SuperSyncCaptureConnectCodeResponseSchema,
+    data,
+    'CaptureConnectCodeResponse',
+  ) as SuperSyncCaptureConnectCodeResult;

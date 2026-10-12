@@ -68,6 +68,7 @@ export {
   SuperSyncCaptureGrantSchema,
   SuperSyncCaptureGrantsResponseSchema,
   SuperSyncCaptureTokenResponseSchema,
+  SuperSyncCaptureConnectCodeResponseSchema,
 } from './supersync-http-contract';
 export type {
   SuperSyncOpType,
@@ -98,4 +99,5 @@ export type {
   SuperSyncCaptureGrant,
   SuperSyncCaptureGrantsResponse,
   SuperSyncCaptureTokenResponse,
+  SuperSyncCaptureConnectCodeResponse,
 } from './supersync-http-contract';

@@ -56,6 +56,7 @@ describe('AgentCaptureSettingsComponent', () => {
         'switchOn',
         'switchOff',
         'createToken',
+        'createConnectCode',
         'revokeGrant',
       ]),
       { isEnabled: signal(true) },
@@ -81,6 +82,23 @@ describe('AgentCaptureSettingsComponent', () => {
         },
       ],
     }).compileComponents();
+  });
+
+  it('shows a one-time connection code and clears it when capture is disabled', async () => {
+    capture.createConnectCode.and.resolveTo({
+      code: 'ABCDE-FGHJK',
+      expiresAt: Date.now() + 600000,
+    });
+    setup();
+    await render();
+    await component.createConnectCode();
+    await render();
+    expect(fixture.nativeElement.querySelector('[e2e="captureConnectCode"]').value).toBe(
+      'ABCDE-FGHJK',
+    );
+    expect(text()).toContain('CAPTURE_CONNECT_CODE_WARNING');
+    await component.turnOff();
+    expect(component.connectCode()).toBeNull();
   });
 
   it('asks to save SuperSync first when it is not the active provider', async () => {

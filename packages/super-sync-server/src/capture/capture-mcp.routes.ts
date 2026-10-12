@@ -33,10 +33,6 @@ import {
  */
 
 const MCP_SERVER_VERSION = '1.0.0';
-// shortcut: no resource_metadata yet. Milestone 3 (OAuth) adds it together
-// with /.well-known/oauth-protected-resource/mcp; pointing at a 404 before
-// then would send OAuth-capable clients into a dead discovery.
-const WWW_AUTHENTICATE = 'Bearer scope="tasks:capture"';
 
 const headerValue = (value: string | string[] | undefined): string | undefined =>
   Array.isArray(value) ? value[0] : value;
@@ -61,18 +57,23 @@ const contextFor = (grant: AuthenticatedGrant): McpServerContext => ({
 const handleMcpPost = async (
   req: FastifyRequest,
   reply: FastifyReply,
+  publicUrl?: string,
 ): Promise<FastifyReply> => {
   const token = bearerToken(req);
   const claimedGrantId = (token && parseCaptureToken(token)?.grantId) || null;
   if (isAuthFailureLimited(req.ip, claimedGrantId)) {
     return reply.code(429).header('Retry-After', '60').send({ error: 'rate_limited' });
   }
-  const grant = token ? await authenticateCaptureToken(token) : null;
+  const grant = token
+    ? await authenticateCaptureToken(
+        token,
+        Date.now(),
+        publicUrl ? `${publicUrl}/mcp` : undefined,
+      )
+    : null;
   if (!grant) {
     recordAuthFailure(req.ip, claimedGrantId);
-    const challenge = token
-      ? `Bearer error="invalid_token", scope="tasks:capture"`
-      : WWW_AUTHENTICATE;
+    const challenge = `Bearer scope="tasks:capture"${token ? ', error="invalid_token"' : ''}${publicUrl ? `, resource_metadata="${publicUrl}/.well-known/oauth-protected-resource/mcp"` : ''}`;
     return reply
       .code(401)
       .header('WWW-Authenticate', challenge)
@@ -110,7 +111,10 @@ const methodNotAllowed = async (
   reply: FastifyReply,
 ): Promise<FastifyReply> => reply.code(405).header('Allow', 'POST').send();
 
-export const captureMcpRoutes = async (fastify: FastifyInstance): Promise<void> => {
+export const captureMcpRoutes = async (
+  fastify: FastifyInstance,
+  options: { publicUrl?: string } = {},
+): Promise<void> => {
   // Raw text, so a malformed body becomes a JSON-RPC parse error rather than
   // a Fastify 400. Encapsulated: only affects routes in this plugin.
   fastify.addContentTypeParser(
@@ -125,7 +129,7 @@ export const captureMcpRoutes = async (fastify: FastifyInstance): Promise<void> 
   fastify.post(
     '/mcp',
     { bodyLimit: CAPTURE_MCP_BODY_LIMIT_BYTES, config },
-    handleMcpPost,
+    (req, reply) => handleMcpPost(req, reply, options.publicUrl),
   );
   fastify.get('/mcp', { config }, methodNotAllowed);
   fastify.delete('/mcp', { config }, methodNotAllowed);

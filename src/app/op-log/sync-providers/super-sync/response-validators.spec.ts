@@ -10,9 +10,22 @@ import {
   validateCaptureClaimResponse,
   validateCaptureGrantsResponse,
   validateCaptureTokenResponse,
+  validateCaptureConnectCodeResponse,
 } from './response-validators';
 
 describe('response-validators', () => {
+  it('validates connection codes and rejects malformed responses', () => {
+    expect(
+      validateCaptureConnectCodeResponse({ code: 'ABCDE-FGHJK', expiresAt: 123 }).code,
+    ).toBe('ABCDE-FGHJK');
+    expect(() =>
+      validateCaptureConnectCodeResponse({ code: 'secret', expiresAt: 123 }),
+    ).toThrow();
+    expect(() =>
+      validateCaptureConnectCodeResponse({ code: 'ABCDE-FGHJK', expiresAt: '123' }),
+    ).toThrow();
+  });
+
   describe('validateOpUploadResponse', () => {
     it('should accept valid response', () => {
       const response = {

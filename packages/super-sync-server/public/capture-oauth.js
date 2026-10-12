@@ -1,0 +1,39 @@
+'use strict';
+const form = document.getElementById('capture-consent');
+const status = document.getElementById('status');
+const submit = form.querySelector('button[type="submit"]');
+document.getElementById('cancel').addEventListener('click', () => {
+  form.remove();
+  const message = document.createElement('p');
+  message.textContent = 'Connection cancelled. You can close this window.';
+  document.querySelector('main').append(message);
+});
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  submit.disabled = true;
+  status.textContent = '';
+  try {
+    const response = await fetch('/oauth/authorize/approve', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        authId: form.dataset.authId,
+        code: form.elements.code.value,
+      }),
+    });
+    if (!response.ok) {
+      status.textContent =
+        response.status === 429
+          ? 'Too many attempts. Please try again later.'
+          : 'This code or connection has expired or is invalid. Start again from your assistant and create a new code in Super Productivity.';
+      return;
+    }
+    const result = await response.json();
+    form.elements.code.value = '';
+    window.location.assign(result.redirect);
+  } catch {
+    status.textContent = 'Could not connect. Please check your connection and try again.';
+  } finally {
+    submit.disabled = false;
+  }
+});

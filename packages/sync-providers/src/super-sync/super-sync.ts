@@ -38,6 +38,7 @@ import {
   type SuperSyncCaptureGrantList,
   type SuperSyncCaptureKeyResult,
   type SuperSyncCaptureTokenResult,
+  type SuperSyncCaptureConnectCodeResult,
   type SuperSyncDeviceListResponse,
   type SuperSyncPrivateCfg,
   type SuperSyncWebSocketAccess,
@@ -637,6 +638,19 @@ export class SuperSyncProvider
     );
     if (response === undefined) throw new SuperSyncCaptureUnsupportedError();
     return this._deps.responseValidators.validateCaptureToken(response);
+  }
+
+  /** A retry would replace the code the user just received. */
+  async createCaptureConnectCode(): Promise<SuperSyncCaptureConnectCodeResult> {
+    const cfg = await this._cfgOrError();
+    const response = await this._ignoreNotFound(
+      this._fetchApi<unknown>(cfg, '/api/capture/connect-code', {
+        method: 'POST',
+        noRetry: true,
+      }),
+    );
+    if (response === undefined) throw new SuperSyncCaptureUnsupportedError();
+    return this._deps.responseValidators.validateCaptureConnectCode(response);
   }
 
   /** A server without capture (404) has no grants. */

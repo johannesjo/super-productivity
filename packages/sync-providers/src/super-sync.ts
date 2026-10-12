@@ -8,6 +8,7 @@ export {
   type SuperSyncCaptureItemInfo,
   type SuperSyncCaptureKeyResult,
   type SuperSyncCaptureTokenResult,
+  type SuperSyncCaptureConnectCodeResult,
   type SuperSyncDeviceInfo,
   type SuperSyncDeviceListResponse,
   type SuperSyncPrivateCfg,

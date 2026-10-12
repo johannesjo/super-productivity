@@ -39,6 +39,7 @@ import {
   type SuperSyncCaptureClaimResult,
   type SuperSyncCaptureGrantList,
   type SuperSyncCaptureTokenResult,
+  type SuperSyncCaptureConnectCodeResult,
   type SuperSyncReplaceTokenResult,
   type SuperSyncPrivateCfg,
   type SuperSyncResponseValidators,
@@ -137,6 +138,7 @@ const createValidatorsPassthrough = (): SuperSyncResponseValidators => ({
   validateReplaceToken: (data) => data as SuperSyncReplaceTokenResult,
   validateCaptureClaim: (data) => data as SuperSyncCaptureClaimResult,
   validateCaptureGrants: (data) => data as SuperSyncCaptureGrantList,
+  validateCaptureConnectCode: (data) => data as SuperSyncCaptureConnectCodeResult,
   validateCaptureToken: (data) => data as SuperSyncCaptureTokenResult,
 });
 
@@ -832,6 +834,26 @@ describe('SuperSyncProvider', () => {
         deviceId: 'dev-1',
         acks: [{ itemId: 'i', taskId: 't' }],
       });
+    });
+
+    it('does not replace a connection code by retrying a lost response', async () => {
+      const { provider, cfgStore, fetchMock } = buildProvider();
+      cfgStore.load.mockResolvedValue(testConfig);
+      fetchMock.mockRejectedValue(new TypeError('Failed to fetch'));
+      await expect(provider.createCaptureConnectCode()).rejects.toThrow();
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      expect(call(fetchMock).url).toBe(
+        'https://sync.example.com/api/capture/connect-code',
+      );
+    });
+
+    it('reports connection-code support missing on an older server', async () => {
+      const { provider, cfgStore, fetchMock } = buildProvider();
+      cfgStore.load.mockResolvedValue(testConfig);
+      fetchMock.mockResolvedValue(errorResponse(404, 'Not Found', ''));
+      await expect(provider.createCaptureConnectCode()).rejects.toBeInstanceOf(
+        SuperSyncCaptureUnsupportedError,
+      );
     });
 
     it('creates a token without retrying a lost response', async () => {

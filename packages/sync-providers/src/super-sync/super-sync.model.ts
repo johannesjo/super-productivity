@@ -160,3 +160,9 @@ export const isSuperSyncWebSocketAccess = (
     typeof (value as { getWebSocketParams?: unknown }).getWebSocketParams === 'function'
   );
 };
+
+/** Short-lived, single-use code displayed only in settings. Never persisted. */
+export interface SuperSyncCaptureConnectCodeResult {
+  code: string;
+  expiresAt: number;
+}

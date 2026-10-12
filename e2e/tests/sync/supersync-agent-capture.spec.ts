@@ -1,3 +1,4 @@
+import { createHash, randomBytes } from 'node:crypto';
 import type { Browser, Page } from '@playwright/test';
 import { test, expect } from '../../fixtures/supersync.fixture';
 import {
@@ -208,6 +209,94 @@ test.describe('@supersync Agent task capture', () => {
   test.afterEach(async () => {
     if (clientA) await closeClient(clientA);
     if (clientB) await closeClient(clientB);
+  });
+
+  test('OAuth consent connects an assistant, refreshes access and imports one literal Inbox task', async ({
+    browser,
+    baseURL,
+    testRunId,
+  }) => {
+    const user = await createTestUser(testRunId);
+    const a = await createSimulatedClient(browser, baseURL!, 'OAuth', testRunId);
+    clientA = a;
+    await a.sync.setupSuperSync(getSuperSyncConfig(user));
+    const dialog = await a.sync.openSuperSyncSettings();
+    const capture = dialog.locator('agent-capture-settings');
+    await capture.getByRole('button', { name: 'Let AI assistants add tasks' }).click();
+    await capture.getByRole('button', { name: 'Create connection code' }).click();
+    const codeInput = capture.locator('[e2e="captureConnectCode"]');
+    await expect(codeInput).toHaveValue(/^[A-Z0-9]{5}-[A-Z0-9]{5}$/);
+    const code = await codeInput.inputValue();
+    const verifier = randomBytes(32).toString('base64url');
+    const clientId = 'https://claude.ai/oauth/mcp-oauth-client-metadata';
+    const callback = 'https://claude.ai/api/mcp/auth_callback';
+    const resource = `${SUPERSYNC_BASE_URL}/mcp`;
+    const consent = await a.page.context().newPage();
+    // Intercept the callback: this local test never contacts a real assistant account.
+    await consent.route(`${callback}**`, (route) =>
+      route.fulfill({ status: 200, contentType: 'text/html', body: '<p>Connected</p>' }),
+    );
+    await consent.goto(
+      `${SUPERSYNC_BASE_URL}/oauth/authorize?${new URLSearchParams({
+        client_id: clientId,
+        redirect_uri: callback,
+        resource,
+        response_type: 'code',
+        scope: 'tasks:capture offline_access',
+        state: 'e2e-state',
+        code_challenge_method: 'S256',
+        code_challenge: createHash('sha256').update(verifier).digest('base64url'),
+      })}`,
+    );
+    await expect(consent.getByRole('heading')).toHaveText(
+      'Connect Claude to Super Productivity',
+    );
+    await consent.getByLabel('Connection code').fill(code);
+    await consent.getByRole('button', { name: 'Allow adding tasks' }).click();
+    await consent.waitForURL(`${callback}**`);
+    const redirect = new URL(consent.url());
+    expect(redirect.searchParams.get('state')).toBe('e2e-state');
+    expect(redirect.searchParams.get('iss')).toBe(SUPERSYNC_BASE_URL);
+    const exchange = await fetch(`${SUPERSYNC_BASE_URL}/oauth/token`, {
+      method: 'POST',
+      body: new URLSearchParams({
+        grant_type: 'authorization_code',
+        code: redirect.searchParams.get('code')!,
+        code_verifier: verifier,
+        client_id: clientId,
+        redirect_uri: callback,
+        resource,
+      }),
+    });
+    expect(exchange.status).toBe(200);
+    const tokens = (await exchange.json()) as {
+      access_token: string;
+      refresh_token: string;
+    };
+    const refresh = await fetch(`${SUPERSYNC_BASE_URL}/oauth/token`, {
+      method: 'POST',
+      body: new URLSearchParams({
+        grant_type: 'refresh_token',
+        refresh_token: tokens.refresh_token,
+        client_id: clientId,
+        resource,
+      }),
+    });
+    expect(refresh.status).toBe(200);
+    const refreshed = (await refresh.json()) as { access_token: string };
+    await consent.close();
+    await capture.getByRole('button', { name: 'Refresh connections' }).click();
+    await expect(capture.locator('li').filter({ hasText: 'Claude' })).toHaveCount(1);
+    await dialog.getByRole('button', { name: /cancel/i }).click();
+    const title = `OAuth-${testRunId} #foo +bar tomorrow`;
+    await captureTask(refreshed.access_token, title);
+    await a.sync.startSync();
+    await expectInboxTasks(a, title, 1);
+    await a.sync.syncAndWait();
+    clientB = await joinClient(browser, baseURL!, testRunId, user);
+    await expectInboxTasks(clientB, title, 1);
+    await clientB.sync.syncAndWait();
+    await expectInboxTasks(clientB, title, 1);
   });
 
   test('an assistant task reaches the Inbox once, on every device', async ({

@@ -1,3 +1,5 @@
+import { getJwtSecret } from './auth';
+import { captureOAuthRoutes } from './capture/capture-oauth.routes';
 import * as fs from 'fs';
 import Fastify, { FastifyError, FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
@@ -503,7 +505,14 @@ export const createServer = (
 
       // Agent task capture: public /mcp for assistants, /api/capture for the app
       if (fullConfig.captureConnectorEnabled) {
-        await fastifyServer.register(captureMcpRoutes);
+        await fastifyServer.register(captureMcpRoutes, {
+          publicUrl: fullConfig.publicUrl,
+        });
+        await fastifyServer.register(captureOAuthRoutes, {
+          publicUrl: fullConfig.publicUrl,
+          signingKey: getJwtSecret(),
+          clients: fullConfig.captureOAuthClients,
+        });
         await fastifyServer.register(captureRoutes, { prefix: '/api/capture' });
       }
 

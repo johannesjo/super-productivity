@@ -364,6 +364,7 @@ All configuration is done via environment variables.
 | `WEBAUTHN_RP_NAME`                      | value of `WEBAUTHN_RP_ID`            | Name shown in your users' OS passkey prompt.                                                                                                                                                                                 |
 | `ALLOWED_EMAILS`                        | - (anyone may register)              | Comma-separated exact addresses and/or `*@domain` rules. **Set it for a private install**; empty means open public registration.                                                                                             |
 | `SUPERSYNC_DEFAULT_STORAGE_QUOTA_BYTES` | `104857600` (100 MB)                 | Quota for accounts created from now on. Existing accounts keep the value stored on their row.                                                                                                                                |
+| `CAPTURE_OAUTH_CLIENTS`                 | Claude and Claude Code               | JSON array of `{ "clientId": "https://…", "name": "…", "redirectUris": ["https://…"] }`; replaces the pinned OAuth client allowlist. No dynamic registration or URL fetching.                                                |
 | `CAPTURE_CONNECTOR_ENABLED`             | `false`                              | Agent task capture: the `/mcp` endpoint and `/api/capture`. Single instance only (in-process retry window and per-grant limit).                                                                                              |
 
 ### Legal pages
@@ -456,6 +457,39 @@ Check sync status and storage info. Not used by the production client — intend
 ```http
 GET /api/sync/status
 ```
+
+## Capture OAuth
+
+When `CAPTURE_CONNECTOR_ENABLED=true`, `/mcp` advertises OAuth discovery. Set
+`PUBLIC_URL` to the externally reachable server origin (HTTPS in production).
+The pinned clients are Claude (`https://claude.ai/oauth/mcp-oauth-client-metadata`)
+and Claude Code (`https://claude.ai/oauth/claude-code-client-metadata`), verified
+against Anthropic's public metadata on 2026-10-12. The web callback is exactly
+`https://claude.ai/api/mcp/auth_callback`; Code uses `/callback` on HTTP
+`localhost` or `127.0.0.1`, with any port. `CAPTURE_OAUTH_CLIENTS` replaces this
+list for operators who need another client. Redirects require HTTPS except
+loopback callbacks; unknown clients and redirects are rejected without a redirect.
+
+Users enable capture in the app, create a connection code in AI assistants
+settings, and enter it on the consent page their assistant opens. Access is
+limited to `tasks:capture`; `offline_access` enables refresh. Access lasts an
+hour, refresh credentials expire after 90 days unused, and each refresh rotates
+them. A retry with the preceding refresh token within two minutes returns the
+same successor; older issued tokens revoke that connection. A forged token
+cannot revoke a grant. Keep `JWT_SECRET` stable: domain-separated HMACs use it
+for refresh authenticity and retry derivation. Rotating it requires OAuth
+clients to reconnect. Only hashes of codes and bearer secrets are stored.
+
+Discovery and token requests bypass the shared-IP request quota. Failed token
+requests use the MCP authentication limiter; authorization pages allow 20 per
+hour per IP, and code approvals allow 10 per minute per IP and 300 per hour
+across the instance. This remains a single-instance feature. Sign-out everywhere
+and switching capture off revoke grants and invalidate unconsumed codes in one
+transaction. Apply the Prisma migration before starting the updated server.
+
+The local browser test covers app code → consent → token → refresh → Inbox
+and a second device. Real Claude web reconnection must also be checked after
+deployment; local tests do not validate Anthropic's hosted connector UI.
 
 ## Client Configuration
 
