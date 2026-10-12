@@ -657,6 +657,7 @@ export const SYNC_FORM: ConfigFormSection<SyncConfig> = {
           hideExpression: (m, v, field) =>
             isNotSyncProvider(field, 2, SyncProviderId.SuperSync),
           type: 'btn',
+          className: 'e2e-get-token-btn',
           templateOptions: {
             text: T.F.SYNC.FORM.SUPER_SYNC.BTN_GET_TOKEN,
             btnType: 'primary',
