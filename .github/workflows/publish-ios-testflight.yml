@@ -327,11 +327,11 @@ jobs:
       - name: Configure iOS signing
         uses: ./.github/actions/setup-ios-signing
         with:
-          mac_certs: ${{ secrets.mac_certs }}
-          mac_certs_password: ${{ secrets.mac_certs_password }}
-          ios_provision_profile: ${{ secrets.IOS_PROVISION_PROFILE }}
-          ios_share_provision_profile: ${{ secrets.IOS_SHARE_PROVISION_PROFILE }}
-          ios_widget_provision_profile: ${{ secrets.IOS_WIDGET_PROVISION_PROFILE }}
+          mac_certs: ${{ secrets.apple_distribution_cert }}
+          mac_certs_password: ${{ secrets.apple_distribution_cert_password }}
+          ios_provision_profile: ${{ secrets.IOS_APP_STORE_PROFILE }}
+          ios_share_provision_profile: ${{ secrets.IOS_SHARE_APP_STORE_PROFILE }}
+          ios_widget_provision_profile: ${{ secrets.IOS_WIDGET_APP_STORE_PROFILE }}
 
       - name: Create ExportOptions.plist
         run: |
