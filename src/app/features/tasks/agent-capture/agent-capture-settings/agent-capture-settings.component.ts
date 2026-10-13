@@ -7,7 +7,7 @@ import {
   signal,
   untracked,
 } from '@angular/core';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatFormField, MatLabel } from '@angular/material/form-field';
 import { MatIcon } from '@angular/material/icon';
@@ -41,6 +41,7 @@ import { AgentCaptureService } from '../agent-capture.service';
   imports: [
     FormlyModule,
     MatButton,
+    MatIconButton,
     MatFormField,
     MatLabel,
     MatIcon,
