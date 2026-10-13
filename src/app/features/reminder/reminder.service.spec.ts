@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { BehaviorSubject, of } from 'rxjs';
-import { ReminderService } from './reminder.service';
+import { ReminderService, REMINDER_DISMISS_UI_COOLDOWN_MS } from './reminder.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { ImexViewService } from '../../imex/imex-meta/imex-view.service';
 import { GlobalConfigService } from '../config/global-config.service';
@@ -371,6 +371,40 @@ describe('ReminderService', () => {
         type: 'ERROR',
         msg: jasmine.any(String),
       });
+    });
+  });
+
+  describe('reminder UI dismiss cooldown', () => {
+    const REMIND_AT = 1_700_000_000_000;
+
+    it('is not suppressed by default', () => {
+      expect(service.isReminderUiSuppressed('task1', REMIND_AT)).toBe(false);
+    });
+
+    it('suppresses an occurrence after a passive dismiss', () => {
+      service.suppressReminderUiAfterDismiss('task1', REMIND_AT);
+      expect(service.isReminderUiSuppressed('task1', REMIND_AT)).toBe(true);
+    });
+
+    it('only suppresses the dismissed task, not others', () => {
+      service.suppressReminderUiAfterDismiss('task1', REMIND_AT);
+      expect(service.isReminderUiSuppressed('task1', REMIND_AT)).toBe(true);
+      expect(service.isReminderUiSuppressed('task2', REMIND_AT)).toBe(false);
+    });
+
+    it('does not suppress a different occurrence of the same task (reschedule)', () => {
+      service.suppressReminderUiAfterDismiss('task1', REMIND_AT);
+      // Rescheduling produces a new remindAt — even within the cooldown window it
+      // must fire, never be hidden by the old dismiss.
+      expect(service.isReminderUiSuppressed('task1', REMIND_AT + 60_000)).toBe(false);
+    });
+
+    it('expires after the cooldown so the reminder re-nudges', () => {
+      service.suppressReminderUiAfterDismiss('task1', REMIND_AT);
+      const afterCooldown = Date.now() + REMINDER_DISMISS_UI_COOLDOWN_MS + 1000;
+      expect(service.isReminderUiSuppressed('task1', REMIND_AT, afterCooldown)).toBe(
+        false,
+      );
     });
   });
 

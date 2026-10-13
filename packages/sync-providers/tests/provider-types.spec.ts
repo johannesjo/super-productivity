@@ -129,4 +129,11 @@ describe('sync provider contracts', () => {
     expect(data.recentOps[0].sv).toBe(7);
     expect(FILE_BASED_SYNC_CONSTANTS.SYNC_FILE).toBe('sync-data.json');
   });
+
+  // SPAP-9: shrink the gap window so slow-syncing clients that miss up to
+  // MAX_RECENT_OPS ops can still catch up via incremental download instead of
+  // falling into the snapshot-replacement full-resync path.
+  it('retains 2000 recent ops to shrink the gap window (SPAP-9)', () => {
+    expect(FILE_BASED_SYNC_CONSTANTS.MAX_RECENT_OPS).toBe(2000);
+  });
 });

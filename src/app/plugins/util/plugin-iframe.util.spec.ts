@@ -330,6 +330,88 @@ describe('handlePluginMessage()', () => {
     );
   });
 
+  it('routes getAllSimpleCounters iframe API calls through plugin-bound methods', async () => {
+    const sourceWindow = jasmine.createSpyObj<{ postMessage: jasmine.Spy }>(
+      'sourceWindow',
+      ['postMessage'],
+    );
+    const simpleCounters = [{ id: 'sc1', title: 'Water', countOnDay: {} }];
+    const getAllSimpleCounters = jasmine
+      .createSpy('getAllSimpleCounters')
+      .and.resolveTo(simpleCounters);
+    const pluginBridge = {
+      createBoundMethods: () => ({
+        getAllSimpleCounters,
+      }),
+    } as unknown as PluginBridgeService;
+
+    await handlePluginMessage(
+      {
+        data: {
+          type: PluginIframeMessageType.API_CALL,
+          bridgeToken: 'test-bridge-token',
+          bridgeGeneration: 4,
+          method: 'getAllSimpleCounters',
+          callId: 16,
+          args: [],
+        },
+        source: sourceWindow,
+      } as unknown as MessageEvent,
+      createConfig(pluginBridge),
+    );
+
+    expect(getAllSimpleCounters).toHaveBeenCalledTimes(1);
+    expect(sourceWindow.postMessage).toHaveBeenCalledWith(
+      {
+        type: PluginIframeMessageType.API_RESPONSE,
+        callId: 16,
+        result: simpleCounters,
+      },
+      '*',
+    );
+  });
+
+  it('routes request iframe API calls through plugin-bound methods', async () => {
+    const sourceWindow = jasmine.createSpyObj<{ postMessage: jasmine.Spy }>(
+      'sourceWindow',
+      ['postMessage'],
+    );
+    const request = jasmine.createSpy('request').and.resolveTo({ ok: true });
+    const pluginBridge = {
+      createBoundMethods: () => ({
+        request,
+      }),
+    } as unknown as PluginBridgeService;
+
+    await handlePluginMessage(
+      {
+        data: {
+          type: PluginIframeMessageType.API_CALL,
+          bridgeToken: 'test-bridge-token',
+          bridgeGeneration: 4,
+          method: 'request',
+          callId: 17,
+          args: ['https://example.test/api', { method: 'POST', body: { ok: true } }],
+        },
+        source: sourceWindow,
+      } as unknown as MessageEvent,
+      createConfig(pluginBridge),
+    );
+
+    expect(request).toHaveBeenCalledOnceWith('https://example.test/api', {
+      method: 'POST',
+      body: { ok: true },
+    });
+    expect(sourceWindow.postMessage).toHaveBeenCalledWith(
+      {
+        type: PluginIframeMessageType.API_RESPONSE,
+        callId: 17,
+        result: { ok: true },
+      },
+      '*',
+    );
+  });
+
   it('routes getSelectedTask iframe API calls through plugin-bound methods', async () => {
     const sourceWindow = jasmine.createSpyObj<{ postMessage: jasmine.Spy }>(
       'sourceWindow',
@@ -383,14 +465,25 @@ describe('handlePluginMessage()', () => {
     expect(script).toContain('const bridgeGeneration = 4');
     expect(script).toContain("getSelectedTask: () => callApi('getSelectedTask')");
     expect(script).toContain("getFocusedTask: () => callApi('getFocusedTask')");
+    // a snack action callback cannot be cloned across postMessage
+    expect(script).toContain('const { action, ...rest } = cfg || {};');
+    expect(script).toContain(
+      "request: (url, options) => callApi('request', [url, options])",
+    );
     expect(script).toContain(
       "registerHeaderButton: unsupportedIframeRegistration('registerHeaderButton')",
     );
+    expect(script).toContain(
+      "registerTaskContextMenuEntry: unsupportedIframeRegistration('registerTaskContextMenuEntry')",
+    );
   });
 
-  it('keeps iframe plugins on an opaque sandbox origin', () => {
+  // allow-same-origin is required: an opaque-origin iframe does not paint on
+  // packaged file:// desktop builds and blanks every plugin UI (#8467). The
+  // durable fix that restores opaque-origin isolation is an app:// scheme.
+  it('runs iframe plugins with a same-origin sandbox so they render on file://', () => {
     expect(PLUGIN_IFRAME_SANDBOX).toContain('allow-scripts');
-    expect(PLUGIN_IFRAME_SANDBOX).not.toContain('allow-same-origin');
+    expect(PLUGIN_IFRAME_SANDBOX).toContain('allow-same-origin');
   });
 
   describe('buildPluginIframeHtml()', () => {
@@ -409,15 +502,41 @@ describe('handlePluginMessage()', () => {
       expect(html).toContain('<div id="app"></div>');
     });
 
-    it('injects the API bridge script (with the bridge token) before </body>', () => {
+    it('injects the API bridge script (with the bridge token) into <head>', () => {
       const html = buildPluginIframeHtml({
         ...createConfig(pluginBridge),
         indexHtml: '<html><head></head><body></body></html>',
       });
       expect(html).toContain('const bridgeToken = "test-bridge-token"');
       expect(html).toContain('window.PluginAPI');
-      // script is injected inside the body, before its closing tag
-      expect(html.indexOf('window.PluginAPI')).toBeLessThan(html.indexOf('</body>'));
+      expect(html.indexOf('window.PluginAPI')).toBeLessThan(html.indexOf('</head>'));
+    });
+
+    // #9526: classic (non-defer) plugin scripts execute at parse time — the API
+    // must already exist by then, or plugins fall into local fallbacks that
+    // silently bypass sync.
+    it('defines window.PluginAPI before any plugin script runs', () => {
+      const html = buildPluginIframeHtml({
+        ...createConfig(pluginBridge),
+        indexHtml:
+          '<html><head><script>window.PluginAPI.getTasks();</script></head>' +
+          '<body><script>window.PluginAPI.showSnack({});</script></body></html>',
+      });
+      const apiDefinition = html.indexOf('window.PluginAPI = {');
+      expect(apiDefinition).toBeGreaterThan(-1);
+      expect(apiDefinition).toBeLessThan(html.indexOf('window.PluginAPI.getTasks()'));
+      expect(apiDefinition).toBeLessThan(html.indexOf('window.PluginAPI.showSnack({})'));
+    });
+
+    it('prepends the API script for fragment HTML without a <head>', () => {
+      const html = buildPluginIframeHtml({
+        ...createConfig(pluginBridge),
+        indexHtml: '<div id="app"></div><script>window.PluginAPI.getTasks();</script>',
+      });
+      expect(html).toContain('<div id="app"></div>');
+      expect(html.indexOf('window.PluginAPI = {')).toBeLessThan(
+        html.indexOf('window.PluginAPI.getTasks()'),
+      );
     });
   });
 

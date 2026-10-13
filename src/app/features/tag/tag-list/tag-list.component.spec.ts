@@ -92,12 +92,13 @@ describe('TagListComponent', () => {
 
     const dateTimeFormatServiceMock = {
       currentLocale: () => 'en',
+      textLocale: () => 'en',
     };
 
     const pluginRegistryMock = {
       registrationVersion: () => 0,
       hasProvider: () => false,
-      getIcon: () => 'extension',
+      getSvgIcon: () => undefined,
       getHumanReadableName: () => 'Plugin',
     };
 

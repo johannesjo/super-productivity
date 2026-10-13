@@ -3,6 +3,9 @@ import { IValidation } from 'typia';
 import type { SyncLogMeta } from '@sp/sync-core';
 import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
 import { INBOX_PROJECT } from '../../features/project/project.const';
+import { getDefaultWorkContextTheme } from '../../features/work-context/work-context-default-theme.util';
+import { WorkContextType } from '../../features/work-context/work-context.model';
+import { WORKLOG_EXPORT_DEFAULTS } from '../../features/work-context/work-context.const';
 import { RECREATE_FALLBACK } from '../core/recreate-fallback.const';
 import { OP_LOG_SYNC_LOGGER } from '../core/sync-logger.adapter';
 import { devError } from '../../util/dev-error';
@@ -187,6 +190,34 @@ export const autoFixTypiaErrors = (
         setValueByPath(data, keys, 0);
         logAutoFixApplied(path, keys, 'simple-counter-countOnDay-null-to-zero', value, 0);
       } else if (
+        // Issue #7330 (recurrence on SIMPLE_COUNTER): a counter recreated from a
+        // partial LWW Update (concurrent delete-vs-update across devices) can be
+        // missing required scalar fields — most often `type`, an enum with no
+        // value typia will accept, so dataRepair previously dead-ended on the
+        // "Repair attempted but failed" dialog. Primary fix is the
+        // RECREATE_FALLBACK backfill in lwwUpdateMetaReducer; this branch is
+        // defense-in-depth for state already corrupted on disk. Field list and
+        // defaults come from RECREATE_FALLBACK.SIMPLE_COUNTER so this heal can't
+        // drift from the recreate defaults. Only `title`/`type`/`countOnDay`
+        // reach here; undefined `icon`/`isEnabled`/`isOn` are already coerced by
+        // the generic null/boolean branches above.
+        keys[0] === 'simpleCounter' &&
+        keys[1] === 'entities' &&
+        keys.length === 4 &&
+        value === undefined &&
+        RECREATE_FALLBACK.SIMPLE_COUNTER?.requiredKeys.includes(keys[3] as string)
+      ) {
+        const field = keys[3] as string;
+        const defaultValue = RECREATE_FALLBACK.SIMPLE_COUNTER.defaults[field];
+        setValueByPath(data, keys, defaultValue);
+        logAutoFixApplied(
+          path,
+          keys,
+          'simple-counter-required-field-default',
+          value,
+          defaultValue,
+        );
+      } else if (
         keys[0] === 'taskRepeatCfg' &&
         keys[1] === 'entities' &&
         keys.length >= 4 &&
@@ -243,6 +274,67 @@ export const autoFixTypiaErrors = (
         const created = Date.now();
         setValueByPath(data, keys, created);
         logAutoFixApplied(path, keys, 'tag-created-undefined-to-now', value, created);
+      } else if (
+        (keys[0] === 'tag' || keys[0] === 'project') &&
+        keys[1] === 'entities' &&
+        keys.length === 4 &&
+        keys[3] === 'theme' &&
+        value == null
+      ) {
+        // A tag/project entity can be persisted with no `theme` at all (#9139).
+        // Left unrepaired it either dead-ends legacy migration ("Migration
+        // failed") or, on the hydration paths where validation is non-fatal,
+        // loads and crashes the theme pipeline on every launch.
+        //
+        // `== null` covers both undefined and an explicit null: the `setOne`
+        // 'replace' branch (lww-update.meta-reducer.ts) applies a remote entity
+        // verbatim, so a null theme is reachable, and typia reports it at this
+        // same path. Gating on `undefined` alone left it dead-ending migration.
+        //
+        // Deliberately NOT matched on `error.expected`: typia reports this as
+        // the generated name `Readonly<__type>.oNN`, whose ordinal shifts
+        // whenever the type graph changes. Keying on it would make this branch
+        // silently stop firing. Path + nullish value is stable.
+        const theme = {
+          ...getDefaultWorkContextTheme(
+            keys[0] === 'tag' ? WorkContextType.TAG : WorkContextType.PROJECT,
+            String(keys[2]),
+          ),
+        };
+        setValueByPath(data, keys, theme);
+        logAutoFixApplied(
+          path,
+          keys,
+          'work-context-theme-undefined-to-default',
+          value,
+          theme,
+        );
+      } else if (
+        (keys[0] === 'tag' || keys[0] === 'project') &&
+        keys[1] === 'entities' &&
+        keys[3] === 'advancedCfg' &&
+        keys[4] === 'worklogExportSettings' &&
+        keys.length >= 6 &&
+        Object.hasOwn(WORKLOG_EXPORT_DEFAULTS, keys[5])
+      ) {
+        // Issue #8279: a synced project carried an invalid worklog-export
+        // `groupBy` enum, so every sync ended in "validation failed". A missing
+        // `groupBy` is reachable from projects saved before the field existed
+        // (early 2019). Reset only the offending top-level field — deeper
+        // errors (e.g. one bad `cols[i]`) reset the whole field — so the rest
+        // of the user's export preferences survive. Copy so the repaired state
+        // never aliases the shared defaults.
+        const fieldKeys = keys.slice(0, 6);
+        const field = keys[5] as keyof typeof WORKLOG_EXPORT_DEFAULTS;
+        const defaultValue = structuredClone(WORKLOG_EXPORT_DEFAULTS[field]);
+        setValueByPath(data, fieldKeys, defaultValue);
+        logAutoFixApplied(
+          path,
+          keys,
+          'work-context-worklog-export-setting-default',
+          value,
+          defaultValue,
+        );
       } else if (
         keys[0] === 'metric' &&
         keys[1] === 'entities' &&

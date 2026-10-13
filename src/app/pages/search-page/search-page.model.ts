@@ -28,10 +28,23 @@ export interface SearchItem {
   // jira only
   titleHighlighted?: string;
   isNote?: boolean;
+  /** A project itself as a result; selecting it opens that project (#10223). */
+  isProject?: boolean;
+  /** A tag itself as a result; selecting it opens that tag (#10223). */
+  isTag?: boolean;
 }
 
 export interface SearchQueryParams {
   focusItem: string;
   dateStr?: string;
   isInBacklog?: boolean;
+  /**
+   * Set only when the navigation started from global search, i.e. when the user
+   * asked "where is this?". The reveal paths draw their attention highlight off
+   * this, never off `focusItem` alone — every other caller of
+   * `NavigateToTaskService.navigate()` (reminder snacks, tracked-task pill,
+   * issue creation, calendar banner) sets `focusItem` without anyone having
+   * asked for attention. (#5476)
+   */
+  isFromSearch?: boolean;
 }

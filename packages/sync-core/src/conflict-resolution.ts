@@ -2,6 +2,7 @@ import {
   extractActionPayload,
   extractEntityFromPayload,
   extractUpdateChanges,
+  isLwwUpdatePayload,
   OpType,
 } from './operation.types';
 import type { EntityConflict, Operation } from './operation.types';
@@ -10,11 +11,13 @@ import type { SyncLogger } from './sync-logger';
 
 export type ConflictResolutionSuggestion = 'local' | 'remote' | 'manual';
 export type LwwConflictResolutionWinner = 'local' | 'remote';
-export type LwwLocalWinOperationKind = 'archive-win' | 'update';
+export type LwwLocalWinOperationKind = 'archive-win' | 'delete-win' | 'update';
 export type LwwConflictResolutionReason =
   | 'remote-archive'
   | 'local-archive'
   | 'local-archive-sibling'
+  | 'remote-delete-wins'
+  | 'local-delete-wins'
   | 'local-timestamp'
   | 'remote-timestamp-or-tie';
 
@@ -41,6 +44,7 @@ export interface LwwConflictResolutionPlanningOptions<
   TOperation extends Operation<string> = Operation,
 > {
   isArchiveAction: (op: TOperation) => boolean;
+  isDeleteWinsAction?: (op: TOperation) => boolean;
   toEntityKey?: (entityType: string, entityId: string) => string;
 }
 
@@ -127,24 +131,65 @@ export const convertLocalDeleteRemoteUpdatesToLww = <
   }
 
   const payloadKey = resolvePayloadKey(conflict.entityType, options.payloadKey);
-  const baseEntity = extractEntityFromPayload(localDeleteOp.payload, payloadKey);
+  const baseEntity = extractEntityFromPayload(
+    localDeleteOp.payload,
+    payloadKey,
+    conflict.entityId,
+  );
 
   return conflict.remoteOps.map((remoteOp) => {
     if (remoteOp.opType !== OpType.Update) {
       return remoteOp;
     }
 
+    const lwwActionType = options.toLwwUpdateActionType(remoteOp.entityType);
+    const existingLwwPayload =
+      remoteOp.actionType === lwwActionType && isLwwUpdatePayload(remoteOp.payload)
+        ? remoteOp.payload
+        : undefined;
+    if (existingLwwPayload?.lwwUpdateMode === 'replace') {
+      return {
+        ...remoteOp,
+        payload: {
+          ...existingLwwPayload,
+          recreatesEntityAfterDelete: true,
+        },
+      } as TOperation;
+    }
+
     if (baseEntity) {
       const remotePayloadKey = resolvePayloadKey(remoteOp.entityType, options.payloadKey);
-      const updateChanges = extractUpdateChanges(remoteOp.payload, remotePayloadKey);
+      const updateChanges = existingLwwPayload
+        ? extractActionPayload(existingLwwPayload)
+        : extractUpdateChanges(remoteOp.payload, remotePayloadKey, conflict.entityId);
+      // NOTE (#9256): this still classifies "is a singleton" by `entityId === '*'`,
+      // the same conflation the host fixed by switching to a storage-pattern check
+      // (see isLwwPayloadIdCanonical). A singleton with a COMPOSITE conflict id
+      // (e.g. TIME_TRACKING) would fall into the else branch and get `id` injected
+      // into its whole-slice payload — and the host's LWW reducer would then
+      // replace the WHOLE feature slice with that merged shape.
+      //
+      // Unreachable today, but NOT because "singletons never emit deletes": they
+      // do — menuTreeDeleteFolder emits MENU_TREE + OpType.Delete with a folderId
+      // entityId. The actual guard is `baseEntity` above: extractEntityFromPayload
+      // finds nothing in that delete payload (no `menuTree` key, no id-matching
+      // array element, no top-level `id` — the field is named `folderId`), so this
+      // branch is skipped. That means renaming such a payload field to `id`, or
+      // adding a singleton delete that carries its entity, ARMS this line. Migrate
+      // to a storage-pattern predicate before either happens.
       const mergedEntity = options.isSingletonEntityId?.(conflict.entityId)
         ? { ...baseEntity, ...updateChanges }
         : { ...baseEntity, ...updateChanges, id: conflict.entityId };
 
       return {
         ...remoteOp,
-        actionType: options.toLwwUpdateActionType(remoteOp.entityType),
-        payload: mergedEntity,
+        actionType: lwwActionType,
+        payload: {
+          actionPayload: mergedEntity,
+          entityChanges: [],
+          lwwUpdateMode: 'replace',
+          recreatesEntityAfterDelete: true,
+        },
       } as TOperation;
     }
 
@@ -178,6 +223,20 @@ const deepEqualInner = (
   if (typeof a !== typeof b) return false;
 
   if (typeof a === 'object') {
+    // `seen` tracks the objects on the CURRENT path, not everything visited, so
+    // it must be unwound on the way back up. A shared sub-object referenced
+    // twice (a DAG, not a cycle) is legitimate — `structuredClone` preserves
+    // aliasing and module-level defaults are routinely aliased — and leaving it
+    // in `seen` made the second visit bail as "circular", so two structurally
+    // identical values compared unequal. A real cycle revisits an ANCESTOR,
+    // which is still on the path, so it is still caught.
+    //
+    // shortcut: unwinding also drops the incidental memoisation, so a heavily
+    // aliased DAG is re-walked per reference (measured: fan-out 6 x depth 8 =
+    // 1.7M visits, ~530ms). No caller is anywhere near that — payloads arrive
+    // as JSON (pure trees, no aliasing) and the aliased inputs are small
+    // module-level config defaults — so this stays unguarded. If one ever is,
+    // add a proven-equal pair cache rather than reverting to a visited set.
     if (seen.has(a as object) || seen.has(b as object)) {
       logger.warn('sync-core.deepEqual detected circular reference, returning false');
       return false;
@@ -185,27 +244,32 @@ const deepEqualInner = (
     seen.add(a as object);
     seen.add(b as object);
 
-    if (Array.isArray(a) && Array.isArray(b)) {
-      if (a.length !== b.length) return false;
-      return a.every((val, i) =>
-        deepEqualInner(val, b[i], logger, maxDepth, seen, depth + 1),
+    try {
+      if (Array.isArray(a) && Array.isArray(b)) {
+        if (a.length !== b.length) return false;
+        return a.every((val, i) =>
+          deepEqualInner(val, b[i], logger, maxDepth, seen, depth + 1),
+        );
+      }
+
+      if (Array.isArray(a) !== Array.isArray(b)) return false;
+
+      const aRecord = a as Record<string, unknown>;
+      const bRecord = b as Record<string, unknown>;
+      const aKeys = Object.keys(aRecord);
+      const bKeys = Object.keys(bRecord);
+      if (aKeys.length !== bKeys.length) return false;
+      if (!aKeys.every((key) => Object.prototype.hasOwnProperty.call(bRecord, key))) {
+        return false;
+      }
+
+      return aKeys.every((key) =>
+        deepEqualInner(aRecord[key], bRecord[key], logger, maxDepth, seen, depth + 1),
       );
+    } finally {
+      seen.delete(a as object);
+      seen.delete(b as object);
     }
-
-    if (Array.isArray(a) !== Array.isArray(b)) return false;
-
-    const aRecord = a as Record<string, unknown>;
-    const bRecord = b as Record<string, unknown>;
-    const aKeys = Object.keys(aRecord);
-    const bKeys = Object.keys(bRecord);
-    if (aKeys.length !== bKeys.length) return false;
-    if (!aKeys.every((key) => Object.prototype.hasOwnProperty.call(bRecord, key))) {
-      return false;
-    }
-
-    return aKeys.every((key) =>
-      deepEqualInner(aRecord[key], bRecord[key], logger, maxDepth, seen, depth + 1),
-    );
   }
 
   return false;
@@ -304,12 +368,29 @@ export const suggestConflictResolution = <TOperation extends Operation<string>>(
 };
 
 /**
+ * The clientId of the op carrying a side's winning (max) timestamp. Used only as
+ * a deterministic tiebreak when both sides share the same max timestamp: the two
+ * devices see "local" and "remote" swapped, so comparing timestamps alone makes
+ * each keep the other's value and diverge permanently. Comparing the winning
+ * clientIds instead — over the same unordered pair on both devices — makes them
+ * converge. The client's per-field resolution breaks a tie on one field the
+ * same way (`localWinningFieldGroups`). A genuine cross-device tie always has exactly one op at
+ * the max timestamp per side (same-client ops on one entity are never
+ * vector-clock-concurrent, so they never reach here as a conflict).
+ */
+const winningClientId = (
+  ops: readonly Operation<string>[],
+  maxTimestamp: number,
+): string => ops.find((op) => op.timestamp === maxTimestamp)?.clientId ?? '';
+
+/**
  * Plans last-write-wins conflict resolution without looking up host state or
  * creating operations.
  *
- * The host supplies archive-action detection because archive semantics are
- * domain-specific. The returned plan tells the host whether a local-win op must
- * be created and which app-side factory should create it.
+ * The host supplies archive-action detection and may opt specific operations
+ * into delete-wins precedence because both policies are domain-specific. The
+ * returned plan tells the host whether a local-win op must be created and which
+ * app-side factory should create it.
  */
 export const planLwwConflictResolutions = <
   TOperation extends Operation<string> = Operation,
@@ -359,10 +440,47 @@ export const planLwwConflictResolutions = <
       };
     }
 
+    const isDeleteWinsAction = options.isDeleteWinsAction;
+    const remoteHasDeleteWins = isDeleteWinsAction
+      ? conflict.remoteOps.some(isDeleteWinsAction)
+      : false;
+    const localHasDeleteWins = isDeleteWinsAction
+      ? conflict.localOps.some(isDeleteWinsAction)
+      : false;
+
+    if (remoteHasDeleteWins) {
+      return {
+        conflict,
+        winner: 'remote',
+        reason: 'remote-delete-wins',
+      };
+    }
+
+    if (localHasDeleteWins) {
+      return {
+        conflict,
+        winner: 'local',
+        reason: 'local-delete-wins',
+        localWinOperationKind: 'delete-win',
+      };
+    }
+
     const localMaxTimestamp = Math.max(...conflict.localOps.map((op) => op.timestamp));
     const remoteMaxTimestamp = Math.max(...conflict.remoteOps.map((op) => op.timestamp));
 
-    if (localMaxTimestamp > remoteMaxTimestamp) {
+    // On an exact-millisecond tie, fall back to a deterministic clientId compare
+    // (larger wins) so both devices converge instead of each keeping the other's
+    // value. A local tie-win must carry `localWinOperationKind: 'update'` exactly
+    // like a timestamp win: the host rejects the original local ops regardless of
+    // winner, and only the resulting compensating op (dominating clock) both
+    // preserves the local value and stops the loser from resurfacing.
+    const localWins =
+      localMaxTimestamp > remoteMaxTimestamp ||
+      (localMaxTimestamp === remoteMaxTimestamp &&
+        winningClientId(conflict.localOps, localMaxTimestamp) >
+          winningClientId(conflict.remoteOps, remoteMaxTimestamp));
+
+    if (localWins) {
       return {
         conflict,
         winner: 'local',
@@ -430,11 +548,12 @@ export const partitionLwwResolutions = <
       partitions.remoteWinsOps.push(...processRemoteWinnerOps(conflict));
 
       for (const op of conflict.remoteOps) {
-        const ids = op.entityIds?.length
-          ? op.entityIds
-          : op.entityId
-            ? [op.entityId]
-            : [];
+        const ids = Array.from(
+          new Set([
+            ...(op.entityId ? [op.entityId] : []),
+            ...(op.entityIds?.length ? op.entityIds : []),
+          ]),
+        );
         for (const id of ids) {
           partitions.remoteWinnerAffectedEntityKeys.add(toEntityKey(op.entityType, id));
         }

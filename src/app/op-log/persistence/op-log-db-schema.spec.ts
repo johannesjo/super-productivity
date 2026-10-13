@@ -6,13 +6,17 @@ import { DB_NAME, DB_VERSION } from './db-keys.const';
 /**
  * Drift guard for the declarative {@link OP_LOG_DB_SCHEMA} descriptor.
  *
- * The descriptor is NOT yet used to create stores — `runDbUpgrade` (imperative)
- * still does that — yet the SQLite backend (Phase B) will be built against the
- * descriptor. So the descriptor must stay byte-for-byte faithful to what
- * `runDbUpgrade` actually produces. These tests fail loudly the moment the two
- * (or the `db-keys.const` version) diverge.
+ * The descriptor is NOT used to create stores — `runDbUpgrade` (imperative)
+ * does that. It was written for the SQLite backend, which is parked (see
+ * docs/sync-and-op-log/sqlite-migration.md), so it must stay byte-for-byte
+ * faithful to what `runDbUpgrade` actually produces. These tests fail loudly the
+ * moment the two (or the `db-keys.const` version) diverge.
  */
 describe('OP_LOG_DB_SCHEMA', () => {
+  it('blocks v2-era readers from opening replacement-LWW history', () => {
+    expect(DB_VERSION).toBeGreaterThan(9);
+  });
+
   it('reuses DB_NAME/DB_VERSION (no third source of truth)', () => {
     expect(OP_LOG_DB_SCHEMA.name).toBe(DB_NAME);
     expect(OP_LOG_DB_SCHEMA.version).toBe(DB_VERSION);

@@ -16,9 +16,6 @@ export enum FocusMainUIState {
 
 // UI screens enum
 export enum FocusScreen {
-  TaskSelection = 'TaskSelection',
-  DurationSelection = 'DurationSelection',
-  Preparation = 'Preparation',
   Main = 'Main',
   SessionDone = 'SessionDone',
   Break = 'Break',
@@ -61,10 +58,6 @@ export interface FocusModeStrategy {
   readonly shouldStartBreakAfterSession: boolean;
   readonly shouldAutoStartNextSession: boolean;
   getBreakDuration(cycle: number): { duration: number; isLong: boolean } | null;
-  getNextScreenAfterTaskSelection(skipPreparation: boolean): {
-    screen: FocusScreen;
-    duration?: number;
-  };
 }
 
 // Helper functions and type guards for timer
@@ -79,6 +72,10 @@ export const isWorkSession = (timer: TimerState): boolean => {
 export const isBreakSession = (timer: TimerState): boolean => {
   return timer.purpose === 'break';
 };
+
+/** Time left until a fixed-duration session ends, never negative. */
+export const getTimerRemainingMs = (timer: TimerState): number =>
+  Math.max(0, timer.duration - timer.elapsed);
 
 /**
  * After incrementCycle, the current cycle is 1 too high for break calculation.

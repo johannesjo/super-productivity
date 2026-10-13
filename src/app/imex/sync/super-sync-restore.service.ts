@@ -1,5 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import { SnackService } from '../../core/snack/snack.service';
+import { BackupRepairFailedError } from '../../op-log/core/errors/sync-errors';
 import { SyncProviderId } from '../../op-log/sync-providers/provider.const';
 import { SuperSyncProvider } from '@sp/sync-providers/super-sync';
 import {
@@ -10,6 +11,7 @@ import { AppDataComplete } from '../../op-log/model/model-config';
 import { T } from '../../t.const';
 import { SyncProviderManager } from '../../op-log/sync-providers/provider-manager.service';
 import { BackupService } from '../../op-log/backup/backup.service';
+import { LocalDraftService } from '../../core/draft/local-draft.service';
 import { SyncLog } from '../../core/log';
 
 /**
@@ -21,6 +23,7 @@ export class SuperSyncRestoreService {
   private _snackService = inject(SnackService);
   private _providerManager = inject(SyncProviderManager);
   private _backupService = inject(BackupService);
+  private _localDraftService = inject(LocalDraftService);
 
   /**
    * Check if Super Sync restore is available.
@@ -67,6 +70,10 @@ export class SuperSyncRestoreService {
           true, // isForceConflict - gates page reload (isSkipReload=true overrides)
         );
 
+        // The notes were just replaced wholesale, so every draft's
+        // baseContent refers to content that no longer exists.
+        this._localDraftService.deleteAllDrafts();
+
         this._snackService.open({
           type: 'SUCCESS',
           msg: T.F.SYNC.S.RESTORE_SUCCESS,
@@ -101,7 +108,9 @@ export class SuperSyncRestoreService {
           type: 'ERROR',
           msg: isEncryptionBlocked
             ? T.F.SYNC.S.RESTORE_ENCRYPTED
-            : T.F.SYNC.S.RESTORE_ERROR,
+            : error instanceof BackupRepairFailedError
+              ? T.FILE_IMEX.S_ERR_IMPORT_UNREPAIRABLE
+              : T.F.SYNC.S.RESTORE_ERROR,
         });
         throw error;
       }

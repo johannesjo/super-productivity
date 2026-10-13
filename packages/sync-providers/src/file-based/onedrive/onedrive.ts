@@ -1,6 +1,10 @@
 import type { SyncLogger } from '@sp/sync-core';
 import type { ProviderPlatformInfo } from '../../platform/provider-platform-info';
 import type { WebFetchFactory } from '../../platform/web-fetch-factory';
+import {
+  executeNativeRequestWithRetry,
+  type NativeHttpExecutor,
+} from '../../http/native-http-retry';
 import type { SyncCredentialStorePort } from '../../credential-store-port';
 import type { FileSyncProvider, SyncProviderAuthHelper } from '../../provider-types';
 import {
@@ -12,12 +16,9 @@ import {
   TooManyRequestsAPIError,
   UploadRevToMatchMismatchAPIError,
 } from '../../errors';
+import { assertUploadedSizeMatches } from '../verify-upload-size';
 import { generateCodeVerifier, generateCodeChallenge } from '../../pkce';
-import type {
-  OneDrivePrivateCfg,
-  OneDriveListResponse,
-  OneDriveTokenResponse,
-} from './onedrive.model';
+import type { OneDrivePrivateCfg, OneDriveTokenResponse } from './onedrive.model';
 
 export const PROVIDER_ID_ONEDRIVE = 'OneDrive' as const;
 
@@ -33,6 +34,7 @@ export interface OneDriveDeps {
   hasOfficialClientId: boolean;
   addOAuthState: (provider: string, state: string) => void;
   isElectron: boolean;
+  nativeHttpExecutor: NativeHttpExecutor;
 }
 
 const ONEDRIVE_PROTOCOL = {
@@ -48,15 +50,10 @@ const ONEDRIVE_DEFAULTS = {
   syncFolderPath: 'Super Productivity',
 } as const;
 
-// Hard cap on listFiles pagination iterations. ~200 items per page × 500 pages
-// = 100k op-log files, well past any realistic limit. A buggy or cyclic
-// continuation that ignored this cap would grow `names[]` unbounded.
-const ONEDRIVE_MAX_LIST_PAGES = 500;
-
 // Allowlist of Microsoft Graph sovereign hosts. `_request` accepts absolute
-// URLs (for @odata.nextLink pass-through), but the request carries the user's
-// Bearer token — sending it to an attacker-controlled host would leak the
-// token. A tampered or spoofed nextLink with any other host throws instead.
+// URLs (for @odata.nextLink pass-through; no caller passes one since listFiles
+// was removed), but the request carries the user's Bearer token — sending it to
+// an attacker-controlled host would leak the token. Any other host throws.
 const ONEDRIVE_GRAPH_HOSTS: ReadonlySet<string> = new Set([
   'graph.microsoft.com',
   'graph.microsoft.us',
@@ -180,6 +177,7 @@ export class OneDrive implements FileSyncProvider<
     const cfg = await this._cfgOrError();
     try {
       const driveItemPath = this._getDriveItemPath(targetPath, cfg);
+      const metadataBefore = await this._requestJson<{ eTag?: string }>(driveItemPath);
       const response = await this._request({
         method: 'GET',
         path: `${driveItemPath}/content`,
@@ -193,9 +191,17 @@ export class OneDrive implements FileSyncProvider<
         };
       }
 
-      const metadata = await this._requestJson<{ eTag?: string }>(driveItemPath);
+      // Without a content ETag, only use metadata that stayed unchanged across
+      // the read. A newer revision could otherwise authorize uploading stale data.
+      if (!metadataBefore.eTag) {
+        throw new NoRevAPIError('OneDrive download missing eTag');
+      }
+      const metadataAfter = await this._requestJson<{ eTag?: string }>(driveItemPath);
+      if (metadataBefore.eTag !== metadataAfter.eTag) {
+        throw new UploadRevToMatchMismatchAPIError('OneDrive changed during download');
+      }
       return {
-        rev: metadata.eTag || '',
+        rev: metadataBefore.eTag,
         dataStr,
       };
     } catch (e) {
@@ -231,10 +237,14 @@ export class OneDrive implements FileSyncProvider<
         headers,
         body: dataStr,
       });
-      const result = (await response.json()) as { eTag?: string };
+      const result = (await response.json()) as { eTag?: string; size?: number };
       if (!result.eTag) {
         throw new NoRevAPIError('OneDrive upload missing eTag');
       }
+      // Fail loudly on a truncated/partial write instead of silently storing a
+      // corrupt sync file (#8604). The Graph driveItem PUT response carries the
+      // stored byte size. See assertUploadedSizeMatches.
+      assertUploadedSizeMatches(dataStr, result.size, targetPath);
       return { rev: result.eTag };
     } catch (e) {
       this._mapAndThrow(e);
@@ -251,45 +261,6 @@ export class OneDrive implements FileSyncProvider<
       });
     } catch (e) {
       this._mapAndThrow(e);
-    }
-  }
-
-  async listFiles(dirPath: string): Promise<string[]> {
-    const cfg = await this._cfgOrError();
-    const names: string[] = [];
-    // Graph /children paginates by ~200 items; follow @odata.nextLink
-    // to collect the full listing. Missing entries would cause replay drift
-    // when the op-log folder grows beyond a single page.
-    let nextUrl: string | undefined = `${this._getDriveItemPath(dirPath, cfg)}/children`;
-    let pages = 0;
-    try {
-      while (nextUrl) {
-        if (++pages > ONEDRIVE_MAX_LIST_PAGES) {
-          throw new Error(
-            `OneDrive listFiles exceeded ${ONEDRIVE_MAX_LIST_PAGES} pages — refusing to continue`,
-          );
-        }
-        const result: OneDriveListResponse =
-          await this._requestJson<OneDriveListResponse>(nextUrl);
-        for (const item of result.value || []) {
-          if (item.file && item.name) {
-            names.push(item.name);
-          }
-        }
-        // Per Microsoft, @odata.nextLink is opaque — pass it through as-is.
-        // _request accepts absolute URLs to support sovereign clouds and
-        // future Graph path drift without silent truncation.
-        nextUrl = result['@odata.nextLink'];
-      }
-      return names;
-    } catch (e) {
-      if (e instanceof RemoteFileNotFoundAPIError) {
-        return [];
-      }
-      if (e instanceof HttpNotOkAPIError && e.response.status === 404) {
-        return [];
-      }
-      throw e;
     }
   }
 
@@ -562,33 +533,38 @@ export class OneDrive implements FileSyncProvider<
     req: OAuthTokenRequest,
   ): Promise<OneDriveTokenResponse> {
     const tenant = cfg.tenantId || ONEDRIVE_DEFAULTS.tenantId;
-    const response = await this._deps.webFetch()(this._buildOAuthTokenUrl(tenant), {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' }, // eslint-disable-line @typescript-eslint/naming-convention
-      body: this._buildOAuthTokenRequestBody(cfg, req),
-    });
+    const response = await this._postOAuthToken(
+      this._buildOAuthTokenUrl(tenant),
+      this._buildOAuthTokenRequestBody(cfg, req),
+      req.grantType,
+    );
 
     if (!response.ok) {
       const body = await response.text();
-      if (response.status === 400) {
-        let parsed: { error?: string } | null = null;
-        try {
-          parsed = JSON.parse(body) as { error?: string };
-        } catch {
-          /* not JSON */
-        }
-        if (parsed?.error === 'invalid_grant') {
-          if (req.grantType === 'refresh_token') {
-            this._deps.logger.warn(
-              '[OneDrive] Refresh token revoked (invalid_grant), clearing credentials',
-            );
-            await this._clearIfConfigMatches({
-              refreshToken: req.refreshToken,
-              clientId: cfg.clientId,
-              tenantId: cfg.tenantId,
-            });
-            throw new MissingRefreshTokenAPIError();
-          }
+      const { error, errorDescription } = this._parseOAuthTokenError(body);
+
+      // The OAuth token endpoint's error body carries only protocol/config
+      // diagnostics (the standard `error` code plus an AADSTS message), never
+      // user content — so the short `error` identity is safe to log. The
+      // longer human-readable `errorDescription` is routed to the UI via
+      // HttpNotOkAPIError.detail, not the structured log.
+      this._deps.logger.warn('[OneDrive] OAuth token request failed', {
+        status: response.status,
+        grantType: req.grantType,
+        error,
+      });
+
+      if (response.status === 400 && error === 'invalid_grant') {
+        if (req.grantType === 'refresh_token') {
+          this._deps.logger.warn(
+            '[OneDrive] Refresh token revoked (invalid_grant), clearing credentials',
+          );
+          await this._clearIfConfigMatches({
+            refreshToken: req.refreshToken,
+            clientId: cfg.clientId,
+            tenantId: cfg.tenantId,
+          });
+          throw new MissingRefreshTokenAPIError();
         }
       }
       if (response.status === 401 && req.grantType === 'refresh_token') {
@@ -603,10 +579,61 @@ export class OneDrive implements FileSyncProvider<
         throw new MissingRefreshTokenAPIError();
       }
       const redactedBody = this._redactTokenBody(body);
-      throw new HttpNotOkAPIError(response, redactedBody);
+      const tokenError = new HttpNotOkAPIError(response, redactedBody);
+      // Surface the Azure error_description (e.g. "AADSTS7000218: ...") to the
+      // UI so a misconfigured Entra app registration is self-diagnosable. This
+      // is the common authorization_code failure mode: the authorize step
+      // succeeds, then token redemption 400s because the app isn't a public
+      // client.
+      if (errorDescription) {
+        tokenError.detail = errorDescription.slice(0, 300);
+      }
+      throw tokenError;
     }
 
     return (await response.json()) as OneDriveTokenResponse;
+  }
+
+  /**
+   * POST to the token endpoint. On native platforms this must go through
+   * native HTTP: the WebView fetch adds an `Origin` header, and Entra only
+   * accepts cross-origin token redemption for SPA registrations — native
+   * ("Mobile and desktop") ones fail with AADSTS90023 (#9546). Electron
+   * strips `Origin`, so web/Electron keep using fetch.
+   *
+   * shortcut: iOS included, although CapacitorHttp there uses
+   * URLSession.shared, whose stale connections caused persistent -1005 errors
+   * for Dropbox that retries did not fix (#6333). WKWebView cannot drop
+   * `Origin`, so there is no working alternative. Upgrade path if -1005 shows
+   * up: add a `disableRedirects` field to `NativeHttpRequestConfig`, pass it
+   * through in `executeNativeRequestWithRetry` and set it here on iOS —
+   * Capacitor then uses a fresh URLSession per request.
+   */
+  private async _postOAuthToken(
+    url: string,
+    body: URLSearchParams,
+    grantType: OAuthTokenRequest['grantType'],
+  ): Promise<Response> {
+    const headers = { 'Content-Type': 'application/x-www-form-urlencoded' }; // eslint-disable-line @typescript-eslint/naming-convention
+    if (!this._deps.platformInfo.isNativePlatform) {
+      return this._deps.webFetch()(url, { method: 'POST', headers, body });
+    }
+
+    const nativeResponse = await executeNativeRequestWithRetry(
+      { url, method: 'POST', headers, data: body.toString() },
+      {
+        executor: this._deps.nativeHttpExecutor,
+        logger: this._deps.logger,
+        label: '[OneDrive]',
+        // An auth code is single-use and the exchange is user-initiated; the
+        // user can simply retry. Refresh keeps the default transient retries.
+        maxRetries: grantType === 'authorization_code' ? 0 : undefined,
+      },
+    );
+    // CapacitorHttp auto-parses JSON responses, so data may be an object.
+    const data = nativeResponse.data;
+    const text = typeof data === 'string' ? data : JSON.stringify(data ?? '');
+    return new Response(text, { status: nativeResponse.status });
   }
 
   private _getRedirectUri(): string {
@@ -720,6 +747,35 @@ export class OneDrive implements FileSyncProvider<
       return {
         code: parsed.error?.code,
         message: parsed.error?.message,
+      };
+    } catch {
+      return {};
+    }
+  }
+
+  /**
+   * Parse the standard OAuth 2.0 error fields from a token-endpoint failure
+   * body. Azure returns `{ error, error_description, error_codes, ... }`; we
+   * keep only the two safe diagnostic fields. `error` is a short standard
+   * code (e.g. `invalid_grant`, `unauthorized_client`); `error_description`
+   * holds the human-readable `AADSTSxxxxx` message.
+   *
+   * Not redundant with `HttpNotOkAPIError._extractErrorFromBody`: that returns
+   * `error` (the short code), whereas we need `error_description` for the UI,
+   * and we also need `error` before any error is constructed — to drive the
+   * structured log and the `invalid_grant` credential-clearing branch.
+   */
+  private _parseOAuthTokenError(body: string): {
+    error?: string;
+    errorDescription?: string;
+  } {
+    try {
+      const parsed = JSON.parse(body) as Record<string, unknown>;
+      const error = typeof parsed.error === 'string' ? parsed.error : undefined;
+      const desc = parsed['error_description'];
+      return {
+        error,
+        errorDescription: typeof desc === 'string' ? desc : undefined,
       };
     } catch {
       return {};

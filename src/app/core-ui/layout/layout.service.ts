@@ -15,9 +15,11 @@ import { Observable } from 'rxjs';
 import { select, Store } from '@ngrx/store';
 import {
   LayoutState,
+  selectActivePluginId,
   selectIsShowAddTaskBar,
   selectIsShowIssuePanel,
   selectIsShowNotes,
+  selectIsShowPluginPanel,
   selectIsShowTaskViewCustomizerPanel,
   selectIsShowScheduleDayPanel,
 } from './store/layout.reducer';
@@ -27,7 +29,10 @@ import { toSignal } from '@angular/core/rxjs-interop';
 
 const XS_BREAKPOINT = 600;
 const XXXS_BREAKPOINT = 398;
-const XS_MEDIA_QUERY = `(max-width: ${XS_BREAKPOINT}px)`;
+const maxWidthMediaQuery = (breakpoint: number): string =>
+  `(max-width: ${breakpoint - 1}px)`;
+const XS_MEDIA_QUERY = maxWidthMediaQuery(XS_BREAKPOINT);
+const XXXS_MEDIA_QUERY = maxWidthMediaQuery(XXXS_BREAKPOINT);
 const initialXsMatch =
   typeof window !== 'undefined' ? window.matchMedia(XS_MEDIA_QUERY).matches : false;
 
@@ -38,12 +43,16 @@ export class LayoutService {
   private static readonly _TASK_ACTION_DELAY = 50;
   private static readonly _TASK_FOCUS_RETRY_DELAY = 250;
   private static readonly _TASK_FOCUS_MAX_RETRIES = 16;
+  private static readonly _TASK_HIGHLIGHT_DURATION = 3000;
+  private static readonly _TASK_HIGHLIGHT_CLASS = 'highlight-searched-task';
 
   private _store$ = inject<Store<LayoutState>>(Store);
   private _breakPointObserver = inject(BreakpointObserver);
   private _previouslyFocusedElement: HTMLElement | null = null;
   private _pendingFocusTaskId: string | null = null; // store new task id until user closes the bar
   private _pendingTaskRevealTimeout?: number;
+  private _pendingTaskHighlightTimeout?: number;
+  private _highlightedTaskEl: HTMLElement | null = null;
 
   // Signal to trigger sidebar focus
   private _focusSideNavTrigger = signal(0);
@@ -61,7 +70,7 @@ export class LayoutService {
     select(selectIsShowIssuePanel),
   );
 
-  readonly selectedTimeView = signal<'week' | 'month'>('week');
+  readonly selectedTimeView = signal<'week' | 'month' | 'day'>('week');
   readonly isWorkViewScrolled = signal<boolean>(false);
   readonly isShowAddTaskBar = toSignal(this.isShowAddTaskBar$, { initialValue: false });
 
@@ -74,7 +83,7 @@ export class LayoutService {
 
   readonly isXxxs = toSignal(
     this._breakPointObserver
-      .observe(`(max-width: ${XXXS_BREAKPOINT}px)`)
+      .observe(XXXS_MEDIA_QUERY)
       .pipe(map((result) => result.matches)),
     { initialValue: false },
   );
@@ -104,6 +113,18 @@ export class LayoutService {
     this._store$.pipe(select(selectIsShowScheduleDayPanel)),
     { initialValue: false },
   );
+
+  // The plugin side panel's open state and which plugin owns it. Exposed for
+  // the header's action-row reveal: a plugin panel's toggle sits at the row's
+  // end exactly like the built-in panel toggles do.
+  readonly isShowPluginPanel = toSignal(
+    this._store$.pipe(select(selectIsShowPluginPanel)),
+    { initialValue: false },
+  );
+
+  readonly activePluginId = toSignal(this._store$.pipe(select(selectActivePluginId)), {
+    initialValue: null,
+  });
 
   // Signal to track if any panel is currently being resized
   readonly isPanelResizing = signal(false);
@@ -168,6 +189,7 @@ export class LayoutService {
   focusTaskInViewWhenReady(
     taskId: string,
     onSuccess?: (el: HTMLElement) => void,
+    onFailure?: () => void,
     retriesLeft: number = LayoutService._TASK_FOCUS_MAX_RETRIES,
   ): void {
     if (this._pendingTaskRevealTimeout) {
@@ -182,13 +204,45 @@ export class LayoutService {
     }
 
     if (retriesLeft <= 0) {
+      onFailure?.();
       return;
     }
 
     this._pendingTaskRevealTimeout = window.setTimeout(() => {
       this._pendingTaskRevealTimeout = undefined;
-      this.focusTaskInViewWhenReady(taskId, onSuccess, retriesLeft - 1);
+      this.focusTaskInViewWhenReady(taskId, onSuccess, onFailure, retriesLeft - 1);
     }, LayoutService._TASK_FOCUS_RETRY_DELAY);
+  }
+
+  /**
+   * Draws a temporary attention highlight on a task revealed by a SEARCH jump,
+   * so it stays findable even after the focus outline is gone. Deliberately not
+   * called from the reveal itself: `focusItem` is set by every navigation caller
+   * (reminder snacks, tracked-task pill, issue creation, calendar banner), and
+   * only search implies the user asked where the task is — so the callers opt in
+   * via `isFromSearch`.
+   *
+   * Mirrors the note reveal in NotesComponent, but deliberately uses its own
+   * class name: the note reveal strips `.highlight-searched-item` from every
+   * element in the document, and `focusItem` is a query param shared by tasks
+   * and notes, so a note reveal would otherwise cut a live task highlight short.
+   * Only one task is highlighted at a time. (#5476)
+   */
+  highlightTaskBriefly(el: HTMLElement): void {
+    if (this._pendingTaskHighlightTimeout) {
+      window.clearTimeout(this._pendingTaskHighlightTimeout);
+      this._pendingTaskHighlightTimeout = undefined;
+    }
+    this._highlightedTaskEl?.classList.remove(LayoutService._TASK_HIGHLIGHT_CLASS);
+    el.classList.add(LayoutService._TASK_HIGHLIGHT_CLASS);
+    this._highlightedTaskEl = el;
+    this._pendingTaskHighlightTimeout = window.setTimeout(() => {
+      this._pendingTaskHighlightTimeout = undefined;
+      el.classList.remove(LayoutService._TASK_HIGHLIGHT_CLASS);
+      if (this._highlightedTaskEl === el) {
+        this._highlightedTaskEl = null;
+      }
+    }, LayoutService._TASK_HIGHLIGHT_DURATION);
   }
 
   private _runForTaskElement(

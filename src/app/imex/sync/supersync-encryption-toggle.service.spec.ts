@@ -101,7 +101,7 @@ describe('SuperSyncEncryptionToggleService', () => {
       // file-based-encryption.service.ts and encryption-password-change.service.ts.
     });
 
-    it('should revert config on failure using pre-captured config (preserving auth credentials)', async () => {
+    it('should NOT revert to a keyless config on failure (would strand the wiped account)', async () => {
       mockSnapshotUploadService.deleteAndReuploadWithNewEncryption.and.rejectWith(
         new Error('Upload failed'),
       );
@@ -110,16 +110,11 @@ describe('SuperSyncEncryptionToggleService', () => {
         /Failed to upload encrypted snapshot/,
       );
 
-      // Should revert using the config captured BEFORE the destructive call
-      expect(mockProviderManager.setProviderConfig).toHaveBeenCalledWith(
-        SyncProviderId.SuperSync,
-        jasmine.objectContaining({
-          baseUrl: 'https://test.example.com',
-          accessToken: 'test-token',
-          encryptKey: undefined,
-          isEncryptionEnabled: false,
-        }),
-      );
+      // The server is already wiped and the new key persisted by
+      // deleteAndReuploadWithNewEncryption. Reverting to encryptKey:undefined would
+      // block every future upload (mandatory encryption + no key). The toggle service
+      // must keep the key, so it must NOT write a keyless config on failure.
+      expect(mockProviderManager.setProviderConfig).not.toHaveBeenCalled();
     });
 
     it('should throw with descriptive message including reason on failure', async () => {
@@ -140,73 +135,6 @@ describe('SuperSyncEncryptionToggleService', () => {
 
       try {
         await service.enableEncryption('my-secret-key');
-        fail('Expected error to be thrown');
-      } catch (error) {
-        expect(error).toBeInstanceOf(Error);
-        expect((error as Error).message).toMatch(/Reason: Network error/);
-        expect((error as Error).cause).toBe(originalError);
-      }
-    });
-  });
-
-  describe('disableEncryption', () => {
-    it('should delegate to deleteAndReuploadWithNewEncryption with correct params', async () => {
-      await service.disableEncryption();
-
-      expect(
-        mockSnapshotUploadService.deleteAndReuploadWithNewEncryption,
-      ).toHaveBeenCalledWith({
-        encryptKey: undefined,
-        isEncryptionEnabled: false,
-        logPrefix: 'SuperSyncEncryptionToggleService',
-      });
-      // clearSessionKeyCache() is called directly on success (module-level
-      // function, not spyable). Matches the pattern in
-      // file-based-encryption.service.ts and encryption-password-change.service.ts.
-    });
-
-    it('should revert config to original state (including encryption key) on failure', async () => {
-      // Set up initial state: encryption is enabled with a key
-      const encryptedCfg: SuperSyncPrivateCfg = {
-        ...mockExistingCfg,
-        isEncryptionEnabled: true,
-        encryptKey: 'original-key',
-      };
-      (mockSyncProvider.privateCfg.load as jasmine.Spy).and.resolveTo(encryptedCfg);
-
-      mockSnapshotUploadService.deleteAndReuploadWithNewEncryption.and.rejectWith(
-        new Error('Upload failed'),
-      );
-
-      await expectAsync(service.disableEncryption()).toBeRejectedWithError(
-        /Failed to upload unencrypted snapshot/,
-      );
-
-      // Should restore the original config including the encryption key
-      expect(mockProviderManager.setProviderConfig).toHaveBeenCalledWith(
-        SyncProviderId.SuperSync,
-        encryptedCfg,
-      );
-    });
-
-    it('should throw with descriptive message including reason on failure', async () => {
-      mockSnapshotUploadService.deleteAndReuploadWithNewEncryption.and.rejectWith(
-        new Error('Server rejected'),
-      );
-
-      await expectAsync(service.disableEncryption()).toBeRejectedWithError(
-        /Failed to upload unencrypted snapshot.*Reason: Server rejected/,
-      );
-    });
-
-    it('should preserve original error as cause', async () => {
-      const originalError = new Error('Network error');
-      mockSnapshotUploadService.deleteAndReuploadWithNewEncryption.and.rejectWith(
-        originalError,
-      );
-
-      try {
-        await service.disableEncryption();
         fail('Expected error to be thrown');
       } catch (error) {
         expect(error).toBeInstanceOf(Error);

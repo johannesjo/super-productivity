@@ -1,6 +1,7 @@
 import { inject, Injectable } from '@angular/core';
 import { unique } from '../../util/unique';
 import { generateCalendarTaskId } from '../calendar-integration/generate-calendar-task-id';
+import { generatePlainspaceTaskId } from './providers/plainspace/generate-plainspace-task-id';
 import {
   BuiltInIssueProviderKey,
   IssueData,
@@ -23,27 +24,29 @@ import {
   DEFAULT_ISSUE_STRS,
   JIRA_TYPE,
   OPEN_PROJECT_TYPE,
-  TRELLO_TYPE,
-  REDMINE_TYPE,
-  AZURE_DEVOPS_TYPE,
-  NEXTCLOUD_DECK_TYPE,
+  PLAINSPACE_TYPE,
 } from './issue.const';
 import { TaskService } from '../tasks/task.service';
 import { IssueTask, Task, TaskCopy } from '../tasks/task.model';
+import { GlobalConfigService } from '../config/global-config.service';
+import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
+import { withRemindAtForDueChange } from '../tasks/util/with-remind-at-for-due-change';
+import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { IssueServiceInterface } from './issue-service-interface';
 import { JiraCommonInterfacesService } from './providers/jira/jira-common-interfaces.service';
-import { TrelloCommonInterfacesService } from './providers/trello/trello-common-interfaces.service';
+// Trello is now a plugin — no built-in service needed
 import { catchError, map, switchMap } from 'rxjs/operators';
 import { IssueLog } from '../../core/log';
 import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-interfaces.service';
 import { CaldavCommonInterfacesService } from './providers/caldav/caldav-common-interfaces.service';
 import { OpenProjectCommonInterfacesService } from './providers/open-project/open-project-common-interfaces.service';
 // Gitea is now a plugin — no built-in service needed
-import { RedmineCommonInterfacesService } from './providers/redmine/redmine-common-interfaces.service';
+// Redmine is now a plugin — no built-in service needed
 // Linear is now a plugin — no built-in service needed
 // ClickUp is now a plugin — no built-in service needed
-import { AzureDevOpsCommonInterfacesService } from './providers/azure-devops/azure-devops-common-interfaces.service';
-import { NextcloudDeckCommonInterfacesService } from './providers/nextcloud-deck/nextcloud-deck-common-interfaces.service';
+// Azure DevOps is now a plugin — no built-in service needed
+// Nextcloud Deck is now a plugin — no built-in service needed
+import { PlainspaceCommonInterfacesService } from './providers/plainspace/plainspace-common-interfaces.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
@@ -66,6 +69,22 @@ import { GlobalProgressBarService } from '../../core-ui/global-progress-bar/glob
 import { NavigateToTaskService } from '../../core-ui/navigate-to-task/navigate-to-task.service';
 import { PluginIssueProviderAdapterService } from '../../plugins/issue-provider/plugin-issue-provider-adapter.service';
 import { PluginIssueProviderRegistryService } from '../../plugins/issue-provider/plugin-issue-provider-registry.service';
+import { PlainspaceIssue } from './providers/plainspace/plainspace-issue.model';
+
+/**
+ * Plainspace reuses one issue id per series (#10074). Completion advances the
+ * schedule but leaves the item done until the next occurrence's day begins.
+ * By then its task may be archived: update polling cannot see it and import
+ * dedup blocks it. Restore that task once the server reopens the issue.
+ * Other providers and non-recurring issues keep the usual archive dedup.
+ */
+const isIssueAwaitingNextOccurrence = (
+  issueProviderKey: IssueProviderKey,
+  issue: IssueDataReduced,
+): boolean =>
+  issueProviderKey === PLAINSPACE_TYPE &&
+  !!(issue as PlainspaceIssue).isRecurring &&
+  !(issue as PlainspaceIssue).isDone;
 
 @Injectable({
   providedIn: 'root',
@@ -73,15 +92,10 @@ import { PluginIssueProviderRegistryService } from '../../plugins/issue-provider
 export class IssueService {
   private _taskService = inject(TaskService);
   private _jiraCommonInterfacesService = inject(JiraCommonInterfacesService);
-  private _trelloCommonInterfacesService = inject(TrelloCommonInterfacesService);
   private _gitlabCommonInterfacesService = inject(GitlabCommonInterfacesService);
   private _caldavCommonInterfaceService = inject(CaldavCommonInterfacesService);
   private _openProjectInterfaceService = inject(OpenProjectCommonInterfacesService);
-  private _redmineInterfaceService = inject(RedmineCommonInterfacesService);
-  private _azureDevOpsCommonInterfaceService = inject(AzureDevOpsCommonInterfacesService);
-  private _nextcloudDeckCommonInterfaceService = inject(
-    NextcloudDeckCommonInterfacesService,
-  );
+  private _plainspaceCommonInterfaceService = inject(PlainspaceCommonInterfacesService);
   private _calendarCommonInterfaceService = inject(CalendarCommonInterfacesService);
   private _issueProviderService = inject(IssueProviderService);
   private _workContextService = inject(WorkContextService);
@@ -94,19 +108,15 @@ export class IssueService {
   private _navigateToTaskService = inject(NavigateToTaskService);
   private _pluginAdapter = inject(PluginIssueProviderAdapterService);
   private _pluginRegistry = inject(PluginIssueProviderRegistryService);
+  private _globalConfigService = inject(GlobalConfigService);
 
   ISSUE_SERVICE_MAP: { [key: string]: IssueServiceInterface } = {
     [GITLAB_TYPE]: this._gitlabCommonInterfacesService,
     [JIRA_TYPE]: this._jiraCommonInterfacesService,
     [CALDAV_TYPE]: this._caldavCommonInterfaceService,
     [OPEN_PROJECT_TYPE]: this._openProjectInterfaceService,
-    [REDMINE_TYPE]: this._redmineInterfaceService,
     [ICAL_TYPE]: this._calendarCommonInterfaceService,
-    [AZURE_DEVOPS_TYPE]: this._azureDevOpsCommonInterfaceService,
-    [NEXTCLOUD_DECK_TYPE]: this._nextcloudDeckCommonInterfaceService,
-
-    // trello
-    [TRELLO_TYPE]: this._trelloCommonInterfacesService,
+    [PLAINSPACE_TYPE]: this._plainspaceCommonInterfaceService,
   };
 
   ISSUE_REFRESH_MAP: {
@@ -243,22 +253,28 @@ export class IssueService {
   async checkAndImportNewIssuesToBacklogForProject(
     providerKey: IssueProviderKey,
     issueProviderId: string,
+    isBackgroundPoll = false,
   ): Promise<void> {
     const service = this._getService(providerKey);
     if (!service?.getNewIssuesToAddToBacklog) {
       return;
     }
-    this._snackService.open({
-      svgIco: this._getProviderIcon(providerKey),
-      msg: T.F.ISSUE.S.POLLING_BACKLOG,
-      isSpinner: true,
-      translateParams: {
-        issueProviderName: this._getProviderName(providerKey),
-        issuesStr: this._translateService.instant(
-          this._getIssueStrings(providerKey).ISSUES_STR,
-        ),
-      },
-    });
+    // Background ('always'-mode) polls run every few minutes regardless of
+    // navigation, so keep them quiet — only the import result snack below is
+    // shown, and only when something is actually added.
+    if (!isBackgroundPoll) {
+      this._snackService.open({
+        svgIco: this._getProviderIcon(providerKey),
+        msg: T.F.ISSUE.S.POLLING_BACKLOG,
+        isSpinner: true,
+        translateParams: {
+          issueProviderName: this._getProviderName(providerKey),
+          issuesStr: this._translateService.instant(
+            this._getIssueStrings(providerKey).ISSUES_STR,
+          ),
+        },
+      });
+    }
 
     const allExistingIssueIds: string[] | number[] =
       await this._taskService.getAllIssueIdsForProviderEverywhere(issueProviderId);
@@ -272,13 +288,36 @@ export class IssueService {
         !(allExistingIssueIds as string[]).includes(issue.id as string),
     );
 
+    // Already-imported recurring issues whose task may sit in the archive: those
+    // are re-activated rather than imported (see isIssueAwaitingNextOccurrence).
+    // Kept out of `issuesToAdd` so the import snack below still counts imports.
+    const reactivationCandidates: IssueDataReduced[] = potentialIssuesToAdd.filter(
+      (issue: IssueDataReduced): boolean =>
+        (allExistingIssueIds as string[]).includes(issue.id as string) &&
+        isIssueAwaitingNextOccurrence(providerKey, issue),
+    );
+    if (reactivationCandidates.length) {
+      await this._reactivateArchivedIssueTasks(
+        providerKey,
+        issueProviderId,
+        reactivationCandidates,
+        isBackgroundPoll,
+      );
+    }
+
     issuesToAdd.forEach((issue: IssueDataReduced) => {
       // TODO add correct project id
+      // Every import here is an automatic backlog poll targeting the provider's
+      // default project, so the currently-viewed context is incidental and must
+      // not leak its tag onto the task (#8673). Flagging it here (rather than in
+      // the effect) also covers the classic poll's mid-fetch context-switch race
+      // — getTaskDefaults reads the *live* context after several awaits.
       this.addTaskFromIssue({
         issueDataReduced: issue,
         issueProviderId,
         issueProviderKey: providerKey,
         isAddToBacklog: true,
+        isAutoImport: true,
       });
     });
 
@@ -341,7 +380,7 @@ export class IssueService {
       if (this.ISSUE_REFRESH_MAP[issueProviderId]?.[issueId]) {
         this.ISSUE_REFRESH_MAP[issueProviderId][issueId].next(update.issue);
       }
-      this._taskService.update(task.id, update.taskChanges);
+      this._updateTaskFromPoll(task, update.taskChanges);
 
       if (isNotifySuccess) {
         this._snackService.open({
@@ -385,10 +424,10 @@ export class IssueService {
 
     for (const pKey of Object.keys(tasksIssueIdsByIssueProviderKey)) {
       const providerKey = pKey as IssueProviderKey;
-      IssueLog.log(
-        'POLLING CHANGES FOR ' + providerKey,
-        tasksIssueIdsByIssueProviderKey[providerKey],
-      );
+      IssueLog.log('POLLING CHANGES FOR ' + providerKey, {
+        taskCount: tasksIssueIdsByIssueProviderKey[providerKey].length,
+        taskIds: tasksIssueIdsByIssueProviderKey[providerKey].map((t) => t.id),
+      });
       const pollingLabelParams = {
         issueProviderName: this._getProviderName(providerKey),
         issuesStr: this._translateService.instant(
@@ -400,16 +439,18 @@ export class IssueService {
         labelParams: pollingLabelParams,
       });
 
+      const service = this._getService(providerKey);
+      if (!service) {
+        this._globalProgressBarService.countDown();
+        continue;
+      }
+
       let updates: {
         task: Task;
         taskChanges: Partial<Task>;
         issue: IssueData;
       }[] = [];
       try {
-        const service = this._getService(providerKey);
-        if (!service) {
-          continue;
-        }
         updates = await service.getFreshDataForIssueTasks(
           tasksIssueIdsByIssueProviderKey[providerKey],
         );
@@ -424,7 +465,7 @@ export class IssueService {
               update.issue,
             );
           }
-          this._taskService.update(update.task.id, update.taskChanges);
+          this._updateTaskFromPoll(update.task, update.taskChanges);
         }
 
         if (updates.length === 1) {
@@ -467,6 +508,7 @@ export class IssueService {
     additional = {},
     isAddToBacklog = false,
     isForceDefaultProject = false,
+    isAutoImport = false,
   }: {
     issueDataReduced: IssueDataReduced;
     issueProviderId: string;
@@ -474,6 +516,10 @@ export class IssueService {
     additional?: Partial<Task>;
     isAddToBacklog?: boolean;
     isForceDefaultProject?: boolean;
+    // Automatic (non-user-initiated) import — a background backlog poll or
+    // calendar auto-import. Such imports fire regardless of what the user is
+    // viewing, so they must not inherit the active context's tag (#8673).
+    isAutoImport?: boolean;
   }): Promise<string | undefined> {
     if (!issueDataReduced || !issueDataReduced.id || !issueProviderId) {
       throw new Error('No issueData');
@@ -501,6 +547,14 @@ export class IssueService {
         ...additional,
         id: generateCalendarTaskId(issueProviderId, issueDataReduced.id.toString()),
       };
+    } else if (issueProviderKey === PLAINSPACE_TYPE) {
+      // Plainspace auto-imports in the background on every device, so concurrent
+      // imports of the same issue must converge on one task id (see
+      // generatePlainspaceTaskId) instead of creating cross-device duplicates.
+      additional = {
+        ...additional,
+        id: generatePlainspaceTaskId(issueProviderId, issueDataReduced.id.toString()),
+      };
     }
 
     const providerCfg = await firstValueFrom(
@@ -513,7 +567,7 @@ export class IssueService {
       ...additionalFromProviderIssueService
     } = this._getAddTaskData(issueProviderKey, issueDataReduced, providerCfg);
     IssueLog.log({
-      related_to,
+      hasRelatedTo: !!related_to,
       additionalKeys: Object.keys(additionalFromProviderIssueService),
     });
 
@@ -547,7 +601,13 @@ export class IssueService {
         }
         return result;
       } else {
+        // An automatic import (background backlog poll / calendar auto-import)
+        // fires regardless of what the user is currently viewing, so the active
+        // tag is incidental. Inheriting it would stamp an unrelated tag onto the
+        // imported task and sync that stray tag to every device. Only inherit the
+        // ambient tag for user-initiated (foreground) imports.
         const contextTagIds =
+          !isAutoImport &&
           this._workContextService.activeWorkContextType === WorkContextType.TAG &&
           this._workContextService.activeWorkContextId !== TODAY_TAG.id
             ? [this._workContextService.activeWorkContextId]
@@ -659,7 +719,7 @@ export class IssueService {
         const subTaskData = this._getAddTaskData(issueProviderKey, subtask);
         const { title: subTaskTitle, ...subTaskAdditional } = subTaskData;
 
-        await this._taskService.addSubTaskTo(parentTaskId, {
+        this._taskService.addSubTaskTo(parentTaskId, {
           title: subTaskTitle,
           issueType: issueProviderKey,
           issueProviderId: issueProviderId,
@@ -708,8 +768,63 @@ export class IssueService {
     // sub-task (has a parentId), attach to its root parent so the new task
     // becomes a sibling of the parent rather than a grandchild.
     const effectiveParentId = parentTask.task.parentId || parentTask.task.id;
-    const taskId = await this._taskService.addSubTaskTo(effectiveParentId, subTaskData);
+    const taskId = this._taskService.addSubTaskTo(effectiveParentId, subTaskData);
     return { taskId, parentTaskId: effectiveParentId };
+  }
+
+  /**
+   * Prepare the next occurrence before restoring it, so schedule, reminder and
+   * provider baselines replay together. Time history and completed subtasks
+   * carry over, matching the active-task poll's parent-only reopen.
+   */
+  private async _reactivateArchivedIssueTasks(
+    providerKey: IssueProviderKey,
+    issueProviderId: string,
+    issues: IssueDataReduced[],
+    isBackgroundPoll: boolean,
+  ): Promise<void> {
+    for (const issue of issues) {
+      const res = await this._taskService.checkForTaskWithIssueEverywhere(
+        issue.id.toString(),
+        providerKey,
+        issueProviderId,
+      );
+      if (!res?.isFromArchive) {
+        continue;
+      }
+
+      let task: Task;
+      try {
+        const { changes } = withRemindAtForDueChange(
+          res.task,
+          this._getAddTaskData(providerKey, issue),
+          this._globalConfigService.cfg()?.reminder.defaultTaskRemindOption ??
+            DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption!,
+        );
+        // Archiving clears the schedule but leaves remindAt behind. Restore
+        // inserts complete entities, so omitting the old reminder is wire-safe.
+        task = { ...res.task, remindAt: undefined, ...changes };
+      } catch {
+        IssueLog.err('Plainspace: invalid issue data, skipping task reactivation');
+        continue;
+      }
+
+      const subTasks = (res.subTasks || []).map((subTask) => ({
+        ...subTask,
+        remindAt: undefined,
+      }));
+      this._taskService.restoreTask(task, subTasks);
+
+      // Background ('always'-mode) polls stay quiet, same as the import snack
+      // above: the task reappearing in the project is the signal.
+      if (!isBackgroundPoll) {
+        this._snackService.open({
+          ico: 'info',
+          msg: T.F.TASK.S.FOUND_RESTORE_FROM_ARCHIVE,
+          translateParams: { title: res.task.title },
+        });
+      }
+    }
   }
 
   private async _checkAndHandleIssueAlreadyAdded(
@@ -799,6 +914,10 @@ export class IssueService {
         const taskWithTaskSubTasks = await this._taskService
           .getByIdWithSubTaskData$(res.task.id)
           .toPromise();
+        // Nothing to move if the task vanished between the lookup and here (#9946).
+        if (!taskWithTaskSubTasks) {
+          return false;
+        }
         this._taskService.moveToCurrentWorkContext(taskWithTaskSubTasks);
         this._snackService.open({
           ico: 'arrow_upward',
@@ -818,6 +937,31 @@ export class IssueService {
     return false;
   }
 
+  /**
+   * A poll result is applied as a plain `updateTask`, which never touches
+   * `remindAt`. Derive it here so a remote (re)schedule lands with its reminder
+   * in the same op (#10047) — same default the import path uses.
+   *
+   * A remote unschedule is two ops on purpose: `remindAt: undefined` inside
+   * `updateTask` is dropped by JSON serialization and never replays on other
+   * devices (#9776), so the clear goes through `dismissReminderOnly`, whose
+   * reducer sets it deterministically. Rare enough that the extra op is fine.
+   */
+  private _updateTaskFromPoll(task: Task, taskChanges: Partial<Task>): void {
+    const { changes, isClearRemindAt } = withRemindAtForDueChange(
+      task,
+      taskChanges,
+      this._globalConfigService.cfg()?.reminder.defaultTaskRemindOption ??
+        DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption!,
+    );
+    this._taskService.update(task.id, changes);
+    if (isClearRemindAt) {
+      this._store.dispatch(
+        TaskSharedActions.dismissReminderOnly({ id: task.id, isSkipSnack: true }),
+      );
+    }
+  }
+
   private _getService(key: IssueProviderKey): IssueServiceInterface | undefined {
     // Registry-first: check plugin registry before built-in map.
     // This handles both 'plugin:*' keys AND migrated keys like 'GITHUB'.
@@ -827,9 +971,9 @@ export class IssueService {
     return this.ISSUE_SERVICE_MAP[key];
   }
 
-  private _getProviderIcon(key: IssueProviderKey): string {
+  private _getProviderIcon(key: IssueProviderKey): string | undefined {
     if (this._pluginRegistry.hasProvider(key)) {
-      return this._pluginRegistry.getIcon(key);
+      return this._pluginRegistry.getSvgIcon(key);
     }
     return ISSUE_PROVIDER_ICON_MAP[key as BuiltInIssueProviderKey];
   }

@@ -110,16 +110,33 @@ describe('FocusModeReducer', () => {
 
       expect(result.isOverlayShown).toBe(false);
     });
+
+    it('should cancel an unstarted preparation countdown when the overlay closes', () => {
+      const state = {
+        ...initialState,
+        isOverlayShown: true,
+        mainState: FocusMainUIState.Countdown,
+      };
+
+      const result = focusModeReducer(state, a.hideFocusOverlay());
+
+      expect(result.mainState).toBe(FocusMainUIState.Preparation);
+    });
   });
 
   describe('screen navigation actions', () => {
     it('should reset to preparation state on task selection', () => {
-      const state = { ...initialState, currentScreen: FocusScreen.Main };
+      const runningState = focusModeReducer(
+        { ...initialState, currentScreen: FocusScreen.Main },
+        a.startFocusSession({ duration: 25 * 60 * 1000 }),
+      );
       const action = a.selectFocusTask();
-      const result = focusModeReducer(state, action);
+      const result = focusModeReducer(runningState, action);
 
       expect(result.currentScreen).toBe(FocusScreen.Main);
       expect(result.mainState).toBe(FocusMainUIState.Preparation);
+      expect(result.timer.purpose).toBeNull();
+      expect(result.timer.isRunning).toBe(false);
     });
 
     it('should stay on main screen for duration selection', () => {
@@ -816,10 +833,12 @@ describe('FocusModeReducer', () => {
           remainingMs: 10 * 60 * 1000,
           isBreak: false,
           isPaused: true,
+          pausedTaskId: 'paused-task',
         }),
       );
 
       expect(result.timer.isRunning).toBe(false);
+      expect(result.pausedTaskId).toBe('paused-task');
       expect(result.timer.elapsed).toBe(15 * 60 * 1000);
     });
 
@@ -927,6 +946,59 @@ describe('FocusModeReducer', () => {
   describe('FOCUS_MODE_FEATURE_KEY', () => {
     it('should export the correct feature key', () => {
       expect(FOCUS_MODE_FEATURE_KEY).toBe('focusMode');
+    });
+  });
+  describe('restoreFocusSession', () => {
+    it('re-adopts a running work session so the next tick catches up', () => {
+      const tenMinutes = 10 * 60_000;
+      const startedAt = Date.now() - tenMinutes;
+      const restored = focusModeReducer(
+        initialState,
+        a.restoreFocusSession({
+          timer: {
+            isRunning: true,
+            startedAt,
+            elapsed: 0,
+            duration: 25 * 60_000,
+            purpose: 'work',
+          },
+          mode: FocusModeMode.Pomodoro,
+          currentCycle: 3,
+          pausedTaskId: null,
+        }),
+      );
+
+      expect(restored.mode).toBe(FocusModeMode.Pomodoro);
+      expect(restored.currentCycle).toBe(3);
+      expect(restored.currentScreen).toBe(FocusScreen.Main);
+      expect(restored.mainState).toBe(FocusMainUIState.InProgress);
+      expect(restored.isOverlayShown).toBe(initialState.isOverlayShown);
+      const ticked = focusModeReducer(restored, a.tick());
+      expect(ticked.timer.elapsed).toBeGreaterThanOrEqual(tenMinutes);
+      expect(ticked.timer.isRunning).toBe(true);
+    });
+
+    it('re-adopts a paused break on the break screen', () => {
+      const restored = focusModeReducer(
+        initialState,
+        a.restoreFocusSession({
+          timer: {
+            isRunning: false,
+            startedAt: 1_000,
+            elapsed: 60_000,
+            duration: 5 * 60_000,
+            purpose: 'break',
+            isLongBreak: false,
+          },
+          mode: FocusModeMode.Pomodoro,
+          currentCycle: 1,
+          pausedTaskId: 'task-1',
+        }),
+      );
+
+      expect(restored.currentScreen).toBe(FocusScreen.Break);
+      expect(restored.pausedTaskId).toBe('task-1');
+      expect(focusModeReducer(restored, a.tick()).timer.elapsed).toBe(60_000);
     });
   });
 });

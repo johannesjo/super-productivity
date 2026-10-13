@@ -69,6 +69,9 @@ describe('replayOperationBatch', () => {
     const onRemoteArchiveDataApplied = vi.fn(() => {
       callOrder.push('remoteArchiveDataApplied');
     });
+    const onReducersCommitted = vi.fn(async () => {
+      callOrder.push('reducersCommitted');
+    });
 
     const result = await replayOperationBatch({
       ops,
@@ -87,6 +90,7 @@ describe('replayOperationBatch', () => {
       }),
       isArchiveAffectingAction: (action) => action.archiveAffecting === true,
       onRemoteArchiveDataApplied,
+      onReducersCommitted,
       yieldToEventLoop,
     });
 
@@ -101,6 +105,7 @@ describe('replayOperationBatch', () => {
       'startApplyingRemoteOps',
       'dispatchBulk',
       'yield',
+      'reducersCommitted',
       'archive:op-1',
       'archive:op-2',
       'yield',
@@ -264,6 +269,134 @@ describe('replayOperationBatch', () => {
     ]);
   });
 
+  it('skips reducer-failed operations during checkpointing and archive handling', async () => {
+    const op1 = createOperation('op-1');
+    const op2 = createOperation('op-2');
+    const op3 = createOperation('op-3');
+    const reducerError = new Error('reducer failed');
+    const onReducersCommitted = vi.fn(async () => undefined);
+    const archiveSideEffects: ArchiveSideEffectPort<ReplayAction> = {
+      handleOperation: vi.fn(async () => undefined),
+    };
+
+    const result = await replayOperationBatch({
+      ops: [op1, op2, op3],
+      dispatcher: { dispatch: vi.fn() },
+      createBulkApplyAction: (operations) => ({
+        type: '[Test] Bulk Apply',
+        operations,
+      }),
+      getReducerFailures: () => [{ op: op2, error: reducerError }],
+      remoteApplyWindow: createRemoteApplyWindow([]),
+      deferredLocalActions: createDeferredLocalActions([]),
+      archiveSideEffects,
+      operationToAction: (op) => ({ type: '[Test] Action', opId: op.id }),
+      onReducersCommitted,
+      yieldToEventLoop: vi.fn(async () => undefined),
+    });
+
+    expect(onReducersCommitted).toHaveBeenCalledOnce();
+    expect(onReducersCommitted).toHaveBeenCalledWith(
+      [op1, op3],
+      [{ op: op2, error: reducerError }],
+    );
+    expect(archiveSideEffects.handleOperation).toHaveBeenCalledTimes(2);
+    expect(archiveSideEffects.handleOperation).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({ opId: 'op-1' }),
+    );
+    expect(archiveSideEffects.handleOperation).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({ opId: 'op-3' }),
+    );
+    expect(result).toEqual({
+      appliedOps: [op1, op3],
+      reducerFailures: [{ op: op2, error: reducerError }],
+    });
+  });
+
+  it('runs only archive side effects when skipReducerDispatch is set (retry path)', async () => {
+    const callOrder: string[] = [];
+    const ops = [createOperation('op-1'), createOperation('op-2')];
+    const dispatcher: ActionDispatchPort<BulkReplayAction> = {
+      dispatch: vi.fn(() => {
+        callOrder.push('dispatchBulk');
+      }),
+    };
+    const archiveSideEffects: ArchiveSideEffectPort<ReplayAction> = {
+      handleOperation: vi.fn(async (action) => {
+        callOrder.push(`archive:${action.opId}`);
+      }),
+    };
+
+    const result = await replayOperationBatch({
+      ops,
+      applyOptions: { skipReducerDispatch: true },
+      dispatcher,
+      createBulkApplyAction: (operations) => ({
+        type: '[Test] Bulk Apply',
+        operations,
+      }),
+      remoteApplyWindow: createRemoteApplyWindow(callOrder),
+      deferredLocalActions: createDeferredLocalActions(callOrder),
+      archiveSideEffects,
+      operationToAction: (op) => ({ type: '[Test] Action', opId: op.id }),
+      yieldToEventLoop: vi.fn(async () => {
+        callOrder.push('yield');
+      }),
+    });
+
+    expect(result).toEqual({ appliedOps: ops });
+    expect(dispatcher.dispatch).not.toHaveBeenCalled();
+    expect(callOrder).toEqual([
+      'startApplyingRemoteOps',
+      'archive:op-1',
+      'archive:op-2',
+      'yield',
+      'startPostSyncCooldown',
+      'endApplyingRemoteOps',
+      'processDeferredActions',
+    ]);
+  });
+
+  it('reports archive failures without re-dispatching when skipReducerDispatch is set', async () => {
+    const op1 = createOperation('op-1');
+    const op2 = createOperation('op-2');
+    const archiveError = new Error('archive failed again');
+    const dispatcher: ActionDispatchPort<BulkReplayAction> = { dispatch: vi.fn() };
+    const archiveSideEffects: ArchiveSideEffectPort<ReplayAction> = {
+      handleOperation: vi.fn(async (action) => {
+        if (action.opId === 'op-2') {
+          throw archiveError;
+        }
+      }),
+    };
+
+    const result = await replayOperationBatch({
+      ops: [op1, op2],
+      applyOptions: { skipReducerDispatch: true },
+      dispatcher,
+      createBulkApplyAction: (operations) => ({
+        type: '[Test] Bulk Apply',
+        operations,
+      }),
+      remoteApplyWindow: createRemoteApplyWindow([]),
+      deferredLocalActions: createDeferredLocalActions([]),
+      archiveSideEffects,
+      operationToAction: (op) => ({ type: '[Test] Action', opId: op.id }),
+      yieldToEventLoop: vi.fn(async () => undefined),
+    });
+
+    expect(dispatcher.dispatch).not.toHaveBeenCalled();
+    expect(result).toEqual({
+      appliedOps: [op1],
+      failedOp: {
+        op: op2,
+        error: archiveError,
+      },
+    });
+  });
+
   it('fails fast when archive side effects are configured without operation conversion', async () => {
     const callOrder: string[] = [];
     const archiveSideEffects: ArchiveSideEffectPort<ReplayAction> = {
@@ -322,6 +455,45 @@ describe('replayOperationBatch', () => {
     expect(callOrder).toEqual([
       'startApplyingRemoteOps',
       'dispatchBulk',
+      'startPostSyncCooldown',
+      'endApplyingRemoteOps',
+      'processDeferredActions',
+    ]);
+  });
+
+  it('closes the sync window and flushes deferred actions when reducer bookkeeping throws', async () => {
+    const callOrder: string[] = [];
+    const checkpointError = new Error('reducer checkpoint failed');
+
+    await expect(
+      replayOperationBatch({
+        ops: [createOperation('op-1')],
+        dispatcher: {
+          dispatch: vi.fn(() => {
+            callOrder.push('dispatchBulk');
+          }),
+        },
+        createBulkApplyAction: (operations) => ({
+          type: '[Test] Bulk Apply',
+          operations,
+        }),
+        remoteApplyWindow: createRemoteApplyWindow(callOrder),
+        deferredLocalActions: createDeferredLocalActions(callOrder),
+        onReducersCommitted: vi.fn(async () => {
+          callOrder.push('reducersCommitted');
+          throw checkpointError;
+        }),
+        yieldToEventLoop: vi.fn(async () => {
+          callOrder.push('yield');
+        }),
+      }),
+    ).rejects.toBe(checkpointError);
+
+    expect(callOrder).toEqual([
+      'startApplyingRemoteOps',
+      'dispatchBulk',
+      'yield',
+      'reducersCommitted',
       'startPostSyncCooldown',
       'endApplyingRemoteOps',
       'processDeferredActions',

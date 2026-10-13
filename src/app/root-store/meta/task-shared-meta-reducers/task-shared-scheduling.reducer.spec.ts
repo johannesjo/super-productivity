@@ -183,6 +183,33 @@ describe('taskSharedSchedulingMetaReducer', () => {
         testState,
       );
     });
+
+    it('should use the captured day when replaying on a different day', () => {
+      const testState = createStateWithExistingTasks([], [], [], ['task1']);
+      testState[appStateFeatureKey] = {
+        ...testState[appStateFeatureKey],
+        todayStr: '2024-06-15',
+      };
+      const action = {
+        ...TaskSharedActions.unscheduleTask({
+          id: 'task1',
+          isLeaveInToday: true,
+        }),
+        today: '2024-06-14',
+      };
+
+      metaReducer(testState, action);
+
+      expectStateUpdate(
+        expectTaskUpdate('task1', {
+          dueDay: '2024-06-14',
+          dueWithTime: undefined,
+        }),
+        action,
+        mockReducer,
+        testState,
+      );
+    });
   });
 
   describe('dismissReminderOnly action', () => {
@@ -229,6 +256,43 @@ describe('taskSharedSchedulingMetaReducer', () => {
   });
 
   describe('planTasksForToday action', () => {
+    // conflict-disjoint-merge.util.ts admits this op as writing no time field
+    // (TIMELESS_OPAQUE_TASK_ACTIONS, #10378): a time delta commutes with it.
+    it('never writes the time fields of the tasks it plans', () => {
+      const today = getDbDateStr();
+      const timeSpentOnDay = { [today]: 3000, '2024-06-01': 5000 };
+      const timed = { timeSpent: 8000, timeSpentOnDay };
+      const testState = createStateWithExistingTasks([], [], [], ['in-today']);
+      const tasks = [
+        createMockTask({ id: 'unscheduled', ...timed }),
+        createMockTask({ id: 'other-day', dueDay: '2024-06-20', ...timed }),
+        createMockTask({ id: 'timed', dueWithTime: Date.now() + 86400000, ...timed }),
+        createMockTask({ id: 'in-today', dueDay: today, remindAt: 1, ...timed }),
+      ];
+      for (const task of tasks) {
+        testState[TASK_FEATURE_NAME].entities[task.id] = task;
+        if (!(testState[TASK_FEATURE_NAME].ids as string[]).includes(task.id)) {
+          (testState[TASK_FEATURE_NAME].ids as string[]).push(task.id);
+        }
+      }
+      for (const isClearScheduledTime of [false, true]) {
+        const action = TaskSharedActions.planTasksForToday({
+          taskIds: tasks.map((task) => task.id),
+          parentTaskMap: {},
+          isClearScheduledTime,
+        });
+        metaReducer(testState, action);
+        const next = mockReducer.calls.mostRecent().args[0] as RootState;
+        expect(next).not.toBe(testState);
+        for (const task of tasks) {
+          const planned = next[TASK_FEATURE_NAME].entities[task.id] as Task;
+          expect(planned.dueDay).withContext(task.id).toBe(today);
+          expect(planned.timeSpent).withContext(task.id).toBe(8000);
+          expect(planned.timeSpentOnDay).withContext(task.id).toEqual(timeSpentOnDay);
+        }
+      }
+    });
+
     it('should add new tasks to the top of Today tag', () => {
       const testState = createStateWithExistingTasks([], [], [], ['existing-task']);
       // Add task entities that will be planned for today
@@ -1029,6 +1093,40 @@ describe('taskSharedSchedulingMetaReducer', () => {
       metaReducer(baseState, action);
 
       expect(mockReducer).toHaveBeenCalledWith(baseState, action);
+    });
+  });
+
+  describe('ordering-only invariant for conflict resolution (#9426)', () => {
+    // ConflictResolutionService rejects conflicted multi-entity rows of these
+    // actions outright (ORDERING_ONLY_MULTI_ACTIONS): lossless ONLY while
+    // their handlers never touch task-entity fields — Today MEMBERSHIP is
+    // derived from task.dueDay/dueWithTime (ADR #2), so dropping the row loses
+    // at most list ordering. If one of these cases fails, the action changed
+    // semantics: remove it from the allowlist in conflict-resolution.service.ts
+    // (or give it a preserve path) BEFORE shipping the reducer change.
+    it('moveTaskInTodayTagList must leave the task feature state untouched', () => {
+      const testState = createStateWithExistingTasks([], [], [], ['task1', 'task2']);
+      const action = TaskSharedActions.moveTaskInTodayTagList({
+        toTaskId: 'task1',
+        fromTaskId: 'task2',
+      });
+
+      metaReducer(testState, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      expect(updatedState[TASK_FEATURE_NAME]).toBe(testState[TASK_FEATURE_NAME]);
+    });
+
+    it('removeTasksFromTodayTag must leave the task feature state untouched', () => {
+      const testState = createStateWithExistingTasks([], [], [], ['task1', 'task2']);
+      const action = TaskSharedActions.removeTasksFromTodayTag({
+        taskIds: ['task1'],
+      });
+
+      metaReducer(testState, action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0];
+      expect(updatedState[TASK_FEATURE_NAME]).toBe(testState[TASK_FEATURE_NAME]);
     });
   });
 });

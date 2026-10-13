@@ -1,9 +1,11 @@
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector } from '@angular/core';
 import {
   planRegularOpsAfterFullStateUpload,
   planUploadLastServerSeqUpdate,
 } from '@sp/sync-core';
 import { OperationLogStoreService } from '../persistence/operation-log-store.service';
+import { SupersededOperationResolverService } from './superseded-operation-resolver.service';
+import { isReissuableReorder } from './reorder-conflict.util';
 import { LockService } from './lock.service';
 import {
   Operation,
@@ -13,9 +15,16 @@ import {
   extractFullStateFromPayload,
   assertValidFullStatePayload,
   ActionType,
+  isGenesisEntityType,
+  isMultiEntityPayload,
 } from '../core/operation.types';
 import { OpLog } from '../../core/log';
-import { LOCK_NAMES, MAX_OPS_PER_UPLOAD_REQUEST } from '../core/operation-log.const';
+import {
+  LOCK_NAMES,
+  MAX_OPS_PER_UPLOAD_REQUEST,
+  DOWNLOAD_PAGE_SIZE,
+  MAX_DOWNLOAD_ITERATIONS,
+} from '../core/operation-log.const';
 import { chunkArray } from '../../util/chunk-array';
 import {
   OperationSyncCapable,
@@ -24,18 +33,29 @@ import {
 } from '../sync-providers/provider.interface';
 import { syncOpToOperation } from './operation-sync.util';
 import { OperationEncryptionService } from './operation-encryption.service';
+import { SyncProviderManager } from '../sync-providers/provider-manager.service';
 import {
   RejectedOpInfo,
   UploadResult,
   UploadOptions,
 } from '../core/types/sync-results.types';
 import { isRetryableUploadError } from '@sp/sync-providers/http';
-import { handleStorageQuotaError } from './sync-error-utils';
-import { DecryptNoPasswordError } from '../core/errors/sync-errors';
+import { getSyncErrorCode, handleStorageQuotaError } from './sync-error-utils';
+import {
+  ClientUpdateRequiredSPError,
+  DecryptNoPasswordError,
+  EncryptNoPasswordError,
+} from '../core/errors/sync-errors';
+import { assertOpsEncryptedWhenExpected } from './assert-ops-encryption-expected';
 import {
   stripLocalOnlySyncScheduleSettings,
   stripLocalOnlySyncSettingsFromAppData,
+  stripLocalOnlySyncSettingsFromGlobalConfig,
 } from '../../features/config/local-only-sync-settings.util';
+import { isLwwUpdateActionType } from '../core/lww-update-action-types';
+import { StateSnapshotService } from '../backup/state-snapshot.service';
+import { isRebasedTimeDeltaReceipt } from '../persistence/acknowledge-operations.util';
+import { isSyncTimeSpentOp } from './fold-sync-time-spent.util';
 
 // Re-export for consumers that import from this service
 export type {
@@ -59,6 +79,9 @@ export class OperationLogUploadService {
   private opLogStore = inject(OperationLogStoreService);
   private lockService = inject(LockService);
   private encryptionService = inject(OperationEncryptionService);
+  private stateSnapshotService = inject(StateSnapshotService);
+  private providerManager = inject(SyncProviderManager);
+  private injector = inject(Injector);
 
   async uploadPendingOps(
     syncProvider: OperationSyncCapable,
@@ -83,6 +106,32 @@ export class OperationLogUploadService {
     let uploadedCount = 0;
     let rejectedCount = 0;
     let hasMorePiggyback = false;
+    let selectedPendingOps: OperationLogEntry[] = [];
+    const pendingAcknowledgementSeqs: number[] = [];
+    const pendingAcknowledgementOriginals = new Map<string, Operation>();
+    const pendingAcknowledgementSeqSet = new Set<number>();
+    const acknowledge = async (seqs: number[]): Promise<void> => {
+      if (seqs.length === 0) {
+        return;
+      }
+      if (!options?.deferAcknowledgement) {
+        // #9074: local persist — a stale cycle must not mark ops synced after
+        // a destructive config change. (Deferred acks are a pure in-memory
+        // collect here; their persist is fenced at the caller.)
+        this.providerManager.assertSyncEpochUnchanged(
+          options?.fenceEpoch,
+          'upload acknowledgement',
+        );
+        await this.opLogStore.markSynced(seqs);
+        return;
+      }
+      for (const seq of seqs) {
+        if (!pendingAcknowledgementSeqSet.has(seq)) {
+          pendingAcknowledgementSeqSet.add(seq);
+          pendingAcknowledgementSeqs.push(seq);
+        }
+      }
+    };
     // Track encryption state of piggybacked operations for detecting encryption config mismatch.
     // When another client disables encryption, all piggybacked ops will be unencrypted.
     // We track this BEFORE decryption to detect the server's actual encryption state.
@@ -92,15 +141,76 @@ export class OperationLogUploadService {
     // last-server-seq covering them must be persisted by the caller AFTER those ops are
     // applied — not here. We surface the planned value instead of persisting it.
     let lastServerSeqToPersist: number | undefined;
+    // Set when the mandatory-encryption guard skips the upload with pending ops still
+    // unsynced, so the caller can report an honest not-in-sync status (not IN_SYNC).
+    let encryptionRequiredKeyMissing = false;
+    let blockedByRejectedFullState = false;
+    // Set when a full-state op hit a retryable server error (e.g. a Postgres
+    // serialization conflict). The op stays pending, but nothing reached the
+    // server this round, so the caller must not report IN_SYNC.
+    let fullStateUploadDeferred = false;
+    let rejectedFullStateBarrierSeq: number | undefined;
 
     await this.lockService.request(LOCK_NAMES.UPLOAD, async () => {
-      // Execute pre-upload callback INSIDE the lock, BEFORE checking for pending ops.
-      // This ensures operations like server migration checks are atomic with the upload.
+      // Execute migration/recovery preparation while upload serialization is
+      // held. The migration service owns its own operation-log transaction.
       if (options?.preUploadCallback) {
+        // #9074: asserted after the lock wait — the callback appends a
+        // migration SYNC_IMPORT locally; old-epoch state must not seed the
+        // new epoch's server.
+        this.providerManager.assertSyncEpochUnchanged(
+          options?.fenceEpoch,
+          'pre-upload migration',
+        );
         await options.preUploadCallback();
       }
 
-      const pendingOps = await this.opLogStore.getUnsynced();
+      // Fix the pending-op set and the file snapshot under the same operation-log
+      // boundary. A task-time action applied by reducers while waiting for this
+      // lock remains visible to snapshot projection as an in-flight delta.
+      const { pendingOps, localStateSnapshot } = await this.lockService.request(
+        LOCK_NAMES.OPERATION_LOG,
+        async () => {
+          // #10377: a pending note or habit order that crossed an applied
+          // remote op is reissued first; one whose reissue had to wait never
+          // uploads stale, which a file-based provider would accept.
+          let capturedPendingOps = await this.opLogStore.getUnsynced();
+          if (capturedPendingOps.some(({ op }) => isReissuableReorder(op))) {
+            const { created, deferredOpIds } = await this.injector
+              .get(SupersededOperationResolverService)
+              .reissueCrossedPendingReorders();
+            if (created > 0) capturedPendingOps = await this.opLogStore.getUnsynced();
+            capturedPendingOps = capturedPendingOps.filter(
+              ({ op }) => !deferredOpIds.includes(op.id),
+            );
+          }
+          return {
+            pendingOps: capturedPendingOps,
+            localStateSnapshot:
+              syncProvider.providerMode === 'fileSnapshotOps'
+                ? this.stateSnapshotService.getStateSnapshotForOperationLog()
+                : undefined,
+          };
+        },
+      );
+      selectedPendingOps = pendingOps;
+
+      const rejectedFullState = await this.opLogStore.getLatestRejectedFullStateOpEntry();
+      const latestActiveFullState = rejectedFullState
+        ? await this.opLogStore.getLatestFullStateOpEntry()
+        : undefined;
+      if (
+        rejectedFullState &&
+        (!latestActiveFullState || latestActiveFullState.seq <= rejectedFullState.seq)
+      ) {
+        blockedByRejectedFullState = true;
+        OpLog.warn(
+          `OperationLogUploadService: Upload remains blocked because rejected ` +
+            `${rejectedFullState.op.opType} ${rejectedFullState.op.id} has not been ` +
+            'superseded by a newer full-state operation.',
+        );
+        return;
+      }
 
       if (pendingOps.length === 0) {
         OpLog.normal('OperationLogUploadService: No pending operations to upload.');
@@ -124,23 +234,97 @@ export class OperationLogUploadService {
         : undefined;
       const isEncryptionEnabled = !!encryptKey;
 
+      // GHSA-9v8x-68pf-p5x7: providers that mandate E2E encryption (SuperSync)
+      // must NEVER transmit plaintext ops. While no usable key is configured yet
+      // — e.g. first-time setup, before the user has chosen a password — abort the
+      // upload entirely and leave every pending op unsynced. Downloads still run
+      // (merge-first), and the encryption-enable flow performs the first, encrypted
+      // upload. Without this guard the initial setup sync pushes all local ops to
+      // the server in cleartext, breaking the E2EE promise even if later deleted.
+      if (syncProvider.isEncryptionMandatory && !encryptKey) {
+        // We got past the empty-ops check above, so there ARE pending ops we are
+        // refusing to upload. Flag it so the caller reports an honest not-in-sync
+        // status instead of IN_SYNC (which a plain uploadedCount:0 would look like).
+        encryptionRequiredKeyMissing = true;
+        // Expected during the pre-encryption setup window (fires on every
+        // auto-sync until a key is set), so log at normal level, not warn.
+        OpLog.normal(
+          'OperationLogUploadService: Encryption is mandatory for this provider but ' +
+            'no key is configured yet — skipping upload until encryption setup completes.',
+        );
+        return;
+      }
+
+      // GHSA-9544-hjjr-fg8h: file-based providers encrypt inside the adapter and
+      // hide the key from this service (no getEncryptKey), so the SuperSync guard
+      // above cannot see their missing key. Ask the adapter directly whether
+      // encryption is enabled for this provider but the key is gone (silently
+      // dropped credentials) and fail CLOSED before either upload loop. Throwing
+      // (rather than returning) both leaves the pending ops unsynced for retry —
+      // never permanently rejected via the snapshot path's markRejected — and
+      // routes to the enter-password recovery dialog in SyncWrapperService. Unlike
+      // the mandatory-encryption case above this is never an expected steady
+      // state, so it warrants an error, not a silent skip.
+      if (
+        syncProvider.isEncryptionKeyMissing &&
+        (await syncProvider.isEncryptionKeyMissing())
+      ) {
+        throw new EncryptNoPasswordError(
+          'File-based sync: encryption is enabled for this provider but the ' +
+            'encryption key is missing — refusing to upload until it is restored.',
+        );
+      }
+
+      // Genesis ops (MIGRATION / RECOVERY) replay as a no-op on every other
+      // client, so API-based providers never upload them (acknowledged below once
+      // this round's full-state ops are settled). File-based providers keep
+      // uploading them: there the ops upload is what writes the state snapshot,
+      // which a genesis-only client must still do. (#9921)
+      const isGenesisToSkip = (entry: OperationLogEntry): boolean =>
+        syncProvider.providerMode !== 'fileSnapshotOps' &&
+        isGenesisEntityType(entry.op.entityType);
+      const uploadableOps = pendingOps.filter((entry) => !isGenesisToSkip(entry));
+
       // Separate full-state operations (backup imports, repairs) from regular ops
       // Full-state ops are uploaded via snapshot endpoint for better efficiency
-      const fullStateOps = pendingOps.filter((entry) =>
+      const fullStateOps = uploadableOps.filter((entry) =>
         FULL_STATE_OP_TYPES.has(entry.op.opType as OpType),
       );
-      let regularOps = pendingOps.filter(
+      let regularOps = uploadableOps.filter(
         (entry) => !FULL_STATE_OP_TYPES.has(entry.op.opType as OpType),
       );
 
+      if (rejectedFullState) {
+        if (
+          latestActiveFullState?.source === 'local' &&
+          !latestActiveFullState.syncedAt
+        ) {
+          // A pending recovery snapshot is allowed to try, but it does not
+          // release the durable barrier until the server actually accepts it.
+          blockedByRejectedFullState = true;
+          rejectedFullStateBarrierSeq = rejectedFullState.seq;
+        }
+      }
+
       // Upload full-state operations via snapshot endpoint
       let fullStateOpUploaded = false;
-      let lastUploadedFullStateOpId: string | undefined;
+      let fullStateUploadBlocked = false;
+      // Local append order (seq), not op id: UUIDv7 ids follow the wall clock and
+      // can order a post-snapshot op BEFORE the full-state op after a clock
+      // rollback, which would mark it synced without ever uploading it.
+      let lastUploadedFullStateOpSeq: number | undefined;
+      let droppedFullStateOnExists = false;
       for (const entry of fullStateOps) {
-        // BackupImport/Repair: always wipe server (recovery operations replace all state)
-        // SyncImport: only wipe when explicitly requested (preserves SYNC_IMPORT_EXISTS check)
+        // BACKUP_IMPORT is an explicit restore and intentionally wipes remote
+        // history. SYNC_IMPORT only does so when explicitly requested. REPAIR
+        // must never wipe first: the server validates its base sequence so a
+        // concurrent remote edit is rejected instead of destroyed.
         const isCleanSlateForOp =
-          entry.op.opType === OpType.SyncImport ? options?.isCleanSlate : true;
+          entry.op.opType === OpType.BackupImport
+            ? true
+            : entry.op.opType === OpType.SyncImport
+              ? entry.op.syncImportReason === 'FORCE_UPLOAD' || options?.isCleanSlate
+              : false;
         const result = await this._uploadFullStateOpAsSnapshot(
           syncProvider,
           entry,
@@ -148,16 +332,24 @@ export class OperationLogUploadService {
           isCleanSlateForOp,
         );
         if (result.accepted) {
-          await this.opLogStore.markSynced([entry.seq]);
+          await acknowledge([entry.seq]);
           uploadedCount++;
           if (result.serverSeq !== undefined) {
             await syncProvider.setLastServerSeq(result.serverSeq);
             lastKnownServerSeq = result.serverSeq;
             highestReceivedSeq = Math.max(highestReceivedSeq, result.serverSeq);
           }
-          // Track that a full-state op was uploaded - regular ops before it are already included
+          // Track that a full-state op was uploaded - regular ops appended before it
+          // are already included in its frozen snapshot payload
           fullStateOpUploaded = true;
-          lastUploadedFullStateOpId = entry.op.id;
+          lastUploadedFullStateOpSeq = entry.seq;
+          if (
+            rejectedFullStateBarrierSeq !== undefined &&
+            entry.seq > rejectedFullStateBarrierSeq
+          ) {
+            blockedByRejectedFullState = false;
+            rejectedFullStateBarrierSeq = undefined;
+          }
         } else {
           // Special handling for SYNC_IMPORT_EXISTS: another client already uploaded
           // a SYNC_IMPORT. We should delete our local SYNC_IMPORT and let the normal
@@ -171,6 +363,7 @@ export class OperationLogUploadService {
             await this.opLogStore.deleteOpsWhere(
               (logEntry) => logEntry.op.id === entry.op.id,
             );
+            droppedFullStateOnExists = true;
             // Don't count as rejected - this is expected behavior when joining existing group
             continue;
           }
@@ -182,15 +375,51 @@ export class OperationLogUploadService {
               `OperationLogUploadService: Full-state op ${entry.op.id} failed due to network error, will retry: ${result.error}`,
             );
             // Don't mark as rejected - leave as unsynced for retry
+            fullStateUploadDeferred = true;
           } else {
-            await this.opLogStore.markRejected([entry.op.id]);
-            rejectedOps.push({ opId: entry.op.id, error: result.error });
+            // Keep the op pending until OperationLogSyncService has processed
+            // piggybacked ops and the central rejection handler has classified
+            // it. Marking it here made the handler skip the entry entirely,
+            // hiding the permanent rejection from the UI.
+            rejectedOps.push({
+              opId: entry.op.id,
+              error: result.error,
+              ...(result.errorCode !== undefined ? { errorCode: result.errorCode } : {}),
+            });
             rejectedCount++;
             OpLog.warn(
               `OperationLogUploadService: Full-state op ${entry.op.id} rejected: ${result.error}`,
             );
           }
+          // Regular operations after this baseline may refer to state that the
+          // server never received. Keep them pending until the full-state failure
+          // is retried or surfaced and resolved.
+          fullStateUploadBlocked = true;
+          break;
         }
+      }
+
+      if (fullStateUploadBlocked) {
+        return;
+      }
+
+      // Settle the skipped genesis ops (see isGenesisToSkip) only now: while the
+      // upload was still blocked above, or when this client's own SYNC_IMPORT was
+      // just dropped in favour of a remote one, the pending genesis op is what
+      // makes the incoming-import gate prompt on the next cycle instead of
+      // silently replacing this client's state. (#9921)
+      const genesisSeqs = pendingOps.filter(isGenesisToSkip).map((entry) => entry.seq);
+      if (genesisSeqs.length > 0 && droppedFullStateOnExists) {
+        OpLog.normal(
+          'OperationLogUploadService: Keeping genesis op(s) pending — the local SYNC_IMPORT ' +
+            'was superseded by a remote one.',
+        );
+      } else if (genesisSeqs.length > 0) {
+        OpLog.normal(
+          `OperationLogUploadService: Marking ${genesisSeqs.length} genesis op(s) synced ` +
+            'without uploading them (no receiver on any other client).',
+        );
+        await acknowledge(genesisSeqs);
       }
 
       // Skip regular ops processing if none exist
@@ -198,16 +427,16 @@ export class OperationLogUploadService {
         return;
       }
 
-      if (fullStateOpUploaded && lastUploadedFullStateOpId) {
+      if (fullStateOpUploaded && lastUploadedFullStateOpSeq !== undefined) {
         const { opsIncludedInSnapshot, opsAfterSnapshot } =
           planRegularOpsAfterFullStateUpload({
             regularOps,
-            lastUploadedFullStateOpId,
+            lastUploadedFullStateOpSeq,
           });
 
         if (opsIncludedInSnapshot.length > 0) {
           const seqs = opsIncludedInSnapshot.map((entry) => entry.seq);
-          await this.opLogStore.markSynced(seqs);
+          await acknowledge(seqs);
           uploadedCount += seqs.length;
           OpLog.normal(
             `OperationLogUploadService: Marked ${seqs.length} regular ops as synced ` +
@@ -229,28 +458,28 @@ export class OperationLogUploadService {
 
       // Convert to SyncOperation format. Local-only operations remain in the
       // local op-log for replay, but are acknowledged locally instead of uploaded.
-      const syncOpPairs = regularOps
-        .map((entry) => ({ entry, syncOp: this._entryToSyncOp(entry) }))
-        .filter(
-          (pair): pair is { entry: OperationLogEntry; syncOp: SyncOperation } =>
-            pair.syncOp !== null,
-        );
-      const localOnlySeqs = regularOps
-        .filter((entry) => !syncOpPairs.some((pair) => pair.entry.seq === entry.seq))
-        .map((entry) => entry.seq);
+      let syncOps: SyncOperation[] = [];
+      const uploadEntries: OperationLogEntry[] = [];
+      const localOnlySeqs: number[] = [];
+      for (const entry of regularOps) {
+        const syncOp = this._entryToSyncOp(entry);
+        if (syncOp === null) {
+          localOnlySeqs.push(entry.seq);
+        } else {
+          syncOps.push(syncOp);
+          uploadEntries.push(entry);
+        }
+      }
       if (localOnlySeqs.length > 0) {
-        await this.opLogStore.markSynced(localOnlySeqs);
+        await acknowledge(localOnlySeqs);
         uploadedCount += localOnlySeqs.length;
         OpLog.normal(
           `OperationLogUploadService: Marked ${localOnlySeqs.length} local-only op(s) as synced without upload`,
         );
       }
-      if (syncOpPairs.length === 0) {
+      if (syncOps.length === 0) {
         return;
       }
-
-      let syncOps: SyncOperation[] = syncOpPairs.map((pair) => pair.syncOp);
-      const uploadEntries = syncOpPairs.map((pair) => pair.entry);
 
       // Encrypt payloads if E2E encryption is enabled
       if (isEncryptionEnabled && encryptKey) {
@@ -259,8 +488,17 @@ export class OperationLogUploadService {
       }
 
       // Upload in batches to avoid 413 Payload Too Large errors
-      const chunks = chunkArray(syncOps, MAX_OPS_PER_UPLOAD_REQUEST);
-      const correspondingEntries = chunkArray(uploadEntries, MAX_OPS_PER_UPLOAD_REQUEST);
+      // A file upload embeds one full snapshot. Keep its atomically captured op
+      // set in one request so a partial chunk failure cannot publish state that
+      // already contains operations left for a later retry.
+      const chunks =
+        syncProvider.providerMode === 'fileSnapshotOps'
+          ? [syncOps]
+          : chunkArray(syncOps, MAX_OPS_PER_UPLOAD_REQUEST);
+      const correspondingEntries =
+        syncProvider.providerMode === 'fileSnapshotOps'
+          ? [uploadEntries]
+          : chunkArray(uploadEntries, MAX_OPS_PER_UPLOAD_REQUEST);
 
       for (let i = 0; i < chunks.length; i++) {
         const chunk = chunks[i];
@@ -272,25 +510,91 @@ export class OperationLogUploadService {
 
         let response;
         try {
-          response = await syncProvider.uploadOps(chunk, clientId, lastKnownServerSeq);
+          response = await syncProvider.uploadOps(
+            chunk,
+            clientId,
+            lastKnownServerSeq,
+            localStateSnapshot,
+          );
         } catch (err) {
           const message = err instanceof Error ? err.message : 'Unknown error';
           OpLog.error(`OperationLogUploadService: Upload failed: ${message}`);
-          handleStorageQuotaError(message);
+          handleStorageQuotaError(err);
           throw err; // Re-throw to propagate the error
         }
 
+        const ambiguousDeltas = entries.filter(
+          ({ op }) =>
+            syncProvider.providerMode === 'superSyncOps' &&
+            isSyncTimeSpentOp(op) &&
+            response.results.some(
+              (result) => result.opId === op.id && result.errorCode === 'INVALID_OP_ID',
+            ),
+        );
+        if (ambiguousDeltas.length > 0) {
+          // Conflict resolution can rebase a pending delta after a lost upload
+          // response. Recover only a matching authenticated server receipt;
+          // an id collision or different content must keep the normal error.
+          const originals = new Map<string, Operation>();
+          let sinceSeq = 0;
+          for (let page = 0; page < MAX_DOWNLOAD_ITERATIONS; page++) {
+            const receipt = await syncProvider.downloadOps(
+              sinceSeq,
+              undefined,
+              DOWNLOAD_PAGE_SIZE,
+            );
+            const matches = receipt.ops
+              .map(({ op }) => op)
+              .filter((op) => ambiguousDeltas.some((entry) => entry.op.id === op.id));
+            assertOpsEncryptedWhenExpected(matches, isEncryptionEnabled);
+            const decoded = encryptKey
+              ? await this.encryptionService.decryptOperations(matches, encryptKey)
+              : matches;
+            decoded.forEach((op) => originals.set(op.id, syncOpToOperation(op)));
+            if (!receipt.hasMore || originals.size === ambiguousDeltas.length) break;
+            const nextSeq = receipt.ops.at(-1)?.serverSeq;
+            if (nextSeq === undefined || nextSeq <= sinceSeq)
+              throw new Error('Non-progressing time delta receipt lookup');
+            sinceSeq = nextSeq;
+            if (page === MAX_DOWNLOAD_ITERATIONS - 1)
+              throw new Error('Time delta receipt lookup exceeded the download limit');
+          }
+          const recovered = ambiguousDeltas.filter(({ op }) => {
+            const original = originals.get(op.id);
+            return original && isRebasedTimeDeltaReceipt(op, original);
+          });
+          if (recovered.length > 0) {
+            if (options?.deferAcknowledgement) {
+              for (const { op } of recovered)
+                pendingAcknowledgementOriginals.set(op.id, originals.get(op.id)!);
+            } else {
+              await this.lockService.request(LOCK_NAMES.OPERATION_LOG, async () => {
+                this.providerManager.assertSyncEpochUnchanged(
+                  options?.fenceEpoch,
+                  'time delta receipt',
+                );
+                await this.opLogStore.markSynced(
+                  recovered.map(({ seq }) => seq),
+                  originals,
+                );
+              });
+            }
+            const recoveredIds = new Set(recovered.map(({ op }) => op.id));
+            response.results = response.results.map((result) =>
+              recoveredIds.has(result.opId) ? { ...result, accepted: true } : result,
+            );
+          }
+        }
+
         // Mark successfully accepted ops as synced
+        const entrySeqByOpId = new Map(entries.map((entry) => [entry.op.id, entry.seq]));
         const acceptedSeqs = response.results
           .filter((r) => r.accepted)
-          .map((r) => {
-            const entry = entries.find((e) => e.op.id === r.opId);
-            return entry?.seq;
-          })
+          .map((r) => entrySeqByOpId.get(r.opId))
           .filter((seq): seq is number => seq !== undefined);
 
         if (acceptedSeqs.length > 0) {
-          await this.opLogStore.markSynced(acceptedSeqs);
+          await acknowledge(acceptedSeqs);
           uploadedCount += acceptedSeqs.length;
         }
 
@@ -309,6 +613,15 @@ export class OperationLogUploadService {
               (response.hasMorePiggyback ? ' (more available on server)' : ''),
           );
           let piggybackSyncOps = response.newOps.map((serverOp) => serverOp.op);
+
+          // Fail closed on a plaintext piggybacked op when encryption is mandatory
+          // (same reasoning as the download path, GHSA-8pxh-mgc7-gp3g). A keyless
+          // mandatory-encryption upload already returned early above, so reaching
+          // here implies a usable key — `isEncryptionEnabled` (=!!encryptKey) holds.
+          assertOpsEncryptedWhenExpected(
+            piggybackSyncOps,
+            !!syncProvider.isEncryptionMandatory && isEncryptionEnabled,
+          );
 
           // Track encryption state BEFORE decryption to detect server's actual state.
           // This is critical for detecting when another client disables encryption.
@@ -330,6 +643,11 @@ export class OperationLogUploadService {
               );
             }
 
+            // Deliberately NOT wrapped with the download path's diagnostic
+            // logging: a piggyback decrypt failure throws before the seq
+            // persist below, so the next sync cycle re-fetches the same ops
+            // through the download path, which writes the exported-Logs
+            // diagnosis there. One log site, same ops.
             piggybackSyncOps = await this.encryptionService.decryptOperations(
               piggybackSyncOps,
               encryptKey,
@@ -418,6 +736,18 @@ export class OperationLogUploadService {
       ...(hasMorePiggyback ? { hasMorePiggyback: true } : {}),
       ...(piggybackHasOnlyUnencryptedData ? { piggybackHasOnlyUnencryptedData } : {}),
       ...(lastServerSeqToPersist !== undefined ? { lastServerSeqToPersist } : {}),
+      ...(encryptionRequiredKeyMissing ? { encryptionRequiredKeyMissing: true } : {}),
+      ...(blockedByRejectedFullState ? { blockedByRejectedFullState: true } : {}),
+      ...(fullStateUploadDeferred ? { fullStateUploadDeferred: true } : {}),
+      ...(options?.deferAcknowledgement
+        ? {
+            selectedPendingOps,
+            pendingAcknowledgementSeqs,
+            ...(pendingAcknowledgementOriginals.size > 0
+              ? { pendingAcknowledgementOriginals }
+              : {}),
+          }
+        : {}),
     };
   }
 
@@ -442,10 +772,44 @@ export class OperationLogUploadService {
       ...(entry.op.syncImportReason
         ? { syncImportReason: entry.op.syncImportReason }
         : {}),
+      ...(entry.op.repairBaseServerSeq !== undefined
+        ? { repairBaseServerSeq: entry.op.repairBaseServerSeq }
+        : {}),
     };
   }
 
   private _sanitizeRegularOpPayloadForUpload(op: Operation): unknown | null {
+    if (
+      op.actionType === ActionType.TASK_SHARED_DELETE_MULTIPLE &&
+      isMultiEntityPayload(op.payload)
+    ) {
+      const actionPayload = { ...op.payload.actionPayload };
+      delete actionPayload['tasks'];
+      return {
+        ...op.payload,
+        actionPayload,
+      };
+    }
+
+    if (
+      op.entityType === 'GLOBAL_CONFIG' &&
+      isLwwUpdateActionType(op.actionType) &&
+      typeof op.payload === 'object' &&
+      op.payload !== null
+    ) {
+      if (isMultiEntityPayload(op.payload)) {
+        return {
+          ...op.payload,
+          actionPayload: stripLocalOnlySyncSettingsFromGlobalConfig(
+            op.payload.actionPayload,
+          ),
+        };
+      }
+      return stripLocalOnlySyncSettingsFromGlobalConfig(
+        op.payload as Record<string, unknown>,
+      );
+    }
+
     if (
       op.actionType !== ActionType.GLOBAL_CONFIG_UPDATE_SECTION ||
       typeof op.payload !== 'object' ||
@@ -512,6 +876,27 @@ export class OperationLogUploadService {
       `OperationLogUploadService: Uploading ${op.opType} operation via snapshot endpoint`,
     );
 
+    const repairBaseServerSeq =
+      op.opType === OpType.Repair &&
+      typeof op.payload === 'object' &&
+      op.payload !== null &&
+      'repairBaseServerSeq' in op.payload &&
+      typeof op.payload.repairBaseServerSeq === 'number'
+        ? op.payload.repairBaseServerSeq
+        : undefined;
+
+    if (
+      op.opType === OpType.Repair &&
+      syncProvider.providerMode === 'superSyncOps' &&
+      syncProvider.supportsCausalRepairSnapshots?.() !== true
+    ) {
+      return {
+        accepted: false,
+        error: 'Server does not advertise causal REPAIR snapshot support',
+        errorCode: 'REPAIR_CAUSALITY_UNSUPPORTED',
+      };
+    }
+
     // Extract state from payload, handling both wrapped and unwrapped formats.
     // Uses shared utility to ensure consistent handling across the codebase.
     let state: unknown = stripLocalOnlySyncSettingsFromAppData(
@@ -548,21 +933,31 @@ export class OperationLogUploadService {
         isCleanSlate,
         op.opType as RestorePointType,
         op.syncImportReason,
+        repairBaseServerSeq,
       );
       return response;
     } catch (err) {
+      // The server refused this app version, not this op: turning the error into
+      // a result would classify the full-state op as rejected. Re-throw, as for
+      // a missing encryption key, so it stays pending until the app is updated.
+      if (err instanceof ClientUpdateRequiredSPError) {
+        throw err;
+      }
       const message = err instanceof Error ? err.message : 'Unknown error';
       OpLog.error(`OperationLogUploadService: Snapshot upload failed: ${message}`);
-      handleStorageQuotaError(message);
+      handleStorageQuotaError(err);
 
-      // Extract errorCode from error message if present (server returns JSON with errorCode)
-      let errorCode: string | undefined;
-      if (message.includes('SYNC_IMPORT_EXISTS')) {
-        errorCode = 'SYNC_IMPORT_EXISTS';
-      }
+      const errorCode = getSyncErrorCode(err) ?? this._getLegacyErrorCode(message);
 
       return { accepted: false, error: message, errorCode };
     }
+  }
+
+  private _getLegacyErrorCode(message: string): string | undefined {
+    if (message.includes('SYNC_IMPORT_EXISTS')) {
+      return 'SYNC_IMPORT_EXISTS';
+    }
+    return undefined;
   }
 
   /**

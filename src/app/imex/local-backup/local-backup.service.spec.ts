@@ -1,9 +1,11 @@
-import { fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { fakeAsync, flushMicrotasks, TestBed, tick } from '@angular/core/testing';
 import { BehaviorSubject, of, Subject } from 'rxjs';
 import { LocalBackupService } from './local-backup.service';
+import { LocalBackupMeta } from './local-backup.model';
 import { GlobalConfigService } from '../../features/config/global-config.service';
 import { StateSnapshotService } from '../../op-log/backup/state-snapshot.service';
 import { BackupService } from '../../op-log/backup/backup.service';
+import { LocalDraftService } from '../../core/draft/local-draft.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { TranslateService } from '@ngx-translate/core';
 import { ArchiveModel } from '../../features/archive/archive.model';
@@ -15,6 +17,8 @@ import { LOCAL_ACTIONS } from '../../util/local-actions.token';
 import { Action } from '@ngrx/store';
 import { DEFAULT_MAX_BACKUP_FILES } from '../../../../electron/shared-with-frontend/backup-file-cleanup.util';
 import { LS } from '../../core/persistence/storage-keys.const';
+import { Log } from '../../core/log';
+import { BackupRepairFailedError } from '../../op-log/core/errors/sync-errors';
 
 const BACKUP_INTERVAL = 5 * 60 * 1000;
 const DATA_CHANGE_DEBOUNCE = 30 * 1000;
@@ -33,6 +37,7 @@ type LocalBackupServiceWithBackupElectron = {
 
 type LocalBackupServiceWithPlatformFlags = {
   _isAndroidWebView: boolean;
+  _isElectron: boolean;
 };
 
 describe('LocalBackupService', () => {
@@ -40,6 +45,7 @@ describe('LocalBackupService', () => {
   let stateSnapshotServiceSpy: jasmine.SpyObj<StateSnapshotService>;
   let globalConfigServiceSpy: jasmine.SpyObj<GlobalConfigService>;
   let backupServiceSpy: jasmine.SpyObj<BackupService>;
+  let localDraftServiceSpy: jasmine.SpyObj<LocalDraftService>;
   let snackServiceSpy: jasmine.SpyObj<SnackService>;
   let translateServiceSpy: jasmine.SpyObj<TranslateService>;
   let platformServiceSpy: jasmine.SpyObj<CapacitorPlatformService>;
@@ -93,6 +99,7 @@ describe('LocalBackupService', () => {
       cfg$: of({ localBackup: { isEnabled: false } }),
     });
     backupServiceSpy = jasmine.createSpyObj('BackupService', ['importCompleteBackup']);
+    localDraftServiceSpy = jasmine.createSpyObj('LocalDraftService', ['deleteAllDrafts']);
     snackServiceSpy = jasmine.createSpyObj('SnackService', ['open']);
     translateServiceSpy = jasmine.createSpyObj('TranslateService', ['instant']);
     platformServiceSpy = jasmine.createSpyObj('CapacitorPlatformService', ['isIOS']);
@@ -130,6 +137,7 @@ describe('LocalBackupService', () => {
         { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
         { provide: StateSnapshotService, useValue: stateSnapshotServiceSpy },
         { provide: BackupService, useValue: backupServiceSpy },
+        { provide: LocalDraftService, useValue: localDraftServiceSpy },
         { provide: SnackService, useValue: snackServiceSpy },
         { provide: TranslateService, useValue: translateServiceSpy },
         { provide: CapacitorPlatformService, useValue: platformServiceSpy },
@@ -210,6 +218,7 @@ describe('LocalBackupService', () => {
           { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
           { provide: StateSnapshotService, useValue: stateSnapshotServiceSpy },
           { provide: BackupService, useValue: backupServiceSpy },
+          { provide: LocalDraftService, useValue: localDraftServiceSpy },
           { provide: SnackService, useValue: snackServiceSpy },
           { provide: TranslateService, useValue: translateServiceSpy },
           { provide: CapacitorPlatformService, useValue: platformServiceSpy },
@@ -296,7 +305,10 @@ describe('LocalBackupService', () => {
     const PREV = 'super-productivity-backup.prev.json';
 
     type LocalBackupServiceWithIosRing = {
+      _readIOSExistingSlotOrThrow: (path: string) => Promise<string | null>;
       _readIOSFileOrNull: (path: string) => Promise<string | null>;
+      _readIOSFileRaw: (path: string) => Promise<string>;
+      _iosFileExists: (path: string) => Promise<boolean>;
       _writeIOSFile: (path: string, data: string) => Promise<void>;
     };
 
@@ -312,7 +324,7 @@ describe('LocalBackupService', () => {
       const existing = JSON.stringify({ task: { ids: ['existing'] } });
       spyOn(
         service as unknown as LocalBackupServiceWithIosRing,
-        '_readIOSFileOrNull',
+        '_readIOSExistingSlotOrThrow',
       ).and.resolveTo(existing);
       const writeSpy = spyOn(
         service as unknown as LocalBackupServiceWithIosRing,
@@ -330,7 +342,7 @@ describe('LocalBackupService', () => {
     it('skips promotion when there is no existing backup yet', async () => {
       spyOn(
         service as unknown as LocalBackupServiceWithIosRing,
-        '_readIOSFileOrNull',
+        '_readIOSExistingSlotOrThrow',
       ).and.resolveTo(null);
       const writeSpy = spyOn(
         service as unknown as LocalBackupServiceWithIosRing,
@@ -343,6 +355,50 @@ describe('LocalBackupService', () => {
       expect(writeSpy.calls.mostRecent().args[0]).toBe(PRIMARY);
     });
 
+    it('bails without writing when the existing slot read fails transiently (#8414)', async () => {
+      // A transient read failure must NOT be mistaken for "no backup yet": the
+      // primary stays untouched (no prev promotion, no overwrite), preserving both
+      // ring slots so the next cycle can retry. Mirrors the Android guard.
+      spyOn(
+        service as unknown as LocalBackupServiceWithIosRing,
+        '_readIOSExistingSlotOrThrow',
+      ).and.rejectWith(new Error('transient read failure'));
+      const writeSpy = spyOn(
+        service as unknown as LocalBackupServiceWithIosRing,
+        '_writeIOSFile',
+      ).and.resolveTo();
+
+      await (service as unknown as LocalBackupServiceWithPrivate)._backup();
+
+      expect(writeSpy).not.toHaveBeenCalled();
+    });
+
+    it('still writes the primary on the first-ever backup when the raw read throws (#8414)', async () => {
+      // Capacitor signals a missing file by THROWING (same as a transient
+      // failure), so the absent re-probe must let the write proceed end-to-end —
+      // the overwrite guard must not over-correct and block a legitimate first
+      // backup. Exercises _readIOSExistingSlotOrThrow's raw-throw + confirmed-absent
+      // branch through _backup().
+      spyOn(
+        service as unknown as LocalBackupServiceWithIosRing,
+        '_readIOSFileRaw',
+      ).and.rejectWith(new Error('File does not exist'));
+      spyOn(
+        service as unknown as LocalBackupServiceWithIosRing,
+        '_iosFileExists',
+      ).and.resolveTo(false);
+      const writeSpy = spyOn(
+        service as unknown as LocalBackupServiceWithIosRing,
+        '_writeIOSFile',
+      ).and.resolveTo();
+
+      await (service as unknown as LocalBackupServiceWithPrivate)._backup();
+
+      // No prev promotion (nothing to promote) — just the single primary write.
+      expect(writeSpy).toHaveBeenCalledTimes(1);
+      expect(writeSpy.calls.mostRecent().args[0]).toBe(PRIMARY);
+    });
+
     it('loadBackupIOS resolves to "" (never throws) when no usable backup exists', async () => {
       // Guards the fire-and-forget startup path from an unhandled rejection.
       spyOn(
@@ -351,6 +407,65 @@ describe('LocalBackupService', () => {
       ).and.resolveTo(null);
 
       await expectAsync(service.loadBackupIOS()).toBeResolvedTo('');
+    });
+  });
+
+  describe('_readIOSExistingSlotOrThrow (write-path read, #8414)', () => {
+    type LocalBackupServiceWithIosSlotRead = {
+      _readIOSExistingSlotOrThrow: (path: string) => Promise<string | null>;
+      _readIOSFileRaw: (path: string) => Promise<string>;
+      _iosFileExists: (path: string) => Promise<boolean>;
+    };
+
+    it('returns the file contents when the read succeeds', async () => {
+      spyOn(
+        service as unknown as LocalBackupServiceWithIosSlotRead,
+        '_readIOSFileRaw',
+      ).and.resolveTo('the-backup');
+
+      const result = await (
+        service as unknown as LocalBackupServiceWithIosSlotRead
+      )._readIOSExistingSlotOrThrow('some-path');
+
+      expect(result).toBe('the-backup');
+    });
+
+    it('returns null when the read fails AND the file is confirmed absent', async () => {
+      // First-ever backup: no file exists. The write must be allowed to proceed.
+      spyOn(
+        service as unknown as LocalBackupServiceWithIosSlotRead,
+        '_readIOSFileRaw',
+      ).and.rejectWith(new Error('File does not exist'));
+      spyOn(
+        service as unknown as LocalBackupServiceWithIosSlotRead,
+        '_iosFileExists',
+      ).and.resolveTo(false);
+
+      const result = await (
+        service as unknown as LocalBackupServiceWithIosSlotRead
+      )._readIOSExistingSlotOrThrow('some-path');
+
+      expect(result).toBeNull();
+    });
+
+    it('rethrows when the read fails but the file still exists (transient failure)', async () => {
+      // The slot is there but momentarily unreadable: we must NOT treat this as
+      // "no backup" — rethrow so the caller bails without overwriting.
+      const readErr = new Error('transient read failure');
+      spyOn(
+        service as unknown as LocalBackupServiceWithIosSlotRead,
+        '_readIOSFileRaw',
+      ).and.rejectWith(readErr);
+      spyOn(
+        service as unknown as LocalBackupServiceWithIosSlotRead,
+        '_iosFileExists',
+      ).and.resolveTo(true);
+
+      await expectAsync(
+        (
+          service as unknown as LocalBackupServiceWithIosSlotRead
+        )._readIOSExistingSlotOrThrow('some-path'),
+      ).toBeRejectedWith(readErr);
     });
   });
 
@@ -370,6 +485,7 @@ describe('LocalBackupService', () => {
           { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
           { provide: StateSnapshotService, useValue: stateSnapshotServiceSpy },
           { provide: BackupService, useValue: backupServiceSpy },
+          { provide: LocalDraftService, useValue: localDraftServiceSpy },
           { provide: SnackService, useValue: snackServiceSpy },
           { provide: TranslateService, useValue: translateServiceSpy },
           { provide: CapacitorPlatformService, useValue: platformServiceSpy },
@@ -407,7 +523,7 @@ describe('LocalBackupService', () => {
     };
 
     type LocalBackupServiceWithIosRing = {
-      _readIOSFileOrNull: (path: string) => Promise<string | null>;
+      _readIOSExistingSlotOrThrow: (path: string) => Promise<string | null>;
       _writeIOSFile: (path: string, data: string) => Promise<void>;
     };
 
@@ -493,7 +609,7 @@ describe('LocalBackupService', () => {
         );
         spyOn(
           service as unknown as LocalBackupServiceWithIosRing,
-          '_readIOSFileOrNull',
+          '_readIOSExistingSlotOrThrow',
         ).and.resolveTo(makeStoredBackup(20));
         const writeSpy = spyOn(
           service as unknown as LocalBackupServiceWithIosRing,
@@ -513,7 +629,7 @@ describe('LocalBackupService', () => {
         );
         spyOn(
           service as unknown as LocalBackupServiceWithIosRing,
-          '_readIOSFileOrNull',
+          '_readIOSExistingSlotOrThrow',
         ).and.resolveTo(makeStoredBackup(20));
         const writeSpy = spyOn(
           service as unknown as LocalBackupServiceWithIosRing,
@@ -545,6 +661,7 @@ describe('LocalBackupService', () => {
           { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
           { provide: StateSnapshotService, useValue: stateSnapshotServiceSpy },
           { provide: BackupService, useValue: backupServiceSpy },
+          { provide: LocalDraftService, useValue: localDraftServiceSpy },
           { provide: SnackService, useValue: snackServiceSpy },
           { provide: TranslateService, useValue: translateServiceSpy },
           { provide: CapacitorPlatformService, useValue: platformServiceSpy },
@@ -599,6 +716,96 @@ describe('LocalBackupService', () => {
 
       expect(backupSpy).not.toHaveBeenCalled();
     }));
+
+    it('contains a failed backup and handles a later trigger', fakeAsync(() => {
+      const { actions$, backupSpy } = setup(true);
+      const error = new DOMException(
+        'An internal error was encountered in the Indexed Database server',
+        'UnknownError',
+      );
+      const logSpy = spyOn(Log, 'err');
+      backupSpy.and.rejectWith(error);
+
+      actions$.next({ type: 'FirstAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      flushMicrotasks();
+
+      expect(logSpy).toHaveBeenCalledWith('LocalBackupService: Backup failed', error);
+
+      backupSpy.and.resolveTo();
+      actions$.next({ type: 'SecondAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      flushMicrotasks();
+
+      expect(backupSpy).toHaveBeenCalledTimes(2);
+    }));
+
+    it('drops an overlapping trigger and handles one after completion', fakeAsync(() => {
+      const { actions$, backupSpy } = setup(true);
+      let resolveFirstBackup: (() => void) | undefined;
+      backupSpy.and.returnValue(
+        new Promise<void>((resolve) => {
+          resolveFirstBackup = resolve;
+        }),
+      );
+
+      actions$.next({ type: 'FirstAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      expect(backupSpy).toHaveBeenCalledTimes(1);
+
+      actions$.next({ type: 'OverlappingAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      expect(backupSpy).toHaveBeenCalledTimes(1);
+
+      resolveFirstBackup?.();
+      flushMicrotasks();
+
+      backupSpy.and.resolveTo();
+      actions$.next({ type: 'LaterAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      flushMicrotasks();
+
+      expect(backupSpy).toHaveBeenCalledTimes(2);
+    }));
+
+    it('keeps the overlap gate closed until the Electron write completes', fakeAsync(() => {
+      const { actions$, backupSpy } = setup(true);
+      let resolveFirstWrite: (() => void) | undefined;
+      const firstWrite = new Promise<void>((resolve) => {
+        resolveFirstWrite = resolve;
+      });
+      const electronBackupSpy = jasmine
+        .createSpy('backupAppData')
+        .and.returnValues(firstWrite, Promise.resolve());
+      (window as unknown as { ea: { backupAppData: jasmine.Spy } }).ea = {
+        backupAppData: electronBackupSpy,
+      };
+      backupSpy.and.callFake(() =>
+        (service as unknown as LocalBackupServiceWithBackupElectron)._backupElectron(
+          {} as AppDataComplete,
+        ),
+      );
+
+      actions$.next({ type: 'FirstAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      flushMicrotasks();
+      expect(electronBackupSpy).toHaveBeenCalledTimes(1);
+
+      // The IPC write is still pending — without awaiting it, exhaustMap's
+      // gate would already be open and this trigger would start a second write.
+      actions$.next({ type: 'OverlappingAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      flushMicrotasks();
+      expect(electronBackupSpy).toHaveBeenCalledTimes(1);
+
+      resolveFirstWrite?.();
+      flushMicrotasks();
+
+      actions$.next({ type: 'LaterAction' });
+      tick(DATA_CHANGE_DEBOUNCE);
+      flushMicrotasks();
+      expect(electronBackupSpy).toHaveBeenCalledTimes(2);
+    }));
   });
 
   describe('informed mobile restore prompt (#7901)', () => {
@@ -636,6 +843,126 @@ describe('LocalBackupService', () => {
     });
   });
 
+  describe('informed Electron restore prompt (#9945)', () => {
+    type LocalBackupServiceWithElectronPrompt = {
+      _restoreElectronPromptMsg: (
+        backupMeta: LocalBackupMeta,
+        backupData: string,
+      ) => string;
+    };
+    const META: LocalBackupMeta = {
+      name: '2026-09-05_162948.json',
+      path: '/backups/2026-09-05_162948.json',
+      folder: '/backups',
+      created: 1757090988000,
+    };
+    const promptMsg = (backupData: string): string =>
+      (
+        service as unknown as LocalBackupServiceWithElectronPrompt
+      )._restoreElectronPromptMsg(META, backupData);
+
+    it('names the task and project counts when the backup parses', () => {
+      translateServiceSpy.instant.and.returnValue('msg');
+
+      promptMsg(
+        JSON.stringify({
+          task: { ids: ['a', 'b'], entities: {} },
+          project: { ids: ['p1'], entities: {} },
+        }),
+      );
+
+      expect(translateServiceSpy.instant).toHaveBeenCalledWith(
+        T.CONFIRM.RESTORE_FILE_BACKUP_WITH_COUNTS,
+        {
+          dir: '/backups',
+          from: new Date(META.created).toLocaleString(),
+          tasks: 2,
+          projects: 1,
+        },
+      );
+    });
+
+    it('falls back to the count-less prompt for an unparseable backup', () => {
+      translateServiceSpy.instant.and.returnValue('msg');
+
+      promptMsg('{corrupt');
+
+      expect(translateServiceSpy.instant).toHaveBeenCalledWith(
+        T.CONFIRM.RESTORE_FILE_BACKUP,
+        { dir: '/backups', from: new Date(META.created).toLocaleString() },
+      );
+    });
+
+    describe('_askForElectronBackupRestore()', () => {
+      type LocalBackupServiceWithElectronRestore = {
+        _askForElectronBackupRestore: () => Promise<void>;
+      };
+      const BACKUP_STR = JSON.stringify({
+        task: { ids: ['a'], entities: {} },
+        project: { ids: [], entities: {} },
+      });
+      const restore = (): Promise<void> =>
+        (
+          service as unknown as LocalBackupServiceWithElectronRestore
+        )._askForElectronBackupRestore();
+
+      beforeEach(() => {
+        translateServiceSpy.instant.and.returnValue('msg');
+        backupServiceSpy.importCompleteBackup.and.resolveTo();
+        (window.confirm as jasmine.Spy).calls.reset();
+      });
+
+      it('imports the newest backup when the user confirms', async () => {
+        spyOn(service, 'checkBackupAvailable').and.resolveTo(META);
+        spyOn(service, 'loadBackupElectron').and.resolveTo(BACKUP_STR);
+        (window.confirm as jasmine.Spy).and.returnValue(true);
+
+        await restore();
+
+        // Own backup: restored even if still invalid after repair (#8279).
+        expect(backupServiceSpy.importCompleteBackup).toHaveBeenCalledWith(
+          jasmine.any(Object),
+          false,
+          true,
+          true,
+          false,
+          undefined,
+          true,
+        );
+      });
+
+      it('does not import when the user declines', async () => {
+        spyOn(service, 'checkBackupAvailable').and.resolveTo(META);
+        spyOn(service, 'loadBackupElectron').and.resolveTo(BACKUP_STR);
+        (window.confirm as jasmine.Spy).and.returnValue(false);
+
+        await restore();
+
+        expect(backupServiceSpy.importCompleteBackup).not.toHaveBeenCalled();
+      });
+
+      it('does not prompt when no backup is available', async () => {
+        spyOn(service, 'checkBackupAvailable').and.resolveTo(false);
+        const loadSpy = spyOn(service, 'loadBackupElectron');
+
+        await restore();
+
+        expect(loadSpy).not.toHaveBeenCalled();
+        expect(window.confirm).not.toHaveBeenCalled();
+      });
+
+      it('stays silent when the newest backup cannot be read', async () => {
+        spyOn(service, 'checkBackupAvailable').and.resolveTo(META);
+        spyOn(service, 'loadBackupElectron').and.rejectWith(new Error('EACCES'));
+
+        await restore();
+
+        expect(window.confirm).not.toHaveBeenCalled();
+        expect(backupServiceSpy.importCompleteBackup).not.toHaveBeenCalled();
+      });
+    });
+  });
+
   describe('import backup', () => {
     it('should import with force conflict to reset vector clock', async () => {
       backupServiceSpy.importCompleteBackup.and.resolveTo();
@@ -647,7 +974,45 @@ describe('LocalBackupService', () => {
         false,
         true,
         true,
+        false,
+        undefined,
+        true,
       );
+    });
+
+    it('should clear crash-safe drafts after a restore', async () => {
+      // The restore replaced the notes wholesale, so every draft's
+      // baseContent now refers to content that no longer exists and would only
+      // offer misleading recovery.
+      backupServiceSpy.importCompleteBackup.and.resolveTo();
+
+      await (service as any)._importBackup(JSON.stringify({ task: { ids: [] } }));
+
+      expect(localDraftServiceSpy.deleteAllDrafts).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not clear drafts when the import fails', async () => {
+      // Nothing was replaced, so the drafts still refer to live content. Move the
+      // cleanup out of the success path (e.g. into a finally) and this goes red.
+      backupServiceSpy.importCompleteBackup.and.rejectWith(new Error('boom'));
+
+      await (service as any)._importBackup(JSON.stringify({ task: { ids: [] } }));
+
+      expect(localDraftServiceSpy.deleteAllDrafts).not.toHaveBeenCalled();
+    });
+
+    it('should explain an unrepairable backup instead of the generic error (#8279)', async () => {
+      backupServiceSpy.importCompleteBackup.and.rejectWith(new BackupRepairFailedError());
+
+      const didImport = await (service as any)._importBackup(
+        JSON.stringify({ task: { ids: [] } }),
+      );
+
+      expect(didImport).toBe(false);
+      expect(snackServiceSpy.open).toHaveBeenCalledWith({
+        type: 'ERROR',
+        msg: T.FILE_IMEX.S_ERR_IMPORT_UNREPAIRABLE,
+      });
     });
   });
 
@@ -689,6 +1054,9 @@ describe('LocalBackupService', () => {
         }),
         false,
         true,
+        true,
+        false,
+        undefined,
         true,
       );
       expect(snackServiceSpy.open).toHaveBeenCalledWith({
@@ -804,6 +1172,9 @@ describe('LocalBackupService', () => {
         }),
         false,
         true,
+        true,
+        false,
+        undefined,
         true,
       );
       expect(snackServiceSpy.open).toHaveBeenCalledWith({
@@ -949,6 +1320,35 @@ describe('LocalBackupService', () => {
 
       await (service as unknown as LocalBackupServiceWithPrivate)._backup();
 
+      expect(service.getLastBackupTime()).toBeNull();
+    });
+
+    it('records the time after a successful Electron write', async () => {
+      localStorage.removeItem(LS.LAST_LOCAL_BACKUP);
+      (service as unknown as LocalBackupServiceWithPlatformFlags)._isElectron = true;
+      spyOn(
+        service as unknown as LocalBackupServiceWithBackupElectron,
+        '_backupElectron',
+      ).and.resolveTo();
+
+      await (service as unknown as LocalBackupServiceWithPrivate)._backup();
+
+      expect(service.getLastBackupTime()).not.toBeNull();
+    });
+
+    it('does NOT record the time when the Electron write fails (#10022)', async () => {
+      localStorage.removeItem(LS.LAST_LOCAL_BACKUP);
+      (service as unknown as LocalBackupServiceWithPlatformFlags)._isElectron = true;
+      const error = new Error('BACKUP failed: Error (code: ENOSPC)');
+      spyOn(
+        service as unknown as LocalBackupServiceWithBackupElectron,
+        '_backupElectron',
+      ).and.rejectWith(error);
+
+      // The rejection reaches the trigger pipeline's catchError, which logs it.
+      await expectAsync(
+        (service as unknown as LocalBackupServiceWithPrivate)._backup(),
+      ).toBeRejectedWith(error);
       expect(service.getLastBackupTime()).toBeNull();
     });
   });

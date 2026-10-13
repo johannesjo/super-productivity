@@ -39,6 +39,17 @@ PluginAPI.registerHeaderButton({
   },
 });
 
+// Add an action to task and subtask context menus
+PluginAPI.registerTaskContextMenuEntry({
+  id: 'copy-external-link',
+  label: 'Copy external link',
+  icon: 'link', // Optional Material icon ligature name; custom SVGs are not supported
+  showFor: ['TASK'], // Omit for both targets; [] is invalid
+  onClick: ({ taskId }) => {
+    console.log('Selected task:', taskId);
+  },
+});
+
 // Register a keyboard shortcut
 PluginAPI.registerShortcut({
   id: 'my_shortcut',
@@ -78,6 +89,9 @@ PluginAPI.registerShortcut({
 - `PluginManifest` - Plugin configuration
 - `PluginHooks` - Available hook types
 - `PluginBaseCfg` - Runtime configuration
+- `PluginTaskContextMenuEntryCfg` - Task context-menu action configuration
+- `PluginTaskContextMenuContext` - Context passed to a task action
+- `PluginTaskContextMenuTarget` - Supported task-menu targets
 
 ### Data Types
 
@@ -135,6 +149,7 @@ Add these to your manifest.json based on what your plugin needs:
 - `addTask` - Create tasks
 - `getAllProjects` - Read projects
 - `addProject` - Create projects
+- `deleteProject` - Delete a project and everything it contains (irreversible)
 - `getAllTags` - Read tags
 - `addTag` - Create tags
 - `persistDataSynced` - Persist plugin data

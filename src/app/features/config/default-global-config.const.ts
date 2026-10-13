@@ -31,7 +31,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isSyncIconEnabled: true,
     isSearchEnabled: true,
     isDonatePageEnabled: true,
-    isEnableUserProfiles: false,
     isHabitsEnabled: true,
     isFinishDayEnabled: true,
   },
@@ -48,30 +47,38 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     defaultProjectId: INBOX_PROJECT.id,
     isMarkdownFormattingInNotesEnabled: true,
     notesTemplate: defaultTaskNotesTemplate,
+    priorityIconPreset: 'chevrons',
   },
   misc: {
     isConfirmBeforeExit: false,
     isConfirmBeforeExitWithoutFinishDay: true,
     isMinimizeToTray: false,
-    isLocalRestApiEnabled: false,
+    isCheckForUpdates: true,
     isTrayShowCurrentCountdown: true,
     startOfNextDay: 0,
     startOfNextDayTime: '00:00',
     isDisableAnimations: false,
     isVerticalActionBar: false,
-    isDisableCelebration: false,
+    // Confetti is attention-grabbing, so it ships off and stays opt-in
+    // (product principle: less noise, more depth). Existing installs keep
+    // their persisted value.
+    isDisableCelebration: true,
     // NOTE: isUseCustomWindowTitleBar is intentionally NOT defaulted here. A
     // persisted default would be pushed to Electron on every launch and override
     // a legacy `isUseObsidianStyleHeader` choice. Its effective default is resolved
-    // at read time (main-window.ts / global-theme.service.ts: `?? !IS_GNOME_DESKTOP`)
-    // and the settings checkbox is seeded display-only in misc-settings-form (#7891).
+    // at read time (main-window.ts / global-theme.service.ts: defaults on, forced
+    // off only on GNOME+Wayland) and the settings checkbox is seeded display-only
+    // in misc-settings-form (#7891).
     isShowProductivityTipLonger: false,
     customTheme: 'default',
     defaultStartPage: 0,
+    backgroundImageDark: null,
+    backgroundImageLight: null,
   },
   shortSyntax: {
     isEnableProject: true,
     isEnableDue: true,
+    isEnableDeadline: false,
     isEnableTag: true,
     urlBehavior: 'keep',
   },
@@ -80,6 +87,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   },
   idle: {
     isOnlyOpenIdleWhenCurrentTask: false,
+    isSuppressIdleDuringFocusMode: false,
     isEnableIdleTimeTracking: true,
     minIdleTime: 5 * minute,
   },
@@ -105,6 +113,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   },
   focusMode: {
     isSkipPreparation: false,
+    isShowPreparation: false,
     isPlayTick: false,
     focusModeSound: 'off',
     isPauseTrackingDuringBreak: true,
@@ -168,6 +177,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     taskUnschedule: 'U',
     taskToggleDone: 'D',
     taskAddSubTask: 'A',
+    taskDuplicate: 'Ctrl+D',
     taskAddAttachment: 'L',
     taskDelete: 'Backspace',
     taskMoveToProject: 'E',
@@ -183,6 +193,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     collapseSubTasks: null,
     togglePlay: 'Y',
     taskEditTags: 'G',
+    taskToggleSelect: 'X',
   },
   localBackup: {
     isEnabled: true,
@@ -229,6 +240,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     // TODO maybe enable later if it works well
     isCompressionEnabled: false,
     isEncryptionEnabled: false,
+    // Absent: join the remote format; empty folders get EMPTY_FOLDER_SYNC_FORMAT.
     encryptKey: null,
     syncProvider: null,
     syncInterval: minute,

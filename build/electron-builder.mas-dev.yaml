@@ -4,6 +4,7 @@ artifactName: ${name}-${arch}.${ext}
 files:
   - electron/**/*
   - '!electron/**/*.ts'
+  - '!electron/**/*.test.cjs'
   - '!electron/**/*.js.map'
   - .tmp/angular-dist/**/*
   - 'embedded.provisionprofile'
@@ -34,8 +35,12 @@ files:
 directories:
   output: './.tmp/app-builds'
 
+beforePack: ./tools/beforePack.js
+afterPack: ./tools/afterPack.js
+
 mac:
   appId: com.super-productivity.app
+  icon: build/icon.icns
   type: development
   category: public.app-category.productivity
   #  entitlements: build/entitlements.mac.plist

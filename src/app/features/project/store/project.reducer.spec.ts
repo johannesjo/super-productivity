@@ -11,7 +11,7 @@ import {
   unarchiveProject,
   updateProjectOrder,
 } from './project.actions';
-import { moveNoteToOtherProject } from '../../note/store/note.actions';
+import { moveNoteToOtherProject, updateNoteOrder } from '../../note/store/note.actions';
 import { INBOX_PROJECT } from '../project.const';
 import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.actions';
 import { WorkContextType } from '../../work-context/work-context.model';
@@ -119,6 +119,36 @@ describe('projectReducer', () => {
       );
       expect((r.entities as any).P1.noteIds).toEqual(['A', 'B']);
       expect((r.entities as any).P2.noteIds).toEqual(['C', 'NEW']);
+    });
+  });
+
+  describe('updateNoteOrder (#10377)', () => {
+    const order = (ids: string[]): Parameters<typeof projectReducer>[1] =>
+      updateNoteOrder({
+        ids,
+        activeContextType: WorkContextType.PROJECT,
+        activeContextId: 'P1',
+      });
+    const noteIds = (ids: string[]): unknown =>
+      (
+        projectReducer(
+          fakeEntityStateFromArray([
+            { id: 'P1', noteIds: ['A', 'B', 'C'] },
+          ] as Partial<Project>[]) as any,
+          order(ids),
+        ).entities as any
+      ).P1.noteIds;
+
+    it('writes the order of the listed notes', () => {
+      expect(noteIds(['C', 'A', 'B'])).toEqual(['C', 'A', 'B']);
+    });
+
+    it('drops a listed note the project no longer holds', () => {
+      expect(noteIds(['C', 'DELETED', 'A', 'B'])).toEqual(['C', 'A', 'B']);
+    });
+
+    it('keeps an unlisted note at the front, as a new note is added', () => {
+      expect(noteIds(['C', 'A'])).toEqual(['B', 'C', 'A']);
     });
   });
 
@@ -382,6 +412,32 @@ describe('projectReducer', () => {
       expect((r.entities as any).P1.backlogTaskIds).toEqual(['B2']);
       // When target is DONE and afterTaskId is null, append to end
       expect((r.entities as any).P1.taskIds).toEqual(['T1', 'T2', 'B1']);
+    });
+
+    it('should not duplicate the task id when re-replayed (DONE, null anchor) (#8469)', () => {
+      const s = fakeEntityStateFromArray([
+        {
+          id: 'P1',
+          taskIds: ['T1', 'T2'],
+          backlogTaskIds: ['B1', 'B2'],
+          isEnableBacklog: true,
+        },
+      ] as Partial<Project>[]);
+
+      const action = moveProjectTaskToRegularList({
+        taskId: 'B1',
+        afterTaskId: null,
+        workContextId: 'P1',
+        src: 'BACKLOG',
+        target: 'DONE',
+      }) as any;
+
+      // Re-applying the same op on top of already-applied state (snapshot
+      // re-replay window, #8469) must not append the id a second time.
+      const once = projectReducer(s as any, action);
+      const twice = projectReducer(once, action);
+      expect((twice.entities as any).P1.taskIds).toEqual(['T1', 'T2', 'B1']);
+      expect((twice.entities as any).P1.backlogTaskIds).toEqual(['B2']);
     });
   });
 

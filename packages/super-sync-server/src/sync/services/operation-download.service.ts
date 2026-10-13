@@ -4,8 +4,11 @@
  * Extracted from SyncService for better separation of concerns.
  * This service handles operation retrieval with gap detection and snapshot optimization.
  */
+import { Prisma } from '@prisma/client';
 import { prisma } from '../../db';
 import {
+  LatestCausalFullStateRow,
+  latestCausalFullStateSql,
   Operation,
   ServerOperation,
   VectorClock,
@@ -21,6 +24,7 @@ const OPERATION_DOWNLOAD_SELECT = {
   opType: true,
   entityType: true,
   entityId: true,
+  entityIds: true,
   payload: true,
   vectorClock: true,
   schemaVersion: true,
@@ -28,6 +32,7 @@ const OPERATION_DOWNLOAD_SELECT = {
   receivedAt: true,
   isPayloadEncrypted: true,
   syncImportReason: true,
+  repairBaseServerSeq: true,
 } as const;
 
 const DOWNLOAD_TRANSACTION_TIMEOUT_MS = 60000;
@@ -54,6 +59,7 @@ type OperationDownloadRow = {
   opType: string;
   entityType: string;
   entityId: string | null;
+  entityIds: string[];
   payload: unknown;
   vectorClock: unknown;
   schemaVersion: number;
@@ -61,6 +67,7 @@ type OperationDownloadRow = {
   receivedAt: bigint;
   isPayloadEncrypted: boolean;
   syncImportReason: string | null;
+  repairBaseServerSeq: number | null;
 };
 
 const mapOperationRow = (row: OperationDownloadRow): ServerOperation => ({
@@ -72,12 +79,14 @@ const mapOperationRow = (row: OperationDownloadRow): ServerOperation => ({
     opType: row.opType as Operation['opType'],
     entityType: row.entityType,
     entityId: row.entityId ?? undefined,
+    entityIds: row.entityIds.length > 0 ? row.entityIds : undefined,
     payload: row.payload,
     vectorClock: row.vectorClock as VectorClock,
     schemaVersion: row.schemaVersion,
     timestamp: Number(row.clientTimestamp),
     isPayloadEncrypted: row.isPayloadEncrypted,
     syncImportReason: row.syncImportReason ?? undefined,
+    repairBaseServerSeq: row.repairBaseServerSeq ?? undefined,
   },
   receivedAt: Number(row.receivedAt),
 });
@@ -106,32 +115,6 @@ const parsePersistedVectorClock = (value: unknown): VectorClock | undefined => {
 };
 
 export class OperationDownloadService {
-  /**
-   * Get operations since a given sequence number.
-   * Simple version without gap detection.
-   */
-  async getOpsSince(
-    userId: number,
-    sinceSeq: number,
-    excludeClient?: string,
-    limit: number = 500,
-  ): Promise<ServerOperation[]> {
-    const ops = await prisma.operation.findMany({
-      where: {
-        userId,
-        serverSeq: { gt: sinceSeq },
-        ...(excludeClient ? { clientId: { not: excludeClient } } : {}),
-      },
-      orderBy: {
-        serverSeq: 'asc',
-      },
-      take: limit,
-      select: OPERATION_DOWNLOAD_SELECT,
-    });
-
-    return ops.map(mapOperationRow);
-  }
-
   /**
    * Get operations and latest sequence atomically with gap detection.
    *
@@ -184,15 +167,21 @@ export class OperationDownloadService {
 
         // Find the latest full-state operation (SYNC_IMPORT, BACKUP_IMPORT, REPAIR)
         // These operations supersede all previous operations
-        const latestFullStateOp = await tx.operation.findFirst({
-          where: {
-            userId,
-            serverSeq: { lte: latestSeq },
-            opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR'] },
-          },
-          orderBy: { serverSeq: 'desc' },
-          select: { serverSeq: true, clientId: true },
-        });
+        // Raw SQL rather than `findFirst` so the op_type values reach PostgreSQL as
+        // LITERALS. Parameterized, this statement flips to a generic plan at execution 6
+        // on every pooled connection, the partial index becomes unreachable, and it
+        // degrades to a backward walk of the user's entire history — cancelled at the 60s
+        // statement_timeout for any user with no causal full-state op. Full reasoning on
+        // latestCausalFullStateSql; do not turn the literals back into params.
+        const latestFullStateRows = await tx.$queryRaw<LatestCausalFullStateRow[]>(
+          latestCausalFullStateSql(userId, latestSeq),
+        );
+        const latestFullStateOp = latestFullStateRows[0]
+          ? {
+              serverSeq: latestFullStateRows[0].server_seq,
+              clientId: latestFullStateRows[0].client_id,
+            }
+          : null;
 
         const latestSnapshotSeq = latestFullStateOp?.serverSeq ?? undefined;
 
@@ -228,8 +217,8 @@ export class OperationDownloadService {
 
         let minSeq: number | null = null;
 
-        if (sinceSeq > 0 && latestSeq > 0) {
-          // Get min sequence, but only when gap detection can use it.
+        if (sinceSeq > 0 || ops.length === 0) {
+          // Also distinguish a reset from an empty page filtered by client ID.
           // NOTE: Prisma's `aggregate({ _min })` compiles to
           // `SELECT MIN(x) FROM (SELECT x ... OFFSET 0) sub`. The OFFSET
           // subquery is a planner optimization fence, so Postgres cannot use
@@ -244,6 +233,27 @@ export class OperationDownloadService {
             select: { serverSeq: true },
           });
           minSeq = minSeqRow?.serverSeq ?? null;
+        }
+
+        // Reset retains the allocation counter to prevent sequence reuse, but
+        // an account without retained operations must still look empty to clients
+        // so their existing full-state migration/re-upload path can run.
+        if (ops.length === 0 && minSeq === null) {
+          if (sinceSeq > 0) {
+            // Same warning the latestSeq === 0 branch logs. Since the allocator
+            // survives a reset, this branch is now the only one a reset account
+            // reaches, so without it reset-induced gaps vanish from the logs.
+            Logger.warn(
+              `[user:${userId}] Gap detected: client at sinceSeq=${sinceSeq} but server is empty (latestSeq=0)`,
+            );
+          }
+
+          return {
+            ops: [],
+            latestSeq: 0,
+            gapDetected: sinceSeq > 0,
+            shouldComputeSnapshotVectorClock: false,
+          };
         }
 
         // Gap detection logic
@@ -301,7 +311,11 @@ export class OperationDownloadService {
           persistedSnapshotVectorClock,
         } satisfies OperationDownloadTransactionResult;
       },
-      { timeout: DOWNLOAD_TRANSACTION_TIMEOUT_MS },
+      {
+        timeout: DOWNLOAD_TRANSACTION_TIMEOUT_MS,
+        // A reset/replacement must not mix the old watermark with new history.
+        isolationLevel: Prisma.TransactionIsolationLevel.RepeatableRead,
+      },
     ); // Matches other sync transactions; stays below Fastify's 80s request timeout.
 
     let snapshotVectorClock: VectorClock | undefined;
@@ -348,10 +362,24 @@ export class OperationDownloadService {
     // Runs outside the interactive transaction: on large histories the aggregate
     // is slow enough to trip Prisma's transaction timeout. Bounded by
     // `latestSnapshotSeq` (captured inside the transaction) so newly-appended
-    // ops can't perturb the result. Background cleanup may delete rows in this
-    // range between commit and this query; in the common case the snapshot op's
-    // own vector_clock subsumes the deltas it replaces, so the per-client max
-    // is preserved.
+    // ops can't perturb the result.
+    //
+    // Background cleanup deletes rows in this range — since #9688 the old-ops
+    // sweep prunes fleet-wide, and this legacy path is taken by exactly the
+    // cohort it prunes (a missing `latest_full_state_*` marker means the newest
+    // causal op predates the marker migration, so its prefix is cold). The
+    // aggregate therefore CAN come back smaller than it once was: a
+    // BACKUP_IMPORT mints a fresh `{ clientId: 1 }` and subsumes nothing (see
+    // operation-upload.service.ts, `persistMergedFullStateClock`), so do NOT
+    // rely on "the snapshot op's own vector_clock covers the deltas it
+    // replaces" — that assumption is false and is what #8973 exists to avoid.
+    //
+    // It is nonetheless safe: a counter can only change a comparison if an op
+    // carrying it still exists, and every surviving op's clock reaches the
+    // client independently (`allOpClocks` on the download, `existingClock` on a
+    // rejection). Both consumers of `snapshotVectorClock` merge upward only, so
+    // a smaller contribution can only fail to add information that is no longer
+    // on the server anyway.
     const clockRows = await prisma.$queryRaw<
       Array<{ client_id: string; max_counter: bigint }>
     >`
@@ -392,7 +420,10 @@ export class OperationDownloadService {
    */
   async getLatestSeq(userId: number): Promise<number> {
     const row = await prisma.userSyncState.findUnique({
-      where: { userId },
+      // lastSeq is an allocation counter, retained even after DELETE /data.
+      // The existence check preserves the empty-server wire contract
+      // without replacing that counter with MAX(server_seq), which can lag it.
+      where: { userId, user: { operations: { some: {} } } },
       select: { lastSeq: true },
     });
     return row?.lastSeq ?? 0;

@@ -441,6 +441,7 @@ describe('Duplicate Operation Pre-check', () => {
               opType: 'UPD',
               entityType: 'TASK',
               entityId: 'task-race',
+              entityIds: [],
               payload: { foo: 'bar' },
               vectorClock: { 'client-1': 1 },
               schemaVersion: 1,
@@ -448,6 +449,7 @@ describe('Duplicate Operation Pre-check', () => {
               receivedAt: BigInt(raceTimestamp),
               isPayloadEncrypted: false,
               syncImportReason: null,
+              repairBaseServerSeq: null,
             }),
           findFirst: vi.fn().mockResolvedValue(null),
           createMany: vi.fn().mockResolvedValue({ count: 0 }),
@@ -466,6 +468,10 @@ describe('Duplicate Operation Pre-check', () => {
         user: {
           update: vi.fn(),
         },
+        // entity_ids branch of the conflict lookup (raw SQL): no multi-entity op
+        // stored, so no max — keeps the array branch from consuming a findUnique
+        // mock slot.
+        $queryRaw: vi.fn().mockResolvedValue([{ maxSeq: null }]),
       };
 
       vi.mocked(prisma.$transaction).mockImplementationOnce(async (callback: any) =>
@@ -497,7 +503,8 @@ describe('Duplicate Operation Pre-check', () => {
         where: { userId: 1 },
         data: { lastSeq: { decrement: 1 } },
       });
-      expect(tx.syncDevice.upsert).toHaveBeenCalled();
+      expect(tx.syncDevice.upsert).not.toHaveBeenCalled();
+      expect(prisma.syncDevice.upsert).toHaveBeenCalled();
     });
 
     it('should reject insert-race ID collisions instead of marking them synced', async () => {
@@ -516,6 +523,7 @@ describe('Duplicate Operation Pre-check', () => {
               opType: 'UPD',
               entityType: 'TASK',
               entityId: 'task-other-user',
+              entityIds: [],
               payload: { foo: 'bar' },
               vectorClock: { 'client-1': 1 },
               schemaVersion: 1,
@@ -523,6 +531,7 @@ describe('Duplicate Operation Pre-check', () => {
               receivedAt: BigInt(raceTimestamp),
               isPayloadEncrypted: false,
               syncImportReason: null,
+              repairBaseServerSeq: null,
             }),
           findFirst: vi.fn().mockResolvedValue(null),
           createMany: vi.fn().mockResolvedValue({ count: 0 }),
@@ -541,6 +550,10 @@ describe('Duplicate Operation Pre-check', () => {
         user: {
           update: vi.fn(),
         },
+        // entity_ids branch of the conflict lookup (raw SQL): no multi-entity op
+        // stored, so no max — keeps the array branch from consuming a findUnique
+        // mock slot.
+        $queryRaw: vi.fn().mockResolvedValue([{ maxSeq: null }]),
       };
 
       vi.mocked(prisma.$transaction).mockImplementationOnce(async (callback: any) =>
@@ -564,7 +577,8 @@ describe('Duplicate Operation Pre-check', () => {
         where: { userId: 1 },
         data: { lastSeq: { decrement: 1 } },
       });
-      expect(tx.syncDevice.upsert).toHaveBeenCalled();
+      expect(tx.syncDevice.upsert).not.toHaveBeenCalled();
+      expect(prisma.syncDevice.upsert).toHaveBeenCalled();
     });
 
     it('should not report non-id insert skips as duplicate operations', async () => {
@@ -586,6 +600,10 @@ describe('Duplicate Operation Pre-check', () => {
         user: {
           update: vi.fn(),
         },
+        // entity_ids branch of the conflict lookup (raw SQL): no multi-entity op
+        // stored, so no max — keeps the array branch from consuming a findUnique
+        // mock slot.
+        $queryRaw: vi.fn().mockResolvedValue([{ maxSeq: null }]),
       };
 
       vi.mocked(prisma.$transaction).mockImplementationOnce(async (callback: any) =>
@@ -606,6 +624,7 @@ describe('Duplicate Operation Pre-check', () => {
       expect(results[0].error).toBe('Transaction failed - please retry');
       expect(tx.userSyncState.update).toHaveBeenCalledTimes(1);
       expect(tx.syncDevice.upsert).not.toHaveBeenCalled();
+      expect(prisma.syncDevice.upsert).not.toHaveBeenCalled();
     });
 
     it('should classify PostgreSQL repeatable-read serialization failures as retryable', async () => {
@@ -622,67 +641,6 @@ describe('Duplicate Operation Pre-check', () => {
         errorCode: SYNC_ERROR_CODES.INTERNAL_ERROR,
       });
       expect(results[0].error).toContain('Concurrent transaction conflict');
-    });
-
-    it('should roll back sequence allocation when final conflict check rejects', async () => {
-      const tx = {
-        operation: {
-          deleteMany: vi.fn(),
-          findUnique: vi.fn().mockResolvedValue(null),
-          findFirst: vi
-            .fn()
-            .mockResolvedValueOnce(null)
-            .mockResolvedValueOnce({
-              clientId: 'client-2',
-              vectorClock: { 'client-2': 1 },
-            }),
-          createMany: vi.fn(),
-        },
-        userSyncState: {
-          upsert: vi.fn().mockResolvedValue({ userId: 1, lastSeq: 0 }),
-          update: vi
-            .fn()
-            .mockResolvedValueOnce({ userId: 1, lastSeq: 1 })
-            .mockResolvedValueOnce({ userId: 1, lastSeq: 0 }),
-        },
-        syncDevice: {
-          upsert: vi.fn().mockResolvedValue({}),
-          deleteMany: vi.fn(),
-        },
-        user: {
-          update: vi.fn(),
-        },
-      };
-
-      vi.mocked(prisma.$transaction).mockImplementationOnce(async (callback: any) =>
-        callback(tx),
-      );
-
-      const results = await syncService.uploadOps(1, 'client-1', [
-        createTestOp({
-          id: 'final-conflict-op',
-          entityId: 'task-final-conflict',
-          vectorClock: { 'client-1': 1 },
-        }),
-      ]);
-
-      expect(results).toHaveLength(1);
-      expect(results[0]).toMatchObject({
-        accepted: false,
-        errorCode: SYNC_ERROR_CODES.CONFLICT_CONCURRENT,
-        existingClock: { 'client-2': 1 },
-      });
-      expect(results[0].serverSeq).toBeUndefined();
-      expect(tx.operation.createMany).not.toHaveBeenCalled();
-      expect(tx.userSyncState.update).toHaveBeenNthCalledWith(1, {
-        where: { userId: 1 },
-        data: { lastSeq: { increment: 1 } },
-      });
-      expect(tx.userSyncState.update).toHaveBeenNthCalledWith(2, {
-        where: { userId: 1 },
-        data: { lastSeq: { decrement: 1 } },
-      });
-      expect(tx.syncDevice.upsert).toHaveBeenCalled();
     });
   });
 

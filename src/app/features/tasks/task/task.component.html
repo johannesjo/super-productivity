@@ -1,7 +1,7 @@
 @let t = task();
 <swipe-block
   [isDone]="t.isDone"
-  [canSwipe]="!taskTitleEditEl?.isEditing()"
+  [canSwipe]="!taskTitleEditEl?.isEditing() && !isTouchSelectionMode()"
   (swipeStart)="onSwipeStart()"
   (swipeRight)="toggleTaskDone()"
   (swipeRightTriggered)="onSwipeRightTriggered($event)"
@@ -19,14 +19,24 @@
         class="title-and-left-btns-wrapper"
         (click)="titleBarClick($event)"
       >
-        <done-toggle
-          [isDone]="t.isDone"
-          [isCurrent]="isCurrent()"
-          [showDoneAnimation]="showDoneAnimation()"
-          [showUndoneAnimation]="showUndoneAnimation()"
-          (toggled)="toggleTaskDone()"
-          [attr.aria-label]="T.F.TASK.CMP.TOGGLE_DONE | translate"
-        ></done-toggle>
+        @if (isTouchSelectionMode()) {
+          <!-- Selection ring, not a checkmark: a check means done. -->
+          <div
+            class="select-ring"
+            [class.isOn]="isMultiSelected()"
+            aria-hidden="true"
+          ></div>
+        } @else {
+          <done-toggle
+            [isDone]="t.isDone"
+            [isMultiSelectAware]="true"
+            [isCurrent]="isCurrent()"
+            [showDoneAnimation]="showDoneAnimation()"
+            [showUndoneAnimation]="showUndoneAnimation()"
+            (toggled)="toggleTaskDone()"
+            [attr.aria-label]="T.F.TASK.CMP.TOGGLE_DONE | translate"
+          ></done-toggle>
+        }
 
         <div class="title-and-tags-wrapper">
           @if (!isInSubTaskList() && t.parentId) {
@@ -36,8 +46,10 @@
           }
 
           <task-title
+            (click)="clearSelectionOnTitleClick($event)"
             [resetToLastExternalValueTrigger]="t"
             [style.pointer-events]="isTouchActive() && t.title.length ? 'none' : 'auto'"
+            [readonly]="isTouchSelectionMode()"
             #taskTitleEditEl
             (valueEdited)="updateTaskTitleIfChanged($event)"
             [value]="t.title"
@@ -55,7 +67,14 @@
 
       <div class="all-controls-wrapper">
         <div
-          (click)="estimateTime()"
+          (click)="onTimeWrapperClick($event)"
+          (keydown.enter)="estimateTime()"
+          (keydown.space)="$event.preventDefault(); estimateTime()"
+          [attr.role]="!t.subTasks?.length ? 'button' : null"
+          [attr.tabindex]="!t.subTasks?.length ? 0 : null"
+          [attr.aria-label]="
+            !t.subTasks?.length ? (T.F.TASK.CMP.ESTIMATE | translate) : null
+          "
           [class.hasNoTimeSpentOrEstimate]="!t.timeSpent && !t.timeEstimate"
           [class.isEditable]="!t.subTasks?.length"
           class="time-wrapper"
@@ -76,7 +95,7 @@
           }
           @if (t.subTasks?.length) {
             @let subTaskTimeSpent = t.subTasks | subTaskTotalTimeSpent;
-            @if (t.timeEstimate || subTaskTimeSpent) {
+            @if (subTaskTimeLeft() || subTaskTimeSpent) {
               <div class="time">
                 <div class="time-val">
                   <mat-icon
@@ -89,7 +108,7 @@
                 <div class="separator">/</div>
                 <div class="time-val">
                   <mat-icon inline="true">hourglass_empty</mat-icon>
-                  {{ t.timeEstimate | msToString }}
+                  {{ subTaskTimeLeft() | msToString }}
                 </div>
               </div>
             }
@@ -132,7 +151,7 @@
                   : (T.F.TASK.CMP.EDIT_SCHEDULED | translate)
               "
               class="ico-btn schedule-btn"
-              [color]="isOverdue() ? 'warn' : ''"
+              [attr.data-scheduled-date-color]="scheduledDateColor()"
               mat-icon-button
             >
               <mat-icon>alarm</mat-icon>
@@ -155,7 +174,7 @@
                   : (T.F.TASK.CMP.EDIT_SCHEDULED | translate)
               "
               class="ico-btn schedule-btn"
-              [color]="isOverdue() ? 'warn' : ''"
+              [attr.data-scheduled-date-color]="scheduledDateColor()"
               mat-icon-button
             >
               @if (isScheduledToday()) {
@@ -182,7 +201,7 @@
                   : (T.F.TASK.CMP.EDIT_SCHEDULED | translate)
               "
               class="ico-btn schedule-btn"
-              [color]="isOverdue() ? 'warn' : ''"
+              [attr.data-scheduled-date-color]="scheduledDateColor()"
               mat-icon-button
             >
               @if (isScheduledToday()) {
@@ -197,6 +216,17 @@
               </div>
             </button>
           }
+          @if (hasTimeConflict()) {
+            <!-- Decorative: MatIcon forces aria-hidden, and the adjacent schedule
+                 button already exposes the conflict to assistive tech. Tooltip is
+                 a mouse-only nicety. -->
+            <mat-icon
+              class="time-conflict-ico"
+              [matTooltip]="T.F.TASK.CMP.TIME_CONFLICT | translate"
+              matTooltipPosition="above"
+              >priority_high</mat-icon
+            >
+          }
           @if (hasDeadline()) {
             <button
               (click)="openDeadlineDialog()"
@@ -208,16 +238,19 @@
               mat-icon-button
             >
               <mat-icon>flag</mat-icon>
-              <div class="time-badge">
-                @if (t.deadlineWithTime) {
-                  {{ t.deadlineWithTime | shortPlannedAt }}
-                } @else if (t.deadlineDay) {
+              @if (t.deadlineWithTime) {
+                <div
+                  class="time-badge"
+                  [innerHTML]="t.deadlineWithTime | shortPlannedAt"
+                ></div>
+              } @else if (t.deadlineDay) {
+                <div class="time-badge">
                   {{
                     t.deadlineDay
                       | localDateStr: globalTrackingIntervalService.todayDateStr()
                   }}
-                }
-              </div>
+                </div>
+              }
             </button>
           }
 
@@ -245,7 +278,7 @@
           <div>
             @if (isShowToggleButton()) {
               <button
-                (click)="toggleShowDetailPanel()"
+                (click)="onToggleDetailPanelBtnClick($event)"
                 title="{{ T.F.TASK.CMP.TOGGLE_DETAIL_PANEL | translate }}  {{
                   kb.taskToggleDetailPanelOpen
                     ? '[' + kb.taskToggleDetailPanelOpen + ']'
@@ -265,6 +298,9 @@
             }
           </div>
         </div>
+        @if (t.priority; as p) {
+          <task-priority-indicator [priority]="p"></task-priority-indicator>
+        }
       </div>
     </div>
 
@@ -274,34 +310,45 @@
         [progress]="progress()"
       ></progress-bar>
     }
-    @if (t.subTasks?.length) {
+    @if (t.subTasks?.length || isAddSubtaskInputVisible()) {
       <div class="sub-tasks">
-        <button
-          (click)="toggleSubTaskMode()"
-          [title]="T.F.TASK.CMP.TOGGLE_SUB_TASK_VISIBILITY | translate"
-          class="toggle-sub-tasks-btn ico-btn mat-elevation-z2"
-          color=""
-          mat-mini-fab
-        >
-          @if (t._hideSubTasksMode === ShowSubTasksMode.HideAll) {
-            <mat-icon>add</mat-icon>
-          } @else {
-            <mat-icon
-              [class.isHideDoneTasks]="t._hideSubTasksMode === ShowSubTasksMode.HideDone"
-              >remove
-            </mat-icon>
-          }
-        </button>
-        <task-list
-          [@expandInOnly]
-          [isHideAll]="!!t._hideSubTasksMode"
-          [isHideDone]="t._hideSubTasksMode === ShowSubTasksMode.HideDone"
-          [isSubTaskList]="true"
-          [listModelId]="t.id"
-          [parentId]="t.id"
-          [tasks]="t.subTasks"
-          listId="SUB"
-        ></task-list>
+        @if (t.subTasks?.length) {
+          <button
+            (click)="toggleSubTaskMode()"
+            [title]="T.F.TASK.CMP.TOGGLE_SUB_TASK_VISIBILITY | translate"
+            class="toggle-sub-tasks-btn ico-btn mat-elevation-z2"
+            color=""
+            mat-mini-fab
+          >
+            @if (t._hideSubTasksMode === ShowSubTasksMode.HideAll) {
+              <mat-icon>add</mat-icon>
+            } @else {
+              <mat-icon
+                [class.isHideDoneTasks]="
+                  t._hideSubTasksMode === ShowSubTasksMode.HideDone
+                "
+                >remove
+              </mat-icon>
+            }
+          </button>
+          <task-list
+            [@expandInOnly]
+            [isHideAll]="!!t._hideSubTasksMode"
+            [isHideDone]="t._hideSubTasksMode === ShowSubTasksMode.HideDone"
+            [isSubTaskList]="true"
+            [listModelId]="t.id"
+            [parentId]="t.id"
+            [tasks]="t.subTasks"
+            listId="SUB"
+          ></task-list>
+        }
+        @if (isAddSubtaskInputVisible()) {
+          <add-subtask-input
+            [@expandFade]
+            [parentId]="t.id"
+            (closed)="onAddSubtaskInputClosed($event)"
+          ></add-subtask-input>
+        }
       </div>
     }
     @if (isDragOver) {
@@ -345,7 +392,7 @@
               [title]="project.title"
               [icon]="project.icon"
               [defaultIcon]="DEFAULT_PROJECT_ICON"
-              [color]="project.theme?.primary"
+              [color]="$safeNavigationMigration(project.theme?.primary)"
               [folderPath]="projectFolderMap().get(project.id)"
             ></select-option-row>
           </button>

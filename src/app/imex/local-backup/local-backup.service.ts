@@ -1,16 +1,17 @@
 import { DestroyRef, inject, Injectable } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { GlobalConfigService } from '../../features/config/global-config.service';
-import { EMPTY, firstValueFrom, interval, merge, Observable } from 'rxjs';
+import { EMPTY, firstValueFrom, from, interval, merge, Observable } from 'rxjs';
 import { LocalBackupConfig } from '../../features/config/global-config.model';
-import { debounceTime, map, switchMap, tap } from 'rxjs/operators';
+import { catchError, debounceTime, exhaustMap, map, switchMap } from 'rxjs/operators';
 import { LOCAL_ACTIONS } from '../../util/local-actions.token';
 import { LocalBackupMeta } from './local-backup.model';
 import { IS_ANDROID_WEB_VIEW_TOKEN } from '../../util/is-android-web-view';
-import { IS_ELECTRON } from '../../app.constants';
+import { IS_ELECTRON, IS_ELECTRON_TOKEN } from '../../app.constants';
 import { androidInterface } from '../../features/android/android-interface';
 import { StateSnapshotService } from '../../op-log/backup/state-snapshot.service';
 import { BackupService } from '../../op-log/backup/backup.service';
+import { LocalDraftService } from '../../core/draft/local-draft.service';
 import { T } from '../../t.const';
 import { TranslateService } from '@ngx-translate/core';
 import { AppDataComplete } from '../../op-log/model/model-config';
@@ -25,6 +26,7 @@ import {
 } from './backup-ring.util';
 import { DEFAULT_MAX_BACKUP_FILES } from '../../../../electron/shared-with-frontend/backup-file-cleanup.util';
 import { SnackService } from '../../core/snack/snack.service';
+import { BackupRepairFailedError } from '../../op-log/core/errors/sync-errors';
 import { Log } from '../../core/log';
 import { confirmDialog } from '../../util/native-dialogs';
 import { CapacitorPlatformService } from '../../core/platform/capacitor-platform.service';
@@ -35,6 +37,11 @@ const DEFAULT_BACKUP_INTERVAL = 5 * 60 * 1000;
 // A2 (#7925): high enough that a flurry of UI actions settles into one backup;
 // low enough that a real change is captured before the user backgrounds the app.
 const DATA_CHANGE_BACKUP_DEBOUNCE = 30 * 1000;
+export interface MobileBackupSlot {
+  slot: 'latest' | 'previous';
+  data: string;
+}
+
 const ANDROID_DB_KEY = 'backup';
 // Previous-generation slot for the two-generation ring (#7901).
 const ANDROID_DB_KEY_PREV = 'backup_prev';
@@ -54,11 +61,13 @@ export class LocalBackupService {
   private _configService = inject(GlobalConfigService);
   private _stateSnapshotService = inject(StateSnapshotService);
   private _backupService = inject(BackupService);
+  private _localDraftService = inject(LocalDraftService);
   private _snackService = inject(SnackService);
   private _translateService = inject(TranslateService);
   private _platformService = inject(CapacitorPlatformService);
   private _localActions$ = inject(LOCAL_ACTIONS);
   private _isAndroidWebView = inject(IS_ANDROID_WEB_VIEW_TOKEN);
+  private _isElectron = inject(IS_ELECTRON_TOKEN);
 
   private _cfg$: Observable<LocalBackupConfig> = this._configService.cfg$.pipe(
     map((cfg) => cfg.localBackup),
@@ -76,7 +85,14 @@ export class LocalBackupService {
           )
         : EMPTY,
     ),
-    tap(() => this._backup()),
+    exhaustMap(() =>
+      from(this._backup()).pipe(
+        catchError((error) => {
+          Log.err('LocalBackupService: Backup failed', error);
+          return EMPTY;
+        }),
+      ),
+    ),
   );
 
   init(): void {
@@ -163,6 +179,41 @@ export class LocalBackupService {
     return selectBestBackupStr(primary, prev) ?? '';
   }
 
+  /**
+   * Both mobile ring slots that hold data, newest first (Settings → backups
+   * list). Blobs are returned as-is; the caller decides how to present them.
+   */
+  async listMobileBackupSlots(): Promise<MobileBackupSlot[]> {
+    if (!this._isAndroidWebView && !this._platformService.isIOS()) {
+      return [];
+    }
+    const [latest, previous] = await Promise.all(
+      this._isAndroidWebView
+        ? [
+            this._loadAndroidDbValueSafe(ANDROID_DB_KEY),
+            this._loadAndroidDbValueSafe(ANDROID_DB_KEY_PREV),
+          ]
+        : [
+            this._readIOSFileOrNull(IOS_BACKUP_FILENAME),
+            this._readIOSFileOrNull(IOS_BACKUP_PREV_FILENAME),
+          ],
+    );
+    // Same gate as the Settings restore: a corrupt slot is never offered.
+    const slots: MobileBackupSlot[] = [];
+    if (latest && isUsableBackupStr(latest)) {
+      slots.push({ slot: 'latest', data: latest });
+    }
+    if (previous && isUsableBackupStr(previous)) {
+      slots.push({ slot: 'previous', data: previous });
+    }
+    return slots;
+  }
+
+  /** Imports a raw backup blob (file or mobile slot); false + snack on failure. */
+  restoreBackupStr(backupData: string): Promise<boolean> {
+    return this._importBackup(backupData);
+  }
+
   /** Newest usable backup blob for the current mobile platform ('' if none). */
   private _loadBestMobileBackupStr(): Promise<string> {
     return this._isAndroidWebView ? this.loadBackupAndroid() : this.loadBackupIOS();
@@ -193,21 +244,7 @@ export class LocalBackupService {
 
     // ELECTRON — has its own rotated meta (folder + date) in the prompt.
     if (IS_ELECTRON) {
-      const backupMeta = await this.checkBackupAvailable();
-      if (typeof backupMeta !== 'boolean') {
-        if (
-          confirmDialog(
-            this._translateService.instant(T.CONFIRM.RESTORE_FILE_BACKUP, {
-              dir: backupMeta.folder,
-              from: new Date(backupMeta.created).toLocaleString(),
-            }),
-          )
-        ) {
-          const backupData = await this.loadBackupElectron(backupMeta.path);
-          Log.log('backupData loaded from Electron backup');
-          await this._importBackup(backupData);
-        }
-      }
+      await this._askForElectronBackupRestore();
       return;
     }
 
@@ -302,6 +339,60 @@ export class LocalBackupService {
     });
   }
 
+  /**
+   * Electron branch of the startup restore: offer the newest rotated backup.
+   * Split out from askForFileStoreBackupIfAvailable so it is reachable in tests
+   * without faking the module-level IS_ELECTRON.
+   */
+  private async _askForElectronBackupRestore(): Promise<void> {
+    const backupMeta = await this.checkBackupAvailable();
+    if (typeof backupMeta === 'boolean') {
+      return;
+    }
+    // Read before prompting so the prompt can name what would be restored
+    // (#9945). Without counts this is a blind choice, and it is shown exactly
+    // when the store is blank and the user has nothing to compare against —
+    // the rotation's newest slot is not by itself evidence of a good backup.
+    let backupData: string;
+    try {
+      backupData = await this.loadBackupElectron(backupMeta.path);
+    } catch (e) {
+      // An unreadable newest backup is nothing to offer; don't prompt for it.
+      Log.err('LocalBackupService: could not read newest backup', e);
+      return;
+    }
+    if (confirmDialog(this._restoreElectronPromptMsg(backupMeta, backupData))) {
+      Log.log('backupData loaded from Electron backup');
+      await this._importBackup(backupData);
+    }
+  }
+
+  /**
+   * Builds the Electron restore prompt. Mirrors the mobile prompt: when the
+   * backup parses, name the task and project counts so the user can judge what
+   * they would restore; otherwise fall back to the count-less prompt (#9945).
+   */
+  private _restoreElectronPromptMsg(
+    backupMeta: LocalBackupMeta,
+    backupData: string,
+  ): string {
+    const dir = backupMeta.folder;
+    const createdStr = new Date(backupMeta.created).toLocaleString();
+    const summary = summarizeBackupStr(backupData);
+    if (!summary) {
+      return this._translateService.instant(T.CONFIRM.RESTORE_FILE_BACKUP, {
+        dir,
+        from: createdStr,
+      });
+    }
+    return this._translateService.instant(T.CONFIRM.RESTORE_FILE_BACKUP_WITH_COUNTS, {
+      dir,
+      from: createdStr,
+      tasks: summary.taskCount,
+      projects: summary.projectCount,
+    });
+  }
+
   private _restoreMobileFromSettingsPromptMsg(backupData: string): string {
     const summary = summarizeBackupStr(backupData);
     return this._translateService.instant(
@@ -327,9 +418,10 @@ export class LocalBackupService {
     }
 
     let didWrite = false;
-    if (IS_ELECTRON) {
+    if (this._isElectron) {
       // Electron has its own rotated, timestamped chain — no ring or A3 guard
-      // needed (the bug class A3 protects against doesn't apply).
+      // needed (the bug class A3 protects against doesn't apply). A failed write
+      // rejects (#10022), skipping the timestamp; the trigger's catchError logs it.
       await this._backupElectron(data);
       didWrite = true;
     }
@@ -370,7 +462,7 @@ export class LocalBackupService {
 
   private async _backupElectron(data: AppDataComplete): Promise<void> {
     const cfg = await firstValueFrom(this._cfg$);
-    window.ea.backupAppData({
+    await window.ea.backupAppData({
       data,
       maxBackupFiles: cfg.maxBackupFiles ?? DEFAULT_MAX_BACKUP_FILES,
     });
@@ -442,11 +534,25 @@ export class LocalBackupService {
   // Returns true when a backup was actually written, false when the A3 guard
   // skipped it or the write failed.
   private async _backupIOS(data: AppDataComplete): Promise<boolean> {
+    // Read the existing primary slot in a way that distinguishes "no backup yet"
+    // from "unreadable" (#8414): on the write path a read failure is ambiguous —
+    // we can't tell "no backup" from "couldn't read it" — so we must not overwrite
+    // the primary on uncertainty. Bail instead, preserving both ring slots; the
+    // next cycle retries. Mirrors _backupAndroid.
+    let existing: string | null;
     try {
-      const existing = await this._readIOSFileOrNull(IOS_BACKUP_FILENAME);
-      if (this._guardNearEmptyOverwrite(data, existing, 'iOS')) {
-        return false;
-      }
+      existing = await this._readIOSExistingSlotOrThrow(IOS_BACKUP_FILENAME);
+    } catch (e) {
+      Log.err(
+        'LocalBackupService: skipping iOS backup — could not read existing slot',
+        e,
+      );
+      return false;
+    }
+    if (this._guardNearEmptyOverwrite(data, existing, 'iOS')) {
+      return false;
+    }
+    try {
       if (existing) {
         await this._writeIOSFile(IOS_BACKUP_PREV_FILENAME, existing);
       }
@@ -468,17 +574,49 @@ export class LocalBackupService {
     });
   }
 
+  private async _readIOSFileRaw(path: string): Promise<string> {
+    const result = await Filesystem.readFile({
+      path,
+      directory: Directory.Data,
+      encoding: Encoding.UTF8,
+    });
+    return result.data as string;
+  }
+
+  /**
+   * Read-path helper: swallows ALL errors and returns null. Safe for
+   * loadBackupIOS (fire-and-forget startup restore), where a missing-vs-unreadable
+   * distinction can't cause data loss and a throw would surface as an unhandled
+   * rejection. NOT for the write path — see _readIOSExistingSlotOrThrow.
+   */
   private async _readIOSFileOrNull(path: string): Promise<string | null> {
     try {
-      const result = await Filesystem.readFile({
-        path,
-        directory: Directory.Data,
-        encoding: Encoding.UTF8,
-      });
-      return result.data as string;
+      return await this._readIOSFileRaw(path);
     } catch {
-      // File doesn't exist
+      // File doesn't exist (or is unreadable — irrelevant on the read path).
       return null;
+    }
+  }
+
+  /**
+   * Write-path helper (#8414): returns null only when the slot is *confirmed
+   * absent* (a legitimate first backup, where the write should proceed), and
+   * rethrows on a transient read failure so the caller bails WITHOUT overwriting,
+   * preserving both ring slots. Capacitor signals a missing file with a thrown
+   * error — the same way it signals a transient failure — so on error we re-probe
+   * with stat(): only a still-absent file reads as "no backup"; anything else is
+   * treated as uncertain and rethrown. Mirrors _backupAndroid's guard.
+   */
+  private async _readIOSExistingSlotOrThrow(path: string): Promise<string | null> {
+    try {
+      return await this._readIOSFileRaw(path);
+    } catch (e) {
+      if (!(await this._iosFileExists(path))) {
+        // Confirmed absent → no existing backup, let the write proceed.
+        return null;
+      }
+      // File is present but unreadable → transient. Don't overwrite on uncertainty.
+      throw e;
     }
   }
 
@@ -498,12 +636,27 @@ export class LocalBackupService {
         false,
         true,
         true,
+        false, // isSkipPreImportBackup
+        undefined, // requiredImportBackupId
+        // Every caller restores this device's own auto-backup (Electron backup
+        // dir, mobile ring slots): state that was already live here. Refusing
+        // it for errors repair cannot fix would leave the user no way back
+        // after local data loss (#8279). Picked files use FileImexComponent.
+        true, // isOwnStateRestore
       );
+      // This profile's notes were just replaced wholesale (Electron startup
+      // restore, mobile auto-restore, Android Settings restore all funnel
+      // here), so every draft's baseContent refers to content that no longer
+      // exists.
+      this._localDraftService.deleteAllDrafts();
       return true;
     } catch (e) {
       this._snackService.open({
         type: 'ERROR',
-        msg: T.FILE_IMEX.S_ERR_IMPORT_FAILED,
+        msg:
+          e instanceof BackupRepairFailedError
+            ? T.FILE_IMEX.S_ERR_IMPORT_UNREPAIRABLE
+            : T.FILE_IMEX.S_ERR_IMPORT_FAILED,
       });
       return false;
     }

@@ -12,6 +12,8 @@ import { IS_ELECTRON } from '../../app.constants';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { SCHEDULE_FORM_CFG } from './form-cfgs/schedule-form.const';
 import { FOCUS_MODE_FORM_CFG } from './form-cfgs/focus-mode-form.const';
+import { FOCUS_MODE_LOCAL_FORM_CFG } from './form-cfgs/focus-mode-local-form.const';
+import { IS_NATIVE_PLATFORM } from '../../util/is-native-platform';
 import { REMINDER_FORM_CFG } from './form-cfgs/reminder-form.const';
 import { SHORT_SYNTAX_FORM_CFG } from './form-cfgs/short-syntax-form.const';
 import { CLIPBOARD_IMAGES_FORM } from './form-cfgs/clipboard-images-form.const';
@@ -25,10 +27,12 @@ const filterGlobalConfigForm = (cfg: ConfigFormSection<any>): boolean => {
   );
 };
 
-// Tab: General - Language, App Features, Misc, Short Syntax, Sound (specified separately in html)
+// Tab: General - Theme (specified separately in html), App Features, Language, Misc,
+// Task Widget, Keyboard, Clipboard Images. App Features leads so customizing the
+// app is the first thing the default tab offers.
 export const GLOBAL_GENERAL_FORM_CONFIG: ConfigFormConfig = [
-  LANGUAGE_SELECTION_FORM_FORM,
   APP_FEATURES_FORM_CFG,
+  LANGUAGE_SELECTION_FORM_FORM,
   MISC_SETTINGS_FORM_CFG,
   TASK_WIDGET_FORM_CFG,
   KEYBOARD_SETTINGS_FORM_CFG,
@@ -55,6 +59,7 @@ export const GLOBAL_IMEX_FORM_CONFIG: ConfigFormConfig = [
 
 export const GLOBAL_PRODUCTIVITY_FORM_CONFIG: ConfigFormConfig = [
   FOCUS_MODE_FORM_CFG,
+  ...(IS_NATIVE_PLATFORM ? [] : [FOCUS_MODE_LOCAL_FORM_CFG]),
   TAKE_A_BREAK_FORM_CFG,
   EVALUATION_SETTINGS_FORM_CFG,
 ].filter(filterGlobalConfigForm);

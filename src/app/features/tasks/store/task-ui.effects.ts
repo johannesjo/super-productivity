@@ -36,6 +36,7 @@ import { Task } from '../task.model';
 import { EMPTY } from 'rxjs';
 import { selectProjectById } from '../../project/store/project.selectors';
 import { Project } from '../../project/project.model';
+import { INBOX_PROJECT } from '../../project/project.const';
 import { Router } from '@angular/router';
 import { NavigateToTaskService } from '../../../core-ui/navigate-to-task/navigate-to-task.service';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
@@ -43,6 +44,8 @@ import { LS } from '../../../core/persistence/storage-keys.const';
 import { skipWhileApplyingRemoteOps } from '../../../util/skip-during-sync.operator';
 import { DateService } from '../../../core/date/date.service';
 import { isBlankTask } from '../util/is-blank-task';
+import { TaskMultiSelectService } from '../task-multi-select.service';
+import { TASK_DELETE_UNDO_WINDOW_MS } from '../../../app.constants';
 
 @Injectable()
 export class TaskUiEffects {
@@ -58,6 +61,7 @@ export class TaskUiEffects {
   private _navigateToTaskService = inject(NavigateToTaskService);
   private _layoutService = inject(LayoutService);
   private _dateService = inject(DateService);
+  private _taskMultiSelectService = inject(TaskMultiSelectService);
 
   taskCreatedSnack$ = createEffect(
     () =>
@@ -121,13 +125,15 @@ export class TaskUiEffects {
         ofType(TaskSharedActions.deleteTask),
         // Skip the undo snack for accidentally created blank tasks
         filter(({ task }) => !isBlankTask(task)),
+        // A bulk delete confirms up front and shows no per-task undo.
+        filter(() => !this._taskMultiSelectService.isBulkFeedbackSuppressed()),
         tap(({ task }) => {
           this._snackService.open({
             translateParams: {
               title: truncate(task.title),
             },
             msg: T.F.TASK.S.DELETED,
-            config: { duration: 5000 },
+            config: { duration: TASK_DELETE_UNDO_WINDOW_MS },
             actionStr: T.G.UNDO,
             actionFn: () => {
               const payload = getLastDeletePayload();
@@ -206,6 +212,8 @@ export class TaskUiEffects {
       this._actions$.pipe(
         ofType(TaskSharedActions.updateTask),
         filter(({ task: { changes } }) => !!changes.isDone),
+        // A bulk "mark done" plays the sound once itself.
+        filter(() => !this._taskMultiSelectService.isBulkFeedbackSuppressed()),
         withLatestFrom(
           this._workContextService.flatDoneTodayNr$,
           this._globalConfigService.sound$,
@@ -220,8 +228,17 @@ export class TaskUiEffects {
     () =>
       this._actions$.pipe(
         ofType(TaskSharedActions.moveToOtherProject),
+        // A bulk move shows one summary snack instead of one per task.
+        filter(() => !this._taskMultiSelectService.isBulkFeedbackSuppressed()),
         filter(
-          ({ targetProjectId }) =>
+          ({ task, targetProjectId }) =>
+            // Don't announce *filing a project-less task into the Inbox*: that is
+            // never a user-initiated move. It is either the #8780 orphan self-heal
+            // (a silent, navigation-triggered repair — the user is navigated there
+            // anyway) or the quick-add default-project assignment when the default
+            // IS the Inbox (short-syntax.effects). Genuine moves of a real task
+            // into the Inbox still have a source project, so they still announce.
+            !(!task.projectId && targetProjectId === INBOX_PROJECT.id) &&
             targetProjectId !== this._workContextService.activeWorkContextId,
         ),
         withLatestFrom(this._workContextService.mainListTaskIds$),

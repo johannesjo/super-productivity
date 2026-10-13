@@ -13,6 +13,7 @@ import { OpLogDbAdapter } from './op-log-db-adapter';
 import { OP_LOG_DB_ADAPTER_FACTORY } from './op-log-db-adapter.token';
 import {
   isConnectionClosingError,
+  isIdbVersionError,
   isLockRelatedIdbOpenError,
 } from './op-log-errors.const';
 import { Log } from '../../core/log';
@@ -54,10 +55,10 @@ interface ArchiveDBSchema {
 export class ArchiveStoreService {
   private _db?: IDBPDatabase<ArchiveDBSchema>;
   private _initPromise?: Promise<void>;
-  // Phase A migration seam: archive reads/writes route through this adapter,
-  // which operates on this service's own SUP_OPS connection (adopted in
-  // _init, released on close/versionchange and on the iOS connection-closing
-  // retry path). Phase B: backend comes from DI.
+  // Archive reads/writes route through this adapter, which operates on this
+  // service's own SUP_OPS connection (adopted in _init, released on
+  // close/versionchange and on the iOS connection-closing retry path). It comes
+  // from DI and is always IndexedDB (the SQLite backend is parked).
   private readonly _adapter: OpLogDbAdapter = inject(OP_LOG_DB_ADAPTER_FACTORY)();
 
   private async _ensureInit(): Promise<void> {
@@ -81,14 +82,6 @@ export class ArchiveStoreService {
    * all stores.
    */
   private async _init(): Promise<void> {
-    // Self-managing backends (e.g. SQLite) own their handle and create their own
-    // schema via the adapter — no WebView IndexedDB connection needed. Mirrors
-    // OperationLogStoreService.init(); only the adopt-connection (IndexedDB)
-    // backend opens/owns a connection here.
-    if (!this._adapter.adoptConnection) {
-      await this._adapter.init();
-      return;
-    }
     const db = await this._openDbWithRetry();
     db.addEventListener('close', () => {
       Log.warn(
@@ -96,7 +89,7 @@ export class ArchiveStoreService {
       );
       this._db = undefined;
       this._initPromise = undefined;
-      this._adapter.adoptConnection?.(undefined);
+      this._adapter.adoptConnection(undefined);
     });
     // A newer tab is upgrading SUP_OPS (a future schema bump). Close now so this
     // connection does not block the upgrade; the next access reopens
@@ -105,10 +98,10 @@ export class ArchiveStoreService {
       db.close();
       this._db = undefined;
       this._initPromise = undefined;
-      this._adapter.adoptConnection?.(undefined);
+      this._adapter.adoptConnection(undefined);
     });
     this._db = db;
-    this._adapter.adoptConnection?.(db);
+    this._adapter.adoptConnection(db);
   }
 
   /**
@@ -131,6 +124,11 @@ export class ArchiveStoreService {
         });
       } catch (e) {
         lastError = e;
+
+        // Downgrade barrier: retrying can't change the on-disk version (#9187).
+        if (isIdbVersionError(e)) {
+          break;
+        }
 
         // Non-lock errors fall back to a short retry budget so we don't block
         // the op-log subsystem for 31s before surfacing the error to the user.
@@ -162,7 +160,8 @@ export class ArchiveStoreService {
     // cause needed for diagnostics (e.g. distinguishing Chromium LevelDB locks
     // from WebKit's iOS "Connection to Indexed Database server lost", #7415).
     const err = new IndexedDBOpenError(lastError);
-    Log.err('[ArchiveStore] IndexedDB open failed after all retries.', err);
+    // See OperationLogStoreService: the barrier path stops retrying (#9187).
+    Log.err('[ArchiveStore] IndexedDB open failed.', err);
     throw err;
   }
 
@@ -181,7 +180,7 @@ export class ArchiveStoreService {
         Log.warn('[ArchiveStore] Connection closing error detected, re-opening...', e);
         this._db = undefined;
         this._initPromise = undefined;
-        this._adapter.adoptConnection?.(undefined);
+        this._adapter.adoptConnection(undefined);
         return await fn();
       }
       throw e;
@@ -193,87 +192,65 @@ export class ArchiveStoreService {
   // ============================================================
 
   /**
-   * Loads archiveYoung data from IndexedDB.
-   * @returns The archive data, or undefined if not found.
+   * Shared store name type for archive_young and archive_old.
+   * Used by the private helpers below to parameterize the store.
    */
+  private _loadFromStore(
+    storeName: typeof STORE_NAMES.ARCHIVE_YOUNG | typeof STORE_NAMES.ARCHIVE_OLD,
+  ): Promise<ArchiveModel | undefined> {
+    return this._withRetryOnClose(async () => {
+      await this._ensureInit();
+      const entry = await this._adapter.get<ArchiveStoreEntry>(storeName, SINGLETON_KEY);
+      return entry?.data;
+    });
+  }
+
+  private _saveToStore(
+    storeName: typeof STORE_NAMES.ARCHIVE_YOUNG | typeof STORE_NAMES.ARCHIVE_OLD,
+    data: ArchiveModel,
+  ): Promise<void> {
+    return this._withRetryOnClose(async () => {
+      await this._ensureInit();
+      await this._adapter.put(storeName, {
+        id: SINGLETON_KEY,
+        data,
+        lastModified: Date.now(),
+      });
+    });
+  }
+
+  private _hasEntry(
+    storeName: typeof STORE_NAMES.ARCHIVE_YOUNG | typeof STORE_NAMES.ARCHIVE_OLD,
+  ): Promise<boolean> {
+    return this._withRetryOnClose(async () => {
+      await this._ensureInit();
+      const entry = await this._adapter.get(storeName, SINGLETON_KEY);
+      return !!entry;
+    });
+  }
+
   async loadArchiveYoung(): Promise<ArchiveModel | undefined> {
-    return this._withRetryOnClose(async () => {
-      await this._ensureInit();
-      const entry = await this._adapter.get<ArchiveStoreEntry>(
-        STORE_NAMES.ARCHIVE_YOUNG,
-        SINGLETON_KEY,
-      );
-      return entry?.data;
-    });
+    return this._loadFromStore(STORE_NAMES.ARCHIVE_YOUNG);
   }
 
-  /**
-   * Saves archiveYoung data to IndexedDB.
-   * @param data The archive data to save.
-   */
   async saveArchiveYoung(data: ArchiveModel): Promise<void> {
-    return this._withRetryOnClose(async () => {
-      await this._ensureInit();
-      await this._adapter.put(STORE_NAMES.ARCHIVE_YOUNG, {
-        id: SINGLETON_KEY,
-        data,
-        lastModified: Date.now(),
-      });
-    });
+    return this._saveToStore(STORE_NAMES.ARCHIVE_YOUNG, data);
   }
 
-  /**
-   * Loads archiveOld data from IndexedDB.
-   * @returns The archive data, or undefined if not found.
-   */
   async loadArchiveOld(): Promise<ArchiveModel | undefined> {
-    return this._withRetryOnClose(async () => {
-      await this._ensureInit();
-      const entry = await this._adapter.get<ArchiveStoreEntry>(
-        STORE_NAMES.ARCHIVE_OLD,
-        SINGLETON_KEY,
-      );
-      return entry?.data;
-    });
+    return this._loadFromStore(STORE_NAMES.ARCHIVE_OLD);
   }
 
-  /**
-   * Saves archiveOld data to IndexedDB.
-   * @param data The archive data to save.
-   */
   async saveArchiveOld(data: ArchiveModel): Promise<void> {
-    return this._withRetryOnClose(async () => {
-      await this._ensureInit();
-      await this._adapter.put(STORE_NAMES.ARCHIVE_OLD, {
-        id: SINGLETON_KEY,
-        data,
-        lastModified: Date.now(),
-      });
-    });
+    return this._saveToStore(STORE_NAMES.ARCHIVE_OLD, data);
   }
 
-  /**
-   * Checks if archiveYoung exists in the database.
-   * Used to determine if migration from legacy 'pf' database is needed.
-   */
   async hasArchiveYoung(): Promise<boolean> {
-    return this._withRetryOnClose(async () => {
-      await this._ensureInit();
-      const entry = await this._adapter.get(STORE_NAMES.ARCHIVE_YOUNG, SINGLETON_KEY);
-      return !!entry;
-    });
+    return this._hasEntry(STORE_NAMES.ARCHIVE_YOUNG);
   }
 
-  /**
-   * Checks if archiveOld exists in the database.
-   * Used to determine if migration from legacy 'pf' database is needed.
-   */
   async hasArchiveOld(): Promise<boolean> {
-    return this._withRetryOnClose(async () => {
-      await this._ensureInit();
-      const entry = await this._adapter.get(STORE_NAMES.ARCHIVE_OLD, SINGLETON_KEY);
-      return !!entry;
-    });
+    return this._hasEntry(STORE_NAMES.ARCHIVE_OLD);
   }
 
   /**

@@ -1,0 +1,6 @@
+New in 18.13.0:
+• Add global wallpapers with per-context overrides.
+• Create tasks in Plainspace-backed projects and poll for new tasks in the background.
+• See overdue tasks, time conflicts, and Later Today event start times more clearly.
+• Improved reminders, Focus Mode, sync prompts, and ISO 8601 date formatting.
+• Fixes for task scheduling, subtasks, CalDAV on Android, Nextcloud setup, dismissed reminders, and large-data restores.

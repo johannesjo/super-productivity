@@ -7,7 +7,7 @@ import {
   HttpRequest,
 } from '@angular/common/http';
 import { parseUrl, stringifyUrl } from 'query-string';
-import { EMPTY, forkJoin, Observable, of } from 'rxjs';
+import { EMPTY, Observable } from 'rxjs';
 import { SnackService } from 'src/app/core/snack/snack.service';
 
 import { GitlabCfg } from '../gitlab.model';
@@ -34,7 +34,6 @@ import { SearchResultItem } from '../../../issue.model';
 import { GITLAB_TYPE, ISSUE_PROVIDER_HUMANIZED } from '../../../issue.const';
 import { assertTruthy } from '../../../../../util/assert-truthy';
 import { handleIssueProviderHttpError$ } from '../../../handle-issue-provider-http-error';
-import { IssueLog } from '../../../../../core/log';
 
 @Injectable({
   providedIn: 'root',
@@ -44,8 +43,6 @@ export class GitlabApiService {
   private _http = inject(HttpClient);
 
   getById$(id: string, cfg: GitlabCfg): Observable<GitlabIssue> {
-    IssueLog.log(this._issueApiLink(cfg, id));
-
     return this._sendIssuePaginatedRequest$(
       {
         url: this._issueApiLink(cfg, id),
@@ -69,7 +66,10 @@ export class GitlabApiService {
 
   private getCustomFilterParam(cfg: GitlabCfg): string {
     if (cfg.filter) {
-      return `&${cfg.filter}`;
+      // The filter is a raw query fragment (`key=val&key2=val2`), so only the
+      // fragment delimiter is escaped: a literal "#" (e.g. a `C#` label) would
+      // otherwise cut off every parameter after it (#10151).
+      return `&${cfg.filter.replace(/#/g, '%23')}`;
     } else {
       return '';
     }
@@ -118,27 +118,20 @@ export class GitlabApiService {
     if (!this._isValidSettings(cfg)) {
       return EMPTY;
     }
-    return this._sendIssuePaginatedRequest$(
+    // NOTE: only the first page is fetched and issue comments are intentionally NOT
+    // loaded here. The search dropdown only needs id + title (the comment count already
+    // rides along via user_notes_count, and full notes are re-fetched in the detail view
+    // via getById$). A broad or empty search term can match thousands of issues, so
+    // paginating through all of them and then firing a /notes request per issue produced a
+    // burst of thousands of requests that GitLab rate-limited with a 429 — see #9034.
+    return this._sendIssueRequestFirstPage$(
       {
-        url: `${this._apiLink(cfg)}/issues?search=${searchText}${this.getScopeParam(
+        url: `${this._apiLink(cfg)}/issues?search=${encodeURIComponent(searchText)}${this.getScopeParam(
           cfg,
         )}&order_by=updated_at${this.getCustomFilterParam(cfg)}`,
       },
       cfg,
-    ).pipe(
-      mergeMap((issues: GitlabIssue[]) => {
-        if (issues && issues.length) {
-          return forkJoin([
-            ...issues.map((issue) => this.getIssueWithComments$(issue, cfg)),
-          ]);
-        } else {
-          return of([]);
-        }
-      }),
-      map((issues: GitlabIssue[]) => {
-        return issues ? issues.map(mapGitlabIssueToSearchResult) : [];
-      }),
-    );
+    ).pipe(map((issues) => issues.map(mapGitlabIssueToSearchResult)));
   }
 
   getProjectIssues$(cfg: GitlabCfg): Observable<GitlabIssue[]> {
@@ -241,6 +234,21 @@ export class GitlabApiService {
     );
   }
 
+  // Fetches only the first page of issues (no x-next-page follow-up) and maps the raw
+  // response body straight to GitlabIssue[]. Used for search, where fetching every page is
+  // both unnecessary and a rate-limit risk on large projects (see searchIssueInProject$).
+  private _sendIssueRequestFirstPage$(
+    params: HttpRequest<string> | any,
+    cfg: GitlabCfg,
+  ): Observable<GitlabIssue[]> {
+    return this._sendPaginatedRequestImpl$(params, cfg, 1).pipe(
+      map((res: any) => {
+        const issues: GitlabOriginalIssue[] = res && res.body ? res.body : [];
+        return issues.map((issue) => mapGitlabIssue(issue, cfg));
+      }),
+    );
+  }
+
   private _sendPaginatedRequest$(
     params: HttpRequest<string> | any,
     cfg: GitlabCfg,
@@ -306,7 +314,6 @@ export class GitlabApiService {
       },
     ];
     // NOTE: DO NOT LOG allArgs - contains PRIVATE-TOKEN in headers
-    // IssueLog.log(allArgs);
 
     const req = new HttpRequest(p.method, p.url, ...allArgs);
 
@@ -324,7 +331,6 @@ export class GitlabApiService {
   }
 
   private _issueApiLink(cfg: GitlabCfg, issueId: string): string {
-    IssueLog.log(issueId);
     const { project, projectIssueId } = getPartsFromGitlabIssueId(issueId);
     return `${this._projectApiLink(cfg, project)}/issues/${projectIssueId}`;
   }

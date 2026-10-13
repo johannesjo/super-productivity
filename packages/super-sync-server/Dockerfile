@@ -1,5 +1,5 @@
 # ---- Builder stage ----
-FROM node:24-alpine AS builder
+FROM --platform=$BUILDPLATFORM node:24-alpine AS builder
 
 WORKDIR /repo
 
@@ -52,6 +52,10 @@ WORKDIR /app
 # Copy built artifacts from builder (note: tsconfig rootDir is "." so structure is dist/src/ and dist/scripts/)
 COPY --from=builder --chown=supersync:nodejs /repo/packages/super-sync-server/dist ./dist
 COPY --from=builder --chown=supersync:nodejs /repo/packages/super-sync-server/public ./public
+# Templates live OUTSIDE public/ on purpose: @fastify/static serves that whole directory,
+# so a template left there is downloadable at /privacy.template.html — which would republish
+# the very statements the generator suppresses when an operator has not configured them.
+COPY --from=builder --chown=supersync:nodejs /repo/packages/super-sync-server/templates ./templates
 COPY --from=builder --chown=supersync:nodejs /repo/packages/super-sync-server/prisma ./prisma
 COPY --from=builder --chown=supersync:nodejs /repo/packages/super-sync-server/scripts ./scripts
 COPY --from=builder --chown=supersync:nodejs /repo/packages/super-sync-server/src ./src
@@ -81,6 +85,9 @@ ENV RUN_MIGRATIONS_ON_STARTUP=false
 # GC starts before cgroup OOM-kill. RSS = old-space + new-space + code cache +
 # native heap + ArrayBuffers, so headroom matters. 576 ≈ 75% of 768m.
 ENV NODE_OPTIONS=--max-old-space-size=576
+# Logged at startup so operators can tell which build runs. Kept after the
+# install layers because it changes on every build and would bust their cache.
+ENV SUPERSYNC_REVISION=$VCS_REF
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=3 \
   CMD wget --no-verbose --tries=1 --spider http://localhost:${PORT}/health || exit 1

@@ -10,14 +10,23 @@ export enum BannerId {
   CalendarEvent = 'CalendarEvent',
   ReminderCountdown = 'ReminderCountdown',
   SimpleCounterCountdownComplete = 'SimpleCounterCountdownComplete',
+  FocusModeSessionDone = 'FocusModeSessionDone',
   StartupNote = 'StartupNote',
   DeadlinesToday = 'DeadlinesToday',
+  SyncSafetyReminder = 'SyncSafetyReminder',
+  SuperSyncEncryptionMigration = 'SuperSyncEncryptionMigration',
+  RatePrompt = 'RatePrompt',
+  SyncConflictContentResolved = 'SyncConflictContentResolved',
+  UpdateAvailable = 'UpdateAvailable',
+  LocalRecoveryPoint = 'LocalRecoveryPoint',
+  TrackingMovedToOtherDevice = 'TrackingMovedToOtherDevice',
 }
 
 export const BANNER_SORT_PRIO_MAP = {
   [BannerId.TakeABreak]: 6,
   [BannerId.CalendarEvent]: 5,
   [BannerId.SimpleCounterCountdownComplete]: 5,
+  [BannerId.FocusModeSessionDone]: 5,
   [BannerId.ReminderCountdown]: 4,
   [BannerId.JiraUnblock]: 4,
   [BannerId.DeadlinesToday]: 3,
@@ -26,6 +35,14 @@ export const BANNER_SORT_PRIO_MAP = {
   [BannerId.StartupNote]: 2,
   [BannerId.Offline]: 0,
   [BannerId.InstallWebApp]: 0,
+  [BannerId.SyncSafetyReminder]: 0,
+  [BannerId.SuperSyncEncryptionMigration]: 0,
+  [BannerId.RatePrompt]: 0,
+  [BannerId.SyncConflictContentResolved]: 1,
+  [BannerId.UpdateAvailable]: 0,
+  [BannerId.LocalRecoveryPoint]: 1,
+  // above StartTrackingReminder, which would contradict it while another device tracks
+  [BannerId.TrackingMovedToOtherDevice]: 3,
 } as const;
 
 export interface BannerAction {

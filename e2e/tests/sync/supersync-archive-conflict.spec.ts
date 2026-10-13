@@ -1,4 +1,4 @@
-import { test } from '../../fixtures/supersync.fixture';
+import { test, expect } from '../../fixtures/supersync.fixture';
 import {
   createTestUser,
   getSuperSyncConfig,
@@ -11,9 +11,11 @@ import {
   expectTaskInWorklog,
   hasTaskInWorklog,
   navigateToWorkView,
+  getArchiveYoungTaskIds,
   type SimulatedE2EClient,
 } from '../../utils/supersync-helpers';
 import { expectTaskNotVisible } from '../../utils/supersync-assertions';
+import { waitForAppReady } from '../../utils/waits';
 
 /**
  * SuperSync Archive Conflict E2E Tests
@@ -165,6 +167,146 @@ test.describe('@supersync Archive Conflict Resolution', () => {
   });
 
   /**
+   * Test C: archive-vs-archive — both clients bulk-archive overlapping tasks
+   * ("Finish day" on two devices, #9537).
+   *
+   * Scenario:
+   * 1. Client A creates T1, T2, T3, syncs
+   * 2. Client B syncs (gets all three)
+   * 3. Client B marks T1 done, archives it, syncs (uploads its own archive op)
+   * 4. Client A — WS-blocked, unaware — marks ALL THREE done and archives them
+   *    in ONE atomic bulk moveToArchive
+   * 5. Client A syncs: its bulk archive loses T1 to B's remote archive. The
+   *    scoped replacement must re-upload T2+T3's archival instead of wedging
+   *    sync forever with SYNC_MULTI_ENTITY_UNSUPPORTED (#9537)
+   * 6. Client B syncs (downloads the replacement)
+   *
+   * Expected: no active tasks on either client; ALL THREE tasks in BOTH
+   * worklogs. T2/T3 in Client B's worklog is the load-bearing assertion —
+   * they can only arrive via the scoped replacement op.
+   */
+  test('bulk archive resolves when both clients archived an overlapping task @supersync', async ({
+    browser,
+    baseURL,
+    testRunId,
+  }) => {
+    const uniqueId = Date.now();
+    let clientA: SimulatedE2EClient | null = null;
+    let clientB: SimulatedE2EClient | null = null;
+
+    try {
+      const user = await createTestUser(testRunId);
+      const syncConfig = getSuperSyncConfig(user);
+
+      // ============ PHASE 1: Client A creates three tasks and syncs ============
+      clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
+      await clientA.sync.setupSuperSync(syncConfig);
+
+      const task1Name = `ArchVsArch-T1-${uniqueId}`;
+      const task2Name = `ArchVsArch-T2-${uniqueId}`;
+      const task3Name = `ArchVsArch-T3-${uniqueId}`;
+
+      await clientA.workView.addTask(task1Name);
+      await clientA.workView.addTask(task2Name);
+      await clientA.workView.addTask(task3Name);
+      console.log(`[ArchVsArch] Client A created tasks T1, T2, T3`);
+
+      await clientA.sync.syncAndWait();
+      console.log('[ArchVsArch] Client A synced (uploaded tasks)');
+
+      // ============ PHASE 2: Client B downloads tasks ============
+      clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
+      await clientB.sync.setupSuperSync(syncConfig);
+      await clientB.sync.syncAndWait();
+
+      await waitForTask(clientB.page, task1Name);
+      await waitForTask(clientB.page, task2Name);
+      await waitForTask(clientB.page, task3Name);
+      console.log('[ArchVsArch] Client B received all three tasks');
+
+      // Block WS-triggered downloads on Client A so it doesn't auto-receive
+      // B's archive before Phase 4 (we want a true concurrent archive race)
+      await clientA.page.evaluate(
+        () => ((globalThis as any).__SP_E2E_BLOCK_WS_DOWNLOAD = true),
+      );
+
+      // ============ PHASE 3: Client B archives the overlapping task ============
+      await markTaskDoneByKey(clientB, task1Name);
+      await archiveDoneTasks(clientB);
+      console.log('[ArchVsArch] Client B archived T1');
+
+      await clientB.sync.syncAndWait();
+      console.log('[ArchVsArch] Client B synced (uploaded its archive op)');
+
+      // ============ PHASE 4: Client A bulk-archives ALL THREE ============
+      // Client A never received B's archive: T1 is still active here, so the
+      // finish-day style bulk covers T1, T2 and T3 in one atomic op.
+      await markTaskDoneByKey(clientA, task1Name);
+      await markTaskDoneByKey(clientA, task2Name);
+      await markTaskDoneByKey(clientA, task3Name);
+      await archiveDoneTasks(clientA);
+      console.log('[ArchVsArch] Client A bulk-archived T1+T2+T3');
+
+      // ============ PHASE 5: Client A syncs (archive-vs-archive conflict) ====
+      // (Flipping the flag mirrors sibling Test A's choreography; the
+      // harness's WS route-block plus blocked immediate-upload/auto-sync and
+      // the explicit syncs are what keep this race deterministic.)
+      await clientA.page.evaluate(
+        () => ((globalThis as any).__SP_E2E_BLOCK_WS_DOWNLOAD = false),
+      );
+      await clientA.sync.syncAndWait();
+      console.log('[ArchVsArch] Client A synced (conflict resolved, no wedge)');
+
+      // Second sync uploads the scoped replacement created by resolution
+      await clientA.sync.syncAndWait();
+      console.log('[ArchVsArch] Client A synced again (uploaded replacement)');
+
+      // ============ PHASE 6: Client B syncs to receive the replacement ======
+      await clientB.sync.syncAndWait();
+
+      // Extra sync round for convergence
+      await clientA.sync.syncAndWait();
+      await clientB.sync.syncAndWait();
+      console.log('[ArchVsArch] Extra sync round for convergence');
+
+      // ============ PHASE 7: Verify tasks NOT in active task list ============
+      await navigateToWorkView(clientA);
+      await navigateToWorkView(clientB);
+
+      await expectTaskNotVisible(clientA, task1Name);
+      await expectTaskNotVisible(clientA, task2Name);
+      await expectTaskNotVisible(clientA, task3Name);
+      console.log('[ArchVsArch] Client A: no tasks in active list');
+
+      // Client B archives T2/T3 through the async remote-apply pipeline —
+      // give it the same extended window sibling Test B documents (15s).
+      const archivedAssertionTimeout = 15000;
+      await expectTaskNotVisible(clientB, task1Name, archivedAssertionTimeout);
+      await expectTaskNotVisible(clientB, task2Name, archivedAssertionTimeout);
+      await expectTaskNotVisible(clientB, task3Name, archivedAssertionTimeout);
+      console.log('[ArchVsArch] Client B: no tasks in active list');
+
+      // ============ PHASE 8: Verify ALL tasks IN worklog on BOTH clients =====
+      await expectTaskInWorklog(clientA, task1Name);
+      await expectTaskInWorklog(clientA, task2Name);
+      await expectTaskInWorklog(clientA, task3Name);
+      console.log('[ArchVsArch] Client A: all three tasks in worklog');
+
+      // T2/T3 here prove the scoped replacement arrived — without it Client B
+      // would keep them active forever (or, pre-fix, sync would wedge).
+      await expectTaskInWorklog(clientB, task1Name);
+      await expectTaskInWorklog(clientB, task2Name);
+      await expectTaskInWorklog(clientB, task3Name);
+      console.log('[ArchVsArch] Client B: all three tasks in worklog');
+
+      console.log('[ArchVsArch] ✓ Test C passed: overlapping bulk archives converged');
+    } finally {
+      if (clientA) await closeClient(clientA);
+      if (clientB) await closeClient(clientB);
+    }
+  });
+
+  /**
    * Test B: LWW Update does not resurrect archived tasks (Bug B)
    *
    * Scenario:
@@ -309,4 +451,149 @@ test.describe('@supersync Archive Conflict Resolution', () => {
       if (clientB) await closeClient(clientB);
     }
   });
+
+  /**
+   * #10220: a restore made while the Finish Day bulk archive is still pending
+   * must survive the conflict with a concurrent remote edit — whether the edit
+   * hits the restored task itself or only a sibling of the same archive.
+   *
+   * Scenario:
+   * 1. Client A creates T1–T3, syncs; Client B syncs
+   * 2. Client B renames the edited task, syncs
+   * 3. Client A (unaware) marks T1–T3 done, runs Finish Day (ONE pending bulk
+   *    moveToArchive) and restores T2 from the worklog
+   * 4. Client A syncs: every conflict row is won locally by the archive
+   *
+   * Expected on both clients, live and after reload: T2 is active and not
+   * done, T1 and T3 are archived. Pre-fix the archive was re-emitted for all
+   * three tasks, re-archiving T2 on Client B.
+   */
+  for (const editedTask of ['T2', 'T1'] as const) {
+    test(`restore survives a pending bulk archive when the remote edit hits ${editedTask} (#10220) @supersync`, async ({
+      browser,
+      baseURL,
+      testRunId,
+    }) => {
+      test.setTimeout(240000);
+      const uniqueId = Date.now();
+      const names = {
+        T1: `RestoreArch-T1-${uniqueId}`,
+        T2: `RestoreArch-T2-${uniqueId}`,
+        T3: `RestoreArch-T3-${uniqueId}`,
+      };
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        const syncConfig = getSuperSyncConfig(await createTestUser(testRunId));
+        clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+        for (const name of Object.values(names)) {
+          await clientA.workView.addTask(name);
+        }
+        await clientA.sync.syncAndWait();
+        const ids = {
+          T1: await getTaskIdByTitle(clientA, names.T1),
+          T2: await getTaskIdByTitle(clientA, names.T2),
+          T3: await getTaskIdByTitle(clientA, names.T3),
+        };
+
+        clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+        await clientB.sync.syncAndWait();
+        await waitForTask(clientB.page, names.T3);
+
+        // Client A must not see the edit before its own archive and restore.
+        await clientA.page.evaluate(
+          () =>
+            ((
+              globalThis as typeof globalThis & { __SP_E2E_BLOCK_WS_DOWNLOAD?: boolean }
+            ).__SP_E2E_BLOCK_WS_DOWNLOAD = true),
+        );
+        await renameTask(clientB, names[editedTask], `${names[editedTask]}-edited`);
+        await clientB.sync.syncAndWait();
+
+        for (const name of Object.values(names)) {
+          await markTaskDoneByKey(clientA, name);
+        }
+        await archiveDoneTasks(clientA);
+        await clientA.page.goto('/#/tag/TODAY/history');
+        await clientA.page.locator('history .week-row .day-toggle').first().click();
+        await clientA.page
+          .locator('.task-summary-table tr', { hasText: names.T2 })
+          .getByRole('button', { name: 'Restore task from archive' })
+          .click();
+        await clientA.page.getByRole('button', { name: 'Do it!' }).click();
+        await waitForTask(clientA.page, names.T2);
+
+        await clientA.page.evaluate(
+          () =>
+            ((
+              globalThis as typeof globalThis & { __SP_E2E_BLOCK_WS_DOWNLOAD?: boolean }
+            ).__SP_E2E_BLOCK_WS_DOWNLOAD = false),
+        );
+        await clientA.sync.syncAndWait();
+        await clientA.sync.syncAndWait();
+        await clientB.sync.syncAndWait();
+        await clientA.sync.syncAndWait();
+        await clientB.sync.syncAndWait();
+
+        const clients = [clientA, clientB];
+        const expectRestoreKept = async (): Promise<void> => {
+          for (const client of clients) {
+            await expect
+              .poll(() => getTaskDoneState(client, ids.T2), { timeout: 30000 })
+              .toBe(false);
+            await expect
+              .poll(() => getArchiveYoungTaskIds(client.page), { timeout: 30000 })
+              .toEqual(expect.arrayContaining([ids.T1, ids.T3]));
+            expect(await getArchiveYoungTaskIds(client.page)).not.toContain(ids.T2);
+          }
+        };
+        await expectRestoreKept();
+
+        // Replay from the persisted op log must reach the same state.
+        for (const client of clients) {
+          await client.page.reload({ waitUntil: 'domcontentloaded', timeout: 30000 });
+          await waitForAppReady(client.page);
+        }
+        await expectRestoreKept();
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    });
+  }
 });
+
+type TaskSummary = { id: string; title: string; isDone: boolean };
+
+const getActiveTasks = (client: SimulatedE2EClient): Promise<TaskSummary[]> =>
+  client.page.evaluate(() => {
+    type StoreLike = {
+      subscribe: (next: (state: unknown) => void) => { unsubscribe: () => void };
+    };
+    const store = (window as unknown as { __e2eTestHelpers?: { store?: StoreLike } })
+      .__e2eTestHelpers?.store;
+    let state: { tasks?: { entities?: Record<string, TaskSummary | undefined> } } = {};
+    store?.subscribe((s) => (state = s as typeof state)).unsubscribe();
+    return Object.values(state.tasks?.entities ?? {})
+      .filter((task): task is TaskSummary => !!task)
+      .map(({ id, title, isDone }) => ({ id, title, isDone }));
+  });
+
+const getTaskIdByTitle = async (
+  client: SimulatedE2EClient,
+  title: string,
+): Promise<string> => {
+  const task = (await getActiveTasks(client)).find((t) => t.title.includes(title));
+  if (!task) throw new Error(`Task not found in state: ${title}`);
+  return task.id;
+};
+
+/** `null` when the task is not in the active store. */
+const getTaskDoneState = async (
+  client: SimulatedE2EClient,
+  id: string,
+): Promise<boolean | null> =>
+  (await getActiveTasks(client)).find((t) => t.id === id)?.isDone ?? null;

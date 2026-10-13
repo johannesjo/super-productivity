@@ -33,6 +33,7 @@ import type {
   OperationSyncCapable,
   SyncOperation,
 } from '../sync-providers/provider.interface';
+import { OperationLogEffects } from '../capture/operation-log.effects';
 
 /**
  * #8304 cross-service integration test.
@@ -147,23 +148,31 @@ describe('OperationLogSyncService + OperationLogUploadService — piggyback seq 
 
     opLogStoreSpy = jasmine.createSpyObj('OperationLogStoreService', [
       'getUnsynced',
+      'getLatestFullStateOpEntry',
+      'getLatestRejectedFullStateOpEntry',
+      'getPendingRemoteOps',
+      'getFailedRemoteOps',
       'markSynced',
       'markRejected',
       'loadStateCache',
       'getLastSeq',
       'getOpById',
       'setVectorClock',
-      'clearFullStateOps',
       'getVectorClock',
       'appendBatchSkipDuplicates',
       'hasSyncedOps',
       'deleteOpsWhere',
+      'isRawRebuildIncomplete',
     ]);
     opLogStoreSpy.getUnsynced.and.resolveTo([localPendingEntry]);
+    opLogStoreSpy.getLatestFullStateOpEntry.and.resolveTo(undefined);
+    opLogStoreSpy.getLatestRejectedFullStateOpEntry.and.resolveTo(undefined);
+    opLogStoreSpy.getPendingRemoteOps.and.resolveTo([]);
+    opLogStoreSpy.getFailedRemoteOps.and.resolveTo([]);
+    opLogStoreSpy.isRawRebuildIncomplete.and.resolveTo(false);
     opLogStoreSpy.markSynced.and.resolveTo(undefined);
     opLogStoreSpy.markRejected.and.resolveTo(undefined);
     opLogStoreSpy.setVectorClock.and.resolveTo();
-    opLogStoreSpy.clearFullStateOps.and.resolveTo();
     opLogStoreSpy.getVectorClock.and.resolveTo(null);
     opLogStoreSpy.deleteOpsWhere.and.resolveTo();
     opLogStoreSpy.appendBatchSkipDuplicates.and.resolveTo({
@@ -191,6 +200,7 @@ describe('OperationLogSyncService + OperationLogUploadService — piggyback seq 
       allOpsFilteredBySyncImport: false,
       filteredOpCount: 0,
       isLocalUnsyncedImport: false,
+      blockedByIncompatibleOp: false,
     });
 
     dialogServiceSpy = jasmine.createSpyObj('SyncImportConflictDialogService', [
@@ -209,12 +219,22 @@ describe('OperationLogSyncService + OperationLogUploadService — piggyback seq 
       'handleServerMigration',
     ]);
     serverMigrationServiceSpy.checkAndHandleMigration.and.resolveTo();
-    serverMigrationServiceSpy.handleServerMigration.and.resolveTo();
+    serverMigrationServiceSpy.handleServerMigration.and.resolveTo({
+      kind: 'created',
+      opId: 'sync-import',
+    });
 
     const stateSnapshotServiceSpy = jasmine.createSpyObj('StateSnapshotService', [
       'getStateSnapshot',
+      'getStateSnapshotAsync',
     ]);
     stateSnapshotServiceSpy.getStateSnapshot.and.returnValue({
+      task: { ids: [] },
+      project: { ids: [INBOX_PROJECT.id] },
+      tag: { ids: [TODAY_TAG.id] },
+      note: { ids: [] },
+    } as any);
+    stateSnapshotServiceSpy.getStateSnapshotAsync.and.resolveTo({
       task: { ids: [] },
       project: { ids: [INBOX_PROJECT.id] },
       tag: { ids: [TODAY_TAG.id] },
@@ -226,6 +246,7 @@ describe('OperationLogSyncService + OperationLogUploadService — piggyback seq 
       ['handleRejectedOps'],
     );
     rejectedOpsHandlerServiceSpy.handleRejectedOps.and.resolveTo({
+      kind: 'completed',
       mergedOpsCreated: 0,
       permanentRejectionCount: 0,
     });
@@ -260,6 +281,12 @@ describe('OperationLogSyncService + OperationLogUploadService — piggyback seq 
         { provide: StateSnapshotService, useValue: stateSnapshotServiceSpy },
         { provide: RejectedOpsHandlerService, useValue: rejectedOpsHandlerServiceSpy },
         { provide: OperationWriteFlushService, useValue: writeFlushServiceSpy },
+        {
+          provide: OperationLogEffects,
+          useValue: jasmine.createSpyObj('OperationLogEffects', {
+            processDeferredActions: Promise.resolve(),
+          }),
+        },
         { provide: SuperSyncStatusService, useValue: superSyncStatusServiceSpy },
         {
           provide: SnackService,
@@ -316,6 +343,7 @@ describe('OperationLogSyncService + OperationLogUploadService — piggyback seq 
           provide: OperationLogDownloadService,
           useValue: jasmine.createSpyObj('OperationLogDownloadService', [
             'downloadRemoteOps',
+            'hasUnseenRemoteOps',
           ]),
         },
         {
@@ -393,6 +421,7 @@ describe('OperationLogSyncService + OperationLogUploadService — piggyback seq 
         allOpsFilteredBySyncImport: false,
         filteredOpCount: 0,
         isLocalUnsyncedImport: false,
+        blockedByIncompatibleOp: false,
       };
     });
     setLastServerSeqSpy.and.callFake(async (n: number) => {

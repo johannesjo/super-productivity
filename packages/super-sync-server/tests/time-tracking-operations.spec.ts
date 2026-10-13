@@ -18,7 +18,13 @@
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { uuidv7 } from 'uuidv7';
-import { testState, resetTestState } from './sync.service.test-state';
+import {
+  testState,
+  resetTestState,
+  isLatestCausalFullStateQuery,
+  latestCausalFullStateRows,
+  rawQueryValues,
+} from './sync.service.test-state';
 import { Operation } from '../src/sync/sync.types';
 
 // Mock the database module with Prisma mocks
@@ -26,6 +32,8 @@ vi.mock('../src/db', async () => {
   const {
     applyOperationSelect,
     hasOperationUniqueConflict,
+    isEntityArrayBranchQuery,
+    entityArrayBranchRows,
     testState: state,
   } = await import('./sync.service.test-state');
   const { Prisma: PrismaModule } = await import('@prisma/client');
@@ -81,24 +89,10 @@ vi.mock('../src/db', async () => {
             applyOperationSelect(state.operations.get(args.where.id), args.select) || null
           );
         }
-        // Single-entity conflict lookup: where { userId, entityType,
-        // OR: [{ entityId: X }, { entityIds: { has: X } }] } (#8334).
-        if (Array.isArray(args.where?.OR) && args.where?.entityType) {
-          const targetId =
-            args.where.OR.find((c: any) => 'entityId' in c)?.entityId ??
-            args.where.OR.find((c: any) => c.entityIds?.has !== undefined)?.entityIds
-              ?.has;
-          const ops = Array.from(state.operations.values())
-            .filter(
-              (op: any) =>
-                op.userId === args.where.userId &&
-                op.entityType === args.where.entityType &&
-                (op.entityId === targetId ||
-                  (Array.isArray(op.entityIds) && op.entityIds.includes(targetId))),
-            )
-            .sort((a: any, b: any) => b.serverSeq - a.serverSeq);
-          return applyOperationSelect(ops[0], args.select) || null;
-        }
+        // Scalar branch of the single-entity conflict lookup (#8334). The entity_ids
+        // half is a separate $queryRaw call; the two were one OR + ORDER BY ...
+        // LIMIT 1 until that degenerated into a full history scan in production
+        // (see the PERF note in conflict.ts detectConflictForEntity).
         if (args.where?.entityId && args.where?.entityType) {
           const ops = Array.from(state.operations.values())
             .filter(
@@ -138,28 +132,6 @@ vi.mock('../src/db', async () => {
           return applyOperationSelect(ops[0], args.select) || ops[0];
         }
         return null;
-      }),
-      count: vi.fn().mockImplementation(async (args: any) => {
-        return Array.from(state.operations.values()).filter((op: any) => {
-          if (args.where?.userId !== undefined && args.where.userId !== op.userId)
-            return false;
-          if (
-            args.where?.serverSeq?.gt !== undefined &&
-            op.serverSeq <= args.where.serverSeq.gt
-          )
-            return false;
-          if (
-            args.where?.serverSeq?.lte !== undefined &&
-            op.serverSeq > args.where.serverSeq.lte
-          )
-            return false;
-          if (
-            args.where?.isPayloadEncrypted !== undefined &&
-            op.isPayloadEncrypted !== args.where.isPayloadEncrypted
-          )
-            return false;
-          return true;
-        }).length;
       }),
       findMany: vi.fn().mockImplementation(async (args: any) => {
         const ops = Array.from(state.operations.values());
@@ -216,6 +188,15 @@ vi.mock('../src/db', async () => {
       }),
       deleteMany: vi.fn().mockImplementation(async () => ({ count: 0 })),
       findUnique: vi.fn().mockImplementation(async (args: any) => {
+        // (user_id, server_seq) compound unique — fetches the array-branch winner.
+        const compound = args.where?.userId_serverSeq;
+        if (compound) {
+          const match = Array.from(state.operations.values()).find(
+            (op: any) =>
+              op.userId === compound.userId && op.serverSeq === compound.serverSeq,
+          );
+          return applyOperationSelect(match, args.select) || null;
+        }
         if (args.where?.id) {
           return (
             applyOperationSelect(state.operations.get(args.where.id), args.select) || null
@@ -311,6 +292,24 @@ vi.mock('../src/db', async () => {
         return state.users.get(args.where.id) || null;
       }),
     },
+    // Array branch of the single-entity conflict lookup: MAX(server_seq) over
+    // `entity_ids @> ARRAY[id]`, scoped to ONE entity — not a user-wide max.
+    // Raw SQL since the full-history-scan fix.
+    $queryRaw: vi.fn().mockImplementation(async (strings: any, ...params: unknown[]) => {
+      // The download path's newest-causal-full-state lookup ships as a pre-built
+      // `Prisma.Sql` so its op_type values stay literals, so it arrives as ONE object
+      // argument rather than a tagged template — see rawQueryText.
+      if (isLatestCausalFullStateQuery(strings)) {
+        return latestCausalFullStateRows(
+          state.operations,
+          rawQueryValues(strings, params),
+        );
+      }
+      if (!isEntityArrayBranchQuery(strings)) {
+        throw new Error(`Unexpected raw query: ${String(strings)}`);
+      }
+      return entityArrayBranchRows(state.operations, params);
+    }),
     // Upload transaction writes the storage counter atomically via $executeRaw.
     $executeRaw: vi.fn().mockResolvedValue(0),
   });
@@ -411,10 +410,12 @@ vi.mock('../src/db', async () => {
 });
 
 import { initSyncService, getSyncService } from '../src/sync/sync.service';
+import { OperationDownloadService } from '../src/sync/services/operation-download.service';
 
 describe('TIME_TRACKING Operations', () => {
   const userId = 1;
   const clientId = 'time-tracking-client';
+  let operationDownloadService: OperationDownloadService;
 
   /**
    * Creates a TIME_TRACKING operation with the standard structure.
@@ -459,6 +460,7 @@ describe('TIME_TRACKING Operations', () => {
       createdAt: new Date(),
     });
     initSyncService();
+    operationDownloadService = new OperationDownloadService();
   });
 
   describe('Operation Upload', () => {
@@ -813,8 +815,9 @@ describe('TIME_TRACKING Operations', () => {
 
       await service.uploadOps(userId, clientId, [op]);
 
-      // Another client downloads - getOpsSince returns { op: Operation, serverSeq }[]
-      const downloadedOps = await service.getOpsSince(userId, 0);
+      // Another client downloads - getOpsSinceWithSeq returns { op: Operation, serverSeq }[]
+      const downloadedOps = (await operationDownloadService.getOpsSinceWithSeq(userId, 0))
+        .ops;
 
       expect(downloadedOps).toHaveLength(1);
       expect(downloadedOps[0].op.entityType).toBe('TIME_TRACKING');
@@ -833,7 +836,8 @@ describe('TIME_TRACKING Operations', () => {
 
       await service.uploadOps(userId, clientId, [op]);
 
-      const downloadedOps = await service.getOpsSince(userId, 0);
+      const downloadedOps = (await operationDownloadService.getOpsSinceWithSeq(userId, 0))
+        .ops;
 
       expect(downloadedOps[0].op.payload).toEqual({
         contextType: 'PROJECT',

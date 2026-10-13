@@ -1,5 +1,13 @@
 import { runDbUpgrade } from './db-upgrade';
-import { STORE_NAMES, OPS_INDEXES } from './db-keys.const';
+import {
+  DB_VERSION,
+  FULL_STATE_OPS_META_KEY,
+  STORE_NAMES,
+  OPS_INDEXES,
+} from './db-keys.const';
+import { deleteDB, openDB } from 'idb';
+import { isIdbVersionError } from './op-log-errors.const';
+import { OpType } from '../core/operation.types';
 
 describe('runDbUpgrade', () => {
   // Mock store with index tracking
@@ -22,6 +30,7 @@ describe('runDbUpgrade', () => {
     const stores = preExistingStores || new Map();
 
     const db = {
+      version: DB_VERSION,
       createObjectStore: jasmine
         .createSpy('createObjectStore')
         .and.callFake((name: string, options?: any) => {
@@ -29,6 +38,9 @@ describe('runDbUpgrade', () => {
           stores.set(name, { store, options });
           return store;
         }),
+      deleteObjectStore: jasmine
+        .createSpy('deleteObjectStore')
+        .and.callFake((name: string) => stores.delete(name)),
       _stores: stores,
     };
 
@@ -153,8 +165,9 @@ describe('runDbUpgrade', () => {
 
       // Version 2 upgrade doesn't create any stores (only version 3+ run)
       // Version 3 only adds an index, doesn't create stores
-      // Version 4 creates archive stores, version 5 profile_data, version 6 client_id
-      expect(db.createObjectStore).toHaveBeenCalledTimes(4); // archive_young, archive_old, profile_data, client_id
+      // Version 4 creates archive stores, version 5's legacy profile store,
+      // version 6 client_id, version 7 meta.
+      expect(db.createObjectStore).toHaveBeenCalledTimes(5);
       expect(db.createObjectStore).not.toHaveBeenCalledWith(
         STORE_NAMES.OPS,
         jasmine.anything(),
@@ -194,7 +207,7 @@ describe('runDbUpgrade', () => {
 
       runDbUpgrade(db, 4, tx);
 
-      expect(db.createObjectStore).toHaveBeenCalledWith(STORE_NAMES.PROFILE_DATA, {
+      expect(db.createObjectStore).toHaveBeenCalledWith('profile_data', {
         keyPath: 'id',
       });
     });
@@ -210,17 +223,169 @@ describe('runDbUpgrade', () => {
       expect(db.createObjectStore).toHaveBeenCalledWith(STORE_NAMES.CLIENT_ID);
     });
 
-    it('should not recreate earlier stores', () => {
+    it('should not recreate stores before version 6', () => {
       const preExisting = new Map([[STORE_NAMES.OPS, { store: createMockStore() }]]);
       const { db, tx } = createMocks(preExisting);
 
       runDbUpgrade(db, 5, tx);
 
-      expect(db.createObjectStore).toHaveBeenCalledTimes(1); // client_id only
+      expect(db.createObjectStore).toHaveBeenCalledTimes(2); // client_id, meta
+      expect(db.createObjectStore).toHaveBeenCalledWith(STORE_NAMES.CLIENT_ID);
+      expect(db.createObjectStore).toHaveBeenCalledWith(STORE_NAMES.META);
     });
   });
 
-  describe('full upgrade path (version 0 to 6)', () => {
+  describe('version 7 upgrade (from version 6)', () => {
+    it('should create meta store', () => {
+      const preExisting = new Map([[STORE_NAMES.OPS, { store: createMockStore() }]]);
+      const { db, tx } = createMocks(preExisting);
+
+      runDbUpgrade(db, 6, tx);
+
+      expect(db.createObjectStore).toHaveBeenCalledWith(STORE_NAMES.META);
+    });
+
+    it('should not recreate earlier stores', () => {
+      const preExisting = new Map([[STORE_NAMES.OPS, { store: createMockStore() }]]);
+      const { db, tx } = createMocks(preExisting);
+
+      runDbUpgrade(db, 6, tx);
+
+      expect(db.createObjectStore).toHaveBeenCalledTimes(1);
+    });
+
+    it('should populate full-state metadata from existing ops', async () => {
+      const dbName = `SUP_OPS_upgrade_meta_${Date.now()}_${Math.random()}`;
+      await deleteDB(dbName);
+
+      const v6Db = await openDB(dbName, 6, {
+        upgrade: (db) => {
+          const opStore = db.createObjectStore(STORE_NAMES.OPS, {
+            keyPath: 'seq',
+            autoIncrement: true,
+          });
+          opStore.createIndex(OPS_INDEXES.BY_ID, 'op.id', { unique: true });
+          opStore.createIndex(OPS_INDEXES.BY_SYNCED_AT, 'syncedAt');
+          opStore.createIndex(OPS_INDEXES.BY_SOURCE_AND_STATUS, [
+            'source',
+            'applicationStatus',
+          ]);
+        },
+      });
+      await v6Db.add(STORE_NAMES.OPS, {
+        op: { id: '01900000-0000-7000-8000-000000000041', o: OpType.SyncImport },
+        appliedAt: Date.now(),
+        source: 'local',
+      });
+      await v6Db.add(STORE_NAMES.OPS, {
+        op: { id: '01900000-0000-7000-8000-000000000043', o: OpType.Update },
+        appliedAt: Date.now(),
+        source: 'local',
+      });
+      await v6Db.add(STORE_NAMES.OPS, {
+        op: { id: '01900000-0000-7000-8000-000000000042', o: OpType.BackupImport },
+        appliedAt: Date.now(),
+        source: 'remote',
+        syncedAt: Date.now(),
+      });
+      v6Db.close();
+
+      const v7Db = await openDB(dbName, 7, {
+        upgrade: (db, oldVersion, _newVersion, tx) => runDbUpgrade(db, oldVersion, tx),
+      });
+
+      const meta = await v7Db.get(STORE_NAMES.META, FULL_STATE_OPS_META_KEY);
+      expect(meta).toEqual({
+        refs: [
+          { opId: '01900000-0000-7000-8000-000000000041', seq: 1 },
+          { opId: '01900000-0000-7000-8000-000000000042', seq: 3 },
+        ],
+        latest: { opId: '01900000-0000-7000-8000-000000000042', seq: 3 },
+      });
+
+      v7Db.close();
+      await deleteDB(dbName);
+    });
+  });
+
+  describe('version 10 downgrade barrier', () => {
+    it('should reject a v9 reader after the v10 database has been opened', async () => {
+      const dbName = `SUP_OPS_v10_barrier_${Date.now()}_${Math.random()}`;
+
+      try {
+        const currentDb = await openDB(dbName, DB_VERSION, {
+          upgrade: (db, oldVersion, _newVersion, tx) => runDbUpgrade(db, oldVersion, tx),
+        });
+        currentDb.close();
+
+        // One open, both assertions. On the success path the connection is
+        // closed before being discarded, so a regression that lets the
+        // downgrade through fails on the expectation rather than hanging the
+        // `finally`'s deleteDB on an open handle.
+        const rejection = await openDB(dbName, 9).then(
+          (db) => {
+            db.close();
+            return null;
+          },
+          (e: unknown) => e,
+        );
+
+        expect(rejection).toEqual(jasmine.objectContaining({ name: 'VersionError' }));
+        // #9187: the rejection an old reader actually gets must be the one the
+        // user-facing classifier recognises, or the dialog falls back to
+        // "your storage may need to be cleared".
+        //
+        // Scope of this oracle: a real downgrade through `openDB`, but on the
+        // fake-indexeddb engine `src/test.ts` installs — NOT Blink. Verified
+        // separately against Chromium 149, which returns
+        //   name: 'VersionError', instanceof DOMException && instanceof Error,
+        //   message: 'The requested version (7) is less than the existing version (10).'
+        // — byte-identical to the message in the #9187 report.
+        expect(isIdbVersionError(rejection)).toBe(true);
+      } finally {
+        await deleteDB(dbName);
+      }
+    });
+  });
+
+  describe('version 11 profile removal', () => {
+    it('deletes the obsolete profile data store without touching live app data', async () => {
+      const dbName = `SUP_OPS_v11_profile_removal_${Date.now()}_${Math.random()}`;
+
+      try {
+        const v10Db = await openDB(dbName, 10, {
+          upgrade: (db, oldVersion, _newVersion, tx) => runDbUpgrade(db, oldVersion, tx),
+        });
+        expect(Array.from(v10Db.objectStoreNames)).toContain('profile_data');
+        await v10Db.put(STORE_NAMES.STATE_CACHE, {
+          id: 'current',
+          state: { marker: 'live app state' },
+        });
+        await v10Db.put('profile_data', {
+          id: 'inactive-profile',
+          data: { marker: 'retired snapshot' },
+        });
+        v10Db.close();
+
+        const v11Db = await openDB(dbName, 11, {
+          upgrade: (db, oldVersion, _newVersion, tx) => runDbUpgrade(db, oldVersion, tx),
+        });
+
+        expect(Array.from(v11Db.objectStoreNames)).not.toContain('profile_data');
+        expect(Array.from(v11Db.objectStoreNames)).toContain(STORE_NAMES.OPS);
+        expect(Array.from(v11Db.objectStoreNames)).toContain(STORE_NAMES.STATE_CACHE);
+        expect(await v11Db.get(STORE_NAMES.STATE_CACHE, 'current')).toEqual({
+          id: 'current',
+          state: { marker: 'live app state' },
+        });
+        v11Db.close();
+      } finally {
+        await deleteDB(dbName);
+      }
+    });
+  });
+
+  describe('full upgrade path (from version 0)', () => {
     it('should create all stores and indexes when upgrading from version 0', () => {
       const { db, tx } = createMocks();
 
@@ -253,17 +418,22 @@ describe('runDbUpgrade', () => {
         jasmine.anything(),
       );
 
-      // Version 5 store
+      // Version 5 legacy store is created for migration continuity, then
+      // removed by version 11 in the same fresh-install upgrade.
       expect(db.createObjectStore).toHaveBeenCalledWith(
-        STORE_NAMES.PROFILE_DATA,
+        'profile_data',
         jasmine.anything(),
       );
+      expect(db.deleteObjectStore).toHaveBeenCalledWith('profile_data');
 
       // Version 6 store
       expect(db.createObjectStore).toHaveBeenCalledWith(STORE_NAMES.CLIENT_ID);
 
-      // Total: 8 stores created
-      expect(db.createObjectStore).toHaveBeenCalledTimes(8);
+      // Version 7 store
+      expect(db.createObjectStore).toHaveBeenCalledWith(STORE_NAMES.META);
+
+      // Nine historical stores are created; one is removed before commit.
+      expect(db.createObjectStore).toHaveBeenCalledTimes(9);
     });
 
     it('should create all indexes on ops store when upgrading from version 0', () => {

@@ -81,77 +81,13 @@ mat-error {
   }
 }
 
-.info-card {
+.intro {
   grid-column: 1 / -1;
-  margin-bottom: var(--s2);
-
-  mat-card-header {
-    align-items: center;
-    gap: 12px;
-  }
-
-  .warning-icon {
-    font-size: 32px;
-    width: 32px;
-    height: 32px;
-  }
-
-  mat-card-title {
-    margin: 0;
-  }
-
-  .warning-content {
-    padding: var(--s) 0;
-
-    p {
-      margin: 12px 0;
-
-      &:first-child {
-        margin-top: 0;
-      }
-    }
-
-    ul {
-      margin: 12px 0 12px var(--s3);
-      padding: 0;
-
-      li {
-        margin: var(--s) 0;
-        font-weight: bold;
-      }
-    }
-
-    .recommendation {
-      display: flex;
-      align-items: center;
-      gap: var(--s);
-      padding: 12px;
-      background-color: var(--primary-50, rgba(63, 81, 181, 0.08));
-      border-radius: var(--card-border-radius);
-      margin-top: var(--s2);
-      margin-bottom: 0;
-
-      mat-icon {
-        color: var(--c-primary);
-      }
-    }
-  }
-}
-
-.install-warning {
   display: flex;
   align-items: center;
   gap: var(--s);
-  padding: 12px;
-  border-color: var(--c-primary);
-  border-radius: var(--card-border-radius);
-  margin-bottom: var(--s2);
-  border-width: 2px;
-  border-style: solid;
-
-  mat-icon {
-    color: var(--c-primary);
-  }
+  margin: var(--s);
+  color: var(--text-color-muted);
 }
 
 // Loading animation for plugins
@@ -169,8 +105,24 @@ mat-error {
   }
 }
 
-.community-plugins-card {
+.group-title,
+.community-plugins-card,
+.install-card {
   grid-column: 1 / -1;
+}
+
+.group-title {
+  margin: var(--s2) var(--s) 0;
+}
+
+.community-warning {
+  color: var(--text-color-muted);
+}
+
+.install-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s);
 }
 
 .community-plugins-list {
@@ -182,9 +134,9 @@ mat-error {
 
 .community-plugin-item {
   padding: var(--s2);
-  border: 1px solid var(--c-border);
+  border: 1px solid var(--extra-border-color);
   border-radius: var(--card-border-radius);
-  background: var(--c-bg-card);
+  background: var(--card-bg);
   display: flex;
   flex-direction: column;
   gap: var(--s);
@@ -207,7 +159,7 @@ mat-error {
   .plugin-author {
     margin: 0;
     font-size: 12px;
-    color: var(--c-text-secondary);
+    color: var(--text-color-muted);
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -239,13 +191,18 @@ mat-error {
   .plugin-desc {
     margin: 0;
     font-size: 14px;
-    color: var(--c-text-secondary);
+    color: var(--text-color-muted);
     display: -webkit-box;
     -webkit-line-clamp: 3;
     line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
   }
+}
+
+.api-access {
+  margin: var(--s) 0 0;
+  padding-left: var(--s3);
 }
 
 .plugin-info-section {

@@ -1,24 +1,24 @@
 import { MarkedOptions, MarkedRenderer } from 'ngx-markdown';
-import { Hooks, Token } from 'marked';
 import {
-  isExternalUrlSchemeAllowed,
-  isPathSafeToOpen,
-} from '../../../electron/shared-with-frontend/is-external-url-allowed';
+  Hooks,
+  type Token,
+  type TokenizerExtensionFunction,
+  type TokenizerStartFunction,
+} from 'marked';
+import { isPathSafeToOpen } from '../../../electron/shared-with-frontend/is-external-url-allowed';
+import { toRenderableHref } from './link-href.util';
+import { escapeHtml } from '../util/escape-html';
 
 /**
  * Escape a string for safe interpolation into a double-quoted HTML attribute.
  *
  * Defense-in-depth: note renders are sanitized as HTML before display, but the
  * raw renderer output still must not be attribute-injectable on its own.
- * `&` must be replaced first.
+ * Delegates to the shared {@link escapeHtml} (same escaping is correct for both
+ * attribute and text contexts); kept as a named re-export for attribute-context
+ * call sites.
  */
-export const escapeHtmlAttr = (value: string): string =>
-  value
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+export const escapeHtmlAttr = escapeHtml;
 
 /**
  * Parses image sizing syntax from title attribute.
@@ -60,6 +60,48 @@ export const preprocessMarkdown = (markdown: string): string => {
       return `![${alt}](${url} "${dimensions}")`;
     },
   );
+};
+
+const WEBEX_TEAMS_URI_PREFIX = 'webexteams://';
+const WEBEX_TEAMS_URI_RE = /^webexteams:\/\/\S{1,2000}/i;
+const WEBEX_TRAILING_PUNCT_RE = /[.,;!?]+$/;
+
+const stripWebexTeamsUriTrailing = (raw: string): string => {
+  const uri = raw.replace(WEBEX_TRAILING_PUNCT_RE, '');
+  let opens = 0;
+  let closes = 0;
+  for (let i = 0; i < uri.length; i++) {
+    const c = uri.charCodeAt(i);
+    if (c === 40) opens++;
+    else if (c === 41) closes++;
+  }
+  let end = uri.length;
+  while (end > 0 && uri.charCodeAt(end - 1) === 41 && closes > opens) {
+    end--;
+    closes--;
+  }
+  return end < uri.length ? uri.substring(0, end) : uri;
+};
+
+const startWebexTeamsAutoLink: TokenizerStartFunction = (src: string): number | void => {
+  const index = src.toLowerCase().indexOf(WEBEX_TEAMS_URI_PREFIX);
+  return index >= 0 ? index : undefined;
+};
+
+const tokenizeWebexTeamsAutoLink: TokenizerExtensionFunction = (src: string) => {
+  const match = WEBEX_TEAMS_URI_RE.exec(src);
+  if (!match) {
+    return undefined;
+  }
+
+  const href = stripWebexTeamsUriTrailing(match[0]);
+  return {
+    type: 'link',
+    raw: href,
+    href,
+    text: href,
+    tokens: [{ type: 'text', raw: href, text: href }],
+  };
 };
 
 export const markedOptionsFactory = (): MarkedOptions => {
@@ -121,10 +163,11 @@ export const markedOptionsFactory = (): MarkedOptions => {
     // Block unsafe URL schemes from rendering as clickable links. On click the
     // href is passed verbatim to shell.openExternal (Electron), which would let
     // note content silently invoke OS protocol handlers. See GHSA-hr87-735w-hfq3.
-    if (!isExternalUrlSchemeAllowed(href)) {
+    const url = toRenderableHref(href);
+    if (!url) {
       return `<span class="markdown-blocked-link" title="Link blocked: unsafe URL scheme">${text}</span>`;
     }
-    return `<a target="_blank" rel="noopener noreferrer" href="${escapeHtmlAttr(href)}" title="${escapeHtmlAttr(title || '')}">${text}</a>`;
+    return `<a target="_blank" rel="noopener noreferrer" href="${escapeHtmlAttr(url)}" title="${escapeHtmlAttr(title || '')}">${text}</a>`;
   };
 
   // Custom image renderer with support for sizing syntax
@@ -196,6 +239,12 @@ export const markedOptionsFactory = (): MarkedOptions => {
     gfm: true,
     breaks: true,
     pedantic: false,
+    extensions: {
+      renderers: {},
+      childTokens: {},
+      inline: [tokenizeWebexTeamsAutoLink],
+      startInline: [startWebexTeamsAutoLink],
+    },
   };
 
   // Add preprocessing hook to handle image sizing syntax

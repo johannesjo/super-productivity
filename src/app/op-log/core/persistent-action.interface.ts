@@ -1,5 +1,12 @@
 import { Action } from '@ngrx/store';
-import { EntityType, OpType } from './operation.types';
+import { EntityType, LwwUpdateMode, OpType } from './operation.types';
+
+/**
+ * Action-envelope keys. An LWW Update action spreads its entity flat
+ * (`{ ...entity, type, meta }`), so these shadow same-named entity fields
+ * such as SimpleCounter.type (see convertOpToAction).
+ */
+export const ENVELOPE_SHADOWED_KEYS = ['type', 'meta'] as const;
 
 export interface PersistentActionMeta {
   isPersistent?: boolean; // When false, the action is blacklisted and not persisted
@@ -16,6 +23,15 @@ export interface PersistentActionMeta {
   // don't clobber the device's own settings while replaying its own ops.
   isApplyingFromOtherClient?: boolean;
   isBulk?: boolean; // TRUE for batch operations
+  lwwUpdateMode?: LwwUpdateMode;
+  recreatesEntityAfterDelete?: boolean;
+  // Authenticated project-move footprint surfaced from the encrypted
+  // LwwUpdatePayload.projectMoveFootprint. Reducers relocate task families from
+  // THIS field, never the plaintext `entityIds` envelope. GHSA-8pxh-mgc7-gp3g.
+  projectMoveFootprint?: readonly string[];
+  // LWW Update only: the payload entity's ENVELOPE_SHADOWED_KEYS fields,
+  // carried here by convertOpToAction because the envelope overwrites them.
+  lwwShadowedFields?: Readonly<Record<string, unknown>>;
 }
 
 export interface PersistentAction extends Action {

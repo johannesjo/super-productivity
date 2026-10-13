@@ -23,11 +23,11 @@ import { ScheduleEventComponent } from '../schedule-event/schedule-event.compone
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatIcon } from '@angular/material/icon';
 import { T } from '../../../t.const';
-import { isTouchActive } from '../../../util/input-intent';
+import { dragDelayForTouch, isTouchActive } from '../../../util/input-intent';
 import { MatTooltip } from '@angular/material/tooltip';
 import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
-import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { parseDbDateStr } from '../../../util/parse-db-date-str';
+import { safeFormatDate } from '../../../util/safe-format-date';
 import { formatMonthDay } from '../../../util/format-month-day.util';
 import { ScheduleWeekDragService } from './schedule-week-drag.service';
 import { calculatePlaceholderForGridMove } from './schedule-week-placeholder.util';
@@ -43,7 +43,6 @@ const MIN_ROW_HEIGHT_PX = 5;
 const MAX_ROW_HEIGHT_PX = 24;
 const ROW_HEIGHT_STEP_PX = 1;
 const MOBILE_ROW_HEIGHT_FACTOR = DEFAULT_MOBILE_ROW_HEIGHT_PX / DEFAULT_ROW_HEIGHT_PX;
-const TOUCH_DRAG_START_DELAY_MS = 75;
 
 interface ScheduleTaskDataLike {
   id?: string;
@@ -59,7 +58,6 @@ interface ScheduleTaskDataLike {
     MatIcon,
     TranslatePipe,
     MatTooltip,
-    LocaleDatePipe,
   ],
   templateUrl: './schedule-week.component.html',
   styleUrl: './schedule-week.component.scss',
@@ -106,11 +104,13 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly isShiftNoScheduleMode = this._service.isShiftMode;
 
   FH = FH;
-  protected readonly isTouchActive = isTouchActive;
   SVEType: typeof SVEType = SVEType;
   T: typeof T = T;
   protected readonly isDraggableSE = isDraggableSE;
-  protected readonly touchDragStartDelayMs = TOUCH_DRAG_START_DELAY_MS;
+  // Touch drags must wait out the app-wide long press. A shorter delay turns any
+  // deliberate (= slow) vertical swipe that starts on an event into a task move,
+  // which makes a densely filled schedule unscrollable on mobile (#9675).
+  protected readonly dragDelayForTouch = dragDelayForTouch;
 
   rowsByNr = Array.from({ length: D_HOURS * FH }, (_, index) => index).filter(
     (_, index) => index % FH === 0,
@@ -132,6 +132,30 @@ export class ScheduleWeekComponent implements OnInit, AfterViewInit, OnDestroy {
       return formatter.format(date);
     });
   });
+
+  // Precompute the day-number ('d') and weekday ('EEE') header labels for each
+  // visible day, keyed on the day list + numeric/text locales. Replaces two
+  // per-column `| localeDate` pipes so no date formatting runs during change
+  // detection; recomputes only when the days or either locale change.
+  readonly dayHeaderLabels = computed<Record<string, { num: string; day: string }>>(
+    () => {
+      const locale = this._dateTimeFormatService.currentLocale();
+      const isoTextLocale = this._dateTimeFormatService.isoTextLocale();
+      const weekdayFormatter = isoTextLocale
+        ? new Intl.DateTimeFormat(isoTextLocale, { weekday: 'short' })
+        : null;
+      const map: Record<string, { num: string; day: string }> = {};
+      for (const day of this.daysToShow()) {
+        map[day] = {
+          num: safeFormatDate(day, 'd', locale),
+          day: weekdayFormatter
+            ? weekdayFormatter.format(parseDbDateStr(day))
+            : safeFormatDate(day, 'EEE', locale),
+        };
+      }
+      return map;
+    },
+  );
 
   endOfDayColRowStart = signal<number>(D_HOURS * 0.5 * FH);
   totalRows: number = D_HOURS * FH;

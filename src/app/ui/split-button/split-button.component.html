@@ -1,0 +1,28 @@
+<div class="g-split-btn">
+  <button
+    class="split-btn-main"
+    (click)="mainClick.emit($event)"
+    [disabled]="disabled()"
+    [matTooltip]="mainLabel()"
+    [attr.aria-label]="mainLabel() || null"
+    color="primary"
+    matTooltipShowDelay="0"
+    mat-stroked-button
+    type="button"
+  >
+    <ng-content></ng-content>
+  </button>
+  <button
+    class="split-btn-trigger"
+    [matMenuTriggerFor]="menu()"
+    [disabled]="disabled()"
+    [matTooltip]="triggerLabel() ? (triggerLabel() | translate) : ''"
+    [attr.aria-label]="triggerLabel() ? (triggerLabel() | translate) : null"
+    color="primary"
+    matTooltipShowDelay="0"
+    mat-stroked-button
+    type="button"
+  >
+    <mat-icon>more_vert</mat-icon>
+  </button>
+</div>

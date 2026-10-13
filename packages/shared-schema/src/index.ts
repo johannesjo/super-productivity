@@ -2,7 +2,7 @@
 export {
   CURRENT_SCHEMA_VERSION,
   MIN_SUPPORTED_SCHEMA_VERSION,
-  MAX_VERSION_SKIP,
+  PROJECT_DELETE_WINS_SCHEMA_VERSION,
 } from './schema-version';
 
 // Types
@@ -27,15 +27,6 @@ export {
 // Migration registry (for inspection/debugging)
 export { MIGRATIONS } from './migrations/index';
 
-// Vector clock types and comparison (shared between client and server)
-export type { VectorClock, VectorClockComparison } from './vector-clock';
-export {
-  compareVectorClocks,
-  mergeVectorClocks,
-  limitVectorClockSize,
-  MAX_VECTOR_CLOCK_SIZE,
-} from './vector-clock';
-
 // Entity types (shared between client and server)
 export type { EntityType } from './entity-types';
 export { ENTITY_TYPES } from './entity-types';
@@ -50,6 +41,7 @@ export {
   SUPER_SYNC_IMPORT_REASONS,
   SUPER_SYNC_SNAPSHOT_REASONS,
   SUPER_SYNC_SNAPSHOT_OP_TYPES,
+  SUPER_SYNC_ERROR_CODES,
   SuperSyncVectorClockSchema,
   SuperSyncClientIdSchema,
   SuperSyncOperationSchema,
@@ -64,16 +56,26 @@ export {
   SuperSyncSnapshotResponseSchema,
   SuperSyncSnapshotUploadResponseSchema,
   SuperSyncStatusResponseSchema,
+  SuperSyncDeviceSchema,
+  SuperSyncDevicesResponseSchema,
+  SuperSyncReplaceTokenResponseSchema,
   SuperSyncRestorePointSchema,
   SuperSyncRestorePointsResponseSchema,
   SuperSyncRestoreSnapshotResponseSchema,
   SuperSyncDeleteAllDataResponseSchema,
+  SuperSyncCaptureItemSchema,
+  SuperSyncCaptureClaimResponseSchema,
+  SuperSyncCaptureGrantSchema,
+  SuperSyncCaptureGrantsResponseSchema,
+  SuperSyncCaptureTokenResponseSchema,
+  SuperSyncCaptureConnectCodeResponseSchema,
 } from './supersync-http-contract';
 export type {
   SuperSyncOpType,
   SuperSyncImportReason,
   SuperSyncSnapshotReason,
   SuperSyncSnapshotOpType,
+  SuperSyncErrorCode,
   SuperSyncOperation,
   SuperSyncUploadOpsRequest,
   SuperSyncDownloadOpsQuery,
@@ -85,8 +87,17 @@ export type {
   SuperSyncSnapshotResponse,
   SuperSyncSnapshotUploadResponse,
   SuperSyncStatusResponse,
+  SuperSyncDevice,
+  SuperSyncDevicesResponse,
+  SuperSyncReplaceTokenResponse,
   SuperSyncRestorePoint,
   SuperSyncRestorePointsResponse,
   SuperSyncRestoreSnapshotResponse,
   SuperSyncDeleteAllDataResponse,
+  SuperSyncCaptureItem,
+  SuperSyncCaptureClaimResponse,
+  SuperSyncCaptureGrant,
+  SuperSyncCaptureGrantsResponse,
+  SuperSyncCaptureTokenResponse,
+  SuperSyncCaptureConnectCodeResponse,
 } from './supersync-http-contract';

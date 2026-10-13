@@ -1,5 +1,6 @@
 import { TaskContextMenuInnerComponent } from './task-context-menu-inner.component';
-import { ComponentFixture, TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { ComponentFixture, TestBed, fakeAsync, flush, tick } from '@angular/core/testing';
+import { signal } from '@angular/core';
 import { TaskService } from '../../task.service';
 import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { TaskRepeatCfgService } from '../../../task-repeat-cfg/task-repeat-cfg.service';
@@ -14,24 +15,71 @@ import { WorkContextService } from '../../../work-context/work-context.service';
 import { TaskFocusService } from '../../task-focus.service';
 import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { DateAdapter } from '@angular/material/core';
-import { of } from 'rxjs';
+import { of, throwError } from 'rxjs';
 import { selectTaskByIdWithSubTaskData } from '../../store/task.selectors';
-import { addSubTask } from '../../store/task.actions';
+import { TaskSharedActions } from '../../../../root-store/meta/task-shared.actions';
+import { DateService } from '../../../../core/date/date.service';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
+import { AddSubtaskInputService } from '../../add-subtask-input/add-subtask-input.service';
+import { Project } from '../../../project/project.model';
+import { Tag } from '../../../tag/tag.model';
+import { DEFAULT_TASK, Task, TaskWithSubTasks } from '../../task.model';
+import { By } from '@angular/platform-browser';
+import { MatMenu } from '@angular/material/menu';
+import { TaskDuplicateService } from '../../task-duplicate.service';
+import { TaskMultiSelectService } from '../../task-multi-select.service';
+import { T } from '../../../../t.const';
+import { PluginTaskContextMenuRegistryService } from '../../../../plugins/plugin-task-context-menu-registry.service';
+
+const projectInTreeOrder = (id: string, title: string): Project =>
+  ({
+    id,
+    title,
+    taskIds: [],
+    backlogTaskIds: [],
+    noteIds: [],
+  }) as unknown as Project;
+
+const tagInTreeOrder = (id: string, title: string): Tag =>
+  ({
+    id,
+    title,
+    taskIds: [],
+    theme: { primary: '#999999' },
+  }) as unknown as Tag;
 
 describe('TaskContextMenuInnerComponent', () => {
   let component: TaskContextMenuInnerComponent;
   let fixture: ComponentFixture<TaskContextMenuInnerComponent>;
   let taskService: jasmine.SpyObj<TaskService>;
+  let taskDuplicateService: jasmine.SpyObj<TaskDuplicateService>;
+  let addSubtaskInputService: jasmine.SpyObj<AddSubtaskInputService>;
   let store: MockStore;
+  let isTaskContextMenuOpen: ReturnType<typeof signal<boolean>>;
+  let closeActiveTaskContextMenu: ReturnType<typeof signal<(() => void) | null>>;
 
   beforeEach(async () => {
     taskService = jasmine.createSpyObj('TaskService', [
-      'add',
-      'createNewTaskWithDefaults',
       'currentTaskId',
+      'selectedTaskId',
+      'setSelectedId',
+      'moveToProject',
+      'remove',
+      'getTasksWithSubTasksByRepeatCfgId$',
+      'getArchiveTasksForRepeatCfgId',
+      'update',
     ]);
     taskService.currentTaskId.and.returnValue('some-id');
+    taskDuplicateService = jasmine.createSpyObj<TaskDuplicateService>(
+      'TaskDuplicateService',
+      ['duplicate'],
+    );
+    addSubtaskInputService = jasmine.createSpyObj<AddSubtaskInputService>(
+      'AddSubtaskInputService',
+      ['requestOpen'],
+    );
+    isTaskContextMenuOpen = signal(false);
+    closeActiveTaskContextMenu = signal<(() => void) | null>(null);
 
     await TestBed.configureTestingModule({
       imports: [
@@ -42,9 +90,14 @@ describe('TaskContextMenuInnerComponent', () => {
       providers: [
         provideMockStore(),
         { provide: TaskService, useValue: taskService },
+        { provide: TaskDuplicateService, useValue: taskDuplicateService },
+        { provide: AddSubtaskInputService, useValue: addSubtaskInputService },
         {
           provide: TaskRepeatCfgService,
-          useValue: { getTaskRepeatCfgById$: () => of(null) },
+          useValue: {
+            getTaskRepeatCfgById$: () => of(null),
+            getTaskRepeatCfgByIdAllowUndefined$: () => of(undefined),
+          },
         },
         { provide: MatDialog, useValue: { open: () => ({ afterClosed: () => of() }) } },
         {
@@ -55,8 +108,14 @@ describe('TaskContextMenuInnerComponent', () => {
         {
           provide: ProjectService,
           useValue: {
-            getProjectsWithoutIdSorted$: () => of([]),
+            getProjectsWithoutIdInTreeOrder$: () =>
+              of([
+                projectInTreeOrder('project-b', 'Project B'),
+                projectInTreeOrder('project-a', 'Project A'),
+              ]),
             getByIdOnce$: () => of({}),
+            moveTaskToTodayList: () => {},
+            moveTaskToBacklog: () => {},
           },
         },
         {
@@ -66,11 +125,23 @@ describe('TaskContextMenuInnerComponent', () => {
             cfg: () => ({ reminder: {}, tasks: {} }),
           },
         },
-        { provide: TagService, useValue: { tagsNoMyDayAndNoList: () => [] } },
+        {
+          provide: TagService,
+          useValue: {
+            tagsNoMyDayAndNoListInTreeOrder: signal([
+              tagInTreeOrder('tag-b', 'Tag B'),
+              tagInTreeOrder('tag-a', 'Tag A'),
+            ]),
+          },
+        },
         { provide: WorkContextService, useValue: { activeWorkContext$: of({}) } },
         {
           provide: TaskFocusService,
-          useValue: { focusedTaskId: { set: () => {} } },
+          useValue: {
+            focusedTaskId: { set: () => {} },
+            isTaskContextMenuOpen,
+            closeActiveTaskContextMenu,
+          },
         },
         { provide: LocaleDatePipe, useValue: {} },
         { provide: DateAdapter, useValue: { getFirstDayOfWeek: () => 0 } },
@@ -79,6 +150,12 @@ describe('TaskContextMenuInnerComponent', () => {
 
     fixture = TestBed.createComponent(TaskContextMenuInnerComponent);
     component = fixture.componentInstance;
+    component.task = {
+      ...DEFAULT_TASK,
+      id: 'task-default',
+      title: 'Default Task',
+      projectId: 'project-current',
+    } as Task;
     store = TestBed.inject(MockStore);
   });
 
@@ -87,115 +164,365 @@ describe('TaskContextMenuInnerComponent', () => {
     store.resetSelectors();
   });
 
+  describe('touch selection entry point', () => {
+    for (const [name, selectable, inDetails, expected] of [
+      ['planner card', true, false, true],
+      ['opted-out card', false, false, false],
+      ['detail panel card', true, true, false],
+    ] as const) {
+      it(`recognizes ${name}`, fakeAsync(() => {
+        const container = document.createElement(inDetails ? 'task-detail-panel' : 'div');
+        const card = document.createElement('planner-task');
+        if (selectable) card.setAttribute('data-task-selectable', 'true');
+        container.appendChild(card);
+        card.appendChild(fixture.nativeElement);
+        component.ngAfterViewInit();
+        expect(component.isInTaskRow).toBe(expected);
+        flush();
+      }));
+    }
+  });
+
+  describe('enterSelectionMode()', () => {
+    it('enters touch selection mode with the task selected', () => {
+      const multiSelect = TestBed.inject(TaskMultiSelectService);
+      taskService.selectedTaskId.and.returnValue(null);
+      component.enterSelectionMode();
+      expect(multiSelect.isTouchSelectionMode()).toBeTrue();
+      expect(multiSelect.has('task-default')).toBeTrue();
+      expect(taskService.setSelectedId).not.toHaveBeenCalled();
+      multiSelect.clear();
+    });
+
+    it('closes an open detail panel first', () => {
+      const multiSelect = TestBed.inject(TaskMultiSelectService);
+      taskService.selectedTaskId.and.returnValue('other-task');
+      component.enterSelectionMode();
+      expect(taskService.setSelectedId).toHaveBeenCalledWith(null);
+      multiSelect.clear();
+    });
+  });
+
+  describe('tree ordered dropdown data', () => {
+    it('should expose move projects in the order provided by ProjectService', (done) => {
+      component.taskSet = {
+        ...DEFAULT_TASK,
+        id: 'task-1',
+        title: 'Task 1',
+        projectId: 'project-current',
+        tagIds: [],
+        subTaskIds: [],
+      } as unknown as Task;
+
+      component.moveToProjectList$.subscribe((projects) => {
+        expect(projects.map((project) => project.id)).toEqual(['project-b', 'project-a']);
+        done();
+      });
+    });
+
+    it('should expose toggle tags in the order provided by TagService', () => {
+      expect(component.toggleTagList().map((tag) => tag.id)).toEqual(['tag-b', 'tag-a']);
+    });
+  });
+
+  describe('plugin task context menu entries', () => {
+    let registry: PluginTaskContextMenuRegistryService;
+
+    beforeEach(() => {
+      registry = TestBed.inject(PluginTaskContextMenuRegistryService);
+      registry.unregisterPlugin('plugin-a');
+    });
+
+    it('does not invoke plugin callbacks while rendering the menu', () => {
+      const onClick = jasmine.createSpy('onClick');
+      registry.register('plugin-a', {
+        id: 'action',
+        label: 'Run action',
+        onClick,
+      });
+
+      component.taskSet = {
+        ...DEFAULT_TASK,
+        id: 'task-1',
+      } as Task;
+      fixture.detectChanges();
+
+      expect(component.pluginTaskContextMenuEntries()).toHaveSize(1);
+      expect(onClick).not.toHaveBeenCalled();
+    });
+
+    it('passes only the exact task id when the plugin action is selected', async () => {
+      const onClick = jasmine.createSpy('onClick');
+      registry.register('plugin-a', {
+        id: 'action',
+        label: 'Run action',
+        onClick,
+      });
+      component.taskSet = {
+        ...DEFAULT_TASK,
+        id: 'task-1',
+      } as Task;
+
+      await component.runPluginTaskContextMenuEntry(
+        component.pluginTaskContextMenuEntries()[0],
+      );
+
+      expect(onClick).toHaveBeenCalledOnceWith({ taskId: 'task-1' });
+    });
+
+    it('renders the plugin submenu and runs the selected entry on click', fakeAsync(() => {
+      const onClick = jasmine.createSpy('onClick');
+      registry.register('plugin-a', {
+        id: 'action',
+        label: 'Run action',
+        onClick,
+      });
+      component.taskSet = {
+        ...DEFAULT_TASK,
+        id: 'task-1',
+      } as Task;
+      fixture.detectChanges();
+
+      const findMenuItem = (text: string): HTMLElement | undefined =>
+        Array.from(
+          document.querySelectorAll<HTMLElement>(
+            '.cdk-overlay-container [mat-menu-item]',
+          ),
+        ).find((el) => el.textContent?.includes(text));
+
+      component.contextMenuTrigger()?.openMenu();
+      fixture.detectChanges();
+      tick();
+      const submenuTrigger = findMenuItem(T.PLUGINS.TASK_CONTEXT_MENU_ACTIONS);
+      expect(submenuTrigger).toBeDefined();
+
+      submenuTrigger!.click();
+      fixture.detectChanges();
+      tick();
+      const entryButton = findMenuItem('Run action');
+      expect(entryButton).toBeDefined();
+
+      entryButton!.click();
+      flush();
+
+      expect(onClick).toHaveBeenCalledOnceWith({ taskId: 'task-1' });
+      component.contextMenuTrigger()?.closeMenu();
+      flush();
+    }));
+
+    it('uses SUBTASK filtering for tasks with a parent', () => {
+      registry.register('plugin-a', {
+        id: 'subtask-action',
+        label: 'Subtask action',
+        showFor: ['SUBTASK'],
+        onClick: () => undefined,
+      });
+
+      component.taskSet = {
+        ...DEFAULT_TASK,
+        id: 'subtask-1',
+        parentId: 'task-1',
+      } as Task;
+
+      expect(
+        component.pluginTaskContextMenuEntries().map((entry) => entry.entryId),
+      ).toEqual(['subtask-action']);
+    });
+  });
+
+  describe('priority submenu', () => {
+    const menuItems = (selector: string): HTMLElement[] =>
+      Array.from(
+        document.querySelectorAll<HTMLElement>(`.cdk-overlay-container ${selector}`),
+      );
+    const openPriorityMenu = (): HTMLElement[] => {
+      component.contextMenuTrigger()?.openMenu();
+      fixture.detectChanges();
+      tick();
+      const trigger = menuItems('[mat-menu-item]').find((el) =>
+        el.textContent?.trim().endsWith(T.F.TASK.CMP.PRIORITY),
+      );
+      expect(trigger).toBeDefined();
+      trigger!.click();
+      fixture.detectChanges();
+      tick();
+      return menuItems('[role="menuitemradio"]');
+    };
+    const closeMenus = (): void => {
+      component.contextMenuTrigger()?.closeMenu();
+      flush();
+    };
+
+    it('lists None, Low, Medium, High and checks only the current level', fakeAsync(() => {
+      component.taskSet = { ...DEFAULT_TASK, id: 'task-1', priority: 'medium' } as Task;
+      fixture.detectChanges();
+
+      const items = openPriorityMenu();
+
+      expect(items.map((el) => el.textContent)).toEqual([
+        jasmine.stringContaining(T.F.TASK.CMP.PRIORITY_NONE),
+        jasmine.stringContaining(T.F.TASK.CMP.PRIORITY_LOW),
+        jasmine.stringContaining(T.F.TASK.CMP.PRIORITY_MEDIUM),
+        jasmine.stringContaining(T.F.TASK.CMP.PRIORITY_HIGH),
+      ]);
+      expect(items.map((el) => el.getAttribute('aria-checked'))).toEqual([
+        'false',
+        'false',
+        'true',
+        'false',
+      ]);
+      expect(items[2].textContent).toContain('check');
+      // Opening focuses the current level, so Enter keeps it.
+      expect(document.activeElement).toBe(items[2]);
+      expect(items[1].querySelector('task-priority-indicator')).not.toBeNull();
+      items[2].click();
+      flush();
+      expect(taskService.update).not.toHaveBeenCalled();
+      closeMenus();
+    }));
+
+    it('sets the numeric level, and clears with null', fakeAsync(() => {
+      component.taskSet = { ...DEFAULT_TASK, id: 'task-1', priority: 'medium' } as Task;
+      fixture.detectChanges();
+
+      openPriorityMenu()[3].click();
+      flush();
+      expect(taskService.update).toHaveBeenCalledWith('task-1', { priority: 3 });
+
+      openPriorityMenu()[0].click();
+      flush();
+      expect(taskService.update).toHaveBeenCalledWith('task-1', { priority: null });
+      closeMenus();
+    }));
+  });
+
   describe('duplicate()', () => {
-    it('should duplicate subtasks with timeEstimate and notes', fakeAsync(() => {
-      const mockTask = {
+    it('delegates a task without subtasks directly to TaskDuplicateService', async () => {
+      const mockTask: Task = {
+        ...DEFAULT_TASK,
+        id: 'PARENT_ID',
+        title: 'Parent Task',
+        projectId: 'P1',
+        tagIds: [],
+        subTaskIds: [],
+      };
+
+      component.task = mockTask;
+
+      await component.duplicate();
+
+      expect(taskDuplicateService.duplicate).toHaveBeenCalledOnceWith({
+        ...mockTask,
+        subTasks: [],
+      });
+    });
+
+    it('delegates the complete task tree to TaskDuplicateService', fakeAsync(() => {
+      const mockTask: Task = {
+        ...DEFAULT_TASK,
         id: 'PARENT_ID',
         title: 'Parent Task',
         projectId: 'P1',
         tagIds: [],
         subTaskIds: ['SUB_ID'],
-      } as any;
-
-      const mockSubTask = {
-        id: 'SUB_ID',
-        title: 'Sub Task',
-        isDone: true,
-        projectId: 'P1',
-        timeEstimate: 3600000,
-        notes: 'Some notes',
       };
-
-      const mockTaskWithSubTasks = {
+      const mockTaskWithSubTasks: TaskWithSubTasks = {
         ...mockTask,
-        subTasks: [mockSubTask],
-      };
-
-      component.task = mockTask;
-      taskService.add.and.returnValue('NEW_PARENT_ID');
-      taskService.createNewTaskWithDefaults.and.returnValue({
-        id: 'NEW_SUB_ID',
-      } as any);
-
-      store.overrideSelector(selectTaskByIdWithSubTaskData, mockTaskWithSubTasks);
-      spyOn(store, 'dispatch');
-
-      component.duplicate();
-      tick(50); // for the delay(50) in _getTaskWithSubtasks
-
-      expect(taskService.add).toHaveBeenCalledWith(
-        'Parent Task (copy)',
-        false,
-        jasmine.objectContaining({ projectId: 'P1' }),
-        false,
-      );
-
-      expect(taskService.createNewTaskWithDefaults).toHaveBeenCalledWith(
-        jasmine.objectContaining({
-          title: 'Sub Task',
-          additional: jasmine.objectContaining({
-            timeEstimate: 3600000,
-            notes: 'Some notes',
+        subTasks: [
+          {
+            ...DEFAULT_TASK,
+            id: 'SUB_ID',
+            title: 'Sub Task',
             isDone: true,
             projectId: 'P1',
-          }),
-        }),
-      );
-
-      expect(store.dispatch).toHaveBeenCalledWith(
-        addSubTask({
-          task: { id: 'NEW_SUB_ID' } as any,
-          parentId: 'NEW_PARENT_ID',
-        }),
-      );
-    }));
-
-    it('should duplicate parent task with notes', fakeAsync(() => {
-      const mockTask = {
-        id: 'PARENT_ID',
-        title: 'Parent Task',
-        projectId: 'P1',
-        tagIds: [],
-        subTaskIds: [],
-        notes: 'My important notes',
-      } as any;
+            timeEstimate: 3_600_000,
+            notes: 'Some notes',
+          },
+        ],
+      };
 
       component.task = mockTask;
-      taskService.add.and.returnValue('NEW_PARENT_ID');
+      store.overrideSelector(selectTaskByIdWithSubTaskData, mockTaskWithSubTasks);
 
-      component.duplicate();
-      tick(50);
+      void component.duplicate();
+      tick(50); // for the delay(50) in _getTaskWithSubtasks
 
-      expect(taskService.add).toHaveBeenCalledWith(
-        'Parent Task (copy)',
-        false,
-        jasmine.objectContaining({ notes: 'My important notes' }),
-        false,
+      expect(taskDuplicateService.duplicate).toHaveBeenCalledOnceWith(
+        mockTaskWithSubTasks,
       );
     }));
+  });
 
-    it('should not include notes when parent task has no notes', fakeAsync(() => {
-      const mockTask = {
-        id: 'PARENT_ID',
-        title: 'Parent Task',
+  describe('deleteTask()', () => {
+    // #8583: Enter in the delete confirm deletes the task.
+    it('focuses the confirm button of the delete dialog', () => {
+      const openSpy = spyOn(TestBed.inject(MatDialog), 'open').and.callThrough();
+      component.task = { ...DEFAULT_TASK, id: 'T1', projectId: 'P1' };
+
+      void component.deleteTask();
+
+      expect(openSpy).toHaveBeenCalledWith(
+        jasmine.anything(),
+        jasmine.objectContaining({
+          data: jasmine.objectContaining({ isFocusConfirm: true }),
+        }),
+      );
+    });
+
+    // #9946: the selector returns undefined for a task that is gone from the
+    // store; removing an id-less stub used to wipe every top-level task.
+    it('removes nothing when the task is gone from the store', fakeAsync(() => {
+      component.task = {
+        ...DEFAULT_TASK,
+        id: 'GONE_ID',
         projectId: 'P1',
-        tagIds: [],
         subTaskIds: [],
-        notes: '',
-      } as any;
+      };
+      store.overrideSelector(selectTaskByIdWithSubTaskData, undefined);
 
-      component.task = mockTask;
-      taskService.add.and.returnValue('NEW_PARENT_ID');
+      void (
+        component as unknown as { _performDelete: () => Promise<void> }
+      )._performDelete();
+      tick(50); // for the delay(50) in _getTaskWithSubtasks
 
-      component.duplicate();
-      tick(50);
-
-      const callArgs = taskService.add.calls.mostRecent().args[2] as any;
-      expect(callArgs.notes).toBeUndefined();
+      expect(taskService.remove).not.toHaveBeenCalled();
     }));
   });
 
   describe('getElementById for task ID lookup', () => {
+    it('registers its close callback when opened and clears it when closed', () => {
+      const closeMenu = jasmine.createSpy('closeMenu');
+      (
+        component as unknown as {
+          contextMenuTrigger: () => { closeMenu: () => void; openMenu: () => void };
+        }
+      ).contextMenuTrigger = () => ({ closeMenu, openMenu: () => {} });
+
+      component.open();
+
+      expect(closeActiveTaskContextMenu()).not.toBeNull();
+      closeActiveTaskContextMenu()?.();
+      expect(closeMenu).toHaveBeenCalled();
+
+      component.onClose();
+      expect(closeActiveTaskContextMenu()).toBeNull();
+    });
+
+    it('does not clear a newer menu registration when destroyed', () => {
+      (
+        component as unknown as {
+          contextMenuTrigger: () => { closeMenu: () => void; openMenu: () => void };
+        }
+      ).contextMenuTrigger = () => ({ closeMenu: () => {}, openMenu: () => {} });
+      component.open();
+      const newerClose = (): void => {};
+      closeActiveTaskContextMenu.set(newerClose);
+
+      component.ngOnDestroy();
+
+      expect(closeActiveTaskContextMenu()).toBe(newerClose);
+    });
+
     it('should use getElementById for task ID in focusRelatedTaskOrNext', fakeAsync(() => {
       component.task = {
         id: 'task-with-{special}-chars',
@@ -211,6 +538,64 @@ describe('TaskContextMenuInnerComponent', () => {
       tick(100);
 
       expect(getByIdSpy).toHaveBeenCalledWith('t-task-with-{special}-chars');
+    }));
+
+    // Regression guard for #8533: focusing the task after the context menu
+    // closes must never scroll the viewport. An action like "add to today"
+    // relocates the task (Overdue -> Today), so a plain .focus() would yank the
+    // list to the moved task. Focus is kept for keyboard continuity, but with
+    // preventScroll so the user stays anchored where they acted.
+    it('should focus the related task with preventScroll to avoid viewport jump', fakeAsync(() => {
+      component.task = {
+        id: 'T1',
+        title: 'Test',
+        projectId: 'P1',
+        tagIds: [],
+        subTaskIds: [],
+      } as any;
+
+      const focusSpy = jasmine.createSpy('focus');
+      spyOn(document, 'getElementById').and.returnValue({
+        focus: focusSpy,
+      } as unknown as HTMLElement);
+
+      component.focusRelatedTaskOrNext();
+      tick(100);
+
+      expect(focusSpy).toHaveBeenCalledWith({ preventScroll: true });
+    }));
+
+    it('should restore external focus only after the root menu closes', fakeAsync(() => {
+      component.task = {
+        id: 'T1',
+        title: 'Test',
+        projectId: 'P1',
+        tagIds: [],
+        subTaskIds: [],
+      } as any;
+
+      const trigger = document.createElement('button');
+      document.body.appendChild(trigger);
+      const triggerFocusSpy = spyOn(trigger, 'focus');
+      const getByIdSpy = spyOn(document, 'getElementById');
+
+      component.open(undefined, false, trigger);
+      fixture.detectChanges();
+      const menus = fixture.debugElement.queryAll(By.directive(MatMenu));
+      expect(menus.length).toBeGreaterThan(1);
+
+      menus[1].injector.get(MatMenu).closed.emit();
+      tick();
+
+      expect(triggerFocusSpy).not.toHaveBeenCalled();
+      expect(getByIdSpy).not.toHaveBeenCalled();
+
+      component.onClose();
+      tick();
+
+      expect(triggerFocusSpy).toHaveBeenCalledOnceWith({ preventScroll: true });
+      expect(getByIdSpy).not.toHaveBeenCalled();
+      trigger.remove();
     }));
   });
 
@@ -229,5 +614,139 @@ describe('TaskContextMenuInnerComponent', () => {
 
       expect(menu.focusFirstItem).toHaveBeenCalledWith('program');
     });
+  });
+
+  describe('focusCheckedSubmenuItem()', () => {
+    const fakeItem = (
+      ariaChecked: string | null,
+    ): { focus: jasmine.Spy; _getHostElement: () => HTMLElement } => {
+      const el = document.createElement('button');
+      if (ariaChecked !== null) {
+        el.setAttribute('aria-checked', ariaChecked);
+      }
+      return { focus: jasmine.createSpy('focus'), _getHostElement: () => el };
+    };
+
+    it('focuses the checked item', () => {
+      const items = [fakeItem('false'), fakeItem('true'), fakeItem('false')];
+      const menu = { _allItems: items, focusFirstItem: jasmine.createSpy() };
+
+      component.focusCheckedSubmenuItem(menu as unknown as MatMenu);
+
+      expect(items[1].focus).toHaveBeenCalledWith('program');
+      expect(menu.focusFirstItem).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the first item when nothing is checked', () => {
+      const items = [fakeItem(null), fakeItem('false')];
+      const menu = { _allItems: items, focusFirstItem: jasmine.createSpy() };
+
+      component.focusCheckedSubmenuItem(menu as unknown as MatMenu);
+
+      expect(menu.focusFirstItem).toHaveBeenCalledWith('program');
+      expect(items[0].focus).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('addSubTask()', () => {
+    it('requests the inline subtask input for the parent task', () => {
+      component.task = {
+        id: 'SUB_ID',
+        title: 'Subtask',
+        parentId: 'PARENT_ID',
+        tagIds: [],
+        subTaskIds: [],
+      } as any;
+
+      component.addSubTask();
+
+      expect(addSubtaskInputService.requestOpen).toHaveBeenCalledWith('PARENT_ID');
+    });
+  });
+
+  // Moving a task between the backlog and the regular list is a list-position
+  // change only; it must not touch the task's schedule (issue #8592).
+  describe('moveToToday() / moveToBacklog() schedule preservation (#8592)', () => {
+    let projectService: ProjectService;
+
+    beforeEach(() => {
+      projectService = TestBed.inject(ProjectService);
+    });
+
+    it('moveToToday() moves to the regular list without scheduling for today', () => {
+      const moveSpy = spyOn(projectService, 'moveTaskToTodayList');
+      const dispatchSpy = spyOn(store, 'dispatch');
+      component.task = {
+        ...DEFAULT_TASK,
+        id: 'task-1',
+        projectId: 'project-current',
+      } as Task;
+
+      component.moveToToday();
+
+      expect(moveSpy).toHaveBeenCalledWith('task-1', 'project-current');
+      const dispatchedTypes = dispatchSpy.calls
+        .allArgs()
+        .map((args) => (args[0] as unknown as { type: string }).type);
+      expect(dispatchedTypes).not.toContain(TaskSharedActions.planTasksForToday.type);
+    });
+
+    it('moveToBacklog() moves to the backlog without clearing a schedule set for today', () => {
+      const moveSpy = spyOn(projectService, 'moveTaskToBacklog');
+      const dispatchSpy = spyOn(store, 'dispatch');
+      component.task = {
+        ...DEFAULT_TASK,
+        id: 'task-1',
+        projectId: 'project-current',
+        dueDay: TestBed.inject(DateService).todayStr(),
+      } as Task;
+
+      component.moveToBacklog();
+
+      expect(moveSpy).toHaveBeenCalledWith('task-1', 'project-current');
+      const dispatchedTypes = dispatchSpy.calls
+        .allArgs()
+        .map((args) => (args[0] as unknown as { type: string }).type);
+      expect(dispatchedTypes).not.toContain(TaskSharedActions.unscheduleTask.type);
+    });
+  });
+
+  // #8715: a task can reference a repeat config that was already deleted (e.g.
+  // via cross-client sync). Moving it must not throw ('Missing taskRepeatCfg')
+  // and crash — it should fall back to a plain task move.
+  describe('moveTaskToProject() with a deleted repeat config (#8715)', () => {
+    it('falls back to a plain move instead of crashing on the missing config', fakeAsync(() => {
+      const taskWithRepeat = {
+        ...DEFAULT_TASK,
+        id: 'task-repeat',
+        title: 'Repeat Task',
+        projectId: 'project-current',
+        repeatCfgId: 'deleted-cfg',
+      } as Task;
+      component.task = taskWithRepeat;
+
+      const taskWithSubTasks = { ...taskWithRepeat, subTasks: [] } as any;
+      store.overrideSelector(selectTaskByIdWithSubTaskData, taskWithSubTasks);
+      // config resolves to undefined (deleted); the other repeat lookups still run
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(
+        of([taskWithSubTasks]),
+      );
+      taskService.getArchiveTasksForRepeatCfgId.and.returnValue(Promise.resolve([]));
+      // guard against regressing to the throwing selector (the #8715 root cause)
+      const repeatCfgService = TestBed.inject(TaskRepeatCfgService);
+      (
+        repeatCfgService as unknown as { getTaskRepeatCfgById$: () => unknown }
+      ).getTaskRepeatCfgById$ = () =>
+        throwError(() => new Error('Missing taskRepeatCfg'));
+
+      component.moveTaskToProject('project-b');
+      tick(50); // _getTaskWithSubtasks delay(50)
+      flush(); // focusRelatedTaskOrNext setTimeout
+
+      expect(taskService.moveToProject).toHaveBeenCalledWith(
+        taskWithSubTasks,
+        'project-b',
+      );
+    }));
   });
 });

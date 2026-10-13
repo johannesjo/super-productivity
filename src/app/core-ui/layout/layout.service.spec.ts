@@ -1,4 +1,4 @@
-import { TestBed } from '@angular/core/testing';
+import { fakeAsync, TestBed, tick } from '@angular/core/testing';
 import { Store } from '@ngrx/store';
 import { LayoutService } from './layout.service';
 import { hideAddTaskBar, showAddTaskBar } from './store/layout.actions';
@@ -59,6 +59,15 @@ describe('LayoutService', () => {
 
     service = TestBed.inject(LayoutService);
     mockStore = TestBed.inject(Store) as jasmine.SpyObj<Store>;
+  });
+
+  it('uses the same exclusive max-width boundaries as the shared SCSS breakpoints', () => {
+    const breakpointObserver = TestBed.inject(
+      BreakpointObserver,
+    ) as jasmine.SpyObj<BreakpointObserver>;
+
+    expect(breakpointObserver.observe).toHaveBeenCalledWith('(max-width: 599px)');
+    expect(breakpointObserver.observe).toHaveBeenCalledWith('(max-width: 397px)');
   });
 
   describe('Focus restoration', () => {
@@ -336,9 +345,55 @@ describe('LayoutService', () => {
       setTimeout(() => {
         expect(scrollContainer.scrollTop).toBe(20);
         expect(taskElement.focus).toHaveBeenCalledWith({ preventScroll: true });
+        // The reveal itself never highlights: `focusItem` is set by every
+        // navigation caller, and only a search jump earns the attention
+        // outline, so the caller opts in via `highlightTaskBriefly`. (#5476)
+        expect(taskElement.classList.contains('highlight-searched-task')).toBeFalse();
         document.body.removeChild(scrollContainer);
         done();
       }, 400);
     });
+
+    it('should invoke onFailure (and not onSuccess) once the retries are exhausted', fakeAsync(() => {
+      const onSuccess = jasmine.createSpy('onSuccess');
+      const onFailure = jasmine.createSpy('onFailure');
+
+      // No element with id `t-never-rendered` exists, so the task never becomes
+      // focusable. Use a small retry budget so the loop exhausts quickly.
+      service.focusTaskInViewWhenReady('never-rendered', onSuccess, onFailure, 2);
+
+      // 2 retries * 250ms delay; tick generously to drain every scheduled retry.
+      tick(1000);
+
+      expect(onSuccess).not.toHaveBeenCalled();
+      expect(onFailure).toHaveBeenCalledTimes(1);
+    }));
+  });
+
+  describe('highlightTaskBriefly', () => {
+    it('should add the highlight class and remove it after the duration', fakeAsync(() => {
+      const el = document.createElement('div');
+
+      service.highlightTaskBriefly(el);
+      expect(el.classList.contains('highlight-searched-task')).toBeTrue();
+
+      tick(3000);
+      expect(el.classList.contains('highlight-searched-task')).toBeFalse();
+    }));
+
+    it('should move the highlight to the latest element when re-triggered', fakeAsync(() => {
+      const first = document.createElement('div');
+      const second = document.createElement('div');
+
+      service.highlightTaskBriefly(first);
+      tick(1000);
+      service.highlightTaskBriefly(second);
+
+      expect(first.classList.contains('highlight-searched-task')).toBeFalse();
+      expect(second.classList.contains('highlight-searched-task')).toBeTrue();
+
+      tick(3000);
+      expect(second.classList.contains('highlight-searched-task')).toBeFalse();
+    }));
   });
 });

@@ -24,7 +24,6 @@
           [innerHTML]="T.F.SYNC.D_DECRYPT_ERROR.P2_FORGOT_PW | translate"
         ></p>
         <button
-          class="btn btn-primary submit-button"
           mat-flat-button
           color="primary"
           (click)="formEl.valid && updatePwAndResync()"
@@ -37,24 +36,10 @@
       </div>
     </form>
 
-    <hr class="divider" />
-
-    <div class="option-section">
-      <p
-        class="option-label"
-        [innerHTML]="T.F.SYNC.D_DECRYPT_ERROR.P3_PW_CHANGED | translate"
-      ></p>
-      <button
-        mat-stroked-button
-        color="warn"
-        type="button"
-        (click)="updatePWAndForceUpload()"
-        [disabled]="!passwordVal"
-      >
-        <mat-icon>cloud_upload</mat-icon>
-        {{ T.F.SYNC.D_DECRYPT_ERROR.BTN_OVER_WRITE_REMOTE | translate }}
-      </button>
-    </div>
+    <p
+      class="option-label"
+      [innerHTML]="T.F.SYNC.D_DECRYPT_ERROR.P3_START_OVER | translate"
+    ></p>
   </div>
 </mat-dialog-content>
 
@@ -62,11 +47,9 @@
   <div class="wrap-buttons">
     <button
       (click)="cancel()"
-      class="btn btn-primary submit-button"
       mat-button
       type="button"
     >
-      <mat-icon>close</mat-icon>
       {{ T.G.CANCEL | translate }}
     </button>
   </div>

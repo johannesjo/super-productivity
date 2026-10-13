@@ -8,11 +8,17 @@ const KEY_TO_REPLACE = [
   'loginName',
   'password',
   'token',
+  'apiKey',
+  'secret',
+  'authorization',
   'notes',
   'authCode',
   'accessToken',
   'host',
   'gitlabBaseUrl',
+  'nextcloudBaseUrl',
+  'icalUrl',
+  'organization',
   'syncFilePath',
   'syncFolderPath',
   'title',
@@ -23,6 +29,7 @@ const KEY_TO_REPLACE = [
   'repo',
   'repoFullname',
   'filterUserName',
+  'filterUsername',
   'caldavUrl',
   'api_key',
 
@@ -37,6 +44,9 @@ const KEY_TO_REPLACE = [
   // Calendar regex filter patterns may contain user-specific title fragments
   'filterIncludeRegex',
   'filterExcludeRegex',
+
+  // Agent capture private key (sync.captureKey)
+  'privateKeyPkcs8',
 ];
 
 const maskString = (key: string, val: string, counter: number): string => {

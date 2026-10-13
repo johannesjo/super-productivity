@@ -13,15 +13,14 @@ import { InjectionToken } from '@angular/core';
  * | Vector clock counter | MAX_SAFE_INTEGER-1000 | (vector-clock.ts) | Requires SYNC_IMPORT on overflow |
  * | Ops per upload batch | 25 | MAX_OPS_PER_UPLOAD_REQUEST | Reduced from 100 to avoid 413 errors |
  * | Download page size | 500 | DOWNLOAD_PAGE_SIZE | Operations per download request |
- * | Max download iterations | 1000 | MAX_DOWNLOAD_ITERATIONS | Server bug protection (500K ops max) |
- * | Max ops in memory | 50,000 | MAX_DOWNLOAD_OPS_IN_MEMORY | Prevents OOM during sync |
+ * | Max download iterations | 1000 | MAX_DOWNLOAD_ITERATIONS | Pages per download pass; rest follows next sync |
+ * | Max ops in memory | 50,000 | MAX_DOWNLOAD_OPS_IN_MEMORY | Ops per download pass (OOM guard); rest follows next sync |
  * | Compaction threshold | 500 | COMPACTION_THRESHOLD | Triggers automatic compaction |
  * | Lock acquisition timeout | 30s | LOCK_ACQUISITION_TIMEOUT_MS | Prevents infinite hang on stuck lock |
  * | Compaction timeout | 25s | COMPACTION_TIMEOUT_MS | Aborts to prevent lock expiration |
  * | Retention window | 7 days | COMPACTION_RETENTION_MS | Normal compaction |
  * | Emergency retention | 1 day | EMERGENCY_COMPACTION_RETENTION_MS | When quota exceeded |
  * | Clock drift warning | 5 min | CLOCK_DRIFT_THRESHOLD_MS | Warns user once per session |
- * | Max conflict retries | 5 | MAX_CONFLICT_RETRY_ATTEMPTS | Then marked as rejected |
  * | Max concurrent resolution | 3 | MAX_CONCURRENT_RESOLUTION_ATTEMPTS | Prevents infinite merge loop |
  * | Post-sync cooldown | 2s | POST_SYNC_COOLDOWN_MS | Suppresses selector effects |
  *
@@ -51,6 +50,13 @@ import { InjectionToken } from '@angular/core';
  */
 export const LOCK_NAMES = {
   /**
+   * Serializes archive task read-modify-write cycles across tabs. This stays
+   * separate from OPERATION_LOG because remote archive handlers already run
+   * while holding that non-reentrant lock.
+   */
+  TASK_ARCHIVE: 'sp_task_archive',
+
+  /**
    * Main operation log lock. Used for:
    * - Writing operations to IndexedDB
    * - Compaction (snapshot + cleanup)
@@ -74,6 +80,19 @@ export const LOCK_NAMES = {
 } as const;
 
 /**
+ * Error code a REPAIR recovery snapshot upload returns when it is based on a
+ * remote the client has not fully merged (#9023). Shared as a single symbol so
+ * the producer (`FileBasedSyncAdapterService`) and the consumer
+ * (`RejectedOpsHandlerService`, which routes it to a rebase) cannot drift apart.
+ *
+ * The value MUST equal the server's `SYNC_ERROR_CODES.REPAIR_STALE` — the same
+ * code arrives over the wire from SuperSync, so this is also the wire contract.
+ * (Server-originated codes like CONFLICT_CONCURRENT stay as string matches: the
+ * server owns those; this one has a client-side producer that must agree.)
+ */
+export const REPAIR_STALE_ERROR_CODE = 'REPAIR_STALE';
+
+/**
  * Maximum time to wait for lock acquisition before throwing (milliseconds).
  * If a lock holder crashes or stalls, waiters would hang indefinitely without this.
  * Default: 30 seconds - long enough for legitimate operations (compaction can take ~5s),
@@ -86,6 +105,32 @@ export const LOCK_ACQUISITION_TIMEOUT_MS = 30000;
  * Compaction reduces storage size by snapshotting state and removing old operations.
  */
 export const COMPACTION_THRESHOLD = 500;
+
+/**
+ * Total op-log size (in ops) above which a compaction is triggered once at
+ * startup. Safety net for the COMPACTION_THRESHOLD in-memory counter, which only
+ * fires within a single session — users whose sessions stay below it never prune
+ * across restarts and accumulate ops indefinitely. Sits well above a heavy user's
+ * healthy ~7-day steady state so that for a normally-synced log compaction's prune
+ * drops the count back below the threshold and it won't re-fire next boot.
+ *
+ * Metric choice: total op count, NOT `lastSeq - stateCache.lastAppliedOpSeq` (the
+ * fix #8336 proposed). The hydrator already persists a fresh snapshot whenever a
+ * boot replays >10 tail ops, so that delta re-zeroes nearly every boot without
+ * anything ever being pruned — it tracks snapshot staleness, while total count
+ * tracks the actual symptom: un-pruned log growth.
+ *
+ * Note: compaction only prunes *synced* ops past the retention window. A log that
+ * has never synced therefore holds nothing prunable, and the trigger skips it
+ * outright (hasSyncedOps() gate) instead of paying a pointless full pass every
+ * boot. The residual case is a client WITH synced history but a large unsynced
+ * backlog (offline / sync-stalled): it can stay above the threshold and re-fire
+ * every boot. Safe but not free: each re-fire is a full background compaction pass
+ * (state-cache snapshot write + op scan) that prunes little or nothing, once per
+ * boot — accepted, since it also keeps the boot snapshot fresh and pruning resumes
+ * as soon as the backlog syncs. See OperationLogCompactionService.
+ */
+export const STARTUP_COMPACTION_OP_THRESHOLD = 5000;
 
 /**
  * Maximum consecutive compaction failures before notifying the user.
@@ -125,24 +170,19 @@ export const MAX_DOWNLOAD_RETRIES = 3;
 export const DOWNLOAD_RETRY_BASE_DELAY_MS = 1000;
 
 /**
- * Maximum operations to accumulate in memory during API download.
- * Prevents out-of-memory errors when syncing with users who have
- * millions of unsynced operations.
+ * Maximum operations to accumulate in memory during one API download pass.
+ * Prevents out-of-memory errors on a large backlog: the download stops at a
+ * page boundary, the prefix is applied and checkpointed, and the next sync
+ * continues from there (#8763).
  */
 export const MAX_DOWNLOAD_OPS_IN_MEMORY = 50000;
 
 /**
- * Maximum iterations for the download loop.
- * Prevents infinite loops if server has a bug and always returns hasMore=true.
- * At 500 ops per page, this allows downloading up to 500,000 operations.
+ * Maximum page requests in one download pass. Bounds the loop if the server
+ * keeps returning hasMore=true; like the memory cap, it checkpoints the prefix
+ * and leaves the rest to the next sync (#8763).
  */
 export const MAX_DOWNLOAD_ITERATIONS = 1000;
-
-/**
- * Maximum retry attempts for operations that fail during conflict resolution.
- * After this many retries across restarts, the operation is marked as rejected.
- */
-export const MAX_CONFLICT_RETRY_ATTEMPTS = 5;
 
 /**
  * Maximum number of operations to be rejected before showing user warning.
@@ -157,14 +197,6 @@ export const MAX_REJECTED_OPS_BEFORE_WARNING = 10;
  * Default: 50 operations per batch
  */
 export const MAX_BATCH_OPERATIONS_SIZE = 50;
-
-/**
- * Maximum age for pending operations before they expire and are rejected (milliseconds).
- * If an operation has been pending for longer than this (e.g., due to data corruption
- * or repeated crashes), it's marked as rejected instead of being replayed.
- * Default: 24 hours - enough time for legitimate recovery scenarios
- */
-export const PENDING_OPERATION_EXPIRY_MS = 24 * 60 * 60 * 1000;
 
 /**
  * Threshold for warning about clock drift between client and server (milliseconds).
@@ -218,7 +250,7 @@ export const DOWNLOAD_PAGE_SIZE = 500;
  *
  * Re-exported from @sp/shared-schema to ensure client and server use the same value.
  */
-export { MAX_VECTOR_CLOCK_SIZE } from '@sp/shared-schema';
+export { MAX_VECTOR_CLOCK_SIZE } from '@sp/sync-core';
 
 /**
  * Minimum length for client IDs in vector clocks.

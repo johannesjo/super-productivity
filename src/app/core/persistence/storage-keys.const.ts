@@ -12,6 +12,11 @@ export enum DB {
 export enum LS {
   APP_START_COUNT = 'APP_START_COUNT',
   APP_START_COUNT_LAST_START_DAY = 'APP_START_COUNT_LAST_START_DAY',
+  // Epoch ms first observed by SyncSafetyBannerService (seeded once, lazily, on
+  // its first run). Used only to tell "used for a while" by wall-clock time for
+  // the sync-setup nudge. NOT a true install date: for installs that predate
+  // this feature it is seeded at upgrade time, so don't reuse it as one.
+  SYNC_SAFETY_FIRST_SEEN = 'SUP_SYNC_SAFETY_FIRST_SEEN',
   RATE_DIALOG_STATE = 'SUP_RATE_DIALOG_STATE',
   // Set on an unhandled error or any detected data damage; read by the rating
   // prompt to hold off for a cooldown after a bad experience. Time only.
@@ -33,6 +38,26 @@ export enum LS {
 
   LAST_NOTE_BANNER_DAY = 'SUP_LAST_NOTE_BANNER_DAY',
 
+  // Set once the user acts on or dismisses the "set up sync to keep your data
+  // safe" startup banner, so the nudge is shown at most once ever.
+  SYNC_SAFETY_NUDGE_DISMISSED = 'SUP_SYNC_SAFETY_NUDGE_DISMISSED',
+
+  // Release tag the user already acted on in the desktop "update available"
+  // banner, so each new version is announced at most once. Device-local on
+  // purpose: other devices run other builds.
+  UPDATE_CHECK_DISMISSED_VERSION = 'SUP_UPDATE_CHECK_DISMISSED_VERSION',
+
+  // Per-install delay (ms) added to Android due-date notifications so devices
+  // don't all hit SuperSync at the same second. Device-local on purpose: the
+  // point is that it differs between devices.
+  DUE_DATE_NOTIFICATION_OFFSET_MS = 'SUP_DUE_DATE_NOTIFICATION_OFFSET_MS',
+
+  // Epoch ms until which the "encrypt your SuperSync account" migration banner
+  // stays hidden. Set when the user picks "Later" (or opens the flow), so — unlike
+  // a permanent dismiss — an unencrypted E2EE-intended account is re-nudged calmly
+  // rather than nagged every sync or forgotten forever. Device-local, no telemetry.
+  SUPER_SYNC_ENCRYPTION_MIGRATION_SNOOZE_UNTIL = 'SUP_SUPER_SYNC_ENCRYPTION_MIGRATION_SNOOZE_UNTIL',
+
   SELECTED_TIME_VIEW = 'SELECTED_TIME_VIEW',
   SCHEDULE_WEEK_ROW_HEIGHT = 'SUP_SCHEDULE_WEEK_ROW_HEIGHT',
 
@@ -47,6 +72,8 @@ export enum LS {
   // NOTE: key is different, but we keep it to avoid showing it again
   IS_SKIP_TOUR = 'SUP_IS_SHOW_TOUR',
 
+  // Historic name (the old preset screen): now set once the first real task is
+  // added, so a reload after that does not start onboarding over.
   ONBOARDING_PRESET_DONE = 'SUP_ONBOARDING_PRESET_DONE',
   ONBOARDING_HINTS_DONE = 'SUP_ONBOARDING_HINTS_DONE',
 
@@ -61,6 +88,7 @@ export enum LS {
 
   FOCUS_MODE_MODE = 'FOCUS_MODE_MODE',
   LAST_COUNTDOWN_DURATION = 'LAST_COUNTDOWN_DURATION',
+  FOCUS_MODE_SESSION = 'FOCUS_MODE_SESSION',
 
   DARK_MODE = 'DARK_MODE',
   CUSTOM_THEME = 'CUSTOM_THEME',
@@ -68,9 +96,14 @@ export enum LS {
   SELECTED_BOARD = 'SELECTED_BOARD',
   DONE_TASKS_HIDDEN = 'DONE_TASKS_HIDDEN',
   EXAMPLE_TASKS_CREATED = 'SUP_EXAMPLE_TASKS_CREATED',
+  // IDs of the seeded example tasks, so onboarding points at them only while they exist
+  EXAMPLE_TASK_IDS = 'SUP_EXAMPLE_TASK_IDS',
   LATER_TODAY_TASKS_HIDDEN = 'LATER_TODAY_TASKS_HIDDEN',
   OVERDUE_TASKS_HIDDEN = 'OVERDUE_TASKS_HIDDEN',
   REPEAT_CFGS_HIDDEN = 'REPEAT_CFGS_HIDDEN',
+  PLAINSPACE_CLAIM_POOL_HIDDEN = 'PLAINSPACE_CLAIM_POOL_HIDDEN',
+  // Plainspace account/identity — local-only, never synced (device identity).
+  PLAINSPACE_ACCOUNT = 'SUP_PLAINSPACE_ACCOUNT',
 
   // Magic side nav
   NAV_SIDEBAR_EXPANDED = 'SUP_NAV_SIDEBAR_EXPANDED',
@@ -81,6 +114,10 @@ export enum LS {
   TASK_VIEW_CUSTOMIZER_BY_CONTEXT = 'SUP_TASK_VIEW_CUSTOMIZER_BY_CONTEXT',
 }
 
+// Prefix for device-local, never-synced note drafts (see LocalDraftService).
+// Full key: `${LS_LOCAL_DRAFT_PREFIX}${entityType}:${entityId}`.
+export const LS_LOCAL_DRAFT_PREFIX = 'SUP_LOCAL_DRAFT_';
+
 // SESSION STORAGE
 export enum SS {
   NOTE_TMP = 'NOTE_TMP_EDIT',
@@ -88,6 +125,7 @@ export enum SS {
   JIRA_WONKY_COOKIE = 'JIRA_WONKY_COOKIE',
   TODO_TMP = 'TODO_TMP_EDIT',
   ADD_TASK_BAR_TXT = 'ADD_TASK_BAR_TXT',
+  ADD_TASK_BAR_NOTE = 'ADD_TASK_BAR_NOTE',
 }
 
 // LEGACY KEYS

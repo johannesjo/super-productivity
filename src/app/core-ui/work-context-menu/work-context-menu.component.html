@@ -1,3 +1,13 @@
+@if (isForProject ? contextId !== INBOX_PROJECT.id : contextId !== TODAY_TAG_ID) {
+  <button
+    (click)="rename()"
+    mat-menu-item
+  >
+    <mat-icon>edit</mat-icon>
+    <span class="text">{{ T.G.RENAME | translate }}</span>
+  </button>
+}
+
 <button
   [routerLink]="[base, contextId, 'history']"
   mat-menu-item
@@ -40,6 +50,21 @@
     }}
   </span>
 </button>
+
+@if (
+  isForProject &&
+  contextId !== INBOX_PROJECT.id &&
+  !(isArchived$ | async) &&
+  !(isSharedOnPlainspace$ | async)
+) {
+  <button
+    (click)="shareProjectOnPlainspace()"
+    mat-menu-item
+  >
+    <mat-icon>group_add</mat-icon>
+    <span class="text">{{ T.PLAINSPACE.SHARE_MENU | translate }}</span>
+  </button>
+}
 
 @if (isForProject || contextId === TODAY_TAG_ID) {
   <button

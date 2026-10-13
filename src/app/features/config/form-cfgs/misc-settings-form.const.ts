@@ -4,8 +4,9 @@ import {
   MiscConfig,
 } from '../global-config.model';
 import { T } from '../../../t.const';
-import { IS_ELECTRON, IS_GNOME_DESKTOP } from '../../../app.constants';
+import { IS_ELECTRON, IS_GNOME_WAYLAND } from '../../../app.constants';
 import { isValidSplitTime } from '../../../util/is-valid-split-time';
+import { isUpdateCheckPossible } from '../../../core/update-check/is-update-check-possible.util';
 
 export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
   title: T.GCF.MISC.TITLE,
@@ -41,11 +42,33 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
     ...((IS_ELECTRON
       ? [
           {
-            key: 'isLocalRestApiEnabled',
+            // Keyless: the switch and the token are owned by the Electron main
+            // process and live on this device only, never in the synced misc
+            // config — a synced switch started the API on every desktop.
+            type: 'local-rest-api-settings',
+          },
+          {
+            // Keyless for the same reason: device-local, owned by main.
+            type: 'assistant-access-settings',
+          },
+        ]
+      : []) as LimitedFormlyFieldConfig<MiscConfig>[]),
+    // Hidden on channels that self-update (store/snap builds); the value still
+    // syncs like the rest of misc config, it just has no effect there.
+    ...((isUpdateCheckPossible()
+      ? [
+          {
+            key: 'isCheckForUpdates',
             type: 'checkbox',
+            // Display-only seed for the paths where the key can still be absent
+            // (pre-hydration initial state, partial section updates) — hydration
+            // itself per-key-merges DEFAULT_GLOBAL_CONFIG.misc in the reducer.
+            // UpdateCheckService treats missing as ON, so the checkbox must show
+            // checked. Same pattern + #7891 residual as isUseCustomWindowTitleBar.
+            defaultValue: true,
             templateOptions: {
-              label: T.GCF.MISC.IS_LOCAL_REST_API_ENABLED,
-              description: T.GCF.MISC.IS_LOCAL_REST_API_ENABLED_HINT,
+              label: T.GCF.MISC.IS_CHECK_FOR_UPDATES,
+              description: T.GCF.MISC.IS_CHECK_FOR_UPDATES_HINT,
             },
           },
         ]
@@ -102,21 +125,21 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
         label: T.GCF.MISC.IS_TRAY_SHOW_CURRENT_COUNTDOWN,
       },
     },
-    ...((IS_ELECTRON && !IS_GNOME_DESKTOP
+    ...((IS_ELECTRON && !IS_GNOME_WAYLAND
       ? [
           {
             key: 'isUseCustomWindowTitleBar',
             type: 'checkbox',
             // Display-only default: seed the checkbox so it reflects the actual
             // window state on a fresh install (the custom title bar is on by
-            // default here -- this field is only shown on non-GNOME Electron, see
-            // the enclosing guard). formly seeds the control without an initial
-            // modelChange, so nothing is persisted on load.
+            // default here -- this field is hidden only on GNOME+Wayland, where the
+            // main process force-disables it, see the enclosing guard). formly seeds
+            // the control without an initial modelChange, so nothing is persisted on load.
             // KNOWN RESIDUAL (#7891): saving any *other* Misc setting emits the
             // whole model and persists this seeded value too. We accept that over a
             // persisted DEFAULT_GLOBAL_CONFIG default, which would be pushed to
             // Electron on *every* launch and override a legacy `isUseObsidianStyleHeader`
-            // choice. So a pre-2025-12 non-GNOME user who had disabled the old
+            // choice. So a pre-2025-12 user who had disabled the old
             // header may see it re-enabled after editing Misc settings (reversible here).
             defaultValue: true,
             templateOptions: {

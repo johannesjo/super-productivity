@@ -2,12 +2,17 @@ import { Action, ActionReducer } from '@ngrx/store';
 import { bulkApplyOperations } from './bulk-hydration.action';
 import { convertOpToAction } from './operation-converter.util';
 import { isLwwUpdateActionType } from '../core/lww-update-action-types';
+import { isLwwUpdatePayload } from '../core/operation.types';
 import {
-  collectArchivingOrDeletingEntityIdsFromBatch,
+  collectTaskRemovalEntityIdsFromBatch,
+  isRemovedAtIndex,
+  isTaskArchiveOrDeleteOp,
   stripBatchArchivedTaskIdsFromLwwPayload,
 } from './bulk-archive-filter.util';
 import { OpLog } from '../../core/log';
 import { runWithBulkReplayLoggingSuppressed } from '../../util/bulk-replay-log-guard';
+import { reportBulkReplayReducerFailure } from './bulk-replay-failure-collector';
+import { isFullStateOpType, isGenesisEntityType } from '../core/operation.types';
 
 /**
  * Meta-reducer that applies multiple operations in a single reducer pass.
@@ -46,69 +51,225 @@ export const bulkOperationsMetaReducer = <T>(
 ): ActionReducer<T> => {
   return (state: T | undefined, action: Action): T => {
     if (action.type === bulkApplyOperations.type) {
-      const { operations, localClientId } = action as ReturnType<
-        typeof bulkApplyOperations
-      >;
-
-      // Pre-scan: collect entity IDs being archived or deleted in this batch.
-      // LWW Update ops for these entities must be skipped to prevent
-      // lwwUpdateMetaReducer.addOne() from resurrecting archived/deleted tasks.
-      const archivingOrDeletingEntityIds = collectArchivingOrDeletingEntityIdsFromBatch(
+      const {
         operations,
-        state,
-      );
+        localClientId,
+        atomicReplayGroups = [],
+        isReplayFromEmptyBaseline = false,
+      } = action as ReturnType<typeof bulkApplyOperations>;
 
-      const hasArchives = archivingOrDeletingEntityIds.size > 0;
       // Apply every op in one synchronous reducer pass. Suppress the action
       // logger's per-op console line for the duration (see bulk-replay-log-guard):
       // this is a single dispatch, and the caller (hydrator / applier) already
       // logs an "applying N ops" summary, so per-op `[a]` lines are just noise.
       const finalState = runWithBulkReplayLoggingSuppressed(() => {
-        let currentState = state;
-        for (const op of operations) {
-          const isLww = hasArchives && isLwwUpdateActionType(op.actionType);
-          // Skip LWW Updates whose entityId itself is archived/deleted in this batch
-          // (covers TASK; for TAG/PROJECT entityId is the tag/project id, not a task).
-          if (isLww && op.entityId && archivingOrDeletingEntityIds.has(op.entityId)) {
-            OpLog.normal(
-              `bulkOperationsMetaReducer: Skipping LWW Update for ` +
-                `${op.entityType}:${op.entityId} — entity archived/deleted in same batch`,
+        const failedOpIds = new Set<string>();
+        const atomicGroupByOpId = new Map<string, string[]>();
+        for (const group of atomicReplayGroups) {
+          for (const opId of group) {
+            atomicGroupByOpId.set(opId, group);
+          }
+        }
+        const reportFailure = (
+          op: (typeof operations)[number],
+          error: unknown,
+        ): boolean => {
+          if (failedOpIds.has(op.id)) {
+            return false;
+          }
+          failedOpIds.add(op.id);
+          reportBulkReplayReducerFailure(op, error);
+          OpLog.err(
+            `bulkOperationsMetaReducer: Skipping reducer-failed operation ${op.id}`,
+            { name: error instanceof Error ? error.name : 'UnknownError' },
+          );
+          return true;
+        };
+        const excludeAtomicGroup = (opId: string): boolean => {
+          const group = atomicGroupByOpId.get(opId);
+          if (!group) {
+            return false;
+          }
+          for (const groupedOpId of group) {
+            failedOpIds.add(groupedOpId);
+          }
+          return true;
+        };
+
+        // An archive/delete op affects how earlier LWW updates are replayed. If
+        // that archive reducer fails, discard the speculative pass and replay
+        // from the original state without the failed archive intent. Reducers
+        // are pure, and retries occur only on the exceptional failure path.
+        while (true) {
+          const candidateOps = operations.filter((op) => !failedOpIds.has(op.id));
+          let archivingOrDeletingEntityIds: Set<string>;
+          let archivingEntityIds: Set<string>;
+          let restoredAt: Map<string, number>;
+          let archiveRestoredAt: Map<string, number>;
+          try {
+            const taskRemovalIds = collectTaskRemovalEntityIdsFromBatch(
+              candidateOps,
+              state,
             );
+            archivingOrDeletingEntityIds = taskRemovalIds.all;
+            archivingEntityIds = taskRemovalIds.archiving;
+            restoredAt = taskRemovalIds.restoredAt;
+            archiveRestoredAt = taskRemovalIds.archiveRestoredAt;
+          } catch (error) {
+            const unsafeArchiveOps = candidateOps.filter(isTaskArchiveOrDeleteOp);
+            for (const op of unsafeArchiveOps) {
+              reportFailure(op, error);
+              excludeAtomicGroup(op.id);
+            }
             continue;
           }
-          const opForApply = hasArchives
-            ? stripBatchArchivedTaskIdsFromLwwPayload(
-                op,
-                isLww,
-                archivingOrDeletingEntityIds,
-              )
-            : op;
-          const opAction = convertOpToAction(opForApply);
-          // Mark ops authored by a DIFFERENT client so reducers can preserve
-          // per-device "local-only" settings against remote overwrites — while
-          // replaying the device's OWN ops faithfully.
-          //
-          // When localClientId is unknown we leave the flag unset (own-op
-          // semantics: apply faithfully, don't preserve). In practice this only
-          // happens before the clientId cache is warm — i.e. a never-synced or
-          // cold-booting device. A device that actually has foreign ops to apply
-          // has already resolved its clientId (download/upload/vector-clock all
-          // require it), so genuine remote applies always carry it and stay
-          // protected. The unset fallback deliberately favours own-op fidelity:
-          // the alternative (blanket-preserve, the old `isRemote` gate) is what
-          // silently nulled the device's own syncProvider on replay. The
-          // residual risk — a foreign op adopting another device's provider/
-          // isEnabled/isEncryptionEnabled — needs a transient IndexedDB failure
-          // on a cold boot and is user-recoverable, strictly narrower than the
-          // own-settings data-loss this replaces.
-          const isApplyingFromOtherClient =
-            !!localClientId && op.clientId !== localClientId;
-          const finalAction = isApplyingFromOtherClient
-            ? { ...opAction, meta: { ...opAction.meta, isApplyingFromOtherClient: true } }
-            : opAction;
-          currentState = reducer(currentState, finalAction);
+
+          const hasArchives = archivingOrDeletingEntityIds.size > 0;
+          let currentState = state;
+          let shouldReplayWithoutFailedOperations = false;
+          for (const [index, op] of candidateOps.entries()) {
+            // #9863: the client's OWN genesis op (legacy `pf` → op-log
+            // migration, disaster recovery) carries the complete pre-migration
+            // state and is the only place in the log that does. Replaying it
+            // as the inert no-op it must remain for every OTHER client would
+            // rebuild the store with post-migration data only — and the
+            // corrupt-snapshot path then persists that truncated state. Gate
+            // strictly on a KNOWN matching clientId: an unknown localClientId
+            // keeps the op inert (the pre-fix behaviour) rather than risking a
+            // foreign genesis op replacing this device's state mid-log.
+            //
+            // It must also be the FIRST op of a batch that the caller declared
+            // as replayed from an empty baseline. The genesis op is the state at
+            // the moment this client's log began, so it can only stand in for
+            // the history when nothing precedes it — neither an earlier op in
+            // the batch nor state hydrated before the batch. Pre-#9921 clients
+            // uploaded their genesis op like any other op, so a server history
+            // can read [other device's ops…, own genesis, own ops…]; a
+            // USE_REMOTE raw rebuild replays that order from seq 0 and a
+            // full-state replay mid-batch would discard everything the other
+            // device did before this one joined. File providers still upload
+            // it, and their USE_REMOTE hydrates a snapshot first and replays
+            // the suffix on top — a leading own genesis there must stay inert.
+            // Every replay-from-scratch path hands the whole history to one
+            // dispatch (no chunking), so batch position is log position there.
+            // Otherwise it stays inert — the pre-#10052 behaviour — and is
+            // logged so the loss is diagnosable.
+            const isOwnGenesisOp =
+              !!localClientId &&
+              op.clientId === localClientId &&
+              isGenesisEntityType(op.entityType);
+            const isLeadingOwnGenesisOp =
+              isOwnGenesisOp && isReplayFromEmptyBaseline && operations[0]?.id === op.id;
+            if (isOwnGenesisOp && !isLeadingOwnGenesisOp) {
+              OpLog.warn(
+                'bulkOperationsMetaReducer: own genesis op is not the first op of a ' +
+                  'replay from an empty baseline — replaying it as inert; its ' +
+                  'pre-migration state is not restored',
+                {
+                  opId: op.id,
+                  entityType: op.entityType,
+                  isFirstInBatch: operations[0]?.id === op.id,
+                  isReplayFromEmptyBaseline,
+                },
+              );
+            }
+            try {
+              const isLww = hasArchives && isLwwUpdateActionType(op.actionType);
+              const recreatesEntityAfterDelete =
+                isLww &&
+                isLwwUpdatePayload(op.payload) &&
+                op.payload.recreatesEntityAfterDelete === true &&
+                (!op.entityId ||
+                  !isRemovedAtIndex(
+                    archivingEntityIds,
+                    archiveRestoredAt,
+                    op.entityId,
+                    index,
+                  ));
+              // Skip LWW Updates whose entityId itself is archived/deleted in this batch
+              // (covers TASK; for TAG/PROJECT entityId is the tag/project id, not a task),
+              // unless a restore or recreate earlier in the batch brought it back.
+              if (
+                isLww &&
+                !recreatesEntityAfterDelete &&
+                op.entityId &&
+                isRemovedAtIndex(
+                  archivingOrDeletingEntityIds,
+                  restoredAt,
+                  op.entityId,
+                  index,
+                )
+              ) {
+                OpLog.normal(
+                  `bulkOperationsMetaReducer: Skipping LWW Update for ` +
+                    `${op.entityType}:${op.entityId} — entity archived/deleted in same batch`,
+                );
+                continue;
+              }
+              const opForApply = hasArchives
+                ? stripBatchArchivedTaskIdsFromLwwPayload(op, isLww, {
+                    has: (id) =>
+                      isRemovedAtIndex(
+                        archivingOrDeletingEntityIds,
+                        restoredAt,
+                        id,
+                        index,
+                      ),
+                  })
+                : op;
+              const opAction = convertOpToAction(opForApply, {
+                replayAsFullState: isLeadingOwnGenesisOp,
+              });
+              // Mark ops authored by a DIFFERENT client so reducers can preserve
+              // per-device "local-only" settings against remote overwrites — while
+              // replaying the device's OWN ops faithfully.
+              //
+              // When localClientId is unknown we leave the flag unset (own-op
+              // semantics: apply faithfully, don't preserve). In practice this only
+              // happens before the clientId cache is warm — i.e. a never-synced or
+              // cold-booting device. A device that actually has foreign ops to apply
+              // has already resolved its clientId (download/upload/vector-clock all
+              // require it), so genuine remote applies always carry it and stay
+              // protected. The unset fallback deliberately favours own-op fidelity:
+              // the alternative (blanket-preserve, the old `isRemote` gate) is what
+              // silently nulled the device's own syncProvider on replay. The
+              // residual risk — a foreign op adopting another device's provider/
+              // isEnabled/isEncryptionEnabled — needs a transient IndexedDB failure
+              // on a cold boot and is user-recoverable, strictly narrower than the
+              // own-settings data-loss this replaces.
+              const isApplyingFromOtherClient =
+                !!localClientId && op.clientId !== localClientId;
+              const finalAction = isApplyingFromOtherClient
+                ? {
+                    ...opAction,
+                    meta: { ...opAction.meta, isApplyingFromOtherClient: true },
+                  }
+                : opAction;
+              currentState = reducer(currentState, finalAction);
+            } catch (error) {
+              const isNewFailure = reportFailure(op, error);
+              if (isFullStateOpType(op.opType) || isLeadingOwnGenesisOp) {
+                // A full-state operation replaces the entire model. Continuing
+                // from the pre-import state would expose a projection that never
+                // existed in the log, so discard the speculative batch.
+                return state;
+              }
+              if (excludeAtomicGroup(op.id)) {
+                // The children of a split migration represent one durable
+                // intent. Discard this speculative pass and replay without all
+                // siblings so the resulting state is reconstructible.
+                shouldReplayWithoutFailedOperations = true;
+                break;
+              }
+              if (isNewFailure && isTaskArchiveOrDeleteOp(op)) {
+                shouldReplayWithoutFailedOperations = true;
+              }
+            }
+          }
+          if (!shouldReplayWithoutFailedOperations) {
+            return currentState;
+          }
         }
-        return currentState;
       });
       return finalState as T;
     }

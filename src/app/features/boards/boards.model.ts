@@ -24,6 +24,10 @@ export enum BoardPanelCfgDeadlineState {
 
 export type BoardSortField = 'dueDate' | 'created' | 'title' | 'timeEstimate';
 export type BoardMatchMode = 'all' | 'any';
+// Closed, typia-validated union inside synced `BoardsState`. Adding a value is
+// a breaking change: released clients reject the synced config as corrupt
+// (repair dialog, can stall sync). Model a future variant outside this union,
+// e.g. as an opaque string field, instead of extending it.
 export type BoardDateTimeframeType =
   | 'all'
   | 'today'

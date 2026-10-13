@@ -19,12 +19,14 @@ import { selectTimelineTasks } from '../work-context/store/work-context.selector
 import { selectPlannerDayMap } from '../planner/store/planner.selectors';
 import { selectTaskRepeatCfgsWithAndWithoutStartTime } from '../task-repeat-cfg/store/task-repeat-cfg.selectors';
 import { selectTimelineConfig } from '../config/store/global-config.reducer';
+import { selectStartOfNextDayDiffMs } from '../../root-store/app-state/app-state.selectors';
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
 import { HiddenCalendarProvidersService } from '../calendar-integration/hidden-calendar-providers.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TaskService } from '../tasks/task.service';
 import { startWith } from 'rxjs/operators';
 import { parseDbDateStr } from '../../util/parse-db-date-str';
+import { anchorContextNow } from './anchor-context-now';
 
 @Injectable({
   providedIn: 'root',
@@ -42,6 +44,10 @@ export class ScheduleService {
   );
   private _timelineConfig = toSignal(this._store.select(selectTimelineConfig));
   private _plannerDayMap = toSignal(this._store.select(selectPlannerDayMap));
+  // a signal, so changing the day start re-projects late-night repeats (#3378)
+  private _startOfNextDayDiffMs = toSignal(
+    this._store.select(selectStartOfNextDayDiffMs),
+  );
   private _calendarEvents = toSignal(this._calendarIntegrationService.calendarEvents$, {
     initialValue: [],
   });
@@ -59,8 +65,18 @@ export class ScheduleService {
       const calendarEvents = this._calendarEvents();
       const currentTaskId = this._taskService.currentTaskId() ?? null;
 
+      // `daysToShow` here is logical today (respecting the start-of-next-day
+      // offset) or a later day the user navigated to. Leaving `now` to its Date.now() default let the raw wall clock
+      // sit past that day's end between midnight and the offset, so every entry
+      // landed beyond the only rendered day and the panel came up empty.
+      const days = daysToShow();
+      const realNow = Date.now();
+      const now = days.length ? anchorContextNow(days[0], realNow) : realNow;
+
       return this.buildScheduleDays({
-        daysToShow: daysToShow(),
+        now,
+        realNow,
+        daysToShow: days,
         timelineTasks,
         taskRepeatCfgs,
         calendarEvents,
@@ -101,6 +117,7 @@ export class ScheduleService {
       timelineCfg?.isWorkStartEndEnabled ? createWorkStartEndCfg(timelineCfg) : undefined,
       timelineCfg?.isLunchBreakEnabled ? createLunchBreakCfg(timelineCfg) : undefined,
       realNow,
+      this._startOfNextDayDiffMs() ?? 0,
     );
   }
 
@@ -153,13 +170,56 @@ export class ScheduleService {
   }
 
   getDaysToShow(nrOfDaysToShow: number, referenceDate: Date | null = null): string[] {
-    const today = referenceDate ? referenceDate.getTime() : new Date().getTime();
+    // Default anchor is the logical day, not the raw clock: between calendar
+    // midnight and the configured start-of-next-day the window must still
+    // begin at (logical) today, which todayStr() elsewhere keeps naming.
+    // Cloned because the cursor is mutated below and referenceDate is the
+    // caller's (a selected-date signal value in the schedule component).
+    const cursor = referenceDate
+      ? new Date(referenceDate)
+      : this._dateService.getLogicalTodayDate();
+    // Only date parts are read below, so pin the cursor to midday first.
+    // setDate() preserves the wall time, and a late-evening one is normalised
+    // past midnight in zones whose spring-forward gap ends at 00:00
+    // (America/Godthab and America/Scoresbysund skip 23:00-23:59), which would
+    // drop a whole day from the window. Midday is never in a gap.
+    cursor.setHours(12, 0, 0, 0);
     const daysToShow: string[] = [];
     for (let i = 0; i < nrOfDaysToShow; i++) {
-      // eslint-disable-next-line no-mixed-operators
-      daysToShow.push(this._dateService.todayStr(today + i * 24 * 60 * 60 * 1000));
+      daysToShow.push(this._dateService.todayStr(cursor.getTime()));
+      // Calendar-day stepping: a DST transition day is 23h/25h long, so
+      // +24h ms arithmetic skips or duplicates a date around it.
+      cursor.setDate(cursor.getDate() + 1);
     }
     return daysToShow;
+  }
+
+  /**
+   * Week rows the displayed month actually occupies, 4 to 6.
+   *
+   * A month needs `daysToGoBack` leading days from the previous month plus its
+   * own length, rounded up to whole weeks. `daysToGoBack` is 0-6 and a month is
+   * 28-31 days, so this is 4 (only a non-leap February starting exactly on the
+   * week's first day) to 6 (a 31-day month starting 5 or 6 days in, e.g. August
+   * 2026 under Monday-first). Most months are 5.
+   *
+   * Pinning it at 6 spans every month but leaves an empty row on most of them.
+   * Deriving it from *available height* is what #9449 was filed for: a day left
+   * out of `daysToShow` gets no events computed at all, so the task vanished
+   * rather than merely being clipped. The month is the right input; the viewport
+   * is not.
+   */
+  getMonthWeeksToShow(
+    firstDayOfWeek: number = 0,
+    referenceDate: Date | null = null,
+  ): number {
+    // Same logical-day anchoring as getMonthDaysToShow below.
+    const today = referenceDate || this._dateService.getLogicalTodayDate();
+    const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const daysToGoBack = (firstDayOfMonth.getDay() - firstDayOfWeek + 7) % 7;
+    // Day 0 of the next month is the last day of this one.
+    const daysInMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0).getDate();
+    return Math.ceil((daysToGoBack + daysInMonth) / 7);
   }
 
   getMonthDaysToShow(
@@ -167,7 +227,8 @@ export class ScheduleService {
     firstDayOfWeek: number = 0,
     referenceDate: Date | null = null,
   ): string[] {
-    const today = referenceDate || new Date();
+    // Same logical-day anchoring as getDaysToShow above.
+    const today = referenceDate || this._dateService.getLogicalTodayDate();
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
 
     // Calculate the first day to show based on firstDayOfWeek setting
@@ -241,7 +302,9 @@ export class ScheduleService {
 
   getDayClass(day: string, referenceMonth?: Date): string {
     const dayDate = parseDbDateStr(day);
-    const today = new Date();
+    // Logical day, same as the window anchors above: the today ring must sit
+    // on the column todayStr() names, not one off during the offset window.
+    const today = this._dateService.getLogicalTodayDate();
 
     // If referenceMonth is provided, use it to determine "current month"
     // Otherwise, use the actual current month

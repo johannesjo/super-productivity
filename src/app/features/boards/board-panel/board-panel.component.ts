@@ -1,15 +1,22 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
+  ElementRef,
+  forwardRef,
+  HostListener,
   inject,
+  Injector,
   input,
   output,
+  signal,
+  viewChildren,
 } from '@angular/core';
 import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { PlannerTaskComponent } from '../../planner/planner-task/planner-task.component';
 import {
-  BoardDateTimeframeCfg,
   BoardPanelCfg,
   BoardPanelCfgDeadlineState,
   BoardPanelCfgScheduledState,
@@ -17,9 +24,13 @@ import {
   BoardPanelCfgTaskTypeFilter,
 } from '../boards.model';
 import {
+  BoardPanelTimeframeRanges,
   buildComparator,
+  doesTaskMatchPanel,
+  doesTaskMatchPanelTimeframes,
   firstSpecificProjectId,
   isAllProjects,
+  resolvePanelTimeframeRanges,
   rewriteTagIdsForPanel,
 } from '../boards.util';
 import { select, Store } from '@ngrx/store';
@@ -34,7 +45,6 @@ import { T } from '../../../t.const';
 import { TaskCopy } from '../../tasks/task.model';
 import { TaskService } from '../../tasks/task.service';
 import { BoardsActions } from '../store/boards.actions';
-import { moveItemInArray } from '../../../util/move-item-in-array';
 import { unique } from '../../../util/unique';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { LocalDateStrPipe } from '../../../ui/pipes/local-date-str.pipe';
@@ -53,43 +63,40 @@ import {
   moveProjectTaskToBacklogListAuto,
   moveProjectTaskToRegularListAuto,
 } from '../../project/store/project.actions';
+import { TaskAddEvent } from '../../tasks/add-task-bar/add-task-bar.component';
+import { firstValueFrom } from 'rxjs';
 import {
-  selectStartOfNextDayDiffMs,
-  selectTodayStr,
-} from '../../../root-store/app-state/app-state.selectors';
-import {
-  adjustDateToBoardTimeframe,
-  matchesBoardDateTimeframe,
-} from '../board-date-filter.util';
+  TASK_CARD_LIST,
+  TaskCardArrow,
+  TaskCardList,
+  TaskCardMove,
+} from '../../tasks/task-card-list.token';
+import { TaskMultiSelectService } from '../../tasks/task-multi-select.service';
+import { TaskBulkActionService } from '../../tasks/task-bulk-action.service';
+import { reorderBoardTasks } from '../reorder-board-tasks';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { checkKeyCombo } from '../../../util/check-key-combo';
+import { ADD_TASK_INLINE_BTN_SELECTOR } from '../../planner/add-task-inline/add-task-inline.const';
+import { getScheduledDateColor } from '../../tasks/util/get-scheduled-date-color';
+import type { ScheduledDateColor } from '../../tasks/util/get-scheduled-date-color';
+import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
+import { DateService } from '../../../core/date/date.service';
+import { selectStartOfNextDayDiffMs } from '../../../root-store/app-state/app-state.selectors';
+import { adjustDateToBoardRange, getBoardTaskDateStr } from '../board-date-filter.util';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { DialogDeadlineComponent } from '../../tasks/dialog-deadline/dialog-deadline.component';
 import { SnackService } from '../../../core/snack/snack.service';
 import { LocaleDatePipe } from '../../../ui/pipes/locale-date.pipe';
 import { truncate } from '../../../util/truncate';
-import { getDbDateStr } from '../../../util/get-db-date-str';
 import { getDeadlineAutoPlanFields } from '../../tasks/util/get-deadline-auto-plan-fields';
+import { DEFAULT_FIRST_DAY_OF_WEEK } from '../../../core/locale.constants';
 
-const ALL_TIMEFRAME: BoardDateTimeframeCfg = { type: 'all' };
-
-const getTaskScheduledDateStr = (
-  task: TaskCopy,
-  startOfNextDayDiffMs: number,
-): string | null => {
-  if (task.dueWithTime) {
-    return getDbDateStr(new Date(task.dueWithTime - startOfNextDayDiffMs));
-  }
-  return task.dueDay || null;
-};
-
-const getTaskDeadlineDateStr = (
-  task: TaskCopy,
-  startOfNextDayDiffMs: number,
-): string | null => {
-  if (task.deadlineWithTime) {
-    return getDbDateStr(new Date(task.deadlineWithTime - startOfNextDayDiffMs));
-  }
-  return task.deadlineDay || null;
-};
+export interface BoardPanelNavigation {
+  direction: -1 | 1 | 'up' | 'down';
+  rowIndex: number;
+  taskIds?: string[];
+  focusTaskId?: string;
+}
 
 @Component({
   selector: 'board-panel',
@@ -109,40 +116,169 @@ const getTaskDeadlineDateStr = (
   templateUrl: './board-panel.component.html',
   styleUrl: './board-panel.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  providers: [LocaleDatePipe],
+  providers: [
+    { provide: TASK_CARD_LIST, useExisting: forwardRef(() => BoardPanelComponent) },
+    LocaleDatePipe,
+  ],
+  host: {
+    // Angular host bindings use template attribute syntax.
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    '[attr.data-board-selection-scope]': 'panelCfg().id',
+  },
 })
-export class BoardPanelComponent {
+export class BoardPanelComponent implements TaskCardList {
   T = T;
   dragDelayForTouch = dragDelayForTouch;
 
   panelCfg = input.required<BoardPanelCfg>();
   editBoard = output<void>();
+  adjacentPanel = output<BoardPanelNavigation>();
 
   store = inject(Store);
   taskService = inject(TaskService);
   _matDialog = inject(MatDialog);
+  readonly multiSelect = inject(TaskMultiSelectService);
+  private readonly _trackingInterval = inject(GlobalTrackingIntervalService);
+  private readonly _dateService = inject(DateService);
+  private _element = inject<ElementRef<HTMLElement>>(ElementRef);
+  private _injector = inject(Injector);
+  private _destroyRef = inject(DestroyRef);
+  private _config = inject(GlobalConfigService);
   private _snackService = inject(SnackService);
   private _localeDatePipe = inject(LocaleDatePipe);
   private _translateService = inject(TranslateService);
+  private _cards = viewChildren(PlannerTaskComponent, { read: ElementRef });
+  readonly isMoving = signal(false);
+
+  rows(): HTMLElement[] {
+    return this._cards().map((card) => card.nativeElement as HTMLElement);
+  }
+
+  addButton(): HTMLElement | null {
+    return this._element.nativeElement.querySelector(ADD_TASK_INLINE_BTN_SELECTOR);
+  }
+
+  focusRow(index: number, taskId?: string): void {
+    const rows = this.rows();
+    const target =
+      (taskId && rows.find((row) => row.dataset.taskId === taskId)) ||
+      rows[Math.min(index, rows.length - 1)] ||
+      this.addButton();
+    target?.focus();
+    target?.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+
+  navigate(taskId: string, key: TaskCardArrow): void {
+    const index = this.tasks().findIndex((task) => task.id === taskId);
+    if (key === 'ArrowLeft' || key === 'ArrowRight') {
+      this.adjacentPanel.emit({
+        direction: key === 'ArrowLeft' ? -1 : 1,
+        rowIndex: index,
+      });
+    } else {
+      const next = index + (key === 'ArrowUp' ? -1 : 1);
+      if (next >= 0 && next < this.tasks().length) this.focusRow(next);
+    }
+  }
+
+  @HostListener('keydown', ['$event'])
+  onAddButtonKeydown(event: KeyboardEvent): void {
+    if (
+      event.target !== this.addButton() ||
+      event.ctrlKey ||
+      event.altKey ||
+      event.metaKey ||
+      event.shiftKey
+    )
+      return;
+    if (event.key !== 'ArrowLeft' && event.key !== 'ArrowRight') return;
+    const keys = this._config.cfg()?.keyboard;
+    if (
+      keys &&
+      Object.values(keys).some(
+        (combo) => typeof combo === 'string' && combo && checkKeyCombo(event, combo),
+      )
+    )
+      return;
+    this.adjacentPanel.emit({
+      direction: event.key === 'ArrowLeft' ? -1 : 1,
+      rowIndex: 0,
+    });
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  moveToAdjacent(taskId: string, direction: -1 | 1): void {
+    const taskIds = this._taskIdsToMove(taskId);
+    if (!taskIds.length) return;
+    this.adjacentPanel.emit({
+      direction,
+      rowIndex: 0,
+      taskIds,
+      focusTaskId: taskId,
+    });
+  }
+
+  reorder(taskId: string, direction: TaskCardMove): void {
+    const ids = this.tasks().map((task) => task.id);
+    const selected = new Set(this._taskIdsToMove(taskId));
+    if (!selected.size) return;
+    if (
+      (direction === 'up' && ids[0] === taskId) ||
+      (direction === 'down' && ids[ids.length - 1] === taskId)
+    ) {
+      this.adjacentPanel.emit({
+        direction,
+        rowIndex: 0,
+        taskIds: [...selected],
+        focusTaskId: taskId,
+      });
+      return;
+    }
+    if (!this.isManualOrder()) return;
+    const taskIds = reorderBoardTasks(ids, selected, direction);
+    if (!fastArrayCompare(ids, taskIds)) {
+      this.store.dispatch(
+        BoardsActions.updatePanelCfgTaskIds({ panelId: this.panelCfg().id, taskIds }),
+      );
+      afterNextRender(() => this.focusRow(0, taskId), { injector: this._injector });
+    }
+  }
+
+  private _taskIdsToMove(taskId: string, sourceTasks = this.tasks()): string[] {
+    if (!this.multiSelect.has(taskId)) return [taskId];
+    const selected = this.multiSelect.selectedIds();
+    const ids = sourceTasks
+      .filter((task) => selected.has(task.id))
+      .map((task) => task.id);
+    return ids.length === selected.size ? ids : [];
+  }
 
   allTasks$ = this.store.select(selectAllTasksInActiveProjects);
   allTasks = toSignal(this.allTasks$, {
     initialValue: [],
   });
 
+  private _startOfNextDayDiffMs = toSignal(
+    this.store.select(selectStartOfNextDayDiffMs),
+    {
+      initialValue: 0,
+    },
+  );
+
+  private _timeframeRanges = computed<BoardPanelTimeframeRanges>(() =>
+    resolvePanelTimeframeRanges(
+      this.panelCfg(),
+      this._trackingInterval.todayDateStr(),
+      this._config.localization()?.firstDayOfWeek ?? DEFAULT_FIRST_DAY_OF_WEEK,
+    ),
+  );
+
   // Use selectUnarchivedProjects (not selectUnarchivedVisibleProjects) to include
   // hidden projects and INBOX, ensuring backlog filtering works for all tasks
   allProjects$ = this.store.select(selectUnarchivedProjects);
   allProjects = toSignal(this.allProjects$, {
     initialValue: [],
-  });
-
-  todayStr = toSignal(this.store.select(selectTodayStr), {
-    initialValue: '',
-  });
-
-  startOfNextDayDiffMs = toSignal(this.store.select(selectStartOfNextDayDiffMs), {
-    initialValue: 0,
   });
 
   // Create a Set of all backlog task IDs for fast lookup
@@ -206,97 +342,30 @@ export class BoardPanelComponent {
 
   tasks = computed(() => {
     const panelCfg = this.panelCfg();
-    const todayStr = this.todayStr();
-    const startOfNextDayDiffMs = this.startOfNextDayDiffMs();
     const orderedTasks: TaskCopy[] = [];
     const nonOrderedTasks: TaskCopy[] = [];
-
-    const allFilteredTasks = this.allTasks().filter((task) => {
-      let isTaskIncluded = true;
-      const taskTagIds = task.tagIds ?? [];
-      if (panelCfg.includedTagIds?.length) {
-        isTaskIncluded =
-          panelCfg.includedTagsMatch === 'any'
-            ? panelCfg.includedTagIds.some((tagId) => taskTagIds.includes(tagId))
-            : panelCfg.includedTagIds.every((tagId) => taskTagIds.includes(tagId));
+    const taskOrder = new Map<string, number>();
+    panelCfg.taskIds.forEach((id, index) => {
+      // Preserve indexOf's first-occurrence ordering for repeated IDs.
+      if (!taskOrder.has(id)) {
+        taskOrder.set(id, index);
       }
-      if (panelCfg.excludedTagIds?.length) {
-        const hit =
-          panelCfg.excludedTagsMatch === 'all'
-            ? panelCfg.excludedTagIds.every((tagId) => taskTagIds.includes(tagId))
-            : panelCfg.excludedTagIds.some((tagId) => taskTagIds.includes(tagId));
-        isTaskIncluded = isTaskIncluded && !hit;
-      }
-
-      if (panelCfg.isParentTasksOnly) {
-        isTaskIncluded = isTaskIncluded && !task.parentId;
-      }
-
-      if (panelCfg.taskDoneState === BoardPanelCfgTaskDoneState.Done) {
-        isTaskIncluded = isTaskIncluded && task.isDone;
-      }
-
-      if (panelCfg.taskDoneState === BoardPanelCfgTaskDoneState.UnDone) {
-        isTaskIncluded = isTaskIncluded && !task.isDone;
-      }
-
-      if (
-        panelCfg.projectIds &&
-        panelCfg.projectIds.length > 0 &&
-        !isAllProjects(panelCfg.projectIds)
-      ) {
-        // TODO check parentId case thoroughly
-        isTaskIncluded = isTaskIncluded && panelCfg.projectIds.includes(task.projectId);
-      }
-
-      if (panelCfg.scheduledState === BoardPanelCfgScheduledState.Scheduled) {
-        isTaskIncluded = isTaskIncluded && !!(task.dueWithTime || task.dueDay);
-        if (isTaskIncluded && panelCfg.scheduledTimeframe) {
-          isTaskIncluded = matchesBoardDateTimeframe({
-            timeframe: panelCfg.scheduledTimeframe,
-            dateOnly: task.dueDay,
-            timestamp: task.dueWithTime,
-            todayStr,
-            startOfNextDayDiffMs,
-          });
-        }
-      }
-
-      if (panelCfg.scheduledState === BoardPanelCfgScheduledState.NotScheduled) {
-        isTaskIncluded = isTaskIncluded && !task.dueWithTime && !task.dueDay;
-      }
-
-      if (panelCfg.deadlineState === BoardPanelCfgDeadlineState.HasDeadline) {
-        isTaskIncluded = isTaskIncluded && !!(task.deadlineWithTime || task.deadlineDay);
-        if (isTaskIncluded && panelCfg.deadlineTimeframe) {
-          isTaskIncluded = matchesBoardDateTimeframe({
-            timeframe: panelCfg.deadlineTimeframe,
-            dateOnly: task.deadlineDay,
-            timestamp: task.deadlineWithTime,
-            todayStr,
-            startOfNextDayDiffMs,
-          });
-        }
-      }
-
-      if (panelCfg.deadlineState === BoardPanelCfgDeadlineState.NoDeadline) {
-        isTaskIncluded = isTaskIncluded && !task.deadlineWithTime && !task.deadlineDay;
-      }
-
-      if (panelCfg.backlogState === BoardPanelCfgTaskTypeFilter.OnlyBacklog) {
-        isTaskIncluded = isTaskIncluded && this._isTaskInBacklog(task);
-      }
-
-      if (panelCfg.backlogState === BoardPanelCfgTaskTypeFilter.NoBacklog) {
-        isTaskIncluded = isTaskIncluded && !this._isTaskInBacklog(task);
-      }
-
-      return isTaskIncluded;
     });
 
+    // Hoist the backlog predicate out of the filter callback so it's allocated
+    // once per recompute, not once per task.
+    const isInBacklog = (t: Readonly<TaskCopy>): boolean => this._isTaskInBacklog(t);
+    const ranges = this._timeframeRanges();
+    const startOfNextDayDiffMs = this._startOfNextDayDiffMs();
+    const allFilteredTasks = this.allTasks().filter(
+      (task) =>
+        doesTaskMatchPanel(task, panelCfg, isInBacklog) &&
+        doesTaskMatchPanelTimeframes(task, ranges, startOfNextDayDiffMs),
+    );
+
     allFilteredTasks.forEach((task) => {
-      const index = panelCfg.taskIds.indexOf(task.id);
-      if (index > -1) {
+      const index = taskOrder.get(task.id);
+      if (index !== undefined) {
         orderedTasks[index] = task;
       } else {
         nonOrderedTasks.push(task);
@@ -313,24 +382,154 @@ export class BoardPanelComponent {
     return merged;
   });
 
-  async drop(ev: CdkDragDrop<BoardPanelCfg, string, TaskCopy>): Promise<void> {
-    const panelCfg = ev.container.data;
-    const task = ev.item.data;
-
-    // In sorted mode, intra-panel drops are no-ops: the task already matches the
-    // panel filter and the visible order is derived from the comparator, not taskIds.
+  async drop(ev: CdkDragDrop<TaskCopy[], TaskCopy[], TaskCopy>): Promise<void> {
     if (ev.previousContainer.id === ev.container.id && !this.isManualOrder()) {
       return;
     }
+    const ids = this._taskIdsToMove(ev.item.data.id, ev.previousContainer.data);
+    if (!ids.length) return;
+    const isSamePanel = ev.previousContainer.id === ev.container.id;
+    const moving = new Set(ids);
+    // CDK removes only the dragged row when calculating its insertion index.
+    // Group placement removes every moving row, including destination duplicates.
+    const index = this.tasks()
+      .filter((task) => !isSamePanel || task.id !== ev.item.data.id)
+      .slice(0, ev.currentIndex)
+      .filter((task) => !moving.has(task.id)).length;
+    if (isSamePanel) {
+      this._placeInOrder(ids, index);
+      return;
+    }
+    await this.moveTasks(ids, index);
+  }
 
-    const prevTaskIds = this.tasks().map((t) => t.id);
+  /** Shared by dragging and keyboard placement; normal task actions retain their effects. */
+  async moveTasks(ids: string[], index = this.tasks().length): Promise<boolean> {
+    if (this.isMoving()) return false;
+    this.isMoving.set(true);
+    const panelCfg = this.panelCfg();
+    try {
+      const tasks = (
+        await Promise.all(
+          unique(ids).map((id) =>
+            firstValueFrom(this.store.select(selectTaskById, { id })),
+          ),
+        )
+      ).filter((task): task is TaskCopy => !!task);
+      const ranges = this._timeframeRanges();
+      // A timeframe panel moves tasks into its range itself (`_applyPanelDates`);
+      // only an unrestricted panel has to ask for a date.
+      const unscheduled =
+        panelCfg.scheduledState === BoardPanelCfgScheduledState.Scheduled &&
+        ranges.scheduled === undefined
+          ? tasks.filter((task) => !task.dueDay && !task.dueWithTime)
+          : [];
+      const withoutDeadline =
+        panelCfg.deadlineState === BoardPanelCfgDeadlineState.HasDeadline &&
+        ranges.deadline === undefined
+          ? tasks.filter((task) => !task.deadlineDay && !task.deadlineWithTime)
+          : [];
+      let schedule: Parameters<TaskBulkActionService['scheduleFor']>[0] | undefined;
+      if (unscheduled.length) {
+        schedule = await firstValueFrom(
+          this._matDialog
+            .open(DialogScheduleTaskComponent, {
+              data: { isSelectDueOnly: true },
+            })
+            .afterClosed(),
+        );
+        if (!schedule?.date) return false;
+      }
+      let deadline: Parameters<TaskBulkActionService['setDeadlineFor']>[0] | undefined;
+      if (withoutDeadline.length) {
+        deadline = await firstValueFrom(
+          this._matDialog
+            .open(DialogDeadlineComponent, {
+              autoFocus: false,
+              data: { isSelectDeadlineOnly: true },
+            })
+            .afterClosed(),
+        );
+        if (!deadline?.date) return false;
+      }
+      if (this._destroyRef.destroyed) return false;
+      this.multiSelect.setBulkFeedbackSuppressed(true);
+      try {
+        for (const original of tasks) {
+          // A preceding parent/project move can change the next selected task.
+          const task = await firstValueFrom(
+            this.store.select(selectTaskById, { id: original.id }),
+          );
+          if (!task) continue;
+          await this._applyPanel(task, panelCfg);
+          const updated = await firstValueFrom(
+            this.store.select(selectTaskById, { id: task.id }),
+          );
+          if (updated) {
+            this._applyPanelDates(updated, panelCfg, ranges, tasks.length === 1);
+          }
+        }
+        // Flush captured task operations before the dependent panel-order write.
+        await new Promise<void>((resolve) => setTimeout(resolve, 0));
+        const movingIds = tasks.map((task) => task.id);
+        this._placeInOrder(movingIds, index);
+        if (schedule) {
+          // Panel placement may have moved a parent and its children to a new
+          // project. Scheduling actions must carry the resulting task data.
+          const tasksToSchedule = (
+            await Promise.all(
+              unscheduled.map((task) =>
+                firstValueFrom(this.store.select(selectTaskById, { id: task.id })),
+              ),
+            )
+          ).filter(
+            (task): task is TaskCopy => !!task && !task.dueDay && !task.dueWithTime,
+          );
+          await this._injector
+            .get(TaskBulkActionService)
+            .scheduleFor(schedule, tasksToSchedule);
+        }
+        if (deadline) {
+          const tasksForDeadline = (
+            await Promise.all(
+              withoutDeadline.map((task) =>
+                firstValueFrom(this.store.select(selectTaskById, { id: task.id })),
+              ),
+            )
+          ).filter(
+            (task): task is TaskCopy =>
+              !!task && !task.deadlineDay && !task.deadlineWithTime,
+          );
+          await this._injector
+            .get(TaskBulkActionService)
+            .setDeadlineFor(deadline, tasksForDeadline);
+        }
+        await new Promise<void>((resolve) => setTimeout(resolve, 0));
+        this.multiSelect.reanchorAfterMove(movingIds, this.rows());
+      } finally {
+        this.multiSelect.setBulkFeedbackSuppressed(false);
+      }
+      return true;
+    } finally {
+      this.isMoving.set(false);
+    }
+  }
 
-    const taskIds = prevTaskIds.includes(task.id)
-      ? // move in array
-        moveItemInArray(prevTaskIds, ev.previousIndex, ev.currentIndex)
-      : // NOTE: original array is mutated and splice does not return a new array
-        prevTaskIds.splice(ev.currentIndex, 0, task.id) && prevTaskIds;
+  private _placeInOrder(ids: string[], index: number): void {
+    const moving = new Set(ids);
+    const remainingIds = this.tasks()
+      .map((task) => task.id)
+      .filter((id) => !moving.has(id));
+    remainingIds.splice(index, 0, ...ids);
+    this.store.dispatch(
+      BoardsActions.updatePanelCfgTaskIds({
+        panelId: this.panelCfg().id,
+        taskIds: remainingIds,
+      }),
+    );
+  }
 
+  private async _applyPanel(task: TaskCopy, panelCfg: BoardPanelCfg): Promise<void> {
     const newTagIds = rewriteTagIdsForPanel(task.tagIds || [], panelCfg);
 
     const updates: Partial<TaskCopy> = {};
@@ -363,12 +562,14 @@ export class BoardPanelComponent {
         )
         .toPromise();
 
-      this.store.dispatch(
-        TaskSharedActions.moveToOtherProject({
-          task: taskWithSubTasks,
-          targetProjectId: firstProjectId,
-        }),
-      );
+      if (taskWithSubTasks) {
+        this.store.dispatch(
+          TaskSharedActions.moveToOtherProject({
+            task: taskWithSubTasks,
+            targetProjectId: firstProjectId,
+          }),
+        );
+      }
     }
 
     if (Object.keys(updates).length > 0) {
@@ -377,26 +578,108 @@ export class BoardPanelComponent {
       );
     }
 
-    this.store.dispatch(
-      BoardsActions.updatePanelCfgTaskIds({
-        panelId: panelCfg.id,
-        taskIds,
-      }),
-    );
-
-    await this._checkToScheduledTask(panelCfg, task.id);
-    await this._checkDeadlineState(panelCfg, task.id);
+    if (panelCfg.scheduledState === BoardPanelCfgScheduledState.NotScheduled) {
+      this.store.dispatch(
+        TaskSharedActions.unscheduleTask({ id: task.id, isSkipToast: true }),
+      );
+    }
+    if (
+      panelCfg.deadlineState === BoardPanelCfgDeadlineState.NoDeadline &&
+      (task.deadlineDay || task.deadlineWithTime)
+    ) {
+      this.store.dispatch(
+        TaskSharedActions.removeDeadline({ taskId: task.id, isSkipSnack: true }),
+      );
+    }
     await this._checkBacklogState(panelCfg, task.id);
   }
 
-  async afterTaskAdd({
-    taskId,
-    isAddToBottom,
-  }: {
-    taskId: string;
-    isAddToBottom: boolean;
-  }): Promise<void> {
+  /**
+   * Moves the task's scheduled day / deadline to the nearest day inside the
+   * panel's timeframe, so a dropped task stays in the panel. Only panels with a
+   * restricted timeframe do this.
+   */
+  private _applyPanelDates(
+    task: TaskCopy,
+    panelCfg: BoardPanelCfg,
+    ranges: BoardPanelTimeframeRanges,
+    isShowSnack: boolean,
+  ): void {
+    const todayStr = this._trackingInterval.todayDateStr();
+    const startOfNextDayDiffMs = this._startOfNextDayDiffMs();
+
+    if (ranges.scheduled !== undefined) {
+      const currentDay = getBoardTaskDateStr(
+        task.dueDay,
+        task.dueWithTime,
+        startOfNextDayDiffMs,
+      );
+      const day = adjustDateToBoardRange(ranges.scheduled, currentDay, todayStr);
+      if (day && day !== currentDay) {
+        this.store.dispatch(PlannerActions.planTaskForDay({ task, day }));
+        if (isShowSnack) {
+          this._showDateAdjustedSnack(task, day, T.F.TASK.S.SCHEDULED_DATE_ADJUSTED);
+        }
+      }
+    }
+
+    if (ranges.deadline !== undefined) {
+      const currentDay = getBoardTaskDateStr(
+        task.deadlineDay,
+        task.deadlineWithTime,
+        startOfNextDayDiffMs,
+      );
+      const deadlineDay = adjustDateToBoardRange(ranges.deadline, currentDay, todayStr);
+      if (deadlineDay && deadlineDay !== currentDay) {
+        this.store.dispatch(
+          TaskSharedActions.setDeadline({
+            taskId: task.id,
+            deadlineDay,
+            // Same as setting this deadline anywhere else: a deadline of today
+            // also plans the task for today.
+            ...getDeadlineAutoPlanFields(this._dateService, deadlineDay),
+            isSkipSnack: true,
+          }),
+        );
+        if (isShowSnack) {
+          this._showDateAdjustedSnack(task, deadlineDay, T.F.TASK.S.DEADLINE_ADJUSTED);
+        }
+      }
+    }
+  }
+
+  private _showDateAdjustedSnack(task: TaskCopy, day: string, msg: string): void {
+    const date =
+      day === this._trackingInterval.todayDateStr()
+        ? this._translateService.instant(T.G.TODAY_TAG_TITLE)
+        : this._localeDatePipe.transform(day, 'shortDate');
+    this._snackService.open({
+      type: 'SUCCESS',
+      msg,
+      translateParams: { title: truncate(task.title, 20), date: date || '' },
+    });
+  }
+
+  async afterTaskAdd({ taskId, isAddToBottom, isNewTask }: TaskAddEvent): Promise<void> {
     const panelCfg = this.panelCfg();
+
+    if (!isNewTask) {
+      const task = await this.store
+        .select(selectTaskById, { id: taskId })
+        .pipe(first())
+        .toPromise();
+      if (!task) {
+        return;
+      }
+
+      const newTagIds = unique(rewriteTagIdsForPanel(task.tagIds || [], panelCfg));
+
+      if (!fastArrayCompare(task.tagIds || [], newTagIds)) {
+        this.taskService.updateTags(task, newTagIds);
+      }
+      return;
+    }
+
     this.store.dispatch(
       BoardsActions.updatePanelCfgTaskIds({
         panelId: panelCfg.id,
@@ -411,6 +694,22 @@ export class BoardPanelComponent {
     await this._checkBacklogState(panelCfg, taskId);
   }
 
+  scheduledDateColor(task: TaskCopy): ScheduledDateColor {
+    if (
+      task.isDone ||
+      this.taskService.currentTaskId() === task.id ||
+      (!task.dueDay && !task.dueWithTime)
+    ) {
+      return '';
+    }
+    return getScheduledDateColor(
+      task,
+      this._trackingInterval.todayDateStr(),
+      this._dateService.getStartOfNextDayDiffMs(),
+      task.dueWithTime ? this._trackingInterval.clockTimestamp() : 0,
+    );
+  }
+
   scheduleTask(task: TaskCopy, ev?: MouseEvent): void {
     ev?.preventDefault();
     ev?.stopPropagation();
@@ -420,9 +719,7 @@ export class BoardPanelComponent {
     });
   }
 
-  editDeadline(task: TaskCopy, ev?: MouseEvent): void {
-    ev?.preventDefault();
-    ev?.stopPropagation();
+  editDeadline(task: TaskCopy): void {
     this._matDialog.open(DialogDeadlineComponent, {
       restoreFocus: true,
       data: { task },
@@ -433,51 +730,25 @@ export class BoardPanelComponent {
     panelCfg: BoardPanelCfg,
     taskId: string,
   ): Promise<void> {
-    if (panelCfg.scheduledState === BoardPanelCfgScheduledState.All) {
-      return;
-    }
-    const task = await this.store
-      .select(selectTaskById, { id: taskId })
-      .pipe(first())
-      .toPromise();
-    if (!task) {
-      return;
-    }
-
     if (panelCfg.scheduledState === BoardPanelCfgScheduledState.Scheduled) {
-      const currentVal = getTaskScheduledDateStr(task, this.startOfNextDayDiffMs());
-      const timeframe = panelCfg.scheduledTimeframe || ALL_TIMEFRAME;
-      if (timeframe.type === 'all') {
-        if (!currentVal) {
-          this.scheduleTask(task);
-        }
-        return;
-      }
-
-      const closestDate = adjustDateToBoardTimeframe({
-        timeframe,
-        currentDate: currentVal,
-        todayStr: this.todayStr(),
-      });
-      if (closestDate && closestDate !== currentVal) {
-        this._showDateChangeSnack(task, closestDate);
-        this.store.dispatch(
-          PlannerActions.planTaskForDay({
-            task,
-            day: closestDate,
-          }),
-        );
+      const task = await firstValueFrom(
+        this.store.select(selectTaskById, { id: taskId }),
+      );
+      if (!task) return;
+      const ranges = this._timeframeRanges();
+      if (ranges.scheduled !== undefined) {
+        this._applyPanelDates(task, panelCfg, { scheduled: ranges.scheduled }, true);
+      } else if (!task.dueDay && !task.dueWithTime) {
+        this.scheduleTask(task);
       }
     }
     if (panelCfg.scheduledState === BoardPanelCfgScheduledState.NotScheduled) {
-      if (task.dueDay || task.dueWithTime) {
-        this.store.dispatch(
-          TaskSharedActions.unscheduleTask({
-            id: taskId,
-            isSkipToast: false,
-          }),
-        );
-      }
+      this.store.dispatch(
+        TaskSharedActions.unscheduleTask({
+          id: taskId,
+          isSkipToast: false,
+        }),
+      );
     }
   }
 
@@ -485,81 +756,17 @@ export class BoardPanelComponent {
     panelCfg: BoardPanelCfg,
     taskId: string,
   ): Promise<void> {
-    if (
-      !panelCfg.deadlineState ||
-      panelCfg.deadlineState === BoardPanelCfgDeadlineState.All
-    ) {
+    if (panelCfg.deadlineState !== BoardPanelCfgDeadlineState.HasDeadline) {
       return;
     }
-
-    const task = await this.store
-      .select(selectTaskById, { id: taskId })
-      .pipe(first())
-      .toPromise();
-    if (!task) {
-      return;
+    const task = await firstValueFrom(this.store.select(selectTaskById, { id: taskId }));
+    if (!task) return;
+    const ranges = this._timeframeRanges();
+    if (ranges.deadline !== undefined) {
+      this._applyPanelDates(task, panelCfg, { deadline: ranges.deadline }, true);
+    } else if (!task.deadlineDay && !task.deadlineWithTime) {
+      this.editDeadline(task);
     }
-
-    const todayStr = this.todayStr();
-    const startOfNextDayDiffMs = this.startOfNextDayDiffMs();
-    const currentVal = getTaskDeadlineDateStr(task, startOfNextDayDiffMs);
-
-    if (panelCfg.deadlineState === BoardPanelCfgDeadlineState.HasDeadline) {
-      const timeframe = panelCfg.deadlineTimeframe || ALL_TIMEFRAME;
-      if (timeframe.type === 'all') {
-        if (!currentVal) {
-          this.editDeadline(task);
-        }
-        return;
-      }
-
-      const closestDate = adjustDateToBoardTimeframe({
-        timeframe,
-        currentDate: currentVal,
-        todayStr,
-      });
-      if (closestDate && closestDate !== currentVal) {
-        this._showDateChangeSnack(task, closestDate, true);
-        this.store.dispatch(
-          TaskSharedActions.setDeadline({
-            taskId: task.id,
-            deadlineDay: closestDate,
-            ...getDeadlineAutoPlanFields(
-              {
-                todayStr: () => todayStr,
-                getStartOfNextDayDiffMs: () => startOfNextDayDiffMs,
-              },
-              closestDate,
-            ),
-            isSkipToast: true,
-          }),
-        );
-      }
-    } else if (panelCfg.deadlineState === BoardPanelCfgDeadlineState.NoDeadline) {
-      if (currentVal) {
-        this.store.dispatch(TaskSharedActions.removeDeadline({ taskId }));
-      }
-    }
-  }
-
-  private _showDateChangeSnack(
-    task: TaskCopy,
-    newDate: string,
-    isDeadline: boolean = false,
-  ): void {
-    const formattedDate =
-      newDate === this.todayStr()
-        ? this._translateService.instant(T.G.TODAY_TAG_TITLE)
-        : (this._localeDatePipe.transform(newDate, 'shortDate') as string);
-
-    this._snackService.open({
-      type: 'SUCCESS',
-      msg: isDeadline ? T.F.TASK.S.DEADLINE_ADJUSTED : T.F.TASK.S.SCHEDULED_DATE_ADJUSTED,
-      translateParams: {
-        title: truncate(task.title, 20),
-        date: formattedDate,
-      },
-    });
   }
 
   private async _checkBacklogState(

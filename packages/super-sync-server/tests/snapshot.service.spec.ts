@@ -1,7 +1,9 @@
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
+import { CURRENT_SCHEMA_VERSION } from '@sp/shared-schema';
 import {
   SnapshotService,
   EncryptedOpsNotSupportedError,
+  LegacyRepairReplayUnsupportedError,
 } from '../src/sync/services/snapshot.service';
 import { replayOpsToState } from '../src/sync/op-replay';
 import * as zlib from 'zlib';
@@ -39,6 +41,7 @@ const EXPECTED_REPLAY_OPERATION_SELECT = {
   payload: true,
   schemaVersion: true,
   isPayloadEncrypted: true,
+  repairBaseServerSeq: true,
 };
 
 describe('SnapshotService', () => {
@@ -469,7 +472,7 @@ describe('SnapshotService', () => {
     });
 
     it('should invoke onCacheDelta with the bytes-written delta after a snapshot rewrite', async () => {
-      // Regression for C3: GET /snapshot rewrites snapshotData inside its
+      // Regression for C3: generateSnapshot rewrites snapshotData inside its
       // transaction, but the storage counter is updated incrementally based
       // on op deltas only. Without this hook the cache can grow up to
       // MAX_SNAPSHOT_SIZE_BYTES with no quota accounting.
@@ -526,7 +529,7 @@ describe('SnapshotService', () => {
     });
 
     it('should skip the cache write when the new blob exceeds maxCacheBytes (B5)', async () => {
-      // Regression for B5: GET /snapshot must not grow `snapshotData` beyond
+      // Regression for B5: generateSnapshot must not grow `snapshotData` beyond
       // the user's remaining quota. When `maxCacheBytes` is set and the new
       // compressed blob would exceed it (accounting for the bytes the
       // previously-cached snapshot will free), skip the cache write — the
@@ -587,8 +590,8 @@ describe('SnapshotService', () => {
       // state without rewriting snapshotData — no counter update is needed.
       // The fast path now runs _assertCachedSnapshotBaseReplayable first, so
       // the operation mocks must answer the findFirst/count probes. Set
-      // snapshotSchemaVersion to CURRENT_SCHEMA_VERSION (2) so the fast
-      // path triggers; v1 would force a migration and bypass it.
+      // snapshotSchemaVersion to CURRENT_SCHEMA_VERSION so the fast
+      // path triggers; an older version would force a migration and bypass it.
       const cachedState = { TASK: { t1: { id: 't1' } } };
       const compressed = zlib.gzipSync(JSON.stringify(cachedState));
       const updateManySpy = vi.fn().mockResolvedValue({ count: 0 });
@@ -603,7 +606,7 @@ describe('SnapshotService', () => {
                 snapshotData: compressed,
                 lastSnapshotSeq: 7,
                 snapshotAt: BigInt(1),
-                snapshotSchemaVersion: 2,
+                snapshotSchemaVersion: CURRENT_SCHEMA_VERSION,
               }),
             updateMany: updateManySpy,
             create: createSpy,
@@ -647,7 +650,7 @@ describe('SnapshotService', () => {
                 snapshotData: compressed,
                 lastSnapshotSeq: 7,
                 snapshotAt: BigInt(1),
-                snapshotSchemaVersion: 2,
+                snapshotSchemaVersion: CURRENT_SCHEMA_VERSION,
               }),
             updateMany: vi.fn(),
             create: vi.fn(),
@@ -666,6 +669,35 @@ describe('SnapshotService', () => {
       );
       expect(findFirstSpy).toHaveBeenCalled();
       expect(countSpy).toHaveBeenCalled();
+    });
+
+    it('rejects a cached snapshot whose base crosses a markerless repair', async () => {
+      const compressed = zlib.gzipSync(JSON.stringify({ TASK: {} }));
+      vi.mocked(prisma.$transaction).mockImplementation(async (fn: any) => {
+        const mockTx = {
+          userSyncState: {
+            findUnique: vi
+              .fn()
+              .mockResolvedValueOnce({ lastSeq: 7 })
+              .mockResolvedValueOnce({
+                snapshotData: compressed,
+                lastSnapshotSeq: 7,
+                snapshotAt: BigInt(1),
+                snapshotSchemaVersion: CURRENT_SCHEMA_VERSION,
+              }),
+          },
+          operation: {
+            findFirst: vi.fn().mockResolvedValue(null),
+            count: vi.fn().mockResolvedValueOnce(0).mockResolvedValueOnce(1),
+            findMany: vi.fn(),
+          },
+        };
+        return fn(mockTx);
+      });
+
+      await expect(service.generateSnapshot(1)).rejects.toThrowError(
+        LegacyRepairReplayUnsupportedError,
+      );
     });
 
     it('should swallow a thrown onCacheDelta to avoid corrupting the snapshot result', async () => {
@@ -1179,7 +1211,10 @@ describe('SnapshotService', () => {
       expect(prisma.operation.findMany).toHaveBeenCalledWith({
         where: {
           userId: 1,
-          opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR'] },
+          OR: [
+            { opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT'] } },
+            { opType: 'REPAIR', repairBaseServerSeq: { not: null } },
+          ],
         },
         orderBy: { serverSeq: 'desc' },
         take: 30,
@@ -1248,6 +1283,22 @@ describe('SnapshotService', () => {
 
       expect(prisma.operation.findMany).toHaveBeenCalledWith(
         expect.objectContaining({ take: 5 }),
+      );
+    });
+
+    it('excludes legacy repairs that cannot be replayed causally', async () => {
+      vi.mocked(prisma.operation.findMany).mockResolvedValue([]);
+
+      await service.getRestorePoints(1);
+
+      expect(prisma.operation.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({
+            OR: expect.arrayContaining([
+              { opType: 'REPAIR', repairBaseServerSeq: { not: null } },
+            ]),
+          }),
+        }),
       );
     });
   });
@@ -1330,7 +1381,7 @@ describe('SnapshotService', () => {
       );
     });
 
-    it('should reject historical snapshot generation when replay cannot reach targetSeq', async () => {
+    it('should reject a historical target when no retained history is available', async () => {
       vi.mocked(prisma.$transaction).mockImplementation(async (fn) => {
         const mockTx = {
           userSyncState: {
@@ -1352,7 +1403,7 @@ describe('SnapshotService', () => {
       });
 
       await expect(service.generateSnapshotAtSeq(1, 5)).rejects.toThrow(
-        'SNAPSHOT_REPLAY_INCOMPLETE',
+        'Target sequence 5 is no longer available',
       );
     });
 

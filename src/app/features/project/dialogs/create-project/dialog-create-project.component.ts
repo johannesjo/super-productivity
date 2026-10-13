@@ -18,24 +18,27 @@ import { FormlyFieldConfig, FormlyFormOptions, FormlyModule } from '@ngx-formly/
 import { ProjectService } from '../../project.service';
 import { DEFAULT_PROJECT } from '../../project.const';
 import { JiraCfg } from '../../../issue/providers/jira/jira.model';
-import { CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG } from '../../project-form-cfg.const';
+import {
+  CREATE_PROJECT_BASIC_CONFIG_FORM_CONFIG,
+  CreateProjectFormModel,
+} from '../../project-form-cfg.const';
 import { SS } from '../../../../core/persistence/storage-keys.const';
 import { Subscription } from 'rxjs';
 import {
   loadFromSessionStorage,
   saveToSessionStorage,
 } from '../../../../core/persistence/local-storage';
-import { RedmineCfg } from '../../../issue/providers/redmine/redmine.model';
 import { T } from '../../../../t.const';
 import { WORK_CONTEXT_THEME_CONFIG_FORM_CONFIG } from '../../../work-context/work-context.const';
 import { GitlabCfg } from 'src/app/features/issue/providers/gitlab/gitlab.model';
 import { CaldavCfg } from 'src/app/features/issue/providers/caldav/caldav.model';
 import { OpenProjectCfg } from '../../../issue/providers/open-project/open-project.model';
-import { getRandomWorkContextColor } from '../../../work-context/work-context-color';
+import { getRandomWorkContextColor } from '../../../../ui/work-context-color';
 import { removeDebounceFromFormItems } from '../../../../util/remove-debounce-from-form-items';
 import { MatButton } from '@angular/material/button';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Log } from '../../../../core/log';
+import { PlainspaceShareService } from '../../../issue/providers/plainspace/plainspace-share.service';
 
 @Component({
   selector: 'dialog-create-project',
@@ -56,6 +59,7 @@ import { Log } from '../../../../core/log';
 export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   private _project = inject<Project>(MAT_DIALOG_DATA);
   private _projectService = inject(ProjectService);
+  private _plainspaceShareService = inject(PlainspaceShareService);
   private _matDialogRef =
     inject<MatDialogRef<DialogCreateProjectComponent>>(MatDialogRef);
 
@@ -68,7 +72,6 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
   gitlabCfg?: GitlabCfg;
   caldavCfg?: CaldavCfg;
   openProjectCfg?: OpenProjectCfg;
-  redmineCfg?: RedmineCfg;
 
   formBasic: UntypedFormGroup = new UntypedFormGroup({});
   formTheme: UntypedFormGroup = new UntypedFormGroup({});
@@ -118,6 +121,8 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
         const projectDataToSave: Project | Partial<Project> = {
           ...this.projectData,
         };
+        // Never persist the transient share flag (not part of the Project model).
+        delete (projectDataToSave as Partial<CreateProjectFormModel>).isShareOnPlainspace;
         if (this._isSaveTmpProject) {
           saveToSessionStorage(SS.PROJECT_TMP, projectDataToSave);
         }
@@ -145,12 +150,24 @@ export class DialogCreateProjectComponent implements OnInit, OnDestroy {
     const projectDataToSave: Project | Partial<Project> = {
       ...this.projectData,
     };
+    // `isShareOnPlainspace` is a transient form-only flag — read it, then strip
+    // it so it is never persisted onto the Project entity.
+    const isShareOnPlainspace = !!(projectDataToSave as Partial<CreateProjectFormModel>)
+      .isShareOnPlainspace;
+    delete (projectDataToSave as Partial<CreateProjectFormModel>).isShareOnPlainspace;
 
     let newProjectId: string | undefined;
     if (projectDataToSave.id) {
       this._projectService.update(projectDataToSave.id, projectDataToSave);
     } else {
       newProjectId = this._projectService.add(projectDataToSave);
+      if (isShareOnPlainspace && newProjectId) {
+        // Fire-and-forget: provision a Plainspace space + bound issue provider.
+        this._plainspaceShareService.shareProjectOnPlainspace(
+          newProjectId,
+          projectDataToSave.title || '',
+        );
+      }
     }
     this._isSaveTmpProject = false;
     sessionStorage.removeItem(SS.PROJECT_TMP);

@@ -1,6 +1,7 @@
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
+  computed,
   ChangeDetectorRef,
   Component,
   DestroyRef,
@@ -23,10 +24,11 @@ import { MatTooltip } from '@angular/material/tooltip';
 import { MarkdownComponent } from 'ngx-markdown';
 import { TranslatePipe } from '@ngx-translate/core';
 import { Subject } from 'rxjs';
-import { debounceTime } from 'rxjs/operators';
+import { auditTime, debounceTime } from 'rxjs/operators';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { T } from '../../t.const';
 import { isSmallScreen } from '../../util/is-small-screen';
+import { DateService } from '../../core/date/date.service';
 import {
   handleListKeydown,
   TextTransformResult,
@@ -45,14 +47,20 @@ import {
   insertTable,
 } from '../inline-markdown/markdown-toolbar.util';
 import { ClipboardImageService } from '../../core/clipboard-image/clipboard-image.service';
+import { DialogConfirmComponent } from '../dialog-confirm/dialog-confirm.component';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports -- grandfathered layer-boundary debt
 import { TaskAttachmentService } from '../../features/tasks/task-attachment/task-attachment.service';
 import { ClipboardPasteHandlerService } from '../../core/clipboard-image/clipboard-paste-handler.service';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports -- grandfathered layer-boundary debt
 import { toggleChecklistItemAtIndex } from '../../features/markdown-checklist/checklist-operations';
 import { HISTORY_STATE } from 'src/app/app.constants';
 import { IS_MOBILE } from 'src/app/util/is-mobile';
 import { IS_IOS } from 'src/app/util/is-ios';
 import { Keyboard } from '@capacitor/keyboard';
 import { DialogMarkdownShortcutsComponent } from './dialog-markdown-shortcuts.component';
+import { LiveMarkdownEditorComponent } from '../inline-markdown/live-markdown/live-markdown-editor.component';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports -- grandfathered layer-boundary debt
+import { GlobalConfigService } from '../../features/config/global-config.service';
 import {
   isShortcutWithKey,
   MARKDOWN_SHORTCUTS,
@@ -80,6 +88,7 @@ const ALL_VIEW_MODES: ['SPLIT', 'PARSED', 'TEXT_ONLY'] = ['SPLIT', 'PARSED', 'TE
     MatIconButton,
     MatTooltip,
     TranslatePipe,
+    LiveMarkdownEditorComponent,
   ],
 })
 export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit {
@@ -88,13 +97,53 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
   private readonly _taskAttachmentService = inject(TaskAttachmentService);
   private readonly _clipboardPasteHandler = inject(ClipboardPasteHandlerService);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly _dateService = inject(DateService);
+  private readonly _globalConfigService = inject(GlobalConfigService);
   _matDialogRef = inject<MatDialogRef<DialogFullscreenMarkdownComponent>>(MatDialogRef);
-  data: { content: string; taskId?: string } = inject(MAT_DIALOG_DATA) || { content: '' };
+  data: {
+    content: string;
+    taskId?: string;
+    originalContent?: string;
+  } = inject(MAT_DIALOG_DATA) || { content: '' };
+  // Reference for the discard confirmation. `originalContent` wins when the
+  // dialog is seeded with recovered draft content that differs from the
+  // persisted entity content.
+  protected _initialContent: string = this.data.originalContent ?? this.data.content;
 
   T: typeof T = T;
   viewMode: ViewMode = isSmallScreen() ? 'TEXT_ONLY' : 'SPLIT';
+  /**
+   * The live editor renders and edits in the same view, so the TEXT/SPLIT/PARSED
+   * toggle has nothing left to switch between and is dropped entirely (#9910).
+   */
+  readonly isLiveMarkdown = computed(
+    // Same condition as InlineMarkdownComponent: with markdown formatting off
+    // the user asked for plain text, and the two surfaces disagreeing would
+    // give them a textarea inline and a rendering editor in fullscreen for the
+    // same note.
+    () => this._globalConfigService.tasks()?.isMarkdownFormattingInNotesEnabled ?? true,
+  );
   readonly previewEl = viewChild<MarkdownComponent>('previewEl');
   readonly textareaEl = viewChild<ElementRef>('textareaEl');
+  readonly liveEditorEl = viewChild<LiveMarkdownEditorComponent>('liveEditorEl');
+  /**
+   * Pasted images are stored behind `indexeddb://` (or, in Electron, a
+   * `file:///…/clipboard-images/` path) and have to be read back before they can
+   * load. Anything else — a plain http(s) image — is used unchanged.
+   */
+  readonly resolveImageSrc = async (src: string): Promise<string> =>
+    (await this._clipboardImageService.resolveClipboardImageUrl(src)) ?? src;
+
+  /** Ctrl/Cmd+Enter saves and closes, matching the textarea's keydownHandler. */
+  readonly liveEditorKeymap = [
+    {
+      key: 'Mod-Enter',
+      run: (): boolean => {
+        this.close();
+        return true;
+      },
+    },
+  ];
   readonly contentChanged = output<string>();
   private readonly _contentChanges$ = new Subject<string>();
   private _currentPastePlaceholder: string | null = null;
@@ -107,6 +156,14 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
   resolvedContent = signal<string>('');
   // Plain property for markdown component compatibility
   resolvedContentData: string | undefined;
+  /**
+   * True while the discard confirmation is up. This dialog stays OPEN behind
+   * that confirm, so anything closing it on an external signal must stand down
+   * until the user has answered — see openFullscreenMarkdownDialog, whose
+   * Location handler would otherwise close through the SAVE path, the exact
+   * opposite of the Discard the user just clicked (#8982 review).
+   */
+  isDiscardConfirmOpen = false;
 
   constructor() {
     // Set initial content synchronously for immediate rendering
@@ -114,6 +171,7 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
 
     const lastViewMode = localStorage.getItem(LS.LAST_FULLSCREEN_EDIT_VIEW_MODE);
     if (
+      !this.isLiveMarkdown() &&
       ALL_VIEW_MODES.includes(lastViewMode as ViewMode) &&
       // empty notes should never be in preview mode
       this.data &&
@@ -132,9 +190,13 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
       this._cdr.markForCheck();
     });
 
-    // Auto-save with debounce
+    // Checkpoint cadence: auditTime, not debounceTime — with a debounce,
+    // continuous typing resets the timer on every keystroke and a crash
+    // mid-burst would lose the whole burst. auditTime keeps emitting the
+    // latest value every 500 ms while typing goes on. The draft checkpoint
+    // is this output's only consumer.
     this._contentChanges$
-      .pipe(debounceTime(500), takeUntilDestroyed(this._destroyRef))
+      .pipe(auditTime(500), takeUntilDestroyed(this._destroyRef))
       .subscribe((value) => {
         this.contentChanged.emit(value);
       });
@@ -186,8 +248,18 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
   }
 
   ngAfterViewInit(): void {
-    // Focus textarea if present (not in PARSED view mode)
+    // Focus textarea if present (not in PARSED view mode). The live editor
+    // focuses itself via [autoFocus].
     this.textareaEl()?.nativeElement?.focus();
+  }
+
+  onLiveEditorDocChanged(content: string): void {
+    this.data.content = content;
+    // Routed through the same hook the textarea's (ngModelChange) fires rather
+    // than pushing _contentChanges$ directly: DialogAddNoteComponent overrides
+    // it to checkpoint the draft into sessionStorage, so bypassing it silently
+    // disabled crash recovery for new notes.
+    this.ngModelChange(content);
   }
 
   openShortcutsHelp(): void {
@@ -272,6 +344,7 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
       ev.shiftKey,
       ev.ctrlKey,
       ev.metaKey,
+      this._dateService.getLogicalTodayDate(),
     );
     if (result) {
       ev.preventDefault();
@@ -292,8 +365,13 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
       setContent: (content) => {
         this.data.content = content;
         this._contentChanges$.next(content);
+        // `data` is a plain object, so writing to it ticks nothing in a
+        // zoneless app — the image-paste swap runs in a promise continuation
+        // with no signal write of its own, and the editor would keep showing
+        // the placeholder until something else happened to schedule a check.
+        this._cdr.markForCheck();
       },
-      getTextarea: () => this.textareaEl()?.nativeElement || null,
+      getTextarea: () => this.liveEditorEl() ?? this.textareaEl()?.nativeElement ?? null,
       getTaskId: () => this.data.taskId || null,
     });
   }
@@ -302,10 +380,26 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
     this._contentChanges$.next(content);
   }
 
+  get hasUnsavedChanges(): boolean {
+    return (this.data.content || '') !== this._initialContent;
+  }
+
+  closeAfterConfirmedDiscard(): void {
+    this._matDialogRef.close({ action: 'DISCARD' });
+  }
+
   close(isSkipSave: boolean = false): void {
-    // When the "Close" button is hit by the user, the note is closed without saving.
+    // When the "Discard" button is hit by the user, the note is closed without saving
+    // (after confirmation if the content was modified). The explicit result lets
+    // callers tell a user-confirmed discard from the dialog being disposed some
+    // other way (e.g. MatDialog.closeAll()), which emits undefined — the note's
+    // crash-safe draft handling clears its draft only on the former.
     if (isSkipSave) {
-      this._matDialogRef.close();
+      // Confirm before discarding modified content, for every caller of this
+      // shared dialog. The "Close" action was renamed to "Discard" (more final),
+      // so confirming is the matching guard. _confirmDiscardIfNeeded no-ops when
+      // nothing was modified, so an unmodified close still closes instantly.
+      this._confirmDiscardIfNeeded(() => this.closeAfterConfirmedDiscard());
       // When the note is made empty manually by the user and the "Save" button is hit, the note is automatically deleted instead of being left blank.
     } else if (!this.data?.content && this.data.content.trim().length < 1) {
       this._matDialogRef.close({ action: 'DELETE' });
@@ -313,6 +407,32 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
     } else {
       this._matDialogRef.close(this.data?.content);
     }
+  }
+
+  protected _confirmDiscardIfNeeded(onDiscard: () => void): void {
+    if (!this.hasUnsavedChanges) {
+      onDiscard();
+      return;
+    }
+    this.isDiscardConfirmOpen = true;
+    this._matDialog
+      .open(DialogConfirmComponent, {
+        restoreFocus: true,
+        data: {
+          message: T.F.NOTE.D_FULLSCREEN.CONFIRM_DISCARD_MSG,
+          okTxt: T.G.DISCARD,
+        },
+      })
+      .afterClosed()
+      .subscribe((isConfirm: boolean) => {
+        // Cleared on every outcome, including the confirm being disposed by a
+        // navigation (it keeps MatDialog's default closeOnNavigation) — the
+        // editor stays open and usable in that case.
+        this.isDiscardConfirmOpen = false;
+        if (isConfirm) {
+          onDiscard();
+        }
+      });
   }
 
   onViewModeChange(): void {
@@ -348,6 +468,14 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
   }
 
   private async _updateResolvedContent(content: string): Promise<void> {
+    // Only the `<markdown>` preview consumes this, and the live editor never
+    // mounts one — it resolves image sources itself, per image. Without this
+    // the dialog would re-resolve every image in the note 100 ms after every
+    // keystroke, for a value nothing reads. The dialog is modal, so the
+    // setting behind `isLiveMarkdown` cannot flip while it is open.
+    if (this.isLiveMarkdown()) {
+      return;
+    }
     const resolved = await this._clipboardImageService.resolveMarkdownImages(content);
     this.resolvedContent.set(resolved);
   }
@@ -413,6 +541,13 @@ export class DialogFullscreenMarkdownComponent implements OnInit, AfterViewInit 
   private _applyTransformWithArgs(
     transformFn: (text: string, start: number, end: number) => TextTransformResult,
   ): void {
+    const liveEditorEl = this.liveEditorEl();
+    if (liveEditorEl) {
+      // The editor dispatches the change itself; onLiveEditorDocChanged then
+      // syncs data.content, so there is no selection to restore by hand.
+      liveEditorEl.applyTransform(transformFn);
+      return;
+    }
     const textarea = this.textareaEl()?.nativeElement;
     if (!textarea) {
       return;

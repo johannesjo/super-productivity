@@ -1,4 +1,8 @@
 <div class="action-bar">
+  <!-- Slot for controls the parent wants to scroll together with these actions
+       (e.g. the add-to-top/bottom and search toggles on the create-mode bar). -->
+  <ng-content></ng-content>
+
   <button
     #projectMenuTrigger
     mat-button
@@ -26,19 +30,6 @@
     } @else {
       <span>{{ selectedProject()?.title }}</span>
     }
-  </button>
-
-  <button
-    mat-button
-    class="action-btn"
-    data-test="add-task-bar-note-btn"
-    (click)="toggleNote.emit()"
-    [class.has-value]="!!stateService.noteTxt()"
-    [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOOLTIP_NOTE | translate"
-    matTooltipPosition="above"
-  >
-    <mat-icon>{{ stateService.noteTxt() ? 'chat' : 'chat_bubble_outline' }}</mat-icon>
-    <span>{{ T.F.TASK.ADD_TASK_BAR.NOTE_BUTTON | translate }}</span>
   </button>
 
   @if (!isHideDueBtn()) {
@@ -178,7 +169,7 @@
     class="action-btn"
     data-test="add-task-bar-repeat-btn"
     [matMenuTriggerFor]="repeatMenu"
-    [class.has-value]="state().repeatQuickSetting"
+    [class.has-value]="state().repeat"
     [class.menu-open]="isRepeatMenuOpen()"
     (click)="onRepeatMenuClick()"
   >
@@ -188,7 +179,7 @@
     }}</span>
   </button>
 
-  @if (state().repeatQuickSetting) {
+  @if (state().repeat) {
     <button
       mat-button
       class="clear-btn"
@@ -217,7 +208,7 @@
         "
         [icon]="project.icon"
         [defaultIcon]="DEFAULT_PROJECT_ICON"
-        [color]="project.theme?.primary"
+        [color]="$safeNavigationMigration(project.theme?.primary)"
         [folderPath]="projectFolderMap().get(project.id)"
       ></select-option-row>
     </button>

@@ -1,10 +1,11 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { Action } from '@ngrx/store';
 import { TaskRepeatCfgEffects } from './task-repeat-cfg.effects';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
+import { DateService } from '../../../core/date/date.service';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskArchiveService } from '../../archive/task-archive.service';
 import { AddTasksForTomorrowService } from '../../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
@@ -94,8 +95,14 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
     const taskRepeatCfgServiceSpy = jasmine.createSpyObj('TaskRepeatCfgService', [
       'updateTaskRepeatCfg',
       'getTaskRepeatCfgById$',
+      'getTaskRepeatCfgByIdAllowUndefined$',
       '_getActionsForTaskRepeatCfg',
     ]);
+    // Default: config exists. Individual tests override; the "deleted config"
+    // tests set this to of(undefined) to exercise the #8715 crash-guard.
+    taskRepeatCfgServiceSpy.getTaskRepeatCfgByIdAllowUndefined$.and.returnValue(
+      of(undefined),
+    );
 
     const matDialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
     const taskArchiveServiceSpy = jasmine.createSpyObj('TaskArchiveService', ['load']);
@@ -1023,7 +1030,7 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
         taskService.getByIdOnce$.and.returnValue(of(mockTask));
 
         // repeat cfg with repeatOnComplete true
-        taskRepeatCfgService.getTaskRepeatCfgById$.and.returnValue(
+        taskRepeatCfgService.getTaskRepeatCfgByIdAllowUndefined$.and.returnValue(
           of({ ...mockRepeatCfg, repeatFromCompletionDate: true }),
         );
 
@@ -1070,7 +1077,7 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
         actions$ = hot('-a', { a: action });
 
         taskService.getByIdOnce$.and.returnValue(of(mockTask));
-        taskRepeatCfgService.getTaskRepeatCfgById$.and.returnValue(
+        taskRepeatCfgService.getTaskRepeatCfgByIdAllowUndefined$.and.returnValue(
           of({ ...mockRepeatCfg, repeatFromCompletionDate: false }),
         );
 
@@ -1093,7 +1100,7 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
         actions$ = hot('-a', { a: action });
 
         taskService.getByIdOnce$.and.returnValue(of(oldTask));
-        taskRepeatCfgService.getTaskRepeatCfgById$.and.returnValue(
+        taskRepeatCfgService.getTaskRepeatCfgByIdAllowUndefined$.and.returnValue(
           of({
             ...mockRepeatCfg,
             repeatFromCompletionDate: true,
@@ -1119,7 +1126,7 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
 
         actions$ = hot('-a', { a: action });
         taskService.getByIdOnce$.and.returnValue(of(legacyTask));
-        taskRepeatCfgService.getTaskRepeatCfgById$.and.returnValue(
+        taskRepeatCfgService.getTaskRepeatCfgByIdAllowUndefined$.and.returnValue(
           of({
             ...mockRepeatCfg,
             repeatFromCompletionDate: true,
@@ -1173,7 +1180,9 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
           },
         } as any),
       );
-      taskRepeatCfgService.getTaskRepeatCfgById$.and.returnValue(of(repeatCfg));
+      taskRepeatCfgService.getTaskRepeatCfgByIdAllowUndefined$.and.returnValue(
+        of(repeatCfg),
+      );
       taskRepeatCfgService._getActionsForTaskRepeatCfg.and.returnValue(
         Promise.resolve([expectedAction]),
       );
@@ -1216,7 +1225,9 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
 
       actions$ = of(action);
       taskService.getByIdOnce$.and.returnValue(of(oldTask));
-      taskRepeatCfgService.getTaskRepeatCfgById$.and.returnValue(of(repeatCfg));
+      taskRepeatCfgService.getTaskRepeatCfgByIdAllowUndefined$.and.returnValue(
+        of(repeatCfg),
+      );
       taskRepeatCfgService._getActionsForTaskRepeatCfg.and.returnValue(
         Promise.resolve([expectedAction]),
       );
@@ -1233,6 +1244,32 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
         error: done.fail,
       });
     });
+
+    // #8715: a completed instance can reference a repeat config that was
+    // already deleted (e.g. via cross-client sync). The lookup must not throw
+    // ('Missing taskRepeatCfg') and crash the whole app — the effect just skips.
+    it('should not throw when the referenced repeat config was deleted (#8715)', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const action = TaskSharedActions.updateTask({
+          task: { id: 'parent-task-id', changes: { isDone: true } },
+        });
+
+        actions$ = hot('-a', { a: action });
+
+        // task still references the (now missing) config
+        taskService.getByIdOnce$.and.returnValue(of(mockTask));
+        // config no longer exists -> non-throwing selector yields undefined
+        taskRepeatCfgService.getTaskRepeatCfgByIdAllowUndefined$.and.returnValue(
+          of(undefined),
+        );
+        // guard against regressing to the throwing selector (the #8715 root cause)
+        taskRepeatCfgService.getTaskRepeatCfgById$.and.returnValue(
+          throwError(() => new Error('Missing taskRepeatCfg')),
+        );
+
+        expectObservable(effects.updateStartDateOnComplete$).toBe('--');
+      });
+    });
   });
 
   describe('autoSyncSubtaskTemplatesFromNewest$', () => {
@@ -1246,7 +1283,7 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
         actions$ = hot('-a', { a: action });
 
         taskService.getByIdOnce$.and.returnValue(of(mockTask));
-        taskRepeatCfgService.getTaskRepeatCfgById$.and.returnValue(
+        taskRepeatCfgService.getTaskRepeatCfgByIdAllowUndefined$.and.returnValue(
           of({
             ...mockRepeatCfg,
             shouldInheritSubtasks: true,
@@ -1285,7 +1322,7 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
         actions$ = hot('-a', { a: action });
 
         taskService.getByIdOnce$.and.returnValue(of(mockTask));
-        taskRepeatCfgService.getTaskRepeatCfgById$.and.returnValue(
+        taskRepeatCfgService.getTaskRepeatCfgByIdAllowUndefined$.and.returnValue(
           of({ ...mockRepeatCfg, shouldInheritSubtasks: false }),
         );
 
@@ -1303,7 +1340,7 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
         actions$ = hot('-a', { a: action });
 
         taskService.getByIdOnce$.and.returnValue(of(mockTask));
-        taskRepeatCfgService.getTaskRepeatCfgById$.and.returnValue(
+        taskRepeatCfgService.getTaskRepeatCfgByIdAllowUndefined$.and.returnValue(
           of({
             ...mockRepeatCfg,
             shouldInheritSubtasks: true,
@@ -1330,7 +1367,7 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
         ];
 
         taskService.getByIdOnce$.and.returnValue(of(mockTask));
-        taskRepeatCfgService.getTaskRepeatCfgById$.and.returnValue(
+        taskRepeatCfgService.getTaskRepeatCfgByIdAllowUndefined$.and.returnValue(
           of({
             ...mockRepeatCfg,
             shouldInheritSubtasks: true,
@@ -1339,6 +1376,32 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
         );
         taskService.getTasksByRepeatCfgId$.and.returnValue(of([mockTask]));
         taskService.getByIdsLive$.and.returnValue(of([mockSubTask1, mockSubTask2]));
+
+        expectObservable(effects.autoSyncSubtaskTemplatesFromNewest$).toBe('--');
+      });
+    });
+
+    // #8715: the parent task can reference a repeat config that was already
+    // deleted (e.g. via cross-client sync). The lookup must not throw and
+    // crash the whole app — the effect should simply skip.
+    it('should not throw when the referenced repeat config was deleted (#8715)', () => {
+      testScheduler.run(({ hot, expectObservable }) => {
+        const action = addSubTask({
+          task: mockSubTask1,
+          parentId: 'parent-task-id',
+        });
+
+        actions$ = hot('-a', { a: action });
+
+        taskService.getByIdOnce$.and.returnValue(of(mockTask));
+        // config no longer exists -> non-throwing selector yields undefined
+        taskRepeatCfgService.getTaskRepeatCfgByIdAllowUndefined$.and.returnValue(
+          of(undefined),
+        );
+        // guard against regressing to the throwing selector (the #8715 root cause)
+        taskRepeatCfgService.getTaskRepeatCfgById$.and.returnValue(
+          throwError(() => new Error('Missing taskRepeatCfg')),
+        );
 
         expectObservable(effects.autoSyncSubtaskTemplatesFromNewest$).toBe('--');
       });
@@ -2906,6 +2969,108 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
         done();
       }, 0);
     });
+
+    // Editing a monthly anchor ("2nd Tuesday" -> "3rd Tuesday", or toggling
+    // last-day-of-month) changes which day the next occurrence lands on, just
+    // like editing the weekly weekday booleans does -- but the monthly anchor
+    // fields were missing from SCHEDULE_AFFECTING_FIELDS, so the live instance
+    // silently stayed on the old day.
+    it('reschedules the live instance when only the monthly nth-weekday anchor changes', () => {
+      const today = new Date();
+      const todayStr = getDbDateStr(today);
+
+      const liveTask: Task = {
+        ...mockTask,
+        isDone: false,
+        dueDay: todayStr,
+        created: today.getTime(),
+      };
+
+      const updatedCfg: TaskRepeatCfgCopy = {
+        ...mockRepeatCfg,
+        repeatCycle: 'MONTHLY',
+        repeatEvery: 1,
+        startDate: todayStr,
+        monthlyWeekOfMonth: 2,
+        monthlyWeekday: 2,
+      };
+      const expectedOccurrence = getNextRepeatOccurrence(updatedCfg as any, new Date(), {
+        inclusive: true,
+      })!;
+      const expectedDayStr = getDbDateStr(expectedOccurrence);
+
+      const action = updateTaskRepeatCfg({
+        taskRepeatCfg: {
+          id: 'repeat-cfg-id',
+          changes: { monthlyWeekOfMonth: 2, monthlyWeekday: 2 },
+        },
+      });
+
+      actions$ = of(action);
+      taskRepeatCfgService.getTaskRepeatCfgById$.and.returnValue(of(updatedCfg));
+      taskService.getTasksByRepeatCfgId$.and.returnValue(of([liveTask]));
+
+      const emitted: Action[] = [];
+      effects.rescheduleTaskOnRepeatCfgUpdate$.subscribe((result) =>
+        emitted.push(result),
+      );
+
+      expect(emitted).toEqual([
+        PlannerActions.planTaskForDay({ task: liveTask as any, day: expectedDayStr }),
+      ]);
+      expect(taskRepeatCfgService.updateTaskRepeatCfg).toHaveBeenCalledWith(
+        'repeat-cfg-id',
+        jasmine.objectContaining({ lastTaskCreationDay: expectedDayStr }),
+      );
+    });
+
+    it('reschedules the live instance when only monthlyLastDay changes', () => {
+      const today = new Date();
+      const todayStr = getDbDateStr(today);
+
+      const liveTask: Task = {
+        ...mockTask,
+        isDone: false,
+        dueDay: todayStr,
+        created: today.getTime(),
+      };
+
+      const updatedCfg: TaskRepeatCfgCopy = {
+        ...mockRepeatCfg,
+        repeatCycle: 'MONTHLY',
+        repeatEvery: 1,
+        startDate: todayStr,
+        monthlyLastDay: true,
+      };
+      const expectedOccurrence = getNextRepeatOccurrence(updatedCfg as any, new Date(), {
+        inclusive: true,
+      })!;
+      const expectedDayStr = getDbDateStr(expectedOccurrence);
+
+      const action = updateTaskRepeatCfg({
+        taskRepeatCfg: {
+          id: 'repeat-cfg-id',
+          changes: { monthlyLastDay: true },
+        },
+      });
+
+      actions$ = of(action);
+      taskRepeatCfgService.getTaskRepeatCfgById$.and.returnValue(of(updatedCfg));
+      taskService.getTasksByRepeatCfgId$.and.returnValue(of([liveTask]));
+
+      const emitted: Action[] = [];
+      effects.rescheduleTaskOnRepeatCfgUpdate$.subscribe((result) =>
+        emitted.push(result),
+      );
+
+      expect(emitted).toEqual([
+        PlannerActions.planTaskForDay({ task: liveTask as any, day: expectedDayStr }),
+      ]);
+      expect(taskRepeatCfgService.updateTaskRepeatCfg).toHaveBeenCalledWith(
+        'repeat-cfg-id',
+        jasmine.objectContaining({ lastTaskCreationDay: expectedDayStr }),
+      );
+    });
   });
 });
 
@@ -3962,6 +4127,50 @@ describe('TaskRepeatCfgEffects - Deterministic Date Scenarios', () => {
       // Critical: scheduleTask and reScheduleTask must NOT be called
       expect(taskService.scheduleTask).not.toHaveBeenCalled();
       expect(taskService.reScheduleTask).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Scenario: schedule edit before the day boundary (#3378)', () => {
+    it("keeps tonight's late-night instance when edited after midnight", (done) => {
+      // 01:00 on Jan 16 with a 05:00 day start is still logical Jan 15
+      jasmine.clock().mockDate(new Date(2025, 0, 16, 1, 0, 0));
+      TestBed.inject(DateService).setStartOfNextDayDiff('05:00');
+      const tonight = new Date(2025, 0, 16, 2, 0, 0).getTime();
+
+      const liveTask: Task = {
+        ...baseTask,
+        dueWithTime: tonight,
+        created: new Date(2025, 0, 15, 12, 0, 0).getTime(),
+      };
+      const cfg: TaskRepeatCfgCopy = {
+        ...baseRepeatCfg,
+        repeatCycle: 'DAILY',
+        repeatEvery: 1,
+        startDate: '2025-01-01',
+        lastTaskCreationDay: '2025-01-15',
+        startTime: '02:00',
+        remindAt: TaskReminderOptionId.AtStart,
+      };
+
+      actions$ = of(
+        updateTaskRepeatCfg({
+          taskRepeatCfg: { id: 'repeat-cfg-id', changes: { repeatEvery: 1 } },
+        }),
+      );
+      taskRepeatCfgService.getTaskRepeatCfgById$.and.returnValue(of(cfg));
+      taskService.getTasksByRepeatCfgId$.and.returnValue(of([liveTask]));
+
+      effects.rescheduleTaskOnRepeatCfgUpdate$.subscribe((result) => {
+        const scheduled = result as ReturnType<
+          typeof TaskSharedActions.scheduleTaskWithTime
+        >;
+        expect(scheduled.dueWithTime).toBe(tonight);
+        expect(taskRepeatCfgService.updateTaskRepeatCfg).toHaveBeenCalledWith(
+          'repeat-cfg-id',
+          jasmine.objectContaining({ lastTaskCreationDay: '2025-01-15' }),
+        );
+        done();
+      });
     });
   });
 });

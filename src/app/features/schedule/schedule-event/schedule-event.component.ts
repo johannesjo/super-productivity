@@ -42,6 +42,8 @@ import { TaskContextMenuComponent } from '../../tasks/task-context-menu/task-con
 import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 import { FH } from '../schedule.const';
 import { CalendarEventActionsService } from '../../calendar-integration/calendar-event-actions.service';
+import { isTouchActive } from '../../../util/input-intent';
+import { isLinkTarget } from '../../../util/dom-element';
 
 const FIVE_MINUTES_IN_MS = 5 * 60 * 1000;
 
@@ -130,7 +132,12 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
       evt.type === SVEType.SplitTask ||
       evt.type === SVEType.TaskPlannedForDay ||
       evt.type === SVEType.SplitTaskPlannedForDay ||
-      evt.type === SVEType.ScheduledTask
+      evt.type === SVEType.ScheduledTask ||
+      // continued segments carry the same task, so selecting and the context
+      // menu work on them too; dragging stays disabled via isDraggableSE()
+      // since only the head segment marks where the task starts
+      evt.type === SVEType.SplitTaskContinued ||
+      evt.type === SVEType.SplitTaskContinuedLast
     ) {
       return evt.data as TaskCopy;
     }
@@ -147,7 +154,7 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
 
   readonly scheduledClockStr = computed(() => {
     const evt = this.se();
-    const is12Hour = !this._dateTimeFormatService.is24HourFormat;
+    const is12Hour = !this._dateTimeFormatService.is24HourFormat();
     return getClockStringFromHours(
       is12Hour && evt.startHours > 12 ? evt.startHours - 12 : evt.startHours,
     );
@@ -159,7 +166,7 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
 
   readonly hoverTitle = computed(() => {
     const evt = this.se();
-    const is12Hour = !this._dateTimeFormatService.is24HourFormat;
+    const is12Hour = !this._dateTimeFormatService.is24HourFormat();
     const startClockStr = getClockStringFromHours(
       is12Hour && evt.startHours > 12 ? evt.startHours - 12 : evt.startHours,
     );
@@ -273,6 +280,7 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
       cancelAnimationFrame(this._measureRafId);
     }
     this._resizeObserver?.disconnect();
+    this._endResizeGesture?.();
   }
 
   private _scheduleTitleLineClampUpdate(): void {
@@ -364,8 +372,7 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
   });
 
   async clickHandler(event: MouseEvent): Promise<void> {
-    const target = event.target as HTMLElement | null;
-    if (target?.tagName === 'A' || target?.closest('a')) {
+    if (isLinkTarget(event.target)) {
       return; // Let link clicks propagate without opening the schedule event panel
     }
     // Prevent opening dialog when resizing or just finished resizing
@@ -382,13 +389,15 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
     } else if (
       evt.type === SVEType.RepeatProjection ||
       evt.type === SVEType.RepeatProjectionSplit ||
-      evt.type === SVEType.ScheduledRepeatProjection
+      evt.type === SVEType.ScheduledRepeatProjection ||
+      evt.type === SVEType.RepeatProjectionSplitContinued ||
+      evt.type === SVEType.RepeatProjectionSplitContinuedLast
     ) {
       const repeatCfg: TaskRepeatCfg = evt.data as TaskRepeatCfg;
       this._matDialog.open(DialogEditTaskRepeatCfgComponent, {
         data: {
           repeatCfg,
-          targetDate: (evt.id.includes('_') && evt.id.split('_')[1]) || undefined,
+          targetDate: evt.sourceOccurrenceDate ?? evt.plannedForDay,
         },
       });
     } else if (evt.type === SVEType.CalendarEvent) {
@@ -471,7 +480,9 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
         delay(50),
       )
       .subscribe((task) => {
-        this._store.dispatch(TaskSharedActions.deleteTask({ task }));
+        if (task) {
+          this._taskService.remove(task);
+        }
       });
   }
 
@@ -523,54 +534,71 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
   readonly _resizeHeight = signal('');
   private _startY = 0;
   private _startHeight = 0;
+  private _heightDelta = 0;
+  private _endResizeGesture: (() => void) | null = null;
 
   isResizable(): boolean {
     if (this.isResizeDisabled() || this.isDragPreview() || this.isMonthView()) {
       return false;
     }
 
+    // Not on touch. The handle is a 12px band along the bottom edge of every event —
+    // about 2mm on a phone, against a finger contact patch of 8-10mm. It cannot be hit
+    // on purpose, only by accident, which on a densely filled schedule turned every
+    // scroll swipe into a duration change (#9675). Estimates stay editable by tapping
+    // the event and using the task detail panel.
+    if (isTouchActive()) {
+      return false;
+    }
+
     const t = this.task();
     const evt = this.se();
-    // Allow resizing for all task types with a time estimate
+    // Allow resizing for all task types with a time estimate.
+    // NOT for continued segments: a split task already has a handle on its head,
+    // and SplitTaskContinuedLast is not reliably the final segment — every day
+    // slice of a multi-day scheduled task carries that type (see
+    // create-view-entries-for-block.ts), so the middle ones cannot grow at all.
     return (
       !!t &&
       (evt.type === SVEType.ScheduledTask ||
         evt.type === SVEType.Task ||
-        evt.type === SVEType.SplitTaskContinuedLast ||
         evt.type === SVEType.TaskPlannedForDay ||
         evt.type === SVEType.SplitTaskPlannedForDay) &&
       t.timeEstimate > 0
     );
   }
 
-  onResizeStart(event: MouseEvent | TouchEvent): void {
+  onResizeStart(event: MouseEvent): void {
     if (!this.isResizable()) return;
 
+    // Keep the gesture away from the host's cdkDrag: the handle resizes, the body moves.
     event.stopPropagation();
     event.preventDefault();
 
-    this._isResizing.set(true);
-
-    const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
-    this._startY = clientY;
+    this._endResizeGesture?.();
+    this._startY = event.clientY;
     this._startHeight = this._elRef.nativeElement.offsetHeight;
+    this._heightDelta = 0;
 
-    // Add event listeners for mouse/touch move and end
-    const moveHandler = (e: MouseEvent | TouchEvent): void => this._onResizeMove(e);
-    const endHandler = (): void => this._onResizeEnd(moveHandler, endHandler);
-
+    const moveHandler = (e: MouseEvent): void => this._onResizeMove(e);
+    const endHandler = (): void => this._onResizeEnd();
     document.addEventListener('mousemove', moveHandler);
     document.addEventListener('mouseup', endHandler);
-    document.addEventListener('touchmove', moveHandler);
-    document.addEventListener('touchend', endHandler);
+    this._endResizeGesture = () => {
+      document.removeEventListener('mousemove', moveHandler);
+      document.removeEventListener('mouseup', endHandler);
+      this._endResizeGesture = null;
+      this._isResizing.set(false);
+    };
+
+    this._isResizing.set(true);
   }
 
-  private _onResizeMove(event: MouseEvent | TouchEvent): void {
+  private _onResizeMove(event: MouseEvent): void {
     if (!this._isResizing()) return;
 
     event.preventDefault();
-    const clientY = 'touches' in event ? event.touches[0].clientY : event.clientY;
-    const deltaY = clientY - this._startY;
+    const deltaY = event.clientY - this._startY;
 
     // Calculate new height based on grid row height for snap-to-grid behavior
     const gridContainer = this._elRef.nativeElement.closest(
@@ -584,18 +612,20 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
       const newHeight = Math.max(rowHeight, this._startHeight + snappedDelta);
 
       // Update the element height temporarily for visual feedback
+      this._heightDelta = newHeight - this._startHeight;
       this._resizeHeight.set(newHeight + 'px');
     } else {
       // Fallback to original behavior
       const newHeight = Math.max(20, this._startHeight + deltaY);
+      this._heightDelta = newHeight - this._startHeight;
       this._resizeHeight.set(newHeight + 'px');
     }
   }
 
-  private _onResizeEnd(moveHandler: any, endHandler: any): void {
+  private _onResizeEnd(): void {
     if (!this._isResizing()) return;
 
-    this._isResizing.set(false);
+    this._endResizeGesture?.();
 
     // Set cooldown flag to prevent immediate click events
     this._justFinishedResizing.set(true);
@@ -603,19 +633,9 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
       this._justFinishedResizing.set(false);
     }, 200); // 200ms cooldown
 
-    // Remove event listeners
-    document.removeEventListener('mousemove', moveHandler);
-    document.removeEventListener('mouseup', endHandler);
-    document.removeEventListener('touchmove', moveHandler);
-    document.removeEventListener('touchend', endHandler);
-
-    // Calculate new duration based on height change
-    const currentHeight = this._elRef.nativeElement.offsetHeight;
-    const heightDelta = currentHeight - this._startHeight;
-
     // Convert height change to time change (based on grid row height)
     // Each row represents a time slice (FH rows per hour)
-    const timeChangeInMs = this._calculateTimeFromHeightDelta(heightDelta);
+    const timeChangeInMs = this._calculateTimeFromHeightDelta(this._heightDelta);
 
     const t = this.task();
     if (t && Math.abs(timeChangeInMs) > 30000) {

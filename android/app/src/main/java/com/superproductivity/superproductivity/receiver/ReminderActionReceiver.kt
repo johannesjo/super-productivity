@@ -44,7 +44,7 @@ class ReminderActionReceiver : BroadcastReceiver() {
 
         when (intent.action) {
             ACTION_SNOOZE -> {
-                Log.d(TAG, "Snooze 10m: notificationId=$notificationId, title=$title")
+                Log.d(TAG, "Snooze 10m: notificationId=$notificationId")
 
                 // Dismiss the notification
                 if (notificationId != -1) {
@@ -57,7 +57,7 @@ class ReminderActionReceiver : BroadcastReceiver() {
             }
 
             ACTION_SNOOZE_1H -> {
-                Log.d(TAG, "Snooze 1h: notificationId=$notificationId, title=$title")
+                Log.d(TAG, "Snooze 1h: notificationId=$notificationId")
 
                 // Dismiss the notification
                 if (notificationId != -1) {
@@ -104,7 +104,7 @@ class ReminderActionReceiver : BroadcastReceiver() {
             title, reminderType, newTriggerTime, useAlarmStyle, isOngoing,
         )
         // Queue for frontend to update NgRx state on next app open
-        ReminderSnoozeQueue.addSnoozeEvent(context, relatedId, newTriggerTime)
+        ReminderSnoozeQueue.addSnoozeEvent(context, relatedId, newTriggerTime, reminderType)
         Log.d(TAG, "Snoozed reminder to ${newTriggerTime}")
     }
 }

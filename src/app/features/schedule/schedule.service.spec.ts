@@ -2,7 +2,14 @@ import { TestBed } from '@angular/core/testing';
 import { signal } from '@angular/core';
 import { ScheduleService } from './schedule.service';
 import { DateService } from '../../core/date/date.service';
-import { provideMockStore } from '@ngrx/store/testing';
+import { getDbDateStr } from '../../util/get-db-date-str';
+import { findSpringForwardSunday } from '../tasks/dst.test-helper';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { selectStartOfNextDayDiffMs } from '../../root-store/app-state/app-state.selectors';
+import {
+  DEFAULT_TASK_REPEAT_CFG,
+  TaskRepeatCfg,
+} from '../task-repeat-cfg/task-repeat-cfg.model';
 import { selectTimelineTasks } from '../work-context/store/work-context.selectors';
 import { selectTaskRepeatCfgsWithAndWithoutStartTime } from '../task-repeat-cfg/store/task-repeat-cfg.selectors';
 import { selectTimelineConfig } from '../config/store/global-config.reducer';
@@ -87,6 +94,67 @@ describe('ScheduleService', () => {
       const lastDay = new Date(result[4]);
       expect(lastDay.getMonth()).toBe(1); // February
     });
+
+    it('should keep the window consecutive across a spring-forward day', () => {
+      // Same hazard as the planner window: +24h ms stepping from a
+      // late-evening anchor skips the 23h transition day.
+      const gap = findSpringForwardSunday(2026);
+      if (!gap) {
+        return;
+      }
+      jasmine.clock().install();
+      try {
+        const saturday = new Date(gap.sunday);
+        saturday.setDate(saturday.getDate() - 1);
+        saturday.setHours(23, 30, 0, 0);
+        jasmine.clock().mockDate(saturday);
+        const result = service.getDaysToShow(3, null);
+        expect(result[0]).toBe(getDbDateStr(saturday));
+        expect(result[1]).toBe(getDbDateStr(gap.sunday));
+      } finally {
+        jasmine.clock().uninstall();
+      }
+    });
+
+    it('should not mutate a provided reference date', () => {
+      const referenceDate = new Date(2028, 5, 15, 10, 0);
+      const before = referenceDate.getTime();
+      service.getDaysToShow(7, referenceDate);
+      expect(referenceDate.getTime()).toBe(before);
+    });
+
+    it('should start on the logical today between midnight and the start-of-next-day offset', () => {
+      // 00:30 on Jan 15 with a 04:00 start-of-next-day is logically still Jan
+      // 14; a window anchored on the raw clock would drop (logical) today's
+      // column right after midnight while todayStr() still names it.
+      jasmine.clock().install();
+      try {
+        jasmine.clock().mockDate(new Date(2026, 0, 15, 0, 30));
+        dateService.setStartOfNextDayDiff('04:00');
+        const result = service.getDaysToShow(3, null);
+        expect(result[0]).toBe('2026-01-14');
+        expect(result[1]).toBe('2026-01-15');
+      } finally {
+        jasmine.clock().uninstall();
+      }
+    });
+  });
+
+  describe('getDayClass', () => {
+    it('should ring the logical today between midnight and the start-of-next-day offset', () => {
+      // Same clock setup as the window specs: at 00:30 with a 04:00 offset the
+      // ring must sit on Jan 14, the column todayStr() names and the window
+      // anchor produces, not on calendar-today.
+      jasmine.clock().install();
+      try {
+        jasmine.clock().mockDate(new Date(2026, 0, 15, 0, 30));
+        dateService.setStartOfNextDayDiff('04:00');
+        expect(service.getDayClass('2026-01-14')).toContain('today');
+        expect(service.getDayClass('2026-01-15')).not.toContain('today');
+      } finally {
+        jasmine.clock().uninstall();
+      }
+    });
   });
 
   describe('getMonthDaysToShow', () => {
@@ -95,6 +163,21 @@ describe('ScheduleService', () => {
       const firstDayOfWeek = 1; // Monday
       const result = service.getMonthDaysToShow(numberOfWeeks, firstDayOfWeek);
       expect(result.length).toBe(numberOfWeeks * 7);
+    });
+
+    it('should show the logical month between midnight and the start-of-next-day offset', () => {
+      // 00:30 on Feb 1 with a 04:00 start-of-next-day is logically still Jan
+      // 31, so the grid must be January's (starting Mon Dec 29), not
+      // February's (starting Mon Jan 26).
+      jasmine.clock().install();
+      try {
+        jasmine.clock().mockDate(new Date(2026, 1, 1, 0, 30));
+        dateService.setStartOfNextDayDiff('04:00');
+        const result = service.getMonthDaysToShow(5, 1, null);
+        expect(result[0]).toBe('2025-12-29');
+      } finally {
+        jasmine.clock().uninstall();
+      }
     });
 
     it('should start with the configured first day of week when firstDayOfWeek is Monday (1)', () => {
@@ -225,6 +308,177 @@ describe('ScheduleService', () => {
       const lastDay = new Date(result[result.length - 1]);
       // With 5 weeks starting from late December, we should reach into February
       expect(lastDay.getMonth()).toBeGreaterThanOrEqual(0);
+    });
+
+    describe('full-month coverage (#9449)', () => {
+      const dayStr = (date: Date): string => dateService.todayStr(date.getTime());
+      const lastDayOfMonth = (year: number, month: number): Date =>
+        new Date(year, month + 1, 0);
+
+      // The derivation itself. Pinning at 6 spanned every month but left an
+      // empty row on most of them; deriving from available height is what
+      // #9449 was filed for. The month is the right input.
+      it('should derive 4 to 6 weeks, and never fewer than the month needs', () => {
+        // Feb 2027 is 28 days starting on a Monday, the only shape that fits
+        // in four rows under a Monday-first week.
+        expect(service.getMonthWeeksToShow(1, new Date(2027, 1, 15))).toBe(4);
+        // Aug 2026 starts on a Saturday: 5 leading days + 31 needs six rows.
+        expect(service.getMonthWeeksToShow(1, new Date(2026, 7, 15))).toBe(6);
+        // Sep 2026 is 30 days from a Tuesday: five rows is exact.
+        expect(service.getMonthWeeksToShow(1, new Date(2026, 8, 15))).toBe(5);
+      });
+
+      it('should never return a count that drops a day of the month', () => {
+        // The count and the grid it feeds have to agree for every pair, or a
+        // day gets no cell and therefore no events at all.
+        for (let monthOffset = 0; monthOffset < 24; monthOffset++) {
+          const reference = new Date(2027, monthOffset, 15);
+          const year = reference.getFullYear();
+          const month = reference.getMonth();
+          const last = dayStr(lastDayOfMonth(year, month));
+
+          for (let firstDayOfWeek = 0; firstDayOfWeek < 7; firstDayOfWeek++) {
+            const weeks = service.getMonthWeeksToShow(firstDayOfWeek, reference);
+            const context = `${year}-${month + 1}, firstDayOfWeek ${firstDayOfWeek}`;
+            expect(weeks).withContext(context).toBeGreaterThanOrEqual(4);
+            expect(weeks).withContext(context).toBeLessThanOrEqual(6);
+            expect(service.getMonthDaysToShow(weeks, firstDayOfWeek, reference))
+              .withContext(context)
+              .toContain(last);
+            // And not a row more than it needs.
+            expect(service.getMonthDaysToShow(weeks - 1, firstDayOfWeek, reference))
+              .withContext(context)
+              .not.toContain(last);
+          }
+        }
+      });
+
+      it('should include Mon 31 Aug 2026 for every first day of week', () => {
+        const aug31 = dayStr(new Date(2026, 7, 31));
+
+        for (let firstDayOfWeek = 0; firstDayOfWeek < 7; firstDayOfWeek++) {
+          const reference = new Date(2026, 7, 15);
+          const result = service.getMonthDaysToShow(
+            service.getMonthWeeksToShow(firstDayOfWeek, reference),
+            firstDayOfWeek,
+            reference,
+          );
+          expect(result).withContext(`firstDayOfWeek ${firstDayOfWeek}`).toContain(aug31);
+        }
+      });
+
+      it('should not reach 31 Aug 2026 with only 5 weeks — why August derives 6', () => {
+        // August 2026 starts on a Saturday, so the padded grid needs 6 rows.
+        // This is the shape the reported bug had: a shorter window silently
+        // stopped before the end of the month.
+        const result = service.getMonthDaysToShow(5, 1, new Date(2026, 7, 15));
+        expect(result).not.toContain(dayStr(new Date(2026, 7, 31)));
+      });
+
+      it('should span the whole month for every month/firstDayOfWeek combination', () => {
+        // 24 consecutive months from Jan 2027 covers every start-weekday and
+        // both a non-leap February (2027) and a leap one (2028).
+        for (let monthOffset = 0; monthOffset < 24; monthOffset++) {
+          const reference = new Date(2027, monthOffset, 15);
+          const year = reference.getFullYear();
+          const month = reference.getMonth();
+          const first = dayStr(new Date(year, month, 1));
+          const last = dayStr(lastDayOfMonth(year, month));
+
+          for (let firstDayOfWeek = 0; firstDayOfWeek < 7; firstDayOfWeek++) {
+            const result = service.getMonthDaysToShow(
+              service.getMonthWeeksToShow(firstDayOfWeek, reference),
+              firstDayOfWeek,
+              reference,
+            );
+            const context = `${year}-${month + 1}, firstDayOfWeek ${firstDayOfWeek}`;
+            expect(result).withContext(context).toContain(first);
+            expect(result).withContext(context).toContain(last);
+          }
+        }
+      });
+    });
+  });
+
+  describe('createScheduleDaysComputed', () => {
+    it('anchors now into the displayed day when the wall clock has passed it', () => {
+      // The day panel shows logical today, which respects the start-of-next-day
+      // offset. Between midnight and that offset the wall clock is already past
+      // that day's end, and an unanchored now pushes every entry out of the only
+      // rendered day.
+      const dayStr = '2026-01-20';
+      const clock = new Date(2026, 0, 21, 3, 0).getTime();
+      spyOn(Date, 'now').and.callFake(() => clock);
+      const buildSpy = spyOn(service, 'buildScheduleDays').and.returnValue([]);
+
+      service.createScheduleDaysComputed(signal([dayStr]))();
+
+      const params = buildSpy.calls.mostRecent().args[0];
+      expect(params.now).toBe(new Date(2026, 0, 20, 0, 0, 0, 0).getTime());
+      expect(params.realNow).toBe(clock);
+    });
+
+    it('keeps the live clock while it still sits inside the displayed day', () => {
+      const dayStr = '2026-01-20';
+      const clock = new Date(2026, 0, 20, 9, 30).getTime();
+      spyOn(Date, 'now').and.callFake(() => clock);
+      const buildSpy = spyOn(service, 'buildScheduleDays').and.returnValue([]);
+
+      service.createScheduleDaysComputed(signal([dayStr]))();
+
+      expect(buildSpy.calls.mostRecent().args[0].now).toBe(clock);
+    });
+
+    it('projects a repeat time before the day start into the night and follows offset changes (#3378)', () => {
+      const store = TestBed.inject(MockStore);
+      const cfg: TaskRepeatCfg = {
+        ...DEFAULT_TASK_REPEAT_CFG,
+        id: 'late-night',
+        title: 'Late night',
+        repeatCycle: 'DAILY',
+        repeatEvery: 1,
+        startDate: '2026-01-01',
+        startTime: '02:00',
+        lastTaskCreationDay: '2026-01-19',
+      };
+      store.overrideSelector(selectTaskRepeatCfgsWithAndWithoutStartTime, {
+        withStartTime: [cfg],
+        withoutStartTime: [],
+      });
+      store.overrideSelector(selectStartOfNextDayDiffMs, 0);
+      store.refreshState();
+      // 01:00 on the 21st is still logical day 20 with a 05:00 day start
+      const clock = new Date(2026, 0, 21, 1, 0).getTime();
+      spyOn(Date, 'now').and.callFake(() => clock);
+      const days = service.createScheduleDaysComputed(
+        signal(['2026-01-20', '2026-01-21']),
+      );
+      const repeatStarts = (): number[] =>
+        days()
+          .flatMap((day) => day.entries)
+          .filter((e) => e.id.includes(cfg.id))
+          .map((e) => e.start);
+
+      expect(repeatStarts()).toEqual([
+        new Date(2026, 0, 20, 2, 0).getTime(),
+        new Date(2026, 0, 21, 2, 0).getTime(),
+      ]);
+
+      store.overrideSelector(selectStartOfNextDayDiffMs, 5 * 60 * 60 * 1000);
+      store.refreshState();
+
+      // day 20's night is calendar day 21; day 21's night is out of view
+      expect(repeatStarts()).toEqual([new Date(2026, 0, 21, 2, 0).getTime()]);
+    });
+
+    it('falls back to the wall clock when no day is displayed', () => {
+      const clock = new Date(2026, 0, 20, 9, 30).getTime();
+      spyOn(Date, 'now').and.callFake(() => clock);
+      const buildSpy = spyOn(service, 'buildScheduleDays').and.returnValue([]);
+
+      service.createScheduleDaysComputed(signal([]))();
+
+      expect(buildSpy.calls.mostRecent().args[0].now).toBe(clock);
     });
   });
 

@@ -1,5 +1,6 @@
 import {
   APP_INITIALIZER,
+  provideAppInitializer,
   enableProdMode,
   EnvironmentInjector,
   ErrorHandler,
@@ -13,11 +14,11 @@ import { registerLocaleData } from '@angular/common';
 
 import { environment } from './environments/environment';
 import { IS_ELECTRON } from './app/app.constants';
+import { DEFAULT_LANGUAGE, LocaleImportFns } from './app/core/locale.constants';
 import {
-  DEFAULT_LANGUAGE,
-  DEFAULT_LOCALE_DATA,
-  LocaleImportFns,
-} from './app/core/locale.constants';
+  registerDefaultLocale,
+  registerNavigatorLocale,
+} from './app/core/locale-registration';
 import { IS_ANDROID_WEB_VIEW } from './app/util/is-android-web-view';
 import { androidInterface } from './app/features/android/android-interface';
 import { AndroidBackButtonService } from './app/features/android/android-back-button.service';
@@ -26,11 +27,16 @@ import { DataInitStateService } from './app/core/data-init/data-init-state.servi
 // Type definitions for window.ea are in ./app/core/window-ea.d.ts
 import { App as CapacitorApp } from '@capacitor/app';
 import { GlobalErrorHandler } from './app/core/error-handler/global-error-handler.class';
-import { bootstrapApplication, BrowserModule } from '@angular/platform-browser';
+import {
+  bootstrapApplication,
+  BrowserModule,
+  REMOVE_STYLES_ON_COMPONENT_DESTROY,
+} from '@angular/platform-browser';
 import {
   HTTP_INTERCEPTORS,
   provideHttpClient,
   withInterceptorsFromDi,
+  withXhr,
 } from '@angular/common/http';
 import { MarkdownModule, MARKED_OPTIONS, SANITIZE } from 'ngx-markdown';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
@@ -46,6 +52,9 @@ import {
 } from '@angular/material/core';
 import { MatDatepickerIntl } from '@angular/material/datepicker';
 import { FormlyConfigModule } from './app/ui/formly-config.module';
+import { provideFormlyConfig } from '@ngx-formly/core';
+import { PRIORITY_ICON_PRESET_SELECT_FORMLY_CONFIG } from './app/features/config/priority-icon-preset-select/priority-icon-preset-select.component';
+import { AGENT_CAPTURE_SETTINGS_FORMLY_CONFIG } from './app/features/tasks/agent-capture/agent-capture-settings/agent-capture-settings.component';
 import { markedOptionsFactory } from './app/ui/marked-options-factory';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { DEFAULT_TODAY_TAG_COLOR } from './app/features/work-context/work-context.const';
@@ -64,6 +73,7 @@ import { StoreModule, Store } from '@ngrx/store';
 import { META_REDUCERS } from './app/root-store/meta/meta-reducer-registry';
 import { setOperationCaptureService } from './app/root-store/meta/task-shared-meta-reducers';
 import { OperationCaptureService } from './app/op-log/capture/operation-capture.service';
+import { LocalDraftService } from './app/core/draft/local-draft.service';
 import { EncryptionPasswordDialogOpenerService } from './app/imex/sync/encryption-password-dialog-opener.service';
 import { DataInitService } from './app/core/data-init/data-init.service';
 import { EffectsModule } from '@ngrx/effects';
@@ -84,6 +94,11 @@ import { Log, SyncLog } from './app/core/log';
 import { setLegacyKdfWarningHandler } from '@sp/sync-core';
 import { OperationWriteFlushService } from './app/op-log/sync/operation-write-flush.service';
 import { TaskService } from './app/features/tasks/task.service';
+import { LocalRestApiFeatureBridgeService } from './app/features/tasks/local-rest-api-feature-bridge.service';
+import { LOCAL_REST_API_FEATURE_BRIDGE } from './app/core/electron/local-rest-api-feature-bridge';
+import { LOCAL_REST_API_FEATURE_ROUTES } from './app/core/electron/local-rest-api-feature-routes';
+import { LocalRestApiTaskRepeatCfgRoutesService } from './app/features/task-repeat-cfg/local-rest-api-task-repeat-cfg-routes.service';
+import { LocalRestApiAssistantCaptureRoutesService } from './app/features/tasks/assistant-capture/local-rest-api-assistant-capture-routes.service';
 import { PluginOAuthRedirectHandler } from './app/plugins/oauth/plugin-oauth-redirect.handler';
 import { OAuthCallbackHandlerService } from './app/imex/sync/oauth-callback-handler.service';
 import { GlobalConfigService } from './app/features/config/global-config.service';
@@ -93,6 +108,8 @@ import { CustomDateAdapter } from './app/core/date-time-format/custom-date-adapt
 import { TranslateMatDatepickerIntl } from './app/core/date-time-format/translate-mat-datepicker-intl';
 import { suspendAudioContext, unlockAudioContext } from './app/util/audio-context';
 import { NetworkRetryInterceptorService } from './app/core/http/network-retry-interceptor.service';
+import { routeCapacitorAppUrl } from './app/core/app-url-open-router';
+import { AppUriQuickActionsService } from './app/core-ui/app-uri-actions/app-uri-quick-actions.service';
 
 if (environment.production || environment.stage) {
   enableProdMode();
@@ -120,8 +137,24 @@ setLegacyKdfWarningHandler(() => {
   );
 });
 
+// Register default locale data before bootstrap: LocaleDatePipe is pure, so a
+// date rendered before registration would cache Angular's built-in en-US
+// resolution for the session (bootstrapApplication's .then runs after first
+// render, which is too late).
+registerDefaultLocale();
+
 bootstrapApplication(AppComponent, {
   providers: [
+    // Await the browser's own regional locale (en-AU, en-CA, … — navigator-only
+    // variants backing "System default") before first render, for the same
+    // pure-pipe reason as above. Never rejects and self-limits to a short
+    // timeout, so a failed or stalled chunk load degrades to the default locale
+    // instead of failing bootstrap or holding up first render indefinitely.
+    provideAppInitializer(() => registerNavigatorLocale()),
+    // Feature-owned formly types, registered here rather than in ui/'s
+    // FormlyConfigModule so ui/ does not import from features/.
+    provideFormlyConfig(PRIORITY_ICON_PRESET_SELECT_FORMLY_CONFIG),
+    provideFormlyConfig(AGENT_CAPTURE_SETTINGS_FORMLY_CONFIG),
     // Provide configuration for TranslateHttpLoader
     {
       provide: TRANSLATE_HTTP_LOADER_CONFIG,
@@ -194,7 +227,7 @@ bootstrapApplication(AppComponent, {
       CdkDropListGroup,
     ),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withXhr(), withInterceptorsFromDi()),
     {
       provide: HTTP_INTERCEPTORS,
       useClass: NetworkRetryInterceptorService,
@@ -205,6 +238,20 @@ bootstrapApplication(AppComponent, {
     ShortTimePipe,
     { provide: DateAdapter, useClass: CustomDateAdapter },
     { provide: MatDatepickerIntl, useClass: TranslateMatDatepickerIntl },
+    {
+      provide: LOCAL_REST_API_FEATURE_BRIDGE,
+      useClass: LocalRestApiFeatureBridgeService,
+    },
+    {
+      provide: LOCAL_REST_API_FEATURE_ROUTES,
+      useClass: LocalRestApiTaskRepeatCfgRoutesService,
+      multi: true,
+    },
+    {
+      provide: LOCAL_REST_API_FEATURE_ROUTES,
+      useClass: LocalRestApiAssistantCaptureRoutesService,
+      multi: true,
+    },
     {
       provide: MAT_DATE_FORMATS,
       useFactory: (dateTimeFormatService: DateTimeFormatService): MatDateFormats => {
@@ -239,6 +286,13 @@ bootstrapApplication(AppComponent, {
       ? [{ provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: { autoFocus: false } }]
       : []),
     provideAnimationsAsync(),
+    // Keep component <style> elements once added. Removing them when the last
+    // instance is destroyed means every snack and dialog adds its stylesheets on
+    // open and removes them on close; each change makes the browser rebuild its
+    // style rules and recalc styles, which stutters the open/close animations.
+    // Component styles must therefore never rely on being removed: no unscoped
+    // `::ng-deep` rules.
+    { provide: REMOVE_STYLES_ON_COMPONENT_DESTROY, useValue: false },
     {
       provide: MATERIAL_ANIMATIONS,
       deps: [GlobalConfigService],
@@ -294,15 +348,58 @@ bootstrapApplication(AppComponent, {
       deps: [PluginOAuthRedirectHandler],
       multi: true,
     },
-    // Ensure OAuthCallbackHandlerService is instantiated at bootstrap on native platforms.
-    // Its constructor registers Capacitor's appUrlOpen listener that bridges
-    // both Dropbox and plugin OAuth redirect callbacks.
+    // Ensure OAuthCallbackHandlerService is instantiated at bootstrap on native
+    // platforms. Its constructor subscribes to the OAuth URLs routed from the
+    // single appUrlOpen listener below; it does not register a listener itself.
     {
       provide: APP_INITIALIZER,
       useFactory: (_handler: OAuthCallbackHandlerService) => {
         return () => {};
       },
       deps: [OAuthCallbackHandlerService],
+      multi: true,
+    },
+    // Ensure AppUriQuickActionsService is instantiated at bootstrap. Like the
+    // handler above it subscribes to a stream fed by the single appUrlOpen
+    // listener below rather than registering its own; nothing else injects it,
+    // so without this a quick action would have no consumer at all.
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (_handler: AppUriQuickActionsService) => {
+        return () => {};
+      },
+      deps: [AppUriQuickActionsService],
+      multi: true,
+    },
+    // Retire only the obsolete device-local journal. Never await deletion:
+    // an older tab can hold its connection open until that tab closes.
+    provideAppInitializer(() => {
+      try {
+        localStorage.removeItem('SUP_CONFLICT_JOURNAL_CLEARED_BEFORE');
+      } catch (error) {
+        Log.err('Failed to remove obsolete conflict journal marker', error);
+      }
+      try {
+        const request = indexedDB.deleteDatabase('SUP_CONFLICT_JOURNAL');
+        request.onerror = () =>
+          Log.err('Failed to retire conflict journal', request.error);
+        request.onblocked = () =>
+          Log.log('Conflict journal retirement awaits an older tab');
+      } catch (error) {
+        Log.err('Failed to retire conflict journal', error);
+      }
+    }),
+    // Remove crash-leftover note drafts past their retention window on app
+    // start. Synchronous
+    // localStorage sweep over a handful of keys; swallows its own errors.
+    {
+      provide: APP_INITIALIZER,
+      useFactory: (localDraft: LocalDraftService) => {
+        return () => {
+          localDraft.pruneOnStart();
+        };
+      },
+      deps: [LocalDraftService],
       multi: true,
     },
     // Note: ImmediateUploadService now initializes itself in constructor
@@ -312,7 +409,7 @@ bootstrapApplication(AppComponent, {
 }).then((appRef) => {
   appInjector = appRef.injector;
 
-  // Expose store + HydrationStateService for e2e tests in dev/stage builds.
+  // Expose store and persistence helpers for E2E tests in non-production builds.
   // Used by the screenshot pipeline to flip locale / customTheme inside a
   // single session (see e2e/store-screenshots/helpers.ts) and by #6230
   // recurring-task tests. Stripped from production via the env guard.
@@ -322,6 +419,13 @@ bootstrapApplication(AppComponent, {
       (window as unknown as { __e2eTestHelpers?: unknown }).__e2eTestHelpers = {
         store: storeRef,
         hydrationState: appRef.injector.get(m.HydrationStateService),
+        flushPendingWrites: () =>
+          appRef.injector.get(OperationWriteFlushService).flushPendingWrites(),
+        compact: async () => {
+          const { OperationLogCompactionService } =
+            await import('./app/op-log/persistence/operation-log-compaction.service');
+          return appRef.injector.get(OperationLogCompactionService).compact();
+        },
       };
     });
   }
@@ -338,10 +442,10 @@ bootstrapApplication(AppComponent, {
   // Initialize touch fix for Material menus
   initializeMatMenuTouchFix();
 
-  // Register default locale immediately (statically imported, no network fetch)
-  registerLocaleData(DEFAULT_LOCALE_DATA, DEFAULT_LANGUAGE);
-
-  // Lazily load and register remaining locales during idle time
+  // Lazily load and register remaining locales during idle time. The
+  // navigator-only regional variants are NOT loaded here — only the entry
+  // matching the browser culture language is ever needed, and the app
+  // initializer above already registered it before first render.
   const registerRemainingLocales = (): void => {
     Object.keys(LocaleImportFns).forEach((locale) => {
       if (locale !== DEFAULT_LANGUAGE) {
@@ -356,13 +460,31 @@ bootstrapApplication(AppComponent, {
 
   // Lazily load and register focus-mode effects during idle time.
   // Safe to defer: focus-mode requires explicit user activation (clicking the
-  // focus button), which cannot happen before idle callback fires.
+  // focus button), which cannot happen before idle callback fires. Restoring a
+  // session killed in the background waits for data load, so it is not raced either.
   const registerLazyEffects = async (): Promise<void> => {
-    const { FocusModeEffects } =
-      await import('./app/features/focus-mode/store/focus-mode.effects');
+    const [{ FocusModeEffects }, sessionPersistence] = await Promise.all([
+      import('./app/features/focus-mode/store/focus-mode.effects'),
+      IS_IOS_NATIVE
+        ? import('./app/features/focus-mode/store/focus-mode-session-persistence.effects')
+        : null,
+    ]);
     const envInjector = appRef.injector.get(EnvironmentInjector);
     createEnvironmentInjector(
-      [importProvidersFrom(EffectsModule.forFeature([FocusModeEffects]))],
+      [
+        importProvidersFrom(
+          // Session restore relies on FocusModeEffects (completion, logging),
+          // so it registers after them. iOS only: it kills backgrounded
+          // WebViews; Android recovers from its native foreground service, and
+          // on desktop a closed app means the user ended the session.
+          EffectsModule.forFeature([
+            FocusModeEffects,
+            ...(sessionPersistence
+              ? [sessionPersistence.FocusModeSessionPersistenceEffects]
+              : []),
+          ]),
+        ),
+      ],
       envInjector,
     );
   };
@@ -524,11 +646,28 @@ if (IS_IOS_NATIVE) {
       BackgroundTask.finish({ taskId });
     });
   });
+}
 
-  // Handle app URL open (for OAuth callbacks, deep links, etc.)
+// Handle app URL open (for OAuth callbacks, deep links, etc.) on iOS *and*
+// Android: both declare VIEW intent filters for the task-action hosts
+// (create-task / complete-task) and the plugin OAuth callbacks, so gating
+// this on iOS alone leaves those routes with no listener at all.
+//
+// This must be the ONLY `appUrlOpen` listener in the app. `@capacitor/app`
+// emits a cold-start URL with `retainUntilConsumed: true`, and Capacitor
+// drains and clears those retained arguments when the *first* listener for
+// the event is added (`CAPPlugin.m`, `addEventListener` →
+// `sendRetainedArgumentsForEvent`). A second listener added later never
+// receives it, so registering one here and another in
+// OAuthCallbackHandlerService meant whichever came second silently lost
+// every cold-launch URL. Instead, route the single event to every consumer.
+if (IS_NATIVE_PLATFORM) {
   CapacitorApp.addListener('appUrlOpen', (event) => {
-    Log.log('iOS app URL open', event.url);
-    // Handle OAuth callbacks or deep links here
-    // The URL will be passed to the app when opened via custom scheme
+    const route = routeCapacitorAppUrl(event.url);
+    // Never log the raw URL — it carries the task title/notes for task
+    // actions and an auth code for OAuth callbacks, and log history is
+    // exportable in bug reports. Log only that the event fired and how it
+    // was routed.
+    Log.log('Native app URL open', { route });
   });
 }

@@ -47,11 +47,6 @@ describe('SchemaMigrationService', () => {
     it('should return the current schema version', () => {
       expect(service.getCurrentVersion()).toBe(CURRENT_SCHEMA_VERSION);
     });
-
-    it('should return 2 as the current version', () => {
-      // Current implementation is at version 2 after migration from MiscConfig to TasksConfig
-      expect(service.getCurrentVersion()).toBe(2);
-    });
   });
 
   describe('getMigrations', () => {
@@ -76,12 +71,12 @@ describe('SchemaMigrationService', () => {
     it('should return true for cache with undefined schemaVersion (defaults to 1)', () => {
       const cache = createMockCache(undefined);
       // When schemaVersion is undefined, it defaults to 1
-      // Since CURRENT_SCHEMA_VERSION is 2, migration is needed
+      // Since CURRENT_SCHEMA_VERSION is 3, migration is needed
       expect(service.needsMigration(cache)).toBeTrue();
     });
 
     it('should return true for cache with older version', () => {
-      const cache = createMockCache(1); // Version 1 is older than current version 2
+      const cache = createMockCache(1); // Version 1 is older than current version 3
       expect(service.needsMigration(cache)).toBeTrue();
     });
   });
@@ -95,7 +90,7 @@ describe('SchemaMigrationService', () => {
     it('should return true for operation with undefined schemaVersion (defaults to 1)', () => {
       const op = createMockOperation('op-1');
       op.schemaVersion = undefined as any;
-      // Since CURRENT_SCHEMA_VERSION is 2, migration is needed
+      // Since CURRENT_SCHEMA_VERSION is 3, migration is needed
       expect(service.operationNeedsMigration(op)).toBeTrue();
     });
 
@@ -147,6 +142,13 @@ describe('SchemaMigrationService', () => {
       // Should return the operation (with undefined treated as version 1)
       expect(result).not.toBeNull();
     });
+
+    it('should reject a present non-integer schema version at the migration boundary', () => {
+      const op = createMockOperation('malformed-op');
+      op.schemaVersion = '2' as unknown as number;
+
+      expect(() => service.migrateOperation(op)).toThrowError(/schemaVersion/);
+    });
   });
 
   describe('migrateOperations', () => {
@@ -180,6 +182,33 @@ describe('SchemaMigrationService', () => {
       const result = service.migrateOperations(ops);
 
       expect(result.map((op) => op.id)).toEqual(['op-a', 'op-b', 'op-c']);
+    });
+
+    it('should preserve unique migrated identities when a v1 config operation splits', () => {
+      const op = createMockOperation('config-op', 1);
+      op.actionType = ActionType.GLOBAL_CONFIG_UPDATE_SECTION;
+      op.entityType = 'GLOBAL_CONFIG';
+      op.entityId = 'misc';
+      op.entityIds = ['misc'];
+      op.payload = {
+        actionPayload: {
+          sectionKey: 'misc',
+          sectionCfg: {
+            isConfirmBeforeTaskDelete: true,
+            unrelatedMiscSetting: 'keep-me',
+          },
+        },
+        entityChanges: [],
+      };
+
+      const result = service.migrateOperations([op]);
+
+      expect(result.map((migrated) => migrated.id)).toEqual([
+        'config-op_misc',
+        'config-op_tasks',
+      ]);
+      expect(result.map((migrated) => migrated.entityId)).toEqual(['misc', 'tasks']);
+      expect(result.map((migrated) => migrated.entityIds)).toEqual([['misc'], ['tasks']]);
     });
   });
 

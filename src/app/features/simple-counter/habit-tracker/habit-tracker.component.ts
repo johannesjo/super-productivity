@@ -11,6 +11,7 @@ import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { SimpleCounter, SimpleCounterType } from '../simple-counter.model';
 import { SimpleCounterService } from '../simple-counter.service';
 import { DateService } from '../../../core/date/date.service';
+import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { T } from '../../../t.const';
 import { TranslateModule } from '@ngx-translate/core';
 import { MatButtonModule } from '@angular/material/button';
@@ -30,6 +31,7 @@ interface HabitDay {
   str: string;
   date: Date;
   dow: number;
+  weekdayLabel?: string;
 }
 
 @Component({
@@ -56,7 +58,12 @@ export class HabitTrackerComponent {
   private _simpleCounterService = inject(SimpleCounterService);
   private _dateTimeFormatService = inject(DateTimeFormatService);
   private _dateService = inject(DateService);
+  private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
   private _matDialog = inject(MatDialog);
+
+  // Exposed so templates can pass the reactive locale to the now-pure
+  // `localeDate` pipe, preserving re-render on a locale change.
+  readonly locale = this._dateTimeFormatService.currentLocale;
 
   showDisabled = signal(false);
 
@@ -68,15 +75,23 @@ export class HabitTrackerComponent {
 
   days = computed(() => {
     const days: HabitDay[] = [];
-    const today = new Date();
+    const isoTextLocale = this._dateTimeFormatService.isoTextLocale();
+    const weekdayFormatter = isoTextLocale
+      ? new Intl.DateTimeFormat(isoTextLocale, { weekday: 'short' })
+      : null;
+    // Day-change dependency, so the window rolls over instead of freezing at first
+    // render (#9072). Also covers sleep and tab throttling, via #5464.
+    this._globalTrackingIntervalService.todayDateStr();
+    const today = this._dateService.getLogicalTodayDate();
     const offset = this.dayOffset();
     for (let i = 6; i >= 0; i--) {
-      const d = new Date();
+      const d = new Date(today);
       d.setDate(today.getDate() - i + offset);
       days.push({
         str: this._dateService.todayStr(d),
         date: d,
         dow: d.getDay(),
+        weekdayLabel: weekdayFormatter?.format(d),
       });
     }
     return days;
@@ -110,7 +125,9 @@ export class HabitTrackerComponent {
     const first = days[0].date;
     const last = days[days.length - 1].date;
 
-    const locale = this._dateTimeFormatService.currentLocale();
+    // Spelled-out `month: 'short'` name follows the UI language under the ISO
+    // 8601 option (the `sv` sentinel would otherwise leak Swedish). #8987 f/u.
+    const locale = this._dateTimeFormatService.textLocale();
     const formatOptions: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
     const firstStr = first.toLocaleDateString(locale, formatOptions);
     const lastStr = last.toLocaleDateString(locale, formatOptions);
@@ -137,8 +154,11 @@ export class HabitTrackerComponent {
       counter.type === SimpleCounterType.ClickCounter ||
       counter.type === SimpleCounterType.RepeatedCountdownReminder
     ) {
-      // Increment for ClickCounters on left click
-      const newVal = currentValue + 1;
+      // Simple completion habits toggle, so a mis-click can be undone by clicking
+      // again (#9970). Goal-based counters keep incrementing past their goal;
+      // exact corrections there go through the right-click/long-press dialog.
+      const newVal =
+        this.isSimpleCompletion(counter) && currentValue > 0 ? 0 : currentValue + 1;
       this._simpleCounterService.setCounterForDate(counter.id, date, newVal);
     } else {
       // For StopWatch or others, open dialog on left click
@@ -209,9 +229,13 @@ export class HabitTrackerComponent {
   }
 
   isSimpleCompletion(counter: SimpleCounter): boolean {
-    // Simple completion: ClickCounter type with no specific goal or goal of 1
+    // Simple completion: a habit tracked as a streak whose goal is a single click.
+    // Streak tracking is required because the settings dialog clears streakMinValue
+    // whenever streaks are off, which would otherwise render plain tallies (the
+    // shipped "Coffee Counter" default) as a checkmark and hide their count.
     return (
       counter.type === SimpleCounterType.ClickCounter &&
+      !!counter.isTrackStreaks &&
       (!counter.streakMinValue || counter.streakMinValue === 1)
     );
   }

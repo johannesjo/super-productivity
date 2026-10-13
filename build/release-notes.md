@@ -1,69 +1,41 @@
 For all current downloads, package links, and platform-specific notes: [check the wiki](https://github.com/super-productivity/super-productivity/wiki/2.01-Downloads-and-Install).
 
-### Highlights
+### New features
 
-- Redesigned the idle dialog with a choice-first flow.
-- Overhauled the Focus Mode screen UX.
-- Added checklist progress, bulk actions, and notes editor UX improvements for tasks.
-- Added a project completion experience.
-- Improved boards project selection with multi-select and sidebar support.
+- Set numeric task priorities with icon presets.
+- Drag selected tasks between sections and projects, and select multiple tasks in the mobile planner.
+- Find projects and tags in search.
+- Undo task unscheduling and preview the next recurring task and inherited subtasks.
+- Added App Auto Track and TickTick CSV import plugins, plus Caffeine Tracker to the community plugin list.
+- Moved Redmine and Nextcloud Deck integrations to plugins.
+- Simplified first-run setup with an offer to track your first task.
+- Custom styles.css changes now reload automatically.
 
-### Search, Notes & Shortcuts
+### Mobile and reminders
 
-- Added a completed-task filter to search.
-- Included note content in global search and improved folder search support.
-- Added keyboard shortcuts to the fullscreen note editor.
-- Added optional shortcuts for scheduling and a shortcut to set task deadlines.
-- Improved long-word wrapping, soft line breaks, and checklist labels in markdown notes.
+- Android: receive native deadline reminders up to one week ahead; reminders are rescheduled as exact alarms when permission is granted.
+- Android: fixed double-counted time, lost time after app termination or restart, background Pomodoro tracking, and missing focus notifications.
+- iOS: share links and text to your inbox, and recover focus sessions after a web view restart.
+- Session endings no longer steal focus; Windows reminders bring the window forward without taking focus.
 
-### Calendar, Planning & Reminders
+### Sync and backups
 
-- Improved calendar design and recurrent task calendar design.
-- Allowed writable plugin calendar events to be rescheduled from Schedule.
-- Fixed overlapping same-time tasks in Schedule.
-- Fixed recurring tasks being double-counted in Today and planner views.
-- Added hover tooltips to reminder popups and restored imported legacy task reminders.
-- Made recurring CalDAV plugin occurrence edits and deletes safer and quieter.
+- Fixed sync issues that could lose tracked time or overwrite concurrent task edits.
+- Fixed conflicts involving task restores and bulk archiving, note deletions, habit edits, and list reordering.
+- Improved concurrent OneDrive writes, WebDAV upload handling, and recovery from interrupted mobile sync downloads.
+- Failed desktop backups are no longer recorded as successful; backups still invalid after repair are rejected.
+- Kept HTTP error URLs and bodies out of exported logs.
 
-### Sync, Backup & Data Safety
+### Fixes and polish
 
-- Improved CalDAV calendar discovery and handling of missing DAV response headers.
-- Preserved entity order during sync data repair.
-- Made “Use Server Data” recoverable and guarded the destructive choice.
-- Kept local sync and schedule settings local during sync.
-- Added Android automatic backup restore and automatic backup file limit configuration.
-- Surfaced native WebDAV errors more clearly.
+- Fixed calendar month navigation, unwanted jumps to the current time, and all-day events spanning multiple dates.
+- Preserved subtask due dates when duplicating tasks and corrected recurring times before a custom day start.
+- Saved pending note edits before switching tasks, fixed repeated checklist insertion, and kept hover controls clear of note text.
+- Improved CalDAV/iCloud discovery, mobile OneDrive sign-in, and GitLab, Gitea, and Azure DevOps integrations.
+- Improved dialog keyboard focus, mobile onboarding hints, and settings search.
+- Updated Romanian, Brazilian Portuguese, Polish, and Vietnamese translations, plus localized planner labels and heatmap dates.
+- Reduced planner processing during time tracking and removed looping Flowtime animations.
 
-### Integrations & Plugins
+### Self-hosting
 
-- Added Redmine issue search by ID, non-Latin search support, and optional project identifiers for global search.
-- Added Jira issue priority display and fixed auto-import pagination, proxy handling, transitions, and yesterday worklog time.
-- Added configurable GitHub issue provider API base URL.
-- Added Azure DevOps auto-import limit configuration.
-- Included Trello workspace boards in the picker.
-- Migrated Gitea and Linear issue providers to plugins.
-- Showed plugin authors and returned plugin dialog results.
-
-### Desktop & Android
-
-- Restored BMP/AVIF desktop background image support.
-- Improved desktop sync-folder handling and tray title settings.
-- Added a day/night Android launch splash background.
-- Fixed Android WebView white screens on resume.
-- Improved Android timer notifications and background behavior.
-- Made Android back button close popups and added Vanadium WebView support.
-- Deferred mobile notification permission prompts until first use.
-
-### Security & Privacy
-
-- Fixed stored XSS/RCE-related vulnerabilities in notes, note images, plugin nodeExecution, and CSP handling.
-- Hardened desktop URL, file path, backup loading, and local file URL handling.
-- Reduced logging of local paths, issue payloads, provider configs, archived task data, dragged task objects, and other sensitive data.
-- Hardened plugin iframe isolation and nodeExecution grants.
-
-### Performance & Polish
-
-- Reduced per-task store subscription and selector overhead.
-- Improved heatmap and Super Sync account badge contrast.
-- Improved task, project, tag, habit, navigation, work-context, and calendar UI details.
-- Fixed task menu keyboard handling, subtask shortcut behavior, project menu typeahead, and kanban in-progress tag cleanup.
+- Added ARM64 SuperSync server images, versioned release images, configurable trusted proxy ranges and daily cleanup time, and fixes for fresh deployments.

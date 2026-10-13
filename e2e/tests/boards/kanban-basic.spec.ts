@@ -1,4 +1,5 @@
 import { test, expect } from '../../fixtures/test.fixture';
+import { waitForStatePersistence } from '../../utils/waits';
 
 /**
  * Boards/Kanban E2E Tests
@@ -10,104 +11,39 @@ import { test, expect } from '../../fixtures/test.fixture';
  */
 
 test.describe('Boards/Kanban', () => {
-  test('should navigate to boards view', async ({ page, workViewPage }) => {
-    await workViewPage.waitForTaskList();
-
-    // Navigate to boards view
-    await page.goto('/#/boards');
-    await page.waitForLoadState('networkidle');
-
-    // Verify URL
-    await expect(page).toHaveURL(/boards/);
-
-    // Verify boards component is visible
-    await expect(page.locator('boards')).toBeVisible({ timeout: 10000 });
-  });
-
-  test('should display default board', async ({ page, workViewPage }) => {
-    await workViewPage.waitForTaskList();
-
-    // Navigate to boards view
-    await page.goto('/#/boards');
-    await page.waitForLoadState('networkidle');
-
-    // Verify boards component is visible
-    await expect(page.locator('boards')).toBeVisible({ timeout: 10000 });
-
-    // Look for board tabs (at least one board should exist by default)
-    const tabGroup = page.locator('mat-tab-group');
-    await expect(tabGroup).toBeVisible();
-  });
-
   test('should create a new board', async ({ page, workViewPage, testPrefix }) => {
     await workViewPage.waitForTaskList();
+    const boardTitle = `${testPrefix}-Test Board`;
 
     // Navigate to boards view
     await page.goto('/#/boards');
     await page.waitForLoadState('networkidle');
 
     await expect(page.locator('boards')).toBeVisible({ timeout: 10000 });
+    const boardTab = page.getByRole('tab', { name: boardTitle, exact: true });
+    await expect(boardTab).toHaveCount(0);
 
-    // Click the add button (+ tab or add board button)
-    // Look for the last tab which is typically the "add" tab
+    // The last tab opens the inline add-board form.
     const addTab = page.locator('mat-tab-group [role="tab"]').last();
-    await addTab.waitFor({ state: 'visible', timeout: 5000 });
+    await expect(addTab).toBeVisible();
     await addTab.click();
 
-    // Should open board edit form
-    const boardEditForm = page.locator('board-edit, dialog-board-edit');
-    const formVisible = await boardEditForm
-      .isVisible({ timeout: 5000 })
-      .catch(() => false);
+    const boardEditForm = page.locator('board-edit');
+    await expect(boardEditForm).toBeVisible();
+    await boardEditForm.getByRole('textbox', { name: 'Title' }).fill(boardTitle);
 
-    if (formVisible) {
-      // Fill in board name
-      const nameInput = page.locator(
-        'input[formcontrolname="title"], input[name="title"]',
-      );
-      const inputVisible = await nameInput
-        .isVisible({ timeout: 3000 })
-        .catch(() => false);
+    const saveBtn = boardEditForm.getByRole('button', { name: 'Save' });
+    await expect(saveBtn).toBeEnabled();
+    await saveBtn.click();
 
-      if (inputVisible) {
-        await nameInput.fill(`${testPrefix}-Test Board`);
-
-        // Save the board
-        const saveBtn = page.locator('button:has-text("Save"), button[type="submit"]');
-        await saveBtn.click();
-
-        // Wait for form to close
-        await page.waitForTimeout(500);
-      }
-    }
-
-    // Verify we're still on the boards page
+    await expect(boardTab).toBeVisible();
     await expect(page).toHaveURL(/boards/);
-  });
 
-  test('should show board columns', async ({ page, workViewPage }) => {
-    await workViewPage.waitForTaskList();
-
-    // Navigate to boards view
-    await page.goto('/#/boards');
-    await page.waitForLoadState('networkidle');
+    await waitForStatePersistence(page);
+    await page.reload();
 
     await expect(page.locator('boards')).toBeVisible({ timeout: 10000 });
-
-    // Wait for board to load
-    await page.waitForTimeout(500);
-
-    // Look for board panels/columns
-    const boardPanel = page.locator('board-panel, .board-panel');
-    const hasPanels = await boardPanel
-      .first()
-      .isVisible({ timeout: 5000 })
-      .catch(() => false);
-
-    if (hasPanels) {
-      const panelCount = await boardPanel.count();
-      expect(panelCount).toBeGreaterThan(0);
-    }
+    await expect(page.getByRole('tab', { name: boardTitle, exact: true })).toBeVisible();
   });
 
   test('should allow navigation back to work view from boards', async ({
@@ -129,30 +65,5 @@ test.describe('Boards/Kanban', () => {
     // Verify we're back at the work view
     await expect(page).toHaveURL(/tag\/TODAY/);
     await expect(page.locator('task-list').first()).toBeVisible();
-  });
-
-  test('should persist board selection across navigation', async ({
-    page,
-    workViewPage,
-  }) => {
-    await workViewPage.waitForTaskList();
-
-    // Navigate to boards
-    await page.goto('/#/boards');
-    await page.waitForLoadState('networkidle');
-
-    // Use first() to avoid strict mode violation during animations
-    await expect(page.locator('boards').first()).toBeVisible({ timeout: 10000 });
-
-    // Navigate away
-    await page.goto('/#/schedule');
-    await page.waitForLoadState('networkidle');
-
-    // Navigate back to boards
-    await page.goto('/#/boards');
-    await page.waitForLoadState('networkidle');
-
-    // Verify boards view loads again
-    await expect(page.locator('boards').first()).toBeVisible({ timeout: 10000 });
   });
 });

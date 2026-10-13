@@ -54,15 +54,6 @@ export abstract class LocalFileSyncBase implements FileSyncProvider<
 
   protected abstract getFilePath(targetPath: string): Promise<string>;
 
-  async listFiles(dirPath: string): Promise<string[]> {
-    this.logger.normal(`${LocalFileSyncBase.LB}.${this.listFiles.name}()`);
-    if (!this.fileAdapter.listFiles) {
-      throw new Error('FileAdapter does not support listFiles');
-    }
-    const fullPath = await this.getFilePath(dirPath);
-    return this.fileAdapter.listFiles(fullPath);
-  }
-
   async getFileRev(
     targetPath: string,
     _localRev: string | null,
@@ -128,10 +119,16 @@ export abstract class LocalFileSyncBase implements FileSyncProvider<
     });
 
     try {
-      if (!isForceOverwrite && revToMatch) {
+      // Best-effort conditional write. The FileAdapter abstraction has no
+      // cross-process compare-and-swap primitive, so this cannot close the
+      // read→write race on a network/cloud-mirrored folder. It still rejects
+      // stale updates, vanished targets, and create collisions observed before
+      // the write. Local file sync is therefore documented as single-writer /
+      // backup-only rather than a multi-device transport.
+      if (!isForceOverwrite) {
         try {
           const existingFile = await this.downloadFile(targetPath);
-          if (existingFile.rev !== revToMatch) {
+          if (revToMatch === null || existingFile.rev !== revToMatch) {
             this.logger.critical(
               `${LocalFileSyncBase.LB}.${this.uploadFile.name}() rev mismatch`,
               { targetPath },
@@ -139,7 +136,11 @@ export abstract class LocalFileSyncBase implements FileSyncProvider<
             throw new UploadRevToMatchMismatchAPIError();
           }
         } catch (err) {
-          if (!(err instanceof RemoteFileNotFoundAPIError)) {
+          if (err instanceof RemoteFileNotFoundAPIError) {
+            if (revToMatch !== null) {
+              throw new UploadRevToMatchMismatchAPIError();
+            }
+          } else {
             throw err;
           }
         }

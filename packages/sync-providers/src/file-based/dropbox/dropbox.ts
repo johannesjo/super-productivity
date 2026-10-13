@@ -32,6 +32,13 @@ export interface DropboxCfg {
 
 export interface DropboxPrivateCfg {
   encryptKey?: string;
+  /**
+   * Durable per-provider record that the user enabled encryption, kept
+   * separately from the key so a silently dropped `encryptKey` stays
+   * detectable (GHSA-9544-hjjr-fg8h). Absent on pre-fix configs — read as
+   * `isEncryptionEnabled ?? !!encryptKey`.
+   */
+  isEncryptionEnabled?: boolean;
   accessToken: string;
   refreshToken: string;
 }
@@ -201,33 +208,13 @@ export class Dropbox implements FileSyncProvider<
     revToMatch: string | null,
     isForceOverwrite: boolean = false,
   ): Promise<{ rev: string }> {
-    let effectiveRev = revToMatch;
-
-    // If no rev provided and not force overwrite, get current rev first
-    if (!effectiveRev && !isForceOverwrite) {
-      try {
-        const current = await this.getFileRev(targetPath, '');
-        effectiveRev = current.rev;
-        this._deps.logger.normal(
-          `${Dropbox.L}.uploadFile got current rev for conditional upload`,
-          { targetPath, hasRev: !!effectiveRev },
-        );
-      } catch (e) {
-        if (!(e instanceof RemoteFileNotFoundAPIError)) {
-          throw e;
-        }
-        // File doesn't exist - proceed without rev (will create new)
-        this._deps.logger.normal(`${Dropbox.L}.uploadFile file does not exist`, {
-          targetPath,
-        });
-      }
-    }
-
+    // Preserve create-only intent. Fetching a newer rev here would overwrite a
+    // concurrent writer that appeared after the caller observed a missing file.
     const r = await this._withTokenRefresh(() =>
       this._api.upload({
         path: this._getPath(targetPath),
         data: dataStr,
-        revToMatch: effectiveRev,
+        revToMatch,
         isForceOverwrite,
         targetPath,
       }),
@@ -260,27 +247,6 @@ export class Dropbox implements FileSyncProvider<
 
       if (this._isUnauthorizedError(e)) {
         throw new AuthFailSPError('Dropbox 401 removeFile', targetPath);
-      }
-
-      throw e;
-    }
-  }
-
-  async listFiles(dirPath: string): Promise<string[]> {
-    this._deps.logger.normal(`${Dropbox.L}.listFiles()`, { dirPath });
-    try {
-      // DropboxApi.listFiles now returns full paths, so no need to prepend _getPath
-      return await this._withTokenRefresh(() =>
-        this._api.listFiles(this._getPath(dirPath), dirPath),
-      );
-    } catch (e) {
-      if (this._isPathNotFoundError(e)) {
-        // If the directory doesn't exist, return empty array
-        return [];
-      }
-
-      if (this._isUnauthorizedError(e)) {
-        throw new AuthFailSPError('Dropbox 401 listFiles', dirPath);
       }
 
       throw e;

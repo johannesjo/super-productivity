@@ -1,11 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import {
   AuthFailSPError,
+  HttpNotOkAPIError,
   RemoteFileNotFoundAPIError,
   TooManyRequestsAPIError,
   UploadRevToMatchMismatchAPIError,
 } from '../../../src/errors';
 import {
+  Dropbox,
   type DropboxCfg,
   type DropboxDeps,
   type DropboxPrivateCfg,
@@ -489,6 +491,54 @@ describe('DropboxApi', () => {
     });
   });
 
+  describe('upload integrity verification', () => {
+    beforeEach(() => {
+      const existingConfig: DropboxPrivateCfg = {
+        accessToken: 'test-access-token',
+        refreshToken: 'test-refresh-token',
+        encryptKey: 'test-key',
+      };
+      (credentialStore.load as ReturnType<typeof vi.fn>).mockResolvedValue(
+        existingConfig,
+      );
+    });
+
+    it('resolves when the stored byte size matches the uploaded data', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ rev: 'new-rev', size: 4 }),
+      } as Response);
+
+      const result = await dropboxApi.upload({
+        path: '/test.json',
+        data: 'test', // 4 bytes
+        isForceOverwrite: true,
+      });
+
+      expect(result.rev).toBe('new-rev');
+    });
+
+    it('throws UploadRevToMatchMismatchAPIError when an ASCII payload is truncated', async () => {
+      fetchSpy.mockResolvedValue({
+        ok: true,
+        // Dropbox accepted a partial body: stored fewer bytes than we sent.
+        json: () => Promise.resolve({ rev: 'new-rev', size: 2 }),
+      } as Response);
+
+      await expect(
+        dropboxApi.upload({
+          path: '/test.json',
+          data: 'test', // 4 ASCII bytes
+          isForceOverwrite: true,
+        }),
+      ).rejects.toThrow(UploadRevToMatchMismatchAPIError);
+    });
+
+    // Branch logic (size absent, multi-byte skip) is covered directly in
+    // verify-upload-size.spec.ts; these two cases only assert the wiring —
+    // that upload() reads result.size and runs the check.
+  });
+
   describe('getTokensFromAuthCode', () => {
     it('should exchange auth code for tokens', async () => {
       fetchSpy.mockResolvedValue({
@@ -521,6 +571,37 @@ describe('DropboxApi', () => {
       expect(body).toContain('code=test-auth-code');
       expect(body).toContain('code_verifier=test-code-verifier');
       expect(body).toContain('grant_type=authorization_code');
+    });
+
+    it('preserves response metadata when the token exchange fails', async () => {
+      const headers = new Headers();
+      headers.set('X-Dropbox-Request-Id', 'dbx-request-123');
+      const response = new Response('gateway timeout', {
+        status: 504,
+        statusText: 'Gateway Timeout',
+        headers,
+      });
+      fetchSpy.mockResolvedValue(response);
+
+      let thrown: HttpNotOkAPIError | undefined;
+      try {
+        await dropboxApi.getTokensFromAuthCode(
+          'test-auth-code',
+          'test-code-verifier',
+          null,
+        );
+      } catch (error) {
+        if (error instanceof HttpNotOkAPIError) {
+          thrown = error;
+        }
+      }
+
+      expect(thrown).toBeDefined();
+      expect(thrown?.response).toBe(response);
+      expect(thrown?.message).toBe('HTTP 504 Gateway Timeout');
+      expect(thrown?.response.headers.get('X-Dropbox-Request-Id')).toBe(
+        'dbx-request-123',
+      );
     });
 
     it('should throw error for invalid token response', async () => {
@@ -812,5 +893,49 @@ describe('DropboxApi Native Platform Routing', () => {
         dropboxApi.download({ path: '/test/nonexistent.json' }),
       ).rejects.toThrow(RemoteFileNotFoundAPIError);
     });
+  });
+});
+
+// Exercise the public provider AND its API encoder: auto-v3 folder creation
+// relies on null meaning create-only. Dropbox has no browser E2E harness.
+describe('Dropbox provider conditional creation', () => {
+  it('does not turn a new-file write into an update of concurrent remote data', async () => {
+    const { deps, fetchSpy, credentialStore } = makeDeps();
+    vi.mocked(credentialStore.load).mockResolvedValue({
+      accessToken: 'token',
+      refreshToken: 'refresh',
+    });
+    let remote = 'pf_2__{"version":2,"state":{"task":{"ids":["remote-task"]}}}';
+    const original = remote;
+    fetchSpy.mockImplementation(async (url: string, init: RequestInit) => {
+      if (url.endsWith('/get_metadata')) {
+        return new Response(JSON.stringify({ rev: 'concurrent-v2-rev' }), {
+          status: 200,
+        });
+      }
+      const args = JSON.parse(new Headers(init.headers).get('Dropbox-API-Arg')!) as {
+        mode: Record<string, string>;
+      };
+      if (args.mode['.tag'] === 'add') {
+        return new Response(JSON.stringify({ error_summary: 'path/conflict/file/...' }), {
+          status: 409,
+        });
+      }
+      remote = String(init.body);
+      return new Response(JSON.stringify({ rev: 'overwritten', size: remote.length }), {
+        status: 200,
+      });
+    });
+    const provider = new Dropbox({ appKey: 'test-key', basePath: '/' }, deps);
+    await expect(
+      provider.uploadFile(
+        'sync-data.json',
+        'pf_3__{"version":3,"format":"split"}',
+        null,
+        false,
+      ),
+    ).rejects.toThrow(UploadRevToMatchMismatchAPIError);
+    expect(remote).toBe(original);
+    expect(fetchSpy).toHaveBeenCalledTimes(1);
   });
 });

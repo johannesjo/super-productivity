@@ -31,6 +31,7 @@ import { LS } from '../../../core/persistence/storage-keys.const';
 import { MatIcon } from '@angular/material/icon';
 import { TranslatePipe } from '@ngx-translate/core';
 import { passesCalendarEventRegexFilter } from '../../calendar-integration/calendar-event-regex-filter';
+import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 
 @Component({
   selector: 'issue-panel-calendar-agenda',
@@ -53,7 +54,12 @@ export class IssuePanelCalendarAgendaComponent {
 
   dropListService = inject(DropListService);
   private _issueService = inject(IssueService);
+  private _dateTimeFormatService = inject(DateTimeFormatService);
   private _loadId = 0;
+
+  // Exposed so the template can pass the reactive locale to the now-pure
+  // `localeDate` pipe, preserving re-render on a locale change.
+  readonly locale = this._dateTimeFormatService.currentLocale;
 
   issueProvider = input.required<IssueProvider>();
   error = signal<string | undefined>(undefined);
@@ -80,7 +86,7 @@ export class IssuePanelCalendarAgendaComponent {
       throw new Error('Issue Provider and Search Result Type dont match');
     }
 
-    Log.log('Add issue', item);
+    Log.log('Add issue', { issueType: item.issueType, issueId: item.issueData.id });
 
     this._issueService.addTaskFromIssue({
       issueDataReduced: item.issueData,

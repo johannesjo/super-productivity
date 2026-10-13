@@ -1,4 +1,5 @@
 import {
+  BOARD_TIMEFRAME_MAX_DAYS,
   adjustDateToBoardTimeframe,
   matchesBoardDateTimeframe,
   resolveBoardDateTimeframeRange,
@@ -9,6 +10,7 @@ import { BoardDateTimeframeCfg } from './boards.model';
 describe('board date timeframe filtering', () => {
   const todayStr = '2026-03-18';
   const startOfNextDayDiffMs = 0;
+  const firstDayOfWeek = 1;
 
   const matches = (
     timeframe: BoardDateTimeframeCfg,
@@ -19,6 +21,7 @@ describe('board date timeframe filtering', () => {
       dateOnly: value.day,
       timestamp: value.timestamp,
       todayStr,
+      firstDayOfWeek,
       startOfNextDayDiffMs,
     });
 
@@ -68,13 +71,65 @@ describe('board date timeframe filtering', () => {
     ).toBeTrue();
   });
 
-  it('resolves next week as the next ISO calendar week', () => {
-    expect(
+  it('resolves next week from the first day of week', () => {
+    const nextWeek = (today: string, firstDay: number): unknown =>
       resolveBoardDateTimeframeRange({
         timeframe: { type: 'nextWeek' },
-        todayStr,
+        todayStr: today,
+        firstDayOfWeek: firstDay,
+      });
+    // 2026-03-18 is a Wednesday.
+    expect(nextWeek(todayStr, 1)).toEqual({ start: '2026-03-23', end: '2026-03-29' });
+    expect(nextWeek(todayStr, 0)).toEqual({ start: '2026-03-22', end: '2026-03-28' });
+    expect(nextWeek(todayStr, 6)).toEqual({ start: '2026-03-21', end: '2026-03-27' });
+    // On the first day of the week itself, next week starts 7 days later.
+    expect(nextWeek('2026-03-23', 1)).toEqual({ start: '2026-03-30', end: '2026-04-05' });
+    expect(nextWeek('2026-03-22', 0)).toEqual({ start: '2026-03-29', end: '2026-04-04' });
+    // Across a year boundary.
+    expect(nextWeek('2026-12-30', 1)).toEqual({ start: '2027-01-04', end: '2027-01-10' });
+  });
+
+  it('resolves next month across a year boundary', () => {
+    expect(
+      resolveBoardDateTimeframeRange({
+        timeframe: { type: 'nextMonth' },
+        todayStr: '2026-12-15',
+        firstDayOfWeek,
       }),
-    ).toEqual({ start: '2026-03-23', end: '2026-03-29' });
+    ).toEqual({ start: '2027-01-01', end: '2027-01-31' });
+  });
+
+  it('rejects day counts above the cap instead of producing invalid dates', () => {
+    for (const type of ['nextNDays', 'atLeastNDaysFuture'] as const) {
+      expect(
+        resolveBoardDateTimeframeRange({
+          timeframe: { type, days: BOARD_TIMEFRAME_MAX_DAYS + 1 },
+          todayStr,
+          firstDayOfWeek,
+        }),
+      )
+        .withContext(type)
+        .toBeNull();
+      expect(sanitizeBoardDateTimeframeCfg({ type, days: 1e9 }))
+        .withContext(type)
+        .toBeUndefined();
+      expect(
+        adjustDateToBoardTimeframe({
+          timeframe: { type, days: 1e9 },
+          currentDate: todayStr,
+          todayStr,
+          firstDayOfWeek,
+        }),
+      )
+        .withContext(type)
+        .toBeNull();
+    }
+    expect(
+      sanitizeBoardDateTimeframeCfg({
+        type: 'atLeastNDaysFuture',
+        days: BOARD_TIMEFRAME_MAX_DAYS,
+      }),
+    ).toEqual({ type: 'atLeastNDaysFuture', days: BOARD_TIMEFRAME_MAX_DAYS });
   });
 
   it('resolves next month as the next calendar month', () => {
@@ -82,6 +137,7 @@ describe('board date timeframe filtering', () => {
       resolveBoardDateTimeframeRange({
         timeframe: { type: 'nextMonth' },
         todayStr,
+        firstDayOfWeek,
       }),
     ).toEqual({ start: '2026-04-01', end: '2026-04-30' });
   });
@@ -124,6 +180,7 @@ describe('board date timeframe filtering', () => {
       resolveBoardDateTimeframeRange({
         timeframe: { type: 'customDate', customDate: '2026-02-31' },
         todayStr,
+        firstDayOfWeek,
       }),
     ).toBeNull();
     expect(
@@ -134,18 +191,21 @@ describe('board date timeframe filtering', () => {
           customEnd: '2026-04-02',
         },
         todayStr,
+        firstDayOfWeek,
       }),
     ).toBeNull();
     expect(
       resolveBoardDateTimeframeRange({
         timeframe: { type: 'customRange' },
         todayStr,
+        firstDayOfWeek,
       }),
     ).toBeNull();
     expect(
       resolveBoardDateTimeframeRange({
         timeframe: { type: 'nextNDays', days: 0 },
         todayStr,
+        firstDayOfWeek,
       }),
     ).toBeNull();
   });
@@ -209,6 +269,7 @@ describe('board date timeframe filtering', () => {
         timeframe: { type: 'nextNDays', days: 3 },
         currentDate: '2026-03-17',
         todayStr,
+        firstDayOfWeek,
       }),
     ).toBe('2026-03-18');
     expect(
@@ -216,6 +277,7 @@ describe('board date timeframe filtering', () => {
         timeframe: { type: 'nextNDays', days: 3 },
         currentDate: '2026-03-19',
         todayStr,
+        firstDayOfWeek,
       }),
     ).toBe('2026-03-19');
     expect(
@@ -223,6 +285,7 @@ describe('board date timeframe filtering', () => {
         timeframe: { type: 'nextNDays', days: 3 },
         currentDate: '2026-03-25',
         todayStr,
+        firstDayOfWeek,
       }),
     ).toBe('2026-03-20');
   });
@@ -233,6 +296,7 @@ describe('board date timeframe filtering', () => {
         timeframe: { type: 'atLeastNDaysFuture', days: 3 },
         currentDate: null,
         todayStr,
+        firstDayOfWeek,
       }),
     ).toBe('2026-03-21');
   });
@@ -243,6 +307,7 @@ describe('board date timeframe filtering', () => {
         timeframe: { type: 'today' },
         timestamp: new Date(2026, 2, 19, 2, 30).getTime(),
         todayStr,
+        firstDayOfWeek,
         startOfNextDayDiffMs: 4 * 60 * 60 * 1000,
       }),
     ).toBeTrue();

@@ -3,12 +3,11 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  computed,
   DestroyRef,
   ElementRef,
-  HostBinding,
   HostListener,
   inject,
-  Input,
   input,
   OnDestroy,
   OnInit,
@@ -23,6 +22,7 @@ import { IS_HYBRID_DEVICE } from '../../../util/is-mouse-primary';
 import { DRAG_DELAY_FOR_TOUCH } from '../../../app.constants';
 import { T } from '../../../t.const';
 import { TaskContextMenuComponent } from '../../tasks/task-context-menu/task-context-menu.component';
+import { TaskPriorityIndicatorComponent } from '../../tasks/task-priority-indicator/task-priority-indicator.component';
 import { MatIcon } from '@angular/material/icon';
 import { TagListComponent } from '../../tag/tag-list/tag-list.component';
 import { InlineInputComponent } from '../../../ui/inline-input/inline-input.component';
@@ -31,6 +31,42 @@ import { hasLinkHints, RenderLinksPipe } from '../../../ui/pipes/render-links.pi
 import { DoneToggleComponent } from '../../../ui/done-toggle/done-toggle.component';
 import { SwipeBlockComponent } from '../../../ui/swipe-block/swipe-block.component';
 import { TranslatePipe } from '@ngx-translate/core';
+import { TaskMultiSelectService } from '../../tasks/task-multi-select.service';
+import { TASK_CARD_LIST } from '../../tasks/task-card-list.token';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { checkKeyCombo } from '../../../util/check-key-combo';
+import { MatDialog } from '@angular/material/dialog';
+import { DialogScheduleTaskComponent } from '../dialog-schedule-task/dialog-schedule-task.component';
+import { DialogDeadlineComponent } from '../../tasks/dialog-deadline/dialog-deadline.component';
+import { DialogTimeEstimateComponent } from '../../tasks/dialog-time-estimate/dialog-time-estimate.component';
+import { Store } from '@ngrx/store';
+import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
+import { DateService } from '../../../core/date/date.service';
+import { DateAdapter } from '@angular/material/core';
+import { getNextWeekDayOffset } from '../../../util/get-next-week-day-offset';
+import { getDbDateStr } from '../../../util/get-db-date-str';
+import { combineDateAndTime } from '../../../util/combine-date-and-time';
+import { millisecondsDiffToRemindOption } from '../../tasks/util/remind-option-to-milliseconds';
+import { PlannerActions } from '../store/planner.actions';
+import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import {
+  getTaskDeleteConfirmData,
+  isTaskDeleteConfirmRequired,
+} from '../../tasks/util/get-task-delete-confirm';
+import { first } from 'rxjs/operators';
+import { isInputElement, isLinkTarget } from '../../../util/dom-element';
+import { isMultiSelectModifierEvent } from '../../../util/is-multi-select-modifier-event';
+import { parseDbDateStr } from '../../../util/parse-db-date-str';
+import {
+  moveTaskDownInTodayList,
+  moveTaskToBottomInTodayList,
+  moveTaskToTopInTodayList,
+  moveTaskUpInTodayList,
+} from '../../work-context/store/work-context-meta.actions';
+import { WorkContextType } from '../../work-context/work-context.model';
+import { TODAY_TAG } from '../../tag/tag.const';
+import { ADD_TASK_INLINE_BTN_SELECTOR } from '../add-task-inline/add-task-inline.const';
+import { getNextPlannerAddButton } from '../get-next-planner-add-button';
 
 @Component({
   selector: 'planner-task',
@@ -43,31 +79,63 @@ import { TranslatePipe } from '@ngx-translate/core';
     TagListComponent,
     InlineInputComponent,
     TaskContextMenuComponent,
+    TaskPriorityIndicatorComponent,
     MsToStringPipe,
     RenderLinksPipe,
     DoneToggleComponent,
     SwipeBlockComponent,
     TranslatePipe,
   ],
+  /* eslint-disable @typescript-eslint/naming-convention */
+  host: {
+    // Planner and Boards opt in; scheduled-list cards keep their existing behavior.
+    '[attr.data-task-id]': 'focusable() ? task().id : null',
+    '[attr.data-task-selectable]': 'focusable() ? "true" : null',
+    '[attr.tabindex]': 'focusable() ? "0" : null',
+    '[class.isDone]': 'task().isDone',
+    '[class.isDragReady]': 'isDragReady()',
+    '[class.isCurrent]': 'isCurrent()',
+    '[class.isMultiSelected]': 'isMultiSelected()',
+  },
+  /* eslint-enable @typescript-eslint/naming-convention */
 })
 export class PlannerTaskComponent implements OnInit, OnDestroy, AfterViewInit {
   private _taskService = inject(TaskService);
   private _cd = inject(ChangeDetectorRef);
   private _destroyRef = inject(DestroyRef);
   private _elementRef = inject(ElementRef);
-  get titleHasLinks(): boolean {
-    const title = this.task?.title;
-    return !!title && hasLinkHints(title);
-  }
+  private _multiSelect = inject(TaskMultiSelectService);
+  private _cardList = inject(TASK_CARD_LIST, { optional: true });
+  private _configService = inject(GlobalConfigService);
+  private _matDialog = inject(MatDialog);
+  private _store = inject(Store);
+  private _dateService = inject(DateService);
+  private _dateAdapter = inject(DateAdapter);
+  private _isTaskDeleteTriggered = false;
+  private _isDestroyed = false;
+  private _completionFocusFallback?: {
+    id: string | null;
+    element: HTMLElement | null;
+  };
 
-  // TODO: Skipped for migration because:
-  //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
-  //  and migrating would break narrowing currently.
-  @Input({ required: true }) task!: TaskCopy;
+  readonly task = input.required<TaskCopy>();
+
+  readonly titleHasLinks = computed<boolean>(() => {
+    const title = this.task().title;
+    return !!title && hasLinkHints(title);
+  });
 
   // TODO remove
   readonly day = input<string | undefined>();
   readonly tagsToHide = input<string[]>();
+  // Containers opt in explicitly; TASK_CARD_LIST supplies board-specific movement.
+  readonly focusable = input<boolean>(false);
+  readonly isMultiSelected = computed(() =>
+    this.focusable() ? this._multiSelect.selectedIds().has(this.task().id) : false,
+  );
+  readonly isTouchSelecting = computed(
+    () => this.focusable() && this._multiSelect.isTouchSelectionMode(),
+  );
 
   readonly T = T;
   readonly isTouchActive = isTouchActive;
@@ -84,25 +152,28 @@ export class PlannerTaskComponent implements OnInit, OnDestroy, AfterViewInit {
     read: TaskContextMenuComponent,
   });
 
-  @HostBinding('class.isDone')
-  get isDone(): boolean {
-    return this.task.isDone;
-  }
-
-  @HostBinding('class.isDragReady')
-  get isDragReadyClass(): boolean {
-    return this.isDragReady();
-  }
-
-  @HostBinding('class.isCurrent')
-  get isCurrent(): boolean {
-    return this.task.id === this._taskService.currentTaskId();
-  }
+  readonly isCurrent = computed<boolean>(
+    () => this.task().id === this._taskService.currentTaskId(),
+  );
 
   @HostListener('contextmenu', ['$event'])
   onContextMenu(event: MouseEvent): void {
     if (isTouchActive()) {
       event.preventDefault();
+      return;
+    }
+    if (this.focusable() && this._multiSelect.has(this.task().id)) {
+      event.preventDefault();
+      event.stopPropagation();
+      const rect = (
+        this._elementRef.nativeElement as HTMLElement
+      ).getBoundingClientRect();
+      const halfWidth = rect.width / 2;
+      const halfHeight = rect.height / 2;
+      this._multiSelect.requestMenuOpen({
+        x: rect.left + halfWidth,
+        y: rect.top + halfHeight,
+      });
       return;
     }
     this.openContextMenu(event);
@@ -111,28 +182,78 @@ export class PlannerTaskComponent implements OnInit, OnDestroy, AfterViewInit {
   @HostListener('click', ['$event'])
   async clickHandler(event: MouseEvent): Promise<void> {
     const target = event.target as HTMLElement | null;
-    if (target?.tagName === 'A' || target?.closest('a')) {
+    if (this.isTouchSelecting() || isLinkTarget(target)) {
       return;
     }
-    if (this.task) {
-      // Use bottom panel on mobile, dialog on desktop
-      this._taskService.setSelectedId(this.task.id);
+    // Mirrors the modifier/touch half of task.component's clear (which lives in
+    // its onHostMouseDown): a modifier click is building the selection and a
+    // touch tap is toggling it, so neither may clear it. The link bail-out above
+    // has to come first, or clicking a link inside a selected row drops the
+    // whole selection. NOT full parity: task.component also bails on every
+    // interactive target, so a click on a button or chip inside a selected
+    // planner row still clears here.
+    // The modifier term looks redundant against selectFromModifierClick's
+    // capture-phase stopPropagation, but that handler bails on inputs and never
+    // suppresses an at-target click — so modifier clicks on an input inside the
+    // row, and on the row element itself, still arrive here.
+    if (
+      this.focusable() &&
+      this._multiSelect.isActive() &&
+      !isMultiSelectModifierEvent(event) &&
+      !this._multiSelect.isTouchSelectionMode()
+    ) {
+      this._multiSelect.clear();
     }
+    if (this.focusable()) {
+      if (!this._isInteractiveClickTarget(target)) {
+        (this._elementRef.nativeElement as HTMLElement).focus();
+        if (!this._cardList || isTouchActive()) {
+          this._taskService.setSelectedId(this.task().id);
+        }
+      }
+      return;
+    }
+    // Use bottom panel on mobile, dialog on desktop
+    this._taskService.setSelectedId(this.task().id);
   }
 
-  get timeEstimate(): number {
-    const t = this.task;
-    return this.task.subTaskIds
+  @HostListener('dblclick', ['$event'])
+  onDoubleClick(event: MouseEvent): void {
+    if (
+      !this.focusable() ||
+      this.isTouchSelecting() ||
+      event.ctrlKey ||
+      event.metaKey ||
+      event.shiftKey ||
+      this._isInteractiveClickTarget(event.target as HTMLElement | null)
+    ) {
+      return;
+    }
+    this._taskService.setSelectedId(this.task().id);
+  }
+
+  private _isInteractiveClickTarget(target: HTMLElement | null): boolean {
+    const host = this._elementRef.nativeElement as HTMLElement;
+    const interactive = target?.closest<HTMLElement>(
+      'a, button, input, textarea, select, [contenteditable="true"], [tabindex]',
+    );
+    return !!interactive && interactive !== host;
+  }
+
+  readonly timeEstimate = computed<number>(() => {
+    const t = this.task();
+    return t.subTaskIds
       ? t.timeEstimate
       : t.timeEstimate - t.timeSpent > 0
         ? t.timeEstimate - t.timeSpent
         : 0;
-  }
+  });
 
   ngOnInit(): void {
-    if (this.task.parentId) {
+    const parentId = this.task().parentId;
+    if (parentId) {
       this._taskService
-        .getByIdLive$(this.task.parentId)
+        .getByIdLive$(parentId)
         .pipe(takeUntilDestroyed(this._destroyRef))
         .subscribe((parentTask) => {
           this.parentTitle = parentTask && parentTask.title;
@@ -145,6 +266,9 @@ export class PlannerTaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (isTouchActive() || IS_HYBRID_DEVICE) {
       const el = this._elementRef.nativeElement;
       const onStart = (): void => {
+        if (this.isTouchSelecting()) {
+          return;
+        }
         this._dragReadyTimeout = window.setTimeout(() => {
           this.isDragReady.set(true);
         }, DRAG_DELAY_FOR_TOUCH);
@@ -159,12 +283,515 @@ export class PlannerTaskComponent implements OnInit, OnDestroy, AfterViewInit {
         () => el.removeEventListener('touchmove', onEnd),
       ];
     }
+    if (this.focusable()) {
+      const host = this._elementRef.nativeElement as HTMLElement;
+      const selectFromModifierClick = (event: MouseEvent): void => {
+        const target = event.target;
+        // Touch selection mode deliberately swallows links too: the whole row
+        // is a selection target in that mode, which also suspends swipe, drag
+        // and title editing. Tapping the link needs the mode left first.
+        if (this.isTouchSelecting()) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          host.focus();
+          this._multiSelect.toggle(this.task().id);
+          return;
+        }
+        if (
+          !(event.ctrlKey || event.metaKey || event.shiftKey) ||
+          (target instanceof HTMLElement && isInputElement(target)) ||
+          // This runs in the CAPTURE phase, so without the bail-out a
+          // Ctrl/Cmd+click on a link is preventDefault'ed here and never opens
+          // its new tab — it would silently toggle the row instead.
+          isLinkTarget(target)
+        ) {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        if (event.shiftKey) {
+          // Range first: until the clicked row takes focus, the focused row is
+          // the one a Shift+click with nothing selected starts from (#10143).
+          this._multiSelect.selectRange(
+            this.task().id,
+            event.ctrlKey || event.metaKey,
+            host,
+          );
+          host.focus();
+        } else {
+          host.focus();
+          this._multiSelect.toggle(this.task().id);
+        }
+      };
+      const preventShiftSelection = (event: MouseEvent): void => {
+        if (
+          event.shiftKey &&
+          !(event.target instanceof HTMLElement && isInputElement(event.target))
+        ) {
+          event.preventDefault();
+        }
+      };
+      host.addEventListener('click', selectFromModifierClick, true);
+      host.addEventListener('mousedown', preventShiftSelection, true);
+      this._touchListenerCleanups.push(
+        () => host.removeEventListener('click', selectFromModifierClick, true),
+        () => host.removeEventListener('mousedown', preventShiftSelection, true),
+      );
+    }
   }
 
   ngOnDestroy(): void {
+    this._isDestroyed = true;
+    if (this.focusable()) {
+      this._multiSelect.removeWhenUnrendered(
+        this.task().id,
+        this._elementRef.nativeElement,
+      );
+    }
     window.clearTimeout(this._doneAnimationTimeout);
     window.clearTimeout(this._dragReadyTimeout);
     this._touchListenerCleanups.forEach((fn) => fn());
+    if (
+      this._completionFocusFallback &&
+      document.activeElement === this._elementRef.nativeElement
+    ) {
+      this._restoreFocus(
+        this.task().id,
+        this._completionFocusFallback.id,
+        this._completionFocusFallback.element,
+      );
+    }
+  }
+
+  @HostListener('keydown', ['$event'])
+  onKeydown(event: KeyboardEvent): void {
+    const host = this._elementRef.nativeElement as HTMLElement;
+    if (!this.focusable() || event.target !== host) {
+      return;
+    }
+    const keys = this._configService.cfg()?.keyboard;
+    if (
+      keys &&
+      Object.values(keys).some(
+        (combo) => typeof combo === 'string' && combo && checkKeyCombo(event, combo),
+      )
+    ) {
+      return;
+    }
+    if (
+      event.ctrlKey &&
+      event.shiftKey &&
+      !event.altKey &&
+      !event.metaKey &&
+      (event.key === 'ArrowLeft' || event.key === 'ArrowRight')
+    ) {
+      this._moveOneDay(event.key === 'ArrowLeft' ? -1 : 1);
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+    if (event.altKey || event.ctrlKey || event.metaKey) {
+      return;
+    }
+    if (event.key === 'Enter') {
+      this._taskService.setSelectedId(this.task().id);
+      event.preventDefault();
+      event.stopPropagation();
+      return;
+    }
+    if (!['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.key)) {
+      return;
+    }
+    if (event.shiftKey && (event.key === 'ArrowUp' || event.key === 'ArrowDown')) {
+      return;
+    }
+    this._moveFocus(event.key as 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight');
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  private _moveFocus(key: 'ArrowUp' | 'ArrowDown' | 'ArrowLeft' | 'ArrowRight'): void {
+    if (this._cardList) {
+      this._cardList.navigate(this.task().id, key);
+      return;
+    }
+    const rows = this._plannerRows();
+    const host = this._elementRef.nativeElement as HTMLElement;
+    const current = host;
+    const currentIndex = rows.indexOf(current);
+    let target: HTMLElement | undefined;
+    if (key === 'ArrowUp' || key === 'ArrowDown') {
+      const scope = current.closest('[data-planner-selection-scope]');
+      const scopedRows = rows.filter(
+        (row) => row.closest('[data-planner-selection-scope]') === scope,
+      );
+      const index = scopedRows.indexOf(current);
+      target = scopedRows[key === 'ArrowDown' ? index + 1 : index - 1];
+    } else {
+      const scopes = Array.from(
+        document.querySelectorAll<HTMLElement>('[data-planner-selection-scope]'),
+      ).filter((scope) =>
+        scope.querySelector('planner-task[data-task-selectable="true"]'),
+      );
+      const scope = current.closest<HTMLElement>('[data-planner-selection-scope]');
+      const scopeIndex = scope ? scopes.indexOf(scope) : -1;
+      const nextScope = scopes[key === 'ArrowRight' ? scopeIndex + 1 : scopeIndex - 1];
+      if (nextScope) {
+        const currentScopeRows = scope
+          ? Array.from(
+              scope.querySelectorAll<HTMLElement>(
+                'planner-task[data-task-selectable="true"]',
+              ),
+            )
+          : [];
+        const rowIndex = Math.max(0, currentScopeRows.indexOf(current));
+        const nextRows = Array.from(
+          nextScope.querySelectorAll<HTMLElement>(
+            'planner-task[data-task-selectable="true"]',
+          ),
+        );
+        target = nextRows[Math.min(rowIndex, nextRows.length - 1)];
+      }
+    }
+    if (target && currentIndex !== -1) {
+      target.focus();
+      target.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
+  }
+
+  private _plannerRows(): HTMLElement[] {
+    if (this._cardList) {
+      return this._cardList.rows();
+    }
+    return Array.from(
+      document.querySelectorAll<HTMLElement>('planner-task[data-task-selectable="true"]'),
+    );
+  }
+
+  @HostListener('planner-task-shortcut', ['$event'])
+  onTaskShortcut(event: CustomEvent<{ keyboardEvent: KeyboardEvent }>): void {
+    const keyboardEvent = event.detail.keyboardEvent;
+    const keys = this._configService.cfg()?.keyboard;
+    if (!keys) {
+      return;
+    }
+    if (checkKeyCombo(keyboardEvent, keys.selectPreviousTask)) {
+      this._moveFocus('ArrowUp');
+    } else if (checkKeyCombo(keyboardEvent, keys.selectNextTask)) {
+      this._moveFocus('ArrowDown');
+    } else if (checkKeyCombo(keyboardEvent, keys.taskToggleDone)) {
+      this._runCompletionWithFocus();
+    } else if (
+      checkKeyCombo(keyboardEvent, keys.togglePlay) &&
+      this._configService.appFeatures().isTimeTrackingEnabled
+    ) {
+      this._taskService.setCurrentId(this.isCurrent() ? null : this.task().id);
+    } else if (checkKeyCombo(keyboardEvent, keys.taskScheduleToday)) {
+      this._runMutationWithFocus(() =>
+        this._taskService.scheduleForTodayById(this.task().id),
+      );
+    } else if (checkKeyCombo(keyboardEvent, keys.taskScheduleTomorrow)) {
+      this._scheduleForOffset('tomorrow');
+    } else if (checkKeyCombo(keyboardEvent, keys.taskScheduleNextWeek)) {
+      this._scheduleForOffset('nextWeek');
+    } else if (checkKeyCombo(keyboardEvent, keys.taskScheduleNextMonth)) {
+      this._scheduleForOffset('nextMonth');
+    } else if (checkKeyCombo(keyboardEvent, keys.taskUnschedule)) {
+      this._runMutationWithFocus(() =>
+        this._store.dispatch(TaskSharedActions.unscheduleTask({ id: this.task().id })),
+      );
+    } else if (checkKeyCombo(keyboardEvent, keys.taskDelete)) {
+      this._deleteTask();
+    } else if (checkKeyCombo(keyboardEvent, keys.taskSchedule)) {
+      this._openTaskDialog(DialogScheduleTaskComponent);
+    } else if (checkKeyCombo(keyboardEvent, keys.taskScheduleDeadline)) {
+      this._openTaskDialog(DialogDeadlineComponent);
+    } else if (checkKeyCombo(keyboardEvent, keys.taskOpenEstimationDialog)) {
+      this._openTaskDialog(DialogTimeEstimateComponent);
+    } else if (
+      checkKeyCombo(keyboardEvent, keys.taskOpenContextMenu) ||
+      this._isNativeContextMenuKey(keyboardEvent)
+    ) {
+      this._openContextMenuFromKeyboard();
+    } else if (checkKeyCombo(keyboardEvent, keys.moveTaskUp)) {
+      this._reorderAllDay('up');
+    } else if (checkKeyCombo(keyboardEvent, keys.moveTaskDown)) {
+      this._reorderAllDay('down');
+    } else if (checkKeyCombo(keyboardEvent, keys.moveTaskToTop)) {
+      this._reorderAllDay('top');
+    } else if (checkKeyCombo(keyboardEvent, keys.moveTaskToBottom)) {
+      this._reorderAllDay('bottom');
+    } else {
+      return;
+    }
+    event.preventDefault();
+  }
+
+  private _scheduleForOffset(offset: 'tomorrow' | 'nextWeek' | 'nextMonth'): void {
+    const date = this._dateService.getLogicalTodayDate();
+    if (offset === 'tomorrow') {
+      date.setDate(date.getDate() + 1);
+    } else if (offset === 'nextWeek') {
+      date.setDate(date.getDate() + getNextWeekDayOffset(this._dateAdapter, date));
+    } else {
+      date.setDate(1);
+      date.setMonth(date.getMonth() + 1);
+    }
+    this._runMutationWithFocus(() => this._scheduleForDay(date));
+  }
+
+  private _moveOneDay(dayDelta: -1 | 1): void {
+    if (this._cardList) {
+      this._cardList.moveToAdjacent(this.task().id, dayDelta);
+      return;
+    }
+    const task = this.task();
+    const displayedDay = this.day();
+    const baseDate = task.dueWithTime
+      ? new Date(task.dueWithTime)
+      : displayedDay
+        ? parseDbDateStr(displayedDay)
+        : task.dueDay
+          ? parseDbDateStr(task.dueDay)
+          : null;
+    if (!baseDate) {
+      return;
+    }
+    baseDate.setDate(baseDate.getDate() + dayDelta);
+    this._runMutationWithFocus(() => this._scheduleForDay(baseDate));
+  }
+
+  private _scheduleForDay(date: Date): void {
+    const task = this.task();
+    if (task.dueWithTime) {
+      const timestamp = combineDateAndTime(date, new Date(task.dueWithTime)).getTime();
+      const remindCfg = millisecondsDiffToRemindOption(task.dueWithTime, task.remindAt);
+      this._taskService.scheduleTask(task, timestamp, remindCfg, false);
+      return;
+    }
+    this._store.dispatch(
+      PlannerActions.planTaskForDay({ task, day: getDbDateStr(date), isShowSnack: true }),
+    );
+  }
+
+  private _deleteTask(): void {
+    if (this._isTaskDeleteTriggered) {
+      return;
+    }
+    if (
+      isTaskDeleteConfirmRequired(
+        this.task(),
+        this._configService.cfg()?.tasks?.isConfirmBeforeDelete ?? true,
+      )
+    ) {
+      this._matDialog
+        .open(DialogConfirmComponent, {
+          data: getTaskDeleteConfirmData(this.task()),
+        })
+        .afterClosed()
+        .pipe(takeUntilDestroyed(this._destroyRef))
+        .subscribe((isConfirm) => {
+          if (isConfirm) {
+            this._performDelete();
+          } else {
+            this._restoreFocus(this.task().id, null, this._localAddButton());
+          }
+        });
+      return;
+    }
+    this._performDelete();
+  }
+
+  private _performDelete(): void {
+    this._isTaskDeleteTriggered = true;
+    const rows = this._plannerRows();
+    const index = rows.indexOf(this._elementRef.nativeElement);
+    const fallbackId =
+      rows[index + 1]?.getAttribute('data-task-id') ??
+      rows[index - 1]?.getAttribute('data-task-id') ??
+      null;
+    const fallbackEl = this._localAddButton();
+    this._taskService
+      .getByIdWithSubTaskData$(this.task().id)
+      .pipe(first(), takeUntilDestroyed(this._destroyRef))
+      .subscribe((task) => {
+        if (task) {
+          this._taskService.remove(task);
+          this._restoreFocus(null, fallbackId, fallbackEl);
+        }
+      });
+  }
+
+  private _reorderAllDay(direction: 'up' | 'down' | 'top' | 'bottom'): void {
+    if (this._cardList) {
+      this._cardList.reorder(this.task().id, direction);
+      return;
+    }
+    const host = this._elementRef.nativeElement as HTMLElement;
+    if (host.closest('.scheduled-items')) {
+      return;
+    }
+    const scope = host.closest<HTMLElement>('[data-planner-selection-scope]');
+    const rows = scope
+      ? Array.from(
+          scope.querySelectorAll<HTMLElement>(
+            '.normal-tasks planner-task[data-task-selectable="true"]',
+          ),
+        )
+      : [];
+    const fromIndex = rows.indexOf(host);
+    const toIndex =
+      direction === 'up'
+        ? fromIndex - 1
+        : direction === 'down'
+          ? fromIndex + 1
+          : direction === 'top'
+            ? 0
+            : rows.length - 1;
+    if (fromIndex < 0 || toIndex < 0 || toIndex >= rows.length || fromIndex === toIndex) {
+      return;
+    }
+    const day = this.day();
+    if (!day) {
+      return;
+    }
+    const fallbackEl = this._localAddButton();
+    if (day === this._dateService.todayStr()) {
+      const props = {
+        taskId: this.task().id,
+        workContextType: WorkContextType.TAG,
+        workContextId: TODAY_TAG.id,
+        doneTaskIds: rows.map((row) => row.getAttribute('data-task-id') as string),
+      };
+      const action =
+        direction === 'up'
+          ? moveTaskUpInTodayList(props)
+          : direction === 'down'
+            ? moveTaskDownInTodayList(props)
+            : direction === 'top'
+              ? moveTaskToTopInTodayList(props)
+              : moveTaskToBottomInTodayList(props);
+      this._store.dispatch(action);
+    } else {
+      this._store.dispatch(
+        PlannerActions.moveInList({ targetDay: day, fromIndex, toIndex }),
+      );
+    }
+    this._restoreFocus(this.task().id, null, fallbackEl);
+  }
+
+  private _runMutationWithFocus(mutation: () => void): void {
+    const rows = this._plannerRows();
+    const host = this._elementRef.nativeElement as HTMLElement;
+    const index = rows.indexOf(host);
+    const fallbackId =
+      rows[index + 1]?.getAttribute('data-task-id') ??
+      rows[index - 1]?.getAttribute('data-task-id') ??
+      null;
+    const fallbackEl = this._localAddButton();
+    mutation();
+    this._restoreFocus(this.task().id, fallbackId, fallbackEl);
+  }
+
+  private _runCompletionWithFocus(): void {
+    const host = this._elementRef.nativeElement as HTMLElement;
+    if (this.task().isDone || (!this._cardList && !host.closest('planner-day-overdue'))) {
+      this._runMutationWithFocus(() => this.toggleTaskDone());
+      return;
+    }
+    const rows = this._plannerRows();
+    const index = rows.indexOf(host);
+    this._completionFocusFallback = {
+      id:
+        rows[index + 1]?.getAttribute('data-task-id') ??
+        rows[index - 1]?.getAttribute('data-task-id') ??
+        null,
+      element: this._localAddButton(),
+    };
+    this.toggleTaskDone();
+  }
+
+  private _restoreFocus(
+    preferredId: string | null,
+    fallbackId: string | null,
+    fallbackEl: HTMLElement | null,
+  ): void {
+    const host = this._elementRef.nativeElement as HTMLElement;
+    setTimeout(() => {
+      const active = document.activeElement;
+      if (
+        active &&
+        active !== document.body &&
+        active.isConnected &&
+        !(this._isDestroyed && active === host)
+      ) {
+        return;
+      }
+      const findRow = (id: string): HTMLElement | null | undefined =>
+        this._cardList
+          ? this._cardList.rows().find((row) => row.dataset.taskId === id)
+          : this._multiSelect.findLiveRowEl(id);
+      const row =
+        (preferredId && findRow(preferredId)) || (fallbackId && findRow(fallbackId));
+      if (row) {
+        row.focus({ preventScroll: true });
+        row.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      } else if (fallbackEl?.isConnected) {
+        fallbackEl.focus({ preventScroll: true });
+      }
+    });
+  }
+
+  private _localAddButton(): HTMLElement | null {
+    if (this._cardList) {
+      return this._cardList.addButton();
+    }
+    const scope = (this._elementRef.nativeElement as HTMLElement).closest<HTMLElement>(
+      '[data-planner-selection-scope]',
+    );
+    // Overdue has no add button; capture the next section's before it disappears.
+    return scope
+      ? (scope.querySelector<HTMLElement>(ADD_TASK_INLINE_BTN_SELECTOR) ??
+          getNextPlannerAddButton(scope))
+      : null;
+  }
+
+  private _openContextMenuFromKeyboard(): void {
+    const host = this._elementRef.nativeElement as HTMLElement;
+    if (!this.isContextMenuLoaded()) {
+      this.isContextMenuLoaded.set(true);
+      setTimeout(() => this.taskContextMenu()?.open(undefined, true, host));
+      return;
+    }
+    this.taskContextMenu()?.open(undefined, true, host);
+  }
+
+  private _isNativeContextMenuKey(event: KeyboardEvent): boolean {
+    return (
+      !event.ctrlKey &&
+      !event.altKey &&
+      !event.metaKey &&
+      !event.shiftKey &&
+      (event.key === 'ContextMenu' ||
+        event.key === 'Menu' ||
+        event.code === 'ContextMenu')
+    );
+  }
+
+  private _openTaskDialog(component: Parameters<MatDialog['open']>[0]): void {
+    const rows = this._plannerRows();
+    const index = rows.indexOf(this._elementRef.nativeElement);
+    const fallbackId =
+      rows[index + 1]?.getAttribute('data-task-id') ??
+      rows[index - 1]?.getAttribute('data-task-id') ??
+      null;
+    const fallbackEl = this._localAddButton();
+    this._matDialog
+      .open(component, { autoFocus: false, data: { task: this.task() } })
+      .afterClosed()
+      .subscribe(() => {
+        this._restoreFocus(this.task().id, fallbackId, fallbackEl);
+      });
   }
 
   // A confirmed horizontal swipe (open menu / mark done) is not a drag, so
@@ -179,7 +806,7 @@ export class PlannerTaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   onSwipeRightTriggered(isTriggered: boolean): void {
-    if (this.task.isDone) {
+    if (this.task().isDone) {
       this.showUndoneAnimation.set(isTriggered);
     } else {
       this.showDoneAnimation.set(isTriggered);
@@ -188,9 +815,10 @@ export class PlannerTaskComponent implements OnInit, OnDestroy, AfterViewInit {
 
   toggleTaskDone(): void {
     window.clearTimeout(this._doneAnimationTimeout);
+    const t = this.task();
     this._doneAnimationTimeout = this._taskService.toggleDoneWithAnimation(
-      this.task.id,
-      this.task.isDone,
+      t.id,
+      t.isDone,
       (v) => this.showDoneAnimation.set(v),
     );
   }
@@ -216,7 +844,7 @@ export class PlannerTaskComponent implements OnInit, OnDestroy, AfterViewInit {
   }
 
   updateTimeEstimate(val: number): void {
-    this._taskService.update(this.task.id, {
+    this._taskService.update(this.task().id, {
       timeEstimate: val,
     });
   }

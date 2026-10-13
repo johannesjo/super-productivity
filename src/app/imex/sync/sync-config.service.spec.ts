@@ -87,6 +87,7 @@ describe('SyncConfigService', () => {
         syncProvider: SyncProviderId.WebDAV,
         syncInterval: 300000,
         isEncryptionEnabled: true,
+        isUseSplitSyncFiles: true,
         encryptKey: 'secret-key',
         webDav: {
           baseUrl: 'https://example.com',
@@ -104,6 +105,7 @@ describe('SyncConfigService', () => {
       expect(globalConfigService.updateSection).toHaveBeenCalledWith('sync', {
         isEnabled: true,
         isEncryptionEnabled: true,
+        isUseSplitSyncFiles: true,
         syncProvider: SyncProviderId.WebDAV,
         syncInterval: 300000,
       });
@@ -151,6 +153,8 @@ describe('SyncConfigService', () => {
           password: 'oldpass', // Preserved from old config
           syncFolderPath: '/old', // Preserved from old config
           encryptKey: 'test-key', // New value from settings
+          // GHSA-9544: durable intent backfilled from the key present at save.
+          isEncryptionEnabled: true,
         },
       );
     });
@@ -180,6 +184,8 @@ describe('SyncConfigService', () => {
         SyncProviderId.LocalFile,
         {
           encryptKey: 'test-key',
+          // GHSA-9544: durable intent backfilled from the key present at save.
+          isEncryptionEnabled: true,
         },
       );
     });
@@ -260,6 +266,43 @@ describe('SyncConfigService', () => {
       );
     });
 
+    it('should clear the SuperSync presence device name on "" but keep it when the form omits it', async () => {
+      const mockProvider = {
+        id: SyncProviderId.SuperSync,
+        privateCfg: {
+          load: jasmine
+            .createSpy('load')
+            .and.returnValue(
+              Promise.resolve({ accessToken: 'saved-token', deviceName: 'Work laptop' }),
+            ),
+        },
+      };
+      (providerManager.getProviderById as jasmine.Spy).and.returnValue(
+        Promise.resolve(mockProvider),
+      );
+      const savedDeviceName = async (deviceName: string | null): Promise<unknown> => {
+        await service.updateSettingsFromForm({
+          isEnabled: true,
+          syncProvider: SyncProviderId.SuperSync,
+          syncInterval: 300000,
+          superSync: {
+            accessToken: 'saved-token',
+            deviceName,
+          } as SyncConfig['superSync'],
+        });
+        return (
+          providerManager.setProviderConfig.calls.mostRecent().args[1] as {
+            deviceName?: string;
+          }
+        ).deviceName;
+      };
+
+      expect(await savedDeviceName('')).toBe('');
+      // A hidden field (resetOnHide) yields null/undefined, never '' — only
+      // an explicit '' from the user may clear the saved name.
+      expect(await savedDeviceName(null)).toBe('Work laptop');
+    });
+
     it('should preserve saved Nextcloud login name when form model has null', async () => {
       const mockProvider = {
         id: SyncProviderId.Nextcloud,
@@ -338,6 +381,8 @@ describe('SyncConfigService', () => {
           accessToken: 'existing-access-token', // Preserved OAuth tokens
           refreshToken: 'existing-refresh-token', // Preserved OAuth tokens
           encryptKey: 'dropbox-key', // Updated from settings
+          // GHSA-9544: durable intent backfilled from the key present at save.
+          isEncryptionEnabled: true,
         },
       );
     });
@@ -809,6 +854,8 @@ describe('SyncConfigService', () => {
           password: 'newpass',
           syncFolderPath: '/new',
           encryptKey: 'new-key',
+          // GHSA-9544: durable intent backfilled from the key present at save.
+          isEncryptionEnabled: true,
         },
       );
     });
@@ -839,6 +886,45 @@ describe('SyncConfigService', () => {
       expect(loggedSettings.nextcloud?.loginName).toBe('[REDACTED]');
       expect(loggedSettings.nextcloud?.userName).toBe('[REDACTED]');
       expect(loggedSettings.nextcloud?.password).toBe('[REDACTED]');
+    });
+
+    it('should redact the SuperSync presence device name when logging form settings', async () => {
+      const logSpy = spyOn(SyncLog, 'log');
+      mockSyncConfig$.next({
+        ...DEFAULT_GLOBAL_CONFIG.sync,
+        isEnabled: true,
+        syncProvider: SyncProviderId.SuperSync,
+      });
+      mockCurrentProviderPrivateCfg$.next({
+        providerId: SyncProviderId.SuperSync,
+        privateCfg: { accessToken: 'saved-token', deviceName: 'Alices MacBook' },
+      });
+
+      await service.syncSettingsForm$.pipe(first()).toPromise();
+
+      const logged = logSpy.calls.mostRecent().args[1] as {
+        superSync: Record<string, unknown>;
+      };
+      expect(logged.superSync.deviceName).toBe('[REDACTED]');
+    });
+
+    it('should redact the agent capture private key when logging form settings', async () => {
+      const logSpy = spyOn(SyncLog, 'log');
+      mockSyncConfig$.next({
+        ...DEFAULT_GLOBAL_CONFIG.sync,
+        isEnabled: true,
+        syncProvider: SyncProviderId.SuperSync,
+        captureKey: { v: 1, privateKeyPkcs8: 'secret-key', publicKeySpki: 'pub' },
+      });
+      mockCurrentProviderPrivateCfg$.next({
+        providerId: SyncProviderId.SuperSync,
+        privateCfg: { accessToken: 'saved-token' },
+      });
+
+      await service.syncSettingsForm$.pipe(first()).toPromise();
+
+      const logged = logSpy.calls.mostRecent().args[1];
+      expect(JSON.stringify(logged)).not.toContain('secret-key');
     });
   });
 
@@ -1237,8 +1323,9 @@ describe('SyncConfigService', () => {
       );
     });
 
-    it('should not add isEncryptionEnabled for non-SuperSync providers', async () => {
-      // Setup WebDAV provider
+    it('should enable encryption when updating the password for a file-based provider', async () => {
+      // Setup WebDAV provider with encryption disabled before it encounters an
+      // encrypted remote and prompts for the password.
       const mockProvider = {
         id: SyncProviderId.WebDAV,
         privateCfg: {
@@ -1249,6 +1336,7 @@ describe('SyncConfigService', () => {
               password: 'test',
               syncFolderPath: '/',
               encryptKey: 'oldpass',
+              isEncryptionEnabled: false,
             }),
           ),
         },
@@ -1261,12 +1349,16 @@ describe('SyncConfigService', () => {
       // Update password
       await service.updateEncryptionPassword('newpass', SyncProviderId.WebDAV);
 
-      // Verify only encryptKey is updated (no isEncryptionEnabled field)
-      const callArgs = (
-        providerManager.setProviderConfig as jasmine.Spy
-      ).calls.mostRecent().args[1];
-      expect(callArgs.encryptKey).toBe('newpass');
-      expect(callArgs.isEncryptionEnabled).toBeUndefined();
+      // The password proves that this client intends to participate in the
+      // encrypted remote. Leaving the explicit false flag in place would make
+      // the next WebDAV upload silently downgrade the remote to plaintext.
+      expect(providerManager.setProviderConfig).toHaveBeenCalledWith(
+        SyncProviderId.WebDAV,
+        jasmine.objectContaining({
+          encryptKey: 'newpass',
+          isEncryptionEnabled: true,
+        }),
+      );
     });
 
     it('should not dispatch persistent global config action when updating password', async () => {

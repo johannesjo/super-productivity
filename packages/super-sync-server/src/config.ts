@@ -1,3 +1,9 @@
+import {
+  CaptureOAuthClient,
+  CaptureOAuthClientsSchema,
+  DEFAULT_CAPTURE_OAUTH_CLIENTS,
+} from './capture/capture-oauth-clients';
+import { isIP } from 'net';
 import * as path from 'path';
 import { Logger } from './logger';
 
@@ -65,17 +71,77 @@ export interface PrivacyConfig {
   addressCity: string;
   addressCountry: string;
   contactEmail: string;
+  /** Free-text address block of the hosting provider, if a third party hosts the data. */
+  hostingProvider?: string;
+  /** Free-text block naming the supervisory authority competent for the controller. */
+  supervisoryAuthority?: string;
 }
+
+/**
+ * Whether this instance may ask users to accept anything.
+ *
+ * Derived, never stored: consent is meaningful exactly when a privacy policy is published,
+ * and that is decided solely by whether the operator identified themselves. Keeping this a
+ * pure function of the environment means there is no initialisation order to get wrong and
+ * no process-wide flag that a forgotten setter could leave pointing the wrong way.
+ */
+export const isConsentRequired = (config: ServerConfig): boolean => !!config.privacy;
+
+/**
+ * Which peers may set X-Forwarded-* so req.ip resolves to the real client IP
+ * instead of the proxy's. Two proxy-addr ranges, one per place the reverse
+ * proxy can sit: 'loopback' (127.0.0.1/8, ::1/128) for host networking or a
+ * same-pod sidecar, and 'uniquelocal' (10/8, 172.16/12, 192.168/16, fc00::/7)
+ * for the docker bridge or an ingress controller's pod network. Headers from
+ * any other peer are ignored, so a client that reaches the origin directly
+ * cannot spoof its IP.
+ *
+ * Must stay a value that validates the connecting address: fastify 5.12.1
+ * disabled the hop-count form (`trustProxy: 1`) because it ignores the peer
+ * address entirely, leaving the headers spoofable (GHSA-3m5p-2c4r-xxw2).
+ *
+ * req.ip is the @fastify/rate-limit key, so too narrow a value silently
+ * collapses every client into one bucket instead of failing loudly. Neither
+ * range covers 100.64.0.0/10 (CGNAT/Tailscale) or 169.254.0.0/16 — a
+ * deployment needing those sets TRUST_PROXY instead of this being widened for
+ * everyone.
+ */
+export const SERVER_TRUST_PROXY = ['loopback', 'uniquelocal'];
+
+const TRUST_PROXY_KEYWORDS = ['loopback', 'linklocal', 'uniquelocal'];
+
+/**
+ * Parse a TRUST_PROXY value into the list fastify's trustProxy option takes.
+ * Throws unless each entry is a keyword or an IP address with an optional
+ * range, so the spoofable hop-count and `true` forms never reach fastify; the
+ * range itself is left to proxy-addr, which rejects an invalid one when the
+ * server starts.
+ */
+export const parseTrustProxy = (value: string): string[] => {
+  const entries = value
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+
+  for (const entry of entries) {
+    const rangeStart = entry.lastIndexOf('/');
+    const address = rangeStart === -1 ? entry : entry.slice(0, rangeStart);
+    const isValid = TRUST_PROXY_KEYWORDS.includes(entry) || isIP(address) !== 0;
+    if (!isValid) {
+      throw new Error(
+        `Invalid TRUST_PROXY entry "${entry}". Use proxy-addr keywords (loopback, linklocal, uniquelocal), ` +
+          'IP addresses or CIDR ranges; hop counts and "true" leave X-Forwarded-For spoofable.',
+      );
+    }
+  }
+
+  return entries;
+};
 
 export interface ServerConfig {
   port: number;
   host: string;
   dataDir: string;
-  /**
-   * Enables the batched upload implementation in SyncService.
-   * Default false for staged rollout.
-   */
-  batchUpload: boolean;
   /**
    * Publicly reachable base URL used for links in emails.
    * Should point to the reverse-proxied address users can access.
@@ -85,6 +151,8 @@ export interface ServerConfig {
     enabled: boolean;
     allowedOrigins?: CorsOrigin[];
   };
+  /** Peers whose X-Forwarded-* headers are trusted; see SERVER_TRUST_PROXY. */
+  trustProxy: string[];
   smtp?: {
     host: string;
     port: number;
@@ -99,6 +167,23 @@ export interface ServerConfig {
    */
   privacy?: PrivacyConfig;
   /**
+   * Where this instance stores user data, as an operator-asserted region label.
+   *
+   * Independent of `privacy` on purpose: it is a claim about infrastructure, not about the
+   * controller, and an operator may want the landing-page badge without publishing a full
+   * policy. Only `EU`/`EEA` renders a badge today — every other value is accepted and
+   * simply shows none, because an EU flag next to "US" would be exactly the kind of false
+   * statement this whole change exists to remove.
+   */
+  dataRegion?: string;
+  /**
+   * Agent task capture: `/mcp` and `/api/capture/*`. Off by default, so a
+   * self-hosted server exposes no new public endpoint unless its operator opts
+   * in. Set CAPTURE_CONNECTOR_ENABLED=true.
+   */
+  captureConnectorEnabled: boolean;
+  captureOAuthClients: CaptureOAuthClient[];
+  /**
    * Test mode configuration. When enabled, provides endpoints for E2E testing.
    * NEVER enable in production!
    */
@@ -110,28 +195,30 @@ export interface ServerConfig {
 }
 
 /**
- * Default CORS origins for production security.
- * - Production app: exact match
- * - Preview deployments: RegExp pattern matching Cloudflare Pages format
- * Use CORS_ORIGINS env var to add additional origins.
+ * Default CORS origins — the stable production app, and nothing else.
+ *
+ * Every self-hosted instance inherits this default, and CORS is registered with
+ * `credentials: true`. A Cloudflare Pages preview wildcard used to sit here too, which
+ * meant servers we do not run granted credentialed cross-origin access to our preview
+ * infrastructure by default. Preview origins belong in our own deployment's CORS_ORIGINS.
+ *
+ * Use the CORS_ORIGINS env var to set your own origins; wildcard subdomain patterns are
+ * still supported there (see `parseCorsOrigin`), they just are not shipped as a default.
  */
-const DEFAULT_CORS_ORIGINS: CorsOrigin[] = [
-  'https://app.super-productivity.com',
-  // Cloudflare Pages preview format: <commit-hash>.<project>.pages.dev
-  // Using [a-zA-Z0-9-]+ to prevent domain confusion attacks (e.g., evil.com.preview.pages.dev)
-  /^https:\/\/[a-zA-Z0-9-]+\.super-productivity-preview\.pages\.dev$/,
-];
+const DEFAULT_CORS_ORIGINS: CorsOrigin[] = ['https://app.super-productivity.com'];
 
 const DEFAULT_CONFIG: ServerConfig = {
   port: 1900,
   host: '0.0.0.0',
   dataDir: './data',
-  batchUpload: false,
   publicUrl: 'http://localhost:1900',
   cors: {
     enabled: true,
     allowedOrigins: DEFAULT_CORS_ORIGINS,
   },
+  trustProxy: SERVER_TRUST_PROXY,
+  captureConnectorEnabled: false,
+  captureOAuthClients: DEFAULT_CAPTURE_OAUTH_CLIENTS,
 };
 
 /**
@@ -187,18 +274,6 @@ export const loadConfigFromEnv = (
     config.dataDir = path.resolve(config.dataDir);
   }
 
-  if (process.env.SUPERSYNC_BATCH_UPLOAD === 'true') {
-    if (process.env.SUPERSYNC_PAYLOAD_BYTES_BACKFILL_COMPLETE !== 'true') {
-      throw new Error(
-        'SUPERSYNC_BATCH_UPLOAD=true requires SUPERSYNC_PAYLOAD_BYTES_BACKFILL_COMPLETE=true. ' +
-          'Run `npm run migrate-payload-bytes` to backfill operation payload_bytes first.',
-      );
-    }
-    config.batchUpload = true;
-  } else if (process.env.SUPERSYNC_BATCH_UPLOAD !== undefined) {
-    config.batchUpload = false;
-  }
-
   // Public URL (for email links)
   if (process.env.PUBLIC_URL) {
     const trimmed = process.env.PUBLIC_URL.trim();
@@ -213,6 +288,15 @@ export const loadConfigFromEnv = (
   // Enforce HTTPS for PUBLIC_URL in production
   if (process.env.NODE_ENV === 'production' && !config.publicUrl.startsWith('https://')) {
     throw new Error('PUBLIC_URL must use HTTPS in production');
+  }
+
+  if (process.env.CAPTURE_OAUTH_CLIENTS) {
+    config.captureOAuthClients = CaptureOAuthClientsSchema.parse(
+      JSON.parse(process.env.CAPTURE_OAUTH_CLIENTS),
+    );
+  }
+  if (process.env.CAPTURE_CONNECTOR_ENABLED !== undefined) {
+    config.captureConnectorEnabled = process.env.CAPTURE_CONNECTOR_ENABLED === 'true';
   }
 
   // CORS configuration
@@ -261,6 +345,14 @@ export const loadConfigFromEnv = (
     }
   }
 
+  // Trusted reverse-proxy peers (comma-separated keywords, IPs or CIDR ranges)
+  if (process.env.TRUST_PROXY) {
+    const trustProxy = parseTrustProxy(process.env.TRUST_PROXY);
+    if (trustProxy.length > 0) {
+      config.trustProxy = trustProxy;
+    }
+  }
+
   // SMTP Configuration
   if (process.env.SMTP_HOST) {
     const port = parseInt(process.env.SMTP_PORT || '587', 10);
@@ -277,16 +369,42 @@ export const loadConfigFromEnv = (
     };
   }
 
-  // Privacy policy configuration (for German legal requirements)
-  if (process.env.PRIVACY_CONTACT_NAME) {
+  // Privacy policy configuration. The generated policy is only served when the operator
+  // has identified themselves as the controller — a policy naming the wrong controller is
+  // worse than no policy at all, so every field below is required to enable it. Partial
+  // configuration is a hard error rather than a silent fallback to placeholder text.
+  const privacyEnv = {
+    contactName: process.env.PRIVACY_CONTACT_NAME,
+    addressStreet: process.env.PRIVACY_ADDRESS_STREET,
+    addressCity: process.env.PRIVACY_ADDRESS_CITY,
+    addressCountry: process.env.PRIVACY_ADDRESS_COUNTRY,
+    contactEmail: process.env.PRIVACY_CONTACT_EMAIL,
+  };
+  const privacyKeys = Object.keys(privacyEnv) as (keyof typeof privacyEnv)[];
+  const privacySet = privacyKeys.filter((key) => !!privacyEnv[key]?.trim());
+  if (privacySet.length > 0 && privacySet.length < privacyKeys.length) {
+    const missing = privacyKeys
+      .filter((key) => !privacyEnv[key]?.trim())
+      .map((key) => `PRIVACY_${key.replace(/[A-Z]/g, (c) => `_${c}`).toUpperCase()}`);
+    throw new Error(
+      `Incomplete privacy policy configuration. Missing: ${missing.join(', ')}. ` +
+        `Set all of them to publish a privacy policy, or none to disable the legal pages.`,
+    );
+  }
+  if (privacySet.length === privacyKeys.length) {
     config.privacy = {
-      contactName: process.env.PRIVACY_CONTACT_NAME,
-      addressStreet: process.env.PRIVACY_ADDRESS_STREET || '',
-      addressCity: process.env.PRIVACY_ADDRESS_CITY || '',
-      addressCountry: process.env.PRIVACY_ADDRESS_COUNTRY || '',
-      contactEmail: process.env.PRIVACY_CONTACT_EMAIL || '',
+      contactName: privacyEnv.contactName as string,
+      addressStreet: privacyEnv.addressStreet as string,
+      addressCity: privacyEnv.addressCity as string,
+      addressCountry: privacyEnv.addressCountry as string,
+      contactEmail: privacyEnv.contactEmail as string,
+      hostingProvider: process.env.PRIVACY_HOSTING_PROVIDER?.trim() || undefined,
+      supervisoryAuthority:
+        process.env.PRIVACY_SUPERVISORY_AUTHORITY?.trim() || undefined,
     };
   }
+
+  config.dataRegion = process.env.PRIVACY_DATA_REGION?.trim() || undefined;
 
   // Test mode configuration
   // Requires both TEST_MODE=true AND TEST_MODE_CONFIRM=yes-i-understand-the-risks

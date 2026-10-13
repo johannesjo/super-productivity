@@ -13,43 +13,31 @@ import {
 } from '@angular/core';
 import { MatMiniFabButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
 import { MatTooltip } from '@angular/material/tooltip';
-import { TranslatePipe } from '@ngx-translate/core';
-import { TagComponent } from '../../../features/tag/tag/tag.component';
-import { fadeAnimation } from '../../../ui/animations/fade.ani';
-import { expandFadeHorizontalAnimation } from '../../../ui/animations/expand.ani';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
+import { LongPressDirective } from '../../../ui/longpress/longpress.directive';
+import { MagicNavConfigService } from '../../magic-side-nav/magic-nav-config.service';
 import { T } from '../../../t.const';
-import { Task } from '../../../features/tasks/task.model';
-import { WorkContext } from '../../../features/work-context/work-context.model';
 import { TaskService } from '../../../features/tasks/task.service';
 import { animationFrameScheduler, Subscription } from 'rxjs';
 import { distinctUntilChanged, observeOn } from 'rxjs/operators';
-import { NavigateToTaskService } from '../../navigate-to-task/navigate-to-task.service';
 
 @Component({
   selector: 'play-button',
   standalone: true,
-  imports: [MatMiniFabButton, MatIcon, MatTooltip, TranslatePipe, TagComponent],
+  imports: [
+    MatMiniFabButton,
+    MatIcon,
+    MatTooltip,
+    TranslatePipe,
+    MatMenu,
+    MatMenuItem,
+    MatMenuTrigger,
+    LongPressDirective,
+  ],
   template: `
     <div class="play-btn-wrapper">
-      @if (currentTask(); as task) {
-        <div
-          @fade
-          class="current-task-title"
-          (click)="navigateToCurrentTask()"
-          matTooltip="{{ T.MH.SHOW_TRACKED_TASK | translate }}"
-          matTooltipPosition="below"
-        >
-          <div class="title">{{ task.title }}</div>
-          @if (currentTaskContext(); as taskContext) {
-            <tag
-              @expandFadeHorizontal
-              [tag]="taskContext"
-              class="project"
-            ></tag>
-          }
-        </div>
-      }
       @if (currentTaskId()) {
         <div class="pulse-circle"></div>
       }
@@ -76,11 +64,17 @@ import { NavigateToTaskService } from '../../navigate-to-task/navigate-to-task.s
       }
 
       <button
-        (click)="taskService.toggleStartTask()"
+        #playBtn
+        (pointerdown)="onPlayPointerDown()"
+        (click)="onPlayClick()"
+        (contextmenu)="$event.preventDefault(); openFeatureMenu()"
+        (longPress)="onLongPress()"
         [color]="currentTaskId() ? 'accent' : 'primary'"
         [matTooltip]="tooltipText() | translate"
+        [attr.aria-label]="tooltipText() | translate"
         matTooltipPosition="below"
         class="play-btn tour-playBtn mat-elevation-z3"
+        [class.mat-mini-fab-icon]="isIconButton()"
         mat-mini-fab
         [disabled]="isDisabled()"
       >
@@ -90,6 +84,24 @@ import { NavigateToTaskService } from '../../navigate-to-task/navigate-to-task.s
           <mat-icon>pause</mat-icon>
         }
       </button>
+
+      <!-- Anchor only: opened from right-click / long-press (or the context-menu
+           key) on the button, so focus returns to the button, not the anchor. -->
+      <span
+        class="feature-menu-anchor"
+        [matMenuTriggerFor]="featureMenu"
+        [matMenuTriggerRestoreFocus]="false"
+        (menuClosed)="onFeatureMenuClosed()"
+      ></span>
+      <mat-menu #featureMenu="matMenu">
+        <button
+          mat-menu-item
+          (click)="disableTimeTracking()"
+        >
+          <mat-icon>visibility_off</mat-icon>
+          <span>{{ T.MH.DISABLE_FEATURE | translate }}</span>
+        </button>
+      </mat-menu>
     </div>
   `,
   styles: [
@@ -146,6 +158,15 @@ import { NavigateToTaskService } from '../../navigate-to-task/navigate-to-task.s
           z-index: 3;
         }
 
+        .feature-menu-anchor {
+          position: absolute;
+          left: 50%;
+          bottom: 0;
+          width: 0;
+          height: 0;
+          pointer-events: none;
+        }
+
         .play-btn {
           position: relative;
           margin-left: 0;
@@ -163,70 +184,28 @@ import { NavigateToTaskService } from '../../navigate-to-task/navigate-to-task.s
           }
         }
       }
-
-      .current-task-title {
-        position: absolute;
-        right: 100%;
-        width: auto;
-        border: 1.5px solid var(--c-accent);
-        border-radius: 10px;
-        min-width: 40px;
-        white-space: nowrap;
-        padding: calc(var(--s-half) * 0.75) var(--s);
-        padding-right: calc(var(--s) * 2.25);
-        margin-right: calc(-1 * var(--s) * 1.75);
-        top: 50%;
-        transform: translateY(-50%);
-        transition: opacity 0.3s ease-out;
-        display: flex;
-        background: var(--bg-lighter);
-        font-size: 13px;
-        z-index: 5;
-        cursor: pointer;
-
-        @media (max-width: 1080px) {
-          display: none;
-        }
-
-        .title {
-          max-width: 200px;
-          text-overflow: ellipsis;
-          overflow: hidden;
-        }
-
-        .project {
-          max-width: 130px;
-          padding-right: 0;
-          padding-left: var(--s-half);
-          font-size: 12px;
-          overflow: hidden;
-          text-overflow: ellipsis;
-
-          ::ng-deep .tag-title {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            display: block;
-          }
-        }
-      }
     `,
   ],
-  animations: [fadeAnimation, expandFadeHorizontalAnimation],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PlayButtonComponent implements OnInit, OnDestroy {
   private _renderer = inject(Renderer2);
   private _cd = inject(ChangeDetectorRef);
-  private _navigateToTaskService = inject(NavigateToTaskService);
+  private _navConfigService = inject(MagicNavConfigService);
+  private _translateService = inject(TranslateService);
+  private _isLongPressClick = false;
 
   readonly T = T;
   readonly taskService = inject(TaskService);
 
-  readonly currentTask = input<Task | null>();
   readonly currentTaskId = input<string | null>();
-  readonly currentTaskContext = input<WorkContext | null>();
+  readonly isMobile = input(false);
+  readonly isIconButton = computed(() => this.isMobile() && !this.currentTaskId());
   readonly hasTrackableTasks = input<boolean>(true);
   readonly circleSvg = viewChild<ElementRef<SVGCircleElement>>('circleSvg');
+  readonly featureMenuTrigger = viewChild(MatMenuTrigger);
+  // `read`: on a Material button the template ref is the component, not the element.
+  readonly playBtn = viewChild('playBtn', { read: ElementRef<HTMLButtonElement> });
 
   readonly isDisabled = computed(
     () => !this.currentTaskId() && !this.hasTrackableTasks(),
@@ -238,6 +217,41 @@ export class PlayButtonComponent implements OnInit, OnDestroy {
   private _subs = new Subscription();
   private circumference = 10 * 2 * Math.PI; // ~62.83
   protected hasTimeEstimate = false;
+
+  /** A new press starts fresh, whether or not the last long press ended in a click. */
+  onPlayPointerDown(): void {
+    this._isLongPressClick = false;
+  }
+
+  onPlayClick(): void {
+    // The click that ends a long press must not also start or stop tracking.
+    if (this._isLongPressClick) {
+      this._isLongPressClick = false;
+      return;
+    }
+    this.taskService.toggleStartTask();
+  }
+
+  onLongPress(): void {
+    this._isLongPressClick = true;
+    this.openFeatureMenu();
+  }
+
+  /** Same "Disable feature" as the side nav items offer for their features. */
+  openFeatureMenu(): void {
+    this.featureMenuTrigger()?.openMenu();
+  }
+
+  onFeatureMenuClosed(): void {
+    this.playBtn()?.nativeElement.focus();
+  }
+
+  disableTimeTracking(): void {
+    this._navConfigService.disableFeature(
+      'isTimeTrackingEnabled',
+      this._translateService.instant(T.GCF.APP_FEATURES.TIME_TRACKING),
+    );
+  }
 
   ngOnInit(): void {
     // Subscribe to current task to track if it has a time estimate
@@ -270,13 +284,6 @@ export class PlayButtonComponent implements OnInit, OnDestroy {
           }
         }),
     );
-  }
-
-  navigateToCurrentTask(): void {
-    const taskId = this.currentTaskId();
-    if (taskId) {
-      this._navigateToTaskService.navigate(taskId);
-    }
   }
 
   ngOnDestroy(): void {

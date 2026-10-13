@@ -12,6 +12,7 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { TranslatePipe } from '@ngx-translate/core';
 import { SnackService } from '../../../core/snack/snack.service';
 import { IS_MOBILE } from 'src/app/util/is-mobile';
+import { LiveMarkdownEditorComponent } from '../../../ui/inline-markdown/live-markdown/live-markdown-editor.component';
 
 @Component({
   // selector: 'dialog-add-note',
@@ -32,6 +33,7 @@ import { IS_MOBILE } from 'src/app/util/is-mobile';
     MatButton,
     MatIconButton,
     TranslatePipe,
+    LiveMarkdownEditorComponent,
   ],
 })
 export class DialogAddNoteComponent extends DialogFullscreenMarkdownComponent {
@@ -45,26 +47,40 @@ export class DialogAddNoteComponent extends DialogFullscreenMarkdownComponent {
   constructor() {
     super();
     this.data = { content: sessionStorage.getItem(SS.NOTE_TMP) || '' };
+    // A new note's true original is empty, so recovered sessionStorage content
+    // counts as modified and gets the discard confirmation.
+    this._initialContent = '';
   }
 
   override close(isSkipSave: boolean = false, isEscapeClose: boolean = false): void {
+    if (isSkipSave && !isEscapeClose) {
+      this._confirmDiscardIfNeeded(() => this.closeAfterConfirmedDiscard());
+      return;
+    }
     if (IS_MOBILE) {
       window.history.back();
     }
-    if (!isEscapeClose) {
-      if (!isSkipSave && this.data?.content && this.data.content.trim().length > 0) {
-        this._noteService.add({ content: this.data.content }, true);
-        this._snackService.open({
-          type: 'SUCCESS',
-          msg: this.T.F.NOTE.S.NOTE_ADDED,
-          ico: 'comment',
-        });
-        this._clearSessionStorage();
-      }
+    if (
+      !isEscapeClose &&
+      !isSkipSave &&
+      this.data?.content &&
+      this.data.content.trim().length > 0
+    ) {
+      this._noteService.add({ content: this.data.content }, true);
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: this.T.F.NOTE.S.NOTE_ADDED,
+        ico: 'comment',
+      });
+      this._clearSessionStorage();
+    }
+    this._matDialogRef.close();
+  }
 
-      if (isSkipSave) {
-        this._clearSessionStorage();
-      }
+  override closeAfterConfirmedDiscard(): void {
+    this._clearSessionStorage();
+    if (IS_MOBILE) {
+      window.history.back();
     }
     this._matDialogRef.close();
   }

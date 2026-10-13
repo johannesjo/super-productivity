@@ -4,6 +4,7 @@
 import {
   IssueProviderManifestConfig,
   IssueProviderPluginDefinition,
+  PluginHttpOptions,
 } from './issue-provider-types';
 
 export interface PluginMenuEntryCfg {
@@ -11,6 +12,29 @@ export interface PluginMenuEntryCfg {
   label: string;
   icon?: string;
   onClick: () => void;
+}
+
+export type PluginTaskContextMenuTarget = 'TASK' | 'SUBTASK';
+
+export interface PluginTaskContextMenuContext {
+  readonly taskId: string;
+}
+
+/**
+ * A plugin action shown in the task context menu's dedicated plugin submenu.
+ * Register from plugin.js; callback registrations are not supported in iframe
+ * index.html files.
+ */
+export interface PluginTaskContextMenuEntryCfg {
+  /** Unique within this plugin. */
+  id: string;
+  /** A non-empty action label of at most 80 characters. */
+  label: string;
+  /** Optional Material icon ligature name. Custom SVG assets are not supported. */
+  icon?: string;
+  /** Defaults to both regular tasks and subtasks when omitted; an empty array is invalid. */
+  showFor?: readonly PluginTaskContextMenuTarget[];
+  onClick: (context: PluginTaskContextMenuContext) => void | Promise<void>;
 }
 
 export enum PluginHooks {
@@ -53,6 +77,12 @@ export type DialogResult = string | undefined;
 
 export interface DialogCfg {
   title?: string;
+  /**
+   * Rich HTML sanitized by the host before rendering, rebuilt from an allowlist.
+   * Semantic HTML, native form controls and inline layout styles are preserved;
+   * scripts, event-handler attributes, unsafe URLs, inline `<svg>` and `style`
+   * values containing `url(` are removed. Escape untrusted values yourself.
+   */
   htmlContent?: string;
   content?: string;
   okBtnLabel?: string;
@@ -64,6 +94,16 @@ export interface SnackCfg {
   msg: string;
   type?: 'SUCCESS' | 'ERROR' | 'WARNING' | 'INFO';
   ico?: string;
+  /**
+   * Optional action button; the snack stays visible longer when set.
+   * plugin.js only — functions cannot cross the iframe postMessage boundary.
+   */
+  action?: SnackActionCfg;
+}
+
+export interface SnackActionCfg {
+  label: string;
+  onClick: () => void;
 }
 
 export type SnackCfgLimited = SnackCfg;
@@ -121,6 +161,28 @@ export interface PluginManifest {
   description?: string;
   hooks: Hooks[];
   permissions: string[];
+  /**
+   * Exact hostnames this plugin is allowed to reach via `PluginAPI.request`
+   * (e.g. `"api.example.com"`). Host-only, exact match — no wildcards, and the
+   * port is ignored. Enforced by the host: a `request` to any host not listed
+   * here is rejected. If omitted or empty, `PluginAPI.request` is disabled for
+   * this plugin (fail-closed). Surfaced to the user at install so the plugin's
+   * outbound network reach is reviewable. Does not affect issue-provider HTTP.
+   *
+   * Requires the `"http"` capability: `PluginAPI.request` only works if the
+   * plugin ALSO declares `"http"` in `permissions`. Network egress is an
+   * explicit, opt-in capability (like `nodeExecution`) — declaring hosts alone
+   * does not grant it.
+   *
+   * Redirects: on web/desktop, `PluginAPI.request` refuses to follow HTTP
+   * redirects (executes via `fetch` with `redirect: 'error'`), so a declared
+   * host cannot 3xx the request onward to a non-allowlisted or private/metadata
+   * host. On native (Capacitor), the platform HTTP layer still follows redirects
+   * — that hop is not re-checked; treat native redirect-following as a known
+   * limitation. DNS rebinding (hostname matched, not the resolved IP) also
+   * remains out of scope.
+   */
+  allowedHosts?: string[];
   iFrame?: boolean;
   isSkipMenuEntry?: boolean;
   type?: 'standard' | 'issueProvider';
@@ -285,16 +347,6 @@ export interface Task {
   _hideSubTasksMode?: number;
 }
 
-export interface ProjectFolder {
-  id: string;
-  title: string;
-  icon?: string | null;
-  parentId?: string | null;
-  isExpanded?: boolean;
-  created: number;
-  updated?: number;
-}
-
 export interface Project {
   id: string;
   title: string;
@@ -311,7 +363,6 @@ export interface Project {
   noteIds: string[];
   isEnableBacklog?: boolean;
   isHiddenFromMenu?: boolean;
-  folderId?: string | null;
 
   // Advanced config (internal) - must be any to match WorkContextCommon
   advancedCfg: unknown;
@@ -375,6 +426,14 @@ export interface PluginWorkContextHeaderBtnCfg {
   showFor: ('PROJECT' | 'TAG' | 'TODAY')[];
 }
 
+/**
+ * OAuth configuration for starting an OAuth flow.
+ *
+ * Bring-your-own credentials: an issue-provider plugin may let users override the
+ * clientId / clientSecret / redirectUri at runtime by writing them under
+ * `pluginConfig.oauthOverrides = { clientId?, clientSecret?, redirectUri? }`. These
+ * overrides apply only to the desktop (Electron loopback) flow and are ignored on web/native.
+ */
 export interface OAuthFlowConfig {
   authUrl: string;
   tokenUrl: string;
@@ -408,6 +467,16 @@ export interface OAuthFlowConfig {
   scopes: string[];
   /** Additional query parameters to append to the authorization URL (e.g. access_type, prompt). */
   extraAuthParams?: Record<string, string>;
+  /**
+   * Optional redirect URI override for the desktop (Electron) loopback flow — e.g.
+   * a user-supplied OAuth app that requires an exact pre-registered
+   * `http://127.0.0.1:<port>/...` callback instead of the host default.
+   *
+   * Desktop-only: web and native each have a single valid callback (the host's
+   * `/assets/oauth-callback.html` page and the app's fixed custom scheme), so this
+   * field is ignored (stripped) on those platforms and the platform default is used.
+   */
+  redirectUri?: string;
 }
 
 export interface OAuthTokenResult {
@@ -471,6 +540,11 @@ export interface PluginAppState {
   readonly globalConfig: Readonly<Record<string, unknown>>;
 }
 
+export interface PluginRequestOptions extends PluginHttpOptions {
+  method?: string;
+  body?: unknown;
+}
+
 export interface PluginAPI {
   cfg: PluginBaseCfg;
   readonly Hooks: typeof PluginHooks;
@@ -481,11 +555,23 @@ export interface PluginAPI {
 
   registerMenuEntry(menuEntryCfg: Omit<PluginMenuEntryCfg, 'pluginId'>): void;
 
+  /** Register an action in the task context menu's plugin submenu. */
+  registerTaskContextMenuEntry(cfg: PluginTaskContextMenuEntryCfg): void;
+
   registerConfigHandler(handler: () => void): void;
 
   registerShortcut(
     shortcutCfg: Omit<PluginShortcutCfg, 'pluginId'> & { id?: string },
   ): void;
+
+  /**
+   * Remove a shortcut this plugin registered before, by the id it was
+   * registered with (when `id` was omitted there, that is the sanitized label).
+   * Registering the same id again replaces the existing entry, so this is only
+   * needed when a shortcut disappears for good. The user's key binding is kept
+   * in the keyboard settings, so re-registering the same id restores it.
+   */
+  unregisterShortcut(shortcutId: string): void;
 
   registerSidePanelButton(sidePanelBtnCfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>): void;
 
@@ -602,6 +688,12 @@ export interface PluginAPI {
   selectTask(taskId: string): Promise<void>;
 
   reInitData(): Promise<void>;
+
+  /**
+   * Update a task. Changing `projectId` moves it like the UI does: subtasks
+   * follow, and for a recurring task the repeat config and every instance
+   * (archived ones included) move without a confirmation.
+   */
   updateTask(taskId: string, updates: Partial<Task>): Promise<void>;
 
   addTask(taskData: PluginCreateTaskData): Promise<string>;
@@ -616,6 +708,14 @@ export interface PluginAPI {
   addProject(projectData: Partial<Project>): Promise<string>;
 
   updateProject(projectId: string, updates: Partial<Project>): Promise<void>;
+
+  /**
+   * Deletes a project AND the tasks it contains, matching what the UI's own
+   * "Delete project" does — the cascade lives in ProjectService.remove().
+   * Deleting the Inbox is refused. If the deleted project is the active work
+   * context, the app falls back to Today.
+   */
+  deleteProject(projectId: string): Promise<void>;
 
   // tags
   getAllTags(): Promise<Tag[]>;
@@ -675,11 +775,37 @@ export interface PluginAPI {
 
   clearOAuthToken(): Promise<void>;
 
+  // secret storage
+  //
+  // Local-only, per-plugin credential storage (IMAP passwords, API tokens, …).
+  // Stored in a dedicated store that is never part of Super Productivity's
+  // sync, exports, or backups, so secrets are per-device — the user re-enters
+  // them on each device. (This is not protection against OS-level device
+  // backups; values are stored unencrypted at rest, like plugin OAuth tokens.)
+  // Use this instead of `persistDataSynced` / issue-provider config for
+  // anything sensitive; those land in synced state, exports, and backups.
+  // `key` must be a non-empty string.
+  setSecret(key: string, value: string): Promise<void>;
+
+  getSecret(key: string): Promise<string | null>;
+
+  deleteSecret(key: string): Promise<void>;
+
+  /**
+   * Issue a host-side HTTP request through Super Productivity's guarded HTTP bridge.
+   * Plugins must provide any Authorization headers themselves; the host only executes
+   * the request and applies existing URL/private-network protections.
+   *
+   * Requires both `"http"` in `permissions` (the capability) and the target host
+   * in `allowedHosts` (the scope). Missing either is rejected (fail-closed).
+   */
+  request<T = unknown>(url: string, options?: PluginRequestOptions): Promise<T>;
+
   // download file
   downloadFile(filename: string, data: string): Promise<void>;
 
-  // node execution (Electron desktop only; currently grantable only to packaged
-  // built-in plugins with nodeExecution permission after main-process user consent)
+  // node execution (Electron desktop only; requires the nodeExecution permission and
+  // main-process user consent)
   executeNodeScript?(request: PluginNodeScriptRequest): Promise<PluginNodeScriptResult>;
 
   // action execution - dispatch NgRx actions (limited to allowed subset)

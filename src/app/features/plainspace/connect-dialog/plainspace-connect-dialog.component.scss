@@ -1,0 +1,33 @@
+:host {
+  display: block;
+  max-width: 440px;
+}
+
+.dialog-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.intro {
+  margin-top: 0;
+}
+
+.open-link {
+  margin-bottom: 12px;
+}
+
+.hint {
+  margin: 0 0 16px;
+  font-size: 12px;
+  color: var(--text-color-muted);
+}
+
+.token-field {
+  width: 100%;
+}
+
+.error {
+  margin: 4px 0 0;
+  color: var(--c-warn);
+}

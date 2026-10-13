@@ -29,6 +29,8 @@ import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/
 import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatDivider } from '@angular/material/divider';
+import { SplitButtonComponent } from '../../../ui/split-button/split-button.component';
 import { AsyncPipe, NgTemplateOutlet } from '@angular/common';
 import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { LocalDateStrPipe } from 'src/app/ui/pipes/local-date-str.pipe';
@@ -41,6 +43,13 @@ import { getDbDateStr } from '../../../util/get-db-date-str';
 import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import { DateService } from '../../../core/date/date.service';
 import { MatTooltip } from '@angular/material/tooltip';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import {
+  getTaskDeleteConfirmData,
+  isTaskDeleteConfirmRequired,
+} from '../util/get-task-delete-confirm';
+import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 
 const MINUTES_TO_MILLISECONDS = 1000 * 60;
 
@@ -74,6 +83,8 @@ export const shouldShowDeadlineScheduleHint = (
     MatMenuItem,
     MatDialogActions,
     MatButton,
+    MatDivider,
+    SplitButtonComponent,
     AsyncPipe,
     NgTemplateOutlet,
     TranslatePipe,
@@ -93,10 +104,16 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   private _store = inject(Store);
   private _reminderService = inject(ReminderService);
   private _dateService = inject(DateService);
+  private _globalConfigService = inject(GlobalConfigService);
   private _elementRef = inject(ElementRef);
+  private _dateTimeFormatService = inject(DateTimeFormatService);
   data = inject<{
     reminders: TaskWithReminderData[];
   }>(MAT_DIALOG_DATA);
+
+  // Exposed so the template can pass the reactive locale to the now-pure
+  // `localeDate` pipe, preserving re-render on a locale change.
+  readonly locale = this._dateTimeFormatService.currentLocale;
 
   T: typeof T = T;
   isDisableControls: boolean = false;
@@ -148,6 +165,8 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   overdueThreshold = Date.now() - 30 * 60 * 1000; // 30 minutes
 
   private _subs: Subscription = new Subscription();
+  // Latches once a delete has been confirmed so a second trigger is a no-op.
+  private _isDeleteTriggered = false;
   // Track dismissed reminder IDs to prevent stale data from worker re-triggering them
   private _dismissedReminderIds = new Set<string>();
   // Reminders we have observed as still-valid in the store at least once. We only
@@ -156,6 +175,14 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
   // already absent at open time is never confirmed, so it is never dropped — this
   // preserves the open-time relaxation that fixed the worker/store snapshot race.
   private _confirmedPresentIds = new Set<string>();
+  // remindAt per shown reminder, captured from worker emissions so a passive
+  // dismiss can be recorded against the exact occurrence (taskId + remindAt) in
+  // the ReminderService UI cooldown.
+  private _remindAtById = new Map<string, number>(
+    this.data.reminders
+      .filter((r) => typeof r.reminderData?.remindAt === 'number')
+      .map((r): [string, number] => [r.id, r.reminderData!.remindAt]),
+  );
   // Stored separately so it can be cancelled eagerly when the dialog begins closing,
   // preventing race conditions where a worker tick updates a mid-animation dialog.
   private _onRemindersActiveSub: Subscription = Subscription.EMPTY;
@@ -173,6 +200,12 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
           filtered
             .filter((r) => r.isDeadlineReminder)
             .forEach((r) => this._deadlineReminderTaskIds.add(r.id));
+          // Keep occurrence remindAt in sync for the destroy-time UI cooldown.
+          filtered.forEach((r) => {
+            if (typeof r.reminderData?.remindAt === 'number') {
+              this._remindAtById.set(r.id, r.reminderData.remindAt);
+            }
+          });
           // Update isAllDeadline dynamically (W7)
           this.isAllDeadline = filtered.every((r) => r.isDeadlineReminder);
           this.taskIds$.next(filtered.map((r) => r.id));
@@ -233,6 +266,24 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
         this._store.dispatch(TaskSharedActions.clearDeadlineReminder({ taskId }));
       }
     });
+    // Scheduled (non-deadline) reminders are intentionally NOT cleared on a
+    // passive dismiss — they should re-nudge later. But re-showing them on the
+    // very next worker tick (~10s) re-grabs the screen and freezes the app. Put
+    // them in a short in-memory UI cooldown instead, so the modal stays closed
+    // long enough to use the app while the reminder itself stays active.
+    this.taskIds$
+      .getValue()
+      .filter(
+        (taskId) =>
+          !this._deadlineReminderTaskIds.has(taskId) &&
+          !this._dismissedReminderIds.has(taskId),
+      )
+      .forEach((taskId) => {
+        const remindAt = this._remindAtById.get(taskId);
+        if (typeof remindAt === 'number') {
+          this._reminderService.suppressReminderUiAfterDismiss(taskId, remindAt);
+        }
+      });
     this._subs.unsubscribe();
   }
 
@@ -342,6 +393,49 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
             this._close();
           }
         }),
+    );
+  }
+
+  deleteTask(task: TaskWithReminderData): void {
+    // Guard against deleting the same task twice (mirrors the task context menu).
+    if (this._isDeleteTriggered) {
+      return;
+    }
+    const isConfirmBeforeDelete =
+      this._globalConfigService.cfg()?.tasks?.isConfirmBeforeDelete ?? true;
+    if (isTaskDeleteConfirmRequired(task, isConfirmBeforeDelete)) {
+      this._subs.add(
+        this._matDialog
+          .open(DialogConfirmComponent, {
+            data: getTaskDeleteConfirmData(task),
+          })
+          .afterClosed()
+          .subscribe((isConfirm) => {
+            if (isConfirm) {
+              this._deleteTask(task);
+            }
+          }),
+      );
+    } else {
+      this._deleteTask(task);
+    }
+  }
+
+  private _deleteTask(task: TaskWithReminderData): void {
+    this._isDeleteTriggered = true;
+    // The reminder list only holds reminder data, so resolve the full task with
+    // its subtasks first — deleting a parent must also remove its subtasks.
+    this._subs.add(
+      this._taskService.getByIdWithSubTaskData$(task.id).subscribe((taskWithSubTasks) => {
+        // The task may have vanished from the store between confirm and resolve
+        // (e.g. synced away), so skip — the store reconcile sub already handles
+        // closing the dialog in that case.
+        if (!taskWithSubTasks) {
+          return;
+        }
+        this._taskService.remove(taskWithSubTasks);
+        this._removeTaskFromList(task.id);
+      }),
     );
   }
 

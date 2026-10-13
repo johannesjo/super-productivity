@@ -10,7 +10,10 @@
   </div>
 </header>
 
-<div class="normal-tasks">
+<div
+  class="normal-tasks"
+  data-planner-selection-scope="overdue"
+>
   <div
     class="normal-tasks-items"
     cdkDropList
@@ -24,9 +27,11 @@
         cdkDrag
         [cdkDragData]="task"
         [cdkDragStartDelay]="dragDelayForTouch()"
+        [cdkDragDisabled]="multiSelect.isTouchSelectionMode()"
         [cdkDragLockAxis]="isXs() ? 'y' : ''"
         [task]="task"
         [day]=""
+        [focusable]="true"
       ></planner-task>
     }
   </div>

@@ -12,8 +12,10 @@ export class WorkViewPage extends BasePage {
   constructor(page: Page, testPrefix: string = '') {
     super(page, testPrefix);
 
-    this.addTaskGlobalInput = page.locator('add-task-bar.global input');
-    this.addBtn = page.locator('.switch-add-to-btn');
+    this.addTaskGlobalInput = page.locator('add-task-bar.global .main-input');
+    // The add-task submit button's stable e2e hook (`.switch-add-to-btn` now
+    // belongs to the add-to-backlog toggle, a different control).
+    this.addBtn = page.locator('.e2e-add-task-submit');
     this.taskList = page.locator('task-list').first();
     this.backdrop = page.locator('.backdrop');
     this.routerWrapper = page.locator('.route-wrapper, main, [role="main"]').first();
@@ -63,16 +65,16 @@ export class WorkViewPage extends BasePage {
 
     await task.press('a');
 
-    // Wait for textarea to appear
-    const textarea = this.page.locator('textarea:focus, input[type="text"]:focus');
-    await textarea.waitFor({ state: 'visible', timeout: 3000 });
-
-    // Ensure the field is properly focused and cleared before filling
-    await textarea.click();
-    await textarea.fill('');
-
-    // Use fill() instead of type() for more reliable text input
-    await textarea.fill(subTaskName);
+    // 'a' opens the inline subtask draft input (a local-only draft that is not
+    // persisted until committed with Enter).
+    const draftInput = this.page.locator('.e2e-add-subtask-input');
+    await draftInput.waitFor({ state: 'visible', timeout: 3000 });
+    await draftInput.fill(subTaskName);
     await this.page.keyboard.press('Enter');
+
+    // The draft stays open for rapid entry; close it so callers get a clean
+    // state (focus returns to the originating task).
+    await this.page.keyboard.press('Escape');
+    await draftInput.waitFor({ state: 'detached', timeout: 3000 });
   }
 }

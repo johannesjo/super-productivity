@@ -13,7 +13,7 @@
  * - Singleton stores (`vector_clock`, `client_id`, `state_cache`,
  *   `import_backup`, archive) are keyed by a known string key.
  * - Two flows require atomic multi-store writes:
- *   `appendWithVectorClockUpdate` (OPS + VECTOR_CLOCK) and
+ *   `appendWithVectorClockOverwrite` (OPS + VECTOR_CLOCK) and
  *   `runDestructiveStateReplacement` (OPS + STATE_CACHE + VECTOR_CLOCK +
  *   CLIENT_ID + archive). Hence the callback-based {@link transaction}: commit
  *   on resolve, roll back on throw — the one shape both IDB auto-commit and
@@ -23,13 +23,35 @@
 /** A value usable as a primary key in either backend. */
 export type DbKey = string | number;
 
-/** Half-open range query against an index (mirrors IDBKeyRange usage). */
+/**
+ * Half-open range over a store's primary key or a single-column index (mirrors
+ * IDBKeyRange usage). Bounds are scalar by design: IndexedDB orders compound
+ * keys lexicographically as tuples while SQLite compares per column, so a
+ * genuine compound *range* cannot be answered identically by both backends —
+ * see {@link DbIndexQuery} for the one compound shape that can.
+ */
 export interface DbKeyRange {
-  lower?: DbKey | DbKey[];
-  upper?: DbKey | DbKey[];
+  lower?: DbKey;
+  upper?: DbKey;
   lowerOpen?: boolean;
   upperOpen?: boolean;
 }
+
+/**
+ * Query for an index read: a {@link DbKeyRange} over a single-column index, or
+ * an exact key tuple for a compound index. The tuple's arity must match the
+ * index (SQLite rejects a mismatch; IndexedDB matches nothing).
+ */
+export type DbIndexQuery = DbKeyRange | DbKey[];
+
+/** `limit` must be a positive integer so both backends bound a walk identically. */
+export const assertIterateLimit = (limit?: number): void => {
+  if (limit !== undefined && (!Number.isInteger(limit) || limit < 1)) {
+    throw new Error(
+      `OpLogDbAdapter: iterate limit must be a positive integer, got ${limit}`,
+    );
+  }
+};
 
 export type DbTxMode = 'readonly' | 'readwrite';
 
@@ -85,6 +107,13 @@ export interface DbIterateOptions {
    * {@link OpLogTx.iterate}, where the enclosing transaction's mode governs.
    */
   mode?: DbTxMode;
+  /**
+   * Visit at most this many entries (positive integer). Lets "first / latest
+   * row" scans (`direction: 'prev'` + `'stop'`, e.g. `getLastSeq`) push the
+   * bound down: IndexedDB stops advancing the cursor, SQLite emits `LIMIT ?`
+   * instead of materializing the whole result set.
+   */
+  limit?: number;
 }
 
 /**
@@ -115,7 +144,7 @@ export interface OpLogTx {
     index: string,
     key: DbKey | DbKey[],
   ): Promise<DbKey | undefined>;
-  getAllFromIndex<T>(store: string, index: string, range?: DbKeyRange): Promise<T[]>;
+  getAllFromIndex<T>(store: string, index: string, query?: DbIndexQuery): Promise<T[]>;
   /**
    * Walk entries in key (or index) order, invoking `visit` per entry. See
    * {@link DbCursorAction} for how to continue / stop / delete and
@@ -134,31 +163,33 @@ export interface OpLogTx {
  * Non-transactional methods are convenience single-store operations (each runs
  * in its own implicit transaction); use {@link transaction} whenever two or
  * more writes must be atomic.
+ *
+ * Concurrency: callers may issue operations concurrently — the op-log does
+ * (capture append, archive write and compaction overlap). Transactions are
+ * mutually exclusive per overlapping store scope, and no bare operation may
+ * interleave into an open transaction. IndexedDB provides this natively
+ * (transactions with overlapping scopes are serialized; disjoint-scope ones may
+ * run concurrently); a backend over a single connection with no nested
+ * transactions (SQLite) MUST serialize internally and provides the stronger
+ * whole-connection exclusion via its FIFO queue. Callers therefore never need
+ * to lock around these methods themselves.
  */
 export interface OpLogDbAdapter {
   /**
-   * Open/create the database against {@link OpLogDbSchema}. Idempotent: safe to
-   * call concurrently; implementations dedupe via an in-flight promise.
-   */
-  init(): Promise<void>;
-
-  /**
-   * Close the underlying connection and drop the cached handle. A subsequent
-   * operation re-opens transparently. Mainly a teardown hook.
+   * Close the underlying connection and drop the cached handle. Operations throw
+   * until a connection is adopted again. Mainly a teardown hook.
    */
   close(): void;
 
   /**
-   * Transitional bridge: operate on a connection/handle owned by the calling
-   * service instead of opening one. Only meaningful for the IndexedDB backend
-   * during the incremental Phase A/B migration, where the store/archive
-   * services still own their own `IDBPDatabase` and lend it here so both share
-   * one connection. Backends that fully self-manage their handle (e.g. SQLite)
-   * leave this undefined; callers guard with `adapter.adoptConnection?.(…)`.
+   * Operate on a connection/handle owned by the calling service instead of
+   * opening one: the store/archive services own their own `IDBPDatabase` (open,
+   * retry, re-open) and lend it here so both share one connection. Every
+   * operation requires a connection to have been adopted first.
    *
    * @param connection the owner's handle, or `undefined` to release it.
    */
-  adoptConnection?(connection: unknown): void;
+  adoptConnection(connection: unknown): void;
 
   add(store: string, value: unknown): Promise<number>;
   put(store: string, value: unknown, key?: DbKey): Promise<void>;
@@ -181,8 +212,8 @@ export interface OpLogDbAdapter {
     index: string,
     key: DbKey | DbKey[],
   ): Promise<DbKey | undefined>;
-  getAllFromIndex<T>(store: string, index: string, range?: DbKeyRange): Promise<T[]>;
-  countFromIndex(store: string, index: string, range?: DbKeyRange): Promise<number>;
+  getAllFromIndex<T>(store: string, index: string, query?: DbIndexQuery): Promise<T[]>;
+  countFromIndex(store: string, index: string, query?: DbIndexQuery): Promise<number>;
 
   /** See {@link OpLogTx.iterate}. */
   iterate<T>(

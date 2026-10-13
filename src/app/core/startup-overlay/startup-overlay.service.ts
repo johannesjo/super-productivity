@@ -1,27 +1,21 @@
 import { inject, Injectable } from '@angular/core';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
-import { TaskService } from '../../features/tasks/task.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
-import { SnackService } from '../snack/snack.service';
 import { SS } from '../persistence/storage-keys.const';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports -- grandfathered layer-boundary debt
 import { androidInterface } from '../../features/android/android-interface';
 import { Log } from '../log';
 
 @Injectable({ providedIn: 'root' })
 export class StartupOverlayService {
-  private _taskService = inject(TaskService);
   private _layoutService = inject(LayoutService);
-  private _snackService = inject(SnackService);
 
   processAndDismiss(): void {
     if (!IS_ANDROID_WEB_VIEW) return;
 
     try {
-      // Drain the widget task queue on cold start.
-      // The processWidgetTasks$ effect in android.effects.ts only fires on
-      // onResume$, which is a Subject — on cold start, onResume fires before
-      // effects subscribe, so the event is lost. We must drain here.
-      this._processQueuedTasks();
+      // Tasks submitted through the overlay are imported from the native
+      // capture inbox by AndroidEffects.importNativeCaptures$.
 
       // Get partial text from native overlay (overlay stays visible).
       // Returns null if bar was never opened, empty string if opened but empty,
@@ -65,37 +59,16 @@ export class StartupOverlayService {
     }
   }
 
-  private _processQueuedTasks(): void {
-    const queueJson = androidInterface.getWidgetTaskQueue?.();
-    if (!queueJson) return;
-
-    try {
-      const queue = JSON.parse(queueJson);
-      const tasks = queue.tasks || [];
-      for (const task of tasks) {
-        this._taskService.add(task.title);
-      }
-
-      if (tasks.length > 0) {
-        this._snackService.open({
-          type: 'SUCCESS',
-          msg:
-            tasks.length === 1
-              ? 'Task added from startup'
-              : `${tasks.length} tasks added from startup`,
-        });
-      }
-    } catch (e) {
-      Log.err('StartupOverlayService: Failed to process queued tasks', e);
-    }
-  }
-
   /**
    * Polls for the AddTaskBar input element using a MutationObserver,
    * with a safety timeout to prevent leaks.
    */
-  private _waitForInput(callback: (input: HTMLInputElement) => void): void {
-    const input = document.querySelector<HTMLInputElement>('add-task-bar.global input');
+  private _waitForInput(callback: (input: HTMLTextAreaElement) => void): void {
+    // The title field is a <textarea class="main-input"> — an `input` type
+    // selector would not match it, so target the class (mirrors the e2e locator).
+    const input = document.querySelector<HTMLTextAreaElement>(
+      'add-task-bar.global .main-input',
+    );
     if (input) {
       callback(input);
       return;
@@ -104,7 +77,9 @@ export class StartupOverlayService {
     let resolved = false;
     const observer = new MutationObserver(() => {
       if (resolved) return;
-      const el = document.querySelector<HTMLInputElement>('add-task-bar.global input');
+      const el = document.querySelector<HTMLTextAreaElement>(
+        'add-task-bar.global .main-input',
+      );
       if (el) {
         resolved = true;
         observer.disconnect();

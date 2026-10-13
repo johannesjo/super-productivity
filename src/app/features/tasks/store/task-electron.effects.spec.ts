@@ -1,124 +1,135 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { Observable, of, Subject } from 'rxjs';
+import { provideMockStore, MockStore } from '@ngrx/store/testing';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { TaskElectronEffects } from './task-electron.effects';
-import { TaskService } from '../task.service';
-import { provideMockStore } from '@ngrx/store/testing';
+import { TimeTrackingActions } from '../../time-tracking/store/time-tracking.actions';
+import {
+  selectIsOsProgressBarOwnedBySession,
+  selectIsOverlayShown,
+} from '../../focus-mode/store/focus-mode.selectors';
+import { selectCurrentTask, selectTaskEntities } from './task.selectors';
+import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { FocusModeService } from '../../focus-mode/focus-mode.service';
-import { tap } from 'rxjs/operators';
+import { TaskService } from '../task.service';
+import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
+import { DEFAULT_TASK, Task } from '../task.model';
 
+/**
+ * The OS progress bar (taskbar/dock) must only ever have one writer: a timed
+ * focus session publishes its own progress, and this effect has to stand down
+ * for exactly as long as that is true. Gating on the focus overlay being
+ * *shown* instead left both writers active whenever the overlay was hidden, so
+ * the bar cycled between the two values every second (#9944).
+ */
 describe('TaskElectronEffects', () => {
   let effects: TaskElectronEffects;
-  let actions$: Observable<any>;
-  let taskService: jasmine.SpyObj<TaskService>;
-  let mockIpcAddTaskFromAppUri$: Subject<{ title: string }>;
+  let actions$: Subject<any>;
+  let store: MockStore;
+  let setProgressBarSpy: jasmine.Spy;
+
+  const task: Task = {
+    ...DEFAULT_TASK,
+    id: 'T1',
+    title: 'Task',
+    projectId: 'project-1',
+    timeSpent: 30 * 60000,
+    timeEstimate: 60 * 60000,
+  };
+
+  const addTimeSpent = (): ReturnType<typeof TimeTrackingActions.addTimeSpent> =>
+    TimeTrackingActions.addTimeSpent({
+      task,
+      date: '2026-01-05',
+      duration: 1000,
+      isFromTrackingReminder: false,
+    });
 
   beforeEach(() => {
-    const taskServiceSpy = jasmine.createSpyObj('TaskService', ['add']);
-    const globalConfigServiceSpy = jasmine.createSpyObj('GlobalConfigService', [], {
-      cfg$: of({}),
-    });
-    const focusModeServiceSpy = jasmine.createSpyObj('FocusModeService', ['mode'], {
-      currentSessionTime$: of(0),
-    });
-    focusModeServiceSpy.mode.and.returnValue('Countdown');
-
-    // Mock window.ea
-    (window as any).ea = {
-      on: jasmine.createSpy('on'),
-      updateCurrentTask: jasmine.createSpy('updateCurrentTask'),
-      setProgressBar: jasmine.createSpy('setProgressBar'),
-      onSwitchTask: jasmine.createSpy('onSwitchTask'),
-    };
-
     actions$ = new Subject<any>();
-    mockIpcAddTaskFromAppUri$ = new Subject<{ title: string }>();
+    setProgressBarSpy = jasmine.createSpy('setProgressBar');
+    (window as any).ea = {
+      on: () => {},
+      onSwitchTask: () => {},
+      updateCurrentTask: () => {},
+      updateTodayTasks: () => {},
+      setProgressBar: setProgressBarSpy,
+    };
 
     TestBed.configureTestingModule({
       providers: [
-        {
-          provide: TaskElectronEffects,
-          useFactory: (
-            taskServiceInj: TaskService,
-            // Other dependencies could be injected here if needed
-          ) => {
-            const effectsInstance = new TaskElectronEffects();
-            // Manually inject dependencies that are used in the effect
-            (effectsInstance as any)._taskService = taskServiceInj;
-
-            // Override the effect with our mock observable
-            effectsInstance.handleAddTaskFromProtocol$ = mockIpcAddTaskFromAppUri$.pipe(
-              tap((data) => {
-                taskServiceInj.add(data.title);
-              }),
-            ) as any;
-
-            return effectsInstance;
-          },
-          deps: [TaskService],
-        },
+        TaskElectronEffects,
         provideMockActions(() => actions$),
-        provideMockStore(),
-        { provide: TaskService, useValue: taskServiceSpy },
-        { provide: GlobalConfigService, useValue: globalConfigServiceSpy },
-        { provide: FocusModeService, useValue: focusModeServiceSpy },
+        provideMockStore({
+          selectors: [
+            { selector: selectCurrentTask, value: task },
+            { selector: selectTaskEntities, value: { T1: task } },
+            { selector: selectTodayTaskIds, value: [] },
+            { selector: selectIsOverlayShown, value: false },
+            { selector: selectIsOsProgressBarOwnedBySession, value: false },
+          ],
+        }),
+        { provide: LOCAL_ACTIONS, useValue: actions$ },
+        { provide: GlobalConfigService, useValue: {} },
+        { provide: TaskService, useValue: { setCurrentId: () => {} } },
+        {
+          provide: FocusModeService,
+          useValue: {
+            currentSessionTime$: new BehaviorSubject(0),
+            mode: () => 'Flowtime',
+          },
+        },
       ],
     });
 
     effects = TestBed.inject(TaskElectronEffects);
-    taskService = TestBed.inject(TaskService) as jasmine.SpyObj<TaskService>;
+    store = TestBed.inject(MockStore);
   });
 
-  describe('handleAddTaskFromProtocol$', () => {
-    it('should add task when receiving data with title', (done) => {
-      const mockData = { title: 'Test Task' };
+  afterEach(() => {
+    store.resetSelectors();
+    delete (window as any).ea;
+  });
 
-      // Subscribe to the effect
-      effects.handleAddTaskFromProtocol$.subscribe(() => {
-        expect(taskService.add).toHaveBeenCalledWith('Test Task');
-        done();
+  describe('setTaskBarProgress$', () => {
+    it('should publish task progress while no focus session owns the bar', () => {
+      const sub = effects.setTaskBarProgress$.subscribe();
+      actions$.next(addTimeSpent());
+      sub.unsubscribe();
+
+      expect(setProgressBarSpy).toHaveBeenCalledWith({
+        progress: 0.5,
+        progressBarMode: 'normal',
       });
-
-      // Emit data through the mocked observable
-      mockIpcAddTaskFromAppUri$.next(mockData);
     });
 
-    it('should handle multiple tasks', (done) => {
-      let callCount = 0;
-      const expectedCalls = 2;
+    it('should stand down while a timed focus session owns the bar', () => {
+      store.overrideSelector(selectIsOsProgressBarOwnedBySession, true);
+      store.refreshState();
 
-      effects.handleAddTaskFromProtocol$.subscribe(() => {
-        callCount++;
-        if (callCount === expectedCalls) {
-          expect(taskService.add).toHaveBeenCalledTimes(2);
-          expect(taskService.add).toHaveBeenCalledWith('Task 1');
-          expect(taskService.add).toHaveBeenCalledWith('Task 2');
-          done();
-        }
-      });
+      const sub = effects.setTaskBarProgress$.subscribe();
+      actions$.next(addTimeSpent());
+      sub.unsubscribe();
 
-      // Emit multiple tasks
-      mockIpcAddTaskFromAppUri$.next({ title: 'Task 1' });
-      mockIpcAddTaskFromAppUri$.next({ title: 'Task 2' });
+      expect(setProgressBarSpy).not.toHaveBeenCalled();
     });
 
-    it('should handle validation logic correctly', (done) => {
-      // Test the validation logic directly
-      const validateData = (data: any): boolean => {
-        if (!data || !data.title || typeof data.title !== 'string') {
-          return false;
-        }
-        return true;
-      };
+    // An open-ended (Flowtime) session owns nothing, so the task progress has to
+    // keep flowing even though the focus overlay may be hidden or shown.
+    it('should keep publishing during an open-ended focus session', () => {
+      store.overrideSelector(selectIsOverlayShown, true);
+      store.overrideSelector(selectIsOsProgressBarOwnedBySession, false);
+      store.refreshState();
 
-      expect(validateData({ title: 'Valid Task' })).toBe(true);
-      expect(validateData(null)).toBe(false);
-      expect(validateData(undefined)).toBe(false);
-      expect(validateData({ notTitle: 'Invalid' })).toBe(false);
-      expect(validateData({ title: 123 })).toBe(false);
+      const sub = effects.setTaskBarProgress$.subscribe();
+      actions$.next(addTimeSpent());
+      sub.unsubscribe();
 
-      done();
+      expect(setProgressBarSpy).toHaveBeenCalledWith({
+        progress: 0.5,
+        progressBarMode: 'normal',
+      });
     });
   });
 });

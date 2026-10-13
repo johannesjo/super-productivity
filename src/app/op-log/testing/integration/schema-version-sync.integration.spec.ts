@@ -9,7 +9,6 @@ import { resetTestUuidCounter } from './helpers/test-client.helper';
 import { MockSyncServer } from './helpers/mock-sync-server.helper';
 import { SimulatedClient } from './helpers/simulated-client.helper';
 import { createMinimalTaskPayload } from './helpers/operation-factory.helper';
-import { MAX_VERSION_SKIP } from '@sp/shared-schema';
 
 /**
  * Integration tests for Schema Version Sync.
@@ -173,11 +172,6 @@ describe('Schema Version Sync Integration', () => {
       expect(migrationService.getCurrentVersion()).toBe(CURRENT_SCHEMA_VERSION);
       expect(typeof CURRENT_SCHEMA_VERSION).toBe('number');
       expect(CURRENT_SCHEMA_VERSION).toBeGreaterThanOrEqual(1);
-    });
-
-    it('should define MAX_VERSION_SKIP as a positive number', () => {
-      expect(typeof MAX_VERSION_SKIP).toBe('number');
-      expect(MAX_VERSION_SKIP).toBeGreaterThan(0);
     });
 
     it('should not need migration for state at current version', () => {

@@ -1,11 +1,13 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   HostBinding,
   inject,
   Input,
 } from '@angular/core';
 import { T } from '../../../t.const';
+import { TaskMultiSelectService } from '../../tasks/task-multi-select.service';
 import { PlannerDay, ScheduleItem, ScheduleItemType } from '../planner.model';
 import { CdkDrag, CdkDragDrop, CdkDropList } from '@angular/cdk/drag-drop';
 import { TaskCopy } from '../../tasks/task.model';
@@ -23,7 +25,6 @@ import { PlannerTaskComponent } from '../planner-task/planner-task.component';
 import { PlannerRepeatProjectionComponent } from '../planner-repeat-projection/planner-repeat-projection.component';
 import { PlannerDeadlineTaskComponent } from '../planner-deadline-task/planner-deadline-task.component';
 import { AddTaskInlineComponent } from '../add-task-inline/add-task-inline.component';
-import { LocaleDatePipe } from 'src/app/ui/pipes/locale-date.pipe';
 import { NgClass } from '@angular/common';
 import { PlannerCalendarEventComponent } from '../planner-calendar-event/planner-calendar-event.component';
 import { MsToStringPipe } from '../../../ui/duration/ms-to-string.pipe';
@@ -34,6 +35,9 @@ import { ShortDate2Pipe } from '../../../ui/pipes/short-date2.pipe';
 import { ProgressBarComponent } from '../../../ui/progress-bar/progress-bar.component';
 import { dragDelayForTouch } from '../../../util/input-intent';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
+import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
+import { parseDbDateStr } from '../../../util/parse-db-date-str';
+import { safeFormatDate } from '../../../util/safe-format-date';
 
 @Component({
   selector: 'planner-day',
@@ -50,7 +54,6 @@ import { LayoutService } from '../../../core-ui/layout/layout.service';
     AddTaskInlineComponent,
     NgClass,
     PlannerCalendarEventComponent,
-    LocaleDatePipe,
     MsToStringPipe,
     RoundDurationPipe,
     ShortTimeHtmlPipe,
@@ -60,11 +63,13 @@ import { LayoutService } from '../../../core-ui/layout/layout.service';
   ],
 })
 export class PlannerDayComponent {
+  protected readonly multiSelect = inject(TaskMultiSelectService);
   private _store = inject(Store);
   private _matDialog = inject(MatDialog);
   private _taskService = inject(TaskService);
   private _dateService = inject(DateService);
   private _layoutService = inject(LayoutService);
+  private _dateTimeFormatService = inject(DateTimeFormatService);
 
   // TODO: Skipped for migration because:
   //  This input is used in a control flow expression (e.g. `@if` or `*ngIf`)
@@ -75,12 +80,34 @@ export class PlannerDayComponent {
     return this.day?.dayDate;
   }
 
+  @HostBinding('attr.data-planner-selection-scope')
+  get selectionScopeAttr(): string | undefined {
+    return this.day?.dayDate;
+  }
+
   protected readonly T = T;
   protected readonly SCHEDULE_ITEM_TYPE = ScheduleItemType;
   protected readonly dragDelayForTouch = dragDelayForTouch;
   // Lock Y-axis on small screens only — on wider screens the planner uses a
   // multi-column grid where cross-column dragging requires horizontal movement.
   protected readonly isXs = this._layoutService.isXs;
+
+  // Precompute the weekday ('EEE') header label, keyed on the current locale.
+  // Replaces a per-CD `| localeDate: 'EEE'` pipe. The parent tracks planner-day
+  // by `day.dayDate`, so the instance (and thus `this.day.dayDate`) is stable
+  // for its lifetime; only a locale change needs to recompute the label.
+  protected readonly dayLabel = computed(() => {
+    const isoTextLocale = this._dateTimeFormatService.isoTextLocale();
+    return isoTextLocale
+      ? parseDbDateStr(this.day.dayDate).toLocaleDateString(isoTextLocale, {
+          weekday: 'short',
+        })
+      : safeFormatDate(
+          this.day.dayDate,
+          'EEE',
+          this._dateTimeFormatService.currentLocale(),
+        );
+  });
 
   getProgressBarClass(percentage: number | undefined): string {
     if (!percentage) return 'bg-success';

@@ -1,5 +1,6 @@
 import {
   ALLOWED_EXTERNAL_URL_SCHEMES,
+  hasExecutableFileExtension,
   isExternalUrlSchemeAllowed,
   isPathSafeToOpen,
   isUncPath,
@@ -12,8 +13,31 @@ describe('isExternalUrlSchemeAllowed', () => {
       'https://example.com/path?q=1#frag',
       'HTTPS://EXAMPLE.COM', // scheme is case-insensitive
       'mailto:someone@example.com',
+      'mid:message-id',
       'file:///home/user/notes.txt',
       '  https://example.com  ', // surrounding whitespace tolerated
+      'tel:+123456789',
+      'sms:+123456789',
+      // App deep-links (#8429): launch a registered app, not an OS handler.
+      'obsidian://open?vault=Notes&file=Today',
+      'vscode://file/home/user/project/main.ts',
+      'vscode-insiders://file/home/user/x.ts',
+      'zotero://select/items/0_ABCD1234',
+      'logseq://graph/Notes?page=Today',
+      // Note/task-app deep-links restored proactively alongside #8859.
+      'notion://www.notion.so/myworkspace/Page-abc123def',
+      'things:///show?id=ABCD-1234',
+      'omnifocus:///task/abc123',
+      'bear://x-callback-url/open-note?id=ABC123',
+      'joplin://x-callback-url/openNote?id=abc123def456',
+      'siyuan://blocks/20240101000000-abcdefg',
+      // #8859 — Outlook desktop deep-link: opaque EntryID, no `//` authority.
+      'outlook:0000000067E6410516B83D47AC4C8EB786CE10920700A34574545A43BF41AC9C4F77801FE8E100000000010C0000A34574545A43BF41AC9C4F77801FE8E10009672045BC0000',
+      'webexteams://im?space=ff135070-68f8-11f1-9229-c7e6cca7a7cd&message=f4f13440-6b50-11f1-8868-03e71232fa87',
+      // DEVONthink item link — same app-deep-link class as obsidian:/zotero:.
+      'x-devonthink-item://23082026-1234-5678-9ABC-DEF012345678',
+      // Parallel Code: opaque task id, only pre-fills its New Task form.
+      'parallelcode://new-task?spTaskId=abc123',
     ];
     allowed.forEach((url) => {
       it(`allows "${url}"`, () => {
@@ -26,7 +50,25 @@ describe('isExternalUrlSchemeAllowed', () => {
         'http:',
         'https:',
         'mailto:',
+        'mid:',
         'file:',
+        'tel:',
+        'sms:',
+        'obsidian:',
+        'vscode:',
+        'vscode-insiders:',
+        'zotero:',
+        'logseq:',
+        'notion:',
+        'things:',
+        'omnifocus:',
+        'bear:',
+        'joplin:',
+        'siyuan:',
+        'outlook:',
+        'webexteams:',
+        'x-devonthink-item:',
+        'parallelcode:',
       ]);
     });
   });
@@ -42,7 +84,6 @@ describe('isExternalUrlSchemeAllowed', () => {
       'vbscript:msgbox(1)',
       'ftp://example.com',
       'ssh://example.com',
-      'tel:+123456789',
       '\\\\192.168.1.100\\share', // UNC / SMB — NTLM hash capture
       '/\\192.168.1.100\\share',
       // file: with a remote authority is the same SMB / NTLM-leak vector and
@@ -143,5 +184,107 @@ describe('isExternalUrlSchemeAllowed', () => {
       expect(isExternalUrlSchemeAllowed(42)).toBe(false);
       expect(isExternalUrlSchemeAllowed({ href: 'https://example.com' })).toBe(false);
     });
+  });
+});
+
+describe('hasExecutableFileExtension (shell.openPath execution gate)', () => {
+  it('flags executable / script extensions across platforms', () => {
+    [
+      'C:\\Users\\me\\evil.bat',
+      '/home/u/evil.sh',
+      './rel/evil.cmd',
+      'x.exe',
+      'x.com',
+      'x.vbs',
+      'x.js',
+      'x.jse',
+      'x.wsf',
+      'x.hta',
+      'x.ps1',
+      'x.msi',
+      'x.scr',
+      'x.lnk',
+      'x.reg',
+      'x.jar',
+      'payload.command',
+      'payload.app',
+      'payload.desktop',
+      'payload.appimage',
+      'payload.run',
+      'file:///C:/tools/evil.bat',
+    ].forEach((p) => expect(hasExecutableFileExtension(p)).toBe(true));
+  });
+
+  it('is case-insensitive and resolves double extensions to the last one', () => {
+    ['EVIL.BAT', 'x.ExE', 'invoice.pdf.bat', 'photo.png.cmd'].forEach((p) =>
+      expect(hasExecutableFileExtension(p)).toBe(true),
+    );
+  });
+
+  it('normalizes Windows trailing dots/spaces and NTFS alternate data streams', () => {
+    [
+      'evil.bat.', // trailing dot — Windows executes as evil.bat
+      'evil.bat   ', // trailing spaces
+      'evil.bat . ',
+      'evil.bat::$DATA', // NTFS ADS
+      'C:\\x\\evil.bat:stream',
+      'file:///C:/x.bat?download=1', // query stripped before the check
+    ].forEach((p) => expect(hasExecutableFileExtension(p)).toBe(true));
+  });
+
+  it('allows documents, folders, and extensionless paths', () => {
+    [
+      '/home/u/report.pdf',
+      'C:\\docs\\sheet.xlsx',
+      'notes.txt',
+      'image.png',
+      'archive.zip',
+      'data.json',
+      'page.html',
+      '/home/u/folder',
+      'C:\\Users\\me',
+      'README',
+      '.bashrc', // dotfile with no extension
+    ].forEach((p) => expect(hasExecutableFileExtension(p)).toBe(false));
+  });
+
+  it('does NOT treat `#`/`?` in a bare path as a URL delimiter (real ext wins)', () => {
+    // `#` is a legal Windows/NTFS filename char; both `#` and `?` are legal on
+    // POSIX. Splitting on them for a bare path would misread the extension and
+    // let the executable through. The real extension must win here.
+    [
+      'C:\\sync\\evil.txt#.bat', // ShellExecute runs this as .bat
+      '/home/u/evil.txt#.sh',
+      '/home/u/launcher.txt?.desktop',
+      'C:\\sync\\report.pdf#.cmd',
+      // POSIX filename that merely starts with the literal `file:` (not a URL) —
+      // `#`/`?` are legal chars here, so the real `.sh`/`.desktop` ext must win.
+      'file:notes.txt#.sh',
+      'file:launcher.txt?.desktop',
+    ].forEach((p) => expect(hasExecutableFileExtension(p)).toBe(true));
+  });
+
+  it('flags additional ShellExecute / launcher vectors', () => {
+    [
+      'x.settingcontent-ms',
+      'x.appref-ms',
+      'x.library-ms',
+      'x.wsc',
+      'x.chm',
+      'x.hlp',
+      'x.diagcab',
+      'x.msix',
+      'x.appx',
+      'payload.pkg',
+      'payload.terminal',
+      'payload.fileloc',
+      'payload.inetloc',
+    ].forEach((p) => expect(hasExecutableFileExtension(p)).toBe(true));
+  });
+
+  it('returns false for non-string input', () => {
+    [undefined, null, 42, { path: 'x.bat' }].forEach((p) =>
+      expect(hasExecutableFileExtension(p as unknown as string)).toBe(false),
+    );
   });
 });

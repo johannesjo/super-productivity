@@ -4,5 +4,7 @@ import Capacitor
 class CustomViewController: CAPBridgeViewController {
     override open func capacitorDidLoad() {
         bridge?.registerPluginInstance(WebDavHttpPlugin())
+        bridge?.registerPluginInstance(StoreReviewPlugin())
+        bridge?.registerPluginInstance(ShareInboxPlugin())
     }
 }

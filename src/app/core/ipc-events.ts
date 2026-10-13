@@ -1,20 +1,67 @@
-import { ipcEvent$ } from '../util/ipc-event';
+import { ipcEvent$, ipcEventReplay$ } from '../util/ipc-event';
 import { IPC } from '../../../electron/shared-with-frontend/ipc-events.const';
 import { map, filter } from 'rxjs/operators';
 import { EMPTY, Observable } from 'rxjs';
 import { IS_ELECTRON } from '../app.constants';
-import { devError } from '../util/dev-error';
+
+export interface AddTaskFromAppUriPayload {
+  title: string;
+  notes?: string;
+  projectId?: string;
+}
+
+export const parseAddTaskFromAppUriPayload = (
+  data: unknown,
+): AddTaskFromAppUriPayload | null => {
+  if (
+    !data ||
+    typeof data !== 'object' ||
+    typeof (data as { title?: unknown }).title !== 'string'
+  ) {
+    return null;
+  }
+  const { title, notes, projectId } = data as {
+    title: string;
+    notes?: unknown;
+    projectId?: unknown;
+  };
+  return {
+    title,
+    ...(typeof notes === 'string' ? { notes } : {}),
+    ...(typeof projectId === 'string' ? { projectId } : {}),
+  };
+};
+
+export interface CompleteTaskFromAppUriPayload {
+  title: string;
+}
+
+export const parseCompleteTaskFromAppUriPayload = (
+  data: unknown,
+): CompleteTaskFromAppUriPayload | null => {
+  if (
+    !data ||
+    typeof data !== 'object' ||
+    typeof (data as { title?: unknown }).title !== 'string'
+  ) {
+    return null;
+  }
+  return { title: (data as { title: string }).title };
+};
+
+export const parseBeforeCloseIdsPayload = (data: unknown): string[] =>
+  Array.isArray(data) && data.every((id) => typeof id === 'string') ? data : [];
 
 export const ipcIdleTime$: Observable<number> = IS_ELECTRON
-  ? ipcEvent$(IPC.IDLE_TIME).pipe(map(([ev, idleTimeInMs]) => idleTimeInMs as number))
+  ? ipcEvent$(IPC.IDLE_TIME).pipe(map(([idleTimeInMs]) => idleTimeInMs as number))
   : EMPTY;
 
 export const ipcAnyFileDownloaded$: Observable<unknown> = IS_ELECTRON
   ? ipcEvent$(IPC.ANY_FILE_DOWNLOADED).pipe()
   : EMPTY;
 
-export const ipcNotifyOnClose$: Observable<unknown> = IS_ELECTRON
-  ? ipcEvent$(IPC.NOTIFY_ON_CLOSE).pipe()
+export const ipcNotifyOnClose$: Observable<string[]> = IS_ELECTRON
+  ? ipcEvent$(IPC.NOTIFY_ON_CLOSE).pipe(map(([ids]) => parseBeforeCloseIdsPayload(ids)))
   : EMPTY;
 
 export const ipcResume$: Observable<unknown> = IS_ELECTRON
@@ -35,22 +82,23 @@ export const ipcShowAddTaskBar$: Observable<unknown> = IS_ELECTRON
   ? ipcEvent$(IPC.SHOW_ADD_TASK_BAR).pipe()
   : EMPTY;
 
-export const ipcAddTaskFromAppUri$: Observable<{ title: string } | null> = IS_ELECTRON
-  ? ipcEvent$(IPC.ADD_TASK_FROM_APP_URI).pipe(
-      map(([ev, data]) => {
-        // Validate that data exists and has required properties
-        if (
-          !data ||
-          typeof data !== 'object' ||
-          typeof (data as { title: string }).title !== 'string'
-        ) {
-          devError(
-            `ipcAddTaskFromAppUri$ received invalid data: ${JSON.stringify(data)}`,
-          );
-          return null;
-        }
-        return data as { title: string };
-      }),
-      filter((data): data is { title: string } => data !== null),
+// `ipcEventReplay$` (not `ipcEvent$`): a cold Electron launch's protocol-URL
+// drain can fire before AppUriTaskActionsService has subscribed (Angular
+// bootstrap isn't instant), and a plain Subject silently drops a value with
+// no subscribers. The ReplaySubject(1) it's backed by ensures the first real
+// subscriber still gets it, mirroring the Capacitor side's
+// `pendingCapacitorAppUriAction$`.
+export const ipcAddTaskFromAppUri$: Observable<AddTaskFromAppUriPayload> = IS_ELECTRON
+  ? ipcEventReplay$(IPC.ADD_TASK_FROM_APP_URI).pipe(
+      map(([data]) => parseAddTaskFromAppUriPayload(data)),
+      filter((data): data is AddTaskFromAppUriPayload => data !== null),
     )
   : EMPTY;
+
+export const ipcCompleteTaskFromAppUri$: Observable<CompleteTaskFromAppUriPayload> =
+  IS_ELECTRON
+    ? ipcEventReplay$(IPC.COMPLETE_TASK_FROM_APP_URI).pipe(
+        map(([data]) => parseCompleteTaskFromAppUriPayload(data)),
+        filter((data): data is CompleteTaskFromAppUriPayload => data !== null),
+      )
+    : EMPTY;

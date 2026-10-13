@@ -2,6 +2,7 @@
   class="week-header"
   [class.isInPanel]="isInPanel()"
 >
+  <ng-content select="[weekHeaderStart]"></ng-content>
   <div class="week-header-dates">
     <div class="filler"><!--for time --></div>
     @for (day of daysToShow(); track $index) {
@@ -9,8 +10,8 @@
         @if (day === todayDateStr()) {
           <mat-icon>wb_sunny</mat-icon>
         }
-        <div class="day-num">{{ day | localeDate: 'd' }}</div>
-        <div class="day-day">{{ day | localeDate: 'EEE' }}</div>
+        <div class="day-num">{{ dayHeaderLabels()[day].num }}</div>
+        <div class="day-day">{{ dayHeaderLabels()[day].day }}</div>
         @if (beyondBudgetStats()[$index].count > 0) {
           <span
             class="over-budget-badge"
@@ -34,6 +35,7 @@
       </div>
     }
   </div>
+  <ng-content select="[weekHeaderEnd]"></ng-content>
 </header>
 
 <div
@@ -128,7 +130,7 @@
         (cdkDragMoved)="dragMoved($event)"
         (cdkDragStarted)="dragStarted($event)"
         (cdkDragReleased)="dragReleased($event)"
-        [cdkDragStartDelay]="isTouchActive() ? touchDragStartDelayMs : 0"
+        [cdkDragStartDelay]="dragDelayForTouch()"
         [event]="ev"
       ></schedule-event>
     } @else {

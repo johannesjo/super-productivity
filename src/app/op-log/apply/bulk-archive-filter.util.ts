@@ -1,4 +1,10 @@
-import { ActionType, Operation, OpType } from '../core/operation.types';
+import {
+  ActionType,
+  isLwwUpdatePayload,
+  isMultiEntityPayload,
+  Operation,
+  OpType,
+} from '../core/operation.types';
 import { OpLog } from '../../core/log';
 import { isLwwUpdateActionType } from '../core/lww-update-action-types';
 
@@ -156,26 +162,72 @@ const harvestTaskEntityMapSubTaskIdsForParents = (
   }
 };
 
+const syncProjectedParentMembership = (
+  projection: TaskEntityMap,
+  taskId: string,
+  previousParentId: unknown,
+  nextParentId: unknown,
+): void => {
+  if (previousParentId === nextParentId) return;
+
+  if (typeof previousParentId === 'string') {
+    const previousParent = projection[previousParentId];
+    if (previousParent && typeof previousParent === 'object') {
+      const parent = previousParent as Record<string, unknown>;
+      const subTaskIds = Array.isArray(parent['subTaskIds'])
+        ? parent['subTaskIds'].filter((subTaskId) => subTaskId !== taskId)
+        : [];
+      projection[previousParentId] = { ...parent, subTaskIds };
+    }
+  }
+
+  if (typeof nextParentId === 'string') {
+    const nextParent = projection[nextParentId];
+    if (nextParent && typeof nextParent === 'object') {
+      const parent = nextParent as Record<string, unknown>;
+      const subTaskIds = Array.isArray(parent['subTaskIds'])
+        ? parent['subTaskIds'].filter(
+            (subTaskId): subTaskId is string => typeof subTaskId === 'string',
+          )
+        : [];
+      projection[nextParentId] = {
+        ...parent,
+        subTaskIds: subTaskIds.includes(taskId) ? subTaskIds : [...subTaskIds, taskId],
+      };
+    }
+  }
+};
+
 const upsertTaskProjectionFromTaskLike = (
   projection: TaskEntityMap,
   taskLike: unknown,
   fallbackId?: string,
+  replaceExisting = false,
 ): void => {
   if (!taskLike || typeof taskLike !== 'object') return;
   const task = taskLike as Record<string, unknown>;
   const id = typeof task.id === 'string' ? task.id : fallbackId;
   if (!id) return;
   const prev = projection[id];
-  projection[id] = {
-    ...(prev && typeof prev === 'object' ? (prev as Record<string, unknown>) : {}),
+  const previousTask =
+    prev && typeof prev === 'object' ? (prev as Record<string, unknown>) : undefined;
+  const nextTask = {
+    ...(replaceExisting ? {} : previousTask),
     ...task,
     id,
   };
+  projection[id] = nextTask;
+  syncProjectedParentMembership(
+    projection,
+    id,
+    previousTask?.['parentId'],
+    nextTask['parentId'],
+  );
 
   const subTasks = task.subTasks;
   if (Array.isArray(subTasks)) {
     for (const subTask of subTasks) {
-      upsertTaskProjectionFromTaskLike(projection, subTask);
+      upsertTaskProjectionFromTaskLike(projection, subTask, undefined, replaceExisting);
     }
   }
 };
@@ -184,16 +236,25 @@ const upsertTaskProjectionFromTaskOrUpdate = (
   projection: TaskEntityMap,
   taskLike: unknown,
   fallbackId?: string,
+  replaceExisting = false,
 ): void => {
   if (!taskLike || typeof taskLike !== 'object') return;
   const task = taskLike as Record<string, unknown>;
   const id = typeof task.id === 'string' ? task.id : fallbackId;
   const changes = task.changes;
   if (id && changes && typeof changes === 'object') {
-    upsertTaskProjectionFromTaskLike(projection, { ...(changes as object), id }, id);
+    // Update<Task> cannot create a missing task. Inventing one here would
+    // make a later restore look like a duplicate, unlike the real reducers.
+    if (!projection[id]) return;
+    upsertTaskProjectionFromTaskLike(
+      projection,
+      { ...(changes as object), id },
+      id,
+      replaceExisting,
+    );
     return;
   }
-  upsertTaskProjectionFromTaskLike(projection, taskLike, fallbackId);
+  upsertTaskProjectionFromTaskLike(projection, taskLike, fallbackId, replaceExisting);
 };
 
 const isTaskLwwUpdateOp = (op: Operation): boolean =>
@@ -237,14 +298,24 @@ const applyTaskProjectionFromOp = (op: Operation, projection: TaskEntityMap): vo
   // TASK LWW Update stores the task partial directly in payload. Other
   // direct-looking task actions like unscheduleTask are commands, not entities.
   if (isTaskLwwUpdateOp(op)) {
-    upsertTaskProjectionFromTaskOrUpdate(projection, payload, op.entityId);
+    upsertTaskProjectionFromTaskOrUpdate(
+      projection,
+      payload,
+      op.entityId,
+      isLwwUpdatePayload(op.payload) && op.payload.lwwUpdateMode === 'replace',
+    );
   }
 };
 
-const isTaskArchiveOrDeleteOp = (op: Operation): boolean =>
-  op.actionType === ActionType.TASK_SHARED_MOVE_TO_ARCHIVE ||
+const isTaskArchiveOp = (op: Operation): boolean =>
+  op.actionType === ActionType.TASK_SHARED_MOVE_TO_ARCHIVE;
+
+const isTaskDeleteOp = (op: Operation): boolean =>
   op.actionType === ActionType.TASK_SHARED_DELETE ||
   op.actionType === ActionType.TASK_SHARED_DELETE_MULTIPLE;
+
+export const isTaskArchiveOrDeleteOp = (op: Operation): boolean =>
+  isTaskArchiveOp(op) || isTaskDeleteOp(op);
 
 const addOperationEntityIds = (op: Operation, sink: Set<string>): void => {
   if (Array.isArray(op.entityIds)) {
@@ -313,6 +384,21 @@ export const collectCascadedSubTaskIds = (
   });
 };
 
+export interface TaskRemovalEntityIds {
+  all: Set<string>;
+  archiving: Set<string>;
+  /**
+   * #10220: index (in the scanned batch) of a `restoreTask` that brought back
+   * a task removed EARLIER in the batch, with no removal after it. Only ops
+   * after that index see the task as active again — see `isRemovedAtIndex`.
+   * A whole-task recreate-after-delete counts too (#10381).
+   */
+  restoredAt: Map<string, number>;
+  /** Same for `archiving`: only a later ARCHIVE undoes it — a later delete
+   * removes the task without archiving it, so recreate-after-delete applies. */
+  archiveRestoredAt: Map<string, number>;
+}
+
 /**
  * Build the same-batch archive/delete filter set using a lightweight task-state
  * projection. This keeps the pre-scan aligned with reducer order: if an earlier
@@ -320,33 +406,131 @@ export const collectCascadedSubTaskIds = (
  * `parentId`, a later stale `moveToArchive` / `deleteTask` sees that child just
  * like `deleteTaskHelper` would when the archive/delete action actually runs.
  */
-export const collectArchivingOrDeletingEntityIdsFromBatch = (
+export const collectTaskRemovalEntityIdsFromBatch = (
   operations: Operation[],
   state: unknown,
-): Set<string> => {
+): TaskRemovalEntityIds => {
   // Archive-free hydration/sync batches are common; skip projection work for them.
-  if (!operations.some(isTaskArchiveOrDeleteOp)) return new Set<string>();
+  if (!operations.some(isTaskArchiveOrDeleteOp)) {
+    return {
+      all: new Set<string>(),
+      archiving: new Set<string>(),
+      restoredAt: new Map<string, number>(),
+      archiveRestoredAt: new Map<string, number>(),
+    };
+  }
 
   const archivingOrDeletingEntityIds = new Set<string>();
+  const archivingEntityIds = new Set<string>();
+  const restoredAt = new Map<string, number>();
+  const archiveRestoredAt = new Map<string, number>();
   const projectedTaskEntities = cloneTaskEntityMap(state);
 
-  for (const op of operations) {
+  for (const [index, op] of operations.entries()) {
     if (isTaskArchiveOrDeleteOp(op)) {
       const removedByThisOp = new Set<string>();
       addOperationEntityIds(op, removedByThisOp);
       collectCascadedSubTaskIds(op, removedByThisOp, projectedTaskEntities);
+      const isArchive = isTaskArchiveOp(op);
       for (const id of removedByThisOp) {
         archivingOrDeletingEntityIds.add(id);
+        restoredAt.delete(id);
+        if (isArchive) {
+          archivingEntityIds.add(id);
+          archiveRestoredAt.delete(id);
+        }
         delete projectedTaskEntities[id];
       }
       continue;
     }
 
+    if (op.actionType === ActionType.TASK_SHARED_RESTORE) {
+      const task = unwrapActionPayloadObject(op.payload)?.task as
+        | { id?: unknown }
+        | undefined;
+      const existingTask =
+        typeof task?.id === 'string'
+          ? (projectedTaskEntities[task.id] as { id?: unknown } | undefined)
+          : undefined;
+      // handleRestoreTask ignores the entire restore when its root is active,
+      // including payload children that have since been deleted.
+      if (existingTask && existingTask.id === task?.id) continue;
+      for (const id of collectRestoredTaskIds(op)) {
+        if (archivingOrDeletingEntityIds.has(id)) restoredAt.set(id, index);
+        if (archivingEntityIds.has(id)) archiveRestoredAt.set(id, index);
+      }
+    }
+
+    // A filtered LWW update must not make the projection's root look active
+    // and turn a later, legitimate restore into a duplicate above.
+    if (isTaskLwwUpdateOp(op) && op.entityId) {
+      const recreatesAfterDelete =
+        isLwwUpdatePayload(op.payload) && op.payload.recreatesEntityAfterDelete === true;
+      if (
+        isRemovedAtIndex(
+          recreatesAfterDelete ? archivingEntityIds : archivingOrDeletingEntityIds,
+          recreatesAfterDelete ? archiveRestoredAt : restoredAt,
+          op.entityId,
+          index,
+        )
+      ) {
+        continue;
+      }
+      // #10381: a whole-task recreate brings back a task deleted earlier in
+      // the batch, like a restore. Later updates of it are ordinary updates
+      // again — a device that received the delete and the recreate in
+      // separate syncs applies them. (A 'patch' recreate of an absent task is
+      // ignored by lwwUpdateMetaReducer, so it restores nothing.) Like a
+      // restore of an active root, a recreate of a task that is already
+      // back does not move the restore point.
+      if (
+        recreatesAfterDelete &&
+        isLwwUpdatePayload(op.payload) &&
+        op.payload.lwwUpdateMode !== 'patch' &&
+        isRemovedAtIndex(archivingOrDeletingEntityIds, restoredAt, op.entityId, index)
+      ) {
+        restoredAt.set(op.entityId, index);
+      }
+    }
     applyTaskProjectionFromOp(op, projectedTaskEntities);
   }
 
-  return archivingOrDeletingEntityIds;
+  return {
+    all: archivingOrDeletingEntityIds,
+    archiving: archivingEntityIds,
+    restoredAt,
+    archiveRestoredAt,
+  };
 };
+
+const collectRestoredTaskIds = (op: Operation): Set<string> => {
+  const restoredIds = new Set<string>();
+  addOperationEntityIds(op, restoredIds);
+  const subTasks = unwrapActionPayloadObject(op.payload)?.subTasks;
+  if (Array.isArray(subTasks)) {
+    for (const subTask of subTasks) {
+      if (subTask && typeof subTask === 'object') {
+        addString((subTask as { id?: unknown }).id, restoredIds);
+      }
+    }
+  }
+  return restoredIds;
+};
+
+/**
+ * Whether the op at `index` must treat `entityId` as removed by the batch.
+ * A task restored (or recreated, #10381) after its removal stays removed for
+ * ops BEFORE the restore (a stale LWW Update there would recreate it, turning
+ * the restore into a no-op), but not for ops after it: restart replay is
+ * status-blind, so a rejected bulk archive still precedes the restore and the
+ * local-win update that re-asserts it (#10220).
+ */
+export const isRemovedAtIndex = (
+  ids: Set<string>,
+  restoredAt: Map<string, number>,
+  entityId: string,
+  index: number,
+): boolean => ids.has(entityId) && !((restoredAt.get(entityId) ?? Infinity) < index);
 
 /**
  * Issue #7330: `lwwUpdateMetaReducer`'s orphan filter only sees taskState as
@@ -362,13 +546,18 @@ export const collectArchivingOrDeletingEntityIdsFromBatch = (
 export const stripBatchArchivedTaskIdsFromLwwPayload = (
   op: Operation,
   isLww: boolean,
-  archivingOrDeletingEntityIds: Set<string>,
+  // A lookup, not a Set: bulk replay answers it per op index (#10220) without
+  // copying the whole removal set for every op.
+  archivingOrDeletingEntityIds: Pick<Set<string>, 'has'>,
 ): Operation => {
   if (!isLww) return op;
   const payload = op.payload;
   if (!payload || typeof payload !== 'object') return op;
+  const entityPayload = isMultiEntityPayload(payload)
+    ? payload.actionPayload
+    : (payload as Record<string, unknown>);
   const newPayload = filterTaskIdArraysFromTagOrProjectPayload(
-    payload as Record<string, unknown>,
+    entityPayload,
     op.entityType,
     (id) => archivingOrDeletingEntityIds.has(id),
     {
@@ -378,5 +567,11 @@ export const stripBatchArchivedTaskIdsFromLwwPayload = (
       entityId: op.entityId,
     },
   );
-  return newPayload ? { ...op, payload: newPayload } : op;
+  if (!newPayload) return op;
+  return {
+    ...op,
+    payload: isMultiEntityPayload(payload)
+      ? { ...payload, actionPayload: newPayload }
+      : newPayload,
+  };
 };

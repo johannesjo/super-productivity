@@ -64,7 +64,7 @@ describe('Migrate MiscConfig to TasksConfig', () => {
       expect(migratedState).toEqual(initialState);
     });
 
-    it('should complete migration even if tasks.isConfirmBeforeDelete exists but misc still has migrated fields', () => {
+    it('should preserve target choices while migrating remaining legacy fields', () => {
       const initialState = {
         globalConfig: {
           misc: {
@@ -86,8 +86,9 @@ describe('Migrate MiscConfig to TasksConfig', () => {
         };
       };
 
-      // Should migrate remaining fields from misc
-      expect(migratedState.globalConfig.tasks.isConfirmBeforeDelete).toBe(true); // Migrated value overwrites
+      // A populated target field belongs to the newer/partial migration and wins
+      // over the stale legacy copy.
+      expect(migratedState.globalConfig.tasks.isConfirmBeforeDelete).toBe(false);
       expect(migratedState.globalConfig.tasks.defaultProjectId).toBe('proj-123'); // Migrated
       expect(migratedState.globalConfig.tasks.existingField).toBe('existing'); // Preserved
       expect(migratedState.globalConfig.misc.isConfirmBeforeTaskDelete).toBeUndefined(); // Removed

@@ -1,6 +1,12 @@
 import { BoardDateTimeframeCfg, BoardDateTimeframeType } from './boards.model';
 import { getDbDateStr, isDBDateStr } from '../../util/get-db-date-str';
 import { dateStrToUtcDate } from '../../util/date-str-to-utc-date';
+import { getDateRangeForMonth } from '../../util/get-date-range-for-month';
+
+// Caps `days` so `addDays` stays far inside the valid Date range. Without it an
+// extreme value yields an Invalid Date that `getDbDateStr` turns into the
+// literal "NaN-NaN-NaN", which a drop would then write into the planner.
+export const BOARD_TIMEFRAME_MAX_DAYS = 3650;
 
 const VALID_TIMEFRAME_TYPES: ReadonlySet<BoardDateTimeframeType> = new Set([
   'all',
@@ -26,6 +32,8 @@ export interface BoardDateTimeframeRange {
 export interface BoardDateTimeframeRangeInput {
   timeframe: BoardDateTimeframeCfg;
   todayStr: string;
+  /** 0 = Sunday, 1 = Monday, … — the user's `localization.firstDayOfWeek`. */
+  firstDayOfWeek: number;
 }
 
 export interface BoardDateTimeframeMatchInput extends BoardDateTimeframeRangeInput {
@@ -56,37 +64,39 @@ const addDays = (dateStr: string, days: number): string => {
   return getDbDateStr(date);
 };
 
-const isValidPositiveInteger = (value: unknown): value is number =>
-  typeof value === 'number' && Number.isInteger(value) && value > 0;
+const isValidDays = (value: unknown): value is number =>
+  typeof value === 'number' &&
+  Number.isInteger(value) &&
+  value > 0 &&
+  value <= BOARD_TIMEFRAME_MAX_DAYS;
 
-const getNextIsoWeekRange = (todayStr: string): BoardDateTimeframeRange => {
+// Not `getWeekRange()`: it shifts its input by the timezone offset, so for a
+// local-midnight date east of UTC it returns the previous week on the first
+// day of the week.
+const getNextWeekRange = (
+  todayStr: string,
+  firstDayOfWeek: number,
+): BoardDateTimeframeRange => {
   const today = dateStrToUtcDate(todayStr);
-  const daysSinceMonday = (today.getDay() + 6) % 7;
-  const start = new Date(today);
-  start.setDate(today.getDate() - daysSinceMonday + 7);
-  const end = new Date(start);
-  end.setDate(start.getDate() + 6);
-
-  return {
-    start: getDbDateStr(start),
-    end: getDbDateStr(end),
-  };
+  const daysSinceWeekStart = (today.getDay() - firstDayOfWeek + 7) % 7;
+  const start = addDays(todayStr, 7 - daysSinceWeekStart);
+  return { start, end: addDays(start, 6) };
 };
 
 const getNextMonthRange = (todayStr: string): BoardDateTimeframeRange => {
   const today = dateStrToUtcDate(todayStr);
-  const start = new Date(today.getFullYear(), today.getMonth() + 1, 1);
-  const end = new Date(today.getFullYear(), today.getMonth() + 2, 0);
-
-  return {
-    start: getDbDateStr(start),
-    end: getDbDateStr(end),
-  };
+  // getDateRangeForMonth takes a 1-based month and rolls 13 over to January.
+  const { rangeStart, rangeEnd } = getDateRangeForMonth(
+    today.getFullYear(),
+    today.getMonth() + 2,
+  );
+  return { start: getDbDateStr(rangeStart), end: getDbDateStr(rangeEnd) };
 };
 
 export const resolveBoardDateTimeframeRange = ({
   timeframe,
   todayStr,
+  firstDayOfWeek,
 }: BoardDateTimeframeRangeInput): BoardDateTimeframeRange | null => {
   if (!isValidDbDateStr(todayStr)) {
     return null;
@@ -104,15 +114,15 @@ export const resolveBoardDateTimeframeRange = ({
     case 'next7Days':
       return { start: todayStr, end: addDays(todayStr, 6) };
     case 'nextNDays':
-      return isValidPositiveInteger(timeframe.days)
+      return isValidDays(timeframe.days)
         ? { start: todayStr, end: addDays(todayStr, timeframe.days - 1) }
         : null;
     case 'atLeastNDaysFuture':
-      return isValidPositiveInteger(timeframe.days)
+      return isValidDays(timeframe.days)
         ? { start: addDays(todayStr, timeframe.days) }
         : null;
     case 'nextWeek':
-      return getNextIsoWeekRange(todayStr);
+      return getNextWeekRange(todayStr, firstDayOfWeek);
     case 'nextMonth':
       return getNextMonthRange(todayStr);
     case 'customDate':
@@ -143,36 +153,51 @@ export const resolveBoardDateTimeframeRange = ({
   }
 };
 
-export const matchesBoardDateTimeframe = ({
-  timeframe,
-  dateOnly,
-  timestamp,
-  todayStr,
-  startOfNextDayDiffMs,
-}: BoardDateTimeframeMatchInput): boolean => {
-  const range = resolveBoardDateTimeframeRange({ timeframe, todayStr });
-  if (!range) {
-    return false;
+/** The task's calendar day, honouring the user's start-of-next-day offset. */
+export const getBoardTaskDateStr = (
+  dateOnly: string | null | undefined,
+  timestamp: number | null | undefined,
+  startOfNextDayDiffMs: number,
+): string | null => {
+  if (typeof timestamp === 'number' && Number.isFinite(timestamp) && timestamp) {
+    return getDbDateStr(new Date(timestamp - startOfNextDayDiffMs));
   }
-
-  const taskDate =
-    typeof timestamp === 'number' && Number.isFinite(timestamp)
-      ? getDbDateStr(new Date(timestamp - startOfNextDayDiffMs))
-      : dateOnly;
-
-  return (
-    isValidDbDateStr(taskDate) &&
-    (!range.start || taskDate >= range.start) &&
-    (!range.end || taskDate <= range.end)
-  );
+  return dateOnly || null;
 };
 
-export const adjustDateToBoardTimeframe = ({
-  timeframe,
-  currentDate,
-  todayStr,
-}: BoardDateTimeframeAdjustInput): string | null => {
-  const range = resolveBoardDateTimeframeRange({ timeframe, todayStr });
+/**
+ * Cheap per-task check against a range resolved once per filter pass.
+ * A `null` range (invalid config) matches nothing.
+ */
+export const isDateInBoardRange = (
+  dateStr: string | null,
+  range: BoardDateTimeframeRange | null,
+): boolean =>
+  !!range &&
+  isValidDbDateStr(dateStr) &&
+  (!range.start || dateStr >= range.start) &&
+  (!range.end || dateStr <= range.end);
+
+export const matchesBoardDateTimeframe = ({
+  dateOnly,
+  timestamp,
+  startOfNextDayDiffMs,
+  ...rangeInput
+}: BoardDateTimeframeMatchInput): boolean =>
+  isDateInBoardRange(
+    getBoardTaskDateStr(dateOnly, timestamp, startOfNextDayDiffMs),
+    resolveBoardDateTimeframeRange(rangeInput),
+  );
+
+/**
+ * Nearest day inside `range` for a task currently on `currentDate`
+ * (today when it has none). Returns null when no valid day can be derived.
+ */
+export const adjustDateToBoardRange = (
+  range: BoardDateTimeframeRange | null,
+  currentDate: string | null | undefined,
+  todayStr: string,
+): string | null => {
   if (!range) {
     return null;
   }
@@ -182,14 +207,24 @@ export const adjustDateToBoardTimeframe = ({
     return null;
   }
 
+  let adjusted = sourceDate;
   if (range.start && sourceDate < range.start) {
-    return range.start;
+    adjusted = range.start;
+  } else if (range.end && sourceDate > range.end) {
+    adjusted = range.end;
   }
-  if (range.end && sourceDate > range.end) {
-    return range.end;
-  }
-  return sourceDate;
+  return isValidDbDateStr(adjusted) ? adjusted : null;
 };
+
+export const adjustDateToBoardTimeframe = ({
+  currentDate,
+  ...rangeInput
+}: BoardDateTimeframeAdjustInput): string | null =>
+  adjustDateToBoardRange(
+    resolveBoardDateTimeframeRange(rangeInput),
+    currentDate,
+    rangeInput.todayStr,
+  );
 
 export const sanitizeBoardDateTimeframeCfg = (
   value: unknown,
@@ -206,7 +241,7 @@ export const sanitizeBoardDateTimeframeCfg = (
   switch (type) {
     case 'nextNDays':
     case 'atLeastNDaysFuture':
-      return isValidPositiveInteger(cfg.days) ? { type, days: cfg.days } : undefined;
+      return isValidDays(cfg.days) ? { type, days: cfg.days } : undefined;
     case 'customDate':
       return isValidDbDateStr(cfg.customDate)
         ? { type, customDate: cfg.customDate }

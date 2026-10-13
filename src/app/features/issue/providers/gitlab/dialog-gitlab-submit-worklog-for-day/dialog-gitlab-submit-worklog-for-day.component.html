@@ -107,7 +107,9 @@
         | translate
           : {
               totalTimeToSubmit: totalTimeToSubmit$ | async | msToString,
-              nrOfTasksToSubmit: (tmpTasksToTrack$ | async)?.length,
+              nrOfTasksToSubmit: $safeNavigationMigration(
+                (tmpTasksToTrack$ | async)?.length
+              ),
             }
     "
   ></div>
@@ -116,7 +118,6 @@
 <mat-dialog-actions align="end">
   <button
     (click)="close()"
-    color="primary"
     mat-button
     type="button"
   >
@@ -125,7 +126,7 @@
 
   <button
     color="primary"
-    mat-stroked-button
+    mat-flat-button
     type="button"
     (click)="submit()"
   >

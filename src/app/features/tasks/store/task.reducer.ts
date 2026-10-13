@@ -12,7 +12,6 @@ import {
   setCurrentTask,
   setSelectedTask,
   toggleStart,
-  toggleTaskHideSubTasks,
   unsetCurrentTask,
   updateTaskUi,
 } from './task.actions';
@@ -44,6 +43,7 @@ import { Update } from '@ngrx/entity';
 import { unique } from '../../../util/unique';
 import { roundDurationVanilla } from '../../../util/round-duration';
 import { loadAllData } from '../../../root-store/meta/load-all-data.action';
+import { allDataWasLoaded } from '../../../root-store/meta/all-data-was-loaded.actions';
 import { createReducer, on } from '@ngrx/store';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
@@ -53,6 +53,8 @@ import {
 } from '../../time-tracking/store/time-tracking.actions';
 import { TaskLog } from '../../../core/log';
 import { devError } from '../../../util/dev-error';
+import { moveValidIdsToFront } from '../util/move-valid-ids-to-front';
+import { applyClearedFields } from '../../../util/cleared-update-fields';
 
 export { taskAdapter };
 
@@ -142,6 +144,7 @@ const reorderSubTask = (
     TaskLog.err(`Parent task ${parentId} not found`);
     return state;
   }
+
   const parentSubTaskIds = parentTask.subTaskIds;
 
   // Check if the subtask is actually in the parent's subtask list
@@ -170,10 +173,14 @@ export const initialTaskState: TaskState = taskAdapter.getInitialState({
   taskDetailTargetPanel: TaskDetailTargetPanel.Default,
   lastCurrentTaskId: null,
   isDataLoaded: false,
+  dismissedCalendarAutoImportEventIdsByProvider: {},
 }) as TaskState;
 
 export const taskReducer = createReducer<TaskState>(
   initialTaskState,
+
+  // Operation-log-only startup replays entities without dispatching loadAllData.
+  on(allDataWasLoaded, (state) => ({ ...state, isDataLoaded: true })),
 
   // META ACTIONS
   // ------------
@@ -196,6 +203,8 @@ export const taskReducer = createReducer<TaskState>(
         selectedTaskId: null,
         lastCurrentTaskId: task.currentTaskId,
         isDataLoaded: true,
+        dismissedCalendarAutoImportEventIdsByProvider:
+          sanitized.dismissedCalendarAutoImportEventIdsByProvider ?? {},
       } as TaskState),
     );
   }),
@@ -218,21 +227,27 @@ export const taskReducer = createReducer<TaskState>(
       );
       return state;
     }
+    const currentTask = state.entities[task.id];
+    if (!currentTask) {
+      return state;
+    }
     const currentTimeSpentForTickDay =
-      (task.timeSpentOnDay && +task.timeSpentOnDay[date]) || 0;
+      (currentTask.timeSpentOnDay && +currentTask.timeSpentOnDay[date]) || 0;
     return updateTimeSpentForTask(
       task.id,
       {
-        ...task.timeSpentOnDay,
+        ...currentTask.timeSpentOnDay,
         [date]: currentTimeSpentForTickDay + duration,
       },
       state,
     );
   }),
 
-  // Sync time spent from remote clients
-  // Local: no-op (state already updated by addTimeSpent ticks)
-  // Remote: apply the batched duration
+  // Sync time spent from operation replay.
+  // Local: no-op (state already updated by addTimeSpent ticks).
+  // Replay is additive for every client so concurrent tracking contributions are
+  // preserved. Op-log/file snapshots project pending local batches out before they
+  // are persisted, preventing a snapshot from overlapping a later delta operation.
   on(syncTimeSpent, (state, action) => {
     // Only apply for remote actions - local state is already up-to-date
     if (!(action.meta as PersistentActionMeta).isRemote) {
@@ -266,26 +281,40 @@ export const taskReducer = createReducer<TaskState>(
 
   //--------------------------------
 
-  // TODO check if working
+  // Only touches the (unsynced) currentTaskId/selectedTaskId pointers. Starting
+  // a done task re-opens it, but that is a change to synced task data and must
+  // travel as its own op: `TaskInternalEffects.reopenStartedDoneTask$` emits a
+  // persistent `updateTask` for it. Writing `isDone` here on a non-persistent
+  // action was invisible to op-log capture and left other devices showing the
+  // task as done forever (#9904).
   on(setCurrentTask, (state, { id }) => {
     if (id) {
-      const task = getTaskById(id, state);
+      // A dialog can hold a task id across a remote `moveToArchive` that removes
+      // the entity (idle dialog: it captures lastCurrentTaskId on open and calls
+      // setCurrentId on confirm). Throwing here escapes the NgRx `State` scan —
+      // there is no boxing meta-reducer for this action — which tears down the
+      // state subscription and silently freezes the store until restart.
+      // This action is non-persistent, so falling back to "nothing tracked"
+      // changes no synced data.
+      const task = state.entities[id];
+      if (!task) {
+        TaskLog.warn('setCurrentTask: task not found, unsetting current task', { id });
+        return {
+          ...state,
+          currentTaskId: null,
+        };
+      }
       const subTaskIds = task.subTaskIds;
       let taskToStartId = id;
       if (subTaskIds && subTaskIds.length) {
+        // A sub task can be gone for the same reason — skip it instead of throwing.
         const undoneTasks = subTaskIds
-          .map((tid) => getTaskById(tid, state))
-          .filter((ta: Task) => !ta.isDone);
+          .map((tid) => state.entities[tid])
+          .filter((ta): ta is Task => !!ta && !ta.isDone);
         taskToStartId = undoneTasks.length ? undoneTasks[0].id : subTaskIds[0];
       }
       return {
-        ...taskAdapter.updateOne(
-          {
-            id: taskToStartId,
-            changes: { isDone: false, doneOn: undefined },
-          },
-          state,
-        ),
+        ...state,
         currentTaskId: taskToStartId,
         selectedTaskId: state.selectedTaskId && taskToStartId,
       };
@@ -353,56 +382,21 @@ export const taskReducer = createReducer<TaskState>(
     return taskAdapter.updateMany(taskUpdates, state);
   }),
 
-  on(updateTaskUi, (state, { task }) => {
-    return taskAdapter.updateOne(task, state);
+  on(updateTaskUi, (state, { task, clearedFields }) => {
+    // Restore keys that JSON serialization dropped from a replayed op's
+    // changes (`{ someField: undefined }`) — see issue #9776.
+    return taskAdapter.updateOne(
+      {
+        id: task.id as string,
+        changes: applyClearedFields(task.changes, clearedFields),
+      },
+      state,
+    );
   }),
 
   // Bulk task updates - used for archive task batch operations
   on(TaskSharedActions.updateTasks, (state, { tasks }) => {
     return taskAdapter.updateMany(tasks, state);
-  }),
-
-  // TODO simplify
-  on(toggleTaskHideSubTasks, (state, { taskId, isShowLess, isEndless }) => {
-    const task = getTaskById(taskId, state);
-    const subTasks = task.subTaskIds.map((id) => getTaskById(id, state));
-    const doneTasksLength = subTasks.filter((t) => t.isDone).length;
-    const isDoneTaskCaseNeeded = doneTasksLength && doneTasksLength < subTasks.length;
-    // for easier calculations we use 0 instead of undefined for show state
-    const oldVal = task._hideSubTasksMode || 0;
-    let newVal: number = isShowLess ? oldVal + 1 : oldVal - 1;
-
-    if (!isDoneTaskCaseNeeded && newVal === 1) {
-      if (isShowLess) {
-        newVal = 2;
-      } else {
-        newVal = 0;
-      }
-    }
-
-    if (isEndless) {
-      if (newVal < 0) {
-        newVal = 2;
-      } else if (newVal > 2) {
-        newVal = 0;
-      }
-    } else {
-      if (newVal < 0) {
-        newVal = 0;
-      } else if (newVal > 2) {
-        newVal = 2;
-      }
-    }
-
-    return taskAdapter.updateOne(
-      {
-        id: taskId,
-        changes: {
-          _hideSubTasksMode: newVal || undefined,
-        },
-      },
-      state,
-    );
   }),
 
   on(moveSubTask, (state, { taskId, srcTaskId, targetTaskId, afterTaskId }) => {
@@ -493,7 +487,15 @@ export const taskReducer = createReducer<TaskState>(
   ),
 
   on(removeTimeSpent, (state, { id, date, duration }) => {
-    const task = getTaskById(id, state);
+    // Mirrors the addTimeSpent guard above: the idle dialog untracks idle time
+    // for the task that was current when idling started, which a remote
+    // `moveToArchive` may have removed meanwhile. Throwing would tear down the
+    // NgRx state subscription and freeze the store.
+    const task = state.entities[id];
+    if (!task) {
+      TaskLog.warn('removeTimeSpent: task not found, skipping', { id });
+      return state;
+    }
     const currentTimeSpentForTickDay =
       (task.timeSpentOnDay && +task.timeSpentOnDay[date]) || 0;
 
@@ -577,7 +579,12 @@ export const taskReducer = createReducer<TaskState>(
     const isLimitToProject: boolean = !!projectId || projectId === null;
 
     const idsToUpdateDirectly: string[] = taskIds.filter((id) => {
-      const task: Task = getTaskById(id, state);
+      // A remote/replayed op may list tasks this client archived or deleted
+      // meanwhile — skip them instead of aborting the whole rounding (#9601).
+      const task: Task | undefined = state.entities[id];
+      if (!task) {
+        return false;
+      }
       return (
         (task.subTaskIds.length === 0 || !!task.parentId) &&
         (!isLimitToProject || task.projectId === projectId)
@@ -743,25 +750,31 @@ export const taskReducer = createReducer<TaskState>(
   }),
 
   on(TaskSharedActions.removeTasksFromTodayTag, (state, { taskIds }) => {
-    const validTaskIds = taskIds.filter((id) => !!state.entities[id]);
-    if (validTaskIds.length !== taskIds.length) {
-      devError(
-        `removeTasksFromTodayTag: ${taskIds.length - validTaskIds.length} orphan ID(s) filtered`,
-      );
+    // we do this to maintain the order of tasks when they are moved to overdue
+    const { ids, invalidCount } = moveValidIdsToFront(
+      state.ids as string[],
+      taskIds,
+      (id) => !!state.entities[id],
+    );
+    if (invalidCount > 0) {
+      devError(`removeTasksFromTodayTag: ${invalidCount} orphan ID(s) filtered`);
     }
     return {
       ...state,
-      // we do this to maintain the order of tasks when they are moved to overdue
-      ids: [...validTaskIds, ...state.ids.filter((id) => !taskIds.includes(id))],
+      ids,
     };
   }),
 
   // Same reordering for the non-persistent variant (#6992)
   on(TaskSharedActions.localRemoveOverdueFromToday, (state, { taskIds }) => {
-    const validTaskIds = taskIds.filter((id) => !!state.entities[id]);
+    const { ids } = moveValidIdsToFront(
+      state.ids as string[],
+      taskIds,
+      (id) => !!state.entities[id],
+    );
     return {
       ...state,
-      ids: [...validTaskIds, ...state.ids.filter((id) => !taskIds.includes(id))],
+      ids,
     };
   }),
 );

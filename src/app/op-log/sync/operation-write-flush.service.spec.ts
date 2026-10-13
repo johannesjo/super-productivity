@@ -1,27 +1,41 @@
 import { TestBed } from '@angular/core/testing';
 import { OperationWriteFlushService } from './operation-write-flush.service';
 import { LockService } from './lock.service';
+import { OperationCaptureService } from '../capture/operation-capture.service';
 
 describe('OperationWriteFlushService', () => {
   let service: OperationWriteFlushService;
   let lockServiceSpy: jasmine.SpyObj<LockService>;
+  let captureServiceSpy: jasmine.SpyObj<OperationCaptureService>;
 
   beforeEach(() => {
     lockServiceSpy = jasmine.createSpyObj('LockService', ['request']);
     lockServiceSpy.request.and.callFake(
       async <T>(_name: string, callback: () => Promise<T>) => callback(),
     );
+    captureServiceSpy = jasmine.createSpyObj('OperationCaptureService', [
+      'getPendingCount',
+    ]);
+    captureServiceSpy.getPendingCount.and.returnValue(0);
 
     TestBed.configureTestingModule({
       providers: [
         OperationWriteFlushService,
         { provide: LockService, useValue: lockServiceSpy },
+        { provide: OperationCaptureService, useValue: captureServiceSpy },
       ],
     });
     service = TestBed.inject(OperationWriteFlushService);
   });
 
   describe('flushPendingWrites', () => {
+    it('should expose whether reducer captures are pending', () => {
+      captureServiceSpy.getPendingCount.and.returnValues(1, 0);
+
+      expect(service.hasPendingWrites()).toBeTrue();
+      expect(service.hasPendingWrites()).toBeFalse();
+    });
+
     it('should acquire the sp_op_log lock', async () => {
       await service.flushPendingWrites();
 
@@ -99,6 +113,71 @@ describe('OperationWriteFlushService', () => {
 
       const lockName = lockServiceSpy.request.calls.mostRecent().args[0];
       expect(lockName).toBe('sp_op_log');
+    });
+  });
+
+  describe('flushThenRunExclusive', () => {
+    it('should flush BEFORE acquiring the lock (calling flush inside the held lock deadlocks)', async () => {
+      const events: string[] = [];
+      spyOn(service, 'flushPendingWrites').and.callFake(async () => {
+        events.push('flush');
+      });
+      lockServiceSpy.request.and.callFake(
+        async <T>(_name: string, callback: () => Promise<T>) => {
+          events.push('lock-acquired');
+          const result = await callback();
+          events.push('lock-released');
+          return result;
+        },
+      );
+
+      await service.flushThenRunExclusive(async () => {
+        events.push('fn');
+      });
+
+      expect(events).toEqual(['flush', 'lock-acquired', 'fn', 'lock-released']);
+    });
+
+    it('should return the value produced by fn', async () => {
+      spyOn(service, 'flushPendingWrites').and.resolveTo();
+
+      const result = await service.flushThenRunExclusive(async () => 42);
+
+      expect(result).toBe(42);
+    });
+
+    it('should release, re-flush, and retry when a capture lands between flush and lock acquisition', async () => {
+      spyOn(service, 'flushPendingWrites').and.resolveTo();
+      captureServiceSpy.getPendingCount.and.returnValues(1, 0);
+      const fn = jasmine.createSpy('fn').and.resolveTo('done');
+
+      const result = await service.flushThenRunExclusive(fn);
+
+      expect(result).toBe('done');
+      expect(service.flushPendingWrites).toHaveBeenCalledTimes(2);
+      expect(lockServiceSpy.request).toHaveBeenCalledTimes(2);
+      expect(fn).toHaveBeenCalledTimes(1);
+    });
+
+    it('should abort after bounded attempts under continuous dispatch activity', async () => {
+      spyOn(service, 'flushPendingWrites').and.resolveTo();
+      captureServiceSpy.getPendingCount.and.returnValue(1);
+      const fn = jasmine.createSpy('fn');
+
+      await expectAsync(service.flushThenRunExclusive(fn)).toBeRejectedWithError(
+        /cutoff not reached/,
+      );
+      expect(fn).not.toHaveBeenCalled();
+      expect(service.flushPendingWrites).toHaveBeenCalledTimes(5);
+    });
+
+    it('should propagate fn rejections without retrying', async () => {
+      spyOn(service, 'flushPendingWrites').and.resolveTo();
+      const testError = new Error('fn failed');
+      const fn = jasmine.createSpy('fn').and.rejectWith(testError);
+
+      await expectAsync(service.flushThenRunExclusive(fn)).toBeRejectedWith(testError);
+      expect(fn).toHaveBeenCalledTimes(1);
     });
   });
 

@@ -7,11 +7,12 @@ import {
 import { prisma } from '../../db';
 import { Logger } from '../../logger';
 import { gunzipAsync, gzipAsync } from '../gzip';
-import type { SnapshotResult } from '../sync.types';
+import { CAUSAL_FULL_STATE_OPERATION_WHERE, type SnapshotResult } from '../sync.types';
 import {
   _resolveExpectedFirstSeq,
   assertContiguousReplayBatch,
   EncryptedOpsNotSupportedError,
+  LegacyRepairReplayUnsupportedError,
   replayOpsToState,
 } from '../op-replay';
 
@@ -46,6 +47,7 @@ const REPLAY_OPERATION_SELECT = {
   payload: true,
   schemaVersion: true,
   isPayloadEncrypted: true,
+  repairBaseServerSeq: true,
 } as const;
 
 export class SnapshotGenerationService {
@@ -393,6 +395,18 @@ export class SnapshotGenerationService {
 
         const totalOpsToProcess = targetSeq - startSeq;
         if (totalOpsToProcess > MAX_OPS_FOR_SNAPSHOT) {
+          // Classify deleted restore points before enforcing the replay budget,
+          // without fetching payloads for an otherwise oversized request.
+          if (startSeq === 0) {
+            const retainedOp = await tx.operation.findFirst({
+              where: { userId, serverSeq: { lte: targetSeq } },
+              orderBy: { serverSeq: 'asc' },
+              select: { serverSeq: true },
+            });
+            if (!retainedOp) {
+              throw new Error(`Target sequence ${targetSeq} is no longer available`);
+            }
+          }
           throw new Error(
             `Too many operations to process (${totalOpsToProcess}). ` +
               `Max: ${MAX_OPS_FOR_SNAPSHOT}.`,
@@ -416,6 +430,12 @@ export class SnapshotGenerationService {
             take: BATCH_SIZE,
             select: REPLAY_OPERATION_SELECT,
           });
+
+          // A reset preserves the allocator. An old restore target can therefore
+          // precede all retained history, even after the replacement is uploaded.
+          if (currentSeq === 0 && batchOps.length === 0) {
+            throw new Error(`Target sequence ${targetSeq} is no longer available`);
+          }
 
           const expectedFirstSeq = _resolveExpectedFirstSeq(
             batchOps,
@@ -474,7 +494,7 @@ export class SnapshotGenerationService {
       where: {
         userId,
         serverSeq: { lte: startSeq },
-        opType: { in: ['SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR'] },
+        ...CAUSAL_FULL_STATE_OPERATION_WHERE,
         isPayloadEncrypted: false,
       },
       orderBy: { serverSeq: 'desc' },
@@ -494,6 +514,22 @@ export class SnapshotGenerationService {
 
     if (encryptedOpCount > 0) {
       throw new EncryptedOpsNotSupportedError(encryptedOpCount);
+    }
+
+    const legacyRepairCount = await tx.operation.count({
+      where: {
+        userId,
+        serverSeq: {
+          gt: latestUnencryptedFullStateOp?.serverSeq ?? 0,
+          lte: startSeq,
+        },
+        opType: 'REPAIR',
+        repairBaseServerSeq: null,
+      },
+    });
+
+    if (legacyRepairCount > 0) {
+      throw new LegacyRepairReplayUnsupportedError();
     }
   }
 }

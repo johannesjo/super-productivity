@@ -16,6 +16,14 @@ import { Task, TaskWithReminder, TaskWithReminderData } from '../tasks/task.mode
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { LegacyPfDbService } from '../../core/persistence/legacy-pf-db.service';
 
+// How long the reminder modal stays closed for a reminder the user dismissed
+// without acting on it (backdrop / Escape / Android back). The reminder itself
+// stays active and re-nudges once this elapses (or on the next cold start) —
+// this only throttles the modal so an overdue reminder cannot re-grab the
+// screen on every worker tick (~10s) and freeze the app. Long enough to use the
+// app, short enough that the reminder does not feel forgotten.
+export const REMINDER_DISMISS_UI_COOLDOWN_MS = 5 * 60 * 1000;
+
 interface WorkerReminder {
   id: string;
   remindAt: number;
@@ -53,6 +61,13 @@ export class ReminderService {
   );
 
   private _w: Worker;
+
+  // Session-only UI cooldown (see REMINDER_DISMISS_UI_COOLDOWN_MS), keyed per
+  // reminder OCCURRENCE (taskId + remindAt). Occurrence-keying means a
+  // reschedule produces a fresh remindAt that is not suppressed, and a task's
+  // schedule vs deadline reminders never share a cooldown. Never persisted or
+  // synced — a pure presentation throttle; cleared on cold start.
+  private _uiSuppressedUntil = new Map<string, number>();
 
   constructor() {
     if (typeof (Worker as unknown) === 'undefined') {
@@ -95,9 +110,42 @@ export class ReminderService {
       .subscribe((reminders) => {
         this._updateRemindersInWorker(reminders);
         if (!environment.production) {
-          Log.log('Updated reminders in worker', reminders);
+          Log.log('Updated reminders in worker', { reminderCount: reminders.length });
         }
       });
+  }
+
+  /**
+   * Throttle re-opening the reminder modal for a reminder occurrence the user
+   * dismissed without acting on it (backdrop / Escape / Android back).
+   */
+  suppressReminderUiAfterDismiss(taskId: string, remindAt: number): void {
+    this._uiSuppressedUntil.set(
+      this._uiCooldownKey(taskId, remindAt),
+      Date.now() + REMINDER_DISMISS_UI_COOLDOWN_MS,
+    );
+  }
+
+  /** Whether the reminder modal should currently stay closed for this occurrence. */
+  isReminderUiSuppressed(
+    taskId: string,
+    remindAt: number,
+    now: number = Date.now(),
+  ): boolean {
+    const key = this._uiCooldownKey(taskId, remindAt);
+    const until = this._uiSuppressedUntil.get(key);
+    if (until === undefined) {
+      return false;
+    }
+    if (until <= now) {
+      this._uiSuppressedUntil.delete(key);
+      return false;
+    }
+    return true;
+  }
+
+  private _uiCooldownKey(taskId: string, remindAt: number): string {
+    return `${taskId}_${remindAt}`;
   }
 
   private async _migrateLegacyReminders(): Promise<void> {

@@ -1,5 +1,5 @@
-import { inject, Injectable } from '@angular/core';
-import { firstValueFrom, Observable, of } from 'rxjs';
+import { computed, inject, Injectable } from '@angular/core';
+import { combineLatest, firstValueFrom, Observable, of } from 'rxjs';
 import { SnackService } from '../../core/snack/snack.service';
 import { Project } from './project.model';
 import { select, Store } from '@ngrx/store';
@@ -28,7 +28,6 @@ import {
   toggleHideFromMenu,
   unarchiveProject,
   updateProject,
-  updateProjectOrder,
 } from './store/project.actions';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { DEFAULT_PROJECT, INBOX_PROJECT } from './project.const';
@@ -41,17 +40,23 @@ import {
 import { selectTaskFeatureState } from '../tasks/store/task.selectors';
 import { getTaskById } from '../tasks/store/task.reducer.util';
 import { TimeTrackingService } from '../time-tracking/time-tracking.service';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { toObservable, toSignal } from '@angular/core/rxjs-interop';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from 'src/app/t.const';
 import { sortByTitle } from '../../util/sort-by-title';
 import { Note } from '../note/note.model';
 import { selectNoteFeatureState } from '../note/store/note.reducer';
 import { addNote } from '../note/store/note.actions';
+import { Section } from '../section/section.model';
+import { addSection } from '../section/store/section.actions';
+import { selectSectionsByContextIdMap } from '../section/store/section.selectors';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 import { LOCAL_ACTIONS } from '../../util/local-actions.token';
 import { DateService } from '../../core/date/date.service';
 import { getDeadlineAutoPlanFields } from '../tasks/util/get-deadline-auto-plan-fields';
+import { MenuTreeService } from '../menu-tree/menu-tree.service';
+import { selectMenuTreeProjectTree } from '../menu-tree/store/menu-tree.selectors';
+import { TaskTimeSyncService } from '../tasks/task-time-sync.service';
 
 export interface ProjectCompletionInfo {
   topLevelTasks: Task[];
@@ -109,13 +114,20 @@ export class ProjectService {
   private readonly _actions$ = inject(LOCAL_ACTIONS);
   private readonly _timeTrackingService = inject(TimeTrackingService);
   private readonly _taskService = inject(TaskService);
+  private readonly _taskTimeSync = inject(TaskTimeSyncService);
   private readonly _translate = inject(TranslateService);
   private readonly _matDialog = inject(MatDialog);
   private readonly _dateService = inject(DateService);
   private readonly _snackService = inject(SnackService);
+  private readonly _menuTreeService = inject(MenuTreeService);
 
   list$: Observable<Project[]> = this._store$.pipe(select(selectUnarchivedProjects));
   list = toSignal(this.list$, { initialValue: [] });
+
+  private _listInTreeOrder = computed(() =>
+    this._menuTreeService.buildProjectListInTreeOrder(this.list()),
+  );
+  listInTreeOrder$ = toObservable(this._listInTreeOrder);
 
   listSorted$: Observable<Project[]> = this.list$.pipe(
     map((projects) => sortByTitle(projects)),
@@ -127,6 +139,10 @@ export class ProjectService {
     map((projects) => projects.filter((p) => !p.isArchived && !p.isHiddenFromMenu)),
   );
   listSortedForUI = toSignal(this.listSortedForUI$, { initialValue: [] });
+
+  listInTreeOrderForUI = computed(() =>
+    this._listInTreeOrder().filter((p) => !p.isArchived && !p.isHiddenFromMenu),
+  );
 
   archived$: Observable<Project[]> = this._store$.pipe(select(selectArchivedProjects));
 
@@ -148,9 +164,12 @@ export class ProjectService {
     );
   }
 
-  getProjectsWithoutIdSorted$(projectId: string | null): Observable<Project[]> {
-    return this.getProjectsWithoutId$(projectId).pipe(
-      map((projects) => sortByTitle(projects)),
+  getProjectsWithoutIdInTreeOrder$(projectId: string | null): Observable<Project[]> {
+    return combineLatest([
+      this.getProjectsWithoutId$(projectId),
+      this._store$.pipe(select(selectMenuTreeProjectTree)),
+    ]).pipe(
+      map(([projects]) => this._menuTreeService.buildProjectListInTreeOrder(projects)),
     );
   }
 
@@ -231,6 +250,10 @@ export class ProjectService {
       const withSubTasks = await firstValueFrom(
         this._taskService.getByIdWithSubTaskData$(task.id),
       );
+      // Skip tasks that vanished from the store mid-loop (#9946).
+      if (!withSubTasks) {
+        continue;
+      }
       this._taskService.moveToProject(withSubTasks, INBOX_PROJECT.id);
       if (task.isDone) {
         this._taskService.setUnDone(task.id);
@@ -380,6 +403,7 @@ export class ProjectService {
       }
     });
     const allTaskIds = [...allParentTaskIds, ...subTaskIdsForProject];
+    allTaskIds.forEach((taskId) => this._taskTimeSync.clearOne(taskId));
     this._store$.dispatch(
       TaskSharedActions.deleteProject({
         projectId: project.id,
@@ -389,13 +413,18 @@ export class ProjectService {
     );
   }
 
-  update(projectId: string, changedFields: Partial<Project>): void {
+  update(
+    projectId: string,
+    changedFields: Partial<Project>,
+    isSkipSnack?: boolean,
+  ): void {
     this._store$.dispatch(
       updateProject({
         project: {
           id: projectId,
           changes: changedFields,
         },
+        isSkipSnack,
       }),
     );
   }
@@ -412,10 +441,6 @@ export class ProjectService {
 
   moveTaskToBacklog(taskId: string, projectId: string): void {
     this._store$.dispatch(moveProjectTaskToBacklogListAuto({ taskId, projectId }));
-  }
-
-  updateOrder(ids: string[]): void {
-    this._store$.dispatch(updateProjectOrder({ ids }));
   }
 
   async duplicateProject(templateProjectId: string): Promise<string> {
@@ -487,9 +512,16 @@ export class ProjectService {
     const newNoteIds = this._duplicateNotesToProject(notesToCopy, newProjectId);
     this.update(newProjectId, { noteIds: newNoteIds });
 
-    this._duplicateTasksToProject(parentTasks, newProjectId, false, taskState);
+    const sectionsMap = await firstValueFrom(
+      this._store$.select(selectSectionsByContextIdMap),
+    );
+    const sectionsToCopy = sectionsMap.get(templateProjectId) ?? [];
 
-    this._duplicateTasksToProject(backlogTasks, newProjectId, true, taskState);
+    const taskIdMap = new Map<string, string>();
+    this._duplicateTasksToProject(parentTasks, newProjectId, false, taskState, taskIdMap);
+    this._duplicateTasksToProject(backlogTasks, newProjectId, true, taskState, taskIdMap);
+
+    this._duplicateSectionsToProject(sectionsToCopy, newProjectId, taskIdMap);
 
     return newProjectId;
   }
@@ -499,6 +531,7 @@ export class ProjectService {
     newProjectId: string,
     isBacklog: boolean,
     taskState: TaskState,
+    taskIdMap: Map<string, string>,
   ): void {
     // For each parent task create a copy in the new project and then copy its subtasks
     for (const p of tasks) {
@@ -526,6 +559,7 @@ export class ProjectService {
         workContextType: WorkContextType.PROJECT,
         workContextId: newProjectId,
       });
+      taskIdMap.set(p.id, newParentTask.id);
 
       // dispatch addTask for the parent task
       this._store$.dispatch(
@@ -565,6 +599,7 @@ export class ProjectService {
             workContextType: WorkContextType.PROJECT,
             workContextId: newProjectId,
           });
+          taskIdMap.set(st.id, newSub.id);
 
           this._store$.dispatch(addSubTask({ task: newSub, parentId: newParentTask.id }));
         }
@@ -591,5 +626,30 @@ export class ProjectService {
       this._store$.dispatch(addNote({ note: newNote, isPreventFocus: true }));
     }
     return newNoteIds;
+  }
+
+  private _duplicateSectionsToProject(
+    sections: Section[],
+    newProjectId: string,
+    taskIdMap: Map<string, string>,
+  ): void {
+    for (const section of sections) {
+      const newTaskIds = section.taskIds
+        .map((id) => taskIdMap.get(id))
+        .filter((id): id is string => !!id);
+
+      this._store$.dispatch(
+        addSection({
+          section: {
+            id: nanoid(),
+            contextId: newProjectId,
+            contextType: WorkContextType.PROJECT,
+            title: section.title,
+            isExpanded: section.isExpanded,
+            taskIds: newTaskIds,
+          },
+        }),
+      );
+    }
   }
 }

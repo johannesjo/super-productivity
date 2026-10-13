@@ -7,7 +7,7 @@ import { PluginRunner } from './plugin-runner';
 import { PluginHooksService } from './plugin-hooks';
 import { PluginSecurityService } from './plugin-security';
 import { Hooks, PluginBaseCfg, PluginInstance, PluginManifest } from './plugin-api.model';
-import { PluginState } from './plugin-state.model';
+import { getUploadedPluginIds, PluginState } from './plugin-state.model';
 import { GlobalThemeService } from '../core/theme/global-theme.service';
 import { IS_ANDROID_WEB_VIEW } from '../util/is-android-web-view';
 import { IS_ELECTRON } from '../app.constants';
@@ -17,11 +17,13 @@ import { PluginCacheService } from './plugin-cache.service';
 import {
   MAX_PLUGIN_CODE_SIZE,
   MAX_PLUGIN_MANIFEST_SIZE,
+  MAX_PLUGIN_TRANSLATIONS_TOTAL_SIZE,
   MAX_PLUGIN_ZIP_SIZE,
 } from './plugin.const';
 import { take } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
 import { PluginCleanupService } from './plugin-cleanup.service';
+import { PluginSecretService } from './secret/plugin-secret.service';
 import { PluginLoaderService } from './plugin-loader.service';
 import { validatePluginManifest } from './util/validate-manifest.util';
 import { TranslateService } from '@ngx-translate/core';
@@ -36,45 +38,24 @@ import { IssueSyncAdapterRegistryService } from '../features/issue/two-way-sync/
 import { SnackService } from '../core/snack/snack.service';
 import { pingWithRetry } from './util/ping-with-retry.util';
 import { PluginBridgeService } from './plugin-bridge.service';
+import { sanitizeSvgIconContent } from '../util/sanitize-svg-icon.util';
+import {
+  logSkippedPluginTranslations,
+  readPluginTranslationsFromZip,
+} from './util/read-plugin-translations-from-zip.util';
+import { BUNDLED_PLUGIN_IDS, BUNDLED_PLUGIN_PATHS } from './bundled-plugins.const';
 
-// Each plugin's `id` (from its manifest.json, distinct from the asset path
-// here) becomes the entityId prefix for all data it persists via
-// `persistDataSynced` — keyed entries land under `<pluginId>:<key>` in IDB,
-// the op-log, and on the sync wire. Once a plugin ships, renaming its id
-// orphans every user's stored data: there is no automatic re-keying. Treat
-// pluginIds as permanent for any plugin that has ever been published.
-const BUNDLED_PLUGIN_PATHS = [
-  'assets/bundled-plugins/yesterday-tasks-plugin',
-  'assets/bundled-plugins/sync-md',
-  'assets/bundled-plugins/api-test-plugin',
-  'assets/bundled-plugins/procrastination-buster',
-  'assets/bundled-plugins/automations',
-  'assets/bundled-plugins/github-issue-provider',
-  'assets/bundled-plugins/clickup-issue-provider',
-  'assets/bundled-plugins/gitea-issue-provider',
-  'assets/bundled-plugins/linear-issue-provider',
-  'assets/bundled-plugins/brain-dump',
-  'assets/bundled-plugins/voice-reminder',
-  'assets/bundled-plugins/google-calendar-provider',
-  'assets/bundled-plugins/caldav-calendar-provider',
-  'assets/bundled-plugins/doc-mode',
-] as const;
-
-const BUNDLED_PLUGIN_IDS = new Set<string>([
-  'ai-productivity-prompts',
-  'api-test-plugin',
-  'automations',
-  'brain-dump',
-  'caldav-calendar-provider',
-  'clickup-issue-provider',
-  'doc-mode',
-  'github-issue-provider',
-  'google-calendar-provider',
-  'procrastination-buster',
-  'sync-md',
-  'voice-reminder',
-  'yesterday-tasks',
-]);
+/**
+ * Thrown by `_fireOnReady` when the user explicitly DENIES a nodeExecution consent
+ * prompt, so the failure handlers can treat it as a deliberate choice (clean disable)
+ * rather than a load failure (#8512). See `_handleNodeExecutionConsentDenied`.
+ */
+export class NodeExecutionConsentDeniedError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'NodeExecutionConsentDeniedError';
+  }
+}
 
 @Injectable({
   providedIn: 'root',
@@ -88,6 +69,7 @@ export class PluginService implements OnDestroy {
   private readonly _pluginMetaPersistenceService = inject(PluginMetaPersistenceService);
   private readonly _pluginUserPersistenceService = inject(PluginUserPersistenceService);
   private readonly _pluginCacheService = inject(PluginCacheService);
+  private readonly _pluginSecretService = inject(PluginSecretService);
   private readonly _cleanupService = inject(PluginCleanupService);
   private readonly _pluginLoader = inject(PluginLoaderService);
   private readonly _pluginBridge = inject(PluginBridgeService);
@@ -107,6 +89,13 @@ export class PluginService implements OnDestroy {
   private _pluginIcons: Map<string, string> = new Map(); // Store plugin ID -> SVG icon content
   private _pluginIframeGenerations: Map<string, number> = new Map();
   private _pluginIconsSignal = signal<Map<string, string>>(new Map());
+  // Plugin ids the user denied nodeExecution for this app session. In-memory only —
+  // never persisted or synced (consent is session-scoped). Makes a denial sticky so a
+  // later non-interactive grant attempt (e.g. startup re-activation via _fireOnReady,
+  // which doesn't pass through checkNodeExecutionPermission) doesn't re-open the native
+  // prompt. Added on deny in _ensureNodeExecutionGrant; cleared only on an explicit
+  // user-initiated enable in checkNodeExecutionPermission (so re-enable always re-asks).
+  private readonly _nodeExecutionDeniedThisSession = new Set<string>();
 
   // Lazy loading state management
   private _pluginStates = signal<Map<string, PluginState>>(new Map());
@@ -243,13 +232,6 @@ export class PluginService implements OnDestroy {
         }
       }
     }
-  }
-
-  private async _loadBuiltInPlugins(): Promise<void> {
-    const pluginPaths = [...BUNDLED_PLUGIN_PATHS];
-
-    // KISS: No preloading - just load plugins directly
-    await this._loadPluginsFromPaths(pluginPaths, 'built-in');
   }
 
   private async _discoverUploadedPlugins(): Promise<void> {
@@ -582,6 +564,12 @@ export class PluginService implements OnDestroy {
       }
       void this._revokeNodeExecutionGrant(pluginId);
 
+      // Deny = clean disable, not an error tile — see _handleNodeExecutionConsentDenied.
+      if (error instanceof NodeExecutionConsentDeniedError) {
+        this._handleNodeExecutionConsentDenied(pluginId);
+        return null;
+      }
+
       this._setPluginState(pluginId, {
         ...currentState,
         status: 'error',
@@ -651,6 +639,16 @@ export class PluginService implements OnDestroy {
     if (IS_ELECTRON && instance.manifest.permissions?.includes('nodeExecution')) {
       const hasGrant = await this._ensureNodeExecutionGrant(instance.manifest);
       if (!hasGrant) {
+        // `_ensureNodeExecutionGrant` returns false for two different reasons: a deliberate
+        // user DENIAL (which records the id in `_nodeExecutionDeniedThisSession`) and a
+        // technical grant-request failure (IPC/bridge error — not recorded). Only a real
+        // denial becomes the recoverable "clean disable"; a technical failure must surface
+        // as a normal error tile/snack so the user sees something actually went wrong.
+        if (this._nodeExecutionDeniedThisSession.has(instance.manifest.id)) {
+          throw new NodeExecutionConsentDeniedError(
+            this._translateService.instant(T.PLUGINS.NODE_EXECUTION_PERMISSION_DENIED),
+          );
+        }
         throw new Error(
           this._translateService.instant(T.PLUGINS.NODE_EXECUTION_PERMISSION_DENIED),
         );
@@ -699,6 +697,12 @@ export class PluginService implements OnDestroy {
     }
     void this._revokeNodeExecutionGrant(pluginId);
 
+    // Deny = clean disable (no error tile / no ERROR snack) — see the helper below.
+    if (error instanceof NodeExecutionConsentDeniedError) {
+      this._handleNodeExecutionConsentDenied(pluginId);
+      return;
+    }
+
     const currentState = this._pluginStates().get(pluginId);
     if (currentState) {
       this._setPluginState(pluginId, {
@@ -718,184 +722,31 @@ export class PluginService implements OnDestroy {
     });
   }
 
-  private async _loadUploadedPlugins(): Promise<void> {
-    try {
-      const cachedPlugins = await this._pluginCacheService.getAllPlugins();
-
-      const promises = cachedPlugins.map(async (cachedPlugin) => {
-        try {
-          PluginLog.log(`Loading cached plugin: ${cachedPlugin.id}`);
-          // Set the path for reload functionality
-          this._pluginPaths.set(cachedPlugin.id, `uploaded://${cachedPlugin.id}`);
-
-          // Load the cached plugin
-          await this._loadUploadedPlugin(cachedPlugin.id);
-          // The plugin instance is already added to _loadedPlugins in _loadUploadedPlugin if loaded successfully
-        } catch (error) {
-          PluginLog.err(`Failed to load cached plugin ${cachedPlugin.id}:`, error);
-          // Continue loading other plugins even if one fails
-        }
-      });
-
-      await Promise.allSettled(promises);
-    } catch (error) {
-      PluginLog.err('Failed to load cached plugins:', error);
-      // Don't throw - this shouldn't prevent other plugins from loading
-    }
-  }
-
   /**
-   * Load plugins from multiple paths with error handling
+   * Normalise a plugin to a clean, re-enableable disabled state after the user DENIED its
+   * nodeExecution consent prompt (#8512 deny-recovery). Clears any `error` so the
+   * management toggle is no longer grayed out (`canEnablePlugin` is `!plugin.error`) and
+   * sets it OFF; flipping it back on clears the session-denied marker (see
+   * `checkNodeExecutionPermission`) and re-opens the prompt — no app restart needed.
+   *
+   * Deliberately IN-MEMORY ONLY — it does NOT persist `isEnabled=false`. nodeExecution
+   * consent is a per-device, session-scoped decision (see `_nodeExecutionDeniedThisSession`);
+   * persisting would write the synced `pluginMetadata` entity, propagating a local "not now"
+   * to every device as a durable disable. Leaving the persisted `isEnabled` untouched means
+   * the next start on THIS device re-prompts, which matches the existing session-scoped model.
+   * Runtime teardown (unload + grant revoke) is the caller's responsibility.
    */
-  private async _loadPluginsFromPaths(
-    pluginPaths: string[],
-    type: 'built-in' | 'uploaded',
-  ): Promise<void> {
-    const promises = pluginPaths.map(async (pluginPath) => {
-      try {
-        const pluginInstance = await this._loadPlugin(pluginPath);
-        // Add all plugin instances to the loaded plugins list so they show up in the management UI
-        // Note: _loadPlugin already adds loaded plugins to _loadedPlugins, so we only need to add disabled ones
-        if (!pluginInstance.loaded && !pluginInstance.isEnabled) {
-          this._loadedPlugins.push(pluginInstance);
-        }
-        // Store the path for built-in plugins to enable reload functionality
-        // This ensures that built-in plugins can be reloaded just like uploaded ones
-        if (pluginInstance.manifest && pluginInstance.manifest.id) {
-          this._pluginPaths.set(pluginInstance.manifest.id, pluginPath);
-        }
-        PluginLog.log(`${type} plugin loaded successfully from ${pluginPath}`);
-      } catch (error) {
-        PluginLog.err(`Failed to load ${type} plugin from ${pluginPath}:`, error);
-        // Continue loading other plugins even if one fails
-      }
-    });
-
-    await Promise.allSettled(promises);
-  }
-
-  private async _loadPlugin(pluginPath: string): Promise<PluginInstance> {
-    try {
-      // Use the loader service for lazy loading
-      const assets = await this._pluginLoader.loadPluginAssets(pluginPath);
-      const { manifest, code: pluginCode, indexHtml, icon, translations } = assets;
-      if (pluginPath.startsWith('uploaded://')) {
-        this._assertUploadedPluginAllowed(manifest);
-      }
-
-      // Store assets if loaded
-      if (indexHtml) {
-        this._pluginIndexHtml.set(manifest.id, indexHtml);
-      }
-      if (icon) {
-        this._pluginIcons.set(manifest.id, icon);
-        this._registerPluginIcon(manifest.id, icon);
-        this._pluginIconsSignal.set(new Map(this._pluginIcons));
-      }
-
-      // Load translations into i18n service
-      if (translations && Object.keys(translations).length > 0) {
-        this._pluginI18nService.loadPluginTranslationsFromContent(
-          manifest.id,
-          translations,
-        );
-      }
-
-      // Check if plugin should be loaded based on persisted enabled state
-      const isPluginEnabled = await this._pluginMetaPersistenceService.isPluginEnabled(
-        manifest.id,
-      );
-
-      // Validate manifest and code
-      const manifestValidation = validatePluginManifest(manifest);
-      if (!manifestValidation.isValid) {
-        throw new Error(
-          this._translateService.instant(T.PLUGINS.VALIDATION_FAILED, {
-            errors: manifestValidation.errors.join(', '),
-          }),
-        );
-      }
-
-      // Check for dangerous permissions
-      if (this._pluginSecurity.hasElevatedPermissions(manifest)) {
-        if (!IS_ELECTRON) {
-          // In web version, create a disabled placeholder for nodeExecution plugins
-          const placeholderInstance: PluginInstance = {
-            manifest,
-            loaded: false,
-            isEnabled: false,
-            error: this._translateService.instant(T.PLUGINS.NODE_ONLY_DESKTOP),
-          };
-          this._pluginPaths.set(manifest.id, pluginPath); // Store the path for potential reload
-          PluginLog.log(
-            `Plugin ${manifest.id} requires desktop version, creating placeholder`,
-          );
-          return placeholderInstance;
-        }
-
-        // Skip consent check during startup - will be checked when plugin is activated
-        // This prevents showing multiple dialogs at once during app startup
-      }
-
-      // Analyze plugin code (informational only - KISS approach)
-      const codeAnalysis = this._pluginSecurity.analyzePluginCode(pluginCode, manifest);
-      if (codeAnalysis.warnings.length > 0) {
-        PluginLog.err(`Plugin ${manifest.id} warnings:`, codeAnalysis.warnings);
-      }
-      if (codeAnalysis.info.length > 0) {
-        PluginLog.info(`Plugin ${manifest.id} info:`, codeAnalysis.info);
-      }
-
-      // If plugin is disabled, create a placeholder instance without loading code
-      if (!isPluginEnabled) {
-        const placeholderInstance: PluginInstance = {
-          manifest,
-          loaded: false,
-          isEnabled: false,
-          error: undefined,
-        };
-        this._pluginPaths.set(manifest.id, pluginPath); // Store the path for potential reload
-        PluginLog.log(`Plugin ${manifest.id} is disabled, skipping load`);
-        return placeholderInstance;
-      }
-
-      // Load the plugin
-      const baseCfg = this._getBaseCfg();
-      const pluginInstance = await this._pluginRunner.loadPlugin(
-        manifest,
-        pluginCode,
-        baseCfg,
-        true, // Plugin is enabled if we reach this point
-      );
-
-      if (pluginInstance.loaded) {
-        // Check if plugin is already in the list to prevent duplicates
-        const existingIndex = this._loadedPlugins.findIndex(
-          (p) => p.manifest.id === manifest.id,
-        );
-        if (existingIndex === -1) {
-          this._loadedPlugins.push(pluginInstance);
-        } else {
-          // Replace existing instance
-          this._loadedPlugins[existingIndex] = pluginInstance;
-        }
-        this._pluginPaths.set(manifest.id, pluginPath); // Store the path
-
-        // Mark plugin as enabled in memory only during startup to avoid sync conflicts
-        // The enabled state will be persisted later when user explicitly enables/disables plugins
-        this._ensurePluginEnabledInMemory(manifest.id);
-
-        await this._fireOnReadyWithCleanup(pluginInstance);
-
-        PluginLog.log(`Plugin ${manifest.id} loaded successfully`);
-      } else {
-        PluginLog.err(`Plugin ${manifest.id} failed to load:`, pluginInstance.error);
-      }
-
-      return pluginInstance;
-    } catch (error) {
-      PluginLog.err(`Failed to load plugin from ${pluginPath}:`, error);
-      throw error;
+  private _handleNodeExecutionConsentDenied(pluginId: string): void {
+    PluginLog.log(`nodeExecution consent denied; disabling plugin: ${pluginId}`);
+    const currentState = this._getPluginState(pluginId);
+    if (currentState) {
+      this._setPluginState(pluginId, {
+        ...currentState,
+        status: 'not-loaded',
+        instance: undefined,
+        isEnabled: false,
+        error: undefined,
+      });
     }
   }
 
@@ -1148,16 +999,6 @@ export class PluginService implements OnDestroy {
     await this._pluginHooks.dispatchHookToPlugin(pluginId, hookName, payload);
   }
 
-  async loadPluginFromPath(pluginPath: string): Promise<PluginInstance> {
-    const pluginInstance = await this._loadPlugin(pluginPath);
-
-    if (pluginInstance.loaded) {
-      this._loadedPlugins.push(pluginInstance);
-    }
-
-    return pluginInstance;
-  }
-
   async loadPluginFromZip(file: File): Promise<PluginInstance> {
     PluginLog.log('Starting plugin load from ZIP', {
       size: file.size,
@@ -1236,6 +1077,13 @@ export class PluginService implements OnDestroy {
           }),
         );
       }
+      // Surface non-fatal manifest problems the way the path-based loader does.
+      // These include "English (en) not in i18n.languages" and unsupported language
+      // codes — both direct causes of translate() silently returning keys (#9459).
+      // warn, matching PluginLoaderService's level for the identical strings.
+      for (const warning of manifestValidation.warnings) {
+        PluginLog.warn(`Plugin ${manifest.id}: ${warning}`);
+      }
       this._assertUploadedPluginAllowed(manifest);
 
       // Extract index.html if it exists (optional) and iFrame is true
@@ -1274,6 +1122,32 @@ export class PluginService implements OnDestroy {
         throw new Error(this._translateService.instant(T.PLUGINS.INDEX_HTML_NOT_LOADED));
       }
 
+      // Extract only translations declared by the manifest. Uploaded plugins use a
+      // virtual cache path, so these files cannot be fetched after the ZIP is discarded.
+      let translations: Record<string, string> | undefined;
+      // Guard the way the path-based loader does: a non-object `i18n` is falsy but
+      // not nullish, so `i18n?.languages.length` would throw a raw TypeError.
+      if (manifest.i18n?.languages && manifest.i18n.languages.length > 0) {
+        const result = readPluginTranslationsFromZip(
+          extractedFiles,
+          manifest.i18n.languages,
+          MAX_PLUGIN_TRANSLATIONS_TOTAL_SIZE,
+        );
+        if (result.isOverLimit) {
+          throw new Error(
+            this._translateService.instant(T.PLUGINS.TRANSLATIONS_TOO_LARGE, {
+              maxSize: (MAX_PLUGIN_TRANSLATIONS_TOTAL_SIZE / 1024 / 1024).toFixed(1),
+            }),
+          );
+        }
+        // Never skip silently: a declared language that loads nothing is exactly the
+        // "translate() just returns the key" mystery reported in #9459.
+        logSkippedPluginTranslations(manifest.id, result.skipped);
+        if (Object.keys(result.translations).length > 0) {
+          translations = result.translations;
+        }
+      }
+
       // Extract icon if specified in manifest
       let iconContent: string | null = null;
       if (manifest.icon && extractedFiles[manifest.icon]) {
@@ -1286,11 +1160,13 @@ export class PluginService implements OnDestroy {
             }),
           );
         }
-        iconContent = new TextDecoder().decode(iconBytes);
-        // Basic SVG validation
-        if (!iconContent.includes('<svg') || !iconContent.includes('</svg>')) {
-          PluginLog.err(`Plugin icon ${manifest.icon} does not appear to be a valid SVG`);
-          iconContent = null;
+        // Sanitize before caching, so anything installed from here on is stored clean.
+        // Icons cached before this existed are still raw, so both sinks sanitize as well.
+        iconContent = sanitizeSvgIconContent(new TextDecoder().decode(iconBytes));
+        if (!iconContent) {
+          PluginLog.err(
+            `Plugin icon ${manifest.icon} could not be sanitized into a renderable SVG icon`,
+          );
         }
       }
 
@@ -1314,6 +1190,23 @@ export class PluginService implements OnDestroy {
       }
       if (codeAnalysis.info.length > 0) {
         PluginLog.info(`Plugin ${manifest.id} info:`, codeAnalysis.info);
+      }
+
+      // An explicit upload always (re)installs code under this id, so any prior persisted
+      // nodeExecution consent no longer applies — clear it unconditionally, BEFORE loading
+      // the new code and outside the `existingState` branch (issue #8512 Phase 2). This
+      // closes the orphaned-consent gap: if consent survived in the main-owned store while
+      // the in-memory/cache record was already gone (a crash mid-uninstall, IndexedDB
+      // eviction, or an external/partial wipe), a same-id re-upload would otherwise skip the
+      // clear and be silently granted node execution with no prompt. This MUST fail closed:
+      // if the revoke can't be persisted we abort the upload here, before any teardown or
+      // code store, rather than load replacement code that could inherit the old grant. (For
+      // a brand-new id with nothing to clear the call is a no-op and returns true.) Re-asking
+      // once per upload is intended; ask-once is about sessions, not uploads.
+      if (!(await this.clearNodeExecutionConsent(manifest.id))) {
+        throw new Error(
+          `Aborting upload of "${manifest.id}": could not clear previous nodeExecution consent`,
+        );
       }
 
       // Teardown existing plugin runtime if re-uploading same ID
@@ -1341,9 +1234,15 @@ export class PluginService implements OnDestroy {
         pluginCode,
         indexHtml || undefined,
         iconContent || undefined,
-        undefined,
+        translations,
         configSchema,
       );
+
+      // An upload always fully replaces this id's translations. The teardown above
+      // only runs when a prior state exists, and a failed upload leaves none (its
+      // error state is filed under a synthetic `error-…` id), so without this a
+      // re-upload that drops a language would keep serving the old version's strings.
+      this._pluginI18nService.unloadPluginTranslations(manifest.id);
 
       // Store index.html content if it exists
       if (indexHtml) {
@@ -1429,6 +1328,17 @@ export class PluginService implements OnDestroy {
 
         PluginLog.log(`Uploaded plugin ${manifest.id} is disabled, skipping load`);
         return placeholderInstance;
+      }
+
+      // Register translations immediately before executing the plugin, so its own
+      // init can call translate(). Deliberately below the placeholder returns above:
+      // a plugin that never runs needs nothing registered, and activating it later
+      // reloads these from the cache anyway.
+      if (translations) {
+        this._pluginI18nService.loadPluginTranslationsFromContent(
+          manifest.id,
+          translations,
+        );
       }
 
       // Load the plugin
@@ -1535,6 +1445,24 @@ export class PluginService implements OnDestroy {
       // Unload and unregister the plugin
       this.unloadPlugin(pluginId);
     }
+    // Disabled and failed plugins can still have translations registered from their ZIP.
+    this._pluginI18nService.unloadPluginTranslations(pluginId);
+
+    // Purge local-only credentials (secrets + OAuth tokens) FIRST so they
+    // never outlive their plugin — even if a later cleanup step throws.
+    // Best-effort: a purge failure is logged but must not abort the uninstall.
+    // There is no later reconcile, so on IndexedDB failure the credentials
+    // orphan on disk until the same plugin id is reinstalled and removed again.
+    try {
+      await this._pluginSecretService.removeSecretsForPlugin(pluginId);
+    } catch (error) {
+      PluginLog.err(`Failed to purge secrets for plugin ${pluginId}:`, error);
+    }
+    try {
+      await this._pluginBridge.clearOAuthTokens(pluginId);
+    } catch (error) {
+      PluginLog.err(`Failed to purge OAuth tokens for plugin ${pluginId}:`, error);
+    }
 
     // Remove from cache
     await this._pluginCacheService.removePlugin(pluginId);
@@ -1559,6 +1487,11 @@ export class PluginService implements OnDestroy {
     this._pluginIcons.delete(pluginId);
     this._pluginIconsSignal.set(new Map(this._pluginIcons));
 
+    // Clear the session denial AND the main-owned persisted consent, so a fresh upload
+    // of this id later starts from a clean prompt and a *different* plugin reusing the id
+    // can never inherit the removed plugin's consent (issue #8512 Phase 2).
+    await this.clearNodeExecutionConsent(pluginId);
+
     // Remove from plugin states
     this._deletePluginState(pluginId);
 
@@ -1566,17 +1499,21 @@ export class PluginService implements OnDestroy {
   }
 
   /**
-   * Clear all uploaded plugins from memory. Called when IndexedDB cache is cleared
+   * Clear all uploaded plugins from memory. Called when the IndexedDB cache is cleared
    * so that in-memory state matches the empty cache.
+   *
+   * Also purges each uploaded plugin's local-only credentials (secrets + OAuth
+   * tokens) and main-owned PERSISTED nodeExecution consent (issue #8512 Phase 2).
+   * The cache wipe removes the plugin code, but credentials and consent live in
+   * dedicated stores / the main process, so without this a later re-upload of the
+   * same id — potentially *different* code — would silently inherit the previous
+   * plugin's secrets, tokens, and node-execution grant with no prompt: the
+   * post-clear upload has no `existingState`, so the re-upload clear in
+   * `loadPluginFromZip` never fires. Mirrors `removeUploadedPlugin`, keeping
+   * "replacing code under an id always re-asks" true on every removal path.
    */
-  clearUploadedPluginsFromMemory(): void {
-    const states = this._pluginStates();
-    const uploadedIds: string[] = [];
-    for (const [pluginId, state] of states.entries()) {
-      if (state.type === 'uploaded') {
-        uploadedIds.push(pluginId);
-      }
-    }
+  async clearUploadedPluginsFromMemory(): Promise<void> {
+    const uploadedIds = getUploadedPluginIds(this._pluginStates());
     for (const pluginId of uploadedIds) {
       this._teardownPluginRuntime(pluginId);
       this._pluginPaths.delete(pluginId);
@@ -1592,6 +1529,25 @@ export class PluginService implements OnDestroy {
       return updated;
     });
     this._pluginIconsSignal.set(new Map(this._pluginIcons));
+    // Purge local-only credentials + persisted consent after teardown has released the
+    // live grants. Each purge is best-effort and idempotent, so a single failure can't
+    // skip the rest or leave a different id's credentials/consent behind for a same-id
+    // re-upload to inherit.
+    await Promise.all(
+      uploadedIds.map(async (pluginId) => {
+        try {
+          await this._pluginSecretService.removeSecretsForPlugin(pluginId);
+        } catch (error) {
+          PluginLog.err(`Failed to purge secrets for plugin ${pluginId}:`, error);
+        }
+        try {
+          await this._pluginBridge.clearOAuthTokens(pluginId);
+        } catch (error) {
+          PluginLog.err(`Failed to purge OAuth tokens for plugin ${pluginId}:`, error);
+        }
+        await this.clearNodeExecutionConsent(pluginId);
+      }),
+    );
   }
 
   /**
@@ -1687,106 +1643,6 @@ export class PluginService implements OnDestroy {
     return instance !== null && instance.loaded;
   }
 
-  private async _loadUploadedPlugin(pluginId: string): Promise<PluginInstance> {
-    try {
-      // Use the loader service for uploaded plugins
-      const assets = await this._pluginLoader.loadUploadedPluginAssets(pluginId);
-      const { manifest, code: pluginCode, indexHtml, icon, translations } = assets;
-      if (manifest.id !== pluginId) {
-        throw new Error(`Cached plugin ${pluginId} manifest id mismatch`);
-      }
-      this._assertUploadedPluginAllowed(manifest);
-
-      // Store assets if loaded
-      if (indexHtml) {
-        this._pluginIndexHtml.set(manifest.id, indexHtml);
-      }
-      if (icon) {
-        this._pluginIcons.set(manifest.id, icon);
-        this._registerPluginIcon(manifest.id, icon);
-        this._pluginIconsSignal.set(new Map(this._pluginIcons));
-      }
-
-      // Load translations into i18n service
-      if (translations && Object.keys(translations).length > 0) {
-        this._pluginI18nService.loadPluginTranslationsFromContent(
-          manifest.id,
-          translations,
-        );
-      }
-
-      // Validate manifest
-      const manifestValidation = validatePluginManifest(manifest);
-      if (!manifestValidation.isValid) {
-        throw new Error(
-          this._translateService.instant(T.PLUGINS.VALIDATION_FAILED, {
-            errors: manifestValidation.errors.join(', '),
-          }),
-        );
-      }
-
-      // Analyze plugin code (informational only - KISS approach)
-      const codeAnalysis = this._pluginSecurity.analyzePluginCode(pluginCode, manifest);
-      if (codeAnalysis.warnings.length > 0) {
-        PluginLog.err(`Plugin ${manifest.id} warnings:`, codeAnalysis.warnings);
-      }
-      if (codeAnalysis.info.length > 0) {
-        PluginLog.info(`Plugin ${manifest.id} info:`, codeAnalysis.info);
-      }
-
-      // Check if plugin is enabled
-      const isPluginEnabled = await this._pluginMetaPersistenceService.isPluginEnabled(
-        manifest.id,
-      );
-
-      // If plugin is disabled, create a placeholder instance without loading code
-      if (!isPluginEnabled) {
-        const placeholderInstance: PluginInstance = {
-          manifest,
-          loaded: false,
-          isEnabled: false,
-          error: undefined,
-        };
-        PluginLog.log(`Uploaded plugin ${manifest.id} is disabled, skipping reload`);
-        return placeholderInstance;
-      }
-
-      // Load the plugin
-      const baseCfg = this._getBaseCfg();
-      const pluginInstance = await this._pluginRunner.loadPlugin(
-        manifest,
-        pluginCode,
-        baseCfg,
-        true, // Plugin is enabled if we reach this point
-      );
-
-      if (pluginInstance.loaded) {
-        // Check if plugin is already in the list to prevent duplicates
-        const existingIndex = this._loadedPlugins.findIndex(
-          (p) => p.manifest.id === manifest.id,
-        );
-        if (existingIndex === -1) {
-          this._loadedPlugins.push(pluginInstance);
-        } else {
-          // Replace existing instance
-          this._loadedPlugins[existingIndex] = pluginInstance;
-        }
-        await this._fireOnReadyWithCleanup(pluginInstance);
-        PluginLog.log(`Uploaded plugin ${manifest.id} reloaded successfully`);
-      } else {
-        PluginLog.err(
-          `Uploaded plugin ${manifest.id} failed to reload:`,
-          pluginInstance.error,
-        );
-      }
-
-      return pluginInstance;
-    } catch (error) {
-      PluginLog.err(`Failed to reload uploaded plugin ${pluginId}:`, error);
-      throw error;
-    }
-  }
-
   private async _ensureNodeExecutionGrant(manifest: PluginManifest): Promise<boolean> {
     if (!this._isElectronRuntime() || !manifest.permissions?.includes('nodeExecution')) {
       return true;
@@ -1794,14 +1650,25 @@ export class PluginService implements OnDestroy {
     if (this._pluginBridge.hasNodeExecutionGrantToken(manifest.id)) {
       return true;
     }
+    // A single enable flow reaches this from several call-sites; once the user has
+    // denied this session, don't re-open the native prompt until they re-enable.
+    if (this._nodeExecutionDeniedThisSession.has(manifest.id)) {
+      return false;
+    }
     let grant: { token: string } | null;
     try {
-      grant = await this._pluginBridge.requestNodeExecutionGrant(manifest.id);
+      // name/version are sent for the consent dialog only; main treats them as
+      // self-declared/unverified for uploaded plugins (it never trusts them for auth).
+      grant = await this._pluginBridge.requestNodeExecutionGrant(manifest.id, {
+        name: manifest.name,
+        version: manifest.version,
+      });
     } catch (error) {
       PluginLog.err(`Failed to get nodeExecution grant for ${manifest.id}:`, error);
       return false;
     }
     if (!grant) {
+      this._nodeExecutionDeniedThisSession.add(manifest.id);
       return false;
     }
 
@@ -1811,10 +1678,59 @@ export class PluginService implements OnDestroy {
 
   private async _revokeNodeExecutionGrant(pluginId: string): Promise<void> {
     const grantToken = this._pluginBridge.revokeNodeExecutionGrantToken(pluginId);
-    if (!grantToken || !this._isElectronRuntime()) {
+    if (!this._isElectronRuntime()) {
       return;
     }
-    await this._pluginBridge.revokeNodeExecutionGrant(pluginId, grantToken);
+    // Always tell main to drop the grant for this id, even if the renderer no longer
+    // holds the token (main revokes by pluginId + webContents), so a re-upload under
+    // the same id can never inherit a live session grant.
+    await this._pluginBridge.revokeNodeExecutionGrant(pluginId, grantToken ?? '');
+  }
+
+  /**
+   * Revoke a plugin's nodeExecution consent: clears the in-session grant token, the
+   * session "denied" marker, and the main-owned PERSISTED consent (issue #8512 Phase 2),
+   * so the next node call re-prompts. Called on disable, uninstall, and re-upload — the
+   * three explicit, user-driven lifecycle edges. Deliberately NOT called from generic
+   * teardown (`_teardownPluginRuntime`), which also fires on app shutdown/navigation and
+   * must preserve "ask once across sessions".
+   *
+   * A persistence failure is logged (id only — the raw error can embed the userData path)
+   * and reported via the RETURN VALUE rather than thrown: lifecycle edges (disable /
+   * uninstall / cache-clear) treat the clear as best-effort and ignore the result, so a rare
+   * disk failure can't abort their bookkeeping (zombie plugin state, or `disablePlugin`
+   * rejecting after the plugin is already disabled). A SECURITY-critical caller that must
+   * fail closed — `loadPluginFromZip`, before it loads replacement code under this id —
+   * instead checks the result and aborts, so replacement code can never inherit a prior
+   * grant just because the revoke write failed.
+   *
+   * @returns `true` if the persisted consent was cleared (or there was nothing to clear),
+   *   `false` if the clear could not be persisted.
+   */
+  async clearNodeExecutionConsent(pluginId: string): Promise<boolean> {
+    this._nodeExecutionDeniedThisSession.delete(pluginId);
+    try {
+      await this._pluginBridge.clearNodeExecutionConsent(pluginId);
+      return true;
+    } catch {
+      PluginLog.err(`Failed to clear persisted nodeExecution consent for ${pluginId}`);
+      return false;
+    }
+  }
+
+  /**
+   * Disable an installed plugin: persist `isEnabled=false`, tear down its runtime, and
+   * revoke its nodeExecution consent (session grant + persisted), so re-enabling re-prompts
+   * (issue #8512 Phase 2). Routing every disable through here keeps "disable revokes
+   * consent" a structural invariant — a future disable path cannot silently skip the revoke
+   * — which is why the revoke lives here rather than in `unloadPlugin` /
+   * `_teardownPluginRuntime` (those also run on app shutdown/navigation, where consent must
+   * survive). `clearNodeExecutionConsent` is a safe no-op for non-node plugins.
+   */
+  async disablePlugin(pluginId: string): Promise<void> {
+    await this._pluginMetaPersistenceService.setPluginEnabled(pluginId, false);
+    this.unloadPlugin(pluginId);
+    await this.clearNodeExecutionConsent(pluginId);
   }
 
   /**
@@ -1834,6 +1750,9 @@ export class PluginService implements OnDestroy {
       return false;
     }
 
+    // This is the interactive (user-initiated) entry point, so an explicit enable
+    // attempt clears any earlier this-session denial and re-opens the prompt.
+    this._nodeExecutionDeniedThisSession.delete(manifest.id);
     return this._ensureNodeExecutionGrant(manifest);
   }
 
@@ -1884,6 +1803,9 @@ export class PluginService implements OnDestroy {
   }
 
   private _assertUploadedPluginAllowed(manifest: PluginManifest): void {
+    // Uploaded plugins may not reuse a bundled plugin's id (it would let unverified
+    // code impersonate a built-in). nodeExecution is no longer blocked here: uploaded
+    // node plugins are gated by the main-process consent dialog at grant time instead.
     if (this._isBundledPluginId(manifest.id)) {
       throw new Error(
         this._translateService.instant(T.PLUGINS.PLUGIN_ID_RESERVED, {
@@ -1891,28 +1813,11 @@ export class PluginService implements OnDestroy {
         }),
       );
     }
-    if (manifest.permissions?.includes('nodeExecution')) {
-      throw new Error(
-        this._translateService.instant(T.PLUGINS.NODE_EXECUTION_BUILT_IN_ONLY),
-      );
-    }
   }
 
   /**
    * Clean up all resources when service is destroyed
    */
-  /**
-   * Ensure plugin is marked as enabled in memory only during startup.
-   * This avoids pfapi writes during initialization that could cause sync conflicts.
-   */
-  private _ensurePluginEnabledInMemory(pluginId: string): void {
-    // We only need to track this in memory for startup purposes
-    // The actual persistence will happen when user explicitly enables/disables plugins
-    PluginLog.log(
-      `Plugin ${pluginId} marked as enabled in memory (no pfapi write during startup)`,
-    );
-  }
-
   ngOnDestroy(): void {
     PluginLog.log('PluginService: Cleaning up all resources');
 

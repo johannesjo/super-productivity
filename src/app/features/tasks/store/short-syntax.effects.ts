@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { createEffect, ofType } from '@ngrx/effects';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { Action } from '@ngrx/store';
-import { addNewTagsFromShortSyntax } from './task.actions';
+import { addNewTagsFromShortSyntax, addSubTask } from './task.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import {
   catchError,
@@ -37,6 +37,7 @@ import { DateService } from '../../../core/date/date.service';
 import { INBOX_PROJECT } from '../../project/project.const';
 import { devError } from '../../../util/dev-error';
 import { TaskLog } from '../../../core/log';
+import { TaskTimeSyncService } from '../task-time-sync.service';
 
 @Injectable()
 export class ShortSyntaxEffects {
@@ -50,14 +51,17 @@ export class ShortSyntaxEffects {
   private _layoutService = inject(LayoutService);
   private _workContextService = inject(WorkContextService);
   private _dateService = inject(DateService);
+  private _taskTimeSyncService = inject(TaskTimeSyncService);
 
   shortSyntax$ = createEffect(() =>
     this._actions$.pipe(
-      ofType(TaskSharedActions.addTask, TaskSharedActions.updateTask),
+      ofType(TaskSharedActions.addTask, TaskSharedActions.updateTask, addSubTask),
       filter((action): boolean => {
         if (action.isIgnoreShortSyntax) {
           return false;
         }
+        // addTask and addSubTask always carry a full title to parse; only
+        // updateTask is gated to title-only changes below.
         if (action.type !== TaskSharedActions.updateTask.type) {
           return true;
         }
@@ -229,6 +233,14 @@ export class ShortSyntaxEffects {
             );
 
             delete finalTaskChanges.hasDeadlineTime;
+            delete finalTaskChanges.dueTimeStr;
+
+            // The parser writes an absolute per-day total. Persist any earlier
+            // additive timer batch first so replay observes the same order as
+            // the live store: delta, then absolute replacement.
+            if (finalTaskChanges.timeSpentOnDay) {
+              this._taskTimeSyncService.flushOne(task.id);
+            }
 
             actions.push(
               TaskSharedActions.applyShortSyntax({

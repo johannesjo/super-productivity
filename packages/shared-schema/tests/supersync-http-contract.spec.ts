@@ -4,7 +4,11 @@ import {
   SUPER_SYNC_MAX_OPS_PER_UPLOAD,
   SuperSyncDownloadOpsQuerySchema,
   SuperSyncDownloadOpsResponseSchema,
+  SuperSyncOperationSchema,
+  SuperSyncRestorePointsResponseSchema,
+  SuperSyncSnapshotUploadResponseSchema,
   SuperSyncUploadOpsRequestSchema,
+  SuperSyncUploadOpsResponseSchema,
   SuperSyncUploadSnapshotRequestSchema,
 } from '../src/supersync-http-contract';
 
@@ -46,21 +50,22 @@ describe('SuperSync HTTP contract schemas', () => {
     expect('extraOpField' in parsed.ops[0]).toBe(false);
   });
 
-  it('caps entityIds per operation', () => {
-    expect(() =>
-      SuperSyncUploadOpsRequestSchema.parse({
-        ops: [
-          {
-            ...createValidOperation(),
-            entityIds: Array.from(
-              { length: SUPER_SYNC_MAX_ENTITY_IDS_PER_OP + 1 },
-              (_, i) => `task-${i}`,
-            ),
-          },
-        ],
-        clientId: 'client_1',
-      }),
-    ).toThrow();
+  it('passes oversized entityIds through for per-operation validation', () => {
+    const operation = {
+      ...createValidOperation(),
+      entityIds: Array.from(
+        { length: SUPER_SYNC_MAX_ENTITY_IDS_PER_OP + 1 },
+        (_, i) => `task-${i}`,
+      ),
+    };
+
+    const parsed = SuperSyncUploadOpsRequestSchema.parse({
+      ops: [operation],
+      clientId: 'client_1',
+    });
+
+    expect(parsed.ops[0].entityIds).toHaveLength(SUPER_SYNC_MAX_ENTITY_IDS_PER_OP + 1);
+    expect(() => SuperSyncOperationSchema.parse(operation)).toThrow();
   });
 
   it('rejects invalid client IDs in upload requests', () => {
@@ -71,6 +76,87 @@ describe('SuperSync HTTP contract schemas', () => {
       }),
     ).toThrow();
   });
+
+  it.each([0, 1.5, -1, 101])(
+    'passes operation schema version %s through the upload transport schema',
+    (schemaVersion) => {
+      const parsed = SuperSyncUploadOpsRequestSchema.parse({
+        ops: [{ ...createValidOperation(), schemaVersion }],
+        clientId: 'client_1',
+      });
+
+      expect(parsed.ops[0].schemaVersion).toBe(schemaVersion);
+      expect(() =>
+        SuperSyncOperationSchema.parse({
+          ...createValidOperation(),
+          schemaVersion,
+        }),
+      ).toThrow();
+    },
+  );
+
+  it.each([
+    ['empty operation ID', { id: '' }],
+    ['overlong operation ID', { id: 'x'.repeat(256) }],
+    ['mismatched operation client ID', { clientId: 'other client' }],
+    ['unknown operation type', { opType: 'UNKNOWN' }],
+    ['unknown entity type', { entityType: 'UNKNOWN' }],
+    ['overlong entity ID', { entityId: 'x'.repeat(256) }],
+    ['invalid vector-clock entry', { vectorClock: { client_1: 'invalid' } }],
+  ])('passes semantic %s through for per-operation validation', (_label, override) => {
+    const operation = { ...createValidOperation(), ...override };
+    const parsed = SuperSyncUploadOpsRequestSchema.parse({
+      ops: [operation],
+      clientId: 'client_1',
+    });
+
+    expect(parsed.ops).toHaveLength(1);
+  });
+
+  it.each([
+    ['non-string operation ID', { id: 123 }],
+    ['empty action type', { actionType: '' }],
+    ['non-string operation type', { opType: 123 }],
+    ['non-string entity type', { entityType: 123 }],
+    ['non-string entity ID', { entityId: 123 }],
+    ['non-string entityIds member', { entityIds: ['task-1', 123] }],
+    ['non-object vector clock', { vectorClock: [] }],
+    ['non-numeric timestamp', { timestamp: '123' }],
+    ['non-numeric schema version', { schemaVersion: '1' }],
+    ['non-boolean encryption flag', { isPayloadEncrypted: 'true' }],
+    ['unknown import reason', { syncImportReason: 'UNKNOWN' }],
+  ])('keeps the upload transport constraint for %s', (_label, override) => {
+    expect(() =>
+      SuperSyncUploadOpsRequestSchema.parse({
+        ops: [{ ...createValidOperation(), ...override }],
+        clientId: 'client_1',
+      }),
+    ).toThrow();
+  });
+
+  it('rejects semantically invalid identifiers beyond the absolute transport cap', () => {
+    expect(() =>
+      SuperSyncUploadOpsRequestSchema.parse({
+        ops: [{ ...createValidOperation(), id: 'x'.repeat(4097) }],
+        clientId: 'client_1',
+      }),
+    ).toThrow();
+  });
+
+  it.each([0, 1.5, -1, 101])(
+    'rejects malformed snapshot schema version %s',
+    (schemaVersion) => {
+      expect(() =>
+        SuperSyncUploadSnapshotRequestSchema.parse({
+          state: {},
+          clientId: 'client_1',
+          reason: 'recovery',
+          vectorClock: { client_1: 1 },
+          schemaVersion,
+        }),
+      ).toThrow();
+    },
+  );
 
   it('coerces download query numbers like the route-level schema', () => {
     const parsed = SuperSyncDownloadOpsQuerySchema.parse({
@@ -105,6 +191,130 @@ describe('SuperSync HTTP contract schemas', () => {
     expect(parsed.requestId).toBe('snapshot-v1-request');
   });
 
+  it('accepts legacy repair snapshots and preserves a causal base when present', () => {
+    const repairRequest = {
+      state: { tasks: {} },
+      clientId: 'client_1',
+      reason: 'recovery' as const,
+      vectorClock: { client_1: 2 },
+      schemaVersion: 1,
+      opId: '018f2f0b-1c2d-7a1b-8c3d-123456789abc',
+      snapshotOpType: 'REPAIR' as const,
+    };
+
+    expect(SuperSyncUploadSnapshotRequestSchema.parse(repairRequest)).toEqual(
+      repairRequest,
+    );
+
+    const parsed = SuperSyncUploadSnapshotRequestSchema.parse({
+      ...repairRequest,
+      repairBaseServerSeq: 42,
+    });
+    expect(parsed.repairBaseServerSeq).toBe(42);
+  });
+
+  it('preserves causal repair metadata on downloaded operations', () => {
+    const parsed = SuperSyncOperationSchema.parse({
+      ...createValidOperation(),
+      opType: 'REPAIR',
+      repairBaseServerSeq: 42,
+    });
+
+    expect(parsed.repairBaseServerSeq).toBe(42);
+  });
+
+  it('preserves causal repair capability negotiation on downloads', () => {
+    const parsed = SuperSyncDownloadOpsResponseSchema.parse({
+      ops: [],
+      hasMore: false,
+      latestSeq: 0,
+      capabilities: { causalRepairSnapshots: true },
+    });
+
+    expect(parsed.capabilities?.causalRepairSnapshots).toBe(true);
+  });
+
+  it('keeps download-side vocabulary fields loose so an unknown value cannot reject a page (#8764)', () => {
+    const page = (ops: unknown[]): unknown => ({
+      ops: ops.map((op, i) => ({ serverSeq: i + 1, op, receivedAt: 1 })),
+      hasMore: false,
+      latestSeq: ops.length,
+    });
+
+    const parsed = SuperSyncDownloadOpsResponseSchema.parse(
+      page([
+        createValidOperation(),
+        { ...createValidOperation(), id: 'op-2', opType: 'FUTURE_OP' },
+        {
+          ...createValidOperation(),
+          id: 'op-3',
+          opType: 'SYNC_IMPORT',
+          syncImportReason: 'FUTURE_REASON',
+        },
+      ]),
+    );
+
+    expect(parsed.ops.map((entry) => entry.op.opType)).toEqual([
+      'CRT',
+      'FUTURE_OP',
+      'SYNC_IMPORT',
+    ]);
+    expect(parsed.ops[2].op.syncImportReason).toBe('FUTURE_REASON');
+    // Structure stays strict: the value must still be a non-empty string.
+    expect(() =>
+      SuperSyncDownloadOpsResponseSchema.parse(
+        page([{ ...createValidOperation(), opType: 123 }]),
+      ),
+    ).toThrow();
+    expect(() =>
+      SuperSyncDownloadOpsResponseSchema.parse(
+        page([{ ...createValidOperation(), opType: '' }]),
+      ),
+    ).toThrow();
+    // The strict enum still guards the standalone operation schema (request side).
+    expect(() =>
+      SuperSyncOperationSchema.parse({ ...createValidOperation(), opType: 'FUTURE_OP' }),
+    ).toThrow();
+  });
+
+  it('keeps restore-point types loose on the response side (#8764)', () => {
+    const parsed = SuperSyncRestorePointsResponseSchema.parse({
+      restorePoints: [
+        { serverSeq: 1, timestamp: 1, type: 'SYNC_IMPORT', clientId: 'c' },
+        { serverSeq: 2, timestamp: 2, type: 'FUTURE_SNAPSHOT', clientId: 'c' },
+      ],
+    });
+
+    expect(parsed.restorePoints.map((point) => point.type)).toEqual([
+      'SYNC_IMPORT',
+      'FUTURE_SNAPSHOT',
+    ]);
+  });
+
+  it('accepts a false capability flag instead of failing the download page (#8764)', () => {
+    const parsed = SuperSyncDownloadOpsResponseSchema.parse({
+      ops: [],
+      hasMore: false,
+      latestSeq: 0,
+      capabilities: { causalRepairSnapshots: false },
+    });
+
+    expect(parsed.capabilities?.causalRepairSnapshots).toBe(false);
+  });
+
+  it('requires an operation ID for destructive clean-slate snapshots', () => {
+    expect(() =>
+      SuperSyncUploadSnapshotRequestSchema.parse({
+        state: {},
+        clientId: 'client_1',
+        reason: 'recovery',
+        vectorClock: { client_1: 1 },
+        schemaVersion: 1,
+        isCleanSlate: true,
+      }),
+    ).toThrow();
+  });
+
   it('rejects requestIds containing characters outside the safe-log charset', () => {
     // Control character — would be unsafe to embed in server log lines.
     expect(() =>
@@ -134,18 +344,36 @@ describe('SuperSync HTTP contract schemas', () => {
     ).toThrow();
   });
 
-  it('validates download responses with latestSnapshotSeq and preserves future fields', () => {
-    const parsed = SuperSyncDownloadOpsResponseSchema.parse({
-      ops: [],
-      hasMore: false,
-      latestSeq: 20,
-      latestSnapshotSeq: 10,
-      snapshotVectorClock: { client_1: 10 },
-      serverTime: 1234567890,
-      futureServerField: 'kept',
+  it('types deduplicated upload responses instead of relying on passthrough', () => {
+    const parsed = SuperSyncUploadOpsResponseSchema.parse({
+      results: [],
+      latestSeq: 12,
+      deduplicated: true,
     });
 
-    expect(parsed.latestSnapshotSeq).toBe(10);
-    expect((parsed as { futureServerField?: string }).futureServerField).toBe('kept');
+    expect(parsed.deduplicated).toBe(true);
+    expect(() =>
+      SuperSyncUploadOpsResponseSchema.parse({
+        results: [],
+        latestSeq: 12,
+        deduplicated: 'true',
+      }),
+    ).toThrow();
+  });
+
+  it('types snapshot upload errorCode responses instead of relying on passthrough', () => {
+    const parsed = SuperSyncSnapshotUploadResponseSchema.parse({
+      accepted: false,
+      error: 'SYNC_IMPORT_EXISTS',
+      errorCode: 'SYNC_IMPORT_EXISTS',
+    });
+
+    expect(parsed.errorCode).toBe('SYNC_IMPORT_EXISTS');
+    expect(() =>
+      SuperSyncSnapshotUploadResponseSchema.parse({
+        accepted: false,
+        errorCode: 409,
+      }),
+    ).toThrow();
   });
 });

@@ -11,18 +11,21 @@ import type {
   EntityConflict as LibEntityConflict,
   ConflictResult as LibConflictResult,
   MultiEntityPayload as LibMultiEntityPayload,
+  LwwUpdatePayload as LibLwwUpdatePayload,
+  LwwUpdateMode,
 } from '@sp/sync-core';
 import type { EntityType as SharedEntityType } from '@sp/shared-schema';
 import { ENTITY_TYPES } from '@sp/shared-schema';
 import {
   createFullStateOpTypeHelpers,
   isMultiEntityPayload as libIsMultiEntityPayload,
+  isLwwUpdatePayload as libIsLwwUpdatePayload,
   OpType,
 } from '@sp/sync-core';
 import { ActionType } from './action-types.enum';
 
 export { OpType, extractActionPayload } from '@sp/sync-core';
-export type { VectorClock };
+export type { VectorClock, LwwUpdateMode };
 export { ENTITY_TYPES, ActionType };
 
 const fullStateOpTypeHelpers = createFullStateOpTypeHelpers<OpType>([
@@ -33,6 +36,20 @@ const fullStateOpTypeHelpers = createFullStateOpTypeHelpers<OpType>([
 
 export const FULL_STATE_OP_TYPES = fullStateOpTypeHelpers.FULL_STATE_OP_TYPES;
 export const isFullStateOpType = fullStateOpTypeHelpers.isFullStateOpType;
+
+/**
+ * Genesis entity types: the MIGRATION (legacy `pf` → op-log) and RECOVERY
+ * (disaster recovery) Batch op that opens a client's log carrying its whole
+ * state. A genesis op is local bookkeeping, not sync history — it replays as a
+ * no-op on every other client, is never counted by `hasSyncedOps()`, and on
+ * API-based providers is never uploaded (#9921). Single source of truth.
+ */
+const GENESIS_ENTITY_TYPES: ReadonlySet<EntityType> = new Set<EntityType>([
+  'MIGRATION',
+  'RECOVERY',
+]);
+export const isGenesisEntityType = (entityType: string): boolean =>
+  GENESIS_ENTITY_TYPES.has(entityType as EntityType);
 
 /**
  * Entity type — Super Productivity's domain set, sourced from `@sp/shared-schema`
@@ -66,6 +83,8 @@ export interface Operation extends Omit<LibOperation, 'actionType' | 'entityType
    * Old operations without this field gracefully show a generic message.
    */
   syncImportReason?: SyncImportReason;
+  /** Server cursor included in a causally accepted automatic repair snapshot. */
+  repairBaseServerSeq?: number;
 }
 
 export interface OperationLogEntry extends Omit<LibOperationLogEntry, 'op'> {
@@ -97,6 +116,10 @@ export interface MultiEntityPayload extends Omit<LibMultiEntityPayload, 'entityC
   entityChanges: EntityChange[];
 }
 
+export interface LwwUpdatePayload extends Omit<LibLwwUpdatePayload, 'entityChanges'> {
+  entityChanges: EntityChange[];
+}
+
 /**
  * SP-narrowed type guard that mirrors `@sp/sync-core`'s `isMultiEntityPayload`
  * but narrows to the app's `MultiEntityPayload` (with the SP entity-type union).
@@ -104,6 +127,9 @@ export interface MultiEntityPayload extends Omit<LibMultiEntityPayload, 'entityC
  */
 export const isMultiEntityPayload = (payload: unknown): payload is MultiEntityPayload =>
   libIsMultiEntityPayload(payload);
+
+export const isLwwUpdatePayload = (payload: unknown): payload is LwwUpdatePayload =>
+  libIsLwwUpdatePayload(payload);
 
 /**
  * Minimal summary of repairs performed, used in REPAIR operation payload.
@@ -125,6 +151,8 @@ export interface RepairSummary {
 export interface RepairPayload {
   appDataComplete: unknown; // AppDataComplete - using unknown to avoid circular deps
   repairSummary: RepairSummary;
+  /** Server cursor at which this repaired snapshot was built. */
+  repairBaseServerSeq?: number;
 }
 
 /**

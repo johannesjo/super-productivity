@@ -30,10 +30,15 @@ class SyncReminderWorker(
             return Result.success()
         }
 
-        val provider = SuperSyncBackgroundProvider()
+        val provider = SuperSyncBackgroundProvider(
+            buildPayloadDecryptor(applicationContext, TAG)
+        )
         var lastSeq = BackgroundSyncCredentialStore.getLastServerSeq(
             applicationContext, credentials.baseUrl
         )
+
+        // Read once per run: the WebView mirrors changes, and a run is short
+        val reminderSettings = BackgroundReminderSettingsStore.get(applicationContext)
 
         Log.d(TAG, "Starting sync check from seq=$lastSeq")
 
@@ -62,10 +67,14 @@ class SyncReminderWorker(
                 totalCancelled++
             }
 
-            // Schedule new reminders
-            for (reminder in result.remindersToSchedule) {
-                scheduleReminderFromSync(applicationContext, reminder)
-                totalScheduled++
+            // Schedule new reminders — unless the user disabled reminders. The
+            // cursor still advances: re-enabling them in the app reschedules
+            // every reminder from its full state, so nothing is lost.
+            if (!reminderSettings.isDisabled) {
+                for (reminder in result.remindersToSchedule) {
+                    scheduleReminderFromSync(applicationContext, reminder, reminderSettings.useAlarmStyle)
+                    totalScheduled++
+                }
             }
 
             // Update sequence cursor.

@@ -63,6 +63,10 @@ const SYNC_WINDOW_FAILSAFE_MS = 2000;
 @Injectable({ providedIn: 'root' })
 export class HydrationStateService implements RemoteApplyWindowPort {
   private _isApplyingRemoteOps = signal(false);
+  private _isHydrationFallbackActive = false;
+  private _isHydrationInProgress = false;
+  private _isDirectApplyActive = false;
+  private _applyingRemoteOpsHoldCount = 0;
   private _isInPostSyncCooldown = signal(false);
   private _isSyncWindowOpen = signal(false);
   private _cooldownTimer: ReturnType<typeof setTimeout> | null = null;
@@ -105,6 +109,41 @@ export class HydrationStateService implements RemoteApplyWindowPort {
   }
 
   /**
+   * #9140: true while this session's boot hydration fell back to an op-log
+   * replay because the on-disk snapshot is intact but unhydratable (failed
+   * migration / reducer rejection). The live store state may then be PARTIAL —
+   * compaction only keeps a retention-window op tail — so writers that derive
+   * a state cache from live state (compaction) MUST skip while this is set:
+   * writing would overwrite the intact snapshot (the last complete local copy)
+   * and prune the very ops the next boot's recovery replays. Set/cleared by
+   * OperationLogHydratorService at the end of each hydration run, so a later
+   * clean run (e.g. plugin reInit after a sync import replaced the cache)
+   * re-enables compaction.
+   */
+  isHydrationFallbackActive(): boolean {
+    return this._isHydrationFallbackActive;
+  }
+
+  setHydrationFallbackActive(isActive: boolean): void {
+    this._isHydrationFallbackActive = isActive;
+  }
+
+  /**
+   * #9084: true for the full duration of OperationLogHydratorService's
+   * hydrateStore() run, covering the gap between the snapshot's loadAllData
+   * dispatch and the tail-op replay on top of it. Compaction must not run in
+   * that gap — see the guard in OperationLogCompactionService._doCompact for
+   * the full reasoning. Set/cleared by the hydrator around each run.
+   */
+  isHydrationInProgress(): boolean {
+    return this._isHydrationInProgress;
+  }
+
+  setHydrationInProgress(isInProgress: boolean): void {
+    this._isHydrationInProgress = isInProgress;
+  }
+
+  /**
    * Marks the start of remote operation application.
    * Called by OperationApplierService before applying operations.
    *
@@ -112,8 +151,8 @@ export class HydrationStateService implements RemoteApplyWindowPort {
    * during this time to prevent superseded vector clocks.
    */
   startApplyingRemoteOps(): void {
-    this._isApplyingRemoteOps.set(true);
-    setIsApplyingRemoteOps(true);
+    this._isDirectApplyActive = true;
+    this._updateApplyingRemoteOpsState();
   }
 
   /**
@@ -123,8 +162,38 @@ export class HydrationStateService implements RemoteApplyWindowPort {
    * Re-enables operation capturing for local operations.
    */
   endApplyingRemoteOps(): void {
-    this._isApplyingRemoteOps.set(false);
-    setIsApplyingRemoteOps(false);
+    this._isDirectApplyActive = false;
+    this._updateApplyingRemoteOpsState();
+  }
+
+  /**
+   * Keeps local persistent actions in the deferred buffer across a wider
+   * critical section that contains a normal replay apply window. Unlike nested
+   * start/end calls, a hold survives the replay coordinator's matching end call.
+   * The returned release function is idempotent.
+   */
+  acquireApplyingRemoteOpsHold(): () => void {
+    this._applyingRemoteOpsHoldCount++;
+    this._updateApplyingRemoteOpsState();
+    let isReleased = false;
+
+    return (): void => {
+      if (isReleased) {
+        return;
+      }
+      isReleased = true;
+      this._applyingRemoteOpsHoldCount = Math.max(
+        0,
+        this._applyingRemoteOpsHoldCount - 1,
+      );
+      this._updateApplyingRemoteOpsState();
+    };
+  }
+
+  private _updateApplyingRemoteOpsState(): void {
+    const isApplying = this._isDirectApplyActive || this._applyingRemoteOpsHoldCount > 0;
+    this._isApplyingRemoteOps.set(isApplying);
+    setIsApplyingRemoteOps(isApplying);
   }
 
   /**

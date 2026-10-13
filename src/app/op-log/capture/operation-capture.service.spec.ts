@@ -84,6 +84,46 @@ describe('OperationCaptureService', () => {
       service.clear();
       expect(service.getPendingCount()).toBe(0);
     });
+
+    it('should expose pending task-time deltas until their write attempt completes', () => {
+      const action = createPersistentAction(
+        '[TimeTracking] Sync time spent',
+        'TASK',
+        'task-1',
+        OpType.Update,
+        { taskId: 'task-1', date: '2024-01-15', duration: 5000 },
+      );
+
+      service.incrementPending(action);
+
+      expect(service.getPendingTaskTimeEntries()).toEqual([
+        { id: 'task-1', date: '2024-01-15', duration: 5000 },
+      ]);
+
+      service.decrementPending(action);
+
+      expect(service.getPendingTaskTimeEntries()).toEqual([]);
+    });
+  });
+
+  describe('unrecovered persist failure flag (#8751)', () => {
+    it('should start unset', () => {
+      expect(service.hasUnrecoveredPersistFailure()).toBeFalse();
+    });
+
+    it('should stay set once marked (sticky until reload)', () => {
+      service.markUnrecoveredPersistFailure();
+      service.markUnrecoveredPersistFailure();
+
+      expect(service.hasUnrecoveredPersistFailure()).toBeTrue();
+    });
+
+    it('should reset via clear()', () => {
+      service.markUnrecoveredPersistFailure();
+      service.clear();
+
+      expect(service.hasUnrecoveredPersistFailure()).toBeFalse();
+    });
   });
 
   describe('extractEntityChanges', () => {
@@ -211,6 +251,9 @@ describe('OperationCaptureService', () => {
       expect(changes[0].entityType).toBe('TASK');
       expect(changes[0].entityId).toBe('task-1');
       expect(changes[0].opType).toBe(OpType.Update);
+      // Pinned wire shape: the delta's ARGUMENTS, not task fields. Released
+      // clients read this as-is; a receiver maps the action type to the fields
+      // it mutates for conflict detection instead (conflict-disjoint-merge.util).
       expect(changes[0].changes).toEqual({
         taskId: 'task-1',
         date: '2024-01-15',

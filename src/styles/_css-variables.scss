@@ -18,11 +18,10 @@
 //
 // Selector contract for theme authors:
 //   Primitives MUST be overridden under `body` (light) or `body.isDarkTheme`
-//   (dark). Declaring a primitive at `:root` only is mode-inconsistent —
-//   `:root` (specificity 0,1,0) beats base `body` (0,0,1) but loses to
-//   `body.isDarkTheme` (0,1,1), so the override silently fails in dark mode.
-//   Semantic aliases live at `:where(body, body.isDarkTheme)` (specificity 0)
-//   so any selector with non-zero specificity wins.
+//   (dark). A `:root` value is inherited, while the base value is declared
+//   directly on `body`; the direct declaration wins before specificity is
+//   considered. Semantic aliases also need a body selector. Their zero-
+//   specificity `:where()` rule lets later body-scoped theme rules win.
 //
 // File layout:
 //   1. `:root` — primitive scales (palette stops, dark/light elevation,
@@ -47,12 +46,39 @@
   // Safe Areas (iOS notch, home indicator)
   // Uses env() for native iOS safe areas
   // -----------------------------
-  --safe-area-top: var(--safe-area-inset-top, env(safe-area-inset-top, 0px));
+  // CapacitorMainActivity.pushStatusBarOverlap measures the top overlap on
+  // API < 35 / WebView < 140. Prefer it over SystemBars' injected 0px, which
+  // otherwise hides the status-bar padding on those devices (#8508 / #8283).
+  // Leave it invalid until native code publishes a measurement: `initial`
+  // enables the var() fallback on other platforms and modern WebViews.
+  --android-status-bar-overlap: initial;
+  --safe-area-top: var(
+    --android-status-bar-overlap,
+    var(--safe-area-inset-top, env(safe-area-inset-top, 0px))
+  );
   --safe-area-bottom: var(--safe-area-inset-bottom, env(safe-area-inset-bottom, 0px));
   --safe-area-left: var(--safe-area-inset-left, env(safe-area-inset-left, 0px));
   --safe-area-right: var(--safe-area-inset-right, env(safe-area-inset-right, 0px));
 
-  // Keyboard height (set dynamically via JS)
+  // Bottom clearance reserved by the mobile bottom nav and everything stacked
+  // above it (scroll content, snackbars). Half the inset by default: iOS's home
+  // indicator is thin and translucent, so a full inset reads as an oversized gap.
+  // Native Android's system bars (3-button / gesture) are opaque and must be
+  // cleared in full or the nav buttons draw under them (#8792) — overridden to
+  // the full inset for native Android in styles.scss. Reads through the shared
+  // --safe-area-bottom (not raw env()) so this tracks the same source as the
+  // header/side-nav/body insets and all bottom-inset UI behaves uniformly across
+  // SystemBars WebView bands. Caveat: on the narrow API >= 35 / WebView < 140
+  // band the shared source can double-count vs SystemBars' native padding (a
+  // cosmetic gap, not an overlap — see the device-matrix risks in
+  // docs/android-edge-to-edge-keyboard.md).
+  --bottom-nav-safe-area: calc(var(--safe-area-bottom) / 2);
+
+  // Keyboard geometry. Android / mobile web write `--keyboard-height` here from
+  // JS (GlobalThemeService). On iOS these are fallbacks only: the live values
+  // go on `.cdk-overlay-container` and the global add-task bar's host, never on
+  // :root, where a write restyles the whole task list (#9779) — see
+  // IosKeyboardService, which also hands the app shell its height directly.
   --keyboard-height: 0px;
   --keyboard-overlay-offset: 0px;
   --visual-viewport-height: 100vh;
@@ -63,6 +89,8 @@
   --s: 8px;
   --s-quarter: 2px;
   --s-half: 4px;
+  // Glyph inside the done toggle and the multi-select ring that replaces it.
+  --done-toggle-glyph-size: 22px;
 
   // -----------------------------
   // Fonts
@@ -123,7 +151,9 @@
   --layout-xl: 2000px;
 
   // Component dimensions
-  --component-max-width: 800px;
+  // Grows with the window so wide desktops don't leave an 800px column
+  // floating in empty canvas; capped so rows never get too long to scan.
+  --component-max-width: clamp(800px, 65vw, 960px);
   // Fluid focus-mode clock diameter — single source of truth for the clock
   // face and the focus-mode-main duration-slider overlay. vmin tracks the
   // smaller viewport dimension (clock is square), capped by vh so squat
@@ -141,9 +171,9 @@
   --mat-mini-fab-size: 48px;
   --mac-title-bar-padding: 20px;
   --vertical-action-bar-width: 48px;
-  // Matches WCO_HEIGHT in electron/main-window.ts. Keep in sync so the
-  // vertical action strip clears the WCO band by exactly this much on
-  // Win/Linux with custom title bar.
+  // Fallback for env(titlebar-area-height), which reports the real WCO band
+  // (WCO_HEIGHT in electron/main-window.ts: 24px Windows, 32px Linux) and is
+  // unset while the overlay is hidden, e.g. in fullscreen.
   --wco-height: 24px;
 
   // Radius scale — use tokens below; legacy aliases kept for existing rules.
@@ -167,9 +197,9 @@
   // NOTE needs to be below the z-index of cdk-overlay which is 1000
   --z-add-task-bar: 999;
   --z-search-bar: 999;
-  --z-onboarding-presets: 999;
   --z-mobile-bottom-nav: 50;
   --z-right-panel: 44;
+  --z-multi-select-bar: 45;
   --z-right-panel-resize-handle: 65;
   --z-right-panel-edge-handle: 66;
   --z-vertical-action-bar: 70;
@@ -257,7 +287,9 @@
   --page-transition-duration: 225ms;
 
   // Transition shorthands
-  --transition-fast: all var(--transition-duration-xs) ease-in-out;
+  // Property-less on purpose: valid both as `transition: var(...)` (defaults
+  // to `all`) and as `transition: opacity var(...)`.
+  --transition-fast: var(--transition-duration-xs) ease-in-out;
   --transition-standard: all var(--transition-duration-m) var(--ani-standard-timing);
   --transition-enter: all var(--transition-duration-m) var(--ani-enter-timing);
   --transition-leave: all var(--transition-duration-m) var(--ani-leave-timing);
@@ -280,10 +312,13 @@
   // Task Component
   // -----------------------------
   --task-first-line-min-height: 40px;
+  // Width of a row's leading control slot (done-toggle, select ring, the repeat
+  // icon on recurring-config rows) — shared so those rows' titles line up.
+  --task-icon-size: 40px;
   --task-icon-default-opacity: 0.7;
   --task-inner-padding-top-bottom: 4px;
   --task-is-done-dim-opacity: 0.3;
-  --task-border-radius: var(--radius-sm);
+  --task-border-radius: 0px;
 
   // Task z-indexes
   --z-drag-handle: 1;
@@ -318,7 +353,9 @@
   // -----------------------------
   --focus-ring-width: 2px;
   --focus-ring-offset: 2px;
-  --focus-ring-color: var(--palette-primary-500);
+  // Fallback for any root-level consumer; body aliases this to the public
+  // `--focus-ring` primitive below.
+  --focus-ring-color: var(--focus-ring, var(--palette-primary-500));
 }
 
 // ===============================
@@ -334,8 +371,8 @@
 //
 //   2. SEMANTIC ALIASES — declared once at `:where(body, body.isDarkTheme)`
 //      (specificity 0,0,0). Category-A semantic tokens whose value is the
-//      same across modes when expressed via primitives. Themes win regardless
-//      of selector choice (`:root`, `body`, `body.isDarkTheme`).
+//      same across modes when expressed via primitives. Body-scoped theme
+//      declarations win without specificity escalation.
 //
 //   3. CATEGORY B — true per-mode tokens whose relationship genuinely differs
 //      between modes (see migration table for rationale). Stay split.
@@ -360,7 +397,9 @@ body {
   // Ink (foreground)
   --ink-strong: rgb(0, 0, 0);
   --ink: rgb(44, 44, 44);
-  --ink-muted: rgba(44, 44, 44, 0.6);
+  // 0.66 remains visibly secondary while meeting WCAG AA against the default
+  // light surfaces (including white cards).
+  --ink-muted: rgba(44, 44, 44, 0.66);
   // RGB triplet (no `rgb()` wrapper) — keystone for `rgba(var(--ink-on-channel), α)` overlays.
   --ink-on-channel: 0, 0, 0;
 
@@ -376,6 +415,10 @@ body {
   // light-mode contrast issue.
   --brand: var(--palette-primary-600);
   --focus-ring: var(--brand);
+  // Must resolve to an opaque solid color: native Android uses this behind
+  // its transparent system bars. `--bg` lets legacy themes participate while
+  // modern themes can override this token directly.
+  --system-surface: var(--bg, #f8f8f7);
 
   // Input fields
   --input-bg: rgba(var(--ink-on-channel), 0.04);
@@ -402,6 +445,7 @@ body.isDarkTheme {
 
   --brand: var(--palette-primary-400);
   --focus-ring: var(--brand);
+  --system-surface: var(--bg, #131314);
 
   // Input fields
   --input-bg: rgba(var(--ink-on-channel), 0.06);
@@ -410,12 +454,17 @@ body.isDarkTheme {
 }
 
 // -----------------------------
-// Layer 2: SEMANTIC ALIASES (zero specificity — themes always win)
+// Layer 2: SEMANTIC ALIASES (zero specificity — body-scoped themes win)
 // -----------------------------
 //
 // `:where()` makes the selector contribute zero specificity (CSS Selectors L4).
-// Any theme override at `body`, `body.isDarkTheme`, or `:root` wins by spec.
+// Later `body` / `body.isDarkTheme` theme rules win. A `:root` declaration is
+// inherited and cannot replace a value declared directly on the body.
 :where(body, body.isDarkTheme) {
+  // Public themes set `--focus-ring`; existing components consume the older
+  // `--focus-ring-color` name.
+  --focus-ring-color: var(--focus-ring);
+
   // Backgrounds (Cat A)
   --bg: var(--surface-1);
   --bg-darker: var(--surface-0);
@@ -426,16 +475,32 @@ body.isDarkTheme {
   // Navigation & panel (Cat A)
   --sidenav-bg: transparent;
   --sidenav-bg-mobile: var(--bg);
-  // 10% ink overlay; replaces the `rgba(255,255,255,1.25)` typo that previously
-  // clamped to opaque white in light mode.
-  --sidenav-item-active-bg: rgba(var(--ink-on-channel), 0.1);
-  --sidenav-active-text: var(--brand);
+  // Keep active labels contrast-safe on every project colour. Brand remains
+  // visible in the non-text selection tint instead of carrying text contrast.
+  --sidenav-item-active-bg: color-mix(in srgb, var(--brand) 18%, transparent);
+  --sidenav-active-text: var(--ink-strong);
   --sidenav-text: var(--text-color-less-intense);
   --sidenav-text-hover: var(--text-color-most-intense);
   --sidenav-text-secondary: var(--text-color-muted);
 
+  // Text/outlined actions sit directly on theme surfaces. Keep a restrained
+  // role-color cue while anchoring arbitrary project palettes in mode-safe ink.
+  // The worst-case black/white palette contrast is guarded by theme-assets.test.
+  --button-primary-label: color-mix(
+    in srgb,
+    var(--palette-primary-500) 18%,
+    var(--ink-strong)
+  );
+  --button-accent-label: color-mix(
+    in srgb,
+    var(--palette-accent-500) 18%,
+    var(--ink-strong)
+  );
+  --button-warn-label: color-mix(in srgb, var(--palette-warn-500) 18%, var(--ink-strong));
+
   --right-panel-bg: transparent;
   --bottom-nav-height: 44px;
+  --bottom-nav-extra-offset: 0px;
   --bottom-nav-bg: var(--sidenav-bg-mobile);
   --bottom-nav-shadow: var(--whiteframe-shadow-2dp);
   --bottom-panel-handle: rgba(var(--ink-on-channel), 0.4);
@@ -445,6 +510,10 @@ body.isDarkTheme {
   --text-color: var(--ink);
   --text-color-muted: var(--ink-muted);
   --text-color-most-intense: var(--ink-strong);
+  // Keep links recognizably branded while anchoring arbitrary project palettes
+  // in mode-safe ink for normal-text contrast.
+  --link-color: color-mix(in srgb, var(--brand) 42%, var(--ink-strong));
+  --task-detail-value-color: var(--text-color-muted);
 
   // Borders / separators / scrim (Cat A)
   --separator-color: var(--separator);
@@ -454,13 +523,25 @@ body.isDarkTheme {
   --notes-container-bg: inherit;
 
   // Task surfaces (Cat A)
-  --task-c-bg: var(--surface-2);
+  // Tasks are flat rows by default: no surface, no box border, hairline
+  // separators, sharp corners. The "classic" theme restores the boxed look by
+  // setting these same tokens, so keep every switch here token-driven.
+  --task-c-bg: transparent;
   --task-c-current-bg: var(--surface-3);
   --task-c-drag-drop-bg: var(--surface-3);
+  --task-border-color: var(--divider-color);
+  --task-border: none;
+  --task-separator: 1px solid var(--separator-color);
+  // Top/bottom edge for rows that draw their own box (planner, boards, issue
+  // panel): the separator when flat, the box border when boxed, so the two
+  // never cancel each other out on the same element.
+  --task-row-edge: var(--task-separator);
+  --task-selected-edge: 3px solid color-mix(in srgb, var(--text-color) 65%, transparent);
+  --task-list-row-gap: 0px;
 
   // Task shadows (Cat A — same in both modes)
   --task-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
-  --task-current-shadow: var(--whiteframe-shadow-4dp);
+  --task-current-shadow: var(--whiteframe-shadow-1dp);
 
   // Chips / progress (Cat A)
   --chip-outline-color: rgba(125, 125, 125, 0.4);
@@ -556,15 +637,19 @@ body {
 
   // Task colors (Cat B)
   --task-c-current-bg: color-mix(in srgb, var(--c-accent) 10%, var(--surface-2));
-  --task-c-selected-bg: var(--selected-task-bg-color);
+  --task-c-selected-bg: var(--state-selected);
+  // Multi-selection reads as a tinted surface — the focus ring is the only
+  // outlined state, so the two never look alike.
+  --task-c-multi-selected-bg: color-mix(in srgb, var(--c-primary) 18%, var(--surface-2));
   --sub-task-c-bg: var(--task-c-bg);
   --sub-task-c-bg-done: var(--task-c-bg);
   --task-c-bg-done: var(--task-c-bg);
   --sub-task-c-bg-in-selected: var(--task-c-bg);
+  --sub-task-border-color: var(--extra-border-color);
 
   // Task shadows (Cat B)
   --task-shadow-sub-task: none;
-  --task-selected-shadow: var(--whiteframe-shadow-3dp);
+  --task-selected-shadow: none;
 
   // Scrollbar colors (Cat B)
   --scrollbar-thumb: rgba(136, 136, 136, 0.4);
@@ -593,11 +678,7 @@ body {
   --hover-controls-border: 1px solid;
   --hover-controls-border-opacity: 0.5;
 
-  // Task detail item (Cat B; `--task-detail-value-color` is broken — out of scope)
-  --task-detail-value-color: rgba(
-    var(--palette-foreground-secondary-text),
-    var(--palette-foreground-secondary-text-alpha, 1)
-  );
+  // Task detail item (Cat B)
   --task-detail-bg: var(--card-bg);
   --task-detail-bg-hover: #eeeeee;
 
@@ -637,15 +718,18 @@ body.isDarkTheme {
 
   // Task colors (Cat B)
   --task-c-current-bg: color-mix(in srgb, var(--c-accent) 18%, var(--surface-3));
-  --task-c-selected-bg: var(--dark6);
-  --sub-task-c-bg: var(--dark4-5);
-  --sub-task-c-bg-done: var(--dark2);
-  --task-c-bg-done: var(--dark1);
-  --sub-task-c-bg-in-selected: var(--dark10);
+  --task-c-selected-bg: var(--state-selected);
+  --task-c-multi-selected-bg: color-mix(in srgb, var(--c-primary) 28%, var(--surface-3));
+  --sub-task-c-bg: var(--task-c-bg);
+  --sub-task-c-bg-done: var(--task-c-bg);
+  --task-c-bg-done: var(--task-c-bg);
+  --sub-task-c-bg-in-selected: var(--task-c-bg);
+  // Dark subtasks separate via a hairline border (like light), not a resting shadow.
+  --sub-task-border-color: var(--extra-border-color);
 
   // Task shadows (Cat B)
-  --task-shadow-sub-task: var(--task-shadow);
-  --task-selected-shadow: var(--whiteframe-shadow-4dp);
+  --task-shadow-sub-task: none;
+  --task-selected-shadow: none;
 
   // Scrollbar colors (Cat B)
   --scrollbar-thumb: rgba(150, 150, 150, 0.3);
@@ -674,8 +758,7 @@ body.isDarkTheme {
   --hover-controls-border: none;
   --hover-controls-border-opacity: 0;
 
-  // Task detail item (Cat B; broken token kept as-is per scope)
-  --task-detail-value-color: rgba(255, 255, 255, 0.7);
+  // Task detail item (Cat B)
   --task-detail-bg: var(--dark8);
   --task-detail-bg-hover: var(--dark12);
 
@@ -693,10 +776,7 @@ body.isDarkTheme {
 }
 
 // -----------------------------
-// State-token demo migrations (this PR — scope per plan §3):
-//   * src/app/features/user-profile/dialog-user-profile-management — `:hover`
-//     overlay + `.active-profile` selected lift now consume `--state-hover` /
-//     `--state-selected`.
+// State-token demo migration (this PR — scope per plan §3):
 //   * src/app/imex/sync/dialog-restore-point — `:hover` overlay + `.selected`
 //     lift now consume `--state-hover` / `--state-selected`.
 // Bulk migration of remaining ~34 ad-hoc rgba state-overlay callsites is a

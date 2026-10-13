@@ -17,6 +17,7 @@ import { getDiffInDays } from '../../util/get-diff-in-days';
 import { selectActiveTaskRepeatCfgs } from '../task-repeat-cfg/store/task-repeat-cfg.selectors';
 import { Log } from '../../core/log';
 import { LayoutService } from '../../core-ui/layout/layout.service';
+import { buildDayWindow } from './util/build-day-window';
 
 @Injectable({
   providedIn: 'root',
@@ -64,35 +65,21 @@ export class PlannerService {
     this._globalTrackingIntervalService.todayDateStr$,
     this.includedWeekDays$,
   ]).pipe(
+    // eslint-disable-next-line local-rules/no-user-content-in-logs -- grandfathered log baseline (2026-09), not yet triaged
     tap(([count, todayStr]) => Log.log('daysToShow$', { count, todayStr })),
-    map(([count, _, includedWeekDays]) => {
-      // Guard against empty includedWeekDays to prevent infinite loop
-      if (includedWeekDays.length === 0) {
-        return [];
-      }
-
-      const today = new Date().getTime();
-      const daysToShow: string[] = [];
-
-      // CRITICAL FIX: Loop until we have the required count of days
-      // (not just iterate N times which produces fewer days if weekends are excluded)
-      let daysAdded = 0;
-      let offset = 0;
-      while (daysAdded < count) {
-        // eslint-disable-next-line no-mixed-operators
-        const dayOfWeek = new Date(today + offset * 24 * 60 * 60 * 1000).getDay();
-        if (includedWeekDays.includes(dayOfWeek)) {
-          daysToShow.push(
-            // eslint-disable-next-line no-mixed-operators
-            this._dateService.todayStr(today + offset * 24 * 60 * 60 * 1000),
-          );
-          daysAdded++;
-        }
-        offset++;
-      }
-
-      return daysToShow;
-    }),
+    map(([count, _, includedWeekDays]) =>
+      buildDayWindow(
+        // Anchor on the logical day, not the raw clock: between calendar
+        // midnight and the configured start-of-next-day the window must still
+        // begin at (logical) today, or the tasks planned for it have no
+        // rendered day at all; ensureDayLoaded below can only extend the
+        // window forward.
+        this._dateService.getLogicalTodayDate(),
+        count,
+        includedWeekDays,
+        (d) => this._dateService.todayStr(d),
+      ),
+    ),
   );
 
   allDueWithTimeTasks$: Observable<TaskWithDueTime[]> = this._store.select(
@@ -100,36 +87,43 @@ export class PlannerService {
   );
 
   // TODO this needs to be more performant
-  days$: Observable<PlannerDay[]> = this.daysToShow$.pipe(
-    switchMap((daysToShow) =>
-      combineLatest([
-        this._store.select(selectActiveTaskRepeatCfgs),
-        this._store.select(selectTodayTaskIds),
-        this._calendarIntegrationService.calendarEvents$,
-        this.allDueWithTimeTasks$,
-        this._globalTrackingIntervalService.todayDateStr$,
-      ]).pipe(
-        switchMap(
-          ([
-            taskRepeatCfgs,
-            todayListTaskIds,
-            calendarEvents,
-            allTasksPlanned,
-            todayStr,
-          ]) =>
-            this._store.select(
-              selectPlannerDays(
-                daysToShow,
-                taskRepeatCfgs,
-                todayListTaskIds,
-                calendarEvents,
-                allTasksPlanned,
-                todayStr,
+  private _selectPlannerDaysFor$(
+    dayDates$: Observable<string[]>,
+  ): Observable<PlannerDay[]> {
+    return dayDates$.pipe(
+      switchMap((daysToShow) =>
+        combineLatest([
+          this._store.select(selectActiveTaskRepeatCfgs),
+          this._store.select(selectTodayTaskIds),
+          this._calendarIntegrationService.calendarEvents$,
+          this.allDueWithTimeTasks$,
+          this._globalTrackingIntervalService.todayDateStr$,
+        ]).pipe(
+          switchMap(
+            ([
+              taskRepeatCfgs,
+              todayListTaskIds,
+              calendarEvents,
+              allTasksPlanned,
+              todayStr,
+            ]) =>
+              this._store.select(
+                selectPlannerDays(
+                  daysToShow,
+                  taskRepeatCfgs,
+                  todayListTaskIds,
+                  calendarEvents,
+                  allTasksPlanned,
+                  todayStr,
+                ),
               ),
-            ),
+          ),
         ),
       ),
-    ),
+    );
+  }
+
+  days$: Observable<PlannerDay[]> = this._selectPlannerDaysFor$(this.daysToShow$).pipe(
     // for better performance
     // TODO better solution, gets called very often
     // tap((val) => Log.log('days$', val)),
@@ -150,7 +144,7 @@ export class PlannerService {
   //   .pipe(shareReplay(1));
 
   getDayOnce$(dayStr: string): Observable<PlannerDay | undefined> {
-    return this.days$.pipe(
+    return this._selectPlannerDaysFor$(of([dayStr])).pipe(
       map((days) => days.find((d) => d.dayDate === dayStr)),
       first(),
     );

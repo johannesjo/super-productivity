@@ -45,6 +45,24 @@
         </button>
       </div>
 
+      @if (nextOccurrenceText(); as nextOccurrenceText) {
+        <div class="next-occurrence">
+          <mat-icon>event_repeat</mat-icon>
+          <span>{{ nextOccurrenceText }}</span>
+        </div>
+      }
+
+      @if (inheritedSubtaskTitles().length) {
+        <div class="inherited-subtasks">
+          {{ T.F.TASK_REPEAT.D_EDIT.INHERITED_SUBTASKS | translate }}
+          <ul>
+            @for (title of inheritedSubtaskTitles(); track $index) {
+              <li>{{ title }}</li>
+            }
+          </ul>
+        </div>
+      }
+
       <formly-form
         (modelChange)="repeatCfg.set($event)"
         [form]="formGroup1()"
@@ -87,7 +105,6 @@
       (click)="close()"
       [attr.aria-label]="T.G.CANCEL | translate"
       class="icon-on-small"
-      color="primary"
       mat-button
       type="button"
     >
@@ -133,7 +150,7 @@
       [attr.aria-describedby]="isWeekdaySelectionInvalid() ? 'weekday-error' : null"
       class="icon-on-small"
       color="primary"
-      mat-raised-button
+      mat-flat-button
       type="submit"
     >
       <mat-icon>save</mat-icon>

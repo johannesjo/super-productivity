@@ -58,8 +58,9 @@ export class SnackCustomComponent implements OnInit, OnDestroy {
     this.snackBarRef.dismissWithAction();
   }
 
-  close(ev?: MouseEvent): void {
+  async close(ev?: MouseEvent): Promise<void> {
     ev?.stopPropagation();
+    await this.data.dismissFn?.();
     this.snackBarRef.dismiss();
   }
 }

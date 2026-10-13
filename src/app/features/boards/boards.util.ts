@@ -1,12 +1,22 @@
 import {
+  BoardDateTimeframeCfg,
   BoardPanelCfg,
   BoardPanelCfgDeadlineState,
   BoardPanelCfgScheduledState,
+  BoardPanelCfgTaskDoneState,
+  BoardPanelCfgTaskTypeFilter,
   BoardSortField,
 } from './boards.model';
 import { TaskCopy } from '../tasks/task.model';
 import { dateStrToUtcDate } from '../../util/date-str-to-utc-date';
-import { sanitizeBoardDateTimeframeCfg } from './board-date-filter.util';
+import {
+  BoardDateTimeframeRange,
+  getBoardTaskDateStr,
+  isDateInBoardRange,
+  resolveBoardDateTimeframeRange,
+  sanitizeBoardDateTimeframeCfg,
+} from './board-date-filter.util';
+import { TODAY_TAG } from '../tag/tag.const';
 
 const VALID_SORT_FIELDS: ReadonlySet<BoardSortField> = new Set([
   'dueDate',
@@ -144,6 +154,13 @@ const NO_OP_COMPARATOR = (): number => 0;
  *   - 'all': strip only the FIRST excluded tag when the task has ALL excluded
  *     tags (breaks the AND-exclude condition without over-removing).
  *
+ * TODAY_TAG is virtual: membership derives from dueDay/dueWithTime and it must
+ * never be written to `task.tagIds` (ARCHITECTURE-DECISIONS #2), so the result
+ * never contains it. Only the INCLUDE side ignores it — dropping it from the
+ * EXCLUDE side would let an AND-exclude fire here that `doesTaskMatchPanel` can
+ * never hit (it only ever sees real tags), stripping a real user tag to satisfy
+ * a filter that was already inert.
+ *
  * Duplicates are not de-duplicated here; callers that care should pass the
  * result through `unique()`.
  */
@@ -154,16 +171,18 @@ export const rewriteTagIdsForPanel = (
     'includedTagIds' | 'includedTagsMatch' | 'excludedTagIds' | 'excludedTagsMatch'
   >,
 ): string[] => {
-  let next: string[] = [...currentTagIds];
+  const includedTagIds = panelCfg.includedTagIds?.filter((id) => id !== TODAY_TAG.id);
+  // Also heals a legacy TODAY_TAG that an older build wrote into the task.
+  let next: string[] = currentTagIds.filter((id) => id !== TODAY_TAG.id);
 
-  if (panelCfg.includedTagIds?.length) {
+  if (includedTagIds?.length) {
     if (panelCfg.includedTagsMatch === 'any') {
-      const hasAny = panelCfg.includedTagIds.some((id) => next.includes(id));
+      const hasAny = includedTagIds.some((id) => next.includes(id));
       if (!hasAny) {
-        next = next.concat(panelCfg.includedTagIds[0]);
+        next = next.concat(includedTagIds[0]);
       }
     } else {
-      next = next.concat(panelCfg.includedTagIds);
+      next = next.concat(includedTagIds);
     }
   }
 
@@ -182,6 +201,164 @@ export const rewriteTagIdsForPanel = (
 
   return next;
 };
+
+/**
+ * Pure membership predicate: does `task` belong in a panel/column with the
+ * given criteria? Companion to `rewriteTagIdsForPanel` (which rewrites a task's
+ * tags TO match) — the two encode the same tag rules and must stay in sync.
+ *
+ * `isInBacklog` is supplied by the caller because backlog membership derives
+ * from project state, not from the task itself. It is only consulted when
+ * `panelCfg.backlogState` requests backlog filtering.
+ */
+export const doesTaskMatchPanel = (
+  task: Readonly<TaskCopy>,
+  panelCfg: Pick<
+    BoardPanelCfg,
+    | 'includedTagIds'
+    | 'includedTagsMatch'
+    | 'excludedTagIds'
+    | 'excludedTagsMatch'
+    | 'isParentTasksOnly'
+    | 'taskDoneState'
+    | 'projectIds'
+    | 'scheduledState'
+    | 'deadlineState'
+    | 'backlogState'
+  >,
+  isInBacklog: (task: Readonly<TaskCopy>) => boolean,
+): boolean => {
+  const taskTagIds = task.tagIds ?? [];
+
+  if (panelCfg.includedTagIds?.length) {
+    const matches =
+      panelCfg.includedTagsMatch === 'any'
+        ? panelCfg.includedTagIds.some((tagId) => taskTagIds.includes(tagId))
+        : panelCfg.includedTagIds.every((tagId) => taskTagIds.includes(tagId));
+    if (!matches) return false;
+  }
+
+  if (panelCfg.excludedTagIds?.length) {
+    const hit =
+      panelCfg.excludedTagsMatch === 'all'
+        ? panelCfg.excludedTagIds.every((tagId) => taskTagIds.includes(tagId))
+        : panelCfg.excludedTagIds.some((tagId) => taskTagIds.includes(tagId));
+    if (hit) return false;
+  }
+
+  if (panelCfg.isParentTasksOnly && task.parentId) {
+    return false;
+  }
+
+  if (panelCfg.taskDoneState === BoardPanelCfgTaskDoneState.Done && !task.isDone) {
+    return false;
+  }
+  if (panelCfg.taskDoneState === BoardPanelCfgTaskDoneState.UnDone && task.isDone) {
+    return false;
+  }
+
+  if (
+    panelCfg.projectIds &&
+    panelCfg.projectIds.length > 0 &&
+    !isAllProjects(panelCfg.projectIds) &&
+    !panelCfg.projectIds.includes(task.projectId)
+  ) {
+    return false;
+  }
+
+  if (
+    panelCfg.scheduledState === BoardPanelCfgScheduledState.Scheduled &&
+    !(task.dueWithTime || task.dueDay)
+  ) {
+    return false;
+  }
+  if (
+    panelCfg.scheduledState === BoardPanelCfgScheduledState.NotScheduled &&
+    (task.dueWithTime || task.dueDay)
+  ) {
+    return false;
+  }
+
+  if (
+    panelCfg.deadlineState === BoardPanelCfgDeadlineState.HasDeadline &&
+    !(task.deadlineWithTime || task.deadlineDay)
+  ) {
+    return false;
+  }
+  if (
+    panelCfg.deadlineState === BoardPanelCfgDeadlineState.NoDeadline &&
+    (task.deadlineWithTime || task.deadlineDay)
+  ) {
+    return false;
+  }
+
+  if (
+    panelCfg.backlogState === BoardPanelCfgTaskTypeFilter.OnlyBacklog &&
+    !isInBacklog(task)
+  ) {
+    return false;
+  }
+  if (
+    panelCfg.backlogState === BoardPanelCfgTaskTypeFilter.NoBacklog &&
+    isInBacklog(task)
+  ) {
+    return false;
+  }
+
+  return true;
+};
+
+export interface BoardPanelTimeframeRanges {
+  /** Absent = no timeframe restriction; null = invalid config, matches nothing. */
+  scheduled?: BoardDateTimeframeRange | null;
+  deadline?: BoardDateTimeframeRange | null;
+}
+
+/**
+ * Resolves a panel's timeframe filters once per filter pass, so the per-task
+ * check in `doesTaskMatchPanelTimeframes` is only string comparisons.
+ */
+export const resolvePanelTimeframeRanges = (
+  panelCfg: Pick<
+    BoardPanelCfg,
+    'scheduledState' | 'scheduledTimeframe' | 'deadlineState' | 'deadlineTimeframe'
+  >,
+  todayStr: string,
+  firstDayOfWeek: number,
+): BoardPanelTimeframeRanges => {
+  const resolve = (
+    timeframe: BoardDateTimeframeCfg | undefined,
+  ): BoardDateTimeframeRange | null | undefined =>
+    timeframe && timeframe.type !== 'all'
+      ? resolveBoardDateTimeframeRange({ timeframe, todayStr, firstDayOfWeek })
+      : undefined;
+
+  return {
+    ...(panelCfg.scheduledState === BoardPanelCfgScheduledState.Scheduled
+      ? { scheduled: resolve(panelCfg.scheduledTimeframe) }
+      : {}),
+    ...(panelCfg.deadlineState === BoardPanelCfgDeadlineState.HasDeadline
+      ? { deadline: resolve(panelCfg.deadlineTimeframe) }
+      : {}),
+  };
+};
+
+/** Companion to `doesTaskMatchPanel` for the date-dependent filters. */
+export const doesTaskMatchPanelTimeframes = (
+  task: Readonly<TaskCopy>,
+  ranges: BoardPanelTimeframeRanges,
+  startOfNextDayDiffMs: number,
+): boolean =>
+  (ranges.scheduled === undefined ||
+    isDateInBoardRange(
+      getBoardTaskDateStr(task.dueDay, task.dueWithTime, startOfNextDayDiffMs),
+      ranges.scheduled,
+    )) &&
+  (ranges.deadline === undefined ||
+    isDateInBoardRange(
+      getBoardTaskDateStr(task.deadlineDay, task.deadlineWithTime, startOfNextDayDiffMs),
+      ranges.deadline,
+    ));
 
 /**
  * Returns an ascending comparator for the given field. Callers multiply by -1

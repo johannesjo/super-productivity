@@ -2,10 +2,12 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  DestroyRef,
   inject,
   signal,
 } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   MAT_DIALOG_DATA,
   MatDialog,
@@ -55,16 +57,15 @@ import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
-import { devError } from '../../../util/dev-error';
 import { IssueLog } from '../../../core/log';
 import { PluginIssueProviderRegistryService } from '../../../plugins/issue-provider/plugin-issue-provider-registry.service';
 import { PluginBridgeService } from '../../../plugins/plugin-bridge.service';
 import { PluginHttpService } from '../../../plugins/issue-provider/plugin-http.service';
 import { OAuthFlowConfig, PluginSyncDirection } from '@super-productivity/plugin-api';
+import { applyPluginOAuthOverrides } from './plugin-oauth-config-overrides.util';
 import { IS_NATIVE_PLATFORM } from '../../../util/is-native-platform';
-import { TrelloAdditionalCfgComponent } from '../providers/trello/trello-view-components/trello_cfg/trello_additional_cfg.component';
+// Trello is now a plugin — board selection is a dynamic `loadOptions` select field
 // ClickUp is now a plugin — no built-in config component needed
-import { NextcloudDeckAdditionalCfgComponent } from '../providers/nextcloud-deck/nextcloud-deck-additional-cfg.component';
 import { TaskService } from '../../tasks/task.service';
 import { firstValueFrom } from 'rxjs';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
@@ -72,6 +73,14 @@ import { ISSUE_PROVIDER_COMMON_FORM_FIELDS } from '../common-issue-form-stuff.co
 import { TagService } from '../../tag/tag.service';
 import { ChipListInputComponent } from '../../../ui/chip-list-input/chip-list-input.component';
 import { unique } from '../../../util/unique';
+import { getErrorTxt } from '../../../util/get-error-text';
+import { mergeIssueProviderModelUpdates } from './issue-provider-model-merge.util';
+import {
+  PLUGIN_OAUTH_TOKEN_KEY_CFG_KEY,
+  shouldScopePluginOAuth,
+} from '../../../plugins/oauth/plugin-oauth-token-key.util';
+
+type OptionsLoadState = 'idle' | 'loading' | 'loaded' | 'empty' | 'failed';
 
 @Component({
   selector: 'dialog-edit-issue-provider',
@@ -92,8 +101,6 @@ import { unique } from '../../../util/unique';
     MatButton,
     MatIcon,
     MatDialogTitle,
-    TrelloAdditionalCfgComponent, // added for custom trello board loading support
-    NextcloudDeckAdditionalCfgComponent,
     ChipListInputComponent,
   ],
   templateUrl: './dialog-edit-issue-provider.component.html',
@@ -113,7 +120,7 @@ export class DialogEditIssueProviderComponent {
   isConnectionWorks = signal(false);
   isOAuthConnected = signal(false);
   isOAuthConnecting = signal(false);
-  optionsLoadState = signal<'idle' | 'loading' | 'loaded' | 'failed'>('idle');
+  optionsLoadState = signal<OptionsLoadState>('idle');
   form = new FormGroup({});
   showLoadOptionsButton = false;
 
@@ -177,9 +184,12 @@ export class DialogEditIssueProviderComponent {
   private _store = inject(Store);
   private _issueService = inject(IssueService);
   private _snackService = inject(SnackService);
+  private _destroyRef = inject(DestroyRef);
   private _taskService = inject(TaskService);
   private _tagService = inject(TagService);
 
+  private _isSubmitSuccessful = false;
+  private _isClosedOrDestroyed = false;
   tagSuggestions = toSignal(this._tagService.tagsNoMyDayAndNoList$, { initialValue: [] });
 
   addTag(id: string): void {
@@ -211,6 +221,20 @@ export class DialogEditIssueProviderComponent {
         getSafeErrorLogMeta(err),
       );
     });
+    const onClose = (): void => {
+      this._isClosedOrDestroyed = true;
+      this._cleanupUnsavedOAuthToken().catch((err) => {
+        IssueLog.err(
+          '[DialogEditIssueProvider] OAuth cleanup failed',
+          getSafeErrorLogMeta(err),
+        );
+      });
+    };
+    this._matDialogRef
+      .beforeClosed()
+      .pipe(takeUntilDestroyed(this._destroyRef))
+      .subscribe(onClose);
+    this._destroyRef.onDestroy(onClose);
   }
 
   submit(isSkipClose = false): void {
@@ -231,6 +255,7 @@ export class DialogEditIssueProviderComponent {
           }),
         );
       }
+      this._isSubmitSuccessful = true;
       if (!isSkipClose) {
         this._matDialogRef.close(this.model);
       }
@@ -254,7 +279,17 @@ export class DialogEditIssueProviderComponent {
   }
 
   formlyModelChange(model: Partial<IssueProvider>): void {
-    this.updateModel(model);
+    // Assign Formly's emitted model by reference. Formly runs in immutable mode
+    // and emits a clone of the full model, short-circuiting its own rebuild only
+    // when it receives that exact reference back (`_modelChangeValue === model`).
+    // Running it through mergeIssueProviderModelUpdates() would create a new
+    // object, defeat that guard, and — because immutable mode re-clones array
+    // field values on every rebuild — spin an infinite
+    // rebuild→patchValue→modelChange loop that freezes the app whenever a
+    // multiSelect field (e.g. "Calendars to display") holds an array value (#8777).
+    // Partial updates from custom cfg components still go through updateModel().
+    this.model = model;
+    this.isConnectionWorks.set(false);
   }
 
   customCfgCmpSave(cfgUpdates: IssueIntegrationCfg): void {
@@ -267,24 +302,7 @@ export class DialogEditIssueProviderComponent {
   }
 
   updateModel(model: Partial<IssueProvider>): void {
-    // NOTE: this currently throws an error when loading issue point stuff for jira
-    try {
-      Object.keys(model).forEach((key) => {
-        if (key !== 'isEnabled') {
-          this.model![key] = model[key];
-        }
-      });
-    } catch (e) {
-      devError(e);
-      const updates: any = {};
-      Object.keys(model).forEach((key) => {
-        if (key !== 'isEnabled') {
-          updates[key] = model[key as keyof IssueProvider];
-        }
-      });
-      this.model = { ...this.model, ...updates };
-    }
-
+    this.model = mergeIssueProviderModelUpdates(this.model, model);
     this.isConnectionWorks.set(false);
   }
 
@@ -300,7 +318,7 @@ export class DialogEditIssueProviderComponent {
           msg: T.F.ISSUE.S.CONNECTION_SUCCESS,
         });
         // Reload dynamic options (e.g. calendar lists) after successful connection
-        await this._loadDynamicOptions();
+        await this._loadAndSetDynamicOptionsState();
       } else {
         this._snackService.open({
           type: 'ERROR',
@@ -309,11 +327,32 @@ export class DialogEditIssueProviderComponent {
       }
     } catch (error) {
       this.isConnectionWorks.set(false);
+      // Two keys, not one with an "Unknown error" placeholder: the else branch
+      // above genuinely has nothing to add, while here there is a real reason to
+      // show (#9635, #9636).
       this._snackService.open({
         type: 'ERROR',
-        msg: T.F.ISSUE.S.CONNECTION_FAILED,
+        msg: T.F.ISSUE.S.CONNECTION_FAILED_WITH_ERROR,
+        translateParams: { errorMsg: this._connectionErrorTxt(error) },
       });
     }
+  }
+
+  /**
+   * The status the user asked for in #9635, minus the request URL Angular bakes
+   * into `HttpErrorResponse.message`. iCal and CalDAV URLs regularly carry a
+   * secret token and are masked on export (`privacy-export.ts`), so they have no
+   * business in a toast that ends up in bug-report screenshots — and the URL is
+   * the one thing the user already knows, having just typed it in this dialog.
+   *
+   * Masked via the error's own `url` rather than by matching Angular's wording,
+   * so a reworded message still can't leak it.
+   */
+  private _connectionErrorTxt(error: unknown): string {
+    const txt = getErrorTxt(error);
+    return error instanceof HttpErrorResponse && error.url
+      ? txt.split(error.url).join('…')
+      : txt;
   }
 
   remove(): void {
@@ -366,9 +405,13 @@ export class DialogEditIssueProviderComponent {
     if (!pluginId) {
       return;
     }
+    const effectiveOAuthConfig = this._withPluginOAuthOverrides(oauthConfig);
+    const tokenKey = shouldScopePluginOAuth(pluginId)
+      ? this._getOAuthTokenKey()
+      : undefined;
     this.isOAuthConnecting.set(true);
     try {
-      await this._pluginBridge.startOAuthFlow(pluginId, oauthConfig);
+      await this._pluginBridge.startOAuthFlow(pluginId, effectiveOAuthConfig, tokenKey);
     } catch (e) {
       const detail = (e instanceof Error ? e.message : String(e))
         .replace(/\s+/g, ' ')
@@ -381,7 +424,13 @@ export class DialogEditIssueProviderComponent {
       });
       return;
     } finally {
-      this.isOAuthConnecting.set(false);
+      if (!this._isClosedOrDestroyed) {
+        this.isOAuthConnecting.set(false);
+      }
+    }
+    if (this._isClosedOrDestroyed) {
+      await this._cleanupUnsavedOAuthToken();
+      return;
     }
     this.isOAuthConnected.set(true);
     this._snackService.open({
@@ -390,7 +439,7 @@ export class DialogEditIssueProviderComponent {
     });
     // _loadDynamicOptions surfaces its own per-field error snacks; failures
     // here must not be reported as OAuth failures (the connection succeeded).
-    await this._loadDynamicOptions();
+    await this._loadAndSetDynamicOptionsState();
   }
 
   async disconnectOAuth(): Promise<void> {
@@ -398,7 +447,10 @@ export class DialogEditIssueProviderComponent {
     if (!pluginId) {
       return;
     }
-    await this._pluginBridge.clearOAuthTokens(pluginId);
+    const tokenKey = shouldScopePluginOAuth(pluginId)
+      ? this._getOAuthTokenKey()
+      : undefined;
+    await this._pluginBridge.clearOAuthToken(pluginId, tokenKey);
     this.isOAuthConnected.set(false);
   }
 
@@ -416,40 +468,45 @@ export class DialogEditIssueProviderComponent {
   }
 
   /**
-   * @returns true if all fields loaded successfully, false if any failed
+   * @returns whether all fields loaded successfully and at least one field has options
    */
-  private async _loadDynamicOptions(): Promise<boolean> {
+  private async _loadDynamicOptions(): Promise<{
+    isSuccess: boolean;
+    hasOptions: boolean;
+  }> {
     const provider = this._pluginRegistry.getProvider(this.issueProviderKey);
     if (!provider) {
-      return false;
+      return { isSuccess: false, hasOptions: false };
     }
     const configFields = this._pluginRegistry.getConfigFields(this.issueProviderKey);
     const dynamicFields = configFields.filter((f) => typeof f.loadOptions === 'function');
     if (!dynamicFields.length) {
-      return true;
+      return { isSuccess: true, hasOptions: true };
     }
 
-    const pluginConfig = (this.model as Record<string, unknown>)['pluginConfig'] ?? {};
+    const pluginConfig = this._getPluginConfigForOAuth();
     const http = this._pluginHttp.createHttpHelper(
-      () => provider.definition.getHeaders(pluginConfig as Record<string, unknown>),
+      () => provider.definition.getHeaders(pluginConfig),
       { allowPrivateNetwork: provider.allowPrivateNetwork },
     );
 
     let anyFailed = false;
+    let hasOptions = false;
     for (const field of dynamicFields) {
       try {
         const options = await field.loadOptions!(
           pluginConfig as Record<string, unknown>,
           http,
         );
+        if (options.length > 0) {
+          hasOptions = true;
+        }
         const formlyField = this._findFormlyField(
           this.fields as FormlyFieldConfig[],
           'pluginConfig.' + field.key,
         );
         if (formlyField?.templateOptions) {
           formlyField.templateOptions.options = options;
-        } else if (formlyField?.props) {
-          formlyField.props.options = options;
         }
       } catch (e) {
         anyFailed = true;
@@ -467,8 +524,6 @@ export class DialogEditIssueProviderComponent {
     }
     // Trigger formly refresh — reassign both fields and model so mat-select
     // re-evaluates display labels for already-selected values.
-    // Use detectChanges() instead of markForCheck() because plugin bridge
-    // async calls may resolve outside Zone.js (e.g. Electron IPC).
     this.fields = [...this.fields];
     const currentPluginCfg = (this.model as Record<string, unknown>)['pluginConfig'];
     this.model = currentPluginCfg
@@ -477,8 +532,46 @@ export class DialogEditIssueProviderComponent {
           pluginConfig: { ...(currentPluginCfg as Record<string, unknown>) },
         }
       : { ...this.model };
+    return { isSuccess: !anyFailed, hasOptions };
+  }
+
+  private async _loadAndSetDynamicOptionsState(): Promise<void> {
+    this._setOptionsLoadState('loading');
+    const result = await this._loadDynamicOptions();
+    this._setOptionsLoadState(
+      result.isSuccess ? (result.hasOptions ? 'loaded' : 'empty') : 'failed',
+    );
+  }
+
+  private _setOptionsLoadState(state: OptionsLoadState): void {
+    this.optionsLoadState.set(state);
+    this._refreshDynamicOptionFieldStates(state);
+    // Use detectChanges() instead of markForCheck() because plugin bridge
+    // async calls may resolve outside Zone.js (e.g. Electron IPC).
     this._cdr.detectChanges();
-    return !anyFailed;
+  }
+
+  private _refreshDynamicOptionFieldStates(state: OptionsLoadState): void {
+    const configFields = this._pluginRegistry.getConfigFields(this.issueProviderKey);
+    const dynamicFields = configFields.filter((f) => typeof f.loadOptions === 'function');
+    for (const field of dynamicFields) {
+      const formlyField = this._findFormlyField(
+        this.fields as FormlyFieldConfig[],
+        'pluginConfig.' + field.key,
+      );
+      if (!formlyField) {
+        continue;
+      }
+      const templateOptions = formlyField.templateOptions;
+      if (!templateOptions) {
+        continue;
+      }
+      const options = templateOptions.options ?? [];
+      const hasOptions = Array.isArray(options) && options.length > 0;
+      const isDisabled = state === 'loading' || state === 'empty' || !hasOptions;
+
+      templateOptions.disabled = isDisabled;
+    }
   }
 
   private _findFormlyField(
@@ -632,6 +725,7 @@ export class DialogEditIssueProviderComponent {
     pattern?: string;
     options?: { value: string; label: string }[];
     showIf?: string;
+    loadOptions?: unknown;
   }): unknown {
     if (f.type === 'link') {
       return {
@@ -662,7 +756,15 @@ export class DialogEditIssueProviderComponent {
         ...(f.description ? { description: f.description } : {}),
         ...(f.type === 'password' ? { type: 'password' } : {}),
         ...(f.type === 'select' || f.type === 'multiSelect'
-          ? { options: f.options }
+          ? {
+              options: f.options,
+              ...(f.loadOptions
+                ? {
+                    disabled: true,
+                    placeholder: T.F.ISSUE.DIALOG.LOAD_OPTIONS_FIRST,
+                  }
+                : {}),
+            }
           : {}),
         ...(f.type === 'multiSelect' ? { multiple: true } : {}),
         ...(f.pattern ? { pattern: f.pattern } : {}),
@@ -734,6 +836,34 @@ export class DialogEditIssueProviderComponent {
     };
   }
 
+  private _getPluginConfigForOAuth(): Record<string, unknown> {
+    const pluginConfig = ((this.model as Record<string, unknown>)['pluginConfig'] ||
+      {}) as Record<string, unknown>;
+    const provider = this._pluginRegistry.getProvider(this.issueProviderKey);
+    const tokenKey =
+      provider && shouldScopePluginOAuth(provider.pluginId)
+        ? this._getOAuthTokenKey()
+        : undefined;
+    return tokenKey
+      ? { ...pluginConfig, [PLUGIN_OAUTH_TOKEN_KEY_CFG_KEY]: tokenKey }
+      : pluginConfig;
+  }
+
+  private _getOAuthTokenKey(): string | undefined {
+    return this.oauthButtons.length ? this.model.id : undefined;
+  }
+
+  private _withPluginOAuthOverrides(oauthConfig: OAuthFlowConfig): OAuthFlowConfig {
+    return applyPluginOAuthOverrides(
+      oauthConfig,
+      ((this.model as Record<string, unknown>)['pluginConfig'] || {}) as Record<
+        string,
+        unknown
+      >,
+      IS_ELECTRON,
+    );
+  }
+
   private _getOAuthButtons(): {
     label: string;
     oauthConfig: OAuthFlowConfig;
@@ -752,12 +882,19 @@ export class DialogEditIssueProviderComponent {
     if (!provider) {
       return;
     }
+    const tokenKey = shouldScopePluginOAuth(provider.pluginId)
+      ? this._getOAuthTokenKey()
+      : undefined;
     const hasTokens = await this._pluginBridge.restoreAndCheckOAuthTokens(
       provider.pluginId,
+      tokenKey,
     );
+    if (this._isClosedOrDestroyed) {
+      return;
+    }
     this.isOAuthConnected.set(hasTokens);
     if (hasTokens) {
-      await this._loadDynamicOptions();
+      await this._loadAndSetDynamicOptionsState();
     } else {
       // For non-OAuth plugins (e.g. CalDAV with Basic Auth), show a "Load Calendars"
       // button and attempt to load dynamic options if credentials are already saved.
@@ -775,10 +912,26 @@ export class DialogEditIssueProviderComponent {
     }
   }
 
+  private async _cleanupUnsavedOAuthToken(): Promise<void> {
+    const provider = this._pluginRegistry.getProvider(this.issueProviderKey);
+    if (
+      this.isEdit ||
+      this._isSubmitSuccessful ||
+      !provider ||
+      !shouldScopePluginOAuth(provider.pluginId)
+    ) {
+      return;
+    }
+    const tokenKey = this._getOAuthTokenKey();
+    if (!tokenKey) {
+      return;
+    }
+    await this._pluginBridge.clearOAuthToken(provider.pluginId, tokenKey);
+    this.isOAuthConnected.set(false);
+  }
+
   async loadDynamicOptions(): Promise<void> {
-    this.optionsLoadState.set('loading');
-    const success = await this._loadDynamicOptions();
-    this.optionsLoadState.set(success ? 'loaded' : 'failed');
+    await this._loadAndSetDynamicOptionsState();
   }
 }
 

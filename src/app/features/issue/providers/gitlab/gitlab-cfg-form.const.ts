@@ -8,7 +8,24 @@ import {
   CROSS_ORIGIN_WARNING,
   ISSUE_PROVIDER_COMMON_FORM_FIELDS,
 } from '../../common-issue-form-stuff.const';
-export const GITLAB_PROJECT_REGEX = /(^[1-9][0-9]*$)|((\/|%2F|\w-?|\.-?)+$)/i;
+// A GitLab project reference is EITHER a numeric project ID OR a namespace-qualified
+// path (`group/project`, subgroups, or the `%2F`-encoded form) — the REST API has no
+// way to resolve a project by a bare slug, so a single-segment name like `test_config`
+// always 404s at poll time (#8665). Require a path separator (`/` or `%2F`) for the
+// non-numeric branch so that mistake gets inline feedback instead. Still permissive
+// about the segment chars (e.g. consecutive hyphens, which GitLab paths allow) to
+// avoid false-rejecting valid paths; the separator lookahead keeps the char class a
+// single unnested quantifier (no catastrophic backtracking).
+//
+// This pattern's `.source` is handed to Formly's `pattern` option, which both feeds
+// Angular's `Validators.pattern` AND is written verbatim to the native `<input pattern>`
+// attribute. Chromium compiles that attribute with the RegExp `v` flag, under which `/`
+// and `-` are reserved inside a character class and MUST be escaped — hence `[\w.%\/\-]`.
+// It must also stay flag-independent (the attribute cannot carry an `i` flag, and a
+// stringified `/…/i` RegExp is not a valid attribute value), so the only case-sensitive
+// literal, the encoded separator, is written explicitly as `%2[Ff]`. Getting this wrong
+// makes Chromium log "Invalid regular expression" on every change-detection cycle (#9034).
+export const GITLAB_PROJECT_REGEX = /^(?:[1-9][0-9]*|(?=.*(?:\/|%2[Ff]))[\w.%\/\-]+)$/;
 
 export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[] = [
   ...CROSS_ORIGIN_WARNING,
@@ -19,7 +36,10 @@ export const GITLAB_CONFIG_FORM: LimitedFormlyFieldConfig<IssueProviderGitlab>[]
       required: true,
       label: T.F.GITLAB.FORM.PROJECT,
       type: 'text',
-      pattern: GITLAB_PROJECT_REGEX,
+      // Pass the source string (not the RegExp object): Formly writes this straight to the
+      // native `<input pattern>` attribute, and a stringified `/…/` RegExp is not a valid
+      // attribute value. See GITLAB_PROJECT_REGEX for the `v`-flag constraints (#9034).
+      pattern: GITLAB_PROJECT_REGEX.source,
       description: T.F.GITLAB.FORM.PROJECT_HINT,
     },
   },

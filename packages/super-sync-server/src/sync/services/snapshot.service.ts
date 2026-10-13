@@ -11,14 +11,17 @@ import { CURRENT_SCHEMA_VERSION } from '@sp/shared-schema';
 import { prisma } from '../../db';
 import { Logger } from '../../logger';
 import { gunzipAsync, gzipAsync } from '../gzip';
-import type { SnapshotResult } from '../sync.types';
+import { CAUSAL_FULL_STATE_OPERATION_WHERE, type SnapshotResult } from '../sync.types';
 import {
   MAX_SNAPSHOT_DECOMPRESSED_BYTES,
   MAX_SNAPSHOT_SIZE_BYTES,
   SnapshotGenerationService,
 } from './snapshot-generation.service';
 
-export { EncryptedOpsNotSupportedError } from '../op-replay';
+export {
+  EncryptedOpsNotSupportedError,
+  LegacyRepairReplayUnsupportedError,
+} from '../op-replay';
 export { MAX_SNAPSHOT_SIZE_BYTES } from './snapshot-generation.service';
 export type { SnapshotResult };
 
@@ -278,8 +281,8 @@ export class SnapshotService {
    * `onCacheDelta` is invoked after the transaction commits with the byte
    * change applied to the `snapshotData` column when the cache was rewritten.
    * Callers should use it to keep the storage usage counter in sync with
-   * on-disk reality — otherwise `GET /snapshot` can grow `snapshotData` by up
-   * to ~MAX_SNAPSHOT_SIZE_BYTES without the counter noticing.
+   * on-disk reality — otherwise the cache can grow `snapshotData` by up to
+   * ~MAX_SNAPSHOT_SIZE_BYTES without the counter noticing.
    *
    * `maxCacheBytes` (B5) caps how large the persisted cache blob may be.
    * When the freshly compressed snapshot would exceed this cap (typically set
@@ -319,17 +322,16 @@ export class SnapshotService {
 
   /**
    * Get available restore points for a user.
-   * Returns significant state-change operations (SYNC_IMPORT, BACKUP_IMPORT, REPAIR)
-   * which represent complete snapshots of the application state.
+   * Returns state-change operations that can be replayed as causal boundaries.
+   * Markerless legacy repairs stay downloadable for old-client compatibility,
+   * but cannot be offered as server-generated restore points.
    */
   async getRestorePoints(userId: number, limit: number = 30): Promise<RestorePoint[]> {
     // Query for full-state operations only
     const ops = await prisma.operation.findMany({
       where: {
         userId,
-        opType: {
-          in: ['SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR'],
-        },
+        ...CAUSAL_FULL_STATE_OPERATION_WHERE,
       },
       orderBy: {
         serverSeq: 'desc',

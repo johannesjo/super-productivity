@@ -63,6 +63,10 @@ type WebdavCredentialsLike = {
   syncFolderPath?: string;
 };
 
+interface WebdavBaseOptions {
+  useCanonicalOcEtag?: boolean;
+}
+
 export abstract class WebdavBaseProvider<
   T extends WebdavProviderId,
   TPrivateCfg extends WebdavCredentialsLike = WebdavPrivateCfg,
@@ -76,7 +80,11 @@ export abstract class WebdavBaseProvider<
   protected readonly _logger: SyncLogger;
   protected readonly _extraPath?: string;
 
-  constructor(deps: WebdavBaseDeps<T, TPrivateCfg>, extraPath?: string) {
+  constructor(
+    deps: WebdavBaseDeps<T, TPrivateCfg>,
+    extraPath?: string,
+    options: WebdavBaseOptions = {},
+  ) {
     this.privateCfg = deps.credentialStore;
     this._logger = deps.logger;
     this._extraPath = extraPath;
@@ -91,6 +99,7 @@ export abstract class WebdavBaseProvider<
       logger: deps.logger,
       getCfg: () => this._cfgOrError(),
       httpAdapter,
+      useCanonicalOcEtag: options.useCanonicalOcEtag,
     });
   }
 
@@ -176,12 +185,6 @@ export abstract class WebdavBaseProvider<
     this._logger.normal(`${this.logLabel}.removeFile()`, { targetPath });
     const { filePath } = await this._getConfigAndPath(targetPath);
     await this._api.remove(filePath);
-  }
-
-  async listFiles(dirPath: string): Promise<string[]> {
-    this._logger.normal(`${this.logLabel}.listFiles()`, { dirPath });
-    const { filePath } = await this._getConfigAndPath(dirPath);
-    return this._api.listFiles(filePath);
   }
 
   protected _getFilePath(targetPath: string, cfg: WebdavPrivateCfg): string {

@@ -12,6 +12,12 @@ import {
 import { nanoid } from 'nanoid';
 import { T } from '../../t.const';
 import { DEFAULT_PANEL_CFG } from './boards.const';
+import { BOARD_TIMEFRAME_MAX_DAYS } from './board-date-filter.util';
+import { getDbDateStr } from '../../util/get-db-date-str';
+
+// The date picker emits Date objects; the synced config stores YYYY-MM-DD.
+const toDbDateStr = (value: unknown): unknown =>
+  value instanceof Date ? getDbDateStr(value) : (value ?? undefined);
 
 const getNewPanel = (): BoardPanelCfg => ({
   ...DEFAULT_PANEL_CFG,
@@ -60,42 +66,52 @@ const buildTimeframeFieldGroup = (
       label: T.F.BOARDS.FORM.TIMEFRAME_DAYS_VALUE,
       type: 'number',
       min: 1,
+      max: BOARD_TIMEFRAME_MAX_DAYS,
       required: true,
     },
   },
   {
     key: 'customDate',
-    type: 'date-btn',
+    type: 'date',
+    parsers: [toDbDateStr],
     expressions: {
       hide: 'model?.type !== "customDate"',
     },
     props: {
       label: T.F.BOARDS.FORM.TIMEFRAME_CUSTOM_DATE_VALUE,
+      required: true,
     },
   },
+  // A range may be open on one side, but not on both.
+  /* eslint-disable @typescript-eslint/naming-convention -- formly expression keys are property paths */
   {
     key: 'customStart',
-    type: 'date-btn',
+    type: 'date',
+    parsers: [toDbDateStr],
     expressions: {
       hide: 'model?.type !== "customRange"',
+      'props.required': '!model?.customEnd',
+      'props.max': 'model?.customEnd',
     },
     props: {
       label: T.F.BOARDS.FORM.TIMEFRAME_CUSTOM_RANGE_START,
-      maxDateKey: 'customEnd',
     },
   },
   {
     key: 'customEnd',
-    type: 'date-btn',
+    type: 'date',
+    parsers: [toDbDateStr],
     expressions: {
       hide: 'model?.type !== "customRange"',
+      'props.required': '!model?.customStart',
+      'props.min': 'model?.customStart',
     },
     props: {
       label: T.F.BOARDS.FORM.TIMEFRAME_CUSTOM_RANGE_END,
-      minDateKey: 'customStart',
     },
   },
 ];
+/* eslint-enable @typescript-eslint/naming-convention */
 
 export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
   {
@@ -247,8 +263,9 @@ export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
         },
         {
           key: 'scheduledTimeframe',
+          // `model` here is the nested timeframe object; the panel is the parent.
           expressions: {
-            hide: `model?.scheduledState !== ${BoardPanelCfgScheduledState.Scheduled}`,
+            hide: `field.parent?.model?.scheduledState !== ${BoardPanelCfgScheduledState.Scheduled}`,
           },
           resetOnHide: true,
           defaultValue: { type: 'all' },
@@ -280,7 +297,7 @@ export const BOARDS_FORM: LimitedFormlyFieldConfig<BoardCfg>[] = [
         {
           key: 'deadlineTimeframe',
           expressions: {
-            hide: `model?.deadlineState !== ${BoardPanelCfgDeadlineState.HasDeadline}`,
+            hide: `field.parent?.model?.deadlineState !== ${BoardPanelCfgDeadlineState.HasDeadline}`,
           },
           resetOnHide: true,
           defaultValue: { type: 'all' },

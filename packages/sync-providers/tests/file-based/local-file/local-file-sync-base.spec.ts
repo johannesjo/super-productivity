@@ -85,10 +85,6 @@ class MockFileAdapter implements FileAdapter {
     this._files.delete(path);
   }
 
-  async listFiles(dirPath: string): Promise<string[]> {
-    return [...this._files.keys()].filter((path) => path.startsWith(dirPath));
-  }
-
   setFile(path: string, content: string): void {
     this._files.set(path, content);
   }
@@ -182,6 +178,25 @@ describe('LocalFileSyncBase', () => {
     expect(fileAdapter.getFile('/test/sync/sync-data.json')).toBe('force content');
   });
 
+  it('rejects a best-effort create when the target already exists', async () => {
+    const fileAdapter = new MockFileAdapter();
+    const provider = new TestableLocalFileSync(fileAdapter);
+    fileAdapter.setFile('/test/sync/sync-data.json', 'other client content');
+
+    await expect(
+      provider.uploadFile('sync-data.json', 'mine', null),
+    ).rejects.toBeInstanceOf(UploadRevToMatchMismatchAPIError);
+    expect(fileAdapter.getFile('/test/sync/sync-data.json')).toBe('other client content');
+  });
+
+  it('rejects when a revision-matched target has disappeared', async () => {
+    const provider = new TestableLocalFileSync(new MockFileAdapter());
+
+    await expect(
+      provider.uploadFile('sync-data.json', 'mine', 'previous-rev'),
+    ).rejects.toBeInstanceOf(UploadRevToMatchMismatchAPIError);
+  });
+
   it('preserves NoRevAPIError identity if hashing returns an empty rev', async () => {
     vi.mocked(md5).mockResolvedValueOnce('');
     const fileAdapter = new MockFileAdapter();
@@ -196,20 +211,6 @@ describe('LocalFileSyncBase', () => {
     const provider = new TestableLocalFileSync(new MockFileAdapter());
 
     await expect(provider.removeFile('nonexistent.json')).resolves.toBeUndefined();
-  });
-
-  it('lists files through the injected file adapter', async () => {
-    const fileAdapter = new MockFileAdapter();
-    const provider = new TestableLocalFileSync(fileAdapter);
-    fileAdapter.setFile('/test/sync/file1.json', 'content1');
-    fileAdapter.setFile('/test/sync/file2.json', 'content2');
-    fileAdapter.setFile('/test/sync/subdir/file3.json', 'content3');
-
-    const files = await provider.listFiles('/');
-
-    expect(files).toContain('/test/sync/file1.json');
-    expect(files).toContain('/test/sync/file2.json');
-    expect(files).toContain('/test/sync/subdir/file3.json');
   });
 
   it('accepts dependency shape used by shims', () => {

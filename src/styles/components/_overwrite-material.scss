@@ -6,23 +6,29 @@
   --mat-dialog-container-max-width: 85vw;
   --mat-menu-item-label-text-size: 14px;
 
-  // Tab contrast improvements - use darker shade for light theme
-  --mat-tab-header-active-label-text-color: var(--palette-primary-700);
-  --mat-tab-header-active-ripple-color: var(--palette-primary-700);
-  --mat-tab-header-active-focus-label-text-color: var(--palette-primary-700);
-  --mat-tab-header-active-hover-label-text-color: var(--palette-primary-700);
-  --mdc-tab-indicator-active-indicator-color: var(--palette-primary-700);
-  --mat-tab-header-inactive-label-text-color: var(--text-color-muted);
   --calendar-hover-bg: color-mix(in srgb, var(--c-primary) 35%, transparent);
 }
 
-// Dark theme tab overrides for better contrast - use lighter shade
+:where(body, body.isDarkTheme) {
+  // Active labels use theme ink so arbitrary project colours cannot reduce
+  // text contrast. Brand stays visible in the indicator and ripple.
+  --mat-tab-header-active-label-text-color: var(--text-color-most-intense);
+  --mat-tab-header-active-ripple-color: var(--brand);
+  --mat-tab-header-active-focus-label-text-color: var(--text-color-most-intense);
+  --mat-tab-header-active-hover-label-text-color: var(--text-color-most-intense);
+  --mdc-tab-indicator-active-indicator-color: var(--brand);
+  --mat-tab-header-inactive-label-text-color: var(--text-color-muted);
+}
+
+// Material's default tab tracking is wider than anything else in the app;
+// match the body text so tabs stop reading as a different typeface. The M2
+// typography mixin emits this token on .mat-mdc-tab-header itself, so a
+// body-level value would lose to it — it has to be set on the same element.
+body .mat-mdc-tab-header {
+  --mat-tab-label-text-tracking: var(--letter-spacing-normal);
+}
+
 body.isDarkTheme {
-  --mat-tab-header-active-label-text-color: var(--palette-primary-300);
-  --mat-tab-header-active-ripple-color: var(--palette-primary-300);
-  --mat-tab-header-active-focus-label-text-color: var(--palette-primary-300);
-  --mat-tab-header-active-hover-label-text-color: var(--palette-primary-300);
-  --mdc-tab-indicator-active-indicator-color: var(--palette-primary-300);
   --calendar-hover-bg: color-mix(in srgb, var(--c-primary) 20%, transparent);
 }
 
@@ -66,7 +72,7 @@ body.isDarkTheme {
 // Native mobile: dialogs need explicit safe-area offsets because they use
 // position:fixed inside a container that spans the full viewport.
 // Connected overlays (menus, selects) are handled via the CDK viewport margin
-// patch in GlobalThemeService._patchCdkViewportForSafeArea().
+// patch in core/theme/cdk-safe-area-viewport.util.ts.
 body.isNativeMobile .cdk-global-overlay-wrapper {
   padding: var(--safe-area-top) var(--safe-area-right) var(--safe-area-bottom)
     var(--safe-area-left);
@@ -230,6 +236,19 @@ body.isNativeMobile .project-complete-fullscreen-dialog {
     box-shadow: 0 0 0 1px var(--input-border-color-focus) !important;
   }
 
+  // Specialized focus treatment for toggle fields:
+  // Remove the border change and enhance the focus ring (outline) instead
+  &:has(mat-slide-toggle) {
+    &.mat-focused .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+      border-color: var(--input-border-color) !important;
+      box-shadow: none !important;
+    }
+    &:has(:focus-visible) .mdc-text-field--filled:not(.mdc-text-field--disabled) {
+      outline: var(--focus-ring-width) solid var(--focus-ring-color);
+      outline-offset: var(--focus-ring-offset);
+    }
+  }
+
   // Error / Invalid state
   &.mat-form-field-invalid .mdc-text-field--filled:not(.mdc-text-field--disabled) {
     border-color: var(--input-border-color-invalid) !important;
@@ -247,29 +266,41 @@ mat-option.isDone {
 
 // BUTTONS
 // -----------
+// Material 2's default 1.25px label tracking makes compact actions feel dated.
+// Use Material's public component tokens so every shared button variant follows
+// the app's restrained typography scale.
+.mat-mdc-button,
+.mat-mdc-unelevated-button,
+.mat-mdc-raised-button,
+.mat-mdc-outlined-button,
+.mat-tonal-button {
+  --mat-button-text-label-text-tracking: var(--letter-spacing-normal);
+  --mat-button-filled-label-text-tracking: var(--letter-spacing-normal);
+  --mat-button-protected-label-text-tracking: var(--letter-spacing-normal);
+  --mat-button-outlined-label-text-tracking: var(--letter-spacing-normal);
+  --mat-button-tonal-label-text-tracking: var(--letter-spacing-normal);
+}
+
 // Ensure proper contrast for text and stroked buttons on standard backgrounds
 // Text buttons use theme colors directly on background, so we need good contrast
 .mat-mdc-button,
 .mat-mdc-outlined-button {
   &[color='primary'] {
-    // Use primary color - validated palettes ensure WCAG AA compliance
-    --mdc-text-button-label-text-color: var(--palette-primary-500);
-    --mdc-outlined-button-label-text-color: var(--palette-primary-500);
-    --mdc-outlined-button-outline-color: var(--palette-primary-500);
+    --mdc-text-button-label-text-color: var(--button-primary-label);
+    --mdc-outlined-button-label-text-color: var(--button-primary-label);
+    --mdc-outlined-button-outline-color: var(--button-primary-label);
   }
 
   &[color='accent'] {
-    // Use accent color - validated palettes ensure WCAG AA compliance
-    --mdc-text-button-label-text-color: var(--palette-accent-500);
-    --mdc-outlined-button-label-text-color: var(--palette-accent-500);
-    --mdc-outlined-button-outline-color: var(--palette-accent-500);
+    --mdc-text-button-label-text-color: var(--button-accent-label);
+    --mdc-outlined-button-label-text-color: var(--button-accent-label);
+    --mdc-outlined-button-outline-color: var(--button-accent-label);
   }
 
   &[color='warn'] {
-    // Use warn color - validated palettes ensure WCAG AA compliance
-    --mdc-text-button-label-text-color: var(--palette-warn-500);
-    --mdc-outlined-button-label-text-color: var(--palette-warn-500);
-    --mdc-outlined-button-outline-color: var(--palette-warn-500);
+    --mdc-text-button-label-text-color: var(--button-warn-label);
+    --mdc-outlined-button-label-text-color: var(--button-warn-label);
+    --mdc-outlined-button-outline-color: var(--button-warn-label);
   }
 }
 
@@ -298,6 +329,17 @@ mat-option.isDone {
 
 .mat-mdc-mini-fab.mat-mdc-mini-fab.mat-mdc-mini-fab {
   --mat-fab-small-state-layer-size: 48px;
+}
+
+// Icon appearance for mini FABs that change emphasis without replacing the
+// focused button. Keep Material's disabled foreground and interaction states.
+// Match the specificity of angular-material-css-vars' primary/accent overrides.
+:root .mat-mdc-mini-fab.mat-mini-fab-icon {
+  --mat-fab-small-foreground-color: var(--text-color);
+  --mat-fab-small-state-layer-color: var(--text-color);
+  // Themes such as Rainbow set FAB shadows with !important.
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .mat-mdc-icon-button.mat-mdc-icon-button.mat-mdc-icon-button {
@@ -438,16 +480,11 @@ body .mat-mdc-button-base .mat-icon {
   cursor: grabbing;
 }
 
-.cdk-drop-list-disabled {
-  border: 4px solid red;
-}
-
 .cdk-drop-list-receiving {
   outline: 1px dashed var(--c-primary);
   border-color: var(--c-primary);
   border-radius: 6px;
   cursor: grabbing;
-  //border: 2px solid green;
 }
 
 // MAT MENU
@@ -457,10 +494,6 @@ body .mat-mdc-button-base .mat-icon {
 
 .mat-mdc-menu-content {
   padding: 0 !important;
-}
-
-.mat-mdc-menu-item.quick-access {
-  border: 1px solid red;
 }
 
 task.cdk-drag-preview .box {
@@ -491,14 +524,16 @@ body.isVerticalActionBar .cdk-overlay-pane.mat-mdc-tooltip-panel {
   }
   body.hasMobileBottomNav mat-snack-bar-container {
     margin-bottom: calc(
-      var(--bottom-nav-height) + env(safe-area-inset-bottom) / 2 + 24px
+      var(--bottom-nav-height) + var(--bottom-nav-safe-area) +
+        var(--bottom-nav-extra-offset) + 24px
     ) !important;
     pointer-events: auto;
     transition: 150ms margin;
   }
   body.hasMobileBottomNav.isAddTaskBarOpen mat-snack-bar-container {
     margin-bottom: calc(
-      var(--bottom-nav-height) + env(safe-area-inset-bottom) / 2 + 48px
+      var(--bottom-nav-height) + var(--bottom-nav-safe-area) +
+        var(--bottom-nav-extra-offset) + 48px
     ) !important;
     pointer-events: auto;
   }
@@ -544,4 +579,30 @@ body.isVerticalActionBar .cdk-overlay-pane.mat-mdc-tooltip-panel {
     > .mat-calendar-body-cell-content:not(.mat-calendar-body-selected) {
     background-color: var(--calendar-hover-bg) !important;
   }
+}
+
+// SLIDE TOGGLE
+// ------------
+.mat-mdc-slide-toggle {
+  // Inherit all unchecked state ripple configurations (both colors and opacities)
+  // for the checked state to ensure they match exactly in color and strength.
+  --mat-slide-toggle-selected-hover-state-layer-color: var(
+    --mat-slide-toggle-unselected-hover-state-layer-color
+  ) !important;
+  --mat-slide-toggle-selected-focus-state-layer-color: var(
+    --mat-slide-toggle-unselected-focus-state-layer-color
+  ) !important;
+  --mat-slide-toggle-selected-pressed-state-layer-color: var(
+    --mat-slide-toggle-unselected-pressed-state-layer-color
+  ) !important;
+
+  --mat-slide-toggle-selected-hover-state-layer-opacity: var(
+    --mat-slide-toggle-unselected-hover-state-layer-opacity
+  ) !important;
+  --mat-slide-toggle-selected-focus-state-layer-opacity: var(
+    --mat-slide-toggle-unselected-focus-state-layer-opacity
+  ) !important;
+  --mat-slide-toggle-selected-pressed-state-layer-opacity: var(
+    --mat-slide-toggle-unselected-pressed-state-layer-opacity
+  ) !important;
 }

@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import {
   MAT_DIALOG_DATA,
+  MatDialog,
   MatDialogActions,
   MatDialogContent,
   MatDialogRef,
@@ -49,6 +50,13 @@ import { selectTimelineConfig } from '../../config/store/global-config.reducer';
 import { getTimeConflictTaskIds } from '../../tasks/util/get-time-conflict-task-ids';
 import { isTaskOutsideWorkHours } from '../../tasks/util/is-task-outside-work-hours';
 import { DateTimePickerComponent } from '../../../ui/datetime-picker/datetime-picker.component';
+import { Observable, of } from 'rxjs';
+import { distinctUntilChanged, map, switchMap } from 'rxjs/operators';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { selectTaskRepeatCfgByIdAllowUndefined } from '../../task-repeat-cfg/store/task-repeat-cfg.selectors';
+import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
+import { getTaskRepeatInfoText } from '../../tasks/task-detail-panel/get-task-repeat-info-text.util';
+import { ExactAlarmHintComponent } from '../../reminder/exact-alarm-hint/exact-alarm-hint.component';
 
 @Component({
   selector: 'dialog-schedule-task',
@@ -60,6 +68,7 @@ import { DateTimePickerComponent } from '../../../ui/datetime-picker/datetime-pi
     MatDialogActions,
     MatDialogContent,
     DateTimePickerComponent,
+    ExactAlarmHintComponent,
   ],
   templateUrl: './dialog-schedule-task.component.html',
   styleUrl: './dialog-schedule-task.component.scss',
@@ -73,12 +82,11 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     isSelectDueOnly?: boolean;
     showQuickAccess?: boolean;
     minDate?: Date | null;
-    maxDate?: Date | null;
     isSubmitOnQuickAccess?: boolean;
-    showTime?: boolean;
-    showReminder?: boolean;
   }>(MAT_DIALOG_DATA);
   private _matDialogRef = inject<MatDialogRef<DialogScheduleTaskComponent>>(MatDialogRef);
+  private _matDialog = inject(MatDialog);
+  private _dateTimeFormatService = inject(DateTimeFormatService);
   private _cd = inject(ChangeDetectorRef);
   private _store = inject(Store);
   private _snackService = inject(SnackService);
@@ -101,11 +109,54 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   );
 
   T: typeof T = T;
+  readonly DO_NOT_REMIND = TaskReminderOptionId.DoNotRemind;
   minDate = this.data.minDate === undefined ? new Date() : this.data.minDate;
-  maxDate = this.data.maxDate === undefined ? null : this.data.maxDate;
 
   remindAvailableOptions: TaskReminderOption[] = TASK_REMINDER_OPTIONS;
   task: TaskCopy | undefined = this.data.task;
+
+  // Recurrence only applies to top-level, non-issue tasks (mirrors the panel's
+  // Repeat row gating). Hidden in select-due-only mode, since that mode IS the
+  // repeat dialog's own start-date picker and a repeat button there is circular.
+  readonly canRepeat =
+    !this.data.isSelectDueOnly &&
+    !!this.data.task &&
+    !this.data.task.parentId &&
+    !this.data.task.issueId;
+
+  // Reactive label for the repeat button. Tracks the live task in the store so it
+  // flips from "does not repeat" to e.g. "Daily" the moment the repeat sub-dialog
+  // saves, without closing this dialog.
+  private _task$: Observable<Task | null> = this.data.task
+    ? this._taskService.getByIdLive$(this.data.task.id)
+    : of(null);
+  // Live task from the store — used to open the repeat dialog with an up-to-date
+  // repeatCfgId (the injected data.task is a frozen snapshot from dialog open).
+  private _liveTask = toSignal(this._task$);
+  readonly repeatCfgLabel = toSignal(
+    this._task$.pipe(
+      map((task) => task?.repeatCfgId ?? null),
+      distinctUntilChanged(),
+      switchMap((repeatCfgId) =>
+        repeatCfgId
+          ? this._store.select(selectTaskRepeatCfgByIdAllowUndefined, { id: repeatCfgId })
+          : of(null),
+      ),
+      map((repeatCfg) => {
+        if (!repeatCfg) {
+          return null;
+        }
+        const [key, params] = getTaskRepeatInfoText(
+          repeatCfg,
+          this._dateTimeFormatService.currentLocale(),
+          this._dateTimeFormatService,
+          this._translateService,
+        );
+        return this._translateService.instant(key, params);
+      }),
+    ),
+    { initialValue: null },
+  );
 
   private _selectedDate = signal<Date | string | null>(null);
   private _selectedTime = signal<string | null>(null);
@@ -117,6 +168,7 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   // private _prevSelectedQuickAccessDate: Date | null = null;
   // private _prevQuickAccessAction: number | null = null;
   private _previewTaskId = '__schedule-preview__';
+  private _repeatCfgCreatedInDialogId: string | null = null;
 
   private _defaultTaskRemindCfgId = computed(
     () =>
@@ -258,6 +310,45 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     this.selectedDate = new Date(newDate);
   }
 
+  async openRepeatDialog(): Promise<void> {
+    // Use the live task, not the frozen dialog snapshot: if a repeat cfg was just
+    // created here, re-opening must route to edit (via its repeatCfgId) instead of
+    // creating a second, orphaning cfg.
+    const task = this._liveTask() ?? this.data.task;
+    if (!task) {
+      return;
+    }
+    // Lazy import to avoid a static schedule-dialog <-> repeat-dialog module cycle,
+    // matching how task.component / add-task-bar open this dialog.
+    const { DialogEditTaskRepeatCfgComponent } =
+      await import('../../task-repeat-cfg/dialog-edit-task-repeat-cfg/dialog-edit-task-repeat-cfg.component');
+    const selectedDate = this.selectedDate;
+    const targetDate = selectedDate
+      ? typeof selectedDate === 'string'
+        ? selectedDate
+        : getDbDateStr(selectedDate)
+      : task.dueDay || getDbDateStr(task.dueWithTime || task.created);
+    this._matDialog
+      .open(DialogEditTaskRepeatCfgComponent, {
+        restoreFocus: true,
+        data: {
+          task,
+          // Only the exact config created inside this still-open schedule dialog
+          // can safely skip the destructive removal warning.
+          isRemoveConfirmationRequired:
+            task.repeatCfgId !== this._repeatCfgCreatedInDialogId,
+          initialStartDate: targetDate,
+          targetDate,
+        },
+      })
+      .afterClosed()
+      .subscribe((createdRepeatCfgId: unknown) => {
+        if (typeof createdRepeatCfgId === 'string') {
+          this._repeatCfgCreatedInDialogId = createdRepeatCfgId;
+        }
+      });
+  }
+
   remove(): void {
     // Only handle remove if task is provided
     if (!this.data.task) {
@@ -265,41 +356,50 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       return;
     }
 
-    if (this.data.task.remindAt) {
-      this._store.dispatch(
-        TaskSharedActions.unscheduleTask({
-          id: this.data.task.id,
-        }),
-      );
-    } else if (this.plannedDayForTask === this._dateService.todayStr()) {
-      // to cover edge cases
-      this._store.dispatch(
-        TaskSharedActions.unscheduleTask({
-          id: this.data.task.id,
-          isSkipToast: true,
-        }),
-      );
+    // apply live task data for snapshot
+    const task = this._liveTask() ?? this.data.task;
+    const { dueDay, dueWithTime, remindAt } = task;
 
-      this._snackService.open({
-        type: 'SUCCESS',
-        msg: T.F.PLANNER.S.REMOVED_PLAN_DATE,
-        translateParams: { taskTitle: truncate(this.data.task.title) },
-      });
-    } else {
-      this._store.dispatch(
-        TaskSharedActions.unscheduleTask({
-          id: this.data.task.id,
-          isSkipToast: true,
-        }),
-      );
+    this._store.dispatch(
+      TaskSharedActions.unscheduleTask({
+        id: task.id,
+        isSkipToast: true,
+      }),
+    );
 
-      this._snackService.open({
-        type: 'SUCCESS',
-        msg: T.F.PLANNER.S.REMOVED_PLAN_DATE,
-        translateParams: { taskTitle: truncate(this.data.task.title) },
-      });
-    }
+    this._snackService.open({
+      type: 'SUCCESS',
+      msg: T.F.PLANNER.S.REMOVED_PLAN_DATE,
+      translateParams: { taskTitle: truncate(task.title) },
+      actionStr: T.G.UNDO,
+      actionFn: () => this._restorePlanDate(task, dueDay, dueWithTime, remindAt),
+    });
     this.close(true);
+  }
+
+  private _restorePlanDate(
+    task: Task,
+    dueDay?: string | null,
+    dueWithTime?: number | null,
+    remindAt?: number | null,
+  ): void {
+    if (dueWithTime) {
+      this._store.dispatch(
+        TaskSharedActions.reScheduleTaskWithTime({
+          task,
+          dueWithTime,
+          remindAt: remindAt ?? undefined,
+          isMoveToBacklog: false,
+        }),
+      );
+    } else if (dueDay) {
+      this._store.dispatch(
+        PlannerActions.planTaskForDay({
+          task,
+          day: dueDay,
+        }),
+      );
+    }
   }
 
   async submit(): Promise<void> {
@@ -363,15 +463,12 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
       this.selectedReminderCfgId === TaskReminderOptionId.DoNotRemind &&
       this.data.task.remindAt !== undefined
     ) {
+      // NOT updateTask({ changes: { remindAt: undefined } }): JSON serialization
+      // drops undefined-valued keys from the op payload, so that clear never
+      // replayed on other devices (#9776). dismissReminderOnly clears remindAt
+      // inside its reducer, which is deterministic on replay.
       this._store.dispatch(
-        TaskSharedActions.updateTask({
-          task: {
-            id: this.data.task.id,
-            changes: {
-              remindAt: undefined,
-            },
-          },
-        }),
+        TaskSharedActions.dismissReminderOnly({ id: this.data.task.id }),
       );
     }
   }
@@ -419,51 +516,33 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   onQuickAccessClick(option: 'today' | 'tomorrow' | 'nextWeek' | 'nextMonth'): void {
     const tDate = new Date();
     tDate.setMinutes(0, 0, 0);
-    let targetDate = new Date(tDate);
 
     switch (option) {
       case 'today':
-        targetDate = new Date(tDate);
+        this.selectedDate = tDate;
         break;
       case 'tomorrow':
-        const tomorrow = new Date(tDate);
+        const tomorrow = tDate;
         tomorrow.setDate(tomorrow.getDate() + 1);
-        targetDate = tomorrow;
+        this.selectedDate = tomorrow;
         break;
       case 'nextWeek':
-        const nextFirstDayOfWeek = new Date(tDate);
+        const nextFirstDayOfWeek = tDate;
         const dayOffset =
           (this._dateAdapter.getFirstDayOfWeek() -
             this._dateAdapter.getDayOfWeek(nextFirstDayOfWeek) +
             7) %
             7 || 7;
         nextFirstDayOfWeek.setDate(nextFirstDayOfWeek.getDate() + dayOffset);
-        targetDate = nextFirstDayOfWeek;
+        this.selectedDate = nextFirstDayOfWeek;
         break;
       case 'nextMonth':
-        const nextMonth = new Date(tDate);
+        const nextMonth = tDate;
         nextMonth.setDate(1);
         nextMonth.setMonth(nextMonth.getMonth() + 1);
-        targetDate = nextMonth;
+        this.selectedDate = nextMonth;
         break;
     }
-
-    const targetDay = new Date(targetDate);
-    targetDay.setHours(0, 0, 0, 0);
-    const minDate = this.minDate;
-    const maxDate = this.maxDate;
-    const minDay = minDate ? new Date(minDate) : null;
-    minDay?.setHours(0, 0, 0, 0);
-    const maxDay = maxDate ? new Date(maxDate) : null;
-    maxDay?.setHours(0, 0, 0, 0);
-
-    if (minDay && minDate && targetDay < minDay) {
-      targetDate = new Date(minDate);
-    }
-    if (maxDay && maxDate && targetDay > maxDay) {
-      targetDate = new Date(maxDate);
-    }
-    this.selectedDate = targetDate;
 
     if (this.data.isSubmitOnQuickAccess !== false) {
       this.submit();

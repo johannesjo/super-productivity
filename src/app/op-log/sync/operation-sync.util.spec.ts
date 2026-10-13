@@ -1,5 +1,6 @@
 import {
   isFileBasedProvider,
+  isFileBasedProviderId,
   isOperationSyncCapable,
   syncOpToOperation,
 } from './operation-sync.util';
@@ -84,6 +85,23 @@ describe('operation-sync utility', () => {
     });
   });
 
+  describe('isFileBasedProviderId', () => {
+    it('agrees with isFileBasedProvider for every SyncProviderId member', () => {
+      const allIds = Object.values(SyncProviderId) as SyncProviderId[];
+      for (const id of allIds) {
+        const provider = { id } as unknown as SyncProviderBase<SyncProviderId>;
+        expect(isFileBasedProviderId(id))
+          .withContext(`isFileBasedProviderId mismatch for SyncProviderId.${id}`)
+          .toBe(isFileBasedProvider(provider));
+      }
+    });
+
+    it('returns true for WebDAV and false for SuperSync', () => {
+      expect(isFileBasedProviderId(SyncProviderId.WebDAV)).toBeTrue();
+      expect(isFileBasedProviderId(SyncProviderId.SuperSync)).toBeFalse();
+    });
+  });
+
   describe('isOperationSyncCapable', () => {
     it('should return true for provider with supportsOperationSync = true', () => {
       const provider = {
@@ -155,6 +173,23 @@ describe('operation-sync utility', () => {
       expect(op.opType).toBe(OpType.Create);
       expect(op.entityType).toBe('TASK');
       expect(op.entityId).toBe('task-456');
+    });
+
+    it('should pass an unknown opType through so the receiver can block at that op (#8764)', () => {
+      const op = syncOpToOperation(
+        createMockSyncOp({ opType: 'FUTURE_OP' as unknown as OpType }),
+      );
+
+      expect(op.opType as string).toBe('FUTURE_OP');
+    });
+
+    it('should still reject a structurally missing opType', () => {
+      expect(() =>
+        syncOpToOperation(createMockSyncOp({ opType: undefined as unknown as OpType })),
+      ).toThrowError(/missing opType/);
+      expect(() =>
+        syncOpToOperation(createMockSyncOp({ opType: '' as unknown as OpType })),
+      ).toThrowError(/missing opType/);
     });
 
     it('should preserve payload', () => {

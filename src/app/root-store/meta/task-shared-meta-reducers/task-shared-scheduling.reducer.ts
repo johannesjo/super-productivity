@@ -9,7 +9,10 @@ import {
 import { Task } from '../../../features/tasks/task.model';
 import { TODAY_TAG } from '../../../features/tag/tag.const';
 import { unique } from '../../../util/unique';
-import { isTodayWithOffset } from '../../../util/is-today.util';
+import {
+  isTodayWithOffset,
+  shouldClearDueTimeForToday,
+} from '../../../util/is-today.util';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { appStateFeatureKey } from '../../app-state/app-state.reducer';
 import { moveItemBeforeItem } from '../../../util/move-item-before-item';
@@ -30,7 +33,7 @@ import { filterOutId } from '../../../util/filter-out-id';
 //
 // IMPORTANT: These handlers implement the dueDay/dueWithTime mutual exclusivity pattern.
 // When setting dueWithTime, dueDay is cleared (set to undefined).
-// See: docs/ai/dueDay-dueWithTime-mutual-exclusivity.md
+// See: ARCHITECTURE-DECISIONS.md Decision #1
 //
 // =============================================================================
 
@@ -77,7 +80,7 @@ const handleScheduleTaskWithTime = (
           dueWithTime,
           // CRITICAL: Mutual exclusivity pattern - setting dueWithTime clears dueDay
           // This prevents state inconsistency where both fields are set with conflicting dates
-          // See: docs/ai/dueDay-dueWithTime-mutual-exclusivity.md
+          // See: ARCHITECTURE-DECISIONS.md Decision #1
           dueDay: undefined,
           remindAt,
         },
@@ -124,9 +127,11 @@ const handleUnScheduleTask = (
   state: RootState,
   taskId: string,
   isLeaveInToday = false,
+  capturedToday?: string,
 ): RootState => {
   // First, update the task entity to clear scheduling data
-  const todayStrForUnschedule = state[appStateFeatureKey]?.todayStr ?? getDbDateStr();
+  const todayStrForUnschedule =
+    capturedToday ?? state[appStateFeatureKey]?.todayStr ?? getDbDateStr();
   const updatedState = {
     ...state,
     [TASK_FEATURE_NAME]: taskAdapter.updateOne(
@@ -233,7 +238,7 @@ const handlePlanTasksForToday = (
     // However, if isClearScheduledTime is true (from reminder dialog), always clear the time
     const shouldClearTime = isClearScheduledTime
       ? !!task?.dueWithTime
-      : task?.dueWithTime && !isTodayWithOffset(task.dueWithTime, today, offsetMs);
+      : shouldClearDueTimeForToday(task?.dueWithTime, today, offsetMs);
 
     return {
       id: taskId,
@@ -332,10 +337,10 @@ const createActionHandlers = (state: RootState, action: Action): ActionHandlerMa
     );
   },
   [TaskSharedActions.unscheduleTask.type]: () => {
-    const { id, isLeaveInToday } = action as ReturnType<
+    const { id, isLeaveInToday, today } = action as ReturnType<
       typeof TaskSharedActions.unscheduleTask
     >;
-    return handleUnScheduleTask(state, id, isLeaveInToday);
+    return handleUnScheduleTask(state, id, isLeaveInToday, today);
   },
   [TaskSharedActions.dismissReminderOnly.type]: () => {
     const { id } = action as ReturnType<typeof TaskSharedActions.dismissReminderOnly>;
@@ -356,6 +361,21 @@ const createActionHandlers = (state: RootState, action: Action): ActionHandlerMa
       today,
       startOfNextDayDiffMs,
       isClearScheduledTime,
+    );
+  },
+  [TaskSharedActions.restoreTask.type]: () => {
+    const { task, restoreToToday } = action as ReturnType<
+      typeof TaskSharedActions.restoreTask
+    >;
+    if (!restoreToToday) {
+      return state;
+    }
+    return handlePlanTasksForToday(
+      state,
+      [task.id],
+      {},
+      restoreToToday.today,
+      restoreToToday.startOfNextDayDiffMs,
     );
   },
   [TaskSharedActions.removeTasksFromTodayTag.type]: () => {

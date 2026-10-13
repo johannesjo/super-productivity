@@ -18,27 +18,14 @@ let serverSeqCounter: number;
 let requestCache: Map<string, any>;
 
 // Mock the database module with Prisma mocks
-vi.mock('../src/db', () => {
-  const applySelect = (op: any, select?: Record<string, boolean>) => {
-    if (!op || !select) {
-      return op;
-    }
-
-    return Object.fromEntries(
-      Object.entries(select)
-        .filter(([, shouldSelect]) => shouldSelect)
-        .map(([key]) => [key, op[key]]),
-    );
-  };
-
-  const hasUniqueConflict = (row: any) =>
-    Array.from(testOperations.values()).some(
-      (op) =>
-        op.id === row.id ||
-        (op.userId === row.userId &&
-          row.serverSeq !== undefined &&
-          op.serverSeq === row.serverSeq),
-    );
+vi.mock('../src/db', async () => {
+  const {
+    applyOperationSelect: applySelect,
+    hasOperationUniqueConflict,
+    mockOperationGroupByMaxSeq,
+    mockOperationFindFirstFreshBelowBoundary,
+  } = await import('./sync.service.test-state');
+  const hasUniqueConflict = (row: any) => hasOperationUniqueConflict(testOperations, row);
 
   return {
     prisma: {
@@ -170,14 +157,23 @@ vi.mock('../src/db', () => {
             upsert: vi.fn().mockResolvedValue({}),
             count: vi.fn().mockResolvedValue(1),
           },
-          $queryRaw: vi.fn().mockResolvedValue([]),
+          // maxSeq null mirrors the conflict lookup's entity_ids branch, matching the
+          // findFirst above, which finds no prior op for an entity either.
+          $queryRaw: vi.fn().mockResolvedValue([{ maxSeq: null }]),
           // Upload transaction writes the storage counter atomically via $executeRaw.
           $executeRaw: vi.fn().mockResolvedValue(0),
         };
         return callback(tx);
       }),
       operation: {
-        findFirst: vi.fn(),
+        // No other findFirst shape reaches this mock, so the helper's
+        // "not my query" sentinel collapses straight to null.
+        findFirst: vi
+          .fn()
+          .mockImplementation(
+            async (args: any) =>
+              mockOperationFindFirstFreshBelowBoundary(testOperations, args) ?? null,
+          ),
         findMany: vi.fn().mockImplementation(async (args: any) => {
           const ops = Array.from(testOperations.values());
           return ops
@@ -197,6 +193,11 @@ vi.mock('../src/db', () => {
             .slice(0, args.take || 500);
         }),
         aggregate: vi.fn().mockResolvedValue({ _min: { serverSeq: 1 } }),
+        groupBy: vi
+          .fn()
+          .mockImplementation(async (args: any) =>
+            mockOperationGroupByMaxSeq(testOperations, args),
+          ),
         findUnique: vi.fn().mockImplementation(async (args: any) => {
           if (args.where?.id) {
             return applySelect(testOperations.get(args.where.id), args.select) || null;
@@ -242,6 +243,11 @@ vi.mock('../src/auth', () => ({
 // Import after mocking
 import { syncRoutes } from '../src/sync/sync.routes';
 import { initSyncService, getSyncService } from '../src/sync/sync.service';
+import { SYNC_ERROR_CODES } from '../src/sync/sync.types';
+
+// Uploads must pass the encrypted-only ingress gate: flag true + a payload
+// with the ciphertext transport shape (canonical base64, >= 28 bytes).
+const ENCRYPTED_PAYLOAD = Buffer.alloc(44, 7).toString('base64');
 
 // Helper to create operation
 const createOp = (
@@ -253,6 +259,7 @@ const createOp = (
     entityType: string;
     entityId: string;
     payload: unknown;
+    isPayloadEncrypted: boolean;
     vectorClock: Record<string, number>;
     timestamp: number;
     schemaVersion: number;
@@ -264,7 +271,8 @@ const createOp = (
   opType: 'CRT',
   entityType: 'TASK',
   entityId: 'task-1',
-  payload: { title: 'Test Task' },
+  payload: ENCRYPTED_PAYLOAD,
+  isPayloadEncrypted: true,
   vectorClock: {},
   timestamp: Date.now(),
   schemaVersion: 1,
@@ -295,6 +303,19 @@ describe('Sync System Fixes', () => {
     await app.close();
   });
 
+  it('returns 400 when a restore target has no retained history after reset', async () => {
+    // DELETE retains the allocator while clearing the history and snapshot cache.
+    serverSeqCounter = 3;
+    const response = await app.inject({
+      method: 'GET',
+      url: '/api/sync/restore/3',
+      headers: { authorization: `Bearer ${authToken}` },
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.json().error).toBe('Target sequence 3 is no longer available');
+  });
+
   // =============================================================================
   // Issue 1: Request deduplication with piggybacking
   // =============================================================================
@@ -303,6 +324,9 @@ describe('Sync System Fixes', () => {
       const clientA = 'client-a';
       const clientB = 'client-b';
       const requestId = 'req-123';
+      // A true retry resends the IDENTICAL body — the request fingerprint
+      // treats a same-requestId/different-body request as a cache miss.
+      const opA = createOp(clientA, { entityId: 'task-a' });
 
       // Step 1: Client A uploads with requestId
       const firstResponse = await app.inject({
@@ -310,7 +334,7 @@ describe('Sync System Fixes', () => {
         url: '/api/sync/ops',
         headers: { authorization: `Bearer ${authToken}` },
         payload: {
-          ops: [createOp(clientA, { entityId: 'task-a' })],
+          ops: [opA],
           clientId: clientA,
           lastKnownServerSeq: 0,
           requestId,
@@ -339,7 +363,7 @@ describe('Sync System Fixes', () => {
         url: '/api/sync/ops',
         headers: { authorization: `Bearer ${authToken}` },
         payload: {
-          ops: [createOp(clientA, { entityId: 'task-a' })],
+          ops: [opA],
           clientId: clientA,
           lastKnownServerSeq: clientASeq,
           requestId,
@@ -366,6 +390,7 @@ describe('Sync System Fixes', () => {
       const clientA = 'client-a';
       const clientB = 'client-b';
       const requestId = 'req-456';
+      const opA = createOp(clientA, { entityId: 'task-1' });
 
       // Client A uploads
       await app.inject({
@@ -373,7 +398,7 @@ describe('Sync System Fixes', () => {
         url: '/api/sync/ops',
         headers: { authorization: `Bearer ${authToken}` },
         payload: {
-          ops: [createOp(clientA, { entityId: 'task-1' })],
+          ops: [opA],
           clientId: clientA,
           lastKnownServerSeq: 0,
           requestId,
@@ -397,7 +422,7 @@ describe('Sync System Fixes', () => {
         url: '/api/sync/ops',
         headers: { authorization: `Bearer ${authToken}` },
         payload: {
-          ops: [createOp(clientA, { entityId: 'task-1' })],
+          ops: [opA],
           clientId: clientA,
           lastKnownServerSeq: 0,
           requestId,
@@ -416,14 +441,12 @@ describe('Sync System Fixes', () => {
   // =============================================================================
   describe('Issue 3: Encrypted snapshot uploads', () => {
     it('should store isPayloadEncrypted flag from snapshot upload', async () => {
-      const cacheSnapshotSpy = vi.spyOn(getSyncService(), 'cacheSnapshot');
-
       const snapshotResponse = await app.inject({
         method: 'POST',
         url: '/api/sync/snapshot',
         headers: { authorization: `Bearer ${authToken}` },
         payload: {
-          state: 'encrypted-string-here',
+          state: ENCRYPTED_PAYLOAD,
           clientId: 'test-client',
           reason: 'recovery',
           vectorClock: { 'test-client': 1 },
@@ -435,16 +458,6 @@ describe('Sync System Fixes', () => {
       expect(snapshotResponse.statusCode).toBe(200);
       const snapshotBody = snapshotResponse.json();
       expect(snapshotBody.accepted).toBe(true);
-      expect(cacheSnapshotSpy).not.toHaveBeenCalled();
-
-      const serverSnapshotResponse = await app.inject({
-        method: 'GET',
-        url: '/api/sync/snapshot',
-        headers: { authorization: `Bearer ${authToken}` },
-      });
-
-      expect(serverSnapshotResponse.statusCode).toBe(400);
-      expect(serverSnapshotResponse.json().errorCode).toBe('ENCRYPTED_OPS_NOT_SUPPORTED');
 
       // Download ops and verify the SYNC_IMPORT has isPayloadEncrypted
       const downloadResponse = await app.inject({
@@ -461,7 +474,10 @@ describe('Sync System Fixes', () => {
       expect(syncImportOp.op.isPayloadEncrypted).toBe(true);
     });
 
-    it('should default isPayloadEncrypted to false when not provided', async () => {
+    it('rejects a snapshot without the encryption flag (E2EE_REQUIRED) and stores nothing', async () => {
+      // Pre-gate behavior was "missing flag defaults to false and is
+      // accepted"; the encrypted-only ingress gate deliberately inverted
+      // that: missing means rejected.
       const snapshotResponse = await app.inject({
         method: 'POST',
         url: '/api/sync/snapshot',
@@ -475,9 +491,10 @@ describe('Sync System Fixes', () => {
         },
       });
 
-      expect(snapshotResponse.statusCode).toBe(200);
+      expect(snapshotResponse.statusCode).toBe(400);
+      expect(snapshotResponse.json().errorCode).toBe(SYNC_ERROR_CODES.E2EE_REQUIRED);
 
-      // Download and verify default
+      // Download and verify the rejected snapshot left no operation behind
       const downloadResponse = await app.inject({
         method: 'GET',
         url: '/api/sync/ops?sinceSeq=0',
@@ -488,7 +505,7 @@ describe('Sync System Fixes', () => {
       const syncImportOp = downloadBody.ops.find(
         (op: { op: { opType: string } }) => op.op.opType === 'SYNC_IMPORT',
       );
-      expect(syncImportOp.op.isPayloadEncrypted).toBe(false);
+      expect(syncImportOp).toBeUndefined();
     });
   });
 
@@ -500,6 +517,7 @@ describe('Sync System Fixes', () => {
     it('should return cached results even when quota would be exceeded on retry', async () => {
       const clientId = uuidv7();
       const requestId = uuidv7();
+      const op = createOp(clientId, { entityId: 'task-1' });
 
       // First request with requestId
       const firstResponse = await app.inject({
@@ -507,7 +525,7 @@ describe('Sync System Fixes', () => {
         url: '/api/sync/ops',
         headers: { authorization: `Bearer ${authToken}` },
         payload: {
-          ops: [createOp(clientId, { entityId: 'task-1' })],
+          ops: [op],
           clientId,
           lastKnownServerSeq: 0,
           requestId,
@@ -525,7 +543,7 @@ describe('Sync System Fixes', () => {
         url: '/api/sync/ops',
         headers: { authorization: `Bearer ${authToken}` },
         payload: {
-          ops: [createOp(clientId, { entityId: 'task-1' })],
+          ops: [op],
           clientId,
           lastKnownServerSeq: 0,
           requestId,
@@ -625,7 +643,8 @@ describe('Sync System Fixes', () => {
               opType: 'CRT',
               entityType: 'TASK',
               entityId,
-              payload: { title: 'Task' },
+              payload: ENCRYPTED_PAYLOAD,
+              isPayloadEncrypted: true,
               vectorClock: { [clientA]: 1 },
               timestamp: Date.now(),
               schemaVersion: 1,

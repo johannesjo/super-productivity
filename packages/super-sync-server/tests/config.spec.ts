@@ -228,43 +228,6 @@ describe('loadConfigFromEnv - CORS_ORIGINS parsing', () => {
   });
 });
 
-describe('loadConfigFromEnv - SuperSync rollout flags', () => {
-  beforeEach(() => {
-    resetEnv();
-  });
-
-  afterEach(() => {
-    resetEnv();
-  });
-
-  it('should keep batch uploads disabled by default', async () => {
-    const { loadConfigFromEnv } = await importConfig();
-    const config = loadConfigFromEnv();
-
-    expect(config.batchUpload).toBe(false);
-  });
-
-  it('should enable batch uploads only after the payload byte backfill completed', async () => {
-    process.env.SUPERSYNC_BATCH_UPLOAD = 'true';
-    process.env.SUPERSYNC_PAYLOAD_BYTES_BACKFILL_COMPLETE = 'true';
-
-    const { loadConfigFromEnv } = await importConfig();
-    const config = loadConfigFromEnv();
-
-    expect(config.batchUpload).toBe(true);
-  });
-
-  it('should reject batch uploads before the payload byte backfill completed', async () => {
-    process.env.SUPERSYNC_BATCH_UPLOAD = 'true';
-
-    const { loadConfigFromEnv } = await importConfig();
-
-    expect(() => loadConfigFromEnv()).toThrow(
-      'SUPERSYNC_BATCH_UPLOAD=true requires SUPERSYNC_PAYLOAD_BYTES_BACKFILL_COMPLETE=true',
-    );
-  });
-});
-
 describe('loadConfigFromEnv - server bind address', () => {
   beforeEach(() => {
     resetEnv();
@@ -333,37 +296,114 @@ describe('DEFAULT_CORS_ORIGINS', () => {
     resetEnv();
   });
 
-  it('should match valid preview deployment URLs', async () => {
+  it('should default to the stable app origin only', async () => {
     const { loadConfigFromEnv } = await importConfig();
     const config = loadConfigFromEnv();
-    const pattern = config.cors.allowedOrigins![1] as RegExp;
 
-    expect(pattern.test('https://f5382282.super-productivity-preview.pages.dev')).toBe(
-      true,
-    );
-    expect(pattern.test('https://abc-123.super-productivity-preview.pages.dev')).toBe(
-      true,
-    );
+    expect(config.cors.allowedOrigins).toEqual(['https://app.super-productivity.com']);
   });
 
-  it('should reject domain confusion attacks', async () => {
+  // Every self-hosted instance inherits this default with `credentials: true`. A pattern
+  // here grants credentialed cross-origin access to infrastructure the operator does not
+  // control, so the default must stay free of wildcards. Preview origins belong in our
+  // own deployment's CORS_ORIGINS. (Wildcard PARSING is still supported and covered by
+  // the parseCorsOrigin tests above — this guards only what ships as the default.)
+  it('should not ship any wildcard or preview origin as a default', async () => {
     const { loadConfigFromEnv } = await importConfig();
     const config = loadConfigFromEnv();
-    const pattern = config.cors.allowedOrigins![1] as RegExp;
 
-    expect(pattern.test('https://evil.com.super-productivity-preview.pages.dev')).toBe(
-      false,
-    );
-    expect(pattern.test('https://a.b.super-productivity-preview.pages.dev')).toBe(false);
+    const origins = config.cors.allowedOrigins!;
+    expect(origins.some((origin) => origin instanceof RegExp)).toBe(false);
+    expect(
+      origins.some(
+        (origin) => typeof origin === 'string' && origin.includes('preview.pages.dev'),
+      ),
+    ).toBe(false);
+  });
+});
+
+describe('loadConfigFromEnv - TRUST_PROXY parsing', () => {
+  beforeEach(() => {
+    resetEnv();
   });
 
-  it('should reject URLs with paths', async () => {
+  afterEach(() => {
+    resetEnv();
+  });
+
+  it('should default to loopback and uniquelocal when TRUST_PROXY is unset', async () => {
+    delete process.env.TRUST_PROXY;
+
+    const { loadConfigFromEnv, SERVER_TRUST_PROXY } = await importConfig();
+    const config = loadConfigFromEnv();
+
+    expect(config.trustProxy).toEqual(['loopback', 'uniquelocal']);
+    expect(config.trustProxy).toEqual(SERVER_TRUST_PROXY);
+  });
+
+  it('should parse a comma-separated list of keywords and address ranges', async () => {
+    process.env.TRUST_PROXY = 'loopback, uniquelocal ,100.64.0.0/10';
+
     const { loadConfigFromEnv } = await importConfig();
     const config = loadConfigFromEnv();
-    const pattern = config.cors.allowedOrigins![1] as RegExp;
 
-    expect(pattern.test('https://abc.super-productivity-preview.pages.dev/path')).toBe(
-      false,
-    );
+    expect(config.trustProxy).toEqual(['loopback', 'uniquelocal', '100.64.0.0/10']);
   });
+
+  it('should accept plain IPv4 and IPv6 addresses and ranges', async () => {
+    process.env.TRUST_PROXY = '10.0.0.5,fd00::/8,::1';
+
+    const { loadConfigFromEnv } = await importConfig();
+    const config = loadConfigFromEnv();
+
+    expect(config.trustProxy).toEqual(['10.0.0.5', 'fd00::/8', '::1']);
+  });
+
+  it('should accept IPv4-mapped IPv6 addresses and ranges', async () => {
+    process.env.TRUST_PROXY = '::ffff:100.64.0.1,::ffff:100.64.0.0/106';
+
+    const { loadConfigFromEnv } = await importConfig();
+    const config = loadConfigFromEnv();
+
+    expect(config.trustProxy).toEqual(['::ffff:100.64.0.1', '::ffff:100.64.0.0/106']);
+  });
+
+  it('should accept an IPv4 range written as a netmask', async () => {
+    process.env.TRUST_PROXY = '10.0.0.0/255.0.0.0';
+
+    const { loadConfigFromEnv } = await importConfig();
+    const config = loadConfigFromEnv();
+
+    expect(config.trustProxy).toEqual(['10.0.0.0/255.0.0.0']);
+  });
+
+  it('should ignore empty entries', async () => {
+    process.env.TRUST_PROXY = ',loopback,,';
+
+    const { loadConfigFromEnv } = await importConfig();
+    const config = loadConfigFromEnv();
+
+    expect(config.trustProxy).toEqual(['loopback']);
+  });
+
+  it('should keep the default when TRUST_PROXY is empty', async () => {
+    process.env.TRUST_PROXY = '';
+
+    const { loadConfigFromEnv, SERVER_TRUST_PROXY } = await importConfig();
+    const config = loadConfigFromEnv();
+
+    expect(config.trustProxy).toEqual(SERVER_TRUST_PROXY);
+  });
+
+  // The hop-count form, the trust-everything form and a stray word all leave
+  // X-Forwarded-For spoofable or unset, so none of them may reach fastify.
+  it.each(['1', 'true', 'loopback,tailscale'])(
+    'should reject TRUST_PROXY=%s',
+    async (value) => {
+      process.env.TRUST_PROXY = value;
+
+      const { loadConfigFromEnv } = await importConfig();
+      expect(() => loadConfigFromEnv()).toThrow(/Invalid TRUST_PROXY/);
+    },
+  );
 });

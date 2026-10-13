@@ -2,13 +2,14 @@ import { inject, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReminderService } from './reminder.service';
 import { MatDialog } from '@angular/material/dialog';
-import { IS_ELECTRON } from '../../app.constants';
+import { IS_ELECTRON, IS_ELECTRON_TOKEN } from '../../app.constants';
 import {
   IS_NATIVE_PLATFORM,
   IS_IOS_NATIVE,
   IS_ANDROID_NATIVE,
 } from '../../util/is-native-platform';
 import {
+  catchError,
   concatMap,
   delay,
   filter,
@@ -25,11 +26,11 @@ import { throttle } from '../../util/decorators';
 import { SyncTriggerService } from '../../imex/sync/sync-trigger.service';
 import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 import { LayoutService } from '../../core-ui/layout/layout.service';
-import { merge, of, timer, interval, firstValueFrom } from 'rxjs';
+import { merge, of, timer, interval, firstValueFrom, Observable, timeout } from 'rxjs';
 import { TaskService } from '../tasks/task.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from 'src/app/t.const';
-import { TaskWithReminderData } from '../tasks/task.model';
+import { TaskWithReminderData, Task } from '../tasks/task.model';
 import { Store } from '@ngrx/store';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { GlobalConfigService } from '../config/global-config.service';
@@ -41,9 +42,15 @@ import {
 import { Log } from '../../core/log';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../android/android-interface';
+import { DateService } from '../../core/date/date.service';
 
 const SNOOZE_10M_MS = 10 * 60 * 1000;
 const SNOOZE_1H_MS = 60 * 60 * 1000;
+// Pre-scheduled reminders for repeatable tasks can fire for a predicted
+// instance before the lazy creation has run (strict sync gate + 1s debounce).
+// The margin covers slow initial syncs; re-queue the done natively instead if
+// this ceiling ever proves too tight.
+const REPEATABLE_DONE_MAX_WAIT_MS = 15000;
 
 @NgModule({
   declarations: [],
@@ -62,6 +69,8 @@ export class ReminderModule {
   private readonly _globalConfigService = inject(GlobalConfigService);
   private readonly _capacitorReminderService = inject(CapacitorReminderService);
   private readonly _syncWrapperService = inject(SyncWrapperService);
+  private readonly _dateService = inject(DateService);
+  private readonly _isElectron = inject(IS_ELECTRON_TOKEN);
 
   constructor() {
     // Initialize reminder service (runs migration in background)
@@ -77,12 +86,23 @@ export class ReminderModule {
         delay(1000),
         concatMap(() =>
           this._reminderService.onRemindersActive$.pipe(
+            // Drop reminders the user dismissed without acting on (backdrop /
+            // Escape / Android back): they are in a short UI cooldown so the
+            // worker (~10s tick) cannot immediately re-open the modal and freeze
+            // the app. The cooldown is in-memory only — a cold start re-nudges.
+            map((reminders) =>
+              (reminders || []).filter((r) => {
+                const remindAt = r.reminderData?.remindAt;
+                return (
+                  remindAt == null ||
+                  !this._reminderService.isReminderUiSuppressed(r.id, remindAt)
+                );
+              }),
+            ),
             // NOTE: we simply filter for open dialogs, as reminders are re-queried quite often
             filter(
               (reminders) =>
-                this._matDialog.openDialogs.length === 0 &&
-                !!reminders &&
-                reminders.length > 0,
+                this._matDialog.openDialogs.length === 0 && reminders.length > 0,
             ),
             // don't show reminders while add task bar is open
             switchMap((reminders: TaskWithReminderData[]) => {
@@ -128,8 +148,11 @@ export class ReminderModule {
           willShowDialog: !IS_ANDROID_NATIVE || overdueReminders.length > 0,
         });
 
-        if (IS_ELECTRON && this._globalConfigService.cfg()?.reminder?.isFocusWindow) {
-          this._uiHelperService.focusApp();
+        if (
+          this._isElectron &&
+          this._globalConfigService.cfg()?.reminder?.isFocusWindow
+        ) {
+          this._uiHelperService.focusAppAfterNotification({ isReminder: true });
         }
 
         this._showNotification(reminders);
@@ -188,7 +211,9 @@ export class ReminderModule {
         } else {
           this._matDialog.open(DialogViewTaskRemindersComponent, {
             restoreFocus: true,
-            disableClose: true,
+            // Backdrop click / Escape closes the dialog. Deadline reminders are
+            // cleared on destroy; scheduled reminders stay active and the worker
+            // re-shows them until the user acts on them.
             data: {
               reminders,
             },
@@ -238,10 +263,44 @@ export class ReminderModule {
       Log.log('ReminderModule: iOS notification actions initialized');
     });
 
-    // Handle notification action events
-    this._capacitorReminderService.action$.subscribe((event: NotificationActionEvent) => {
-      this._handleIOSNotificationAction(event);
-    });
+    // Handle notification action events (gated on the initial data load — see
+    // _handleAfterDataLoaded / #8551).
+    this._handleAfterDataLoaded(
+      this._capacitorReminderService.action$,
+      (event: NotificationActionEvent) => this._handleIOSNotificationAction(event),
+    );
+  }
+
+  /**
+   * Subscribe to a notification-action stream, but defer handling of each event
+   * until the initial data load (and initial sync, mirroring the reminder dialog
+   * gate) has completed.
+   *
+   * On cold start these events are delivered before the NgRx store is hydrated
+   * from persistence. Reading the task that early makes getByIdOnce$() return
+   * undefined, which the done/tap handlers treat as "task already done" and
+   * silently drop the action — so a task marked done from the notification
+   * reappears as not-done on open (#8551).
+   *
+   * We subscribe immediately (rather than gating the subscription itself) so no
+   * event from a non-buffering Subject — e.g. the iOS action$ — is missed while
+   * we wait. concatMap preserves event order and, once data is loaded, lets each
+   * event through without further delay.
+   */
+  private _handleAfterDataLoaded<T>(
+    stream$: Observable<T>,
+    handler: (val: T) => void,
+  ): void {
+    stream$
+      .pipe(
+        concatMap((val) =>
+          this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
+            first(),
+            map(() => val),
+          ),
+        ),
+      )
+      .subscribe(handler);
   }
 
   /**
@@ -253,7 +312,11 @@ export class ReminderModule {
     const taskId = event.extra?.['relatedId'] as string | undefined;
     const reminderType = event.extra?.['reminderType'] as string | undefined;
     if (!taskId) {
-      Log.warn('ReminderModule: No task ID in notification action', event);
+      Log.warn('ReminderModule: No task ID in notification action', {
+        actionId: event.actionId,
+        notificationId: event.notificationId,
+        extraKeys: Object.keys(event.extra ?? {}),
+      });
       return;
     }
 
@@ -272,32 +335,7 @@ export class ReminderModule {
           event.actionId === NOTIFICATION_ACTION.SNOOZE_10M
             ? SNOOZE_10M_MS
             : SNOOZE_1H_MS;
-        const newRemindAt = Date.now() + snoozeMs;
-        if (reminderType === 'DEADLINE') {
-          // setDeadline enforces mutual exclusivity between deadlineDay and
-          // deadlineWithTime — passing both would null the day. Forward only the
-          // more specific field (deadlineWithTime) when present.
-          this._store.dispatch(
-            TaskSharedActions.setDeadline({
-              taskId,
-              ...(typeof task.deadlineWithTime === 'number'
-                ? { deadlineWithTime: task.deadlineWithTime }
-                : task.deadlineDay
-                  ? { deadlineDay: task.deadlineDay }
-                  : {}),
-              deadlineRemindAt: newRemindAt,
-            }),
-          );
-        } else {
-          this._store.dispatch(
-            TaskSharedActions.reScheduleTaskWithTime({
-              task,
-              remindAt: newRemindAt,
-              dueWithTime: task.dueWithTime ?? newRemindAt,
-              isMoveToBacklog: false,
-            }),
-          );
-        }
+        this._dispatchSnooze(task, Date.now() + snoozeMs, reminderType);
         Log.log('ReminderModule: Task snoozed via iOS notification', {
           taskId,
           snoozeMs,
@@ -320,19 +358,24 @@ export class ReminderModule {
       return;
     }
 
-    androidInterface.onReminderTap$.subscribe((taskId: string) => {
-      this._handleTapAction(taskId);
+    // Defer handling until the store is hydrated — see _handleAfterDataLoaded /
+    // #8551. On cold start these queued actions are replayed from ReplaySubjects
+    // the moment we subscribe, which is before persistence has loaded.
+    this._handleAfterDataLoaded(androidInterface.onReminderTap$, (tap) => {
+      if (typeof tap === 'string') {
+        this._handleTapAction(tap);
+      } else {
+        this._handleTapAction(tap.taskId, tap.reminderType);
+      }
     });
 
-    androidInterface.onReminderDone$.subscribe((taskId: string) => {
+    this._handleAfterDataLoaded(androidInterface.onReminderDone$, (taskId: string) => {
       this._handleDoneAction(taskId);
     });
 
-    androidInterface.onReminderSnooze$.subscribe(
-      (event: { taskId: string; newRemindAt: number }) => {
-        this._handleSnoozeAction(event.taskId, event.newRemindAt);
-      },
-    );
+    this._handleAfterDataLoaded(androidInterface.onReminderSnooze$, (event) => {
+      this._handleSnoozeAction(event.taskId, event.newRemindAt, event.reminderType);
+    });
   }
 
   /**
@@ -378,7 +421,7 @@ export class ReminderModule {
       // Continue even if sync fails
     }
 
-    const task = await firstValueFrom(this._taskService.getByIdOnce$(taskId));
+    const task = await this._getDoneActionTask(taskId);
     if (!task || task.isDone) {
       this._snackService.open({
         type: 'SUCCESS',
@@ -395,9 +438,56 @@ export class ReminderModule {
   }
 
   /**
+   * Resolve the task for a Done action, tolerating a pending repeatable
+   * instance.
+   *
+   * Reminders for repeatable tasks are natively pre-scheduled for predicted
+   * instances (`rpt_<cfgId>_<dayStr>`, #7850) before the task entity exists.
+   * The instance is created lazily only after the strict initial-sync gate
+   * plus a 1s debounce (TaskDueEffects#createRepeatableTasksAndAddDueToday$),
+   * so a Done tap on a cold start can beat creation; a one-shot read then
+   * returns undefined and the #8551 guard would drop the done as "already
+   * completed" while the unchecked instance appears right after (#10077).
+   *
+   * Only a predicted id for TODAY can still be created (lazy creation
+   * materializes only the newest occurrence), so the bounded wait applies
+   * exactly to that case. For anything else a missing task is really missing
+   * and we fall through to the #8551 handling — the native done queue is
+   * already cleared, so there is nothing to replay.
+   */
+  private async _getDoneActionTask(taskId: string): Promise<Task | undefined> {
+    const task = await firstValueFrom(this._taskService.getByIdOnce$(taskId));
+    if (task) {
+      return task;
+    }
+
+    // Predicted instance ids have the shape `rpt_<cfgId>_<dayStr>` (getRepeatableTaskId).
+    // todayStr() is deliberately the LOGICAL day: it must match the day
+    // addAllDueToday creates the instance for.
+    const isTodaysPredictedInstance =
+      taskId.startsWith('rpt_') && taskId.endsWith(`_${this._dateService.todayStr()}`);
+    if (!isTodaysPredictedInstance) {
+      return undefined;
+    }
+
+    return await firstValueFrom(
+      this._taskService.getByIdLive$(taskId).pipe(
+        filter((t): t is Task => !!t),
+        take(1),
+        timeout(REPEATABLE_DONE_MAX_WAIT_MS),
+        catchError(() => of(undefined)),
+      ),
+    );
+  }
+
+  /**
    * Handle snooze from Android notification: update NgRx state to match native alarm.
    */
-  private async _handleSnoozeAction(taskId: string, newRemindAt: number): Promise<void> {
+  private async _handleSnoozeAction(
+    taskId: string,
+    newRemindAt: number,
+    reminderType?: string,
+  ): Promise<void> {
     Log.log('ReminderModule: Handling snooze action from Android', {
       taskId,
       newRemindAt,
@@ -412,13 +502,45 @@ export class ReminderModule {
     if (!task || task.isDone) {
       return;
     }
-    this._store.dispatch(
-      TaskSharedActions.reScheduleTaskWithTime({
-        task,
-        remindAt: newRemindAt,
-        dueWithTime: task.dueWithTime ?? newRemindAt,
-        isMoveToBacklog: false,
-      }),
-    );
+    this._dispatchSnooze(task, newRemindAt, reminderType);
+  }
+
+  /**
+   * A deadline snooze moves only the deadline reminder; anything else
+   * reschedules the task's own reminder.
+   */
+  private _dispatchSnooze(task: Task, newRemindAt: number, reminderType?: string): void {
+    if (reminderType === 'DEADLINE') {
+      // Deadline removed meanwhile (e.g. via sync): setDeadline would store an
+      // orphan deadlineRemindAt without a deadline.
+      if (typeof task.deadlineWithTime !== 'number' && !task.deadlineDay) {
+        return;
+      }
+      // setDeadline enforces mutual exclusivity between deadlineDay and
+      // deadlineWithTime — passing both would null the day. Forward only the
+      // more specific field (deadlineWithTime) when present.
+      this._store.dispatch(
+        TaskSharedActions.setDeadline({
+          taskId: task.id,
+          ...(typeof task.deadlineWithTime === 'number'
+            ? { deadlineWithTime: task.deadlineWithTime }
+            : task.deadlineDay
+              ? { deadlineDay: task.deadlineDay }
+              : {}),
+          deadlineRemindAt: newRemindAt,
+          // The deadline itself is unchanged, so "Deadline set" would mislead.
+          isSkipSnack: true,
+        }),
+      );
+    } else {
+      this._store.dispatch(
+        TaskSharedActions.reScheduleTaskWithTime({
+          task,
+          remindAt: newRemindAt,
+          dueWithTime: task.dueWithTime ?? newRemindAt,
+          isMoveToBacklog: false,
+        }),
+      );
+    }
   }
 }

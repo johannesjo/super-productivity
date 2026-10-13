@@ -3,7 +3,7 @@ import { FormlyFieldConfig } from '@ngx-formly/core';
 import { LanguageCode, DateTimeLocale } from '../../core/locale.constants';
 import { SyncProviderId } from '../../op-log/sync-providers/provider.const';
 import { ProjectCfgFormKey } from '../project/project.model';
-import { KeyboardConfig } from './keyboard-config.model';
+import { KeyboardConfig } from '@sp/keyboard-config';
 import { TaskReminderOptionId } from '../tasks/task.model';
 
 export type AppFeaturesConfig = Readonly<{
@@ -18,7 +18,6 @@ export type AppFeaturesConfig = Readonly<{
   isSyncIconEnabled: boolean;
   isSearchEnabled: boolean;
   isDonatePageEnabled: boolean;
-  isEnableUserProfiles: boolean;
   isHabitsEnabled: boolean;
   isFinishDayEnabled: boolean;
 }>;
@@ -27,7 +26,14 @@ export type MiscConfig = Readonly<{
   isConfirmBeforeExit: boolean;
   isConfirmBeforeExitWithoutFinishDay: boolean;
   isMinimizeToTray: boolean;
+  // Legacy: the local REST API switch is device-local now (Electron main's
+  // simple store), because a synced switch started the listener on every
+  // desktop. Nothing reads or writes this anymore; kept optional so synced data
+  // from older clients keeps validating.
   isLocalRestApiEnabled?: boolean;
+  // Desktop-only daily check for a newer GitHub release (#5463). Optional
+  // because it was added later; a missing key means ON (see UpdateCheckService).
+  isCheckForUpdates?: boolean;
   /** @deprecated Legacy hour-only representation. Use `startOfNextDayTime` as canonical source of truth. */
   startOfNextDay: number;
   /** Canonical start-of-next-day value, including minute precision. */
@@ -46,6 +52,12 @@ export type MiscConfig = Readonly<{
   // number: one of DefaultStartPage. string: project id.
   defaultStartPage?: number | string;
   unsplashApiKey?: string | null;
+  // Global wallpaper: shown on pages that don't provide their own background
+  // (Planner, Schedule, Boards, Config, and tags/projects without an image).
+  backgroundImageDark?: string | null;
+  backgroundImageLight?: string | null;
+  backgroundOverlayOpacity?: number;
+  backgroundImageBlur?: number;
 
   // @todo: remove deprecated items in future major releases, after giving users time to migrate
   isConfirmBeforeTaskDelete?: boolean; // Deprecated
@@ -59,6 +71,9 @@ export type MiscConfig = Readonly<{
   overlayIndicatorOpacity?: number; // Deprecated – moved to taskWidget.opacity
 }>;
 
+/** How a task's priority is drawn next to its title. */
+export type TaskPriorityIconPreset = 'chevrons' | 'numbers';
+
 export type TasksConfig = Readonly<{
   isAutoMarkParentAsDone: boolean;
   isAutoAddWorkedOnToToday: boolean;
@@ -67,11 +82,18 @@ export type TasksConfig = Readonly<{
   isMarkdownFormattingInNotesEnabled: boolean;
   defaultProjectId?: string | null | false; // allow 'false' because of #569
   notesTemplate: string;
+  /**
+   * A `TaskPriorityIconPreset`, typed as an opaque string so a preset added by a
+   * newer client does not fail validation (and get reset) on older ones. Optional:
+   * older data lacks it; readers fall back to `'chevrons'` for missing/unknown.
+   */
+  priorityIconPreset?: string;
 }>;
 
 export type ShortSyntaxConfig = Readonly<{
   isEnableProject: boolean;
   isEnableDue: boolean;
+  isEnableDeadline?: boolean;
   isEnableTag: boolean;
   urlBehavior?: 'keep' | 'extract' | 'keep-and-attach';
 }>;
@@ -96,6 +118,7 @@ export type IdleConfig = Readonly<{
   isEnableIdleTimeTracking: boolean;
   minIdleTime: number;
   isOnlyOpenIdleWhenCurrentTask: boolean;
+  isSuppressIdleDuringFocusMode: boolean;
 }>;
 
 export type TakeABreakConfig = Readonly<{
@@ -150,6 +173,11 @@ export interface SuperSyncConfig extends WebDavConfig {
   isEncryptionEnabled?: boolean;
   /** Encryption password (SuperSync-specific, stored in private config) */
   encryptKey?: string | null;
+  // NOTE: the experimental live-tracking-presence opt-in and device name are
+  // intentionally NOT here. They are per-device choices stored in the
+  // provider's private config (`SuperSyncPrivateCfg.isTrackingPresenceEnabled`
+  // / `.deviceName`) so they are never uploaded or shared across devices — see
+  // SyncWrapperService._applyTrackingPresenceGate.
 }
 
 export interface NextcloudConfig {
@@ -201,13 +229,35 @@ export type SoundConfig = Readonly<{
   volume: number;
 }>;
 
+/**
+ * Base64 DER encodings; see sync-core `capture-open.ts` for the format.
+ * `v` is open-ended so typia accepts a future version; clients skip it.
+ */
+export type CaptureKeyConfig = Readonly<{
+  v: number;
+  privateKeyPkcs8: string;
+  publicKeySpki: string;
+}>;
+
 export type SyncConfig = Readonly<{
   isEnabled: boolean;
   isEncryptionEnabled?: boolean;
   isCompressionEnabled?: boolean;
+  /**
+   * Absent: use the remote format, or EMPTY_FOLDER_SYNC_FORMAT (v2) for an empty folder.
+   * false: retain legacy v2 behavior. true: explicitly migrate v2 to v3.
+   * The migration is one-way per sync folder.
+   */
+  isUseSplitSyncFiles?: boolean;
   syncProvider: SyncProviderId | null;
   syncInterval: number;
   isManualSyncOnly?: boolean;
+  /**
+   * Agent task capture key pair (SuperSync). Synced on purpose: every device
+   * opens captures sealed to it. Absent or null means capture is off; null is
+   * what switching off writes, since an absent field does not travel.
+   */
+  captureKey?: CaptureKeyConfig | null;
 
   /* NOTE: view model for form only*/
   encryptKey?: string | null;
@@ -262,7 +312,19 @@ export type DominaModeConfig = Readonly<{
 }>;
 
 export type FocusModeConfig = Readonly<{
+  /**
+   * @deprecated Replaced by the opt-in `isShowPreparation`. The full-screen
+   * preparation countdown is now off by default; pressing start plays a brief
+   * inline rocket launch instead. Kept (still written with its default) so older
+   * clients that require this field keep validating synced config — no longer read.
+   */
   isSkipPreparation: boolean;
+  /**
+   * Opt-in: when true, starting a focus session first shows the full-screen
+   * preparation countdown (the "Get ready" checklist + rocket). Off/absent by
+   * default — the default start plays a quick inline rocket launch and begins.
+   */
+  isShowPreparation?: boolean;
   focusModeSound?: 'off' | 'tick' | 'whiteNoise';
   /** @deprecated Use focusModeSound instead. Kept for backward-compat validation of old data. */
   isPlayTick?: boolean;
@@ -288,6 +350,10 @@ export type TaskWidgetConfig = Readonly<{
   isEnabled?: boolean;
   isAlwaysShow?: boolean;
   opacity?: number;
+}>;
+
+export type FocusModeLocalConfig = Readonly<{
+  isLoopBreakEndAlarm?: boolean;
 }>;
 
 export type ClipboardImagesConfig = Readonly<{
@@ -336,7 +402,10 @@ export type GlobalConfigSectionKey = keyof GlobalConfigState | 'EMPTY';
 // handler. Kept separate from `GlobalConfigSectionKey` so it cannot leak into
 // `updateGlobalConfigSection` action payloads (which would create phantom ops
 // in the sync log).
-export type GlobalConfigFormSectionKey = GlobalConfigSectionKey | 'taskWidget';
+export type GlobalConfigFormSectionKey =
+  | GlobalConfigSectionKey
+  | 'taskWidget'
+  | 'focusModeLocal';
 
 export type GlobalSectionConfig =
   | MiscConfig
@@ -349,14 +418,15 @@ export type GlobalSectionConfig =
   | DailySummaryNote
   | SyncConfig
   | ClipboardImagesConfig
-  | TaskWidgetConfig;
+  | TaskWidgetConfig
+  | FocusModeLocalConfig;
 type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 
 export interface LimitedFormlyFieldConfig<FormModel> extends Omit<
   FormlyFieldConfig,
   'key'
 > {
-  key?: keyof FormModel;
+  key?: keyof FormModel & (string | number);
 }
 
 export type CustomCfgSection =
@@ -368,6 +438,11 @@ export type CustomCfgSection =
 export interface ConfigSectionAction {
   label: string;
   icon?: string;
+  /**
+   * Renders as a full-width row styled like the section's fields (icon, label,
+   * chevron) instead of a button below them — for navigating somewhere else.
+   */
+  isRow?: boolean;
   onClick: () => void | Promise<void>;
 }
 

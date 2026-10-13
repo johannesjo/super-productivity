@@ -21,12 +21,15 @@ import { DateService } from '../../../core/date/date.service';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 import { remindOptionToMilliseconds } from '../../tasks/util/remind-option-to-milliseconds';
 import { TODAY_TAG } from '../../tag/tag.const';
+import { TaskTimeSyncService } from '../../tasks/task-time-sync.service';
 
 describe('TaskRepeatCleanupEffects', () => {
   let effects: TaskRepeatCleanupEffects;
   let store: jasmine.SpyObj<Store>;
   let repeatableTasks$: BehaviorSubject<TaskWithSubTasks[]>;
   let repeatCfgs$: BehaviorSubject<TaskRepeatCfg[]>;
+  let taskTimeSync: jasmine.SpyObj<TaskTimeSyncService>;
+  let startOfNextDayDiffMs: number;
 
   const DAY_MS = 24 * 60 * 60 * 1000;
   const todayMs = new Date().setHours(12, 0, 0, 0);
@@ -52,6 +55,7 @@ describe('TaskRepeatCleanupEffects', () => {
   beforeEach(() => {
     repeatableTasks$ = new BehaviorSubject<TaskWithSubTasks[]>([]);
     repeatCfgs$ = new BehaviorSubject<TaskRepeatCfg[]>([]);
+    startOfNextDayDiffMs = 0;
 
     const storeSpy = jasmine.createSpyObj<Store>('Store', ['select', 'dispatch']);
     storeSpy.select.and.callFake((selector: unknown) =>
@@ -83,6 +87,7 @@ describe('TaskRepeatCleanupEffects', () => {
       'DeletedTaskIssueSidecarService',
       ['set'],
     );
+    taskTimeSync = jasmine.createSpyObj('TaskTimeSyncService', ['clearOne']);
 
     TestBed.configureTestingModule({
       providers: [
@@ -93,7 +98,14 @@ describe('TaskRepeatCleanupEffects', () => {
         { provide: SyncWrapperService, useValue: syncWrapperSpy },
         { provide: HydrationStateService, useValue: hydrationStateSpy },
         { provide: DeletedTaskIssueSidecarService, useValue: sidecarSpy },
-        { provide: DateService, useValue: { todayStr: () => getDbDateStr(todayMs) } },
+        { provide: TaskTimeSyncService, useValue: taskTimeSync },
+        {
+          provide: DateService,
+          useValue: {
+            todayStr: () => getDbDateStr(todayMs),
+            getStartOfNextDayDiffMs: () => startOfNextDayDiffMs,
+          },
+        },
       ],
     });
 
@@ -215,6 +227,62 @@ describe('TaskRepeatCleanupEffects', () => {
 
       // The older instance is removed; the newer one survives.
       expect(getDispatchedDeleteIds()).toEqual(['today-stale']);
+      expect(taskTimeSync.clearOne).toHaveBeenCalledOnceWith('today-stale');
+
+      sub.unsubscribe();
+    }));
+
+    it('includes subtasks when deleting a duplicate parent instance', fakeAsync(() => {
+      const staleSubtask: Task = {
+        ...DEFAULT_TASK,
+        id: 'stale-subtask',
+        parentId: 'today-stale-parent',
+        projectId: 'p1',
+        title: 'Subtask',
+        created: todayMs - 60_000,
+        dueDay: getDbDateStr(todayMs),
+      };
+      const staleParent: TaskWithSubTasks = {
+        ...DEFAULT_TASK,
+        id: 'today-stale-parent',
+        projectId: 'p1',
+        title: 'Duplicate',
+        repeatCfgId: 'cfg-with-subtask',
+        created: todayMs - 60_000,
+        dueDay: getDbDateStr(todayMs),
+        subTaskIds: [staleSubtask.id],
+        subTasks: [staleSubtask],
+      };
+      const newestParent = wrapWithSubTasks({
+        ...DEFAULT_TASK,
+        id: 'today-newest-parent',
+        projectId: 'p1',
+        title: 'Duplicate',
+        repeatCfgId: 'cfg-with-subtask',
+        created: todayMs,
+        dueDay: getDbDateStr(todayMs),
+      });
+      repeatableTasks$.next([staleParent, newestParent]);
+
+      const sub = effects.cleanupDuplicateRepeatInstances$.subscribe();
+      tick(3001);
+
+      const deleteAction = store.dispatch.calls
+        .allArgs()
+        .map(
+          ([action]) =>
+            action as unknown as ReturnType<typeof TaskSharedActions.deleteTasks>,
+        )
+        .find((action) => action.type === TaskSharedActions.deleteTasks.type);
+      expect(deleteAction?.taskIds).toEqual(['today-stale-parent']);
+      expect(deleteAction?.tasks?.map(({ id }) => id)).toEqual([
+        'today-stale-parent',
+        'stale-subtask',
+      ]);
+      expect(taskTimeSync.clearOne.calls.allArgs()).toEqual([
+        ['today-stale-parent'],
+        ['stale-subtask'],
+      ]);
 
       sub.unsubscribe();
     }));
@@ -339,6 +407,190 @@ describe('TaskRepeatCleanupEffects', () => {
       tick(3001);
 
       expect(getDispatchedDeleteIds()).toEqual(['timed-template-yesterday']);
+
+      sub.unsubscribe();
+    }));
+
+    it('deletes late-night overdue instances placed after the day boundary (#3378)', fakeAsync(() => {
+      startOfNextDayDiffMs = 5 * 60 * 60 * 1000;
+      repeatCfgs$.next([
+        skipOverdueCfg('cfg-late-night', '', {
+          title: 'Make the bed',
+          startTime: '02:00',
+          remindAt: TaskReminderOptionId.AtStart,
+        }),
+      ]);
+      const lateNightInstance = (id: string, logicalDayMs: number): Task => {
+        const dueWithTime = getDateTimeFromClockString('02:00', logicalDayMs + DAY_MS);
+        return {
+          ...DEFAULT_TASK,
+          projectId: 'p1',
+          id,
+          title: 'Make the bed',
+          repeatCfgId: 'cfg-late-night',
+          created: logicalDayMs,
+          dueDay: undefined,
+          dueWithTime,
+          remindAt: dueWithTime,
+          isDone: false,
+          timeSpent: 0,
+        };
+      };
+      // created for logical yesterday -> due today 02:00, still logical yesterday
+      const yesterdayInstance = lateNightInstance('late-night-yesterday', yesterdayMs);
+      // written by a client without #3378: due on the calendar day itself
+      const legacyInstance: Task = {
+        ...lateNightInstance('late-night-legacy', yesterdayMs - DAY_MS),
+        dueWithTime: getDateTimeFromClockString('02:00', yesterdayMs),
+        remindAt: getDateTimeFromClockString('02:00', yesterdayMs),
+      };
+      const todayInstance = lateNightInstance('late-night-today', todayMs);
+
+      repeatableTasks$.next([
+        wrapWithSubTasks(legacyInstance),
+        wrapWithSubTasks(yesterdayInstance),
+        wrapWithSubTasks(todayInstance),
+      ]);
+
+      const sub = effects.cleanupDuplicateRepeatInstances$.subscribe();
+      tick(3001);
+
+      expect(getDispatchedDeleteIds().sort()).toEqual([
+        'late-night-legacy',
+        'late-night-yesterday',
+      ]);
+
+      sub.unsubscribe();
+    }));
+
+    it('deletes timed overdue instances whose reminder was cleared or snoozed', fakeAsync(() => {
+      // remindAt is app-managed: firing + dismissing clears it, snoozing rewrites
+      // it to a new time. Neither is a user edit, so both must still be reaped.
+      const weekMs = 7 * DAY_MS;
+      const lastWeekMs = todayMs - weekMs;
+      const twoDaysAgoMs = yesterdayMs - DAY_MS;
+      const oneHourMs = 60 * 60 * 1000;
+      const yesterdayDue = getDateTimeFromClockString('20:00', yesterdayMs);
+      const lastWeekDue = getDateTimeFromClockString('20:00', lastWeekMs);
+      const twoDaysAgoDue = getDateTimeFromClockString('20:00', twoDaysAgoMs);
+      repeatCfgs$.next([
+        skipOverdueCfg('cfg-reminder', '', {
+          title: 'Export Bookmarks',
+          startTime: '20:00',
+          remindAt: TaskReminderOptionId.AtStart,
+        }),
+      ]);
+      const base = {
+        ...DEFAULT_TASK,
+        projectId: 'p1',
+        title: 'Export Bookmarks',
+        repeatCfgId: 'cfg-reminder',
+        dueDay: undefined,
+        isDone: false,
+        timeSpent: 0,
+      };
+      const dismissed: Task = {
+        ...base,
+        id: 'reminder-dismissed',
+        created: yesterdayMs,
+        dueWithTime: yesterdayDue,
+        // fired, then dismissed -> dismissReminderOnly cleared remindAt
+        remindAt: undefined,
+      };
+      const snoozed: Task = {
+        ...base,
+        id: 'reminder-snoozed',
+        created: lastWeekMs,
+        dueWithTime: lastWeekDue,
+        // snoozed 1h from the notification -> rewritten, dueWithTime untouched
+        remindAt: lastWeekDue + oneHourMs,
+      };
+      const snoozedActive: Task = {
+        ...base,
+        id: 'reminder-snoozed-active',
+        created: twoDaysAgoMs,
+        dueWithTime: twoDaysAgoDue,
+        // snoozed into the FUTURE and not fired again yet. Still reaped: making
+        // the verdict depend on Date.now() would make it depend on when the
+        // reaper runs.
+        remindAt: todayMs + oneHourMs,
+      };
+      const todayInstance: Task = {
+        ...base,
+        id: 'reminder-today',
+        created: todayMs,
+        dueDay: getDbDateStr(todayMs),
+      };
+
+      repeatableTasks$.next([
+        wrapWithSubTasks(dismissed),
+        wrapWithSubTasks(snoozed),
+        wrapWithSubTasks(snoozedActive),
+        wrapWithSubTasks(todayInstance),
+      ]);
+
+      const sub = effects.cleanupDuplicateRepeatInstances$.subscribe();
+      tick(3001);
+
+      expect(getDispatchedDeleteIds().sort()).toEqual([
+        'reminder-dismissed',
+        'reminder-snoozed',
+        'reminder-snoozed-active',
+      ]);
+
+      sub.unsubscribe();
+    }));
+
+    it('keeps a day-planned overdue instance that carries a reminder', fakeAsync(() => {
+      // No in-app path sets remindAt without a dueWithTime, so a day-planned
+      // instance that has one was marked deliberately via PluginAPI.updateTask.
+      // Covers both branches that still compare it: the timed config's
+      // "scheduled action not run yet" shape, and the untimed config.
+      repeatCfgs$.next([
+        skipOverdueCfg('cfg-timed-plugin', '', {
+          title: 'Timed Plugin Reminder',
+          startTime: '20:00',
+          remindAt: TaskReminderOptionId.AtStart,
+        }),
+        skipOverdueCfg('cfg-untimed-plugin', '', { title: 'Untimed Plugin Reminder' }),
+      ]);
+      const base = {
+        ...DEFAULT_TASK,
+        projectId: 'p1',
+        isDone: false,
+        timeSpent: 0,
+      };
+      const mkPair = (cfgId: string, title: string): Task[] => [
+        {
+          ...base,
+          id: `${cfgId}-yesterday`,
+          title,
+          repeatCfgId: cfgId,
+          created: yesterdayMs,
+          dueDay: getDbDateStr(yesterdayMs),
+          remindAt: getDateTimeFromClockString('20:00', yesterdayMs),
+        },
+        {
+          ...base,
+          id: `${cfgId}-today`,
+          title,
+          repeatCfgId: cfgId,
+          created: todayMs,
+          dueDay: getDbDateStr(todayMs),
+        },
+      ];
+
+      repeatableTasks$.next(
+        [
+          ...mkPair('cfg-timed-plugin', 'Timed Plugin Reminder'),
+          ...mkPair('cfg-untimed-plugin', 'Untimed Plugin Reminder'),
+        ].map(wrapWithSubTasks),
+      );
+
+      const sub = effects.cleanupDuplicateRepeatInstances$.subscribe();
+      tick(3001);
+
+      expect(getDispatchedDeleteIds()).toEqual([]);
 
       sub.unsubscribe();
     }));

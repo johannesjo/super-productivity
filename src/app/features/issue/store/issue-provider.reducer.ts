@@ -14,6 +14,36 @@ export const issueProviderInitialState: IssueProviderState = adapter.getInitialS
   // additional entity state properties
 });
 
+const toIdStr = (v: unknown): string =>
+  typeof v === 'number' || typeof v === 'string' ? String(v) : '';
+
+// TODO: Remove legacy field preservation after a few releases.
+// selectedBoardTitle first so the tooltip/initials keep showing the board.
+// Numeric ids become strings (plugin select values); the legacy transition
+// toggle maps to pushing the done state.
+const migrateNextcloudDeckProvider = (provider: Record<string, unknown>): IssueProvider =>
+  ({
+    ...provider,
+    pluginId: 'nextcloud-deck-issue-provider',
+    pluginConfig: {
+      selectedBoardTitle: provider['selectedBoardTitle'] ?? '',
+      nextcloudBaseUrl: provider['nextcloudBaseUrl'] ?? '',
+      username: provider['username'] ?? '',
+      password: provider['password'] ?? '',
+      selectedBoardId: toIdStr(provider['selectedBoardId']),
+      importStackIds: Array.isArray(provider['importStackIds'])
+        ? provider['importStackIds'].map(toIdStr)
+        : [],
+      doneStackId: toIdStr(provider['doneStackId']),
+      filterByAssignee: provider['filterByAssignee'] ?? true,
+      titleTemplate: provider['titleTemplate'] ?? '',
+      twoWaySync: {
+        isDone: provider['isTransitionIssuesEnabled'] ? 'both' : 'pullOnly',
+        notes: 'pullOnly',
+      },
+    },
+  }) as unknown as IssueProvider;
+
 export const issueProviderReducer = createReducer(
   issueProviderInitialState,
 
@@ -119,6 +149,98 @@ export const issueProviderReducer = createReducer(
             projectId: provider['projectId'] ?? '',
           },
         } as unknown as IssueProvider;
+      }
+
+      // Migrate pre-plugin TRELLO providers to plugin shape
+      if (
+        provider &&
+        provider['issueProviderKey'] === 'TRELLO' &&
+        !provider['pluginConfig']
+      ) {
+        needsMigration = true;
+        // TODO: Remove legacy field preservation after a few releases.
+        // Spread original provider so legacy fields (apiKey, token, boardId, etc.)
+        // survive for older clients that haven't upgraded yet. boardName is listed
+        // first so the provider tooltip/initials (which show the first non-secret
+        // config string) keep displaying the board name.
+        migratedEntities[id] = {
+          ...provider,
+          pluginId: 'trello-issue-provider',
+          pluginConfig: {
+            boardName: provider['boardName'] ?? '',
+            apiKey: provider['apiKey'] ?? '',
+            token: provider['token'] ?? '',
+            boardId: provider['boardId'] ?? '',
+            filterUsername: provider['filterUsername'] ?? '',
+          },
+        } as unknown as IssueProvider;
+      }
+
+      // Migrate pre-plugin AZURE_DEVOPS providers to plugin shape
+      if (
+        provider &&
+        provider['issueProviderKey'] === 'AZURE_DEVOPS' &&
+        !provider['pluginConfig']
+      ) {
+        needsMigration = true;
+        // TODO: Remove legacy field preservation after a few releases.
+        // Spread original provider so legacy fields (host, token, project, etc.)
+        // survive for older clients that haven't upgraded yet. project is listed
+        // first so the provider tooltip/initials (which show the first non-secret
+        // config string) keep displaying the project name.
+        migratedEntities[id] = {
+          ...provider,
+          pluginId: 'azure-devops-issue-provider',
+          pluginConfig: {
+            project: provider['project'] ?? '',
+            host: provider['host'] ?? '',
+            token: provider['token'] ?? '',
+            organization: provider['organization'] ?? '',
+            scope: provider['scope'] ?? 'assigned-to-me',
+            autoImportLimit: provider['autoImportLimit'] ?? 50,
+          },
+        } as unknown as IssueProvider;
+      }
+
+      // Migrate pre-plugin REDMINE providers to plugin shape
+      if (
+        provider &&
+        provider['issueProviderKey'] === 'REDMINE' &&
+        !provider['pluginConfig']
+      ) {
+        needsMigration = true;
+        // TODO: Remove legacy field preservation after a few releases.
+        // projectId first so the tooltip/initials keep showing it.
+        migratedEntities[id] = {
+          ...provider,
+          pluginId: 'redmine-issue-provider',
+          pluginConfig: {
+            projectId: provider['projectId'] ?? '',
+            host: provider['host'] ?? '',
+            api_key: provider['api_key'] ?? '',
+            // an unset legacy scope applied no filter; don't narrow it to assigned-to-me
+            scope: provider['scope'] || 'all',
+            isShowTimeTrackingDialog: provider['isShowTimeTrackingDialog'] ?? false,
+            isShowTimeTrackingDialogForEachSubTask:
+              provider['isShowTimeTrackingDialogForEachSubTask'] ?? false,
+            ...(provider['timeTrackingDialogDefaultTime']
+              ? {
+                  timeTrackingDialogDefaultTime:
+                    provider['timeTrackingDialogDefaultTime'],
+                }
+              : {}),
+          },
+        } as unknown as IssueProvider;
+      }
+
+      // Migrate pre-plugin NEXTCLOUD_DECK providers to plugin shape
+      if (
+        provider &&
+        provider['issueProviderKey'] === 'NEXTCLOUD_DECK' &&
+        !provider['pluginConfig']
+      ) {
+        needsMigration = true;
+        migratedEntities[id] = migrateNextcloudDeckProvider(provider);
       }
     }
     if (!needsMigration) {

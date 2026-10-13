@@ -1,25 +1,56 @@
 import { TestBed } from '@angular/core/testing';
-import { of } from 'rxjs';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { BehaviorSubject, of } from 'rxjs';
 import { LocalRestApiHandlerService } from './local-rest-api-handler.service';
 import { TaskService } from '../../features/tasks/task.service';
 import { TaskArchiveService } from '../../features/archive/task-archive.service';
 import { ProjectService } from '../../features/project/project.service';
+import { Project } from '../../features/project/project.model';
 import { TagService } from '../../features/tag/tag.service';
+import { IssueLog } from '../log';
+import {
+  LOCAL_REST_API_FEATURE_BRIDGE,
+  LocalRestApiFeatureBridge,
+} from './local-rest-api-feature-bridge';
+import {
+  LOCAL_REST_API_FEATURE_ROUTES,
+  LocalRestApiFeatureRoutes,
+} from './local-rest-api-feature-routes';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { DateService } from '../date/date.service';
+import { DataInitStateService } from '../data-init/data-init-state.service';
 import { Task, TaskWithSubTasks, TaskArchive } from '../../features/tasks/task.model';
+import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import {
   LocalRestApiRequestPayload,
   LocalRestApiResponsePayload,
 } from '../../../../electron/shared-with-frontend/local-rest-api.model';
+import {
+  FocusModeMode,
+  FocusModeState,
+  FocusScreen,
+  TimerState,
+} from '../../features/focus-mode/focus-mode.model';
+import * as focusModeActions from '../../features/focus-mode/store/focus-mode.actions';
+import * as focusModeSelectors from '../../features/focus-mode/store/focus-mode.selectors';
+import {
+  focusModeReducer,
+  initialState as initialFocusModeState,
+} from '../../features/focus-mode/store/focus-mode.reducer';
 
 describe('LocalRestApiHandlerService', () => {
+  let isDataLoaded$: BehaviorSubject<boolean>;
   let service: LocalRestApiHandlerService;
   let taskServiceMock: jasmine.SpyObj<TaskService>;
   let taskArchiveServiceMock: jasmine.SpyObj<TaskArchiveService>;
   let projectServiceMock: jasmine.SpyObj<ProjectService>;
   let tagServiceMock: jasmine.SpyObj<TagService>;
   let dateServiceMock: jasmine.SpyObj<DateService>;
+  let featureBridgeMock: jasmine.SpyObj<LocalRestApiFeatureBridge>;
+  let featureRoutes: LocalRestApiFeatureRoutes[];
+  let store: MockStore;
+  let dispatchSpy: jasmine.Spy;
+  let activeProjects: Project[];
   let requestHandler: ((payload: LocalRestApiRequestPayload) => void) | null = null;
   let responsePromiseResolve: ((response: LocalRestApiResponsePayload) => void) | null =
     null;
@@ -47,6 +78,21 @@ describe('LocalRestApiHandlerService', () => {
     ...task,
     subTasks,
   });
+
+  const setFocusState = (
+    overrides: Partial<Omit<FocusModeState, 'timer'>> & {
+      timer?: Partial<TimerState>;
+    } = {},
+  ): void => {
+    const { timer: timerOverrides, ...stateOverrides } = overrides;
+    store.setState({
+      focusMode: {
+        ...initialFocusModeState,
+        ...stateOverrides,
+        timer: { ...initialFocusModeState.timer, ...timerOverrides },
+      },
+    });
+  };
 
   const mockElectronApi = (): void => {
     (window as any).ea = {
@@ -98,8 +144,25 @@ describe('LocalRestApiHandlerService', () => {
   };
 
   beforeEach(() => {
+    // Specs that call `store.overrideSelector()` without `resetSelectors()`
+    // leak into this file: `overrideSelector` runs `setResult()` on the
+    // memoized selector ITSELF - a module singleton shared by the whole Karma
+    // context - and `resetSelectors()` only clears what its own store instance
+    // registered. The GET /focus specs below read focus-mode state through
+    // those selectors, so a leaked result makes them assert against a frozen
+    // timer instead of the state they set (jasmine randomizes spec order, so
+    // it only fails in some runs). Release them before the store is built, so
+    // any override this file's own `provideMockStore` sets up survives.
+    Object.values(focusModeSelectors).forEach((selector) => {
+      if (typeof selector === 'function' && 'release' in selector) {
+        selector.release();
+        selector.clearResult();
+      }
+    });
+
     requestHandler = null;
     responsePromiseResolve = null;
+    activeProjects = [];
 
     mockElectronApi();
 
@@ -140,8 +203,12 @@ describe('LocalRestApiHandlerService', () => {
       ['add', 'update', 'remove', 'archive'],
       {
         list$: of([]),
+        archived$: of([]),
       },
     );
+    Object.defineProperty(projectServiceMock, 'list', {
+      value: (() => activeProjects) as ProjectService['list'],
+    });
 
     tagServiceMock = jasmine.createSpyObj(
       'TagService',
@@ -159,6 +226,16 @@ describe('LocalRestApiHandlerService', () => {
     dateServiceMock.todayStr.and.returnValue('2026-05-12');
     dateServiceMock.getStartOfNextDayDiffMs.and.returnValue(0);
 
+    featureBridgeMock = jasmine.createSpyObj<LocalRestApiFeatureBridge>(
+      'LocalRestApiFeatureBridge',
+      ['issueLink', 'addLiteralSubTask'],
+    );
+    featureBridgeMock.issueLink.and.returnValue(Promise.resolve(''));
+
+    featureRoutes = [];
+
+    isDataLoaded$ = new BehaviorSubject<boolean>(true);
+
     TestBed.configureTestingModule({
       providers: [
         LocalRestApiHandlerService,
@@ -167,10 +244,19 @@ describe('LocalRestApiHandlerService', () => {
         { provide: ProjectService, useValue: projectServiceMock },
         { provide: TagService, useValue: tagServiceMock },
         { provide: DateService, useValue: dateServiceMock },
+        { provide: LOCAL_REST_API_FEATURE_BRIDGE, useValue: featureBridgeMock },
+        { provide: LOCAL_REST_API_FEATURE_ROUTES, useValue: featureRoutes },
+        {
+          provide: DataInitStateService,
+          useValue: { isAllDataLoadedInitially$: isDataLoaded$ },
+        },
+        provideMockStore({ initialState: { focusMode: initialFocusModeState } }),
       ],
     });
 
     service = TestBed.inject(LocalRestApiHandlerService);
+    store = TestBed.inject(MockStore);
+    dispatchSpy = spyOn(store, 'dispatch');
   });
 
   afterEach(() => {
@@ -192,6 +278,29 @@ describe('LocalRestApiHandlerService', () => {
     });
   });
 
+  describe('readiness', () => {
+    beforeEach(() => {
+      service.init();
+    });
+
+    it('answers APP_NOT_READY until the app data has loaded', async () => {
+      isDataLoaded$.next(false);
+      const notReady = await sendRequestAndWait(createRequest('GET', '/tasks'));
+      expect(notReady.status).toBe(503);
+      expect(notReady.body).toEqual(
+        jasmine.objectContaining({
+          ok: false,
+          error: jasmine.objectContaining({ code: 'APP_NOT_READY' }),
+        }),
+      );
+      expect(taskServiceMock.add).not.toHaveBeenCalled();
+
+      isDataLoaded$.next(true);
+      const ready = await sendRequestAndWait(createRequest('GET', '/tasks'));
+      expect(ready.status).toBe(200);
+    });
+  });
+
   describe('GET /status', () => {
     beforeEach(() => {
       service.init();
@@ -206,6 +315,361 @@ describe('LocalRestApiHandlerService', () => {
 
       expect(response.body.ok).toBe(true);
       expect(response.status).toBe(200);
+    });
+  });
+
+  describe('GET /focus', () => {
+    beforeEach(() => {
+      service.init();
+    });
+
+    const requestFocus = async (): Promise<LocalRestApiResponsePayload> =>
+      sendRequestAndWait(createRequest('GET', '/focus'));
+
+    const expectFocusData = (
+      response: LocalRestApiResponsePayload,
+      expected: unknown,
+    ): void => {
+      expect(response.status).toBe(200);
+      expect(response.body.ok).toBe(true);
+      if (!response.body.ok) {
+        throw new Error(`Expected success response, got ${response.body.error.code}`);
+      }
+      expect(response.body.data).toEqual(expected);
+    };
+
+    it('should return a null timer while focus mode is idle', async () => {
+      setFocusState({ mode: FocusModeMode.Countdown });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Countdown,
+        cycle: 1,
+        isSessionDone: false,
+        timer: null,
+      });
+    });
+
+    it('should return a running Pomodoro work timer', async () => {
+      setFocusState({
+        timer: {
+          isRunning: true,
+          startedAt: 1,
+          elapsed: 120_000,
+          duration: 1_500_000,
+          purpose: 'work',
+        },
+        mode: FocusModeMode.Pomodoro,
+        currentCycle: 2,
+      });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Pomodoro,
+        cycle: 2,
+        isSessionDone: false,
+        timer: {
+          purpose: 'work',
+          status: 'running',
+          isOvertime: false,
+          elapsedMs: 120_000,
+          remainingMs: 1_380_000,
+          durationMs: 1_500_000,
+          isLongBreak: false,
+        },
+      });
+    });
+
+    it('should return a paused Countdown work timer', async () => {
+      setFocusState({
+        timer: {
+          isRunning: false,
+          startedAt: 1,
+          elapsed: 90_000,
+          duration: 300_000,
+          purpose: 'work',
+        },
+        mode: FocusModeMode.Countdown,
+        currentCycle: 1,
+      });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Countdown,
+        cycle: 1,
+        isSessionDone: false,
+        timer: {
+          purpose: 'work',
+          status: 'paused',
+          isOvertime: false,
+          elapsedMs: 90_000,
+          remainingMs: 210_000,
+          durationMs: 300_000,
+          isLongBreak: false,
+        },
+      });
+    });
+
+    it('should return a running Countdown work timer', async () => {
+      setFocusState({
+        timer: {
+          isRunning: true,
+          startedAt: 1,
+          elapsed: 90_000,
+          duration: 300_000,
+          purpose: 'work',
+        },
+        mode: FocusModeMode.Countdown,
+      });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Countdown,
+        cycle: 1,
+        isSessionDone: false,
+        timer: {
+          purpose: 'work',
+          status: 'running',
+          isOvertime: false,
+          elapsedMs: 90_000,
+          remainingMs: 210_000,
+          durationMs: 300_000,
+          isLongBreak: false,
+        },
+      });
+    });
+
+    it('should return a completed work session separately from the timer', async () => {
+      setFocusState({
+        currentScreen: FocusScreen.SessionDone,
+        mode: FocusModeMode.Countdown,
+      });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Countdown,
+        cycle: 1,
+        isSessionDone: true,
+        timer: null,
+      });
+    });
+
+    it('should return running short and long Pomodoro breaks', async () => {
+      const timer: TimerState = {
+        isRunning: true,
+        startedAt: 1,
+        elapsed: 30_000,
+        duration: 300_000,
+        purpose: 'break',
+      };
+
+      setFocusState({ timer, mode: FocusModeMode.Pomodoro, currentCycle: 2 });
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Pomodoro,
+        cycle: 2,
+        isSessionDone: false,
+        timer: {
+          purpose: 'break',
+          status: 'running',
+          isOvertime: false,
+          elapsedMs: 30_000,
+          remainingMs: 270_000,
+          durationMs: 300_000,
+          isLongBreak: false,
+        },
+      });
+
+      setFocusState({
+        timer: { ...timer, isLongBreak: true },
+        mode: FocusModeMode.Pomodoro,
+        currentCycle: 5,
+      });
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Pomodoro,
+        cycle: 5,
+        isSessionDone: false,
+        timer: {
+          purpose: 'break',
+          status: 'running',
+          isOvertime: false,
+          elapsedMs: 30_000,
+          remainingMs: 270_000,
+          durationMs: 300_000,
+          isLongBreak: true,
+        },
+      });
+    });
+
+    it('should return a completed Pomodoro break as done', async () => {
+      setFocusState({
+        timer: {
+          isRunning: false,
+          startedAt: 1,
+          elapsed: 300_000,
+          duration: 300_000,
+          purpose: 'break',
+          isLongBreak: true,
+        },
+        mode: FocusModeMode.Pomodoro,
+        currentCycle: 5,
+      });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Pomodoro,
+        cycle: 5,
+        isSessionDone: false,
+        timer: {
+          purpose: 'break',
+          status: 'done',
+          isOvertime: false,
+          elapsedMs: 300_000,
+          remainingMs: 0,
+          durationMs: 300_000,
+          isLongBreak: true,
+        },
+      });
+    });
+
+    it('should return a stopped Pomodoro break with time remaining as paused', async () => {
+      setFocusState({
+        timer: {
+          isRunning: false,
+          startedAt: 1,
+          elapsed: 30_000,
+          duration: 300_000,
+          purpose: 'break',
+          isLongBreak: true,
+        },
+        mode: FocusModeMode.Pomodoro,
+        currentCycle: 5,
+      });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Pomodoro,
+        cycle: 5,
+        isSessionDone: false,
+        timer: {
+          purpose: 'break',
+          status: 'paused',
+          isOvertime: false,
+          elapsedMs: 30_000,
+          remainingMs: 270_000,
+          durationMs: 300_000,
+          isLongBreak: true,
+        },
+      });
+    });
+
+    it('should return running and paused Flowtime work timers', async () => {
+      setFocusState({
+        timer: {
+          isRunning: true,
+          startedAt: 1,
+          elapsed: 600_000,
+          duration: 0,
+          purpose: 'work',
+        },
+        mode: FocusModeMode.Flowtime,
+      });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Flowtime,
+        cycle: 1,
+        isSessionDone: false,
+        timer: {
+          purpose: 'work',
+          status: 'running',
+          isOvertime: false,
+          elapsedMs: 600_000,
+          remainingMs: 0,
+          durationMs: 0,
+          isLongBreak: false,
+        },
+      });
+
+      setFocusState({
+        timer: {
+          isRunning: false,
+          startedAt: 1,
+          elapsed: 600_000,
+          duration: 0,
+          purpose: 'work',
+        },
+        mode: FocusModeMode.Flowtime,
+      });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Flowtime,
+        cycle: 1,
+        isSessionDone: false,
+        timer: {
+          purpose: 'work',
+          status: 'paused',
+          isOvertime: false,
+          elapsedMs: 600_000,
+          remainingMs: 0,
+          durationMs: 0,
+          isLongBreak: false,
+        },
+      });
+    });
+
+    it('should retain the Pomodoro cycle after switching to Flowtime', async () => {
+      const flowtimeState = focusModeReducer(
+        {
+          ...initialFocusModeState,
+          mode: FocusModeMode.Pomodoro,
+          currentCycle: 5,
+          timer: {
+            isRunning: true,
+            startedAt: 1,
+            elapsed: 600_000,
+            duration: 1_500_000,
+            purpose: 'work',
+          },
+        },
+        focusModeActions.setFocusModeMode({ mode: FocusModeMode.Flowtime }),
+      );
+      store.setState({ focusMode: flowtimeState });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Flowtime,
+        cycle: 5,
+        isSessionDone: false,
+        timer: {
+          purpose: 'work',
+          status: 'running',
+          isOvertime: false,
+          elapsedMs: 600_000,
+          remainingMs: 0,
+          durationMs: 0,
+          isLongBreak: false,
+        },
+      });
+    });
+
+    it('should preserve overtime while a work timer is paused', async () => {
+      setFocusState({
+        timer: {
+          isRunning: false,
+          startedAt: 1,
+          elapsed: 1_600_000,
+          duration: 1_500_000,
+          purpose: 'work',
+        },
+        mode: FocusModeMode.Pomodoro,
+        _isOvertimeEnabled: true,
+      });
+
+      expectFocusData(await requestFocus(), {
+        mode: FocusModeMode.Pomodoro,
+        cycle: 1,
+        isSessionDone: false,
+        timer: {
+          purpose: 'work',
+          status: 'paused',
+          isOvertime: true,
+          elapsedMs: 1_600_000,
+          remainingMs: 0,
+          durationMs: 1_500_000,
+          isLongBreak: false,
+        },
+      });
     });
   });
 
@@ -224,6 +688,21 @@ describe('LocalRestApiHandlerService', () => {
         expect(response.body.ok).toBe(true);
         expect(response.status).toBe(200);
         expectTaskIds(response, ['task-1', 'task-2']);
+      });
+
+      it('should leave out tasks of archived projects by default', async () => {
+        const tasks = [
+          createMockTask('task-1', { projectId: 'live' }),
+          createMockTask('task-2', { projectId: 'shelved' }),
+        ];
+        Object.defineProperty(taskServiceMock, 'allTasks$', { get: () => of(tasks) });
+        Object.defineProperty(projectServiceMock, 'archived$', {
+          get: () => of([{ id: 'shelved', isArchived: true } as Project]),
+        });
+
+        const response = await sendRequestAndWait(createRequest('GET', '/tasks'));
+
+        expectTaskIds(response, ['task-1']);
       });
 
       it('should filter tasks by query', async () => {
@@ -497,6 +976,87 @@ describe('LocalRestApiHandlerService', () => {
         );
       });
 
+      it('should set a deadline after creating the task and then read the response', async () => {
+        const taskLookup = jasmine.createSpy('taskLookup').and.callFake(() => {
+          expect(dispatchSpy).toHaveBeenCalled();
+          return of(createMockTask('new-task-id', { deadlineDay: '2026-05-12' }));
+        });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => taskLookup,
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('POST', '/tasks', {
+            body: {
+              title: 'Deadline task',
+              notes: 'created through REST',
+              deadlineDay: '2026-05-12',
+            },
+          }),
+        );
+
+        expect(taskServiceMock.add).toHaveBeenCalledWith('Deadline task', false, {
+          title: 'Deadline task',
+          notes: 'created through REST',
+        });
+        expect(dispatchSpy).toHaveBeenCalledOnceWith(
+          TaskSharedActions.setDeadline({
+            taskId: 'new-task-id',
+            deadlineDay: '2026-05-12',
+            autoPlanToday: '2026-05-12',
+            autoPlanStartOfNextDayDiffMs: 0,
+            isSkipSnack: true,
+          }),
+        );
+        expect(response.body.ok).toBe(true);
+        if (!response.body.ok) {
+          throw new Error('Expected a success response');
+        }
+        expect(response.body.data).toEqual(
+          jasmine.objectContaining({ deadlineDay: '2026-05-12' }),
+        );
+      });
+
+      it('should not dispatch a deadline removal for all-null deadline fields', async () => {
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(createMockTask('new-task-id')),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('POST', '/tasks', {
+            body: {
+              title: 'Task without deadline',
+              deadlineDay: null,
+              deadlineWithTime: null,
+              deadlineRemindAt: null,
+            },
+          }),
+        );
+
+        expect(response.status).toBe(201);
+        expect(dispatchSpy).not.toHaveBeenCalled();
+      });
+
+      it('should reject conflicting deadline fields on create', async () => {
+        const response = await sendRequestAndWait(
+          createRequest('POST', '/tasks', {
+            body: {
+              title: 'Invalid deadline',
+              deadlineDay: '2026-05-12',
+              deadlineWithTime: 1_778_582_400_000,
+            },
+          }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.body.ok).toBe(false);
+        if (response.body.ok) {
+          throw new Error('Expected an error response');
+        }
+        expect(response.body.error.code).toBe('INVALID_INPUT');
+        expect(taskServiceMock.add).not.toHaveBeenCalled();
+      });
+
       it('should return 400 for missing title', async () => {
         const response = await sendRequestAndWait(
           createRequest('POST', '/tasks', { body: { notes: 'some notes' } }),
@@ -537,6 +1097,19 @@ describe('LocalRestApiHandlerService', () => {
         });
       });
 
+      it('should return 400 when an allowed field has an invalid type', async () => {
+        const response = await sendRequestAndWait(
+          createRequest('POST', '/tasks', {
+            body: { title: 'New Task', timeEstimate: 'not-a-number' },
+          }),
+        );
+
+        expect(response.body.ok).toBe(false);
+        expect(response.status).toBe(400);
+        expect((response.body as any).error.code).toBe('INVALID_INPUT');
+        expect(taskServiceMock.add).not.toHaveBeenCalled();
+      });
+
       it('should reject subTaskIds in body with 400', async () => {
         const response = await sendRequestAndWait(
           createRequest('POST', '/tasks', {
@@ -548,6 +1121,118 @@ describe('LocalRestApiHandlerService', () => {
         expect(response.status).toBe(400);
         expect((response.body as any).error.code).toBe('UNSUPPORTED_FIELD');
         expect(taskServiceMock.add).not.toHaveBeenCalled();
+      });
+
+      describe('isIgnoreShortSyntax', () => {
+        beforeEach(() => {
+          Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+            get: () => (id: string) =>
+              id === 'parent-1'
+                ? of(createMockTask('parent-1', { projectId: 'project-1' }))
+                : of(createMockTask(id)),
+          });
+        });
+
+        it('should store a top-level title literally when asked', async () => {
+          await sendRequestAndWait(
+            createRequest('POST', '/tasks', {
+              body: { title: 'Fix #12 in 30m', isIgnoreShortSyntax: true },
+            }),
+          );
+
+          expect(taskServiceMock.add).toHaveBeenCalledWith(
+            'Fix #12 in 30m',
+            false,
+            { title: 'Fix #12 in 30m' },
+            false,
+            true,
+          );
+        });
+
+        it('should create a literal subtask without the parsing path', async () => {
+          featureBridgeMock.addLiteralSubTask.and.returnValue('literal-sub');
+
+          const response = await sendRequestAndWait(
+            createRequest('POST', '/tasks', {
+              body: {
+                title: 'Child #x',
+                parentId: 'parent-1',
+                isIgnoreShortSyntax: true,
+              },
+            }),
+          );
+
+          expect(response.status).toBe(201);
+          expect(taskServiceMock.addSubTaskTo).not.toHaveBeenCalled();
+          expect(featureBridgeMock.addLiteralSubTask).toHaveBeenCalledOnceWith(
+            'parent-1',
+            { title: 'Child #x' },
+          );
+          expect((response.body as any).data.id).toBe('literal-sub');
+        });
+
+        it('should reject a non-boolean flag', async () => {
+          const response = await sendRequestAndWait(
+            createRequest('POST', '/tasks', {
+              body: { title: 'T', isIgnoreShortSyntax: 'yes' },
+            }),
+          );
+
+          expect(response.status).toBe(400);
+          expect(taskServiceMock.add).not.toHaveBeenCalled();
+        });
+
+        it('should update a title literally when asked', async () => {
+          await sendRequestAndWait(
+            createRequest('PATCH', '/tasks/task-1', {
+              body: { title: 'Renamed #tag', isIgnoreShortSyntax: true },
+            }),
+          );
+
+          expect(taskServiceMock.update).not.toHaveBeenCalled();
+          expect(dispatchSpy).toHaveBeenCalledOnceWith(
+            TaskSharedActions.updateTask({
+              task: { id: 'task-1', changes: { title: 'Renamed #tag' } },
+              isIgnoreShortSyntax: true,
+            }),
+          );
+        });
+
+        it('should reject a non-boolean flag on PATCH', async () => {
+          const response = await sendRequestAndWait(
+            createRequest('PATCH', '/tasks/task-1', {
+              body: { title: 'T', isIgnoreShortSyntax: 1 },
+            }),
+          );
+
+          expect(response.status).toBe(400);
+          expect(taskServiceMock.update).not.toHaveBeenCalled();
+          expect(dispatchSpy).not.toHaveBeenCalled();
+        });
+
+        it('should keep non-title changes on the regular update path', async () => {
+          await sendRequestAndWait(
+            createRequest('PATCH', '/tasks/task-1', {
+              body: { title: 'Renamed #tag', notes: 'n', isIgnoreShortSyntax: true },
+            }),
+          );
+
+          expect(taskServiceMock.update).toHaveBeenCalledWith('task-1', {
+            title: 'Renamed #tag',
+            notes: 'n',
+          });
+          expect(dispatchSpy).not.toHaveBeenCalled();
+        });
+
+        it('should keep parsing by default', async () => {
+          await sendRequestAndWait(
+            createRequest('PATCH', '/tasks/task-1', { body: { title: 'Renamed #tag' } }),
+          );
+
+          expect(taskServiceMock.update).toHaveBeenCalledWith('task-1', {
+            title: 'Renamed #tag',
+          });
+        });
       });
 
       describe('with parentId (create subtask)', () => {
@@ -575,6 +1260,43 @@ describe('LocalRestApiHandlerService', () => {
             notes: 'child notes',
           });
           expect(taskServiceMock.add).not.toHaveBeenCalled();
+        });
+
+        it('should set a deadline on a newly created subtask', async () => {
+          const parentTask = createMockTask('parent-1', { projectId: 'project-1' });
+          const newSubTask = createMockTask('new-subtask-id', {
+            parentId: 'parent-1',
+            projectId: 'project-1',
+            deadlineWithTime: 1_778_582_400_000,
+          });
+          Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+            get: () => (id: string) =>
+              id === 'parent-1' ? of(parentTask) : of(newSubTask),
+          });
+
+          const response = await sendRequestAndWait(
+            createRequest('POST', '/tasks', {
+              body: {
+                title: 'Child with deadline',
+                parentId: 'parent-1',
+                deadlineWithTime: 1_778_582_400_000,
+              },
+            }),
+          );
+
+          expect(taskServiceMock.addSubTaskTo).toHaveBeenCalledWith('parent-1', {
+            title: 'Child with deadline',
+          });
+          expect(dispatchSpy).toHaveBeenCalledOnceWith(
+            TaskSharedActions.setDeadline({
+              taskId: 'new-subtask-id',
+              deadlineWithTime: 1_778_582_400_000,
+              autoPlanToday: '2026-05-12',
+              autoPlanStartOfNextDayDiffMs: 0,
+              isSkipSnack: true,
+            }),
+          );
+          expect(response.status).toBe(201);
         });
 
         it('should return 404 when parentId does not exist', async () => {
@@ -686,6 +1408,189 @@ describe('LocalRestApiHandlerService', () => {
         expect(response.status).toBe(404);
         expect((response.body as any).error.code).toBe('TASK_NOT_FOUND');
       });
+
+      it('should hide a task of an archived project only when source=active', async () => {
+        const shelvedTask = createMockTask('task-1', { projectId: 'shelved' });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(shelvedTask),
+        });
+        Object.defineProperty(projectServiceMock, 'archived$', {
+          get: () => of([{ id: 'shelved', isArchived: true } as Project]),
+        });
+
+        const active = await sendRequestAndWait(
+          createRequest('GET', '/tasks/task-1', { query: { source: 'active' } }),
+        );
+        const plain = await sendRequestAndWait(createRequest('GET', '/tasks/task-1'));
+
+        expect(active.status).toBe(404);
+        expect((active.body as any).error.code).toBe('TASK_NOT_FOUND');
+        expect(plain.status).toBe(200);
+      });
+
+      describe('issueUrl', () => {
+        const issueTask = createMockTask('task-1', {
+          issueType: 'GITHUB',
+          issueId: '42',
+          issueProviderId: 'provider-1',
+        });
+
+        const mockGetTask = (task: Task): void => {
+          Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+            get: () => (_id: string) => of(task),
+          });
+        };
+
+        const getData = (
+          response: LocalRestApiResponsePayload,
+        ): Record<string, unknown> => {
+          if (!response.body.ok) {
+            throw new Error(`Expected success response, got ${response.body.error.code}`);
+          }
+          return response.body.data as Record<string, unknown>;
+        };
+
+        const withIssueUrl = { query: { include: 'issueUrl' } };
+
+        it('should include issueUrl when asked and the provider builds a link', async () => {
+          mockGetTask(issueTask);
+          featureBridgeMock.issueLink.and.returnValue(
+            Promise.resolve('https://github.com/o/r/issues/42'),
+          );
+
+          const response = await sendRequestAndWait(
+            createRequest('GET', '/tasks/task-1', withIssueUrl),
+          );
+
+          expect(response.status).toBe(200);
+          expect(featureBridgeMock.issueLink).toHaveBeenCalledWith(
+            'GITHUB',
+            '42',
+            'provider-1',
+          );
+          const data = getData(response);
+          expect(data.issueUrl).toBe('https://github.com/o/r/issues/42');
+          expect(data.id).toBe('task-1');
+        });
+
+        it('should not look up the link unless asked', async () => {
+          mockGetTask(issueTask);
+
+          const response = await sendRequestAndWait(
+            createRequest('GET', '/tasks/task-1'),
+          );
+
+          expect(response.status).toBe(200);
+          expect(featureBridgeMock.issueLink).not.toHaveBeenCalled();
+          expect('issueUrl' in getData(response)).toBe(false);
+        });
+
+        it('should accept a repeated include parameter', async () => {
+          mockGetTask(issueTask);
+          featureBridgeMock.issueLink.and.returnValue(
+            Promise.resolve('https://github.com/o/r/issues/42'),
+          );
+
+          const response = await sendRequestAndWait(
+            createRequest('GET', '/tasks/task-1', {
+              query: { include: ['subTasks', 'issueUrl'] },
+            }),
+          );
+
+          expect(getData(response).issueUrl).toBe('https://github.com/o/r/issues/42');
+        });
+
+        it('should accept issueUrl in a comma-separated include list', async () => {
+          mockGetTask(issueTask);
+          featureBridgeMock.issueLink.and.returnValue(
+            Promise.resolve('https://github.com/o/r/issues/42'),
+          );
+
+          const response = await sendRequestAndWait(
+            createRequest('GET', '/tasks/task-1', {
+              query: { include: 'subTasks, issueUrl' },
+            }),
+          );
+
+          expect(getData(response).issueUrl).toBe('https://github.com/o/r/issues/42');
+        });
+
+        it('should omit issueUrl and not look it up for a task without an issue', async () => {
+          mockGetTask(createMockTask('task-1'));
+
+          const response = await sendRequestAndWait(
+            createRequest('GET', '/tasks/task-1', withIssueUrl),
+          );
+
+          expect(response.status).toBe(200);
+          expect(featureBridgeMock.issueLink).not.toHaveBeenCalled();
+          expect('issueUrl' in getData(response)).toBe(false);
+        });
+
+        it('should omit issueUrl when the provider returns an empty link', async () => {
+          mockGetTask(issueTask);
+          featureBridgeMock.issueLink.and.returnValue(Promise.resolve(''));
+
+          const response = await sendRequestAndWait(
+            createRequest('GET', '/tasks/task-1', withIssueUrl),
+          );
+
+          expect(response.status).toBe(200);
+          expect('issueUrl' in getData(response)).toBe(false);
+        });
+
+        it('should return 200 without issueUrl when building the link fails', async () => {
+          mockGetTask(issueTask);
+          const warnSpy = spyOn(IssueLog, 'warn');
+          featureBridgeMock.issueLink.and.returnValue(
+            Promise.reject(new Error('provider config missing')),
+          );
+
+          const response = await sendRequestAndWait(
+            createRequest('GET', '/tasks/task-1', withIssueUrl),
+          );
+
+          expect(response.status).toBe(200);
+          expect('issueUrl' in getData(response)).toBe(false);
+          expect(warnSpy).toHaveBeenCalledWith(jasmine.any(String), { id: 'task-1' });
+        });
+
+        it('should return 200 without issueUrl when building the link hangs', async () => {
+          mockGetTask(issueTask);
+          let markCalled!: () => void;
+          const isCalled = new Promise<void>((resolve) => (markCalled = resolve));
+          featureBridgeMock.issueLink.and.callFake(() => {
+            markCalled();
+            return new Promise<string>(() => undefined);
+          });
+
+          jasmine.clock().install();
+          try {
+            const responsePromise = sendRequestAndWait(
+              createRequest('GET', '/tasks/task-1', withIssueUrl),
+            );
+            await isCalled;
+            jasmine.clock().tick(3000);
+            const response = await responsePromise;
+
+            expect(response.status).toBe(200);
+            expect('issueUrl' in getData(response)).toBe(false);
+          } finally {
+            jasmine.clock().uninstall();
+          }
+        });
+
+        it('should not look up issue links for the task list', async () => {
+          Object.defineProperty(taskServiceMock, 'allTasks$', {
+            get: () => of([issueTask]),
+          });
+
+          const response = await sendRequestAndWait(createRequest('GET', '/tasks'));
+
+          expect(response.status).toBe(200);
+          expect(featureBridgeMock.issueLink).not.toHaveBeenCalled();
+        });
+      });
     });
 
     describe('PATCH /tasks/:id', () => {
@@ -706,6 +1611,436 @@ describe('LocalRestApiHandlerService', () => {
         );
       });
 
+      it('should set a day deadline through the deadline action', async () => {
+        const mockTask = createMockTask('task-1');
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { deadlineDay: '2026-05-12' },
+          }),
+        );
+
+        expect(response.status).toBe(200);
+        expect(dispatchSpy).toHaveBeenCalledOnceWith(
+          TaskSharedActions.setDeadline({
+            taskId: 'task-1',
+            deadlineDay: '2026-05-12',
+            autoPlanToday: '2026-05-12',
+            autoPlanStartOfNextDayDiffMs: 0,
+            isSkipSnack: true,
+          }),
+        );
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should set a timed deadline and clear the day deadline via the action', async () => {
+        const mockTask = createMockTask('task-1', { deadlineDay: '2026-05-11' });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { deadlineWithTime: 1_778_582_400_000 },
+          }),
+        );
+
+        expect(dispatchSpy).toHaveBeenCalledOnceWith(
+          TaskSharedActions.setDeadline({
+            taskId: 'task-1',
+            deadlineWithTime: 1_778_582_400_000,
+            autoPlanToday: '2026-05-12',
+            autoPlanStartOfNextDayDiffMs: 0,
+            isSkipSnack: true,
+          }),
+        );
+      });
+
+      it('should remove a deadline when both deadline fields are null', async () => {
+        const mockTask = createMockTask('task-1', {
+          deadlineDay: '2026-05-12',
+          deadlineRemindAt: 1_778_496_000_000,
+        });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { deadlineDay: null, deadlineWithTime: null },
+          }),
+        );
+
+        expect(dispatchSpy).toHaveBeenCalledOnceWith(
+          TaskSharedActions.removeDeadline({ taskId: 'task-1', isSkipSnack: true }),
+        );
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should ignore nulling deadlineWithTime when the task has a day deadline', async () => {
+        const mockTask = createMockTask('task-1', {
+          deadlineDay: '2026-05-12',
+          deadlineRemindAt: 1_778_496_000_000,
+        });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { deadlineWithTime: null },
+          }),
+        );
+
+        expect(response.status).toBe(200);
+        expect(dispatchSpy).not.toHaveBeenCalled();
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should ignore nulling deadlineDay when the task has a timed deadline', async () => {
+        const mockTask = createMockTask('task-1', {
+          deadlineWithTime: 1_778_582_400_000,
+          deadlineRemindAt: 1_778_496_000_000,
+        });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { deadlineDay: null },
+          }),
+        );
+
+        expect(response.status).toBe(200);
+        expect(dispatchSpy).not.toHaveBeenCalled();
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should keep the reminder when re-sending the unchanged day deadline', async () => {
+        const mockTask = createMockTask('task-1', {
+          deadlineDay: '2026-05-12',
+          deadlineRemindAt: 1_778_496_000_000,
+        });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { deadlineDay: '2026-05-12' },
+          }),
+        );
+
+        expect(response.status).toBe(200);
+        expect(dispatchSpy).not.toHaveBeenCalled();
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should keep the reminder when re-sending the unchanged timed deadline', async () => {
+        const mockTask = createMockTask('task-1', {
+          deadlineWithTime: 1_778_582_400_000,
+          deadlineRemindAt: 1_778_496_000_000,
+        });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { deadlineWithTime: 1_778_582_400_000 },
+          }),
+        );
+
+        expect(response.status).toBe(200);
+        expect(dispatchSpy).not.toHaveBeenCalled();
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should clear only the reminder without re-planning a day deadline', async () => {
+        const mockTask = createMockTask('task-1', {
+          deadlineDay: '2026-05-12',
+          deadlineRemindAt: 1_778_496_000_000,
+        });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { deadlineRemindAt: null },
+          }),
+        );
+
+        expect(response.status).toBe(200);
+        expect(dispatchSpy).toHaveBeenCalledOnceWith(
+          TaskSharedActions.clearDeadlineReminder({ taskId: 'task-1' }),
+        );
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should clear only the reminder without re-planning a timed deadline', async () => {
+        const mockTask = createMockTask('task-1', {
+          deadlineWithTime: 1_778_582_400_000,
+          deadlineRemindAt: 1_778_496_000_000,
+        });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { deadlineRemindAt: null },
+          }),
+        );
+
+        expect(response.status).toBe(200);
+        expect(dispatchSpy).toHaveBeenCalledOnceWith(
+          TaskSharedActions.clearDeadlineReminder({ taskId: 'task-1' }),
+        );
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should treat a stored null reminder as no reminder', async () => {
+        const mockTask = createMockTask('task-1', {
+          deadlineDay: '2026-05-12',
+          deadlineRemindAt: null,
+        });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { deadlineRemindAt: null },
+          }),
+        );
+
+        expect(response.status).toBe(200);
+        expect(dispatchSpy).not.toHaveBeenCalled();
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should treat a stored null reminder as no reminder when nulling the inactive deadline field', async () => {
+        const mockTask = createMockTask('task-1', {
+          deadlineDay: '2026-05-12',
+          deadlineRemindAt: null,
+        });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { deadlineWithTime: null, deadlineRemindAt: null },
+          }),
+        );
+
+        expect(response.status).toBe(200);
+        expect(dispatchSpy).not.toHaveBeenCalled();
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should treat a stored null reminder as no reminder for a timed deadline', async () => {
+        const mockTask = createMockTask('task-1', {
+          deadlineWithTime: 1_778_582_400_000,
+          deadlineRemindAt: null,
+        });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { deadlineDay: null, deadlineRemindAt: null },
+          }),
+        );
+
+        expect(response.status).toBe(200);
+        expect(dispatchSpy).not.toHaveBeenCalled();
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should set a deadline reminder alongside a deadline', async () => {
+        const mockTask = createMockTask('task-1');
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: {
+              deadlineDay: '2026-05-13',
+              deadlineRemindAt: 1_778_496_000_000,
+            },
+          }),
+        );
+
+        expect(dispatchSpy).toHaveBeenCalledOnceWith(
+          TaskSharedActions.setDeadline({
+            taskId: 'task-1',
+            deadlineDay: '2026-05-13',
+            deadlineRemindAt: 1_778_496_000_000,
+            isSkipSnack: true,
+          }),
+        );
+      });
+
+      it('should update a reminder while preserving the existing deadline', async () => {
+        const mockTask = createMockTask('task-1', {
+          deadlineDay: '2026-05-13',
+        });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { deadlineRemindAt: 1_778_496_000_000 },
+          }),
+        );
+
+        expect(dispatchSpy).toHaveBeenCalledOnceWith(
+          TaskSharedActions.setDeadline({
+            taskId: 'task-1',
+            deadlineDay: '2026-05-13',
+            deadlineRemindAt: 1_778_496_000_000,
+            isSkipSnack: true,
+          }),
+        );
+      });
+
+      it('should reject conflicting day and timed deadlines', async () => {
+        const mockTask = createMockTask('task-1');
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: {
+              deadlineDay: '2026-05-13',
+              deadlineWithTime: 1_778_582_400_000,
+            },
+          }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.body.ok).toBe(false);
+        if (response.body.ok) {
+          throw new Error('Expected an error response');
+        }
+        expect(response.body.error.code).toBe('INVALID_INPUT');
+        expect(dispatchSpy).not.toHaveBeenCalled();
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      for (const invalidDeadlineDay of ['2026/05/13', '2026-02-30']) {
+        it(`should reject an invalid deadline day (${invalidDeadlineDay})`, async () => {
+          const response = await sendRequestAndWait(
+            createRequest('PATCH', '/tasks/task-1', {
+              body: { deadlineDay: invalidDeadlineDay },
+            }),
+          );
+
+          expect(response.status).toBe(400);
+          expect(response.body.ok).toBe(false);
+          if (response.body.ok) {
+            throw new Error('Expected an error response');
+          }
+          expect(response.body.error.code).toBe('INVALID_INPUT');
+          expect(dispatchSpy).not.toHaveBeenCalled();
+        });
+      }
+
+      for (const invalidField of ['deadlineWithTime', 'deadlineRemindAt'] as const) {
+        it(`should reject a non-positive ${invalidField}`, async () => {
+          const response = await sendRequestAndWait(
+            createRequest('PATCH', '/tasks/task-1', {
+              body: { [invalidField]: 0 },
+            }),
+          );
+
+          expect(response.status).toBe(400);
+          expect(response.body.ok).toBe(false);
+          if (response.body.ok) {
+            throw new Error('Expected an error response');
+          }
+          expect(response.body.error.code).toBe('INVALID_INPUT');
+          expect(dispatchSpy).not.toHaveBeenCalled();
+        });
+      }
+
+      it('should reject a deadline reminder without a deadline', async () => {
+        const mockTask = createMockTask('task-1');
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { deadlineRemindAt: 1_778_496_000_000 },
+          }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.body.ok).toBe(false);
+        if (response.body.ok) {
+          throw new Error('Expected an error response');
+        }
+        expect(response.body.error.code).toBe('INVALID_INPUT');
+        expect(dispatchSpy).not.toHaveBeenCalled();
+      });
+
+      it('should combine a deadline with normal task fields', async () => {
+        const mockTask = createMockTask('task-1');
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { title: 'Updated title', deadlineDay: '2026-05-13' },
+          }),
+        );
+
+        expect(taskServiceMock.update).toHaveBeenCalledOnceWith('task-1', {
+          title: 'Updated title',
+        });
+        expect(dispatchSpy).toHaveBeenCalledOnceWith(
+          TaskSharedActions.setDeadline({
+            taskId: 'task-1',
+            deadlineDay: '2026-05-13',
+            isSkipSnack: true,
+          }),
+        );
+      });
+
+      it('should set a deadline on an existing subtask', async () => {
+        const mockTask = createMockTask('subtask-1', { parentId: 'parent-1' });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/subtask-1', {
+            body: { deadlineDay: '2026-05-13' },
+          }),
+        );
+
+        expect(response.status).toBe(200);
+        expect(dispatchSpy).toHaveBeenCalledOnceWith(
+          TaskSharedActions.setDeadline({
+            taskId: 'subtask-1',
+            deadlineDay: '2026-05-13',
+            isSkipSnack: true,
+          }),
+        );
+      });
+
       it('should return 404 for non-existent task', async () => {
         Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
           get: () => (_id: string) => of(undefined),
@@ -717,6 +2052,23 @@ describe('LocalRestApiHandlerService', () => {
 
         expect(response.body.ok).toBe(false);
         expect(response.status).toBe(404);
+      });
+
+      it('should return 404 when PATCH targets an unavailable task', async () => {
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(undefined),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/archived-task', {
+            body: { deadlineDay: '2026-05-13' },
+          }),
+        );
+
+        expect(response.status).toBe(404);
+        expect(response.body.ok).toBe(false);
+        expect(dispatchSpy).not.toHaveBeenCalled();
+        expect(taskArchiveServiceMock.hasTask).not.toHaveBeenCalled();
       });
 
       it('should return 400 for invalid body', async () => {
@@ -778,6 +2130,265 @@ describe('LocalRestApiHandlerService', () => {
         expect(response.body.ok).toBe(false);
         expect(response.status).toBe(400);
         expect((response.body as any).error.code).toBe('UNSUPPORTED_FIELD');
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should return 400 (not dispatch) when a field has an invalid type', async () => {
+        const mockTask = createMockTask('task-1');
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { tagIds: 123, timeEstimate: 'abc' },
+          }),
+        );
+
+        expect(response.body.ok).toBe(false);
+        expect(response.status).toBe(400);
+        expect((response.body as any).error.code).toBe('INVALID_INPUT');
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should accept valid typed fields and dispatch them', async () => {
+        const mockTask = createMockTask('task-1');
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { tagIds: ['tag-1'], timeEstimate: 1000, isDone: true },
+          }),
+        );
+
+        expect(response.body.ok).toBe(true);
+        expect(taskServiceMock.update).toHaveBeenCalledWith('task-1', {
+          tagIds: ['tag-1'],
+          timeEstimate: 1000,
+          isDone: true,
+        });
+      });
+
+      it('should update projectId together with other fields in one dispatch', async () => {
+        let mockTask = createMockTask('task-1', { projectId: 'project-1' });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+        taskServiceMock.update.and.callFake((id, changes) => {
+          if (id === mockTask.id) {
+            mockTask = { ...mockTask, ...changes };
+          }
+        });
+        activeProjects = [{ id: 'project-2' } as Project];
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { projectId: 'project-2', title: 'Moved task' },
+          }),
+        );
+
+        expect(response.body.ok).toBe(true);
+        expect(taskServiceMock.update).toHaveBeenCalledOnceWith('task-1', {
+          projectId: 'project-2',
+          title: 'Moved task',
+        });
+        if (!response.body.ok) {
+          throw new Error('Expected a success response');
+        }
+        expect(response.body.data).toEqual(
+          jasmine.objectContaining({
+            projectId: 'project-2',
+            title: 'Moved task',
+          }),
+        );
+      });
+
+      it('should reject projectId changes for subtasks', async () => {
+        const mockTask = createMockTask('subtask-1', {
+          parentId: 'parent-1',
+          projectId: 'project-1',
+        });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/subtask-1', {
+            body: { projectId: 'project-2' },
+          }),
+        );
+
+        expect(response.status).toBe(400);
+        expect(response.body.ok).toBe(false);
+        if (response.body.ok) {
+          throw new Error('Expected an error response');
+        }
+        expect(response.body.error.code).toBe('UNSUPPORTED_FIELD');
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should allow an unchanged inherited projectId on subtasks', async () => {
+        let mockTask = createMockTask('subtask-1', {
+          parentId: 'parent-1',
+          projectId: 'project-1',
+        });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+        taskServiceMock.update.and.callFake((id, changes) => {
+          if (id === mockTask.id) {
+            mockTask = { ...mockTask, ...changes };
+          }
+        });
+        activeProjects = [{ id: 'project-1' } as Project];
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/subtask-1', {
+            body: { projectId: 'project-1', title: 'Round-tripped subtask' },
+          }),
+        );
+
+        expect(response.body.ok).toBe(true);
+        expect(taskServiceMock.update).toHaveBeenCalledOnceWith('subtask-1', {
+          projectId: 'project-1',
+          title: 'Round-tripped subtask',
+        });
+      });
+
+      it('should allow an unchanged archived projectId in a task round trip', async () => {
+        const mockTask = createMockTask('task-1', {
+          projectId: 'archived-project',
+        });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: {
+              projectId: 'archived-project',
+              title: 'Round-tripped task',
+            },
+          }),
+        );
+
+        expect(response.body.ok).toBe(true);
+        expect(taskServiceMock.update).toHaveBeenCalledOnceWith('task-1', {
+          projectId: 'archived-project',
+          title: 'Round-tripped task',
+        });
+      });
+
+      it('should reject an unknown destination project', async () => {
+        const mockTask = createMockTask('task-1', { projectId: 'project-1' });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { projectId: 'missing-project' },
+          }),
+        );
+
+        expect(response.status).toBe(404);
+        expect(response.body.ok).toBe(false);
+        if (response.body.ok) {
+          throw new Error('Expected an error response');
+        }
+        expect(response.body.error.code).toBe('PROJECT_NOT_FOUND');
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should reject an archived destination project', async () => {
+        const mockTask = createMockTask('task-1', { projectId: 'project-1' });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+        activeProjects = [
+          {
+            id: 'archived-project',
+            isArchived: true,
+          } as Project,
+        ];
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { projectId: 'archived-project' },
+          }),
+        );
+
+        expect(response.status).toBe(404);
+        expect(response.body.ok).toBe(false);
+        if (response.body.ok) {
+          throw new Error('Expected an error response');
+        }
+        expect(response.body.error.code).toBe('PROJECT_NOT_FOUND');
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should reject prototype-property names as missing project ids', async () => {
+        const mockTask = createMockTask('task-1', { projectId: 'project-1' });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { projectId: 'constructor' },
+          }),
+        );
+
+        expect(response.status).toBe(404);
+        expect(response.body.ok).toBe(false);
+        if (response.body.ok) {
+          throw new Error('Expected an error response');
+        }
+        expect(response.body.error.code).toBe('PROJECT_NOT_FOUND');
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should reject prototype-property names as missing task ids', async () => {
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(Object.prototype as Task),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/constructor', {
+            body: { title: 'Ignored' },
+          }),
+        );
+
+        expect(response.status).toBe(404);
+        expect(response.body.ok).toBe(false);
+        if (response.body.ok) {
+          throw new Error('Expected an error response');
+        }
+        expect(response.body.error.code).toBe('TASK_NOT_FOUND');
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('should reject empty or whitespace-only projectIds', async () => {
+        const mockTask = createMockTask('task-1', { projectId: 'project-1' });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        for (const projectId of ['', '   ']) {
+          const response = await sendRequestAndWait(
+            createRequest('PATCH', '/tasks/task-1', {
+              body: { projectId },
+            }),
+          );
+
+          expect(response.status).toBe(400);
+          expect(response.body.ok).toBe(false);
+          if (response.body.ok) {
+            throw new Error('Expected an error response');
+          }
+          expect(response.body.error.code).toBe('INVALID_INPUT');
+        }
         expect(taskServiceMock.update).not.toHaveBeenCalled();
       });
     });
@@ -1052,6 +2663,61 @@ describe('LocalRestApiHandlerService', () => {
 
         expect(response.body.ok).toBe(true);
       });
+    });
+  });
+
+  describe('feature routes', () => {
+    const createFeatureRoutes = (
+      response?: LocalRestApiResponsePayload,
+    ): jasmine.SpyObj<LocalRestApiFeatureRoutes> => {
+      const routes = jasmine.createSpyObj<LocalRestApiFeatureRoutes>('FeatureRoutes', [
+        'handle',
+      ]);
+      routes.handle.and.resolveTo(response);
+      return routes;
+    };
+
+    beforeEach(() => {
+      service.init();
+    });
+
+    it('should answer with the first feature route that handles the request', async () => {
+      const featureResponse: LocalRestApiResponsePayload = {
+        requestId: 'test-request-id',
+        status: 200,
+        body: { ok: true, data: { handled: true } },
+      };
+      const notMine = createFeatureRoutes(undefined);
+      const mine = createFeatureRoutes(featureResponse);
+      const after = createFeatureRoutes(featureResponse);
+      featureRoutes.push(notMine, mine, after);
+      const request = createRequest('GET', '/feature-things');
+
+      const response = await sendRequestAndWait(request);
+
+      expect(response).toEqual(featureResponse);
+      expect(notMine.handle).toHaveBeenCalledWith(request);
+      expect(mine.handle).toHaveBeenCalledWith(request);
+      expect(after.handle).not.toHaveBeenCalled();
+    });
+
+    it('should return 404 when no feature route handles the request', async () => {
+      featureRoutes.push(createFeatureRoutes(undefined));
+
+      const response = await sendRequestAndWait(createRequest('GET', '/feature-things'));
+
+      expect(response.status).toBe(404);
+      expect((response.body as any).error.code).toBe('NOT_FOUND');
+    });
+
+    it('should not ask feature routes about core routes', async () => {
+      const routes = createFeatureRoutes(undefined);
+      featureRoutes.push(routes);
+
+      const response = await sendRequestAndWait(createRequest('GET', '/tags'));
+
+      expect(response.status).toBe(200);
+      expect(routes.handle).not.toHaveBeenCalled();
     });
   });
 

@@ -14,17 +14,23 @@ import { TranslateModule } from '@ngx-translate/core';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { DialogCompleteResolveTasksComponent } from '../../features/project/dialog-complete-resolve-tasks/dialog-complete-resolve-tasks.component';
 import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
+import { DialogPromptComponent } from '../../ui/dialog-prompt/dialog-prompt.component';
 import { DateService } from '../../core/date/date.service';
 import { DialogProjectCompleteComponent } from '../../features/project/dialog-project-complete/dialog-project-complete.component';
+import { PlainspaceShareService } from '../../features/issue/providers/plainspace/plainspace-share.service';
 
 describe('WorkContextMenuComponent', () => {
   let component: WorkContextMenuComponent;
   let fixture: ComponentFixture<WorkContextMenuComponent>;
   let mockProjectService: jasmine.SpyObj<ProjectService>;
+  let mockTagService: jasmine.SpyObj<TagService>;
   let mockWorkContextService: { activeWorkContextId: string | undefined };
   let mockMatDialog: jasmine.SpyObj<MatDialog>;
+  let mockPlainspaceShareService: jasmine.SpyObj<PlainspaceShareService>;
   let resolveResult$: any;
   let confirmResult$: any;
+  let promptResult$: any;
+  let isSharedOnPlainspace$: any;
   let router: Router;
   const logicalDoneOn = new Date(2026, 5, 5, 1, 0, 0).getTime();
 
@@ -46,6 +52,7 @@ describe('WorkContextMenuComponent', () => {
       'markTasksDone',
       'getByIdOnce$',
       'getByIdLive$',
+      'update',
     ]);
     mockProjectService.getByIdOnce$.and.returnValue(
       of({ id: 'project-123', title: 'Demo project' } as any),
@@ -65,14 +72,34 @@ describe('WorkContextMenuComponent', () => {
       of({ id: 'project-123', title: 'Demo project' } as any),
     );
     mockWorkContextService = { activeWorkContextId: undefined };
+    mockTagService = jasmine.createSpyObj('TagService', ['getTagById$', 'updateTag']);
+    mockTagService.getTagById$.and.returnValue(
+      of({ id: 'tag-1', title: 'Demo tag' } as any),
+    );
 
     const mockShareService = jasmine.createSpyObj('ShareService', ['getShareSupport']);
     mockShareService.getShareSupport.and.returnValue(Promise.resolve('none'));
 
+    mockPlainspaceShareService = jasmine.createSpyObj('PlainspaceShareService', [
+      'shareProjectOnPlainspace',
+    ]);
+    mockPlainspaceShareService.shareProjectOnPlainspace.and.returnValue(
+      Promise.resolve('space-1'),
+    );
+
+    // Default: project not yet shared → the Collaborate action is visible.
+    isSharedOnPlainspace$ = of(false);
+    const mockStore = jasmine.createSpyObj('Store', ['dispatch', 'select']);
+    mockStore.select.and.callFake(() => isSharedOnPlainspace$);
+
     mockMatDialog = jasmine.createSpyObj('MatDialog', ['open']);
     resolveResult$ = of(undefined);
     confirmResult$ = of(true);
+    promptResult$ = of(undefined);
     mockMatDialog.open.and.callFake((componentOrTemplateRef) => {
+      if (componentOrTemplateRef === DialogPromptComponent) {
+        return { afterClosed: () => promptResult$ } as MatDialogRef<unknown>;
+      }
       if (componentOrTemplateRef === DialogCompleteResolveTasksComponent) {
         return { afterClosed: () => resolveResult$ } as MatDialogRef<unknown>;
       }
@@ -90,13 +117,14 @@ describe('WorkContextMenuComponent', () => {
         { provide: WorkContextService, useValue: mockWorkContextService },
         { provide: SnackService, useValue: { open: () => {} } },
         { provide: MatDialog, useValue: mockMatDialog },
-        {
-          provide: TagService,
-          useValue: jasmine.createSpyObj('TagService', ['getTagById$']),
-        },
+        { provide: TagService, useValue: mockTagService },
         { provide: WorkContextMarkdownService, useValue: {} },
         { provide: ShareService, useValue: mockShareService },
-        { provide: Store, useValue: jasmine.createSpyObj('Store', ['dispatch']) },
+        { provide: Store, useValue: mockStore },
+        {
+          provide: PlainspaceShareService,
+          useValue: mockPlainspaceShareService,
+        },
         {
           provide: DateService,
           useValue: {
@@ -292,6 +320,69 @@ describe('WorkContextMenuComponent', () => {
     });
   });
 
+  describe('rename()', () => {
+    it('updates the project title once when a different title is entered', async () => {
+      promptResult$ = of('  New project  ');
+      await component.rename();
+      expect(mockProjectService.update).toHaveBeenCalledOnceWith('project-123', {
+        title: 'New project',
+      });
+    });
+
+    it('does not update the project when the title is unchanged', async () => {
+      promptResult$ = of('Demo project');
+      await component.rename();
+      expect(mockProjectService.update).not.toHaveBeenCalled();
+    });
+
+    it('does not update the project when the prompt is empty or cancelled', async () => {
+      promptResult$ = of('   ');
+      await component.rename();
+      promptResult$ = of(undefined);
+      await component.rename();
+      expect(mockProjectService.update).not.toHaveBeenCalled();
+    });
+
+    it('does nothing when the project cannot be found', async () => {
+      mockProjectService.getByIdOnce$.and.returnValue(of(undefined as any));
+      promptResult$ = of('New project');
+      await component.rename();
+      expect(mockMatDialog.open).not.toHaveBeenCalled();
+      expect(mockProjectService.update).not.toHaveBeenCalled();
+    });
+
+    it('updates the tag title once when a different title is entered', async () => {
+      component.contextId = 'tag-1';
+      component.contextTypeSet = WorkContextType.TAG;
+      promptResult$ = of('New tag');
+      await component.rename();
+      expect(mockTagService.updateTag).toHaveBeenCalledOnceWith('tag-1', {
+        title: 'New tag',
+      });
+      expect(mockProjectService.update).not.toHaveBeenCalled();
+    });
+
+    it('does not update the tag when the title is unchanged or the prompt is cancelled', async () => {
+      component.contextId = 'tag-1';
+      component.contextTypeSet = WorkContextType.TAG;
+      promptResult$ = of('Demo tag');
+      await component.rename();
+      promptResult$ = of(undefined);
+      await component.rename();
+      expect(mockTagService.updateTag).not.toHaveBeenCalled();
+    });
+
+    it('does nothing and does not throw when the tag cannot be found', async () => {
+      component.contextId = 'missing-tag';
+      component.contextTypeSet = WorkContextType.TAG;
+      mockTagService.getTagById$.and.returnValue(of(undefined as any));
+      promptResult$ = of('New tag');
+      await expectAsync(component.rename()).toBeResolved();
+      expect(mockMatDialog.open).not.toHaveBeenCalled();
+      expect(mockTagService.updateTag).not.toHaveBeenCalled();
+    });
+  });
+
   describe('archived state', () => {
     it('detects an archived project on init', async () => {
       mockProjectService.getByIdLive$.and.returnValue(
@@ -377,6 +468,65 @@ describe('WorkContextMenuComponent', () => {
       expect(menuButtonByIcon('unarchive')).toBeNull();
       expect(menuButtonByIcon('archive')).toBeNull();
       expect(menuButtonByIcon('check_circle')).toBeTruthy();
+    });
+  });
+
+  describe('shareProjectOnPlainspace()', () => {
+    it('provisions sharing for the project via the share service', async () => {
+      mockProjectService.getByIdOnce$.and.returnValue(
+        of({ id: 'project-123', title: 'Demo project' } as any),
+      );
+      await component.shareProjectOnPlainspace();
+      expect(mockPlainspaceShareService.shareProjectOnPlainspace).toHaveBeenCalledWith(
+        'project-123',
+        'Demo project',
+      );
+    });
+
+    it('does nothing when the project cannot be found', async () => {
+      mockProjectService.getByIdOnce$.and.returnValue(of(undefined as any));
+      await component.shareProjectOnPlainspace();
+      expect(mockPlainspaceShareService.shareProjectOnPlainspace).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('rendered Collaborate-on-Plainspace action', () => {
+    it('renders the action for an active, not-yet-shared project and wires it up', async () => {
+      mockProjectService.getByIdLive$.and.returnValue(
+        of({ id: 'project-123', isArchived: false } as any),
+      );
+      mockProjectService.getByIdOnce$.and.returnValue(
+        of({ id: 'project-123', title: 'Demo project' } as any),
+      );
+      isSharedOnPlainspace$ = of(false);
+      fixture.detectChanges();
+
+      const shareBtn = menuButtonByIcon('group_add');
+      expect(shareBtn).toBeTruthy();
+
+      shareBtn!.click();
+      await fixture.whenStable();
+      expect(mockPlainspaceShareService.shareProjectOnPlainspace).toHaveBeenCalledWith(
+        'project-123',
+        'Demo project',
+      );
+    });
+
+    it('hides the action once the project is already shared', async () => {
+      mockProjectService.getByIdLive$.and.returnValue(
+        of({ id: 'project-123', isArchived: false } as any),
+      );
+      isSharedOnPlainspace$ = of(true);
+      fixture.detectChanges();
+
+      expect(menuButtonByIcon('group_add')).toBeNull();
+    });
+
+    it('does not render the action for a tag context', async () => {
+      component.contextTypeSet = WorkContextType.TAG;
+      fixture.detectChanges();
+
+      expect(menuButtonByIcon('group_add')).toBeNull();
     });
   });
 });

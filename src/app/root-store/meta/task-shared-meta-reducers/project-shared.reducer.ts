@@ -3,23 +3,21 @@ import { Update } from '@ngrx/entity';
 import { RootState } from '../../root-state';
 import { TaskSharedActions } from '../task-shared.actions';
 import { PROJECT_FEATURE_NAME } from '../../../features/project/store/project.reducer';
-import { TAG_FEATURE_NAME } from '../../../features/tag/store/tag.reducer';
 import {
   TASK_FEATURE_NAME,
   taskAdapter,
 } from '../../../features/tasks/store/task.reducer';
 import { TIME_TRACKING_FEATURE_KEY } from '../../../features/time-tracking/store/time-tracking.reducer';
 import { TimeTrackingState } from '../../../features/time-tracking/time-tracking.model';
-import { Tag } from '../../../features/tag/tag.model';
 import { Task, TaskWithSubTasks } from '../../../features/tasks/task.model';
 import { unique } from '../../../util/unique';
 import {
   ActionHandlerMap,
+  enrichDeleteProjectAction,
   getProject,
-  getTag,
+  removeTasksFromAllTags,
   removeTasksFromList,
   updateProject,
-  updateTags,
 } from './task-shared-helpers';
 import { TASK_REPEAT_CFG_FEATURE_NAME } from '../../../features/task-repeat-cfg/store/task-repeat-cfg.selectors';
 import { TaskRepeatCfgState } from '../../../features/task-repeat-cfg/task-repeat-cfg.model';
@@ -140,17 +138,9 @@ const handleDeleteProject = (
   projectId: string,
   allTaskIds: string[],
 ): ExtendedState => {
-  const tagUpdates = (state[TAG_FEATURE_NAME].ids as string[]).map(
-    (tagId): Update<Tag> => ({
-      id: tagId,
-      changes: {
-        taskIds: removeTasksFromList(getTag(state, tagId).taskIds, allTaskIds),
-      },
-    }),
-  );
-
-  // First update tags
-  const stateWithUpdatedTags = updateTags(state, tagUpdates) as ExtendedState;
+  // First strip the deleted project's tasks from every tag (same all-tags
+  // scan the delete/archive paths use — handles one-sided refs after sync).
+  const stateWithUpdatedTags = removeTasksFromAllTags(state, allTaskIds) as ExtendedState;
 
   // Cleanup TIME_TRACKING for deleted project
   const updatedTimeTracking = cleanupTimeTrackingForProject(
@@ -217,10 +207,11 @@ export const projectSharedMetaReducer: MetaReducer = (
     if (!state) return reducer(state, action);
 
     const extendedState = state as ExtendedState;
-    const actionHandlers = createActionHandlers(extendedState, action);
-    const handler = actionHandlers[action.type];
+    const effectiveAction = enrichDeleteProjectAction(extendedState, action);
+    const actionHandlers = createActionHandlers(extendedState, effectiveAction);
+    const handler = actionHandlers[effectiveAction.type];
     const updatedState = handler ? handler(extendedState) : extendedState;
 
-    return reducer(updatedState, action);
+    return reducer(updatedState, effectiveAction);
   };
 };

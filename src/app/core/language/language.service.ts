@@ -41,6 +41,7 @@ export class LanguageService {
     if (!lng) this._set(this.detect());
     else if (this.isSupported(lng)) this._set(lng);
     else {
+      // eslint-disable-next-line local-rules/no-user-content-in-logs -- grandfathered log baseline (2026-09), not yet triaged
       Log.err('Not supported language code', lng);
       this.tryAutoswitch();
     }
@@ -60,7 +61,10 @@ export class LanguageService {
     this._isRTL.set(this._checkIsRTL(lng));
     this._translateService.use(lng);
 
-    this._dateTimeFormatService.setDateAdapterLocale(lng);
+    // Register the UI language for ISO text labels and as the locale fallback.
+    // DateTimeFormatService owns the adapter locale so an explicit date/time
+    // override keeps winning (#8565).
+    this._dateTimeFormatService.setUiLanguage(lng);
   }
 
   private _checkIsRTL(lng: LanguageCode): boolean {

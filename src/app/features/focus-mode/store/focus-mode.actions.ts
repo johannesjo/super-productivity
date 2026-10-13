@@ -1,5 +1,5 @@
 import { createAction, props } from '@ngrx/store';
-import { FocusModeMode } from '../focus-mode.model';
+import { FocusModeMode, TimerState } from '../focus-mode.model';
 
 // Core actions
 export const focusModeLoaded = createAction('[FocusMode] Loaded');
@@ -21,7 +21,7 @@ export const startFocusPreparation = createAction('[FocusMode] Start Preparation
 
 export const startFocusSession = createAction(
   '[FocusMode] Start Session',
-  props<{ duration?: number }>(),
+  props<{ duration?: number; taskId?: string }>(),
 );
 
 export const navigateToMainScreen = createAction('[FocusMode] Navigate To Main Screen');
@@ -99,5 +99,21 @@ export const restoreFocusSessionFromNative = createAction(
     remainingMs: number;
     isBreak: boolean;
     isPaused: boolean;
+    pausedTaskId?: string;
+  }>(),
+);
+
+/**
+ * Re-adopt a focus session from the local snapshot after the WebView was killed
+ * in the background and recreated with an idle store (iOS only).
+ * `timer.startedAt` is absolute, so the tick reducer catches up on its own.
+ */
+export const restoreFocusSession = createAction(
+  '[FocusMode] Restore Session',
+  props<{
+    timer: TimerState;
+    mode: FocusModeMode;
+    currentCycle: number;
+    pausedTaskId: string | null;
   }>(),
 );

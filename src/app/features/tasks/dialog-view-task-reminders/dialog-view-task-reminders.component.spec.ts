@@ -20,7 +20,12 @@ import { ProjectService } from '../../project/project.service';
 import { Reminder } from '../../reminder/reminder.model';
 import { ReminderService } from '../../reminder/reminder.service';
 import { TODAY_TAG } from '../../tag/tag.const';
-import { DEFAULT_TASK, Task, TaskWithReminderData } from '../task.model';
+import {
+  DEFAULT_TASK,
+  Task,
+  TaskWithReminderData,
+  TaskWithSubTasks,
+} from '../task.model';
 import { TaskService } from '../task.service';
 import {
   DialogViewTaskRemindersComponent,
@@ -588,7 +593,10 @@ describe('DialogViewTaskRemindersComponent destroy clears unhandled deadline rem
   let projectServiceSpy: jasmine.SpyObj<ProjectService>;
   let matDialogSpy: jasmine.SpyObj<MatDialog>;
   let matDialogRefSpy: jasmine.SpyObj<MatDialogRef<DialogViewTaskRemindersComponent>>;
-  let reminderServiceStub: { onRemindersActive$: Subject<TaskWithReminderData[]> };
+  let reminderServiceStub: {
+    onRemindersActive$: Subject<TaskWithReminderData[]>;
+    suppressReminderUiAfterDismiss: (taskId: string, remindAt: number) => void;
+  };
 
   const buildTask = (id: string, overrides: Partial<Task> = {}): Task =>
     ({
@@ -649,6 +657,7 @@ describe('DialogViewTaskRemindersComponent destroy clears unhandled deadline rem
     matDialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
     reminderServiceStub = {
       onRemindersActive$: new Subject<TaskWithReminderData[]>(),
+      suppressReminderUiAfterDismiss: jasmine.createSpy('suppressReminderUiAfterDismiss'),
     };
 
     await TestBed.configureTestingModule({
@@ -724,6 +733,31 @@ describe('DialogViewTaskRemindersComponent destroy clears unhandled deadline rem
     component.ngOnDestroy();
 
     expect(dispatchedClearIds()).toEqual([]);
+  });
+
+  it('puts passively-dismissed schedule reminders into the UI cooldown on destroy', () => {
+    const reminder = buildReminder('task-1', { isDeadline: false });
+    const component = createComponent([reminder], [buildTask('task-1')]);
+
+    // No explicit action — closed via backdrop/Escape.
+    component.ngOnDestroy();
+
+    expect(reminderServiceStub.suppressReminderUiAfterDismiss).toHaveBeenCalledOnceWith(
+      'task-1',
+      jasmine.any(Number),
+    );
+  });
+
+  it('does NOT cooldown a schedule reminder the user already acted on', () => {
+    const reminder = buildReminder('task-1', { isDeadline: false });
+    const component = createComponent([reminder], [buildTask('task-1')]);
+
+    // Explicit action removes it from the list and marks it dismissed.
+    component.dismissReminderOnly(reminder);
+
+    component.ngOnDestroy();
+
+    expect(reminderServiceStub.suppressReminderUiAfterDismiss).not.toHaveBeenCalled();
   });
 
   it('clears every unhandled deadline reminder on destroy, skipping dismissed ones', () => {
@@ -904,7 +938,13 @@ describe('DialogViewTaskRemindersComponent accessibility', () => {
           provide: MatDialog,
           useValue: { open: () => ({ afterClosed: () => of(false) }) },
         },
-        { provide: ReminderService, useValue: { onRemindersActive$: new Subject() } },
+        {
+          provide: ReminderService,
+          useValue: {
+            onRemindersActive$: new Subject(),
+            suppressReminderUiAfterDismiss: () => {},
+          },
+        },
         {
           provide: DateService,
           useValue: { todayStr: () => '2026-06-06', getStartOfNextDayDiffMs: () => 0 },
@@ -941,7 +981,10 @@ describe('DialogViewTaskRemindersComponent navigation and focus', () => {
   let component: DialogViewTaskRemindersComponent;
   let fixture: any;
   let taskServiceSpy: jasmine.SpyObj<TaskService>;
-  let reminderServiceStub: { onRemindersActive$: Subject<TaskWithReminderData[]> };
+  let reminderServiceStub: {
+    onRemindersActive$: Subject<TaskWithReminderData[]>;
+    suppressReminderUiAfterDismiss: (taskId: string, remindAt: number) => void;
+  };
 
   const buildTask = (id: string): Task =>
     ({ ...DEFAULT_TASK, id, title: `Task ${id}` }) as Task;
@@ -959,7 +1002,10 @@ describe('DialogViewTaskRemindersComponent navigation and focus', () => {
       'setDone',
       'setCurrentId',
     ]);
-    reminderServiceStub = { onRemindersActive$: new Subject<TaskWithReminderData[]>() };
+    reminderServiceStub = {
+      onRemindersActive$: new Subject<TaskWithReminderData[]>(),
+      suppressReminderUiAfterDismiss: jasmine.createSpy('suppressReminderUiAfterDismiss'),
+    };
 
     await TestBed.configureTestingModule({
       imports: [
@@ -1153,7 +1199,10 @@ describe('DialogViewTaskRemindersComponent reconciles vanished reminders (sync)'
   let projectServiceSpy: jasmine.SpyObj<ProjectService>;
   let matDialogSpy: jasmine.SpyObj<MatDialog>;
   let matDialogRefSpy: jasmine.SpyObj<MatDialogRef<DialogViewTaskRemindersComponent>>;
-  let reminderServiceStub: { onRemindersActive$: Subject<TaskWithReminderData[]> };
+  let reminderServiceStub: {
+    onRemindersActive$: Subject<TaskWithReminderData[]>;
+    suppressReminderUiAfterDismiss: (taskId: string, remindAt: number) => void;
+  };
   let storeTasks$: BehaviorSubject<Task[]>;
 
   const buildTask = (id: string, overrides: Partial<Task> = {}): Task =>
@@ -1205,6 +1254,7 @@ describe('DialogViewTaskRemindersComponent reconciles vanished reminders (sync)'
     matDialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
     reminderServiceStub = {
       onRemindersActive$: new Subject<TaskWithReminderData[]>(),
+      suppressReminderUiAfterDismiss: jasmine.createSpy('suppressReminderUiAfterDismiss'),
     };
 
     await TestBed.configureTestingModule({
@@ -1441,5 +1491,183 @@ describe('DialogViewTaskRemindersComponent reconciles vanished reminders (sync)'
     matDialogRefSpy.getState.and.returnValue(MatDialogState.CLOSED);
     storeTasks$.next([buildTask('task-1', { remindAt: undefined })]);
     expect(matDialogRefSpy.close).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe('DialogViewTaskRemindersComponent single-task delete', () => {
+  let taskServiceSpy: jasmine.SpyObj<TaskService>;
+  let projectServiceSpy: jasmine.SpyObj<ProjectService>;
+  let matDialogSpy: jasmine.SpyObj<MatDialog>;
+  let matDialogRefSpy: jasmine.SpyObj<MatDialogRef<DialogViewTaskRemindersComponent>>;
+  let dispatchSpy: jasmine.Spy;
+  let reminderServiceStub: {
+    onRemindersActive$: Subject<TaskWithReminderData[]>;
+    suppressReminderUiAfterDismiss: (taskId: string, remindAt: number) => void;
+  };
+
+  const buildTask = (id: string, overrides: Partial<Task> = {}): Task =>
+    ({
+      ...DEFAULT_TASK,
+      id,
+      title: `Task ${id}`,
+      remindAt: Date.now() - 1000,
+      ...overrides,
+    }) as Task;
+
+  const buildReminder = (
+    id: string,
+    opts: { isDeadline?: boolean } = {},
+  ): TaskWithReminderData =>
+    ({
+      ...DEFAULT_TASK,
+      id,
+      title: `Task ${id}`,
+      deadlineRemindAt: opts.isDeadline ? Date.now() - 1000 : undefined,
+      remindAt: opts.isDeadline ? undefined : Date.now() - 1000,
+      isDeadlineReminder: !!opts.isDeadline,
+      reminderData: { remindAt: Date.now() - 1000 },
+    }) as TaskWithReminderData;
+
+  const createComponent = (
+    reminders: TaskWithReminderData[],
+    storeTasks: Task[],
+  ): DialogViewTaskRemindersComponent => {
+    TestBed.overrideProvider(MAT_DIALOG_DATA, { useValue: { reminders } });
+    taskServiceSpy.getByIdsLive$.and.returnValue(of(storeTasks));
+    const store = TestBed.inject(MockStore);
+    dispatchSpy = spyOn(store, 'dispatch').and.callThrough();
+    const fixture = TestBed.createComponent(DialogViewTaskRemindersComponent);
+    return fixture.componentInstance;
+  };
+
+  // cfg() resolves to undefined with an empty MockStore, so isConfirmBeforeDelete
+  // defaults to true and deleteTask always routes through the confirm dialog.
+  const mockConfirmResult = (isConfirm: boolean): void => {
+    matDialogSpy.open.and.returnValue({
+      afterClosed: () => of(isConfirm),
+    } as unknown as MatDialogRef<unknown>);
+  };
+
+  beforeEach(async () => {
+    matDialogRefSpy = jasmine.createSpyObj('MatDialogRef', ['close', 'getState']);
+    matDialogRefSpy.getState.and.returnValue(MatDialogState.OPEN);
+    taskServiceSpy = jasmine.createSpyObj('TaskService', [
+      'getByIdsLive$',
+      'getByIdWithSubTaskData$',
+      'remove',
+      'setDone',
+      'setCurrentId',
+    ]);
+    projectServiceSpy = jasmine.createSpyObj('ProjectService', ['moveTaskToTodayList']);
+    matDialogSpy = jasmine.createSpyObj('MatDialog', ['open']);
+    reminderServiceStub = {
+      onRemindersActive$: new Subject<TaskWithReminderData[]>(),
+      suppressReminderUiAfterDismiss: jasmine.createSpy('suppressReminderUiAfterDismiss'),
+    };
+
+    await TestBed.configureTestingModule({
+      imports: [
+        DialogViewTaskRemindersComponent,
+        NoopAnimationsModule,
+        TranslateModule.forRoot(),
+      ],
+      providers: [
+        provideMockStore({ initialState: {} }),
+        { provide: MatDialogRef, useValue: matDialogRefSpy },
+        { provide: MAT_DIALOG_DATA, useValue: { reminders: [] } },
+        { provide: TaskService, useValue: taskServiceSpy },
+        { provide: ProjectService, useValue: projectServiceSpy },
+        { provide: MatDialog, useValue: matDialogSpy },
+        { provide: ReminderService, useValue: reminderServiceStub },
+        TranslateService,
+        TranslateStore,
+      ],
+    })
+      .overrideComponent(DialogViewTaskRemindersComponent, {
+        set: { template: '' },
+      })
+      .compileComponents();
+  });
+
+  it('removes the task (with subtasks) and closes the dialog on confirm', () => {
+    const reminder = buildReminder('task-1');
+    const taskWithSubTasks = {
+      ...buildTask('task-1'),
+      subTasks: [],
+    } as TaskWithSubTasks;
+    taskServiceSpy.getByIdWithSubTaskData$.and.returnValue(of(taskWithSubTasks));
+    mockConfirmResult(true);
+
+    const component = createComponent([reminder], [buildTask('task-1')]);
+    component.deleteTask(reminder);
+
+    expect(taskServiceSpy.getByIdWithSubTaskData$).toHaveBeenCalledWith('task-1');
+    expect(taskServiceSpy.remove).toHaveBeenCalledOnceWith(taskWithSubTasks);
+    expect(matDialogRefSpy.close).toHaveBeenCalledTimes(1);
+  });
+
+  // #8583: Enter in the delete confirm deletes the task.
+  it('focuses the confirm button of the delete dialog', () => {
+    const reminder = buildReminder('task-1');
+    mockConfirmResult(false);
+
+    const component = createComponent([reminder], [buildTask('task-1')]);
+    component.deleteTask(reminder);
+
+    expect(matDialogSpy.open).toHaveBeenCalledWith(
+      jasmine.anything(),
+      jasmine.objectContaining({
+        data: jasmine.objectContaining({ isFocusConfirm: true }),
+      }),
+    );
+  });
+
+  it('does NOT remove the task when the confirm dialog is cancelled', () => {
+    const reminder = buildReminder('task-1');
+    mockConfirmResult(false);
+
+    const component = createComponent([reminder], [buildTask('task-1')]);
+    component.deleteTask(reminder);
+
+    expect(taskServiceSpy.remove).not.toHaveBeenCalled();
+    expect(matDialogRefSpy.close).not.toHaveBeenCalled();
+  });
+
+  it('does NOT clear the deadline reminder on destroy after deleting a deadline-reminder task', () => {
+    const reminder = buildReminder('task-1', { isDeadline: true });
+    const taskWithSubTasks = {
+      ...buildTask('task-1'),
+      subTasks: [],
+    } as TaskWithSubTasks;
+    taskServiceSpy.getByIdWithSubTaskData$.and.returnValue(of(taskWithSubTasks));
+    mockConfirmResult(true);
+
+    const component = createComponent([reminder], [buildTask('task-1')]);
+    component.deleteTask(reminder);
+    dispatchSpy.calls.reset();
+
+    component.ngOnDestroy();
+
+    const clearCalls = dispatchSpy.calls
+      .allArgs()
+      .map(([action]) => action)
+      .filter((a) => a.type === TaskSharedActions.clearDeadlineReminder.type);
+    expect(clearCalls).toEqual([]);
+  });
+
+  it('ignores a second deleteTask call while a delete is in flight', () => {
+    const reminder = buildReminder('task-1');
+    const taskWithSubTasks = {
+      ...buildTask('task-1'),
+      subTasks: [],
+    } as TaskWithSubTasks;
+    taskServiceSpy.getByIdWithSubTaskData$.and.returnValue(of(taskWithSubTasks));
+    mockConfirmResult(true);
+
+    const component = createComponent([reminder], [buildTask('task-1')]);
+    component.deleteTask(reminder);
+    component.deleteTask(reminder);
+
+    expect(taskServiceSpy.remove).toHaveBeenCalledTimes(1);
   });
 });

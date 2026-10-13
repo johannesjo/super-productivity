@@ -23,7 +23,9 @@ interface LogEntry {
 // deep local debugging call Log.setLevel(LogLevel.DEBUG) ad hoc.
 const LOG_LEVEL = LogLevel.VERBOSE;
 
-const MAX_DATA_LENGTH = 400;
+// Exported so payloads designed for the exported Logs can pin "fits in one
+// arg" in their specs (see operation-decrypt-failure-log.util.spec.ts).
+export const MAX_DATA_LENGTH = 400;
 
 const truncateSerialized = (value: string): string =>
   value.length > MAX_DATA_LENGTH ? 'short:' + value.substring(0, MAX_DATA_LENGTH) : value;
@@ -53,6 +55,10 @@ const formatDomObjectLabel = (value: { constructor?: { name?: string } }): strin
 
 const serializeErrorMessage = (error: Error): string => truncateSerialized(String(error));
 
+// Privacy invariant: serialize ONLY name/message/stack. Logs are exportable,
+// and some error types (e.g. HttpNotOkAPIError) carry a `.detail`/`.body` with
+// provider-response content — Nextcloud filenames, Azure AADSTS text — that is
+// sanctioned for UI display only. Never spread additional own-properties here.
 const serializeErrorArg = (error: Error): Record<string, unknown> => {
   const result: Record<string, unknown> = {
     name: error.name,
@@ -65,6 +71,26 @@ const serializeErrorArg = (error: Error): Record<string, unknown> => {
 
   return result;
 };
+
+// Angular's HttpErrorResponse is not an Error, and its url, message and body can
+// carry user content. Matched by name and url rather than instanceof so the
+// reminder worker, which bundles this file, does not pull in @angular/common/http.
+const isHttpErrorResponse = (
+  value: unknown,
+): value is { status: unknown; statusText: unknown } =>
+  typeof value === 'object' &&
+  value !== null &&
+  (value as { name?: unknown }).name === 'HttpErrorResponse' &&
+  'url' in value;
+
+const serializeHttpErrorArg = (error: {
+  status: unknown;
+  statusText: unknown;
+}): Record<string, unknown> => ({
+  name: 'HttpErrorResponse',
+  status: error.status,
+  statusText: error.statusText,
+});
 
 // IMPORTANT: All Log class methods and context loggers (SyncLog, etc.) record logs to history
 // for later export. The trade-off is that line numbers will show log.ts instead of the
@@ -127,6 +153,8 @@ export class Log {
           msg = firstArg;
         } else if (firstArg instanceof Error) {
           msg = serializeErrorMessage(firstArg);
+        } else if (isHttpErrorResponse(firstArg)) {
+          msg = JSON.stringify(serializeHttpErrorArg(firstArg));
         } else if (typeof firstArg === 'object' && firstArg !== null) {
           // Handle DOM objects (HTMLCollection, NodeList, etc.)
           if (isDomRelatedObject(firstArg)) {
@@ -247,6 +275,9 @@ export class Log {
           }
           if (arg instanceof Error) {
             return serializeErrorArg(arg);
+          }
+          if (isHttpErrorResponse(arg)) {
+            return serializeHttpErrorArg(arg);
           }
           // Try to serialize each arg safely
           const r = JSON.stringify(arg);

@@ -21,7 +21,16 @@
 
   <style name="AppTheme.NoActionBarLaunch" >
     <item name="android:windowActionBarOverlay">true</item>
-    <item name="android:windowBackground">@null</item>
+    <!--
+      Theme-colored window decor (was @null). With @null the decor falls back to
+      the static Light AppTheme default (~white), which the adjustResize keyboard
+      animation can briefly expose behind the WebView as a white flash even in
+      dark mode. @color/windowBackground has a values-night variant (#131314), so
+      this tracks system day/night; the in-app theme toggle (which can diverge
+      from the system setting) is kept in sync at runtime by
+      NavigationBarPlugin.setWebViewBackgroundColor.
+    -->
+    <item name="android:windowBackground">@color/windowBackground</item>
     <item name="windowActionBar">false</item>
     <item name="windowNoTitle">true</item>
     <item name="android:background">@null</item>

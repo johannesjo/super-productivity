@@ -1,11 +1,6 @@
-import {
-  ipcRenderer,
-  IpcRendererEvent,
-  webFrame,
-  contextBridge,
-  webUtils,
-} from 'electron';
+import { ipcRenderer, webFrame, contextBridge, webUtils } from 'electron';
 import { ElectronAPI } from './electronAPI.d';
+import { IS_GNOME_DESKTOP, IS_GNOME_WAYLAND } from './common.const';
 import { IPC, IPCEventValue } from './shared-with-frontend/ipc-events.const';
 import {
   getDistChannel,
@@ -19,7 +14,17 @@ import {
 import {
   LocalRestApiRequestPayload,
   LocalRestApiResponsePayload,
+  LocalRestApiState,
 } from './shared-with-frontend/local-rest-api.model';
+import {
+  AssistantAccessCredentialResult,
+  AssistantAccessScope,
+  AssistantAccessState,
+} from './shared-with-frontend/assistant-access.model';
+import {
+  createJiraPreloadApiConsumer,
+  toPayloadOnlyIpcListener,
+} from './shared-with-frontend/preload-api';
 
 let pluginNodeExecutionApiConsumed = false;
 
@@ -30,32 +35,12 @@ const _invoke: (channel: IPCEventValue, ...args: unknown[]) => Promise<unknown> 
   ...args
 ) => ipcRenderer.invoke(channel, ...args);
 
-const isGnomeDesktop = (): boolean => {
-  if (process.platform !== 'linux') {
-    return false;
-  }
-
-  const desktopValues = [
-    process.env.XDG_CURRENT_DESKTOP,
-    process.env.XDG_SESSION_DESKTOP,
-    process.env.DESKTOP_SESSION,
-    process.env.GNOME_SHELL_SESSION_MODE,
-  ]
-    .filter((value): value is string => !!value)
-    .map((value) => value.toLowerCase());
-
-  return desktopValues.some(
-    (value) => value.includes('gnome') || value.includes('ubuntu'),
-  );
-};
+const consumeJiraApi = createJiraPreloadApiConsumer(_invoke);
 
 const ea: ElectronAPI = {
-  on: (
-    channel: string,
-    listener: (event: IpcRendererEvent, ...args: unknown[]) => void,
-  ) => {
+  on: (channel: string, listener: (...args: unknown[]) => void) => {
     // NOTE: there is no proper way to unsubscribe apart from unsubscribing all
-    ipcRenderer.on(channel, listener);
+    ipcRenderer.on(channel, toPayloadOnlyIpcListener(listener));
   },
   // SYNC
   // ----
@@ -67,6 +52,7 @@ const ea: ElectronAPI = {
   getBackupPath: () => _invoke('GET_BACKUP_PATH') as Promise<string>,
   checkBackupAvailable: () =>
     _invoke('BACKUP_IS_AVAILABLE') as Promise<false | LocalBackupMeta>,
+  listBackups: () => _invoke('BACKUP_LIST') as Promise<LocalBackupMeta[]>,
   loadBackupData: (backupPath) =>
     _invoke('BACKUP_LOAD_DATA', backupPath) as Promise<string>,
   fileSyncSave: (args) => _invoke('FILE_SYNC_SAVE', args) as Promise<string | Error>,
@@ -76,11 +62,14 @@ const ea: ElectronAPI = {
       dataStr: string | undefined;
     }>,
   fileSyncRemove: (args) => _invoke('FILE_SYNC_REMOVE', args) as Promise<void>,
-  fileSyncListFiles: (args) =>
-    _invoke('FILE_SYNC_LIST_FILES', args) as Promise<string[] | Error>,
   checkDirExists: (args) => _invoke('CHECK_DIR_EXISTS', args) as Promise<true | Error>,
 
   pickDirectory: () => _invoke('PICK_DIRECTORY') as Promise<string | Error | undefined>,
+  commitPickedDirectory: () =>
+    _invoke('COMMIT_PICKED_DIRECTORY') as Promise<
+      { path: string; isChanged: boolean } | null | Error
+    >,
+  discardPickedDirectory: () => _invoke('DISCARD_PICKED_DIRECTORY') as Promise<void>,
   getSyncFolderPath: () => _invoke('GET_SYNC_FOLDER_PATH') as Promise<string | null>,
 
   showOpenDialog: (options: {
@@ -108,7 +97,8 @@ const ea: ElectronAPI = {
   },
   getZoomFactor: () => webFrame.getZoomFactor(),
   isLinux: () => process.platform === 'linux',
-  isGnomeDesktop,
+  isGnomeDesktop: () => IS_GNOME_DESKTOP,
+  isGnomeWayland: () => IS_GNOME_WAYLAND,
   isMacOS: () => process.platform === 'darwin',
   isAppleSilicon: () => process.platform === 'darwin' && process.arch === 'arm64',
   isSnap: () => process && process.env && !!process.env.SNAP,
@@ -181,7 +171,7 @@ const ea: ElectronAPI = {
   relaunch: () => _send('RELAUNCH'),
   exit: () => _send('EXIT'),
   flashFrame: () => _send('FLASH_FRAME'),
-  showOrFocus: () => _send('SHOW_OR_FOCUS'),
+  showOrFocus: (opts?: { isReminder?: boolean }) => _send('SHOW_OR_FOCUS', opts),
   lockScreen: () => _send('LOCK_SCREEN'),
   shutdownNow: () => _send('SHUTDOWN_NOW'),
   reloadMainWin: () => _send('RELOAD_MAIN_WIN'),
@@ -222,10 +212,7 @@ const ea: ElectronAPI = {
     _send('REGISTER_GLOBAL_SHORTCUTS', keyboardCfg),
   showFullScreenBlocker: (args) => _send('FULL_SCREEN_BLOCKER', args),
 
-  makeJiraRequest: (args) => _send('JIRA_MAKE_REQUEST_EVENT', args),
-  jiraSetupImgHeaders: (args) => _send('JIRA_SETUP_IMG_HEADERS', args),
-
-  backupAppData: (appData) => _send('BACKUP', appData),
+  backupAppData: (appData) => _invoke('BACKUP', appData) as Promise<void>,
 
   updateCurrentTask: (
     task,
@@ -245,8 +232,6 @@ const ea: ElectronAPI = {
       focusModeMode,
     ),
 
-  exec: (command: string) => _send('EXEC', command),
-
   updateTodayTasks: (tasks: any[]) => _send('TODAY_TASKS_UPDATED', tasks),
 
   onSwitchTask: (listener: (taskId: string) => void) => {
@@ -255,6 +240,8 @@ const ea: ElectronAPI = {
     ipcRenderer.on('SWITCH_TASK', (_: any, taskId: string) => listener(taskId));
   },
 
+  consumeJiraApi: () => consumeJiraApi(),
+
   // Plugin API
   consumePluginNodeExecutionApi: () => {
     if (pluginNodeExecutionApiConsumed) {
@@ -262,8 +249,11 @@ const ea: ElectronAPI = {
     }
     pluginNodeExecutionApiConsumed = true;
     return {
-      requestGrant: (pluginId: string) =>
-        _invoke('PLUGIN_REQUEST_NODE_EXECUTION_GRANT', pluginId) as Promise<{
+      requestGrant: (
+        pluginId: string,
+        displayInfo?: { name?: string; version?: string },
+      ) =>
+        _invoke('PLUGIN_REQUEST_NODE_EXECUTION_GRANT', pluginId, displayInfo) as Promise<{
           token: string;
         } | null>,
       executeScript: (
@@ -283,11 +273,14 @@ const ea: ElectronAPI = {
           pluginId,
           grantToken,
         ) as Promise<void>,
+      clearConsent: (pluginId: string) =>
+        _invoke('PLUGIN_CLEAR_NODE_EXECUTION_CONSENT', pluginId) as Promise<void>,
     };
   },
 
   // Plugin OAuth
-  pluginOAuthPrepare: () => _invoke('PLUGIN_OAUTH_PREPARE') as Promise<{ port: number }>,
+  pluginOAuthPrepare: (port?: number) =>
+    _invoke('PLUGIN_OAUTH_PREPARE', port) as Promise<{ port: number }>,
   pluginOAuthStart: (url: string) => _send('PLUGIN_OAUTH_START', { url }),
   onPluginOAuthCb: (
     listener: (data: { code?: string; error?: string; state?: string }) => void,
@@ -306,6 +299,23 @@ const ea: ElectronAPI = {
   },
   sendLocalRestApiResponse: (payload: LocalRestApiResponsePayload) =>
     _send(IPC.LOCAL_REST_API_RESPONSE, payload),
+  getLocalRestApiToken: () => _invoke(IPC.LOCAL_REST_API_GET_TOKEN) as Promise<string>,
+  regenerateLocalRestApiToken: () =>
+    _invoke(IPC.LOCAL_REST_API_REGENERATE_TOKEN) as Promise<string>,
+  getLocalRestApiState: () =>
+    _invoke(IPC.LOCAL_REST_API_GET_STATE) as Promise<LocalRestApiState>,
+  setLocalRestApiEnabled: (isEnabled: boolean) =>
+    _invoke(IPC.LOCAL_REST_API_SET_ENABLED, isEnabled) as Promise<LocalRestApiState>,
+  getAssistantAccessState: () =>
+    _invoke(IPC.ASSISTANT_ACCESS_GET_STATE) as Promise<AssistantAccessState>,
+  setAssistantAccessEnabled: (isEnabled: boolean) =>
+    _invoke(IPC.ASSISTANT_ACCESS_SET_ENABLED, isEnabled) as Promise<AssistantAccessState>,
+  setAssistantAccessScopes: (scopes: AssistantAccessScope[]) =>
+    _invoke(IPC.ASSISTANT_ACCESS_SET_SCOPES, scopes) as Promise<AssistantAccessState>,
+  rotateAssistantAccessCredential: () =>
+    _invoke(
+      IPC.ASSISTANT_ACCESS_ROTATE_CREDENTIAL,
+    ) as Promise<AssistantAccessCredentialResult>,
 };
 
 // Expose ea to window for ipc-event.ts using contextBridge for context isolation

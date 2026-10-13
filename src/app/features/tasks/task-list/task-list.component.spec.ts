@@ -1,3 +1,4 @@
+import { TaskMultiDragService } from '../task-multi-drag.service';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TaskListComponent } from './task-list.component';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
@@ -6,6 +7,7 @@ import { TaskService } from '../task.service';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { IssueService } from '../../issue/issue.service';
 import { TaskViewCustomizerService } from '../../task-view-customizer/task-view-customizer.service';
+import { NO_TAG_GROUP_ID } from '../../task-view-customizer/types';
 import { ScheduleExternalDragService } from '../../schedule/schedule-week/schedule-external-drag.service';
 import { DropListService } from '../../../core-ui/drop-list/drop-list.service';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -13,6 +15,7 @@ import { of } from 'rxjs';
 import { TaskWithSubTasks } from '../task.model';
 import { SectionService } from '../../section/section.service';
 import { moveSubTask } from '../store/task.actions';
+import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.actions';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { Task } from '../task.model';
@@ -79,10 +82,31 @@ describe('TaskListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [TaskListComponent, NoopAnimationsModule],
       providers: [
+        {
+          provide: TaskMultiDragService,
+          useValue: {
+            ids: () => [],
+            selectedIds: () => new Set(),
+            draggedIds: () => new Set(),
+            previewTasks: () => [],
+            selectionSize: () => 0,
+            isListGroupDrag: () => false,
+            start: () => {},
+            clear: () => {},
+            finish: () => {},
+            canDrop: () => false,
+            isPlacementUnchanged: () => false,
+            drop: () => Promise.resolve(),
+          },
+        },
         provideMockStore({ initialState: {} }),
         {
           provide: TaskService,
-          useValue: { currentTaskId$: of(null) },
+          useValue: {
+            currentTaskId$: of(null),
+            updateTags: jasmine.createSpy('updateTags'),
+            addToToday: jasmine.createSpy('addToToday'),
+          },
         },
         {
           provide: WorkContextService,
@@ -710,11 +734,158 @@ describe('TaskListComponent', () => {
       expect(sectionServiceMock.addTaskToSection).not.toHaveBeenCalled();
       expect(sectionServiceMock.removeTaskFromSection).not.toHaveBeenCalled();
     });
+
+    it('skips a reorder WITHIN the Done list (auto-sorted) so no moveTaskInTodayList op is emitted', () => {
+      callMove('task1', 'DONE', 'DONE', 'PARENT', 'PARENT');
+
+      const dispatched = (store.dispatch as jasmine.Spy).calls
+        .allArgs()
+        .map((args) => args[0]);
+      expect(dispatched.some((a) => a.type === moveTaskInTodayList.type)).toBe(false);
+    });
+
+    it('still moves a task OUT of Done (DONE -> UNDONE) via moveTaskInTodayList', () => {
+      callMove('task1', 'DONE', 'UNDONE', 'PARENT', 'PARENT');
+
+      const dispatched = (store.dispatch as jasmine.Spy).calls
+        .allArgs()
+        .map((args) => args[0]);
+      expect(dispatched.some((a) => a.type === moveTaskInTodayList.type)).toBe(true);
+    });
   });
 
   // The public drop() handler turns a CdkDragDrop event into the right action,
   // including the placement math (newIds order -> anchor). Covers the
   // event->action translation the reducer specs assume.
+  describe('group drop bounds', () => {
+    let moveGroup: jasmine.Spy;
+    const groupEvent = (point: {
+      x: number;
+      y: number;
+    }): Parameters<TaskListComponent['drop']>[0] =>
+      ({
+        previousContainer: { data: { listId: 'PARENT', listModelId: 'UNDONE' } },
+        container: {
+          data: { listId: 'PARENT', listModelId: 'section', filteredTasks: [] },
+          element: {
+            nativeElement: {
+              getBoundingClientRect: () => ({
+                left: 100,
+                right: 500,
+                top: 300,
+                bottom: 350,
+              }),
+            },
+          },
+        },
+        item: { data: { id: 't1' } },
+        previousIndex: 0,
+        currentIndex: 0,
+        isPointerOverContainer: false,
+        dropPoint: point,
+      }) as unknown as Parameters<TaskListComponent['drop']>[0];
+
+    beforeEach(() => {
+      spyOn(component.multiDrag, 'ids').and.returnValue(['t1', 't2', 't3']);
+      spyOn(component.multiDrag, 'isListGroupDrag').and.returnValue(true);
+      spyOn(component.multiDrag, 'canDrop').and.returnValue(true);
+      spyOn(component.multiDrag, 'isPlacementUnchanged').and.returnValue(false);
+      moveGroup = spyOn(component.multiDrag, 'drop').and.resolveTo();
+    });
+
+    it('moves the group when the pointer is inside the live section but outside cached bounds', async () => {
+      await component.drop(groupEvent({ x: 300, y: 325 }));
+      expect(moveGroup).toHaveBeenCalledOnceWith('section', 't1', ['t1']);
+      expect(store.dispatch).not.toHaveBeenCalled();
+    });
+
+    it('keeps the actual destination order when the group leader stays at the same index', async () => {
+      const data = {
+        listId: 'PARENT',
+        listModelId: 'section',
+        filteredTasks: [{ id: 'before' }, { id: 't1' }, { id: 'after' }],
+      };
+      const container = {
+        data,
+        element: {
+          nativeElement: {
+            getBoundingClientRect: () => ({
+              left: 100,
+              right: 500,
+              top: 300,
+              bottom: 350,
+            }),
+          },
+        },
+      };
+      await component.drop({
+        previousContainer: container,
+        container,
+        item: { data: { id: 't1' } },
+        previousIndex: 1,
+        currentIndex: 1,
+        isPointerOverContainer: true,
+        dropPoint: { x: 300, y: 325 },
+      } as unknown as Parameters<TaskListComponent['drop']>[0]);
+
+      expect(component.multiDrag.isPlacementUnchanged).toHaveBeenCalledOnceWith('t1', [
+        'before',
+        't1',
+        'after',
+      ]);
+      expect(moveGroup).toHaveBeenCalledOnceWith('section', 't1', [
+        'before',
+        't1',
+        'after',
+      ]);
+    });
+
+    it('skips a same-index group drop only when the complete placement is unchanged', async () => {
+      (component.multiDrag.isPlacementUnchanged as jasmine.Spy).and.returnValue(true);
+      const data = {
+        listId: 'PARENT',
+        listModelId: 'section',
+        filteredTasks: [{ id: 't1' }],
+      };
+      const container = {
+        data,
+        element: {
+          nativeElement: {
+            getBoundingClientRect: () => ({
+              left: 100,
+              right: 500,
+              top: 300,
+              bottom: 350,
+            }),
+          },
+        },
+      };
+      await component.drop({
+        previousContainer: container,
+        container,
+        item: { data: { id: 't1' } },
+        previousIndex: 0,
+        currentIndex: 0,
+        isPointerOverContainer: true,
+        dropPoint: { x: 300, y: 325 },
+      } as unknown as Parameters<TaskListComponent['drop']>[0]);
+
+      expect(moveGroup).not.toHaveBeenCalled();
+    });
+
+    it('cancels the group move when released outside cached and live bounds', async () => {
+      await component.drop(groupEvent({ x: 300, y: 400 }));
+      expect(moveGroup).not.toHaveBeenCalled();
+      expect(store.dispatch).not.toHaveBeenCalled();
+    });
+
+    it('still rejects an unsupported target inside its live bounds', async () => {
+      (component.multiDrag.canDrop as jasmine.Spy).and.returnValue(false);
+      await component.drop(groupEvent({ x: 300, y: 325 }));
+      expect(moveGroup).not.toHaveBeenCalled();
+    });
+  });
+
   describe('drop() conversion dispatch', () => {
     type ListData = {
       listId: 'PARENT' | 'SUB';
@@ -809,11 +980,14 @@ describe('TaskListComponent', () => {
       );
 
       expect(store.dispatch).toHaveBeenCalledWith(
-        TaskSharedActions.convertToMainTask({
+        jasmine.objectContaining({
+          type: TaskSharedActions.convertToMainTask.type,
           task: dragged as unknown as TaskWithSubTasks,
           isPlanForToday: false,
           afterTaskId: 't1',
           isDone: false,
+          today: jasmine.any(String),
+          modified: jasmine.any(Number),
         }),
       );
     });
@@ -830,13 +1004,185 @@ describe('TaskListComponent', () => {
       );
 
       expect(store.dispatch).toHaveBeenCalledWith(
-        TaskSharedActions.convertToMainTask({
+        jasmine.objectContaining({
+          type: TaskSharedActions.convertToMainTask.type,
           task: dragged as unknown as TaskWithSubTasks,
           isPlanForToday: false,
           afterTaskId: null,
           isDone: true,
+          today: jasmine.any(String),
+          doneOn: jasmine.any(Number),
+          modified: jasmine.any(Number),
         }),
       );
+    });
+  });
+
+  // Grouped-by-tag view: a task dragged into a DIFFERENT tag group has its tags
+  // reassigned (move: drop the source group's tag, add the target's) instead of
+  // being reordered. groupTagId is undefined outside that view, null for a
+  // no-single-tag bucket ('No tag' / 'Unknown tag' / duplicate-titled).
+  describe('drop() tag-group retag', () => {
+    type GroupListData = {
+      listId: 'PARENT' | 'SUB';
+      listModelId: string;
+      filteredTasks: { id: string }[];
+      groupTagId?: string | null;
+    };
+    const dropEvent = (opts: {
+      previous: GroupListData;
+      target: GroupListData;
+      dragged: MockDragTask;
+      currentIndex?: number;
+    }): Parameters<TaskListComponent['drop']>[0] =>
+      ({
+        previousContainer: { data: opts.previous },
+        container: { data: opts.target },
+        item: { data: opts.dragged },
+        previousIndex: 0,
+        currentIndex: opts.currentIndex ?? 0,
+      }) as unknown as Parameters<TaskListComponent['drop']>[0];
+
+    const undoneGroup = (
+      groupTagId: string | null | undefined,
+      filteredTasks: { id: string }[] = [],
+    ): GroupListData => ({
+      listId: 'PARENT',
+      listModelId: 'UNDONE',
+      filteredTasks,
+      groupTagId,
+    });
+
+    let taskService: { updateTags: jasmine.Spy };
+
+    beforeEach(() => {
+      taskService = TestBed.inject(TaskService) as unknown as typeof taskService;
+      (store.dispatch as jasmine.Spy).calls.reset();
+    });
+
+    // The reorder fall-through (no retag) dispatches a moveTaskInTodayList.
+    const expectReorderDispatched = (): void => {
+      const dispatched = (store.dispatch as jasmine.Spy).calls
+        .allArgs()
+        .map((args) => args[0]);
+      expect(dispatched.some((a) => a.type === moveTaskInTodayList.type)).toBe(true);
+    };
+
+    it('drops the source tag and adds the target tag, preserving other tags', async () => {
+      await component.drop(
+        dropEvent({
+          previous: undoneGroup('tagA'),
+          target: undoneGroup('tagB', [{ id: 'keep' }]),
+          dragged: { id: 't1', parentId: null, tagIds: ['tagA', 'tagC'] },
+        }),
+      );
+
+      expect(taskService.updateTags).toHaveBeenCalledTimes(1);
+      const [task, newTags] = taskService.updateTags.calls.mostRecent().args;
+      expect(task.id).toBe('t1');
+      expect(newTags).toEqual(['tagC', 'tagB']);
+      // Retag short-circuits the reorder path.
+      expect(store.dispatch).not.toHaveBeenCalled();
+    });
+
+    it('adds the target tag when dragging out of the "No tag" bucket (no removal)', async () => {
+      await component.drop(
+        dropEvent({
+          previous: undoneGroup(NO_TAG_GROUP_ID),
+          target: undoneGroup('tagB'),
+          dragged: { id: 't1', parentId: null, tagIds: [] },
+        }),
+      );
+
+      expect(taskService.updateTags).toHaveBeenCalledTimes(1);
+      const [, newTags] = taskService.updateTags.calls.mostRecent().args;
+      expect(newTags).toEqual(['tagB']);
+    });
+
+    it('clears all tags when dropping onto the "No tag" bucket', async () => {
+      await component.drop(
+        dropEvent({
+          previous: undoneGroup('tagA'),
+          target: undoneGroup(NO_TAG_GROUP_ID),
+          dragged: { id: 't1', parentId: null, tagIds: ['tagA', 'tagB'] },
+        }),
+      );
+
+      expect(taskService.updateTags).toHaveBeenCalledTimes(1);
+      const [task, newTags] = taskService.updateTags.calls.mostRecent().args;
+      expect(task.id).toBe('t1');
+      expect(newTags).toEqual([]);
+      expect(store.dispatch).not.toHaveBeenCalled();
+    });
+
+    it('appends the target tag even if the task already has it (relies on updateTags de-dupe)', async () => {
+      // _retagAcrossGroups does not de-dupe itself — it trusts updateTags' unique().
+      await component.drop(
+        dropEvent({
+          previous: undoneGroup('tagA'),
+          target: undoneGroup('tagB'),
+          dragged: { id: 't1', parentId: null, tagIds: ['tagA', 'tagB'] },
+        }),
+      );
+
+      const [, newTags] = taskService.updateTags.calls.mostRecent().args;
+      // Source 'tagA' dropped, 'tagB' appended → duplicate left for updateTags to collapse.
+      expect(newTags).toEqual(['tagB', 'tagB']);
+    });
+
+    it('adds the target tag (no removal) when dragging from an ambiguous/unknown source bucket (src null)', async () => {
+      await component.drop(
+        dropEvent({
+          previous: undoneGroup(null),
+          target: undoneGroup('tagB'),
+          dragged: { id: 't1', parentId: null, tagIds: ['tagX'] },
+        }),
+      );
+
+      expect(taskService.updateTags).toHaveBeenCalledTimes(1);
+      const [, newTags] = taskService.updateTags.calls.mostRecent().args;
+      // Source bucket has no single tag to drop → only the target is appended.
+      expect(newTags).toEqual(['tagX', 'tagB']);
+    });
+
+    it('does NOT retag when dropping into a no-single-tag bucket (target null)', async () => {
+      await component.drop(
+        dropEvent({
+          previous: undoneGroup('tagA'),
+          target: undoneGroup(null),
+          dragged: { id: 't1', parentId: null, tagIds: ['tagA'] },
+        }),
+      );
+
+      expect(taskService.updateTags).not.toHaveBeenCalled();
+      // Falls through to a normal reorder within the today list.
+      expectReorderDispatched();
+    });
+
+    it('does NOT retag when reordering within the same tag group', async () => {
+      await component.drop(
+        dropEvent({
+          previous: undoneGroup('tagA'),
+          target: undoneGroup('tagA', [{ id: 'other' }]),
+          dragged: { id: 't1', parentId: null, tagIds: ['tagA'] },
+        }),
+      );
+
+      expect(taskService.updateTags).not.toHaveBeenCalled();
+      expectReorderDispatched();
+    });
+
+    it('does NOT retag outside the grouped-by-tag view (groupTagId undefined)', async () => {
+      await component.drop(
+        dropEvent({
+          previous: undoneGroup(undefined),
+          target: undoneGroup(undefined),
+          dragged: { id: 't1', parentId: null, tagIds: ['tagA'] },
+        }),
+      );
+
+      expect(taskService.updateTags).not.toHaveBeenCalled();
+      expectReorderDispatched();
     });
   });
 });

@@ -31,7 +31,9 @@ export const addProjects = createAction(
 
 export const updateProject = createAction(
   '[Project] Update Project',
-  (projectProps: { project: Update<Project> }) => ({
+  // isSkipSnack: suppress the unconditional "Project updated" snack — used by
+  // flows that surface their own outcome (e.g. the conflict-review flip).
+  (projectProps: { project: Update<Project>; isSkipSnack?: boolean }) => ({
     ...projectProps,
     meta: {
       isPersistent: true,
@@ -171,6 +173,10 @@ export const moveProjectTaskUpInBacklogList = createAction(
   (taskProps: {
     taskId: string;
     workContextId: string;
+    /**
+     * Wire-frozen name: carries the NOT-done ids.
+     * See the `doneTaskIds` note in work-context-meta.actions.ts.
+     */
     doneBacklogTaskIds: string[];
   }) => ({
     ...taskProps,
@@ -188,6 +194,10 @@ export const moveProjectTaskDownInBacklogList = createAction(
   (taskProps: {
     taskId: string;
     workContextId: string;
+    /**
+     * Wire-frozen name: carries the NOT-done ids.
+     * See the `doneTaskIds` note in work-context-meta.actions.ts.
+     */
     doneBacklogTaskIds: string[];
   }) => ({
     ...taskProps,
@@ -205,6 +215,10 @@ export const moveProjectTaskToTopInBacklogList = createAction(
   (taskProps: {
     taskId: string;
     workContextId: string;
+    /**
+     * Wire-frozen name: carries the NOT-done ids.
+     * See the `doneTaskIds` note in work-context-meta.actions.ts.
+     */
     doneBacklogTaskIds: string[];
   }) => ({
     ...taskProps,
@@ -222,6 +236,10 @@ export const moveProjectTaskToBottomInBacklogList = createAction(
   (taskProps: {
     taskId: string;
     workContextId: string;
+    /**
+     * Wire-frozen name: carries the NOT-done ids.
+     * See the `doneTaskIds` note in work-context-meta.actions.ts.
+     */
     doneBacklogTaskIds: string[];
   }) => ({
     ...taskProps,

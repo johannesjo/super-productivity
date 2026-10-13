@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { CaldavCfg } from './caldav.model';
 // @ts-ignore
-import DavClient, { namespaces as NS } from '@nextcloud/cdav-library';
+import type DavClient from '@nextcloud/cdav-library';
 // @ts-ignore
-import Calendar from 'cdav-library/models/calendar';
+import type Calendar from 'cdav-library/models/calendar';
 import { loadIcalModule } from '../../../schedule/ical/ical-lazy-loader';
 
 import { from, Observable, throwError } from 'rxjs';
@@ -18,6 +18,10 @@ import { throwHandledError } from '../../../../util/throw-handled-error';
 import { IssueLog } from '../../../../core/log';
 import { Capacitor } from '@capacitor/core';
 import { WebDavHttp } from '../../../../op-log/sync-providers/file-based/webdav/capacitor-webdav-http';
+
+// Loaded on first use to keep the library out of the initial bundle.
+// @ts-ignore
+const loadCdavLibrary = (): Promise<any> => import('@nextcloud/cdav-library');
 
 /** Subset of the XMLHttpRequest surface that @nextcloud/cdav-library v1.5.3 actually uses. */
 interface XhrLike {
@@ -43,6 +47,12 @@ interface XhrLike {
 interface ClientCache {
   client: DavClient;
   calendars: Map<string, Calendar>;
+}
+
+interface CalendarHomeLike {
+  displayname?: string;
+  url: string;
+  findAllCalendars: () => Promise<Calendar[]>;
 }
 
 interface CalDavTaskData {
@@ -74,18 +84,58 @@ export class CaldavClientService {
     );
   }
 
-  private static _getCalendarUriFromUrl(url: string): string {
-    if (url.endsWith('/')) {
-      url = url.substring(0, url.length - 1);
-    }
+  private static _normalizeCalDavPath(value: string): string {
+    return value.replace(/\/+$/, '');
+  }
 
-    return url.substring(url.lastIndexOf('/') + 1);
+  private static _getCalendarUriFromUrl(url: string): string {
+    const normalizedUrl = CaldavClientService._normalizeCalDavPath(url);
+    return normalizedUrl.substring(normalizedUrl.lastIndexOf('/') + 1);
+  }
+
+  private static _isSameCalDavPath(a: string, b: string): boolean {
+    return (
+      CaldavClientService._normalizeCalDavPath(a) ===
+      CaldavClientService._normalizeCalDavPath(b)
+    );
+  }
+
+  private static _matchesCalendarDisplayName(
+    item: { displayname?: string },
+    resource: string,
+  ): boolean {
+    return item.displayname === resource;
+  }
+
+  private static _matchesCalendarUri(item: { url: string }, resource: string): boolean {
+    return CaldavClientService._getCalendarUriFromUrl(item.url) === resource;
+  }
+
+  private static _findMatchingCalendar(
+    calendars: Calendar[],
+    resource: string,
+    calendarHome: CalendarHomeLike,
+  ): Calendar | undefined {
+    const concreteCalendars = calendars.filter(
+      (item) => !CaldavClientService._isSameCalDavPath(item.url, calendarHome.url),
+    );
+    const displayNameMatch = concreteCalendars.find((item) =>
+      CaldavClientService._matchesCalendarDisplayName(item, resource),
+    );
+
+    return (
+      displayNameMatch ??
+      concreteCalendars.find((item) =>
+        CaldavClientService._matchesCalendarUri(item, resource),
+      )
+    );
   }
 
   private static async _getAllTodos(
     calendar: Calendar,
     filterOpen: boolean,
   ): Promise<CalDavTaskData[]> {
+    const { namespaces: NS } = await loadCdavLibrary();
     const query = {
       name: [NS.IETF_CALDAV, 'comp-filter'],
       attributes: [['name', 'VCALENDAR']],
@@ -119,6 +169,7 @@ export class CaldavClientService {
     calendar: Calendar,
     taskUid: string,
   ): Promise<CalDavTaskData[]> {
+    const { namespaces: NS } = await loadCdavLibrary();
     const query = {
       name: [NS.IETF_CALDAV, 'comp-filter'],
       attributes: [['name', 'VCALENDAR']],
@@ -144,6 +195,19 @@ export class CaldavClientService {
     return await calendar.calendarQuery([query]);
   }
 
+  // RFC 5545 lists COMPLETED, STATUS, and PERCENT-COMPLETE as independent
+  // optional VTODO properties — a server may send any one of them alone to
+  // mark a todo done, so the COMPLETED timestamp alone misses STATUS-only
+  // todos. The poll mapping and the push dirty-check must agree on this,
+  // else reopening a STATUS-only completed todo never reaches the server.
+  private static _isTodoCompleted(todo: any): boolean {
+    return (
+      !!todo.getFirstPropertyValue('completed') ||
+      todo.getFirstPropertyValue('status') === CaldavIssueStatus.COMPLETED ||
+      +(todo.getFirstPropertyValue('percent-complete') as string) === 100
+    );
+  }
+
   private static async _mapTask(task: CalDavTaskData): Promise<CaldavIssue> {
     const ICAL = await loadIcalModule();
     const jCal = ICAL.parse(task.data);
@@ -160,10 +224,14 @@ export class CaldavClientService {
 
     const dtstart = todo.getFirstPropertyValue('dtstart') as any;
     const due = todo.getFirstPropertyValue('due') as any;
+    const status =
+      (todo.getFirstPropertyValue('status') as CaldavIssueStatus) || undefined;
+    const percentComplete =
+      +(todo.getFirstPropertyValue('percent-complete') as string) || undefined;
 
     return {
       id: todo.getFirstPropertyValue('uid') as string,
-      completed: !!todo.getFirstPropertyValue('completed'),
+      completed: CaldavClientService._isTodoCompleted(todo),
       item_url: task.url,
       summary: (todo.getFirstPropertyValue('summary') as string) || '',
       start: dtstart?.toJSDate().getTime(),
@@ -171,10 +239,9 @@ export class CaldavClientService {
       due: due?.toJSDate().getTime(),
       isDueAllDay: due ? due.isDate === true : undefined,
       note: (todo.getFirstPropertyValue('description') as string) || undefined,
-      status: (todo.getFirstPropertyValue('status') as CaldavIssueStatus) || undefined,
+      status,
       priority: +(todo.getFirstPropertyValue('priority') as string) || undefined,
-      percent_complete:
-        +(todo.getFirstPropertyValue('percent-complete') as string) || undefined,
+      percent_complete: percentComplete,
       location: todo.getFirstPropertyValue('location') as string,
       labels: categories,
       etag_hash: this._hashEtag(task.etag),
@@ -229,6 +296,7 @@ export class CaldavClientService {
     if (this._clientCache.has(client_key)) {
       return this._clientCache.get(client_key) as ClientCache;
     } else {
+      const { default: DavClient } = await loadCdavLibrary();
       const client = new DavClient(
         {
           rootUrl: cfg.caldavUrl,
@@ -258,19 +326,32 @@ export class CaldavClientService {
       return clientCache.calendars.get(resource);
     }
 
-    const calendars = await clientCache.client.calendarHomes[0]
-      .findAllCalendars()
-      .catch((err) => this._handleNetErr(err));
+    let lastCalendarHomeError: unknown;
 
-    const calendar = calendars.find(
-      (item: Calendar) =>
-        (item.displayname || CaldavClientService._getCalendarUriFromUrl(item.url)) ===
+    for (const calendarHome of clientCache.client.calendarHomes as CalendarHomeLike[]) {
+      const calendars = await calendarHome.findAllCalendars().catch((err: unknown) => {
+        lastCalendarHomeError = err;
+        return null;
+      });
+
+      if (!calendars) {
+        continue;
+      }
+
+      const calendar = CaldavClientService._findMatchingCalendar(
+        calendars,
         resource,
-    );
+        calendarHome,
+      );
 
-    if (calendar !== undefined) {
-      clientCache.calendars.set(resource, calendar);
-      return calendar;
+      if (calendar !== undefined) {
+        clientCache.calendars.set(resource, calendar);
+        return calendar;
+      }
+    }
+
+    if (lastCalendarHomeError) {
+      this._handleNetErr(lastCalendarHomeError);
     }
 
     this._snackService.open({
@@ -617,7 +698,7 @@ export class CaldavClientService {
     const now = ICAL.Time.now();
     let changeObserved = false;
 
-    const oldCompleted = !!todo.getFirstPropertyValue('completed');
+    const oldCompleted = CaldavClientService._isTodoCompleted(todo);
     if (updates.completed !== undefined && updates.completed !== oldCompleted) {
       if (updates.completed) {
         todo.updatePropertyWithValue('completed', now);

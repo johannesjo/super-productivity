@@ -1,9 +1,20 @@
-import { inject, Injectable } from '@angular/core';
-import { createEffect } from '@ngrx/effects';
-import { Action, Store } from '@ngrx/store';
-import { filter, map, pairwise, startWith, tap, withLatestFrom } from 'rxjs/operators';
-import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
-import { androidInterface } from '../android-interface';
+import { inject, Injectable, InjectionToken } from '@angular/core';
+import { createEffect, ofType } from '@ngrx/effects';
+import { createSelector, Store } from '@ngrx/store';
+import {
+  exhaustMap,
+  filter,
+  map,
+  pairwise,
+  startWith,
+  tap,
+  withLatestFrom,
+} from 'rxjs/operators';
+import {
+  IS_ANDROID_WEB_VIEW,
+  IS_ANDROID_WEB_VIEW_TOKEN,
+} from '../../../util/is-android-web-view';
+import { androidInterface, AndroidInterface } from '../android-interface';
 import {
   selectIsBreakActive,
   selectIsLongBreak,
@@ -16,23 +27,30 @@ import * as focusModeActions from '../../focus-mode/store/focus-mode.actions';
 import {
   selectCurrentTask,
   selectCurrentTaskId,
-  selectIsTaskDataLoaded,
+  selectTaskEntities,
 } from '../../tasks/store/task.selectors';
-import { combineLatest, Observable } from 'rxjs';
-import { FocusModeMode, TimerState } from '../../focus-mode/focus-mode.model';
+import { combineLatest, firstValueFrom } from 'rxjs';
+import {
+  FocusModeMode,
+  getTimerRemainingMs,
+  TimerState,
+} from '../../focus-mode/focus-mode.model';
 import { DroidLog } from '../../../core/log';
 import { HydrationStateService } from '../../../op-log/apply/hydration-state.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
+import { Task } from '../../tasks/task.model';
+import { CapacitorReminderService } from '../../../core/platform/capacitor-reminder.service';
+import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
+import { TaskService } from '../../tasks/task.service';
+import { OperationWriteFlushService } from '../../../op-log/sync/operation-write-flush.service';
+import { T } from '../../../t.const';
+import { DataInitStateService } from '../../../core/data-init/data-init-state.service';
+import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
+import { waitForSyncWindow } from '../../../util/wait-for-sync-window.operator';
+import { bulkApplyOperations } from '../../../op-log/apply/bulk-hydration.action';
 
-/**
- * On app resume, fire a single `tick()` so the wall-clock-based focus reducer
- * snaps the in-app countdown back to the truth after the WebView interval was
- * frozen in the background (#7856). The `tick` reducer is a no-op when the timer
- * is idle or paused, so no extra guard is needed here.
- */
-export const createFocusResumeTick$ = (onResume$: Observable<void>): Observable<Action> =>
-  onResume$.pipe(map(() => focusModeActions.tick()));
+type FocusNotificationTask = Pick<Task, 'id' | 'title'> | null | undefined;
 
 /**
  * Whether the focus-mode notification needs a fresh push to the native service.
@@ -40,9 +58,9 @@ export const createFocusResumeTick$ = (onResume$: Observable<void>): Observable<
  * changes need no push at all — and since prev/curr are consecutive per-tick
  * emissions (~1s apart), the 5s gate suppresses them entirely (#8243). Do not
  * weaken it: every push re-runs startForeground + a notification rebuild.
- * Pause/purpose changes — and the large elapsed jump a resume `tick()`
- * produces (#7856) — must propagate immediately so the notification
- * reconciles with the corrected in-app countdown. (The 5000 here and
+ * Pause/purpose and displayed-task changes — and the large elapsed jump a
+ * resume `tick()` produces (#7856) — must propagate immediately so the
+ * notification reconciles with the corrected in-app state. (The 5000 here and
  * TIME_SPENT_JUMP_THRESHOLD_MS in android-foreground-tracking.effects.ts
  * encode the same "larger than any tick" idea but differ in semantics —
  * abs() vs decrease-always-passes — so they are deliberately not shared.)
@@ -50,8 +68,13 @@ export const createFocusResumeTick$ = (onResume$: Observable<void>): Observable<
 export const hasFocusNotificationStateChanged = (
   prevTimer: TimerState | undefined,
   currTimer: TimerState,
+  prevTask?: FocusNotificationTask,
+  currTask?: FocusNotificationTask,
 ): boolean => {
   if (!prevTimer) return true;
+  // The task title is part of the native notification payload, even though the
+  // focus timer itself is unchanged when tracking switches to another task.
+  if (prevTask?.id !== currTask?.id || prevTask?.title !== currTask?.title) return true;
   // Pause state changed
   if (prevTimer.isRunning !== currTimer.isRunning) return true;
   // Purpose changed (work -> break or vice versa)
@@ -61,20 +84,100 @@ export const hasFocusNotificationStateChanged = (
 };
 
 /**
+ * Which native focus service call an active session's state change needs.
+ * The service stops itself when its countdown completes, and Android 12+
+ * refuses a foreground-service start from the background. So a phase that
+ * Pomodoro auto-starts while the app is away (break, next session) can be active
+ * in app state with no service, and ACTION_UPDATE cannot revive it (#9531).
+ * A lost service is restarted on the next notification-relevant change, or on
+ * the first emission after a resume: a quick return stays below the 5s gate.
+ * Only a running timer restarts it: a stopped one is either paused (the service
+ * survives pauses) or about to complete, where a restart would replace the
+ * completion notification. `isNativeServiceRunning` is lazy because it crosses
+ * the JS bridge.
+ */
+export const getFocusServiceCall = ({
+  wasFocusModeActive,
+  isStateChanged,
+  isResumed,
+  isInBackground,
+  timer,
+  isNativeServiceRunning,
+}: {
+  wasFocusModeActive: boolean;
+  isStateChanged: boolean;
+  isResumed: boolean;
+  isInBackground: boolean;
+  timer: TimerState;
+  isNativeServiceRunning: () => boolean;
+}): 'start' | 'update' | null => {
+  if (!wasFocusModeActive) return 'start';
+  if (!isStateChanged && !isResumed) return null;
+  // Background restarts are refused and surface a misleading settings warning,
+  // so a lost service waits for the resume (or a foreground change) instead.
+  const canRestart = isResumed || !isInBackground;
+  if (timer.isRunning && canRestart && !isNativeServiceRunning()) return 'start';
+  return isStateChanged ? 'update' : null;
+};
+
+/**
+ * Wall-clock slack (ms) for the "session has reached its scheduled end" check
+ * below. The native completion arrives at (or, after bridge/broadcast latency,
+ * just past) `startedAt + duration`, so a small positive slack absorbs latency
+ * and clock jitter without ever admitting the #8805 stale-completion case — a
+ * freshly-started session sits minutes away from its end, not seconds.
+ */
+const NATIVE_COMPLETE_TOLERANCE_MS = 2000;
+
+/**
  * Whether a native timer-complete event should drive a state change. The native
  * foreground service fires this when its countdown reaches 0; we act on it only
- * while the matching session is still active in app state — a break event needs an
- * active break, a work event needs a still-running work session. The work guard is
- * what makes the native completion a no-op once a resume `tick()` has already
- * completed the session on return from the background (#7856), so the two never
- * double-complete. Pure + exported so the `IS_ANDROID_WEB_VIEW`-gated effect's guard
- * is unit-testable.
+ * while the matching session is still active in app state (a break event needs an
+ * active break, a work event a still-running work session) AND that session has
+ * actually reached its scheduled end by the WALL CLOCK (`now - startedAt >=
+ * duration`).
+ *
+ * The purpose/isRunning guard makes a work completion a no-op once a resume
+ * `tick()` has already completed the session on return from the background
+ * (#7856), so the two never double-complete.
+ *
+ * The wall-clock guard additionally rejects a STALE or duplicate native
+ * completion that lands on a *different*, still-running session than the one it
+ * was fired for — e.g. the work session the user just started by advancing from a
+ * break with the "next session" arrow. Without it that fresh session is completed
+ * immediately, and in Pomodoro completing a work session auto-spawns a break, so
+ * the arrow appears to "start another break" instead of the session (#8805). We
+ * compare against the wall clock rather than the stored `timer.elapsed` because a
+ * backgrounded session's `elapsed` is frozen and stale, whereas `now - startedAt`
+ * stays accurate — the same basis the reducer's `tick` uses (`elapsed =
+ * Date.now() - startedAt`), so a genuine over-run completion on resume (#7856)
+ * still passes even though its last in-app tick is far behind.
+ *
+ * `now` is injectable so the guard stays deterministically unit-testable.
  */
 export const shouldHandleNativeTimerComplete = (
   isBreak: boolean,
   timer: TimerState,
-): boolean =>
-  isBreak ? timer.purpose === 'break' : timer.purpose === 'work' && timer.isRunning;
+  now: number = Date.now(),
+): boolean => {
+  // Must match the kind of session the event was fired for.
+  if (isBreak ? timer.purpose !== 'break' : timer.purpose !== 'work') {
+    return false;
+  }
+  // A work completion is void once the in-app tick already stopped the session
+  // (#7856). Breaks keep their prior semantics (no isRunning requirement): a
+  // finished break stays on-screen, stopped, until the user leaves it.
+  if (!isBreak && !timer.isRunning) {
+    return false;
+  }
+  // A running timer always has a startedAt, and fixed-duration timers have
+  // duration > 0 (Flowtime work — duration 0 — never schedules a native
+  // completion, so it never reaches here); guard defensively regardless.
+  if (timer.startedAt == null || timer.duration <= 0) {
+    return false;
+  }
+  return now - timer.startedAt >= timer.duration - NATIVE_COMPLETE_TOLERANCE_MS;
+};
 
 export type NativeFocusModeData = {
   durationMs: number;
@@ -82,6 +185,9 @@ export type NativeFocusModeData = {
   remainingMs: number;
   isBreak: boolean;
   isPaused: boolean;
+  taskId?: string;
+  taskTimeSpentMs?: number;
+  isTaskTracking?: boolean;
 };
 
 /**
@@ -114,8 +220,15 @@ export const parseNativeFocusModeData = (
     return null;
   }
 
-  const { durationMs, remainingMs, isBreak, isPaused } =
-    parsed as Partial<NativeFocusModeData>;
+  const {
+    durationMs,
+    remainingMs,
+    isBreak,
+    isPaused,
+    taskId,
+    taskTimeSpentMs,
+    isTaskTracking,
+  } = parsed as Partial<NativeFocusModeData>;
   if (
     typeof durationMs !== 'number' ||
     !Number.isFinite(durationMs) ||
@@ -130,112 +243,293 @@ export const parseNativeFocusModeData = (
     return null;
   }
 
-  return { durationMs, remainingMs, isBreak, isPaused };
+  return {
+    durationMs,
+    remainingMs,
+    isBreak,
+    isPaused,
+    ...(typeof taskId === 'string' &&
+    typeof taskTimeSpentMs === 'number' &&
+    Number.isFinite(taskTimeSpentMs) &&
+    typeof isTaskTracking === 'boolean'
+      ? { taskId, taskTimeSpentMs, isTaskTracking }
+      : {}),
+  };
 };
+
+export const FOCUS_ANDROID_INTERFACE = new InjectionToken<AndroidInterface>(
+  'FOCUS_ANDROID_INTERFACE',
+  { providedIn: 'root', factory: () => androidInterface },
+);
 
 @Injectable()
 export class AndroidFocusModeEffects {
+  private _isAndroidWebView = inject(IS_ANDROID_WEB_VIEW_TOKEN);
+  private _androidInterface = inject(FOCUS_ANDROID_INTERFACE);
   private _store = inject(Store);
   private _hydrationState = inject(HydrationStateService);
   private _snackService = inject(SnackService);
   private _globalTrackingInterval = inject(GlobalTrackingIntervalService);
+  private _reminderService = inject(CapacitorReminderService);
+  private _actions$ = inject(LOCAL_ACTIONS);
+  private _taskService = inject(TaskService);
+  private _syncTrigger = inject(SyncTriggerService);
+  private _dataInitState = inject(DataInitStateService);
+  private _operationWriteFlush = inject(OperationWriteFlushService);
+  // Set on resume so the next emission checks the native service even when a
+  // quick return keeps the elapsed jump below the 5s update gate (#9531).
+  private _isNativeServiceCheckDue = false;
+  // Latest isInBackground$ value; gates restarting a lost native service.
+  private _isInBackground = false;
 
-  // Start/stop focus mode notification when timer state changes
-  syncFocusModeToNotification$ =
+  /**
+   * Ask for notification permission when the user STARTS a focus session.
+   *
+   * Action-based on purpose: `syncFocusModeToNotification$` also reaches its
+   * start branch via `restoreFocusSessionFromNative` on cold start (see
+   * `recoverFocusSession$`), and prompting there would put an OS dialog on the
+   * launch path — the unprompted launch-time prompt #8120 removed. Only
+   * `startFocusSession` is genuinely user-initiated. See #9648.
+   *
+   * Not awaited — see the re-post rationale on
+   * `_repostFocusNotificationAfterGrant()`.
+   */
+  requestNotificationPermissionOnFocusStart$ =
     IS_ANDROID_WEB_VIEW &&
     createEffect(
       () =>
-        combineLatest([
-          this._store.select(selectTimer),
-          this._store.select(selectMode),
-          this._store.select(selectCurrentTask),
-          this._store.select(selectIsBreakActive),
-          this._store.select(selectIsLongBreak),
-          this._store.select(selectTimeRemaining),
-        ]).pipe(
-          // PERF: Skip during hydration/sync to avoid unnecessary processing
-          filter(() => !this._hydrationState.isApplyingRemoteOps()),
-          map(
-            ([timer, mode, currentTask, isBreakActive, isLongBreak, timeRemaining]) => ({
-              timer,
-              mode,
-              currentTask,
-              isBreakActive,
-              isLongBreak,
-              timeRemaining,
-            }),
-          ),
-          startWith(null),
-          pairwise(),
-          tap(([prev, curr]) => {
-            if (!curr) return;
+        this._actions$.pipe(
+          ofType(focusModeActions.startFocusSession),
+          tap(() => {
+            void this._reminderService
+              .requestPermissionsInBackground()
+              .then((isNewlyGranted) => {
+                if (isNewlyGranted) {
+                  void this._repostFocusNotificationAfterGrant();
+                }
+              });
+          }),
+        ),
+      { dispatch: false },
+    );
 
-            const {
-              timer,
-              mode,
-              currentTask,
-              isBreakActive,
-              isLongBreak,
-              timeRemaining,
-            } = curr;
-            const taskTitle = currentTask?.title || null;
+  // Start/stop focus mode notification when timer state changes
+  syncFocusModeToNotification$ =
+    this._isAndroidWebView &&
+    createEffect(
+      () =>
+        this._store
+          .select(
+            createSelector(
+              selectTimer,
+              selectMode,
+              selectCurrentTask,
+              selectIsBreakActive,
+              selectIsLongBreak,
+              selectTimeRemaining,
+              createSelector(selectPausedTaskId, selectTaskEntities, (id, entities) =>
+                id ? entities[id] : undefined,
+              ),
+              (
+                timer,
+                mode,
+                currentTask,
+                isBreakActive,
+                isLongBreak,
+                timeRemaining,
+                pausedTask,
+              ) => ({
+                timer,
+                mode,
+                currentTask,
+                recoveryTask: currentTask ?? pausedTask,
+                isBreakActive,
+                isLongBreak,
+                timeRemaining,
+              }),
+            ),
+          )
+          .pipe(
+            // Sample one consistent store state: separate selector streams can
+            // combine a new break timer with the previous work flag/remainder.
+            filter(() => !this._hydrationState.isApplyingRemoteOps()),
+            startWith(null),
+            pairwise(),
+            tap(([prev, curr]) => {
+              if (!curr) return;
 
-            // Check if focus mode is active (has a purpose)
-            const isFocusModeActive = timer.purpose !== null;
-            const wasFocusModeActive = prev?.timer?.purpose !== null;
+              const {
+                timer,
+                mode,
+                currentTask,
+                isBreakActive,
+                isLongBreak,
+                timeRemaining,
+                recoveryTask,
+              } = curr;
+              const taskTitle = currentTask?.title || null;
 
-            if (isFocusModeActive) {
-              const title = this._getNotificationTitle(mode, isBreakActive, isLongBreak);
-              const remainingMs = timer.duration > 0 ? timeRemaining : timer.elapsed; // Flowtime shows elapsed
+              // Check if focus mode is active (has a purpose)
+              const isFocusModeActive = timer.purpose !== null;
+              const wasFocusModeActive = !!prev && prev.timer.purpose !== null;
 
-              // Start service if just became active, otherwise update
-              if (!wasFocusModeActive) {
-                DroidLog.log('AndroidFocusModeEffects: Starting focus mode service', {
-                  title,
-                  duration: timer.duration,
-                  remaining: remainingMs,
-                  isBreak: isBreakActive,
-                  isPaused: !timer.isRunning,
-                });
-                this._safeNativeCall(
-                  () =>
-                    androidInterface.startFocusModeService?.(
-                      title,
-                      timer.duration,
-                      remainingMs,
-                      isBreakActive,
-                      !timer.isRunning,
-                      taskTitle,
-                    ),
-                  'Failed to start focus mode notification',
-                  true,
+              if (isFocusModeActive) {
+                const title = this._getNotificationTitle(
+                  mode,
+                  isBreakActive,
+                  isLongBreak,
                 );
-              } else if (hasFocusNotificationStateChanged(prev?.timer, timer)) {
-                // Only update if something significant changed
-                DroidLog.log('AndroidFocusModeEffects: Updating focus mode service', {
-                  title,
-                  remaining: remainingMs,
-                  isPaused: !timer.isRunning,
-                  isBreak: isBreakActive,
+                const remainingMs = timer.duration > 0 ? timeRemaining : timer.elapsed; // Flowtime shows elapsed
+
+                const isStateChanged = hasFocusNotificationStateChanged(
+                  prev?.timer,
+                  timer,
+                  prev?.currentTask,
+                  currentTask,
+                );
+                const isResumed = this._isNativeServiceCheckDue;
+                this._isNativeServiceCheckDue = false;
+                // Start service if just became active or lost, otherwise update
+                const serviceCall = getFocusServiceCall({
+                  wasFocusModeActive,
+                  isStateChanged,
+                  isResumed,
+                  isInBackground: this._isInBackground,
+                  timer,
+                  // The native bridge reports a stopped service as 'null'.
+                  isNativeServiceRunning: () =>
+                    this._androidInterface.getFocusModeElapsed?.() !== 'null',
                 });
+                // Every start needs fresh recovery data: a lost service has no task clock.
+                // Task totals are recovery data, so mirror even small edits.
+                // Updating this clock does not rebuild the native notification.
+                if (
+                  serviceCall === 'start' ||
+                  prev?.currentTask?.id !== currentTask?.id ||
+                  prev?.recoveryTask?.id !== recoveryTask?.id ||
+                  prev?.recoveryTask?.timeSpent !== recoveryTask?.timeSpent
+                ) {
+                  this._safeNativeCall(
+                    () =>
+                      this._androidInterface.updateFocusTask?.(
+                        recoveryTask?.id ?? null,
+                        recoveryTask?.timeSpent ?? 0,
+                        !!currentTask,
+                      ),
+                    'Failed to update focus task tracking',
+                  );
+                }
+                if (serviceCall === 'start') {
+                  DroidLog.log('AndroidFocusModeEffects: Starting focus mode service', {
+                    // eslint-disable-next-line local-rules/no-user-content-in-logs -- grandfathered log baseline (2026-09), not yet triaged
+                    title,
+                    duration: timer.duration,
+                    remaining: remainingMs,
+                    isBreak: isBreakActive,
+                    isPaused: !timer.isRunning,
+                  });
+                  this._safeNativeCall(
+                    () =>
+                      this._androidInterface.startFocusModeService?.(
+                        title,
+                        timer.duration,
+                        remainingMs,
+                        isBreakActive,
+                        !timer.isRunning,
+                        taskTitle,
+                      ),
+                    'Failed to start focus mode notification',
+                    true,
+                  );
+                } else if (serviceCall === 'update') {
+                  // Only update if something significant changed
+                  DroidLog.log('AndroidFocusModeEffects: Updating focus mode service', {
+                    // eslint-disable-next-line local-rules/no-user-content-in-logs -- grandfathered log baseline (2026-09), not yet triaged
+                    title,
+                    remaining: remainingMs,
+                    isPaused: !timer.isRunning,
+                    isBreak: isBreakActive,
+                  });
+                  this._safeNativeCall(
+                    () =>
+                      this._androidInterface.updateFocusModeService?.(
+                        title,
+                        remainingMs,
+                        !timer.isRunning,
+                        isBreakActive,
+                        taskTitle,
+                      ),
+                    'Failed to update focus mode service',
+                  );
+                }
+              } else if (wasFocusModeActive && !isFocusModeActive) {
+                // Focus mode ended, stop the service
+                DroidLog.log('AndroidFocusModeEffects: Stopping focus mode service');
                 this._safeNativeCall(
-                  () =>
-                    androidInterface.updateFocusModeService?.(
-                      title,
-                      remainingMs,
-                      !timer.isRunning,
-                      isBreakActive,
-                      taskTitle,
-                    ),
-                  'Failed to update focus mode service',
+                  () => this._androidInterface.stopFocusModeService?.(),
+                  'Failed to stop focus mode service',
                 );
               }
-            } else if (wasFocusModeActive && !isFocusModeActive) {
-              // Focus mode ended, stop the service
-              DroidLog.log('AndroidFocusModeEffects: Stopping focus mode service');
+            }),
+          ),
+      { dispatch: false },
+    );
+
+  // Both flags flip in one handler, so a resume always pairs "foreground" with
+  // a pending check; isResumed also lets the helper restart regardless of order.
+  // A pause drops an unconsumed check so it cannot restart from the background.
+  trackAppBackgroundState$ =
+    this._isAndroidWebView &&
+    createEffect(
+      () =>
+        this._androidInterface.isInBackground$.pipe(
+          tap((isInBackground) => {
+            this._isInBackground = isInBackground;
+            this._isNativeServiceCheckDue = !isInBackground;
+          }),
+        ),
+      { dispatch: false },
+    );
+
+  // Bulk replay suppresses normal notification mirroring. Adjust only the
+  // applied task delta so remote edits preserve unrecorded native elapsed time.
+  // Sample every local action before pairing: local ticks can occur while the
+  // remote-apply window is open and must not become part of the remote delta.
+  syncReplayedTaskTimeToNative$ =
+    IS_ANDROID_WEB_VIEW &&
+    createEffect(
+      () =>
+        this._actions$.pipe(
+          startWith(null),
+          withLatestFrom(
+            this._store.select(
+              createSelector(
+                selectCurrentTask,
+                selectPausedTaskId,
+                selectTaskEntities,
+                (currentTask, pausedId, entities) =>
+                  currentTask ?? (pausedId ? entities[pausedId] : undefined),
+              ),
+            ),
+            this._store.select(selectTimer),
+          ),
+          pairwise(),
+          tap(([[, previousTask, previousTimer], [action, task, timer]]) => {
+            if (
+              action?.type !== bulkApplyOperations.type ||
+              !this._hydrationState.isApplyingRemoteOps() ||
+              previousTimer.purpose === null ||
+              timer.purpose === null ||
+              !task ||
+              !previousTask ||
+              task.id !== previousTask.id
+            )
+              return;
+            const delta = task.timeSpent - previousTask.timeSpent;
+            if (delta !== 0) {
               this._safeNativeCall(
-                () => androidInterface.stopFocusModeService?.(),
-                'Failed to stop focus mode service',
+                () => androidInterface.adjustFocusTaskTime?.(task.id, delta),
+                'Failed to reconcile native focus task time after replay',
               );
             }
           }),
@@ -255,10 +549,7 @@ export class AndroidFocusModeEffects {
         ),
         tap(([, timer]) => {
           if (timer.purpose === 'work' && timer.isRunning) {
-            const cap =
-              timer.duration > 0
-                ? Math.max(0, timer.duration - timer.elapsed)
-                : undefined;
+            const cap = timer.duration > 0 ? getTimerRemainingMs(timer) : undefined;
             this._globalTrackingInterval.triggerWakeUpTick(cap);
           }
         }),
@@ -277,23 +568,6 @@ export class AndroidFocusModeEffects {
       ),
     );
 
-  // When the app returns to the foreground, the WebView's interval(1000) may have
-  // been frozen while backgrounded, leaving the in-app focus countdown stale and
-  // adrift from the still-accurate native notification (#7856). Fire one tick so
-  // the wall-clock reducer snaps the countdown back to the truth — mirroring how
-  // time tracking re-syncs from native on resume (syncOnResume$).
-  resyncFocusTimerOnResume$ =
-    IS_ANDROID_WEB_VIEW &&
-    createEffect(() =>
-      createFocusResumeTick$(
-        androidInterface.onResume$.pipe(
-          tap(() =>
-            DroidLog.log('AndroidFocusModeEffects: App resumed, re-syncing focus timer'),
-          ),
-        ),
-      ),
-    );
-
   // Re-adopt a focus session that kept running in the native foreground
   // service after the app was swiped from recents and reopened (#7855). The
   // WebView is recreated with an idle store, so without this the session (and
@@ -302,7 +576,9 @@ export class AndroidFocusModeEffects {
   // Triggers ONLY on the resume/cold-start edge:
   //   - onResume$ (ReplaySubject + startWith) fires on every app resume and
   //     replays the cold-start emission even if it fired before we subscribed;
-  //   - selectIsTaskDataLoaded flips false→true once when hydration settles.
+  //   - initial loading finishes after BOTH snapshot and tail-op replay;
+  //     reconciliation then waits for initial sync with the local baseline captured.
+  //     Task readiness alone can become true while only the snapshot is loaded.
   // `selectTimer` is SAMPLED via withLatestFrom, NOT used as a trigger. This is
   // load-bearing: if the timer were a combineLatest source, *ending* a session
   // (cancel/complete) would re-emit an idle store and re-run this read. Because
@@ -313,37 +589,95 @@ export class AndroidFocusModeEffects {
   // the timer means only a genuine resume/cold-start can trigger recovery.
   //
   // We recover only while the store is idle, so a live in-app session is never
-  // clobbered. (The sibling resyncFocusTimerOnResume$ also fires on resume, but
-  // its tick() is a no-op while the store is idle, so the two don't conflict.)
+  // clobbered. The tracking resume handler also dispatches tick(), which is a
+  // no-op while the store is idle, so the two do not conflict.
   // After restore, syncFocusModeToNotification$ re-issues startFocusModeService
   // with the same remaining time the native service already holds — an
   // intentional, idempotent round-trip (no countdown reset).
   recoverFocusSession$ =
     IS_ANDROID_WEB_VIEW &&
-    createEffect(() =>
-      combineLatest([
-        androidInterface.onResume$.pipe(startWith(undefined)),
-        this._store.select(selectIsTaskDataLoaded),
-      ]).pipe(
-        filter(([, isTaskDataLoaded]) => isTaskDataLoaded),
-        withLatestFrom(this._store.select(selectTimer)),
-        filter(
-          ([, timer]) =>
-            timer.purpose === null && !this._hydrationState.isApplyingRemoteOps(),
+    createEffect(
+      () =>
+        combineLatest([
+          androidInterface.onResume$.pipe(startWith(undefined)),
+          this._dataInitState.isAllDataLoadedInitially$,
+        ]).pipe(
+          filter(([, isDataLoaded]) => isDataLoaded),
+          withLatestFrom(
+            this._store.select(selectTimer),
+            this._store.select(selectTaskEntities),
+          ),
+          filter(
+            ([, timer]) =>
+              timer.purpose === null && !this._hydrationState.isApplyingRemoteOps(),
+          ),
+          map(([, , entities]) => ({
+            data: parseNativeFocusModeData(androidInterface.getFocusModeElapsed?.()),
+            entities,
+          })),
+          exhaustMap(({ data, entities }) =>
+            data
+              ? this._recoverFocusSession(
+                  data,
+                  data.taskId ? entities[data.taskId]?.timeSpent : undefined,
+                )
+              : [],
+          ),
         ),
-        map(() => parseNativeFocusModeData(androidInterface.getFocusModeElapsed?.())),
-        filter((data): data is NativeFocusModeData => data !== null),
-        tap((data) =>
-          DroidLog.log('AndroidFocusModeEffects: Recovering focus session from native', {
-            durationMs: data.durationMs,
-            remainingMs: data.remainingMs,
-            isBreak: data.isBreak,
-            isPaused: data.isPaused,
-          }),
-        ),
-        map((data) => focusModeActions.restoreFocusSessionFromNative(data)),
-      ),
+      { dispatch: false },
     );
+
+  private async _recoverFocusSession(
+    initialData: NativeFocusModeData,
+    recordedBeforeSync: number | undefined,
+  ): Promise<void> {
+    try {
+      // Capture the local baseline before initial sync, then add only the
+      // missing local interval to the post-sync task. Subtracting the synced
+      // total would swallow time added on another device while we were away.
+      const [, timer, entities] = await firstValueFrom(
+        this._syncTrigger.afterInitialSyncDoneStrict$.pipe(
+          waitForSyncWindow(
+            this._hydrationState,
+            'AndroidFocusModeEffects:recoverFocusSession',
+          ),
+          withLatestFrom(
+            this._store.select(selectTimer),
+            this._store.select(selectTaskEntities),
+          ),
+        ),
+      );
+      if (timer.purpose !== null || this._hydrationState.isApplyingRemoteOps()) return;
+      const data = parseNativeFocusModeData(androidInterface.getFocusModeElapsed?.());
+      // A user can end or replace the native session while startup sync waits.
+      if (!data || data.taskId !== initialData.taskId) return;
+      const task = data.taskId ? entities[data.taskId] : undefined;
+      if (
+        task &&
+        data.taskTimeSpentMs !== undefined &&
+        recordedBeforeSync !== undefined
+      ) {
+        this._taskService.addTimeSpentAndSync(
+          task,
+          data.taskTimeSpentMs - recordedBeforeSync,
+        );
+      }
+      this._globalTrackingInterval.resetTrackingStart();
+      this._store.dispatch(
+        focusModeActions.restoreFocusSessionFromNative({
+          ...data,
+          pausedTaskId: task?.id,
+        }),
+      );
+      if (task && data.isTaskTracking) {
+        this._taskService.setCurrentId(task.id);
+      }
+      await this._operationWriteFlush.flushPendingWrites();
+    } catch (error) {
+      DroidLog.err('Failed to recover focus task time', error);
+      this._snackService.open({ msg: T.F.ANDROID.TIME_RECOVERY_FAILED, type: 'ERROR' });
+    }
+  }
 
   handleFocusSkip$ =
     IS_ANDROID_WEB_VIEW &&
@@ -403,12 +737,67 @@ export class AndroidFocusModeEffects {
 
   private _completionDuration(timer: TimerState): number {
     if (timer.duration > 0) {
-      const cap = Math.max(0, timer.duration - timer.elapsed);
-      const tick = this._globalTrackingInterval.triggerWakeUpTick(cap);
+      const tick = this._globalTrackingInterval.triggerWakeUpTick(
+        getTimerRemainingMs(timer),
+      );
       return Math.min(timer.duration, timer.elapsed + tick.duration);
     }
     const tick = this._globalTrackingInterval.triggerWakeUpTick();
     return timer.elapsed + tick.duration;
+  }
+
+  /**
+   * Re-post the focus notification after a late POST_NOTIFICATIONS grant.
+   *
+   * `startForeground()` already ran while the permission was denied, so Android
+   * dropped that notification and does not replay it. The notification renders
+   * its countdown via a native chronometer, so steady-state elapsed changes
+   * push NO updates at all (`hasFocusNotificationStateChanged` suppresses
+   * consecutive ~1s ticks entirely, #8243) — without this re-post, the
+   * first-ever focus session would stay notification-less until a pause, break
+   * transition, task switch, or resume-tick jump. Mirrors
+   * `_repostTrackingNotificationAfterGrant` in
+   * android-foreground-tracking.effects.ts (#9648).
+   *
+   * Reads the CURRENT timer state rather than values captured at start: the
+   * native service re-anchors its countdown to the pushed remainingMs, so a
+   * stale value would rewind it by the dialog duration. If the session ended
+   * while the dialog was open, purpose is null (skip below) — and the native
+   * side additionally ignores ACTION_UPDATE when the service is not running.
+   */
+  private async _repostFocusNotificationAfterGrant(): Promise<void> {
+    const [timer, mode, currentTask, isBreakActive, isLongBreak, timeRemaining] =
+      await firstValueFrom(
+        combineLatest([
+          this._store.select(selectTimer),
+          this._store.select(selectMode),
+          this._store.select(selectCurrentTask),
+          this._store.select(selectIsBreakActive),
+          this._store.select(selectIsLongBreak),
+          this._store.select(selectTimeRemaining),
+        ]),
+      );
+    if (timer.purpose === null) {
+      return;
+    }
+    const title = this._getNotificationTitle(mode, isBreakActive, isLongBreak);
+    const remainingMs = timer.duration > 0 ? timeRemaining : timer.elapsed; // Flowtime shows elapsed
+    DroidLog.log('AndroidFocusModeEffects: Re-posting notification after grant', {
+      // eslint-disable-next-line local-rules/no-user-content-in-logs -- grandfathered log baseline (2026-09), not yet triaged
+      title,
+      remaining: remainingMs,
+    });
+    this._safeNativeCall(
+      () =>
+        androidInterface.updateFocusModeService?.(
+          title,
+          remainingMs,
+          !timer.isRunning,
+          isBreakActive,
+          currentTask?.title || null,
+        ),
+      'Failed to re-post focus notification after permission grant',
+    );
   }
 
   private _safeNativeCall(fn: () => void, errorMsg: string, showSnackbar = false): void {

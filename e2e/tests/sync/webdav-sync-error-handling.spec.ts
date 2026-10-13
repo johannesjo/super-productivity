@@ -6,9 +6,10 @@ import {
   createUniqueSyncFolder,
   createWebDavFolder,
   setupClient,
-  waitForSync,
+  waitForSyncComplete,
   simulateNetworkFailure,
   restoreNetwork,
+  closeContextsSafely,
 } from '../../utils/sync-helpers';
 import { waitForStatePersistence } from '../../utils/waits';
 
@@ -40,10 +41,11 @@ test.describe('@webdav WebDAV Sync Error Handling', () => {
     // Configure Sync on Client A
     await syncPageA.setupWebdavSync(WEBDAV_CONFIG);
     await expect(syncPageA.syncBtn).toBeVisible();
+    await waitForSyncComplete(pageA, syncPageA);
 
     // First, verify sync works normally
     await syncPageA.triggerSync();
-    await waitForSync(pageA, syncPageA);
+    await waitForSyncComplete(pageA, syncPageA);
 
     // Create a task
     const taskName = `Network Test Task ${Date.now()}`;
@@ -54,26 +56,21 @@ test.describe('@webdav WebDAV Sync Error Handling', () => {
     await simulateNetworkFailure(pageA);
 
     // Trigger sync - should fail
-    await syncPageA.triggerSync();
+    await syncPageA.syncBtn.click();
 
     // Wait for error indication (snackbar or sync icon change)
     // The sync should fail gracefully
     const startTime = Date.now();
     let errorFound = false;
     while (Date.now() - startTime < 15000 && !errorFound) {
-      // Check for error snackbar
-      const snackBars = pageA.locator('.mat-mdc-snack-bar-container');
-      const count = await snackBars.count();
-      for (let i = 0; i < count; ++i) {
-        const text = await snackBars.nth(i).innerText();
-        if (
-          text.toLowerCase().includes('error') ||
-          text.toLowerCase().includes('fail') ||
-          text.toLowerCase().includes('network')
-        ) {
-          errorFound = true;
-          break;
-        }
+      // Check for error snackbar. One snapshot of all bars: they auto-dismiss, so
+      // count() + nth(i).innerText() could wait out its whole timeout on a bar that
+      // had just closed and throw from inside this polling loop.
+      const snackBarTexts = await pageA
+        .locator('.mat-mdc-snack-bar-container')
+        .allInnerTexts();
+      if (snackBarTexts.some((text) => /error|fail|network/i.test(text))) {
+        errorFound = true;
       }
 
       // Check for error icon on sync button
@@ -151,31 +148,19 @@ test.describe('@webdav WebDAV Sync Error Handling', () => {
     await expect(syncPageA.syncBtn).toBeVisible();
 
     // Trigger sync - should fail with auth error
-    await syncPageA.triggerSync();
+    await syncPageA.syncBtn.click();
 
     // Wait for error indication
     const startTime = Date.now();
     let authErrorFound = false;
     while (Date.now() - startTime < 15000 && !authErrorFound) {
-      // Check for error snackbar
-      const snackBars = pageA.locator('.mat-mdc-snack-bar-container');
-      const count = await snackBars.count();
-      for (let i = 0; i < count; ++i) {
-        const text = await snackBars
-          .nth(i)
-          .innerText()
-          .catch(() => '');
-        const textLower = text.toLowerCase();
-        if (
-          textLower.includes('401') ||
-          textLower.includes('auth') ||
-          textLower.includes('unauthorized') ||
-          textLower.includes('error') ||
-          textLower.includes('fail')
-        ) {
-          authErrorFound = true;
-          break;
-        }
+      // Check for error snackbar. One snapshot of all bars: they auto-dismiss, so
+      // count() + nth(i).innerText() could burn the action timeout on a closed bar.
+      const snackBarTexts = await pageA
+        .locator('.mat-mdc-snack-bar-container')
+        .allInnerTexts();
+      if (snackBarTexts.some((text) => /401|auth|unauthorized|error|fail/i.test(text))) {
+        authErrorFound = true;
       }
 
       if (!authErrorFound) {
@@ -216,6 +201,7 @@ test.describe('@webdav WebDAV Sync Error Handling', () => {
     // Configure Sync on Client A
     await syncPageA.setupWebdavSync(WEBDAV_CONFIG);
     await expect(syncPageA.syncBtn).toBeVisible();
+    await waitForSyncComplete(pageA, syncPageA);
 
     // Create some tasks
     const taskName = `Double Sync Task ${Date.now()}`;
@@ -223,12 +209,14 @@ test.describe('@webdav WebDAV Sync Error Handling', () => {
     await waitForStatePersistence(pageA);
 
     // Trigger sync twice rapidly (simulating double-click)
+    syncPageA.prepareForNextSyncCycle('write');
     await syncPageA.syncBtn.click();
     await pageA.waitForTimeout(100);
     await syncPageA.syncBtn.click();
 
-    // Wait for sync to complete
-    await waitForSync(pageA, syncPageA);
+    // Prove that the rapid trigger produced a completed provider write rather
+    // than reusing the setup cycle's response.
+    await waitForSyncComplete(pageA, syncPageA);
 
     // App should not crash and task should still be visible
     const taskLocator = pageA.locator('task', { hasText: taskName });
@@ -239,9 +227,18 @@ test.describe('@webdav WebDAV Sync Error Handling', () => {
 
     // Try another sync to confirm everything works
     await syncPageA.triggerSync();
-    await waitForSync(pageA, syncPageA);
+    await waitForSyncComplete(pageA, syncPageA);
+
+    // A fresh client must be able to hydrate the task from the remote commit.
+    const { context: contextB, page: pageB } = await setupClient(browser, url);
+    const syncPageB = new SyncPage(pageB);
+    await syncPageB.setupWebdavSync(WEBDAV_CONFIG);
+    await waitForSyncComplete(pageB, syncPageB);
+    await expect(pageB.locator('task', { hasText: taskName })).toBeVisible({
+      timeout: 10000,
+    });
 
     // Cleanup
-    await contextA.close();
+    await closeContextsSafely(contextA, contextB);
   });
 });

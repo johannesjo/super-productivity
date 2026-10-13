@@ -62,7 +62,9 @@ import { HiddenCalendarEventsService } from './hidden-calendar-events.service';
 import { TaskArchiveService } from '../archive/task-archive.service';
 import { passesCalendarEventRegexFilter } from './calendar-event-regex-filter';
 import { NotIcalResponseError } from '../schedule/ical/is-likely-ical';
+import { sanitizeIcalUrlForDisplay } from '../issue/mapping-helper/get-issue-provider-tooltip';
 import { isCalendarProviderDisabledOnCurrentPlatform } from '../issue/providers/calendar/is-calendar-provider-disabled-on-current-platform.util';
+import { withPluginOAuthTokenKey } from '../../plugins/oauth/plugin-oauth-token-key.util';
 
 const ONE_MONTHS = 60 * 60 * 1000 * 24 * 31;
 const ONE_WEEK = 60 * 60 * 1000 * 24 * 7;
@@ -119,8 +121,18 @@ export class CalendarIntegrationService {
     this._store
       .select(selectCalendarProviders)
       .pipe(distinctUntilChanged(fastArrayCompare)),
-    this._store.select(selectEnabledIssueProviders).pipe(
-      map((providers) =>
+    // `registrationChanges$` emits when a plugin (un)registers. Plugins load
+    // asynchronously after bootstrap, while the issue-provider store is hydrated
+    // early — so without this trigger `getUseAgendaView` is read once (before the
+    // plugin registers, returning false), the store never re-emits, and the
+    // plugin's calendar events stay absent until a re-subscription forces a
+    // re-projection (e.g. navigating away and back). Re-run the filter on
+    // registration so agenda-view plugin events surface without navigation.
+    combineLatest([
+      this._store.select(selectEnabledIssueProviders),
+      this._pluginRegistry.registrationChanges$,
+    ]).pipe(
+      map(([providers]) =>
         providers.filter(
           (p): p is IssueProviderPluginType =>
             isPluginIssueProvider(p.issueProviderKey) &&
@@ -315,12 +327,17 @@ export class CalendarIntegrationService {
       return [];
     }
 
+    const pluginConfig = withPluginOAuthTokenKey(
+      provider.pluginId,
+      pluginProvider.pluginConfig,
+      pluginProvider.id,
+    );
     const http = this._pluginHttp.createHttpHelper(
-      () => Promise.resolve(provider.definition.getHeaders(pluginProvider.pluginConfig)),
+      () => Promise.resolve(provider.definition.getHeaders(pluginConfig)),
       { allowPrivateNetwork: provider.allowPrivateNetwork },
     );
     const results: PluginSearchResult[] =
-      await provider.definition.getNewIssuesForBacklog(pluginProvider.pluginConfig, http);
+      await provider.definition.getNewIssuesForBacklog(pluginConfig, http);
 
     return results
       .filter((r) => r.start != null)
@@ -381,13 +398,7 @@ export class CalendarIntegrationService {
           ...CORS_SKIP_EXTRA_HEADERS,
         },
       })
-      .pipe(
-        map((v) => !!v),
-        catchError((err) => {
-          Log.err(err);
-          return of(false);
-        }),
-      )
+      .pipe(map((v) => !!v))
       .toPromise()
       .then((result) => result ?? false);
   }
@@ -447,18 +458,35 @@ export class CalendarIntegrationService {
           })),
         ),
         catchError((err) => {
-          Log.err(err);
+          // iCal feed URLs frequently embed a secret token (Google/Outlook
+          // private feeds). HttpErrorResponse puts the full URL in `.url` and
+          // `.message`, and the log history is exportable — so log only the
+          // sanitized host plus the error name/status, never the raw error.
+          Log.err('CAL_PROVIDER_REQUEST_ERROR', {
+            icalHost: sanitizeIcalUrlForDisplay(calProvider.icalUrl),
+            name: (err as Error)?.name,
+            status: (err as { status?: number })?.status,
+          });
           if (err instanceof NotIcalResponseError) {
             this._snackService.open({
               type: 'ERROR',
               msg: T.F.CALENDARS.S.CAL_PROVIDER_NOT_ICAL,
             });
           } else {
+            // Replace the raw iCal URL (which may embed a secret token) with
+            // the sanitized host so the user-visible snackbar can't leak it
+            // via screenshot/screenshare.
+            const rawErrTxt = getErrorTxt(err);
+            const errTxt = calProvider.icalUrl
+              ? rawErrTxt
+                  .split(calProvider.icalUrl)
+                  .join(sanitizeIcalUrlForDisplay(calProvider.icalUrl))
+              : rawErrTxt;
             this._snackService.open({
               type: 'ERROR',
               msg: T.F.CALENDARS.S.CAL_PROVIDER_ERROR,
               translateParams: {
-                errTxt: getErrorTxt(err),
+                errTxt,
               },
             });
           }

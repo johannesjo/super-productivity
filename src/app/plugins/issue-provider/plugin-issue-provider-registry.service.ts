@@ -1,4 +1,6 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { BehaviorSubject, Observable } from 'rxjs';
 import {
   RegisteredPluginIssueProvider,
   IssueProviderPluginDefinition,
@@ -8,6 +10,21 @@ import {
 } from './plugin-issue-provider.model';
 import { IssueProviderKey } from '../../features/issue/issue.model';
 import { PluginLog } from '../../core/log';
+import { BUILT_IN_SVG_ICON_NAMES } from '../../core/theme/built-in-svg-icons.const';
+
+/**
+ * Returns `icon` only if it is a registered SVG icon: the plugin's own uploaded SVG or
+ * a built-in SVG name. Anything else (e.g. a Material ligature like
+ * 'confirmation_number') would make MatIconRegistry log "Error retrieving icon", so
+ * callers get undefined and fall back to their default icon (#10550).
+ */
+export const toPluginSvgIcon = (
+  icon: string | undefined,
+  pluginId: string,
+): string | undefined =>
+  icon === `plugin-${pluginId}-icon` || (icon && BUILT_IN_SVG_ICON_NAMES.has(icon))
+    ? icon
+    : undefined;
 
 @Injectable({ providedIn: 'root' })
 export class PluginIssueProviderRegistryService {
@@ -16,8 +33,21 @@ export class PluginIssueProviderRegistryService {
   /** Maps pluginId → registeredKey for cleanup */
   private _pluginIdToKey = new Map<string, string>();
 
-  /** Signal that increments on each registration/unregistration, so computed signals can react */
-  readonly registrationVersion = signal(0);
+  /**
+   * Single source of truth for "a plugin (un)registered", exposed two ways so signal-
+   * and stream-based consumers react to the same event without drifting:
+   * - `registrationChanges$` (RxJS) for observable pipelines that must re-run without an
+   *   effect/CD flush AND emit synchronously on subscribe — e.g.
+   *   `CalendarIntegrationService.calendarEvents$`. (A `toObservable(signal)` only emits
+   *   once its effect runs, delaying even the initial value; a `BehaviorSubject` does not.)
+   * - `registrationVersion` (signal) for `computed()` consumers, e.g. `tag-list`.
+   */
+  private readonly _registrationVersion$ = new BehaviorSubject(0);
+  readonly registrationChanges$: Observable<number> =
+    this._registrationVersion$.asObservable();
+  readonly registrationVersion = toSignal(this._registrationVersion$, {
+    requireSync: true,
+  });
 
   register(opts: {
     pluginId: string;
@@ -53,7 +83,7 @@ export class PluginIssueProviderRegistryService {
       allowPrivateNetwork: opts.allowPrivateNetwork,
     });
     this._pluginIdToKey.set(opts.pluginId, key);
-    this.registrationVersion.update((v) => v + 1);
+    this._bumpRegistrationVersion();
   }
 
   unregister(pluginId: string): void {
@@ -61,8 +91,14 @@ export class PluginIssueProviderRegistryService {
     if (key) {
       this._providers.delete(key);
       this._pluginIdToKey.delete(pluginId);
-      this.registrationVersion.update((v) => v + 1);
+      this._bumpRegistrationVersion();
     }
+  }
+
+  /** Advance the single registration counter; both `registrationChanges$` and the
+   * derived `registrationVersion` signal update from it. */
+  private _bumpRegistrationVersion(): void {
+    this._registrationVersion$.next(this._registrationVersion$.value + 1);
   }
 
   /** Get the registered key for a pluginId (e.g. 'GITHUB' or 'plugin:my-plugin') */
@@ -82,8 +118,10 @@ export class PluginIssueProviderRegistryService {
     return Array.from(this._providers.values());
   }
 
-  getIcon(key: string): string {
-    return this._providers.get(key)?.icon ?? 'extension';
+  /** Provider icon usable with `mat-icon [svgIcon]`; see `toPluginSvgIcon`. */
+  getSvgIcon(key: string): string | undefined {
+    const provider = this._providers.get(key);
+    return provider && toPluginSvgIcon(provider.icon, provider.pluginId);
   }
 
   getName(key: string): string {

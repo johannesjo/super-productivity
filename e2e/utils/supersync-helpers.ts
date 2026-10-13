@@ -3,8 +3,11 @@ import {
   type BrowserContext,
   type Locator,
   type Page,
+  type Request,
+  type Route,
   expect,
 } from '@playwright/test';
+import { gunzipSync } from 'zlib';
 import { SuperSyncPage, type SuperSyncConfig } from '../pages/supersync.page';
 import { WorkViewPage } from '../pages/work-view.page';
 import { waitForAppReady } from './waits';
@@ -14,7 +17,6 @@ import {
   UI_VISIBLE_TIMEOUT,
   UI_VISIBLE_TIMEOUT_LONG,
   UI_SETTLE_SMALL,
-  UI_SETTLE_MEDIUM,
   UI_SETTLE_STANDARD,
   UI_SETTLE_EXTENDED,
   RETRY_BASE_DELAY,
@@ -36,6 +38,44 @@ import {
  */
 export const SUPERSYNC_BASE_URL =
   process.env.SUPERSYNC_E2E_URL || 'http://localhost:1901';
+
+/**
+ * Matches `/api/sync/ops` uploads and downloads. Every SuperSync request
+ * carries query parameters (downloads their cursor, all requests
+ * `appVersion`), so a glob without the trailing `*` matches nothing.
+ * Do not add a trailing slash: the production endpoint has none.
+ */
+const SUPERSYNC_OPS_ROUTE = '**/api/sync/ops*';
+
+/** Matches `/api/sync/snapshot` uploads, query parameters included. */
+export const SUPERSYNC_SNAPSHOT_ROUTE = '**/api/sync/snapshot*';
+
+export const routeSuperSyncOps = async (
+  page: Page,
+  handler: (route: Route) => Promise<void>,
+): Promise<void> => {
+  await page.route(SUPERSYNC_OPS_ROUTE, handler);
+};
+
+export const unrouteSuperSyncOps = async (page: Page): Promise<void> =>
+  page.unroute(SUPERSYNC_OPS_ROUTE);
+
+/** Parse a SuperSync upload body regardless of whether the browser gzipped it. */
+export const parseSuperSyncRequestBody = <T>(request: Request): T => {
+  try {
+    return request.postDataJSON() as T;
+  } catch {
+    const rawBody = request.postDataBuffer();
+    if (!rawBody) {
+      throw new Error('SuperSync request did not contain a body');
+    }
+    try {
+      return JSON.parse(gunzipSync(rawBody).toString('utf-8')) as T;
+    } catch (error) {
+      throw new Error('Failed to parse SuperSync request body', { cause: error });
+    }
+  }
+};
 
 /**
  * Test user credentials returned from the server.
@@ -105,20 +145,6 @@ export const createTestUser = async (
   }
 
   throw new Error(`Max retries (${maxRetries}) exceeded for createTestUser`);
-};
-
-/**
- * Clean up all test data on the server.
- * Call this in test teardown if needed.
- */
-export const cleanupTestData = async (): Promise<void> => {
-  const response = await fetch(`${SUPERSYNC_BASE_URL}/api/test/cleanup`, {
-    method: 'POST',
-  });
-
-  if (!response.ok) {
-    console.warn(`Cleanup failed: ${response.status}`);
-  }
 };
 
 /**
@@ -193,6 +219,129 @@ export const getSuperSyncConfig = (user: TestUser): SuperSyncConfig => {
 };
 
 /**
+ * Seed the SuperSync provider's private config straight into the `sup-sync`
+ * credentials database, the way `seedLegacyDatabase` seeds `pf`.
+ *
+ * Must run BEFORE the app boots (JS blocked): the credential store caches the
+ * config in memory once loaded. With `encryptKey` already present, the config
+ * dialog's Save keeps it (SuperSync never takes the key from the form) and the
+ * post-setup encryption modal is skipped — so the setup sync uploads plain
+ * ordinary ops and no snapshot is deleted and re-uploaded as a SYNC_IMPORT.
+ * That is the only way the harness can leave a server holding ordinary ops and
+ * no full-state op (#9921).
+ */
+export const seedSuperSyncCredentials = async (
+  page: Page,
+  cfg: { baseUrl: string; accessToken: string; encryptKey: string },
+): Promise<void> => {
+  await page.evaluate(
+    async (privateCfg) =>
+      new Promise<void>((resolve, reject) => {
+        // Mirrors SyncCredentialStore: db 'sup-sync' v1, out-of-line-key store
+        // 'credentials', key PRIVATE_CFG_PREFIX + providerId.
+        const request = indexedDB.open('sup-sync', 1);
+        request.onupgradeneeded = (event) => {
+          const db = (event.target as IDBOpenDBRequest).result;
+          if (!db.objectStoreNames.contains('credentials')) {
+            db.createObjectStore('credentials');
+          }
+        };
+        request.onsuccess = (event) => {
+          const db = (event.target as IDBOpenDBRequest).result;
+          const tx = db.transaction('credentials', 'readwrite');
+          tx.objectStore('credentials').put(privateCfg, '__sp_cred_SuperSync');
+          tx.oncomplete = () => {
+            db.close();
+            resolve();
+          };
+          tx.onerror = () => {
+            db.close();
+            reject(tx.error);
+          };
+        };
+        request.onerror = () => reject(request.error);
+      }),
+    { ...cfg, isEncryptionEnabled: true },
+  );
+};
+
+/** Full-state op types (mirrors FULL_STATE_OP_TYPES in the app). */
+export const isFullStateOpType = (opType: string): boolean =>
+  ['SYNC_IMPORT', 'BACKUP_IMPORT', 'REPAIR'].includes(opType);
+
+/**
+ * Archived task ids in this client's young archive (`SUP_OPS`/`archive_young`,
+ * key `current`). Archived tasks are not rendered by default, so the archive is
+ * read straight from IndexedDB. Call it only after the app has booted (see
+ * getLocalOpLogSummary for why).
+ */
+export const getArchiveYoungTaskIds = async (page: Page): Promise<string[]> =>
+  page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('SUP_OPS');
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    try {
+      if (!db.objectStoreNames.contains('archive_young')) {
+        return [];
+      }
+      const archive = await new Promise<
+        { data?: { task?: { ids?: string[] } } } | undefined
+      >((resolve, reject) => {
+        const tx = db.transaction('archive_young', 'readonly');
+        const request = tx.objectStore('archive_young').get('current');
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      return archive?.data?.task?.ids ?? [];
+    } finally {
+      db.close();
+    }
+  });
+
+/**
+ * Summary of every entry in this client's local op log (`SUP_OPS`/`ops`).
+ * Entries are stored in the compact format, where `o` is the opType and `e`
+ * the entityType — the same string values as the full format. Call it only
+ * after the app has booted (the DB is opened without a version and would
+ * otherwise be created empty).
+ */
+export const getLocalOpLogSummary = async (
+  page: Page,
+): Promise<{ opType: string; entityType: string; isSynced: boolean }[]> =>
+  page.evaluate(async () => {
+    const db = await new Promise<IDBDatabase>((resolve, reject) => {
+      const request = indexedDB.open('SUP_OPS');
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    try {
+      if (!db.objectStoreNames.contains('ops')) {
+        return [];
+      }
+      const entries = await new Promise<
+        {
+          op: { o?: string; e?: string; opType?: string; entityType?: string };
+          syncedAt?: number;
+        }[]
+      >((resolve, reject) => {
+        const tx = db.transaction('ops', 'readonly');
+        const request = tx.objectStore('ops').getAll();
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+      });
+      return entries.map((entry) => ({
+        opType: entry.op.o ?? entry.op.opType ?? '',
+        entityType: entry.op.e ?? entry.op.entityType ?? '',
+        isSynced: !!entry.syncedAt,
+      }));
+    } finally {
+      db.close();
+    }
+  });
+
+/**
  * Create a simulated E2E client with its own isolated browser context.
  *
  * Each client has:
@@ -211,9 +360,28 @@ export const createSimulatedClient = async (
   baseURL: string,
   clientName: string,
   testPrefix: string,
-  options: { allowExampleTasks?: boolean } = {},
+  options: {
+    allowExampleTasks?: boolean;
+    /**
+     * Start with the calm new-install app features (`NEW_INSTALL_APP_FEATURES`)
+     * instead of the all-features-on set the E2E suite otherwise uses. The tour
+     * stays hidden: the app never shows it to a Playwright user agent.
+     */
+    isNewInstallAppFeatures?: boolean;
+    /** Released bundles register service workers; block them when switching builds. */
+    serviceWorkers?: 'allow' | 'block';
+    /**
+     * Runs on the app origin with all JavaScript blocked, before the app boots
+     * for the first time — for seeding IndexedDB (e.g. seedSuperSyncCredentials).
+     */
+    seedBeforeBoot?: (page: Page) => Promise<void>;
+  } = {},
 ): Promise<SimulatedE2EClient> => {
-  const { allowExampleTasks = false } = options;
+  const {
+    allowExampleTasks = false,
+    isNewInstallAppFeatures = false,
+    seedBeforeBoot,
+  } = options;
   // Use provided baseURL or fall back to localhost:4242 (Playwright fixture may be undefined)
   const effectiveBaseURL = baseURL || 'http://localhost:4242';
 
@@ -222,24 +390,42 @@ export const createSimulatedClient = async (
     userAgent: `PLAYWRIGHT SYNC-CLIENT-${clientName}`,
     baseURL: effectiveBaseURL,
     viewport: { width: 1920, height: 1080 },
+    serviceWorkers: options.serviceWorkers,
+  });
+
+  // Install the devError/beforeunload fallback on EVERY page this context ever
+  // creates, not just the first one: several import specs close the page and
+  // re-open it via `context.newPage()`. On such a listener-less page Playwright
+  // auto-DISMISSES native dialogs, silently answering sync confirmations with
+  // "cancel" (the import dialog then never closes). The strict sync helpers
+  // also deliberately leave beforeunload/devERR dialogs to this fallback and
+  // block the renderer if it is missing.
+  context.on('page', (contextPage) => {
+    installDevErrorDialogHandler(contextPage, `Client ${clientName}`);
   });
 
   const page = await context.newPage();
   const runtimeErrors = attachPageErrorCollector(page, `Client ${clientName}`);
-  installDevErrorDialogHandler(page, `Client ${clientName}`);
 
   // Skip onboarding, hints, and example tasks before the app boots.
   // This runs before any page JavaScript, so Angular sees the flags immediately.
   // Tests of the example-task sync gate opt back in via { allowExampleTasks: true }
   // so first-run onboarding tasks are actually created.
-  await page.addInitScript((allowExamples) => {
-    localStorage.setItem('SUP_ONBOARDING_PRESET_DONE', 'true');
-    localStorage.setItem('SUP_ONBOARDING_HINTS_DONE', 'true');
-    localStorage.setItem('SUP_IS_SHOW_TOUR', 'true');
-    if (!allowExamples) {
-      localStorage.setItem('SUP_EXAMPLE_TASKS_CREATED', 'true');
-    }
-  }, allowExampleTasks);
+  await page.addInitScript(
+    ({ allowExamples, isNewInstall }) => {
+      localStorage.setItem('SUP_ONBOARDING_PRESET_DONE', 'true');
+      localStorage.setItem('SUP_ONBOARDING_HINTS_DONE', 'true');
+      // getInitialAppFeatures() starts E2E clients with every feature on only
+      // while this flag is set.
+      if (!isNewInstall) {
+        localStorage.setItem('SUP_IS_SHOW_TOUR', 'true');
+      }
+      if (!allowExamples) {
+        localStorage.setItem('SUP_EXAMPLE_TASKS_CREATED', 'true');
+      }
+    },
+    { allowExamples: allowExampleTasks, isNewInstall: isNewInstallAppFeatures },
+  );
 
   page.on('console', (msg) => {
     if (msg.type() === 'error') {
@@ -248,6 +434,15 @@ export const createSimulatedClient = async (
       console.log(`[Client ${clientName}] Console ${msg.type()}:`, msg.text());
     }
   });
+
+  if (seedBeforeBoot) {
+    // Block JS so the seed lands before the app initializes (the aborted
+    // *.js loads only surface as console noise; the error collector above
+    // listens to pageerror only).
+    await page.route('**/*.js', async (route) => {
+      await route.abort();
+    });
+  }
 
   // Navigate to app with retry for transient ERR_CONNECTION_REFUSED.
   // Under parallel load (many workers × 2-3 browser contexts each), the Angular
@@ -276,6 +471,13 @@ export const createSimulatedClient = async (
     }
   }
   if (lastGotoError) throw lastGotoError;
+
+  if (seedBeforeBoot) {
+    console.log(`[Client ${clientName}] Seeding before first boot...`);
+    await seedBeforeBoot(page);
+    await page.unroute('**/*.js');
+    await page.reload({ waitUntil: 'domcontentloaded' });
+  }
 
   await waitForAppReady(page);
 
@@ -391,17 +593,6 @@ export const waitForTask = async (
 };
 
 /**
- * Count tasks matching a pattern on the page.
- */
-export const countTasks = async (page: Page, pattern?: string): Promise<number> => {
-  if (pattern) {
-    const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    return page.locator(`task:has-text("${escapedPattern}")`).count();
-  }
-  return page.locator('task').count();
-};
-
-/**
  * Check if a task exists on the page.
  */
 export const hasTask = async (page: Page, taskName: string): Promise<boolean> => {
@@ -432,19 +623,6 @@ const escapeForSelector = (text: string): string => {
 export const getTaskElement = (client: SimulatedE2EClient, taskName: string): Locator => {
   const escapedName = escapeForSelector(taskName);
   return client.page.locator(`task:has-text("${escapedName}")`);
-};
-
-/**
- * Get a task element locator from a page by task name.
- * Use this when you have a page but not a client.
- *
- * @param page - The Playwright page
- * @param taskName - The task name to search for
- * @returns Locator for the task element
- */
-export const getTaskElementFromPage = (page: Page, taskName: string): Locator => {
-  const escapedName = escapeForSelector(taskName);
-  return page.locator(`task:has-text("${escapedName}")`);
 };
 
 /**
@@ -693,6 +871,14 @@ export const renameTask = async (
   // Type directly into the textarea via evaluate to avoid focus/detach races
   await textarea.evaluate((el: HTMLTextAreaElement, name: string) => {
     el.focus();
+    // Dispatch focus explicitly rather than trusting el.focus() to emit it.
+    // These tests drive two clients as separate pages and only one page can hold
+    // focus, so on CI the event often never fires. TaskTitleComponent then keeps
+    // _isFocused=false, and its resetToLastExternalValueTrigger resets tmpValue
+    // to the stored title on the next task-object emission — blur therefore
+    // computes wasChanged=false, task.component skips update(), and the rename
+    // is silently dropped without ever becoming an op.
+    el.dispatchEvent(new Event('focus', { bubbles: true }));
     el.value = name;
     el.dispatchEvent(new Event('input', { bubbles: true }));
   }, newName);
@@ -700,7 +886,17 @@ export const renameTask = async (
   await textarea.evaluate((el: HTMLTextAreaElement) => {
     el.dispatchEvent(new Event('blur', { bubbles: true }));
   });
-  await client.page.waitForTimeout(UI_SETTLE_MEDIUM);
+  // Assert against the STORE, not the DOM. task-title renders tmpValue (a
+  // component-local signal) in both its editing and idle branches, so a DOM
+  // check matches as soon as the synthetic input fires and can never tell a
+  // typed title from a committed one. Only the store proves an op was captured
+  // — and an uncaptured rename is invisible until a later sync reverts it.
+  await expect
+    .poll(() => getTaskTitleFromState(client, newName), {
+      timeout: UI_VISIBLE_TIMEOUT,
+      message: `renameTask: "${newName}" never reached the store — the rename was typed but never committed as an op`,
+    })
+    .toBe(newName);
 };
 
 /**
@@ -714,10 +910,18 @@ export const startTimeTracking = async (
   taskName: string,
 ): Promise<void> => {
   const task = getTaskElement(client, taskName);
-  await task.hover();
   const startBtn = task.locator('.start-task-btn');
-  await startBtn.waitFor({ state: 'visible', timeout: UI_VISIBLE_TIMEOUT });
-  await startBtn.click();
+  // The button exists only while the first line is hovered; a re-render or
+  // layout shift between hover and click detaches it, and click never re-hovers.
+  // Re-hover each attempt, and skip the click once tracking runs so a retry
+  // cannot toggle it back off.
+  await expect(async () => {
+    if (!(await task.evaluate((el) => el.classList.contains('isCurrent')))) {
+      await task.hover();
+      await startBtn.click({ timeout: 2000 });
+    }
+    await expect(task).toHaveClass(/\bisCurrent\b/, { timeout: 1000 });
+  }).toPass({ timeout: UI_VISIBLE_TIMEOUT });
 };
 
 /**
@@ -760,70 +964,22 @@ export const getTaskCount = async (client: SimulatedE2EClient): Promise<number> 
  * Get all task titles as an array.
  * Useful for comparing task order between clients.
  *
+ * Reads every row in one in-page evaluation. `count()` followed by a per-row
+ * `nth(i).innerText()` is not a snapshot: each read re-resolves the locator and
+ * auto-waits, so a re-render in between (a sync applying ops, a view swap) leaves
+ * `nth(i)` pointing past the new end of the list and the read waits out its whole
+ * timeout on a row that no longer exists.
+ *
+ * The result is still whatever the DOM showed at that instant, so callers that
+ * assert on the list after a sync should poll it (`expect.poll`) rather than
+ * trust one read.
+ *
  * @param client - The simulated E2E client
  * @returns Array of task titles in order
  */
 export const getTaskTitles = async (client: SimulatedE2EClient): Promise<string[]> => {
-  const tasks = client.page.locator('task .task-title');
-  const count = await tasks.count();
-  const titles: string[] = [];
-  for (let i = 0; i < count; i++) {
-    const text = await tasks.nth(i).innerText();
-    titles.push(text.trim());
-  }
-  return titles;
-};
-
-/**
- * Get the tracked time display text for a task.
- *
- * @param client - The simulated E2E client
- * @param taskName - The task name
- * @returns The time display text or null if not present
- */
-export const getTaskTimeDisplay = async (
-  client: SimulatedE2EClient,
-  taskName: string,
-): Promise<string | null> => {
-  const task = getTaskElement(client, taskName);
-  const timeVal = task.locator('.time-wrapper .time-val').first();
-  if ((await timeVal.count()) > 0) {
-    return timeVal.textContent();
-  }
-  return null;
-};
-
-/**
- * Wait for a task's tracked time text to be present.
- *
- * The task row intentionally hides `.time-wrapper` while hover controls are mounted,
- * so time-tracking assertions should read the rendered text instead of requiring
- * visual visibility.
- *
- * @param client - The simulated E2E client
- * @param taskName - The task name
- * @param timeout - Maximum time to wait for non-empty time text
- * @returns The trimmed time display text
- */
-export const waitForTaskTimeDisplay = async (
-  client: SimulatedE2EClient,
-  taskName: string,
-  timeout = UI_VISIBLE_TIMEOUT,
-): Promise<string> => {
-  await expect
-    .poll(
-      async () => {
-        const text = await getTaskTimeDisplay(client, taskName);
-        return text?.trim() ?? '';
-      },
-      {
-        timeout,
-        intervals: [250, 500, 1000],
-      },
-    )
-    .not.toBe('');
-
-  return (await getTaskTimeDisplay(client, taskName))!.trim();
+  const titles = await client.page.locator('task .task-title').allInnerTexts();
+  return titles.map((title) => title.trim());
 };
 
 /**
@@ -836,8 +992,75 @@ export const waitForTaskTimeDisplay = async (
  * @param taskName - The task name
  * @returns The persisted timeSpent value in milliseconds, or null if not found
  */
-export const getTaskTimeSpentFromState = async (
+/**
+ * Read a task's title from the live NgRx store.
+ *
+ * The DOM cannot answer this: task-title renders tmpValue, a component-local
+ * signal, in both its editing and idle branches, so it shows a typed title
+ * whether or not an op was ever captured. Only the store distinguishes them.
+ *
+ * @param client - The simulated E2E client
+ * @param titleSubstring - Substring identifying the task
+ * @returns The stored title, or null when no task matches
+ */
+export const getTaskTitleFromState = async (
   client: SimulatedE2EClient,
+  titleSubstring: string,
+): Promise<string | null> =>
+  client.page.evaluate(async (name) => {
+    const isRecord = (value: unknown): value is Record<string, unknown> =>
+      typeof value === 'object' && value !== null;
+
+    const getTitleFromRootState = (state: Record<string, unknown>): string | null => {
+      const taskState = state.tasks ?? state.task;
+      if (!isRecord(taskState) || !isRecord(taskState.entities)) {
+        return null;
+      }
+      for (const task of Object.values(taskState.entities)) {
+        if (
+          isRecord(task) &&
+          typeof task.title === 'string' &&
+          task.title.includes(name)
+        ) {
+          return task.title;
+        }
+      }
+      return null;
+    };
+
+    type StoreSubscription = { unsubscribe: () => void };
+    type StoreLike = {
+      subscribe: (next: (state: unknown) => void) => StoreSubscription;
+    };
+
+    const helpers = (window as unknown as { __e2eTestHelpers?: { store?: StoreLike } })
+      .__e2eTestHelpers;
+
+    const store = helpers?.store;
+    if (!store) {
+      return null;
+    }
+
+    const liveState = await new Promise<Record<string, unknown> | null>((resolve) => {
+      let isDone = false;
+      const subscriptionRef: { current?: StoreSubscription } = {};
+      const finish = (state: unknown): void => {
+        if (isDone) {
+          return;
+        }
+        isDone = true;
+        window.setTimeout(() => subscriptionRef.current?.unsubscribe());
+        resolve(isRecord(state) ? state : null);
+      };
+      subscriptionRef.current = store.subscribe(finish);
+      window.setTimeout(() => finish(null), 1000);
+    });
+
+    return liveState ? getTitleFromRootState(liveState) : null;
+  }, titleSubstring);
+
+export const getTaskTimeSpentFromState = async (
+  client: Pick<SimulatedE2EClient, 'page'>,
   taskName: string,
 ): Promise<number | null> =>
   client.page.evaluate(async (name) => {
@@ -876,7 +1099,8 @@ export const getTaskTimeSpentFromState = async (
       }
     ).__e2eTestHelpers;
 
-    if (helpers?.store) {
+    const liveStore = helpers?.store;
+    if (liveStore) {
       const liveState = await new Promise<Record<string, unknown> | null>((resolve) => {
         let isDone = false;
         const subscriptionRef: { current?: StoreSubscription } = {};
@@ -889,7 +1113,7 @@ export const getTaskTimeSpentFromState = async (
           resolve(isRecord(state) ? state : null);
         };
 
-        subscriptionRef.current = helpers.store.subscribe(finish);
+        subscriptionRef.current = liveStore.subscribe(finish);
         window.setTimeout(() => finish(null), 1000);
       });
 
@@ -949,6 +1173,123 @@ export const waitForTaskTimeSpent = async (
     .toBeGreaterThan(0);
 
   return (await getTaskTimeSpentFromState(client, taskName))!;
+};
+
+/**
+ * Poll until a task's persisted timeSpent equals the exact expected value.
+ *
+ * @param client - The simulated E2E client
+ * @param taskName - The task name
+ * @param expectedTimeSpent - The expected timeSpent in milliseconds
+ */
+export const expectExactTaskTime = async (
+  client: Pick<SimulatedE2EClient, 'page'>,
+  taskName: string,
+  expectedTimeSpent: number,
+): Promise<void> => {
+  await expect
+    .poll(() => getTaskTimeSpentFromState(client, taskName), {
+      timeout: 30000,
+      intervals: [250, 500, 1000],
+    })
+    .toBe(expectedTimeSpent);
+};
+
+/**
+ * Record an exact local time delta through the same two actions used by the
+ * production timer: one updates local state, the other writes the replayable op.
+ *
+ * @param client - The simulated E2E client
+ * @param taskName - The task name to record time on
+ * @param date - The worklog day string (YYYY-MM-DD) to book the time on
+ * @param duration - The time delta in milliseconds
+ */
+export const recordTaskTimeDelta = async (
+  client: Pick<SimulatedE2EClient, 'page'>,
+  taskName: string,
+  date: string,
+  duration: number,
+): Promise<void> => {
+  await client.page.evaluate(
+    async ({ name, taskDate, delta }) => {
+      const isRecordInPage = (value: unknown): value is Record<string, unknown> =>
+        typeof value === 'object' && value !== null;
+
+      type StoreSubscription = { unsubscribe: () => void };
+      type StoreLike = {
+        subscribe: (next: (state: unknown) => void) => StoreSubscription;
+        dispatch: (action: unknown) => void;
+      };
+
+      const store = (
+        window as unknown as {
+          __e2eTestHelpers?: { store?: StoreLike };
+        }
+      ).__e2eTestHelpers?.store;
+
+      if (!store) {
+        throw new Error('E2E store helper is unavailable');
+      }
+
+      const rootState = await new Promise<Record<string, unknown>>((resolve, reject) => {
+        const subscriptionRef: { current?: StoreSubscription } = {};
+        let isDone = false;
+        const timeoutId = window.setTimeout(() => {
+          if (!isDone) {
+            isDone = true;
+            subscriptionRef.current?.unsubscribe();
+            reject(new Error('Timed out reading the NgRx state'));
+          }
+        }, 1000);
+
+        subscriptionRef.current = store.subscribe((state) => {
+          if (isDone || !isRecordInPage(state)) {
+            return;
+          }
+          isDone = true;
+          window.clearTimeout(timeoutId);
+          window.setTimeout(() => subscriptionRef.current?.unsubscribe());
+          resolve(state);
+        });
+      });
+
+      const taskState = rootState.tasks ?? rootState.task;
+      if (!isRecordInPage(taskState) || !isRecordInPage(taskState.entities)) {
+        throw new Error('Task state is unavailable');
+      }
+
+      const task = Object.values(taskState.entities).find(
+        (value) =>
+          isRecordInPage(value) &&
+          typeof value.title === 'string' &&
+          value.title.includes(name),
+      );
+      if (!isRecordInPage(task) || typeof task.id !== 'string') {
+        throw new Error(`Task not found: ${name}`);
+      }
+
+      store.dispatch({
+        type: '[TimeTracking] Add time spent',
+        task,
+        date: taskDate,
+        duration: delta,
+        isFromTrackingReminder: false,
+      });
+      store.dispatch({
+        type: '[TimeTracking] Sync time spent',
+        taskId: task.id,
+        date: taskDate,
+        duration: delta,
+        meta: {
+          isPersistent: true,
+          entityType: 'TASK',
+          entityId: task.id,
+          opType: 'UPD',
+        },
+      });
+    },
+    { name: taskName, taskDate: date, delta: duration },
+  );
 };
 
 /**
@@ -1087,26 +1428,43 @@ export const markTaskDoneByKey = async (
  * @param client - The simulated E2E client
  */
 export const archiveDoneTasks = async (client: SimulatedE2EClient): Promise<void> => {
-  // Click the "Finish Day" button to go to Daily Summary
+  // Click the "Finish Day" button to go to Daily Summary, re-issuing the click
+  // until navigation actually starts. The button itself no longer swaps on
+  // hasDoneTasks() (fixed in the finish-day-btn template), but it still sits
+  // inside work-view's own @if, so a click can land while Angular re-creates
+  // the element and silently no-op before the routerLink is wired.
   const finishDayBtn = client.page.locator('.e2e-finish-day');
   await finishDayBtn.waitFor({ state: 'visible', timeout: UI_VISIBLE_TIMEOUT });
-  await finishDayBtn.click();
-
-  // Wait for navigation to Daily Summary
-  await client.page.waitForURL(/daily-summary/);
+  let finishDayAttempts = 0;
+  await expect(async () => {
+    finishDayAttempts++;
+    // Skip the click once we are already navigating: the button is gone by
+    // then, and clicking a missing element would report a click timeout for a
+    // navigation that actually succeeded. Bound it for the same reason.
+    if (!/daily-summary/.test(client.page.url())) {
+      await finishDayBtn.click({ timeout: 2000 });
+    }
+    await client.page.waitForURL(/daily-summary/, { timeout: 2000 });
+  }).toPass({ timeout: UI_VISIBLE_TIMEOUT_LONG });
+  if (finishDayAttempts > 1) {
+    // Surface the retry: the suite runs with retries: 0 so that non-determinism
+    // stays visible, and a silent in-test retry would defeat that.
+    console.warn(`[archiveDoneTasks] Finish Day took ${finishDayAttempts} attempts`);
+  }
 
   // Click "Save & Go Home" button (has sun icon wb_sunny)
   const saveAndGoHomeBtn = client.page.locator(
     'daily-summary button[mat-flat-button]:has(mat-icon:has-text("wb_sunny"))',
   );
   await saveAndGoHomeBtn.waitFor({ state: 'visible', timeout: UI_VISIBLE_TIMEOUT });
-  await saveAndGoHomeBtn.click();
-
   // Wait for navigation back to work view.
   // Use negative lookahead: /(active\/tasks|tag\/TODAY)/ would match the
   // current /daily-summary URL; adding (?!\/daily-summary) ensures we wait
   // for a real navigation. Also handles tag/TODAY without /tasks suffix.
-  await client.page.waitForURL(/(active\/tasks|tag\/TODAY(?!\/daily-summary))/);
+  await Promise.all([
+    client.page.waitForURL(/(active\/tasks|tag\/TODAY(?!\/daily-summary))/),
+    saveAndGoHomeBtn.click(),
+  ]);
   await client.page.waitForTimeout(UI_SETTLE_STANDARD);
 };
 
@@ -1187,56 +1545,6 @@ export const expectTaskInWorklog = async (
   if (!found) {
     throw new Error(`Expected task "${taskName}" to be in worklog, but it was not found`);
   }
-};
-
-/**
- * Assert that a task does NOT appear in the worklog.
- *
- * @param client - The simulated E2E client
- * @param taskName - The task name that should NOT be in worklog
- */
-export const expectTaskNotInWorklog = async (
-  client: SimulatedE2EClient,
-  taskName: string,
-): Promise<void> => {
-  const found = await hasTaskInWorklog(client, taskName);
-  if (found) {
-    throw new Error(`Expected task "${taskName}" NOT to be in worklog, but it was found`);
-  }
-};
-
-/**
- * Get the count of worklog entries (archived tasks).
- *
- * @param client - The simulated E2E client
- * @returns The number of task entries in worklog
- */
-export const getWorklogTaskCount = async (
-  client: SimulatedE2EClient,
-): Promise<number> => {
-  // Navigate to worklog
-  await client.page.goto('/#/tag/TODAY/history');
-  await client.page.waitForLoadState('networkidle');
-  await client.page.waitForTimeout(UI_SETTLE_STANDARD);
-
-  // Expand week rows
-  const weekRows = client.page.locator('.week-row');
-  const weekCount = await weekRows.count();
-  for (let i = 0; i < Math.min(weekCount, 3); i++) {
-    const row = weekRows.nth(i);
-    if (await row.isVisible()) {
-      await row.click().catch(() => {});
-      await client.page.waitForTimeout(UI_SETTLE_SMALL);
-    }
-  }
-
-  // Count task entries
-  const taskEntries = await client.page
-    .locator('.task-summary-table .task-title, .worklog-task, worklog-task')
-    .count()
-    .catch(() => 0);
-
-  return taskEntries;
 };
 
 /**

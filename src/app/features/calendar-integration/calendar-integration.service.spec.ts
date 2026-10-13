@@ -29,12 +29,9 @@ import { Subscription } from 'rxjs';
 import { getDbDateStr } from '../../util/get-db-date-str';
 import { PluginIssueProviderRegistryService } from '../../plugins/issue-provider/plugin-issue-provider-registry.service';
 import { PluginHttpService } from '../../plugins/issue-provider/plugin-http.service';
+import { IssueProviderPluginDefinition } from '../../plugins/issue-provider/plugin-issue-provider.model';
 import { IssueProviderPluginType } from '../issue/issue.model';
 import { NotIcalResponseError } from '../schedule/ical/is-likely-ical';
-// Static import forces ical.js into the main test bundle so the dynamic
-// import() inside loadIcalModule resolves from the webpack module cache
-// without a JSONP chunk request — which times out in Karma's test runner.
-import 'ical.js';
 import { loadIcalModule } from '../schedule/ical/ical-lazy-loader';
 import { CalendarIntegrationEvent } from './calendar-integration.model';
 import { HiddenCalendarEventsService } from './hidden-calendar-events.service';
@@ -955,16 +952,17 @@ END:VCALENDAR`;
       expect(result).toBe(true);
     });
 
-    it('should return false when connection fails', async () => {
+    // Rejects rather than resolving `false`, so the provider dialog has a reason
+    // to show instead of a bare "Connection failed" (#9635).
+    it('should surface the error when connection fails', async () => {
       const cfg = createMockProvider();
 
       const promise = service.testConnection(cfg);
 
       const req = httpMock.expectOne(cfg.icalUrl);
-      req.error(new ProgressEvent('error'));
+      req.error(new ProgressEvent('error'), { status: 401, statusText: 'Unauthorized' });
 
-      const result = await promise;
-      expect(result).toBe(false);
+      await expectAsync(promise).toBeRejected();
     });
 
     it('should return false for empty response', async () => {
@@ -1177,6 +1175,28 @@ END:VCALENDAR`;
       // can branch on its identity via `instanceof`. A plain-Error wrapper (the
       // prior behaviour via `throw new Error(err)`) would fail this check.
       expect(caughtError).toBeInstanceOf(NotIcalResponseError);
+    }));
+
+    it('should not leak the tokenized iCal URL in the error snack', fakeAsync(() => {
+      const mockProvider = createMockProvider({
+        icalUrl: 'https://calendar.google.com/calendar/ical/SECRET_TOKEN/basic.ics',
+      });
+      mockSnackService.open.calls.reset();
+
+      const sub = service.requestEvents$(mockProvider).subscribe();
+      subscriptions.push(sub);
+
+      const req = httpMock.expectOne(mockProvider.icalUrl);
+      req.flush('nope', { status: 401, statusText: 'Unauthorized' });
+
+      flush();
+      const snackArg = mockSnackService.open.calls.mostRecent().args[0] as {
+        msg: string;
+        translateParams?: { errTxt?: string };
+      };
+      expect(snackArg.msg).toBe('F.CALENDARS.S.CAL_PROVIDER_ERROR');
+      expect(snackArg.translateParams?.errTxt).not.toContain('SECRET_TOKEN');
+      expect(JSON.stringify(snackArg)).not.toContain('SECRET_TOKEN');
     }));
   });
 
@@ -2261,5 +2281,105 @@ END:VCALENDAR`;
       expect(allDay).toEqual(jasmine.objectContaining({ id: 'evt-without-time' }));
       expect(allDay.dueWithTime).toBeUndefined();
     });
+  });
+
+  // Regression: plugin issue-provider calendars (e.g. the Google Calendar plugin) register
+  // asynchronously AFTER the issue-provider store is hydrated. calendarEvents$ must react to
+  // that registration (via PluginIssueProviderRegistryService.registrationChanges$) and surface
+  // the plugin's events WITHOUT needing a re-subscription — otherwise agenda events only appear
+  // after navigating away and back to the Today view.
+  describe('plugin registering after subscription', () => {
+    it('surfaces plugin calendar events once the plugin registers (no re-subscribe)', fakeAsync(() => {
+      const PLUGIN_KEY = 'plugin:gcal';
+      const pluginProvider = {
+        id: 'gcal-provider-id',
+        issueProviderKey: PLUGIN_KEY,
+        isEnabled: true,
+        pluginConfig: {},
+      } as unknown as IssueProviderPluginType;
+
+      const twoHoursMs = 2 * 60 * 60 * 1000;
+      const futureStart = Date.now() + twoHoursMs;
+      const getNewIssuesForBacklog = jasmine
+        .createSpy('getNewIssuesForBacklog')
+        .and.returnValue(
+          Promise.resolve([
+            {
+              id: 'gcal-evt-1',
+              title: 'Standup',
+              start: futureStart,
+              dueWithTime: futureStart,
+              duration: 30 * 60 * 1000,
+            },
+          ]),
+        );
+      const mockPluginHttp = {
+        createHttpHelper: jasmine.createSpy('createHttpHelper').and.returnValue({}),
+      };
+
+      TestBed.resetTestingModule();
+      localStorage.clear();
+      TestBed.configureTestingModule({
+        imports: [HttpClientTestingModule],
+        providers: [
+          CalendarIntegrationService,
+          provideMockStore({
+            selectors: [
+              { selector: selectCalendarProviders, value: [] },
+              // The provider config is already hydrated in the store before the plugin
+              // (which supplies `useAgendaView`) has registered.
+              { selector: selectEnabledIssueProviders, value: [pluginProvider] },
+              { selector: selectAllCalendarTaskEventIds, value: [] },
+            ],
+          }),
+          { provide: SnackService, useValue: mockSnackService },
+          { provide: PluginHttpService, useValue: mockPluginHttp },
+          { provide: TaskArchiveService, useValue: mockTaskArchiveService },
+        ],
+      });
+
+      const freshService = TestBed.inject(CalendarIntegrationService);
+      const registry = TestBed.inject(PluginIssueProviderRegistryService);
+
+      const emissions: string[][] = [];
+      const sub = freshService.calendarEvents$.subscribe((entries) =>
+        emissions.push(entries.flatMap((e) => e.items.map((i) => i.id))),
+      );
+
+      // Before registration `getUseAgendaView` is false → the provider is not treated as a
+      // calendar source and nothing is fetched.
+      tick(0);
+      flushMicrotasks();
+      expect(emissions.flat()).not.toContain('gcal-evt-1');
+      expect(getNewIssuesForBacklog).not.toHaveBeenCalled();
+
+      // Plugin finishes loading and registers as an agenda-view calendar provider.
+      registry.register({
+        pluginId: 'gcal',
+        issueProviderKey: PLUGIN_KEY,
+        definition: {
+          getHeaders: () => ({}),
+          getNewIssuesForBacklog,
+        } as unknown as IssueProviderPluginDefinition,
+        name: 'Google Calendar',
+        humanReadableName: 'Google Calendar',
+        icon: 'calendar',
+        pollIntervalMs: 60000,
+        issueStrings: { singular: 'Event', plural: 'Events' },
+        useAgendaView: true,
+      });
+
+      // Without any re-subscription, the plugin's event must now appear.
+      tick(0);
+      flushMicrotasks();
+      tick(100);
+      flushMicrotasks();
+
+      expect(getNewIssuesForBacklog).toHaveBeenCalled();
+      expect(emissions[emissions.length - 1]).toContain('gcal-evt-1');
+
+      sub.unsubscribe();
+      discardPeriodicTasks();
+    }));
   });
 });

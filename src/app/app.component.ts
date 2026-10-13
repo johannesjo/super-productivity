@@ -21,6 +21,7 @@ import { TaskWidgetSettingsService } from './features/config/task-widget-setting
 import { LayoutService } from './core-ui/layout/layout.service';
 import { SnackService } from './core/snack/snack.service';
 import { IS_ELECTRON } from './app.constants';
+import { IS_MAC } from './util/is-mac';
 import { expandAnimation } from './ui/animations/expand.ani';
 import { warpRouteAnimation } from './ui/animations/warp-route';
 import { firstValueFrom, Subscription } from 'rxjs';
@@ -30,17 +31,20 @@ import { LS } from './core/persistence/storage-keys.const';
 import { BannerId } from './core/banner/banner.model';
 import { T } from './t.const';
 import { GlobalThemeService } from './core/theme/global-theme.service';
+import { IosKeyboardService } from './core/theme/ios-keyboard.service';
 import { resolveBgImageToDataUrl } from './core/theme/resolve-bg-image-to-data-url.util';
 import { LanguageService } from './core/language/language.service';
 import { WorkContextService } from './features/work-context/work-context.service';
 import { SyncTriggerService } from './imex/sync/sync-trigger.service';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
-import { concatMap, first, take } from 'rxjs/operators';
+import { first, take } from 'rxjs/operators';
 
-import { IS_MOBILE } from './util/is-mobile';
 import { recordSearchNavDebug } from './util/search-nav-debug';
 import { warpAnimation, warpInAnimation } from './ui/animations/warp.ani';
-import { AddTaskBarComponent } from './features/tasks/add-task-bar/add-task-bar.component';
+import {
+  AddTaskBarComponent,
+  TaskAddEvent,
+} from './features/tasks/add-task-bar/add-task-bar.component';
 import { Dir } from '@angular/cdk/bidi';
 import { MagicSideNavComponent } from './core-ui/magic-side-nav/magic-side-nav.component';
 import { MainHeaderComponent } from './core-ui/main-header/main-header.component';
@@ -51,61 +55,49 @@ import { DOCUMENT } from '@angular/common';
 import { RightPanelComponent } from './features/right-panel/right-panel.component';
 import { selectIsOverlayShown } from './features/focus-mode/store/focus-mode.selectors';
 import { Store } from '@ngrx/store';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MarkdownPasteService } from './features/tasks/markdown-paste.service';
 import { TaskService } from './features/tasks/task.service';
+import { TaskAttachmentService } from './features/tasks/task-attachment/task-attachment.service';
 import { MatMenuItem } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
 import { NoteStartupBannerService } from './features/note/note-startup-banner.service';
+import { SyncSafetyBannerService } from './imex/sync/sync-safety-banner.service';
+import { SuperSyncEncryptionMigrationBannerService } from './imex/sync/super-sync-encryption-migration-banner.service';
 import { ProjectService } from './features/project/project.service';
 import { TagService } from './features/tag/tag.service';
 import { ContextMenuComponent } from './ui/context-menu/context-menu.component';
-import {
-  WorkContextType,
-  type WorkContextThemeCfg,
-} from './features/work-context/work-context.model';
+import { WorkContextType } from './features/work-context/work-context.model';
 import { SectionService } from './features/section/section.service';
 import { DialogPromptComponent } from './ui/dialog-prompt/dialog-prompt.component';
 import { TODAY_TAG } from './features/tag/tag.const';
-import { normalizeBackgroundImageBlur } from './features/work-context/work-context.const';
 import { openWorkContextSettingsDialog } from './features/work-context/dialog-work-context-settings/open-work-context-settings-dialog';
 import { isInputElement } from './util/dom-element';
+import { getDroppedUrl } from './core/drop-paste-input/drop-paste-input';
+import { readableUrl } from './util/readable-url';
 import { MobileBottomNavComponent } from './core-ui/mobile-bottom-nav/mobile-bottom-nav.component';
 import { StartupService } from './core/startup/startup.service';
 import { DataInitStateService } from './core/data-init/data-init-state.service';
+import { AppUriTaskActionsService } from './features/tasks/app-uri-actions/app-uri-task-actions.service';
+import { IosShareService } from './features/tasks/ios-share/ios-share.service';
+import { AgentCaptureService } from './features/tasks/agent-capture/agent-capture.service';
 import { ExampleTasksService } from './core/example-tasks/example-tasks.service';
 import { KeyboardLayoutService } from './core/keyboard-layout/keyboard-layout.service';
 import { setKeyboardLayoutService } from './util/check-key-combo';
-import { OnboardingPresetSelectionComponent } from './features/onboarding/onboarding-preset-selection.component';
+import { TaskMultiSelectBarComponent } from './features/tasks/task-multi-select-bar/task-multi-select-bar.component';
+import { TaskMultiSelectService } from './features/tasks/task-multi-select.service';
 import { OnboardingHintComponent } from './features/onboarding/onboarding-hint.component';
 import { OnboardingHintService } from './features/onboarding/onboarding-hint.service';
 import { MaterialIconsLoaderService } from './ui/material-icons-loader.service';
 import { BrowserTitleService } from './core/browser-title/browser-title.service';
 
-const ONBOARDING_PRESET_EXIT_DELAY = 1000;
-const ONBOARDING_ENTRANCE_COMPLETE_DELAY = 2000;
 const ENTRANCE_ANIMATION_DURATION = 1500;
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
-
-type WorkContextThemeSource =
-  | {
-      theme?: WorkContextThemeCfg | null;
-    }
-  | null
-  | undefined;
-
-export const getBackgroundOverlayOpacity = (context: WorkContextThemeSource): number => {
-  const baseOpacity = context?.theme?.backgroundOverlayOpacity ?? 20;
-  return baseOpacity * 0.01;
-};
-
-export const getBackgroundImageBlur = (context: WorkContextThemeSource): number =>
-  normalizeBackgroundImageBlur(context?.theme?.backgroundImageBlur);
 
 @Component({
   selector: 'app-root',
@@ -134,8 +126,8 @@ export const getBackgroundImageBlur = (context: WorkContextThemeSource): number 
     TranslatePipe,
     ContextMenuComponent,
     MobileBottomNavComponent,
-    OnboardingPresetSelectionComponent,
     OnboardingHintComponent,
+    TaskMultiSelectBarComponent,
   ],
 })
 export class AppComponent implements OnDestroy, AfterViewInit {
@@ -144,15 +136,24 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   private _bannerService = inject(BannerService);
   private _snackService = inject(SnackService);
   private _globalThemeService = inject(GlobalThemeService);
+  private _iosKeyboardService = inject(IosKeyboardService);
+  /** Sized above the iOS keyboard; null everywhere else. See IosKeyboardService. */
+  readonly iosShellHeight = this._iosKeyboardService.shellHeight;
   private _languageService = inject(LanguageService);
   private _activatedRoute = inject(ActivatedRoute);
   private _matDialog = inject(MatDialog);
   private _markdownPasteService = inject(MarkdownPasteService);
   private _taskService = inject(TaskService);
+  private _taskAttachmentService = inject(TaskAttachmentService);
+  private _translateService = inject(TranslateService);
   private _projectService = inject(ProjectService);
   private _tagService = inject(TagService);
   private _destroyRef = inject(DestroyRef);
   private _noteStartupBannerService = inject(NoteStartupBannerService);
+  private _syncSafetyBannerService = inject(SyncSafetyBannerService);
+  private _superSyncEncryptionMigrationBannerService = inject(
+    SuperSyncEncryptionMigrationBannerService,
+  );
   private _ngZone = inject(NgZone);
   private _document = inject(DOCUMENT, { optional: true });
   private _startupService = inject(StartupService);
@@ -165,6 +166,11 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   private _keyboardLayoutService = inject(KeyboardLayoutService);
   private _dataInitStateService = inject(DataInitStateService);
   private _materialIconsLoaderService = inject(MaterialIconsLoaderService);
+  // Injected only to trigger its constructor eagerly at app start, so a
+  // cold-launch add-task/complete-task URL action is never missed.
+  private _appUriTaskActionsService = inject(AppUriTaskActionsService);
+  private _iosShareService = inject(IosShareService);
+  private _agentCaptureService = inject(AgentCaptureService);
   readonly onboardingHintService = inject(OnboardingHintService);
 
   private _syncTriggerService = inject(SyncTriggerService);
@@ -178,6 +184,8 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   readonly T = T;
   readonly TODAY_TAG_ID = TODAY_TAG.id;
   readonly isShowMobileButtonNav = this.layoutService.isShowMobileBottomNav;
+  private readonly _taskMultiSelectService = inject(TaskMultiSelectService);
+  readonly isMultiSelecting = this._taskMultiSelectService.isSelecting;
 
   @ViewChild('routeWrapper', { read: ElementRef }) routeWrapper?: ElementRef<HTMLElement>;
   @ViewChild(RouterOutlet) private _routerOutlet?: RouterOutlet;
@@ -219,37 +227,15 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     { initialValue: null },
   );
 
-  private readonly _activeWorkContext = toSignal(
-    this.workContextService.activeWorkContext$,
-    { initialValue: null },
-  );
   readonly resolvedBgImage = signal<string | null>(null);
-
-  isShowOnboardingPresets = signal(
-    !localStorage.getItem(LS.ONBOARDING_PRESET_DONE) &&
-      !localStorage.getItem(LS.IS_SKIP_TOUR),
-  );
 
   private _subs: Subscription = new Subscription();
 
   constructor() {
     this._startupService.init();
+    this._iosShareService.start();
+    this._agentCaptureService.start();
     void this._materialIconsLoaderService.ensureFontReady();
-
-    // Skip onboarding for existing users with data
-    if (this.isShowOnboardingPresets()) {
-      this._dataInitStateService.isAllDataLoadedInitially$
-        .pipe(
-          concatMap(() => this._projectService.list$),
-          first(),
-        )
-        .subscribe((projectList) => {
-          if (projectList.length > 2) {
-            localStorage.setItem(LS.ONBOARDING_PRESET_DONE, 'true');
-            this.isShowOnboardingPresets.set(false);
-          }
-        });
-    }
 
     // Clear app entrance animation after it completes
     if (this.isAppEntrance()) {
@@ -272,7 +258,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
             focusItem: params.focusItem,
             url: window.location.pathname + window.location.search,
           });
-          this._focusElement(params.focusItem);
+          this._focusElement(params.focusItem, params.isFromSearch === 'true');
         }
       }),
     );
@@ -308,13 +294,18 @@ export class AppComponent implements OnDestroy, AfterViewInit {
       .pipe(take(1))
       .subscribe(() => {
         void this._noteStartupBannerService.showLastNoteIfNeeded();
+        this._syncSafetyBannerService.showReminderIfNeeded();
+        void this._superSyncEncryptionMigrationBannerService.showBannerIfNeeded();
       });
 
     // ! For keyboard shortcuts to work correctly with any layouts (QWERTZ/AZERTY/etc) - user's keyboard layout must be presaved
     // Connect the service to the utility functions
     setKeyboardLayoutService(this._keyboardLayoutService);
-    // Defer keyboard layout detection to idle time for better initial load performance
-    if (typeof requestIdleCallback === 'function') {
+    // Defer keyboard layout detection to idle time for better initial load performance,
+    // EXCEPT on macOS Electron where it is needed eagerly for the initial global shortcut registration.
+    if (IS_ELECTRON && IS_MAC) {
+      void this._keyboardLayoutService.saveUserLayout();
+    } else if (typeof requestIdleCallback === 'function') {
       requestIdleCallback(() => this._keyboardLayoutService.saveUserLayout());
     } else {
       setTimeout(() => this._keyboardLayoutService.saveUserLayout(), 0);
@@ -432,18 +423,20 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     return this._activeWorkContextId() ?? null;
   }
 
-  onTaskAdded({ taskId }: { taskId: string; isAddToBottom: boolean }): void {
+  onTaskAdded({ taskId }: TaskAddEvent): void {
     this.layoutService.setPendingFocusTaskId(taskId);
     this.layoutService.scrollToNewTask(taskId);
+    if (this.onboardingHintService.shouldAutoCloseFirstTaskComposer(taskId)) {
+      this.layoutService.hideAddTaskBar(taskId);
+    }
   }
 
-  readonly bgOverlayOpacity = computed((): number => {
-    return getBackgroundOverlayOpacity(this._activeWorkContext());
-  });
-
-  readonly bgImageBlur = computed((): number => {
-    return getBackgroundImageBlur(this._activeWorkContext());
-  });
+  // Opacity + blur follow the resolved background source (per-context image or
+  // the global wallpaper), resolved centrally by GlobalThemeService — on
+  // non-context pages the active context is the sticky "Today" default and must
+  // not style the wallpaper.
+  readonly bgOverlayOpacity = this._globalThemeService.bgOverlayOpacity;
+  readonly bgImageBlur = this._globalThemeService.bgImageBlur;
 
   readonly bgImageBlurFilter = computed((): string => {
     const blur = this.bgImageBlur();
@@ -485,24 +478,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     }
   }
 
-  isAppEntrance = signal(!this.isShowOnboardingPresets());
-
-  onPresetSelected(): void {
-    this.isAppEntrance.set(true);
-    setTimeout(() => {
-      this.isShowOnboardingPresets.set(false);
-    }, ONBOARDING_PRESET_EXIT_DELAY);
-    setTimeout(() => {
-      this.isAppEntrance.set(false);
-      this.onboardingHintService.startAfterPresetSelection();
-    }, ONBOARDING_ENTRANCE_COMPLETE_DELAY);
-  }
-
-  // Returning user set up sync from onboarding: just reveal the app with their
-  // synced data — no preset applied, no new-user hint tour.
-  onOnboardingDismissed(): void {
-    this.isShowOnboardingPresets.set(false);
-  }
+  isAppEntrance = signal(true);
 
   ngAfterViewInit(): void {
     this._ngZone.runOutsideAngular(() => {
@@ -515,9 +491,11 @@ export class AppComponent implements OnDestroy, AfterViewInit {
         ev.preventDefault();
       };
 
-      // Ensure accidental file drops don’t replace the SPA with the dropped file
+      // Ensure accidental file drops don’t replace the SPA with the dropped file,
+      // and turn a web link dropped on empty app chrome into a "Check <url>" task.
       const onDrop = (ev: DragEvent): void => {
         ev.preventDefault();
+        this._createTaskFromDroppedLink(ev);
       };
 
       const onKeyDown = (ev: KeyboardEvent): void => {
@@ -542,27 +520,63 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     this._subs.unsubscribe();
   }
 
+  // Drops onto tasks/notes/panels stopPropagation in their own handlers, so this
+  // document-level drop only sees links dropped on empty app chrome — mirroring
+  // the Android "share a link" flow by creating a "Check <url>" task.
+  private _createTaskFromDroppedLink(ev: DragEvent): void {
+    if (isInputElement(ev.target as HTMLElement)) {
+      return;
+    }
+    const url = getDroppedUrl(ev);
+    if (!url) {
+      return;
+    }
+    // Re-enter Angular: the drop listener runs outside the zone (see above).
+    this._ngZone.run(() => {
+      // Mirror the Android share flow: a readable title plus the raw URL as a
+      // clickable attachment (so the task stays legible and the link opens).
+      const taskId = this._taskService.add(
+        this._translateService.instant(T.APP.DROP_LINK.TASK_TITLE, {
+          url: readableUrl(url),
+        }),
+      );
+      this._taskAttachmentService.addAttachment(taskId, {
+        id: null,
+        type: 'LINK',
+        path: url,
+        title: url,
+        icon: 'link',
+      });
+      this._snackService.open({
+        type: 'SUCCESS',
+        ico: 'add_task',
+        msg: T.APP.DROP_LINK.SNACK,
+      });
+    });
+  }
+
   /**
    * since page load and animation time are not always equal
    * retrying until the rendered task row is available avoids missing focus targets
    */
-  private _focusElement(id: string): void {
+  private _focusElement(id: string, isFromSearch: boolean = false): void {
     recordSearchNavDebug('appComponent:focusElement', {
       taskId: id,
       url: window.location.pathname + window.location.search,
+      isFromSearch,
     });
     this.layoutService.focusTaskInViewWhenReady(id, (el) => {
+      // Only a search jump earns the attention highlight: `focusItem` is also set
+      // by reminder snacks, the tracked-task pill, issue creation and the calendar
+      // banner, where the user never asked "where is it". (#5476)
+      if (isFromSearch) {
+        this.layoutService.highlightTaskBriefly(el);
+      }
       recordSearchNavDebug('appComponent:focusElement:success', {
         taskId: id,
         url: window.location.pathname + window.location.search,
         matchedElementId: el.id,
       });
-      if (el && IS_MOBILE) {
-        el.classList.add('mobile-highlight-searched-item');
-        el.addEventListener('blur', () =>
-          el.classList.remove('mobile-highlight-searched-item'),
-        );
-      }
     });
   }
 }

@@ -14,12 +14,13 @@ import {
   SVEEntryForNextDay,
 } from '../schedule.model';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
+import { isValidSplitTime } from '../../../util/is-valid-split-time';
 import { SCHEDULE_TASK_MIN_DURATION_IN_MS, SVEType } from '../schedule.const';
 import { createViewEntriesForDay } from './create-view-entries-for-day';
 import { msLeftToday } from '../../../util/ms-left-today';
 import { getTasksWithinAndBeyondBudget } from './get-tasks-within-and-beyond-budget';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
-import { selectTaskRepeatCfgsForExactDay } from '../../task-repeat-cfg/store/task-repeat-cfg.selectors';
+import { getTaskRepeatCfgsForExactDayCached } from '../../task-repeat-cfg/store/get-task-repeat-cfgs-for-exact-day-cached.util';
 import { Log } from '../../../core/log';
 
 type ScheduleFlowTask = TaskWithoutReminder | TaskWithPlannedForDayIndication;
@@ -74,6 +75,15 @@ export const createScheduleDays = (
     }
   }
 
+  // Hoisted out of the day loop: a corrupt `workStart` (possible because an
+  // imported/synced `schedule` config is never per-field defaulted or healed --
+  // see createBlockerBlocksForWorkStartEnd) would otherwise throw "Invalid clock
+  // string" here and take the whole Schedule panel down (#5358). Skipping it
+  // just means the day starts at `now`, as when no work start/end is set.
+  // Not a devError: createSortedBlockerBlocks already reports the same cfg.
+  const isWorkStartTimeUsable =
+    !!workStartEndCfg && isValidSplitTime(workStartEndCfg.startTime);
+
   const v: ScheduleDay[] = dayDates.map((dayDate, i) => {
     const nextDayStartDate = dateStrToUtcDate(dayDate);
     nextDayStartDate.setHours(24, 0, 0, 0);
@@ -87,7 +97,7 @@ export const createScheduleDays = (
       dayStartTime >= todayStart && dayStartTime < currentWeekEndTime;
 
     let startTime = i == 0 ? now : dayStartTime;
-    if (workStartEndCfg) {
+    if (workStartEndCfg && isWorkStartTimeUsable) {
       const startTimeToday = getDateTimeFromClockString(
         workStartEndCfg.startTime,
         dateStrToUtcDate(dayDate),
@@ -97,11 +107,14 @@ export const createScheduleDays = (
       }
     }
 
-    const nonScheduledRepeatCfgsDueOnDay = selectTaskRepeatCfgsForExactDay.projector(
+    // Which cfgs are due is a property of the calendar day, not of where the
+    // clock happens to sit. Anchoring this on startTime (which is `now` for
+    // i === 0) only agrees with dayDate while day 0 contains now -- an
+    // invariant month view breaks, since its day 0 is the first grid cell and
+    // usually lands in the previous month.
+    const nonScheduledRepeatCfgsDueOnDay = getTaskRepeatCfgsForExactDayCached(
       unScheduledTaskRepeatCfgs,
-      {
-        dayDate: startTime,
-      },
+      dayStartTime,
     );
 
     const blockerBlocksForDay = blockerBlocksDayMap[dayDate] || [];
@@ -255,8 +268,15 @@ export const createScheduleDays = (
         ) {
           viewEntriesPushedToNextDay.push(entry);
         } else {
-          Log.log('entry Start:', new Date(entry.start), { entry });
-          Log.err('Entry start time after next day start', entry);
+          // `entry.data` carries content for most SVE variants (a TaskCopy, a
+          // TaskRepeatCfg, a calendar event) — log ids and the timing fields
+          // this branch is actually about, never the entry itself.
+          Log.err('Entry start time after next day start', {
+            entryId: entry.id,
+            entryType: entry.type,
+            start: entry.start,
+            duration: entry.duration,
+          });
         }
       } else {
         viewEntriesToRenderForDay.push(normalizeDayAssignedEntry(entry));

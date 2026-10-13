@@ -1,4 +1,9 @@
-import { FileBasedSyncTestHarness } from '../helpers/file-based-sync-test-harness';
+import {
+  FileBasedSyncTestHarness,
+  HarnessClient,
+} from '../helpers/file-based-sync-test-harness';
+import { OpDownloadResponse } from '../../../sync-providers/provider.interface';
+import { uuidv7 } from 'uuidv7';
 
 describe('File-Based Sync Integration - Multi-Client Convergence', () => {
   let harness: FileBasedSyncTestHarness;
@@ -24,7 +29,8 @@ describe('File-Based Sync Integration - Multi-Client Convergence', () => {
       await clientA.uploadOps([opA]);
 
       // Client B downloads and creates its own op
-      await clientB.downloadOps(0);
+      const downloaded = await clientB.downloadOps(0);
+      await clientB.adapter.setLastServerSeq(downloaded.latestSeq);
       const opB = clientB.createOp('Task', 'task-b', 'CRT', 'TaskActionTypes.ADD_TASK', {
         title: 'From B',
       });
@@ -55,8 +61,10 @@ describe('File-Based Sync Integration - Multi-Client Convergence', () => {
       await clientA.uploadOps([initialOp]);
 
       // All clients sync
-      await clientB.downloadOps(0);
-      await clientC.downloadOps(0);
+      const downloadB = await clientB.downloadOps(0);
+      await clientB.adapter.setLastServerSeq(downloadB.latestSeq);
+      const downloadC = await clientC.downloadOps(0);
+      await clientC.adapter.setLastServerSeq(downloadC.latestSeq);
 
       // C creates and uploads
       const opC = clientC.createOp('Task', 'task-c', 'CRT', 'TaskActionTypes.ADD_TASK', {
@@ -65,7 +73,8 @@ describe('File-Based Sync Integration - Multi-Client Convergence', () => {
       await clientC.uploadOps([opC]);
 
       // B downloads and adds
-      await clientB.downloadOps(0);
+      const nextDownloadB = await clientB.downloadOps(0);
+      await clientB.adapter.setLastServerSeq(nextDownloadB.latestSeq);
       const opB = clientB.createOp('Task', 'task-b', 'CRT', 'TaskActionTypes.ADD_TASK', {
         title: 'From B',
       });
@@ -95,9 +104,13 @@ describe('File-Based Sync Integration - Multi-Client Convergence', () => {
         title: 'C',
       });
 
-      // All upload (with potential conflicts/merges)
+      // Each upload follows a download, as in the real sync cycle.
       await clientA.uploadOps([opA]);
+      const downloadB = await clientB.downloadOps(0);
+      await clientB.adapter.setLastServerSeq(downloadB.latestSeq);
       await clientB.uploadOps([opB]);
+      const downloadC = await clientC.downloadOps(0);
+      await clientC.adapter.setLastServerSeq(downloadC.latestSeq);
       await clientC.uploadOps([opC]);
 
       // All download to get final state
@@ -166,6 +179,7 @@ describe('File-Based Sync Integration - Multi-Client Convergence', () => {
       for (const serverOp of downloadB.ops) {
         clientB.mergeRemoteClock(serverOp.op.vectorClock);
       }
+      await clientB.adapter.setLastServerSeq(downloadB.latestSeq);
 
       // Client B should be able to upload
       const opB = clientB.createOp('Task', 'task-b', 'CRT', 'TaskActionTypes.ADD_TASK', {
@@ -194,6 +208,7 @@ describe('File-Based Sync Integration - Multi-Client Convergence', () => {
       for (const serverOp of downloadB.ops) {
         clientB.mergeRemoteClock(serverOp.op.vectorClock);
       }
+      await clientB.adapter.setLastServerSeq(downloadB.latestSeq);
       const opB = clientB.createOp('Task', 'task-b', 'CRT', 'TaskActionTypes.ADD_TASK', {
         title: 'B',
       });
@@ -238,6 +253,7 @@ describe('File-Based Sync Integration - Multi-Client Convergence', () => {
       // B downloads, knows about A1
       const downloadB = await clientB.downloadOps(0);
       clientB.mergeRemoteClock(downloadB.ops[0].op.vectorClock);
+      await clientB.adapter.setLastServerSeq(downloadB.latestSeq);
 
       // B creates op
       const opB = clientB.createOp('Task', 'task-b', 'CRT', 'TaskActionTypes.ADD_TASK', {
@@ -330,6 +346,103 @@ describe('File-Based Sync Integration - Multi-Client Convergence', () => {
     });
   });
 
+  describe('REPAIR recovery snapshot concurrency (#9023)', () => {
+    // A REPAIR recovery snapshot force-replaces the whole shared file. Before the
+    // guard it did so unconditionally, so a concurrent op another device had
+    // uploaded — but this client had not yet merged — was silently dropped. The
+    // guard makes the REPAIR yield (REPAIR_STALE) until that op is pulled in, then
+    // converge. This drives the full loop across two clients on one shared remote.
+
+    // The harness downloadOps() does NOT promote the last-seen rev (the real sync
+    // service does that via setLastServerSeq after the ops are applied). Do it
+    // explicitly so the client's REPAIR is based on the rev it actually saw, and
+    // merge the downloaded clock so the client's later ops are causally correct.
+    const applyDownload = async (
+      client: HarnessClient,
+      download: OpDownloadResponse,
+    ): Promise<void> => {
+      for (const serverOp of download.ops) {
+        client.mergeRemoteClock(serverOp.op.vectorClock);
+      }
+      await client.adapter.setLastServerSeq(download.latestSeq);
+    };
+
+    const repair = (
+      client: HarnessClient,
+      state: unknown,
+    ): Promise<{ accepted: boolean; errorCode?: string }> =>
+      client.adapter.uploadSnapshot(
+        state,
+        client.clientId,
+        'recovery',
+        client.getCurrentClock(),
+        1,
+        undefined, // isPayloadEncrypted
+        uuidv7(), // opId
+        false, // isCleanSlate
+        'REPAIR', // snapshotOpType — engages the concurrency guard
+      );
+
+    const taskState = (...ids: string[]): unknown => ({
+      task: {
+        ids,
+        entities: Object.fromEntries(ids.map((id) => [id, { id }])),
+      },
+    });
+
+    it('does not clobber a concurrent op, then converges after rebasing on it', async () => {
+      const a = harness.createClient('client-a');
+      const b = harness.createClient('client-b');
+
+      // A and B both start synced on A's first op.
+      await a.uploadOps([
+        a.createOp('Task', 'task-a', 'CRT', 'TaskActionTypes.ADD_TASK', { title: 'A' }),
+      ]);
+      await applyDownload(b, await b.downloadOps(0));
+
+      // B uploads a concurrent op that A never downloads.
+      await b.uploadOps([
+        b.createOp('Task', 'task-b', 'CRT', 'TaskActionTypes.ADD_TASK', { title: 'B' }),
+      ]);
+
+      // A tries to publish a REPAIR snapshot from its now-stale view of the remote.
+      const stale = await repair(a, taskState('task-a'));
+
+      // The guard fires: A yields instead of force-overwriting.
+      expect(stale.accepted).toBe(false);
+      expect(stale.errorCode).toBe('REPAIR_STALE');
+
+      // Critically — B's op is still on the remote. Nothing was clobbered.
+      const afterStale = await harness.createClient('observer-1').downloadOps(0);
+      expect(afterStale.ops.map((o) => o.op.entityId)).toContain('task-b');
+
+      // Rebase: A pulls in B's op, then re-publishes a merged REPAIR snapshot.
+      await applyDownload(a, await a.downloadOps(0));
+      const merged = await repair(a, taskState('task-a', 'task-b'));
+
+      // The retry converges (no wedge) — the rebased base rev now matches the remote.
+      expect(merged.accepted).toBe(true);
+
+      // A fresh client bootstraps to the merged state: B's data survived the repair.
+      const finalState = (await harness.createClient('observer-2').downloadOps(0))
+        .snapshotState as { task: { ids: string[] } };
+      expect(finalState.task.ids).toContain('task-a');
+      expect(finalState.task.ids).toContain('task-b');
+    });
+
+    it('publishes a REPAIR snapshot when the remote has not advanced (no false stale)', async () => {
+      const a = harness.createClient('client-a');
+      await a.uploadOps([
+        a.createOp('Task', 'task-a', 'CRT', 'TaskActionTypes.ADD_TASK', { title: 'A' }),
+      ]);
+
+      // No other client wrote since A's upload → the repair's base rev matches the
+      // remote → it publishes rather than needlessly rebasing.
+      const result = await repair(a, taskState('task-a'));
+      expect(result.accepted).toBe(true);
+    });
+  });
+
   describe('Rapid Multi-Client Sync', () => {
     it('should handle rapid sequential syncs from multiple clients', async () => {
       const clientA = harness.createClient('client-a');
@@ -337,18 +450,24 @@ describe('File-Based Sync Integration - Multi-Client Convergence', () => {
       const clientC = harness.createClient('client-c');
       const observer = harness.createClient('observer');
 
-      // Rapid sequential uploads
+      // Rapid sequential download/upload cycles
       for (let i = 0; i < 3; i++) {
+        const downloadA = await clientA.downloadOps();
+        await clientA.adapter.setLastServerSeq(downloadA.latestSeq);
         await clientA.uploadOps([
           clientA.createOp('Task', `task-a-${i}`, 'CRT', 'TaskActionTypes.ADD_TASK', {
             title: `A${i}`,
           }),
         ]);
+        const downloadB = await clientB.downloadOps();
+        await clientB.adapter.setLastServerSeq(downloadB.latestSeq);
         await clientB.uploadOps([
           clientB.createOp('Task', `task-b-${i}`, 'CRT', 'TaskActionTypes.ADD_TASK', {
             title: `B${i}`,
           }),
         ]);
+        const downloadC = await clientC.downloadOps();
+        await clientC.adapter.setLastServerSeq(downloadC.latestSeq);
         await clientC.uploadOps([
           clientC.createOp('Task', `task-c-${i}`, 'CRT', 'TaskActionTypes.ADD_TASK', {
             title: `C${i}`,

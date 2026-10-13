@@ -10,6 +10,13 @@ on:
 permissions:
   contents: write
 
+# Per-ref so rapid non-tag master pushes supersede each other (newest dev build
+# wins). Groups are keyed by ref, so a master push can never cancel a `v*` tag
+# release build (different ref = different group).
+concurrency:
+  group: build-android-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build-android:
     runs-on: ubuntu-latest
@@ -18,21 +25,26 @@ jobs:
       UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
     steps:
       - name: Checkout sources
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
-      - uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          # Full commit/tag graph (blobless, so cheap) is needed to derive the
+          # per-push dev versionCode from the last stable tag.
+          fetch-depth: 0
+          filter: blob:none
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v6
         with:
           node-version: 22
       - name: Setup Java
-        uses: actions/setup-java@be666c2fcd27ec809703dec50e508c2fdc7f6654 # v5
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
         with:
           distribution: 'temurin'
           java-version: 21
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
+        uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
       #      - name: Build with Gradle
       #        run: ./gradlew build
       - name: Setup android-sdk
-        uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4.0.1
+        uses: android-actions/setup-android@be39fa834029ff78f1a44aa3bb0819b8fc2bd8fd # v4.0.4
         with:
           accept-android-sdk-licenses: true
           log-accepted-android-sdk-licenses: true #make accepting the android sdk license verbose
@@ -42,7 +54,7 @@ jobs:
         id: npm-cache-dir
         run: |
           echo "dir=$(npm config get cache)" >> $GITHUB_OUTPUT
-      - uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v5
         id: npm-cache # use this to check for `cache-hit` ==> if: steps.npm-cache.outputs.cache-hit != 'true'
         with:
           path: ${{ steps.npm-cache-dir.outputs.dir }}
@@ -61,6 +73,37 @@ jobs:
         run: |
           echo "${{ secrets.DROID_KEYSTORE_BASE_64 }}" | base64 --decode > keystore.jks
 
+      # --- Per-push dev build (non-tag master pushes only) --------------------
+      # On plain master pushes the release-signed APK is otherwise artifact-only;
+      # here we stamp it with a dev versionCode and (after Build) ship it to the
+      # Play `internal` track so a fresh build auto-updates on the phone. All
+      # steps are gated to refs/heads/master (non-tag), so the tag/release path
+      # is untouched. Nothing is committed — the versionCode is only sed'd into
+      # the working copy of build.gradle at build time.
+      - name: Compute dev versionCode
+        id: devvc
+        # Dev distribution must never redden the release-critical build; on any
+        # failure the downstream gates read '' and simply skip.
+        continue-on-error: true
+        if: github.ref == 'refs/heads/master'
+        run: node tools/android-dev-version-code.js
+      - name: Apply dev versionCode
+        id: applyvc
+        # continue-on-error: a dev-versioning hiccup must never break the
+        # release-critical build; on failure `applied` stays unset and the Play
+        # upload below is skipped (the artifact build still succeeds).
+        continue-on-error: true
+        if: github.ref == 'refs/heads/master' && steps.devvc.outputs.skip == 'false'
+        env:
+          CODE: ${{ steps.devvc.outputs.code }}
+        run: |
+          set -euo pipefail
+          sed -i -E "s/versionCode [0-9_]+/versionCode ${CODE}/" android/app/build.gradle
+          grep -qE "versionCode ${CODE}( |$)" android/app/build.gradle \
+            || { echo "::error::versionCode override did not apply"; exit 1; }
+          grep -nE 'versionCode [0-9_]+' android/app/build.gradle
+          echo "applied=true" >> "$GITHUB_OUTPUT"
+
       - name: Build
         run: npm run dist:android:prod
         env:
@@ -68,12 +111,102 @@ jobs:
           RELEASE_KEYSTORE_ALIAS: ${{ secrets.DROID_KEYSTORE_ALIAS }}
           RELEASE_KEY_PASSWORD: ${{ secrets.DROID_KEY_PASSWORD }}
 
-      - name: DEBUG
+      # Keep-rule failures are silent (a stripped @JavascriptInterface method or
+      # WorkManager worker builds fine, it just never runs) and android-tests.yml
+      # only guards PRs — this workflow ships every master push straight to the
+      # Play internal track, so gate the publish on the mapping R8 produced.
+      # When minification is on, R8 runs per variant and both flavors ship from
+      # master, so check each mapping — playRelease passing says nothing about
+      # fdroidRelease. Deliberately NOT continue-on-error: shipping a build with
+      # a dead JS bridge is worse than shipping nothing.
+      #
+      # Minification is OFF today (#9784), so there is nothing to check. Arm the
+      # gate from what the build actually emitted rather than from the source
+      # text: R8 writes mapping/<variant>/mapping.txt whenever it runs, under any
+      # spelling or DSL, so re-enabling it cannot leave this step green-but-blind.
+      - name: Verify R8 keep rules survive minification
         run: |
-          ls -la android/app/build/outputs
-          ls -la android/app/build/outputs/apk
-          ls -la android/app/build/outputs/apk/play
-          ls -la android/app/build/outputs/apk/play/release
+          set -euo pipefail
+          shopt -s nullglob
+          mappings=(android/app/build/outputs/mapping/*Release/mapping.txt)
+          if [ ${#mappings[@]} -eq 0 ]; then
+            echo "Minification is off (#9784) — R8 emitted no release mapping, nothing to verify."
+            exit 0
+          fi
+          for variant in playRelease fdroidRelease; do
+            echo "--- ${variant}"
+            node tools/verify-r8-mapping.mjs \
+              "android/app/build/outputs/mapping/${variant}/mapping.txt"
+          done
+
+      # Play requires 16 KB-aligned native libraries for apps targeting Android
+      # 15+. Misalignment is silent at build time and only surfaces at upload (or
+      # as a crash on 16 KB-page devices), so gate the release on it here.
+      # `-c` is check-only and `-P 16` needs build-tools 35+; the trailing `4` is
+      # zipalign's mandatory <align> argument for everything that is not an .so.
+      #
+      # Scope, so nobody over-trusts a green run: this checks the *zip entry
+      # offset* of uncompressed .so files. A DEFLATED .so reports "OK -
+      # compressed" whatever its offset, and zipalign never parses the ELF, so a
+      # prebuilt lib with 4 KB p_align also passes (that needs Google's separate
+      # check_elf_alignment.sh). AGP stores native libs uncompressed by default,
+      # so today — with no .so in the APK at all — this is a cheap guard for the
+      # day a plugin adds one, not proof of 16 KB compliance.
+      - name: Verify 16 KB native page alignment
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          sdk="${ANDROID_HOME:-${ANDROID_SDK_ROOT:-}}"
+          # Array form, not `ls`: under nullglob an unmatched glob vanishes from
+          # the word list, so `ls -1 <glob>` would silently list the CWD instead
+          # and hand back a bogus path that passes the -z check below.
+          candidates=("${sdk:-/nonexistent}"/build-tools/*/zipalign)
+          zipalign=""
+          if [ ${#candidates[@]} -gt 0 ]; then
+            zipalign="$(printf '%s\n' "${candidates[@]}" | sort -V | tail -1)"
+          fi
+          if [ -z "${zipalign}" ]; then
+            echo "::error::zipalign not found under ${sdk:-<unset ANDROID_HOME>}/build-tools"
+            exit 1
+          fi
+          apks=(android/app/build/outputs/apk/*/release/*.apk)
+          if [ ${#apks[@]} -eq 0 ]; then
+            echo "::error::no release APK found to verify"
+            exit 1
+          fi
+          for apk in "${apks[@]}"; do
+            echo "--- ${apk}"
+            "${zipalign}" -c -P 16 4 "${apk}"
+          done
+
+      # `sync:android` deletes the service-worker files (nothing on Android
+      # registers a service worker, and ngsw.json carries a build timestamp that
+      # breaks F-Droid's reproducible-build verification, #4155). That strip
+      # never fails the build, so assert the outcome on the packaged artifact
+      # instead. No PR triggers this workflow, and no PR workflow could host the
+      # check: android-tests.yml assembles an APK but substitutes a stand-in
+      # smoke page for the Angular bundle, so the assertion would be vacuous.
+      - name: 'Verify no service worker shipped in the APK'
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          apks=(android/app/build/outputs/apk/*/release/*.apk)
+          if [ ${#apks[@]} -eq 0 ]; then
+            echo "::error::no release APK found to verify"
+            exit 1
+          fi
+          for apk in "${apks[@]}"; do
+            # Listing captured first: piping straight into `grep -q` makes grep
+            # exit on the first match, unzip die of SIGPIPE, and pipefail report
+            # that 141 as the pipeline status — so the `if` reads false and the
+            # check passes on exactly the APKs it should catch.
+            listing="$(unzip -l "${apk}")"
+            if printf '%s\n' "${listing}" \
+              | grep -E 'assets/public/(ngsw|safety-worker|worker-basic)'; then
+              echo "::error::${apk} ships service-worker assets; the strip in sync:android did not run (#4155)"
+              exit 1
+            fi
+          done
 
       # APK is now signed automatically by Gradle using signingConfig
 
@@ -82,6 +215,29 @@ jobs:
         with:
           name: sup-android-release
           path: android/app/build/outputs/apk/**/*.apk
+
+      # Ship the dev-versioned APK to the Play `internal` track (non-tag master
+      # pushes only, and only when the versionCode was actually applied). This is
+      # the same track the tag build stages real releases on below; dev builds
+      # (code base+1..999) and releases (base+9000) stay distinct by versionCode,
+      # so they interleave on the track without colliding. Chosen over a closed
+      # track because internal testing skips review, so builds land in minutes.
+      - name: Upload dev build to Play (internal track)
+        # continue-on-error: re-runs (same commit -> same versionCode, which Play
+        # rejects as already used), the post-release window (a just-tagged release
+        # has a higher code on this track until the tag propagates to the dev
+        # step — closed by `git push --follow-tags`), and transient Play API
+        # errors must not fail the release-critical workflow.
+        continue-on-error: true
+        if: github.ref == 'refs/heads/master' && steps.applyvc.outputs.applied == 'true'
+        uses: r0adkll/upload-google-play@e738b9dd8f2476ea806d921b64aacd24f34515a5 # v1.1.5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: com.superproductivity.superproductivity
+          releaseFiles: android/app/build/outputs/apk/play/release/*.apk
+          releaseName: 'dev ${{ steps.devvc.outputs.code }} (${{ steps.devvc.outputs.sha }})'
+          tracks: internal
+          status: completed
 
       - name: Wait for main release to be created
         if: startsWith(github.ref, 'refs/tags/v')
@@ -107,14 +263,27 @@ jobs:
       - name: Upload APK to existing GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
         run: |
-          for apk in android/app/build/outputs/apk/play/release/*.apk; do
-            if [ -f "$apk" ]; then
-              echo "Uploading $apk to release ${{ github.ref_name }}"
-              gh release upload ${{ github.ref_name }} "$apk" --repo ${{ github.repository }}
-            fi
+          set -euo pipefail
+          shopt -s nullglob
+          apks=(android/app/build/outputs/apk/play/release/*.apk)
+          # An unmatched glob left the old `for`/`[ -f ]` body unrun and the step
+          # green, so a tagged release could ship with no Android APK attached.
+          if [ ${#apks[@]} -eq 0 ]; then
+            echo "::error::no play release APK found to attach to ${TAG}"
+            exit 1
+          fi
+          for apk in "${apks[@]}"; do
+            echo "Uploading ${apk} to release ${TAG}"
+            # --clobber so re-running a tag build replaces the asset instead of
+            # failing on "already exists" — that failure also skipped the Play
+            # Console steps below. It deletes before re-uploading, so a failed
+            # re-upload loses the old asset; the build artifact is the backup.
+            gh release upload "${TAG}" "${apk}" --clobber --repo "${REPO}"
           done
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG: ${{ github.ref_name }}
+          REPO: ${{ github.repository }}
 
       - name: Prepare Google Play release notes
         if: startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-')

@@ -34,6 +34,8 @@ export {
   ImpossibleError,
   DecryptError,
   DecryptNoPasswordError,
+  OperationIntegrityError,
+  EncryptNoPasswordError,
   DataRepairNotPossibleError,
   BackupImportFailedError,
   WebCryptoNotAvailableError,
@@ -45,11 +47,7 @@ export {
   SyncAlreadyInProgressError,
   LockAcquisitionTimeoutError,
   CanNotMigrateMajorDownError,
-  LockPresentError,
-  NoRemoteModelFile,
   PotentialCorsError,
-  RevMismatchForModelError,
-  SyncInvalidTimeValuesError,
 } from './core/errors/sync-errors';
 
 // Provider interfaces

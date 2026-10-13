@@ -1,10 +1,13 @@
 import { TestBed } from '@angular/core/testing';
 import { OperationLogStoreService } from '../../persistence/operation-log-store.service';
 import { OperationLogCompactionService } from '../../persistence/operation-log-compaction.service';
+import { OpLogDbAdapter } from '../../persistence/op-log-db-adapter';
+import { SINGLETON_KEY, STORE_NAMES } from '../../persistence/db-keys.const';
 import { VectorClockService } from '../../sync/vector-clock.service';
 import { OpType, VectorClock } from '../../core/operation.types';
 import { CURRENT_SCHEMA_VERSION } from '../../persistence/schema-migration.service';
 import { TestClient, resetTestUuidCounter } from './helpers/test-client.helper';
+import { clearDeferredActions } from '../../capture/operation-capture.meta-reducer';
 import {
   createTaskOperation,
   createMinimalTaskPayload,
@@ -35,10 +38,29 @@ describe('Compaction Integration', () => {
   let vectorClockService: VectorClockService;
   let mockStateSnapshot: jasmine.SpyObj<StateSnapshotService>;
 
+  // The persisted compaction counter has no production writer any more, so seed
+  // it directly (keeping any existing snapshot). Compaction's counter reset stays
+  // observable this way, which the tests below use to tell which path compact() took.
+  const seedCompactionCounter = async (count: number): Promise<void> => {
+    const adapter = (storeService as unknown as { _adapter: OpLogDbAdapter })._adapter;
+    const existing = await adapter.get<object>(STORE_NAMES.STATE_CACHE, SINGLETON_KEY);
+    await adapter.put(STORE_NAMES.STATE_CACHE, {
+      ...(existing ?? {
+        id: SINGLETON_KEY,
+        state: null,
+        lastAppliedOpSeq: 0,
+        vectorClock: {},
+        compactedAt: 0,
+      }),
+      compactionCounter: count,
+    });
+  };
+
   beforeEach(async () => {
     // Create mock for StateSnapshotService
     mockStateSnapshot = jasmine.createSpyObj('StateSnapshotService', [
       'getStateSnapshot',
+      'getStateSnapshotForOperationLog',
     ]);
 
     // Default mock return value - cast to any since we only need partial data for tests
@@ -49,6 +71,9 @@ describe('Compaction Integration', () => {
       note: { ids: [], entities: {} },
       globalConfig: {},
     } as any);
+    mockStateSnapshot.getStateSnapshotForOperationLog.and.callFake(() =>
+      mockStateSnapshot.getStateSnapshot(),
+    );
 
     TestBed.configureTestingModule({
       providers: [
@@ -66,6 +91,10 @@ describe('Compaction Integration', () => {
     await storeService.init();
     await storeService._clearAllDataForTesting();
     resetTestUuidCounter();
+    // The real compaction service bails when the MODULE-LEVEL deferred buffer
+    // is non-empty (#8469). Another spec leaking into it would make these
+    // tests fail order-dependently under jasmine's random order — start clean.
+    clearDeferredActions();
   });
 
   describe('Snapshot creation', () => {
@@ -227,8 +256,13 @@ describe('Compaction Integration', () => {
     });
   });
 
-  describe('Compaction preserves unsynced operations', () => {
-    it('should never delete unsynced operations during compaction', async () => {
+  // These cover the terminal markers compaction's delete predicate reads
+  // (syncedAt / rejectedAt), not compaction itself: none of them call
+  // compact(). The predicate itself lives in
+  // operation-log-compaction.service.spec.ts, including the case where a
+  // rejected op becomes eligible once older than the retention window (#8769).
+  describe('Terminal markers the compaction predicate reads', () => {
+    it('should exclude synced ops from the unsynced query', async () => {
       const client = new TestClient('client-test');
 
       // Create operations
@@ -251,17 +285,12 @@ describe('Compaction Integration', () => {
       // Mark only first two as synced
       await storeService.markSynced([allOps[0].seq, allOps[1].seq]);
 
-      // Simulate old appliedAt (older than retention period)
-      // Note: We can't directly modify appliedAt, but we can verify the logic
-      // by checking unsynced ops are preserved
-
-      // Verify unsynced op is preserved
       const unsynced = await storeService.getUnsynced();
       expect(unsynced.length).toBe(1);
       expect(unsynced[0].op.id).toBe(op3.id);
     });
 
-    it('should preserve rejected operations for audit', async () => {
+    it('should keep the row and stamp rejectedAt when an op is rejected', async () => {
       const client = new TestClient('client-test');
 
       const op1 = createTaskOperation(client, 'task-1', OpType.Create, {
@@ -277,7 +306,6 @@ describe('Compaction Integration', () => {
       // Reject op2 (simulating conflict)
       await storeService.markRejected([op2.id]);
 
-      // Verify rejected op is still in log
       const allOps = await storeService.getOpsAfterSeq(0);
       expect(allOps.length).toBe(2);
 
@@ -506,9 +534,8 @@ describe('Compaction Integration', () => {
 
   describe('Compaction counter', () => {
     it('should reset compaction counter after save', async () => {
-      // Increment counter
-      await storeService.incrementCompactionCounter();
-      await storeService.incrementCompactionCounter();
+      // Seed counter
+      await seedCompactionCounter(2);
 
       let counter = await storeService.getCompactionCounter();
       expect(counter).toBe(2);
@@ -518,26 +545,6 @@ describe('Compaction Integration', () => {
 
       counter = await storeService.getCompactionCounter();
       expect(counter).toBe(0);
-    });
-
-    it('should track operations for compaction threshold', async () => {
-      const client = new TestClient('client-test');
-
-      // Start at 0
-      let counter = await storeService.getCompactionCounter();
-      expect(counter).toBe(0);
-
-      // Add operations and increment counter
-      for (let i = 0; i < 5; i++) {
-        await storeService.append(
-          createTaskOperation(client, `task-${i}`, OpType.Create, { title: `Task ${i}` }),
-          'local',
-        );
-        await storeService.incrementCompactionCounter();
-      }
-
-      counter = await storeService.getCompactionCounter();
-      expect(counter).toBe(5);
     });
   });
 
@@ -629,7 +636,7 @@ describe('Compaction Integration', () => {
         compactedAt: Date.now(),
         schemaVersion: CURRENT_SCHEMA_VERSION,
       });
-      await storeService.incrementCompactionCounter();
+      await seedCompactionCounter(1);
 
       // Live NgRx state is the transient empty/initial state.
       mockStateSnapshot.getStateSnapshot.and.returnValue({
@@ -656,8 +663,7 @@ describe('Compaction Integration', () => {
         createTaskOperation(client, 'task-1', OpType.Create, { title: 'Task 1' }),
         'local',
       );
-      await storeService.incrementCompactionCounter();
-      await storeService.incrementCompactionCounter();
+      await seedCompactionCounter(2);
 
       const liveState = {
         task: {

@@ -7,6 +7,7 @@ import {
   DialogCfg,
   DialogResult,
   NotifyCfg,
+  PluginManifest,
 } from '@super-productivity/plugin-api';
 
 describe('PluginAPI', () => {
@@ -14,8 +15,10 @@ describe('PluginAPI', () => {
   let showIndexHtmlAsViewSpy: jasmine.Spy;
   let reInitDataSpy: jasmine.Spy;
   let dispatchActionSpy: jasmine.Spy;
+  let requestSpy: jasmine.Spy;
   let getSelectedTaskSpy: jasmine.Spy;
   let getFocusedTaskSpy: jasmine.Spy;
+  let registerTaskContextMenuEntrySpy: jasmine.Spy;
   let mockBridge: jasmine.SpyObj<{
     createBoundMethods: () => Record<string, unknown>;
     getAppState: () => Promise<unknown>;
@@ -36,12 +39,14 @@ describe('PluginAPI', () => {
     showIndexHtmlAsViewSpy = jasmine.createSpy('showIndexHtmlAsView');
     reInitDataSpy = jasmine.createSpy('reInitData').and.resolveTo();
     dispatchActionSpy = jasmine.createSpy('dispatchAction');
+    requestSpy = jasmine.createSpy('request').and.resolveTo({ ok: true });
     getSelectedTaskSpy = jasmine
       .createSpy('getSelectedTask')
       .and.resolveTo({ id: 'selected-task', title: 'Selected Task' });
     getFocusedTaskSpy = jasmine
       .createSpy('getFocusedTask')
       .and.resolveTo({ id: 'focused-task', title: 'Focused Task' });
+    registerTaskContextMenuEntrySpy = jasmine.createSpy('registerTaskContextMenuEntry');
 
     mockBridge = jasmine.createSpyObj('PluginBridgeService', [
       'createBoundMethods',
@@ -55,9 +60,11 @@ describe('PluginAPI', () => {
     mockBridge.createBoundMethods.and.returnValue({
       showIndexHtmlAsView: showIndexHtmlAsViewSpy,
       dispatchAction: dispatchActionSpy,
+      request: requestSpy,
       getSelectedTask: getSelectedTaskSpy,
       getFocusedTask: getFocusedTaskSpy,
       persistDataSynced: jasmine.createSpy('persistDataSynced'),
+      registerTaskContextMenuEntry: registerTaskContextMenuEntrySpy,
       log: {
         critical: jasmine.createSpy(),
         err: jasmine.createSpy(),
@@ -90,6 +97,16 @@ describe('PluginAPI', () => {
       'test-plugin',
       mockBridge as unknown as PluginBridgeService,
       mockI18nService,
+      {
+        id: 'test-plugin',
+        name: 'Test Plugin',
+        manifestVersion: 1,
+        version: '1.0.0',
+        minSupVersion: '1.0.0',
+        hooks: [],
+        permissions: [],
+      } as PluginManifest,
+      undefined,
     );
   });
 
@@ -97,6 +114,17 @@ describe('PluginAPI', () => {
     it('should delegate to the bridge method', () => {
       pluginAPI.showIndexHtmlAsView();
       expect(showIndexHtmlAsViewSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('registerTaskContextMenuEntry()', () => {
+    it('delegates the entry registration to the bound bridge method', () => {
+      const onClick = jasmine.createSpy('onClick');
+      const cfg = { id: 'set-color', label: 'Set color', onClick };
+
+      pluginAPI.registerTaskContextMenuEntry(cfg);
+
+      expect(registerTaskContextMenuEntrySpy).toHaveBeenCalledOnceWith(cfg);
     });
   });
 
@@ -157,6 +185,24 @@ describe('PluginAPI', () => {
 
       expect(result).toBe('Continue');
       expect(mockBridge.openDialog).toHaveBeenCalledOnceWith(dialogCfg);
+    });
+  });
+
+  describe('request()', () => {
+    it('should delegate host HTTP requests to the bound bridge method', async () => {
+      const options = {
+        method: 'POST',
+        headers: { Authorization: 'Bearer mock-token' },
+        body: { ok: true },
+      };
+
+      const result = await pluginAPI.request<{ ok: boolean }>(
+        'https://example.test/api',
+        options,
+      );
+
+      expect(result).toEqual({ ok: true });
+      expect(requestSpy).toHaveBeenCalledOnceWith('https://example.test/api', options);
     });
   });
 

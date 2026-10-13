@@ -104,7 +104,10 @@
                     }}</span>
                     <span class="when">
                       {{ T.F.ISSUE.ISSUE_CONTENT.AT | translate }}
-                      {{ getCommentCreated(lastComment(), cfg) | localeDate: 'short' }}
+                      {{
+                        getCommentCreated(lastComment(), cfg)
+                          | localeDate: 'short' : undefined : locale()
+                      }}
                     </span>
                   </div>
                   @if (getCommentBody(lastComment(), cfg); as body) {
@@ -124,7 +127,11 @@
               </div>
             }
           } @else {
-            @for (comment of comments() | sort: cfg.comments?.sortField; track $index) {
+            @for (
+              comment of comments()
+                | sort: $safeNavigationMigration(cfg.comments?.sortField);
+              track $index
+            ) {
               <div class="comment">
                 @if (getCommentAvatar(comment, cfg); as avatar) {
                   <img
@@ -137,7 +144,10 @@
                     <span class="author-name">{{ getCommentAuthor(comment, cfg) }}</span>
                     <span class="when">
                       {{ T.F.ISSUE.ISSUE_CONTENT.AT | translate }}
-                      {{ getCommentCreated(comment, cfg) | localeDate: 'short' }}
+                      {{
+                        getCommentCreated(comment, cfg)
+                          | localeDate: 'short' : undefined : locale()
+                      }}
                     </span>
                   </div>
                   @if (getCommentBody(comment, cfg); as body) {

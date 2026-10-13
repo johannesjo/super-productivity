@@ -2,16 +2,19 @@ import { TestBed } from '@angular/core/testing';
 import { SuperSyncRestoreService } from './super-sync-restore.service';
 import { SyncProviderManager } from '../../op-log/sync-providers/provider-manager.service';
 import { BackupService } from '../../op-log/backup/backup.service';
+import { LocalDraftService } from '../../core/draft/local-draft.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { SyncProviderId } from '../../op-log/sync-providers/provider.const';
 import { RestorePoint } from '../../op-log/sync-providers/provider.interface';
 import { T } from '../../t.const';
+import { BackupRepairFailedError } from '../../op-log/core/errors/sync-errors';
 import { SyncLog } from '../../core/log';
 
 describe('SuperSyncRestoreService', () => {
   let service: SuperSyncRestoreService;
   let mockProviderManager: jasmine.SpyObj<SyncProviderManager>;
   let mockBackupService: jasmine.SpyObj<BackupService>;
+  let mockLocalDraftService: jasmine.SpyObj<LocalDraftService>;
   let mockSnackService: jasmine.SpyObj<SnackService>;
   let mockProvider: any;
 
@@ -30,6 +33,10 @@ describe('SuperSyncRestoreService', () => {
 
     mockBackupService = jasmine.createSpyObj('BackupService', ['importCompleteBackup']);
 
+    mockLocalDraftService = jasmine.createSpyObj('LocalDraftService', [
+      'deleteAllDrafts',
+    ]);
+
     mockSnackService = jasmine.createSpyObj('SnackService', ['open']);
 
     // Spy on logger methods for retry logging tests
@@ -41,6 +48,7 @@ describe('SuperSyncRestoreService', () => {
         SuperSyncRestoreService,
         { provide: SyncProviderManager, useValue: mockProviderManager },
         { provide: BackupService, useValue: mockBackupService },
+        { provide: LocalDraftService, useValue: mockLocalDraftService },
         { provide: SnackService, useValue: mockSnackService },
       ],
     });
@@ -170,6 +178,24 @@ describe('SuperSyncRestoreService', () => {
       });
     });
 
+    it('should clear crash-safe drafts after a restore', async () => {
+      // The restore replaced the notes wholesale, so every draft's
+      // baseContent now refers to content that no longer exists.
+      await service.restoreToPoint(100);
+
+      expect(mockLocalDraftService.deleteAllDrafts).toHaveBeenCalledTimes(1);
+    });
+
+    it('should not clear drafts when the restore fails', async () => {
+      mockBackupService.importCompleteBackup.and.returnValue(
+        Promise.reject(new Error('validation failed')),
+      );
+
+      await expectAsync(service.restoreToPoint(100)).toBeRejected();
+
+      expect(mockLocalDraftService.deleteAllDrafts).not.toHaveBeenCalled();
+    });
+
     it('should show error snack and rethrow on failure after retries', async () => {
       jasmine.clock().install();
 
@@ -267,6 +293,18 @@ describe('SuperSyncRestoreService', () => {
       expect(mockSnackService.open).toHaveBeenCalledWith({
         type: 'ERROR',
         msg: T.F.SYNC.S.RESTORE_ERROR,
+      });
+    });
+
+    it('should explain an unrepairable server snapshot instead of the generic error (#8279)', async () => {
+      const error = new BackupRepairFailedError();
+      mockBackupService.importCompleteBackup.and.rejectWith(error);
+
+      await expectAsync(service.restoreToPoint(100)).toBeRejectedWith(error);
+
+      expect(mockSnackService.open).toHaveBeenCalledWith({
+        type: 'ERROR',
+        msg: T.FILE_IMEX.S_ERR_IMPORT_UNREPAIRABLE,
       });
     });
 

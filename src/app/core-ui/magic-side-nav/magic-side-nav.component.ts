@@ -1,3 +1,4 @@
+import { TaskMultiDragService } from '../../features/tasks/task-multi-drag.service';
 /* eslint-disable @typescript-eslint/naming-convention */
 import {
   AfterViewInit,
@@ -34,15 +35,26 @@ import { ScheduleExternalDragService } from '../../features/schedule/schedule-we
 import { Log } from '../../core/log';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { DragDropRegistry } from '@angular/cdk/drag-drop';
+import { CdkTrapFocus } from '@angular/cdk/a11y';
 import { WorkContextType } from '../../features/work-context/work-context.model';
 import { HISTORY_STATE } from '../../app.constants';
 import { SwipeDirective } from '../../ui/swipe-gesture/swipe.directive';
 import { DataInitStateService } from '../../core/data-init/data-init-state.service';
+import { TranslatePipe } from '@ngx-translate/core';
+import { T } from '../../t.const';
 
-const COLLAPSED_WIDTH = 64;
+// 56px = 24px icon + 16px (var(--s2)) padding on each side, so the left-aligned
+// nav icons sit centered in the collapsed rail.
+const COLLAPSED_WIDTH = 56;
 const MOBILE_NAV_WIDTH = 300;
 const FOCUS_DELAY_MS = 10;
 const INITIAL_ENTER_ANIMATION_DURATION_MS = 425;
+// `--transition-duration-l` (375ms) plus a 50ms buffer — the duration the panel
+// animates its width over (`--sidenav-transition-duration` in the stylesheet).
+// The timeout is a fixed timer rather than a `transitionend` listener, so the
+// buffer is what keeps it from firing before the width has settled and clipping
+// the last of the collapse; the two numbers have to move together.
+const SIDENAV_WIDTH_ANIMATION_DURATION_MS = 425;
 
 @Component({
   selector: 'magic-side-nav',
@@ -54,6 +66,8 @@ const INITIAL_ENTER_ANIMATION_DURATION_MS = 425;
     MatMenuModule,
     NavMatMenuComponent,
     SwipeDirective,
+    CdkTrapFocus,
+    TranslatePipe,
   ],
   templateUrl: './magic-side-nav.component.html',
   styleUrl: './magic-side-nav.component.scss',
@@ -76,6 +90,7 @@ export class MagicSideNavComponent implements OnDestroy, AfterViewInit {
   private readonly _dataInitStateService = inject(DataInitStateService);
   private readonly _router = inject(Router);
   private _dragDropRegistry = inject(DragDropRegistry);
+  private _multiDrag = inject(TaskMultiDragService);
   private _externalDragService = inject(ScheduleExternalDragService);
   private _pointerUpSubscription: Subscription | null = null;
 
@@ -89,6 +104,8 @@ export class MagicSideNavComponent implements OnDestroy, AfterViewInit {
     () => this._isDataLoaded() && this._sideNavConfigService.areInitialTreesReady(),
   );
   readonly WorkContextType = WorkContextType;
+  readonly T = T;
+  readonly isMobile = this._layoutService.isXs;
   private readonly _initialState = this._getInitialState();
 
   activeWorkContextId = input<string | null>(null);
@@ -97,7 +114,6 @@ export class MagicSideNavComponent implements OnDestroy, AfterViewInit {
   mobileVisibleChange = output<boolean>();
 
   isFullMode = signal(this._initialState.isFullMode);
-  isMobile = signal(this._initialState.isMobile);
   showMobileMenuOverlay = signal(false);
   // Temporarily disable swipe during menu open animation to prevent
   // the touch event from the toggle button being captured as a swipe
@@ -140,6 +156,15 @@ export class MagicSideNavComponent implements OnDestroy, AfterViewInit {
   private readonly _onDragEnd: () => void = () => this._handleDragEnd();
 
   constructor() {
+    let wasMobile = this.isMobile();
+    effect(() => {
+      const isMobile = this.isMobile();
+      if (!wasMobile && isMobile) {
+        untracked(() => this.showMobileMenuOverlay.set(false));
+      }
+      wasMobile = isMobile;
+    });
+
     // Emit mobile visible changes to parent while in mobile mode
     effect(() => {
       if (this.isMobile()) {
@@ -184,12 +209,6 @@ export class MagicSideNavComponent implements OnDestroy, AfterViewInit {
           if (!this.isMobile()) this.toggleSideNavMode();
         });
       }
-    });
-
-    const resizeListener = (): void => this._checkScreenSize();
-    window.addEventListener('resize', resizeListener);
-    this._destroyRef.onDestroy(() => {
-      window.removeEventListener('resize', resizeListener);
     });
 
     window.requestAnimationFrame(() => {
@@ -284,30 +303,17 @@ export class MagicSideNavComponent implements OnDestroy, AfterViewInit {
     }
   }
 
-  private _checkScreenSize(): void {
-    const wasMobile = this.isMobile();
-    const currentMobile = this._isMobileViewport();
-    this.isMobile.set(currentMobile);
-
-    if (wasMobile !== currentMobile && currentMobile) {
-      // Switching to mobile - close overlay but preserve fullMode preference
-      this.showMobileMenuOverlay.set(false);
-    }
-  }
-
   private _getInitialState(): {
     currentWidth: number;
     isFullMode: boolean;
-    isMobile: boolean;
   } {
     const config = this.config();
-    const isMobile = this._isMobileViewport();
+    const isMobile = this.isMobile();
 
     if (isMobile) {
       return {
         currentWidth: config.defaultWidth,
         isFullMode: config.fullModeByDefault,
-        isMobile,
       };
     }
 
@@ -316,13 +322,7 @@ export class MagicSideNavComponent implements OnDestroy, AfterViewInit {
         readNumberLSBounded(LS.NAV_SIDEBAR_WIDTH, config.minWidth, config.maxWidth) ??
         config.defaultWidth,
       isFullMode: readBoolLS(LS.NAV_SIDEBAR_EXPANDED, config.fullModeByDefault),
-      isMobile,
     };
-  }
-
-  private _isMobileViewport(): boolean {
-    const maxWidth = this.config().mobileBreakpoint - 1;
-    return window.matchMedia(`(max-width: ${maxWidth}px)`).matches;
   }
 
   toggleMobileNav(): void {
@@ -398,15 +398,7 @@ export class MagicSideNavComponent implements OnDestroy, AfterViewInit {
       return;
     }
 
-    if (item.type === 'action') {
-      item.action?.();
-    }
-
-    if (item.type === 'plugin') {
-      item.action?.();
-    }
-
-    // Handle via service for actions/hrefs
+    // Single dispatcher for everything but tree items
     this._sideNavConfigService.onNavItemClick(item);
 
     if (this.isMobile()) {
@@ -498,11 +490,12 @@ export class MagicSideNavComponent implements OnDestroy, AfterViewInit {
       this._animateTimeoutId = null;
     }
     this.animateWidth.set(true);
-    // Slightly longer than --transition-duration-m (225ms) to ensure cleanup
+    // Slightly longer than --sidenav-transition-duration to ensure cleanup runs
+    // after the width has settled instead of cutting it short
     this._animateTimeoutId = window.setTimeout(() => {
       this.animateWidth.set(false);
       this._animateTimeoutId = null;
-    }, 300);
+    }, SIDENAV_WIDTH_ANIMATION_DURATION_MS);
   }
 
   private _handleArrowNavigation(event: KeyboardEvent): void {
@@ -607,6 +600,11 @@ export class MagicSideNavComponent implements OnDestroy, AfterViewInit {
       event.preventDefault();
       event.stopPropagation();
 
+      if (this.isMobile() && this.showMobileMenuOverlay()) {
+        this.toggleMobileNav();
+        return;
+      }
+
       this._unfocusNavAndFocusTask();
     }
   }
@@ -667,6 +665,27 @@ export class MagicSideNavComponent implements OnDestroy, AfterViewInit {
   }
 
   private _handlePointerUp(event: MouseEvent | TouchEvent): void {
+    const ids = [...this._multiDrag.ids()];
+    if (ids.length > 1) {
+      if (this._multiDrag.isCancelled()) return;
+      const position = getPointerPosition(event);
+      const projectId = position
+        ? document
+            .elementFromPoint(position.x, position.y)
+            ?.closest('nav-item[data-project-id]')
+            ?.getAttribute('data-project-id')
+        : null;
+      if (projectId) {
+        this._externalDragService.setCancelNextDrop(true);
+        this._externalDragService
+          .activeDragRef()
+          ?.ended.pipe(take(1))
+          .subscribe(() => {
+            void this._multiDrag.moveToProject(projectId, ids);
+          });
+      }
+      return;
+    }
     const draggedTask = this._externalDragService.activeTask();
 
     // exclude recurring tasks

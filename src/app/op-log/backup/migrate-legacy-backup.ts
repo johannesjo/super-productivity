@@ -27,27 +27,30 @@ import { plannerInitialState } from '../../features/planner/store/planner.reduce
 import { issueProviderInitialState } from '../../features/issue/store/issue-provider.reducer';
 import { menuTreeInitialState } from '../../features/menu-tree/store/menu-tree.reducer';
 import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
-import { initialTimeTrackingState } from '../../features/time-tracking/store/time-tracking.reducer';
 import { TTWorkContextSessionMap } from '../../features/time-tracking/time-tracking.model';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import {
   INBOX_PROJECT,
   LEGACY_NO_LIST_TAG_ID,
 } from '../../features/project/project.const';
+import { WORK_CONTEXT_DEFAULT_COMMON } from '../../features/work-context/work-context.const';
+import { DEFAULT_TASK_REPEAT_CFG } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 import { getDbDateStr } from '../../util/get-db-date-str';
 import { isTodayWithOffset } from '../../util/is-today.util';
 // Matches DateService.setStartOfNextDayDiff semantics for legacy backup normalization.
 import { getStartOfNextDayDiffMs } from '../../util/start-of-next-day.util';
 import { LanguageCode } from '../../core/locale.constants';
 import {
-  initialPluginUserDataState,
-  initialPluginMetaDataState,
-} from '../../plugins/plugin-persistence.model';
-import { AppDataComplete } from '../model/model-config';
+  AppDataComplete,
+  MODEL_CONFIGS,
+  withDefaultModelSlices,
+} from '../model/model-config';
 import { OpLog } from '../../core/log';
 import { migrateLegacyTaskRemindersIntoTasks } from '../../features/reminder/migrate-legacy-task-reminders.util';
 
 const LEGACY_INBOX_PROJECT_ID = 'INBOX' as const;
+const APP_DATA_MODEL_KEYS = Object.keys(MODEL_CONFIGS) as (keyof AppDataComplete)[];
+const V17_VALID_KEYS = new Set<keyof AppDataComplete>(APP_DATA_MODEL_KEYS);
 
 /**
  * Detects whether the incoming data is a legacy (pre-v14) backup that needs
@@ -112,6 +115,9 @@ export const migrateLegacyBackup = (
 
   // === Migration 4.5: Lowercase language codes ===
   data = _migration45LowercaseLanguageCodes(data);
+
+  // === Entity fields the pre-v14 per-model migrations used to fill ===
+  data = _fillLegacyEntityDefaults(data);
 
   // === Final: Ensure all v17-required keys exist with defaults ===
   data = _ensureV17Defaults(data);
@@ -730,17 +736,6 @@ function _migration44LocalizationAndAppFeatures(
     };
   }
 
-  // 5. Migrate User Profiles
-  if (typeof data.globalConfig?.misc?.isEnableUserProfiles === 'boolean') {
-    if (data.globalConfig.appFeatures) {
-      data.globalConfig.appFeatures = {
-        ...data.globalConfig.appFeatures,
-        isEnableUserProfiles: data.globalConfig.misc.isEnableUserProfiles,
-      };
-    }
-    delete data.globalConfig.misc.isEnableUserProfiles;
-  }
-
   finishOps.forEach((op) => op());
   return data;
 }
@@ -771,80 +766,54 @@ function _migration45LowercaseLanguageCodes(
 }
 
 // ---------------------------------------------------------------------------
+// Entity defaults — required fields that pre-v14 per-model migrations filled
+// ---------------------------------------------------------------------------
+
+/**
+ * dataRepair cannot fill these, and a backup still invalid after repair is
+ * refused (#8279), so a legacy file missing them would no longer import at all.
+ * Only absent fields are filled; existing values are kept as-is.
+ */
+function _fillLegacyEntityDefaults(data: Record<string, any>): Record<string, any> {
+  for (const key of ['project', 'tag']) {
+    for (const ctx of Object.values(data[key]?.entities ?? {}) as any[]) {
+      if (ctx && ctx.advancedCfg === undefined) {
+        ctx.advancedCfg = structuredClone(WORK_CONTEXT_DEFAULT_COMMON.advancedCfg);
+      }
+    }
+  }
+  for (const note of Object.values(data.note?.entities ?? {}) as any[]) {
+    if (note && note.modified === undefined) {
+      note.modified = note.created;
+    }
+  }
+  for (const cfg of Object.values(data.taskRepeatCfg?.entities ?? {}) as any[]) {
+    if (!cfg) continue;
+    cfg.repeatCycle ??= DEFAULT_TASK_REPEAT_CFG.repeatCycle;
+    cfg.repeatEvery ??= DEFAULT_TASK_REPEAT_CFG.repeatEvery;
+    // Before `order`, the placement was the boolean `isAddToBottom`; the
+    // pre-v14 migration mapped it to 1 (bottom), else 0 (top).
+    cfg.order ??= cfg.isAddToBottom ? 1 : DEFAULT_TASK_REPEAT_CFG.order;
+  }
+  return data;
+}
+
+// ---------------------------------------------------------------------------
 // Final: ensure all v17-required keys exist with defaults
 // ---------------------------------------------------------------------------
 
 function _ensureV17Defaults(data: Record<string, any>): Record<string, any> {
-  if (!data.issueProvider) {
-    data.issueProvider = issueProviderInitialState;
-  }
-  if (!data.boards) {
-    data.boards = initialBoardsState;
-  }
-  if (!data.planner) {
-    data.planner = plannerInitialState;
-  }
-  if (!data.menuTree) {
-    data.menuTree = menuTreeInitialState;
-  }
-  if (!data.timeTracking) {
-    data.timeTracking = initialTimeTrackingState;
-  }
-  if (!data.pluginUserData) {
-    data.pluginUserData = initialPluginUserDataState;
-  }
-  if (!data.pluginMetadata) {
-    data.pluginMetadata = initialPluginMetaDataState;
-  }
-  if (!data.reminders) {
-    data.reminders = [];
-  }
-  if (!data.archiveYoung) {
-    data.archiveYoung = {
-      task: { ids: [], entities: {} },
-      timeTracking: initialTimeTrackingState,
-      lastTimeTrackingFlush: 0,
-    };
-  }
-  if (!data.archiveOld) {
-    data.archiveOld = {
-      task: { ids: [], entities: {} },
-      timeTracking: initialTimeTrackingState,
-      lastTimeTrackingFlush: 0,
-    };
-  }
-  return data;
+  return withDefaultModelSlices(data) as unknown as Record<string, any>;
 }
 
 // ---------------------------------------------------------------------------
 // Final: strip keys that are not part of v17's AppDataComplete
 // ---------------------------------------------------------------------------
 
-const V17_VALID_KEYS = new Set([
-  'project',
-  'menuTree',
-  'globalConfig',
-  'planner',
-  'boards',
-  'note',
-  'issueProvider',
-  'metric',
-  'task',
-  'tag',
-  'simpleCounter',
-  'taskRepeatCfg',
-  'reminders',
-  'timeTracking',
-  'pluginUserData',
-  'pluginMetadata',
-  'archiveYoung',
-  'archiveOld',
-]);
-
 function _stripLegacyKeys(data: Record<string, any>): Record<string, any> {
   const stripped: Record<string, any> = {};
   for (const key of Object.keys(data)) {
-    if (V17_VALID_KEYS.has(key)) {
+    if (V17_VALID_KEYS.has(key as keyof AppDataComplete)) {
       stripped[key] = data[key];
     } else {
       OpLog.log(`migrateLegacyBackup: Stripping legacy key "${key}"`);

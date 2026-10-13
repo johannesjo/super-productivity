@@ -3,7 +3,6 @@ import { Operation, VectorClock } from '../core/operation.types';
 import { OpLog } from '../../core/log';
 import {
   CURRENT_SCHEMA_VERSION as SHARED_CURRENT_SCHEMA_VERSION,
-  MAX_VERSION_SKIP as SHARED_MAX_VERSION_SKIP,
   MIN_SUPPORTED_SCHEMA_VERSION as SHARED_MIN_SUPPORTED_SCHEMA_VERSION,
   MIGRATIONS,
   migrateState,
@@ -17,11 +16,30 @@ import {
 
 // Re-export shared constants for backwards compatibility
 export const CURRENT_SCHEMA_VERSION = SHARED_CURRENT_SCHEMA_VERSION;
-export const MAX_VERSION_SKIP = SHARED_MAX_VERSION_SKIP;
 export const MIN_SUPPORTED_SCHEMA_VERSION = SHARED_MIN_SUPPORTED_SCHEMA_VERSION;
 
 // Re-export types
 export type { SchemaMigration };
+
+export const getOperationSchemaVersion = (op: { schemaVersion?: unknown }): number => {
+  if (op.schemaVersion === undefined) {
+    return 1;
+  }
+  if (
+    typeof op.schemaVersion !== 'number' ||
+    !Number.isInteger(op.schemaVersion) ||
+    // Deliberately accepts 0 (unlike the server contract's min(1)): a parsed 0
+    // then fails the MIN_SUPPORTED_SCHEMA_VERSION comparison and surfaces as
+    // VERSION_UNSUPPORTED — a truthful message — instead of a generic
+    // migration-failure. Safety is identical either way.
+    op.schemaVersion < 0
+  ) {
+    throw new Error(
+      'Operation schemaVersion must be a non-negative integer when present.',
+    );
+  }
+  return op.schemaVersion;
+};
 
 /**
  * Interface for state cache that may need migration.
@@ -58,7 +76,7 @@ export interface MigratableStateCache {
  *    - Drop op if migration returns null
  * 3. Apply migrated ops to migrated state
  *
- * @see docs/ai/sync/operation-log-architecture.md A.7
+ * @see docs/sync-and-op-log/operation-log-architecture.md A.7
  */
 @Injectable({ providedIn: 'root' })
 export class SchemaMigrationService {
@@ -83,8 +101,12 @@ export class SchemaMigrationService {
   /**
    * Migrates a state cache to the current schema version if needed.
    * Returns the migrated cache, or the original if no migration was needed.
+   * The result always carries the version the chain produced, which is what
+   * makes it safe to persist via `saveStateCache()` (#8770).
    */
-  migrateStateIfNeeded(cache: MigratableStateCache): MigratableStateCache {
+  migrateStateIfNeeded(
+    cache: MigratableStateCache,
+  ): MigratableStateCache & { schemaVersion: number } {
     // Handle old caches that don't have schemaVersion
     const currentVersion = cache.schemaVersion ?? 1;
 
@@ -133,7 +155,7 @@ export class SchemaMigrationService {
    * @returns The migrated operation(s), or null if it should be dropped
    */
   migrateOperation(op: Operation): Operation | Operation[] | null {
-    const opVersion = op.schemaVersion ?? 1;
+    const opVersion = getOperationSchemaVersion(op);
 
     if (opVersion >= CURRENT_SCHEMA_VERSION) {
       return op;
@@ -164,6 +186,7 @@ export class SchemaMigrationService {
     if (Array.isArray(result.data)) {
       return result.data.map((migratedOpLike) => ({
         ...op,
+        id: migratedOpLike.id,
         opType: migratedOpLike.opType as Operation['opType'],
         entityType: migratedOpLike.entityType as Operation['entityType'],
         entityId: migratedOpLike.entityId,
@@ -176,9 +199,11 @@ export class SchemaMigrationService {
     // Merge migrated fields back into the original operation
     return {
       ...op,
+      id: result.data.id,
       opType: result.data.opType as Operation['opType'],
       entityType: result.data.entityType as Operation['entityType'],
       entityId: result.data.entityId,
+      entityIds: result.data.entityIds,
       payload: result.data.payload,
       schemaVersion: result.data.schemaVersion,
     };
@@ -225,13 +250,14 @@ export class SchemaMigrationService {
    * Returns true if the operation needs migration.
    */
   operationNeedsMigration(op: Operation): boolean {
+    const schemaVersion = getOperationSchemaVersion(op);
     return sharedOperationNeedsMigration(
       {
         id: op.id,
         opType: op.opType,
         entityType: op.entityType,
         payload: op.payload,
-        schemaVersion: op.schemaVersion ?? 1,
+        schemaVersion,
       },
       CURRENT_SCHEMA_VERSION,
     );
