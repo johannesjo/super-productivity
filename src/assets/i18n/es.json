@@ -2857,8 +2857,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Sonido de recordatorio de tomar un descanso",
+      "DING": "Campana",
       "DONE_SOUND": "Sonido de tarea marcada como hecha",
       "IS_INCREASE_DONE_PITCH": "Aumentar tono por cada tarea hecha",
+      "SMALL_DING": "Campanilla",
+      "SOUND_1": "Sonido 1",
+      "SOUND_2": "Sonido 2",
+      "SOUND_3": "Sonido 3",
+      "SOUND_4": "Sonido 4",
+      "SOUND_5": "Sonido 5",
+      "SOUND_6": "Sonido 6",
+      "SOUND_7": "Sonido 7",
       "TITLE": "Sonido",
       "TRACK_TIME_SOUND": "Sonido de recordatorio de tiempo de seguimiento",
       "VOLUME": "Volumen"

@@ -2856,8 +2856,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Faça um lembrete sonoro de pausa",
+      "DING": "Sino",
       "DONE_SOUND": "Som de tarefa concluída",
       "IS_INCREASE_DONE_PITCH": "Aumente o tom para cada tarefa realizada",
+      "SMALL_DING": "Sino pequeno",
+      "SOUND_1": "Som 1",
+      "SOUND_2": "Som 2",
+      "SOUND_3": "Som 3",
+      "SOUND_4": "Som 4",
+      "SOUND_5": "Som 5",
+      "SOUND_6": "Som 6",
+      "SOUND_7": "Som 7",
       "TITLE": "Som",
       "TRACK_TIME_SOUND": "Som de lembrete de tempo de rastreamento",
       "VOLUME": "Volume"

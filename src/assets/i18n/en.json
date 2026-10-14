@@ -2872,8 +2872,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Take a break reminder sound",
+      "DING": "Ding",
       "DONE_SOUND": "Task completed sound",
       "IS_INCREASE_DONE_PITCH": "Increase pitch for every task completed",
+      "SMALL_DING": "Small Ding",
+      "SOUND_1": "Sound 1",
+      "SOUND_2": "Sound 2",
+      "SOUND_3": "Sound 3",
+      "SOUND_4": "Sound 4",
+      "SOUND_5": "Sound 5",
+      "SOUND_6": "Sound 6",
+      "SOUND_7": "Sound 7",
       "TITLE": "Sound",
       "TRACK_TIME_SOUND": "Track time reminder sound",
       "VOLUME": "Volume"

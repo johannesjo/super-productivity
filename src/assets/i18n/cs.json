@@ -2872,8 +2872,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Zvuk připomenutí přestávky",
+      "DING": "Cinknutí zvonku",
       "DONE_SOUND": "Zvuk označení úkolu jako hotového",
       "IS_INCREASE_DONE_PITCH": "Zvýšit výšku tónu po každém dokončeném úkolu",
+      "SMALL_DING": "Cinknutí malého zvonku",
+      "SOUND_1": "Zvuk 1",
+      "SOUND_2": "Zvuk 2",
+      "SOUND_3": "Zvuk 3",
+      "SOUND_4": "Zvuk 4",
+      "SOUND_5": "Zvuk 5",
+      "SOUND_6": "Zvuk 6",
+      "SOUND_7": "Zvuk 7",
       "TITLE": "Zvuk",
       "TRACK_TIME_SOUND": "Zvuk připomenutí sledování času",
       "VOLUME": "Hlasitost"
