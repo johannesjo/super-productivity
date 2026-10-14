@@ -207,7 +207,10 @@ export class SuperSyncPage extends BasePage {
     this.syncBtn = page.locator('button.sync-btn');
     this.providerSelect = page.locator('formly-field-mat-select mat-select');
     this.baseUrlInput = page.locator('.e2e-baseUrl input');
-    this.accessTokenInput = page.locator('.e2e-accessToken input');
+    // Current clients render an input (#10784); released clients a textarea.
+    this.accessTokenInput = page.locator(
+      '.e2e-accessToken input, .e2e-accessToken textarea',
+    );
     this.presenceDeviceNameInput = page.locator('.e2e-presenceDeviceName input');
     this.enableEncryptionBtn = page.locator('.e2e-enable-encryption-btn button');
     this.disableEncryptionBtn = page.locator('.e2e-disable-encryption-btn button');
