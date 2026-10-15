@@ -42,6 +42,8 @@ export class TaskRelatedModelEffects {
         ofType(TimeTrackingActions.addTimeSpent),
         // PERF: Skip during hydration/sync before any further work.
         filter(() => !this._hydrationState.isApplyingRemoteOps()),
+        // Time back-filled for a past day is not work done today.
+        filter(({ isBackfill }) => !isBackfill),
         // Cheap field checks first: a task with its own due date is already
         // handled by dueDay-based TODAY membership, so it can never need
         // auto-adding here. Running these before any store read means the

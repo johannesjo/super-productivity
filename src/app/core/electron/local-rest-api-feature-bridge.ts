@@ -19,6 +19,7 @@ export interface LocalRestApiFeatureBridge {
   /**
    * Adds time spent on `date` (YYYY-MM-DD) the way the app's own tracking
    * does, so `timeSpentOnDay`, the parent roll-up and sync stay consistent.
+   * A past day is back-filled: no work start/end and no auto-plan for today.
    */
   addTimeSpentOnDay(task: object, durationMs: number, date: string): void;
 }
