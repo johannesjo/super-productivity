@@ -5,8 +5,8 @@ import { CAPTURE_RETRY_WINDOW_MS } from './capture.const';
  * Best-effort dedupe of assistant retries: assistants re-send a create after a
  * timeout without an idempotency id (Stage A probe: 0 of 7 calls sent one).
  * Per grant, calls run one at a time and an identical title, notes and due
- * date/time within the window answers "Saved" again without a new item. A deliberate identical
- * repeat inside the window is merged too.
+ * date/time within the window answers "Saved" again without a new item. A
+ * deliberate identical repeat inside the window is merged too.
  *
  * shortcut: in-process lock and map, single SuperSync instance (helm max 1).
  * Restarts drop it; move to a table if the server scales out.
