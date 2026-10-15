@@ -24,6 +24,10 @@ export interface CapturePayload {
   v: 1;
   title: string;
   notes?: string;
+  /** `YYYY-MM-DD`; optional within v1, ignored by apps that predate it. */
+  dueDate?: string;
+  /** `HH:MM`, local to the importing device; only with `dueDate`. */
+  dueTime?: string;
   createdAt: number;
   client: string;
 }

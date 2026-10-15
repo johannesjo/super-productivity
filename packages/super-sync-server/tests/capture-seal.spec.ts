@@ -158,4 +158,36 @@ describe('validateCreateTaskArgs', () => {
       typeof validateCreateTaskArgs({ title: 'a', notes: 'x'.repeat(8 * 1024) }),
     ).toBe('object');
   });
+
+  it('keeps a due day and an optional time', () => {
+    expect(validateCreateTaskArgs({ title: 'a', dueDate: '2026-10-16' })).toEqual({
+      title: 'a',
+      dueDate: '2026-10-16',
+    });
+    expect(
+      validateCreateTaskArgs({
+        title: 'a',
+        notes: '',
+        dueDate: '2028-02-29',
+        dueTime: '09:30',
+      }),
+    ).toEqual({ title: 'a', dueDate: '2028-02-29', dueTime: '09:30' });
+  });
+
+  it('refuses a bad due day or time', () => {
+    for (const due of [
+      { dueTime: '09:30' },
+      { dueDate: '2026-02-30' },
+      { dueDate: '2026-13-01' },
+      { dueDate: '26-10-16' },
+      { dueDate: '2026-10-16T09:30' },
+      { dueDate: 20261016 },
+      { dueDate: '2026-10-16', dueTime: '24:00' },
+      { dueDate: '2026-10-16', dueTime: '9:30' },
+      { dueDate: '2026-10-16', dueTime: '09:30:00' },
+      { dueDate: '2026-10-16', dueTime: 930 },
+    ]) {
+      expect(typeof validateCreateTaskArgs({ title: 'a', ...due })).toBe('string');
+    }
+  });
 });

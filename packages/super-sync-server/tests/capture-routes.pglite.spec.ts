@@ -37,11 +37,15 @@ const toolCall = (
   id: number,
   title: string,
   notes?: string,
+  due: { dueDate?: string; dueTime?: string } = {},
 ): Record<string, unknown> => ({
   jsonrpc: '2.0',
   id,
   method: 'tools/call',
-  params: { name: 'create_task', arguments: { title, ...(notes ? { notes } : {}) } },
+  params: {
+    name: 'create_task',
+    arguments: { title, ...(notes ? { notes } : {}), ...due },
+  },
 });
 
 describe('capture routes (PGlite)', () => {
@@ -191,6 +195,30 @@ describe('capture routes (PGlite)', () => {
     for (const reply of replies) expect(toolText(reply).text).toBe(CAPTURE_SAVED_TEXT);
     const grants = (await api('GET', '/grants')).json().grants;
     expect(grants[0].pendingCount).toBe(1);
+  });
+
+  it('seals the due day and time, and keeps the same title on other days apart', async () => {
+    await api('PUT', '/key', { publicKey: key.publicKey });
+    const token = await newToken();
+    const due = { dueDate: '2026-10-16', dueTime: '09:30' };
+    await mcp(token, toolCall(1, 'Dentist', undefined, due));
+    await mcp(token, toolCall(2, 'Dentist', undefined, due));
+    await mcp(token, toolCall(3, 'Dentist', undefined, { dueDate: '2026-10-17' }));
+
+    const claim = (
+      await api('POST', '/claim', {
+        deviceId: 'dev-a',
+        fingerprint: captureKeyFingerprint(key.publicKey),
+      })
+    ).json();
+    const payloads = claim.items.map((item: { itemId: string; ciphertext: string }) =>
+      openCapture(key.ecdh, item.itemId, item.ciphertext),
+    );
+    expect(payloads).toEqual([
+      expect.objectContaining({ v: 1, title: 'Dentist', ...due }),
+      expect.objectContaining({ v: 1, title: 'Dentist', dueDate: '2026-10-17' }),
+    ]);
+    expect(payloads[1].dueTime).toBeUndefined();
   });
 
   it('refuses a disabled key and revokes its tokens', async () => {

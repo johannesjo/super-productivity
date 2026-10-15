@@ -8,7 +8,8 @@ import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions'
 import { CaptureKeyConfig } from '../../config/global-config.model';
 import { INBOX_PROJECT } from '../../project/project.const';
 import { WorkContextType } from '../../work-context/work-context.model';
-import { DEFAULT_TASK } from '../task.model';
+import { DEFAULT_TASK, Task, TaskReminderOptionId } from '../task.model';
+import { remindOptionToMilliseconds } from '../util/remind-option-to-milliseconds';
 import { NativeCaptureSource } from '../native-capture/native-capture-importer.service';
 
 /** Never rename: installs keep their receipts under it. */
@@ -17,6 +18,8 @@ export const AGENT_CAPTURE_RECEIPTS_KEY = 'sp-agent-capture-receipts';
 // Server limits (capture.const.ts), re-checked before a payload becomes a synced task.
 const TITLE_MAX_CHARS = 500;
 const NOTES_MAX_CHARS = 8 * 1024;
+const DUE_DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
+const DUE_TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
 /** The server has no capture routes (feature off, rollback, other server). */
 export class CaptureUnsupportedError extends Error {
@@ -27,7 +30,15 @@ export interface AgentCapture {
   /** The server-issued task id; also the importer's dedupe and receipt id. */
   id: string;
   /** Null when the item could not be opened or its payload is invalid. */
-  task: { title: string; notes?: string; createdAt: number } | null;
+  task: {
+    title: string;
+    notes?: string;
+    createdAt: number;
+    /** `YYYY-MM-DD`; a calendar day. */
+    dueDay?: string;
+    /** `[hours, minutes]` on `dueDay`, in this device's time zone. */
+    dueTime?: [number, number];
+  } | null;
 }
 
 /** What one import run captured synchronously when it claimed. */
@@ -37,6 +48,8 @@ export interface AgentCaptureRun {
   deviceId: string;
   /** Set in the addTask itself, so setDefaultEstimateIfNonGiven$ adds no second op. */
   defaultEstimate: number;
+  /** Applied to a capture with a time, as when scheduling in the app. */
+  defaultRemindOption: TaskReminderOptionId;
   /** Throws SyncEpochChangedError once the account, provider or password changed. */
   assertUnchanged: (context: string) => void;
 }
@@ -77,8 +90,8 @@ export const createSuperSyncCaptureSource = (
     },
     isValid: (capture) => capture.task !== null,
     createTask: (capture) => {
-      const { defaultEstimate } = currentRun('createTask');
-      deps.dispatch(addInboxTaskAction(capture, defaultEstimate));
+      const { defaultEstimate, defaultRemindOption } = currentRun('createTask');
+      deps.dispatch(addInboxTaskAction(capture, defaultEstimate, defaultRemindOption));
     },
     acknowledge: async (id) => {
       const { provider, deviceId } = currentRun('acknowledge');
@@ -116,7 +129,7 @@ const openItem = async (
 ): Promise<AgentCapture> => {
   try {
     const payload = await openCapture(run.key, item.itemId, item.ciphertext);
-    return { id: item.taskId, task: toTask(payload) };
+    return { id: item.taskId, task: toCaptureTask(payload) };
   } catch (e) {
     if (!(e instanceof CaptureOpenError)) throw e;
     // Kept un-acked: it expires server-side. Id and code only, never content.
@@ -140,7 +153,41 @@ export const neutralizeAutoloadMedia = (notes: string): string =>
   // `!+`: dropping one `!` of `!![` would leave a working `![`.
   notes.replace(/!+\[/g, '[').replace(AUTOLOAD_TAG, '&lt;');
 
-const toTask = (payload: unknown): AgentCapture['task'] => {
+/** Rejects shapes like 2026-02-30 that the pattern lets through. */
+const parseDueDay = (value: unknown): string | undefined => {
+  if (typeof value !== 'string') return undefined;
+  const m = DUE_DATE_RE.exec(value);
+  if (!m) return undefined;
+  const [year, month, day] = [Number(m[1]), Number(m[2]), Number(m[3])];
+  const utc = new Date(Date.UTC(year, month - 1, day));
+  return utc.getUTCFullYear() === year &&
+    utc.getUTCMonth() === month - 1 &&
+    utc.getUTCDate() === day
+    ? value
+    : undefined;
+};
+
+const parseDueTime = (value: unknown): [number, number] | undefined => {
+  if (typeof value !== 'string') return undefined;
+  const m = DUE_TIME_RE.exec(value);
+  return m ? [Number(m[1]), Number(m[2])] : undefined;
+};
+
+/**
+ * Optional v1 fields. An invalid day or time is dropped rather than failing
+ * the capture: the task still lands, unscheduled, as on apps before them.
+ */
+const toDue = (
+  p: Record<string, unknown>,
+): Pick<NonNullable<AgentCapture['task']>, 'dueDay' | 'dueTime'> => {
+  const dueDay = parseDueDay(p.dueDate);
+  if (!dueDay) return {};
+  const dueTime = parseDueTime(p.dueTime);
+  return dueTime ? { dueDay, dueTime } : { dueDay };
+};
+
+/** Validates an opened payload; null when it cannot become a task. */
+export const toCaptureTask = (payload: unknown): AgentCapture['task'] => {
   const p = payload as Record<string, unknown> | null;
   if (!p || p.v !== 1 || typeof p.title !== 'string') return null;
   const title = p.title.trim();
@@ -153,12 +200,41 @@ const toTask = (payload: unknown): AgentCapture['task'] => {
       ? neutralizeAutoloadMedia([...p.notes].slice(0, NOTES_MAX_CHARS).join(''))
       : '';
   const createdAt = typeof p.createdAt === 'number' ? p.createdAt : Date.now();
-  return { title, ...(notes ? { notes } : {}), createdAt };
+  return { title, ...(notes ? { notes } : {}), createdAt, ...toDue(p) };
+};
+
+/**
+ * A day alone becomes `dueDay`; with a time, `dueWithTime` in this device's
+ * time zone (dueDay cleared, ARCHITECTURE-DECISIONS.md Decision #1). Resolved
+ * here, before the op, so replay never depends on the replaying device.
+ */
+const toSchedule = (
+  task: NonNullable<AgentCapture['task']>,
+  defaultRemindOption: TaskReminderOptionId,
+): Pick<Task, 'dueDay' | 'dueWithTime' | 'hasPlannedTime' | 'remindAt'> => {
+  if (!task.dueDay) return {};
+  if (!task.dueTime) return { dueDay: task.dueDay };
+  const [year, month, day] = task.dueDay.split('-').map(Number);
+  const dueWithTime = new Date(
+    year,
+    month - 1,
+    day,
+    task.dueTime[0],
+    task.dueTime[1],
+  ).getTime();
+  const remindAt = remindOptionToMilliseconds(dueWithTime, defaultRemindOption);
+  return {
+    dueDay: undefined,
+    dueWithTime,
+    hasPlannedTime: true,
+    ...(remindAt === undefined ? {} : { remindAt }),
+  };
 };
 
 const addInboxTaskAction = (
   capture: AgentCapture,
   defaultEstimate: number,
+  defaultRemindOption: TaskReminderOptionId,
 ): ReturnType<typeof TaskSharedActions.addTask> => {
   const task = capture.task as NonNullable<AgentCapture['task']>;
   return TaskSharedActions.addTask({
@@ -170,6 +246,7 @@ const addInboxTaskAction = (
       projectId: INBOX_PROJECT.id,
       created: task.createdAt,
       timeEstimate: defaultEstimate,
+      ...toSchedule(task, defaultRemindOption),
     },
     workContextId: INBOX_PROJECT.id,
     workContextType: WorkContextType.PROJECT,

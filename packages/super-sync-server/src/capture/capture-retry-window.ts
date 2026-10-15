@@ -4,8 +4,8 @@ import { CAPTURE_RETRY_WINDOW_MS } from './capture.const';
 /**
  * Best-effort dedupe of assistant retries: assistants re-send a create after a
  * timeout without an idempotency id (Stage A probe: 0 of 7 calls sent one).
- * Per grant, calls run one at a time and an identical title + notes within the
- * window answers "Saved" again without a new item. A deliberate identical
+ * Per grant, calls run one at a time and an identical title, notes and due
+ * date/time within the window answers "Saved" again without a new item. A deliberate identical
  * repeat inside the window is merged too.
  *
  * shortcut: in-process lock and map, single SuperSync instance (helm max 1).
@@ -18,9 +18,18 @@ const processKey = randomBytes(32);
 const recent = new Map<string, Map<string, number>>();
 const locks = new Map<string, Promise<unknown>>();
 
-const contentKey = (title: string, notes: string | undefined): string =>
+export interface CaptureContent {
+  title: string;
+  notes?: string;
+  dueDate?: string;
+  dueTime?: string;
+}
+
+const contentKey = (c: CaptureContent): string =>
   createHmac('sha256', processKey)
-    .update(JSON.stringify([title, notes ?? null]))
+    .update(
+      JSON.stringify([c.title, c.notes ?? null, c.dueDate ?? null, c.dueTime ?? null]),
+    )
     .digest('base64');
 
 const pruneGrant = (grantId: string, now: number): Map<string, number> | undefined => {
@@ -52,20 +61,18 @@ export const withGrantLock = async <T>(
 
 export const isRecentCapture = (
   grantId: string,
-  title: string,
-  notes: string | undefined,
+  content: CaptureContent,
   now: number = Date.now(),
-): boolean => pruneGrant(grantId, now)?.has(contentKey(title, notes)) ?? false;
+): boolean => pruneGrant(grantId, now)?.has(contentKey(content)) ?? false;
 
 /** Call only after the item's insert committed. */
 export const recordCapture = (
   grantId: string,
-  title: string,
-  notes: string | undefined,
+  content: CaptureContent,
   now: number = Date.now(),
 ): void => {
   const entries = pruneGrant(grantId, now) ?? new Map<string, number>();
-  entries.set(contentKey(title, notes), now + CAPTURE_RETRY_WINDOW_MS);
+  entries.set(contentKey(content), now + CAPTURE_RETRY_WINDOW_MS);
   recent.set(grantId, entries);
 };
 

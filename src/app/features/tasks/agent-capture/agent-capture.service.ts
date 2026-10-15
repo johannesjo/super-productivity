@@ -26,6 +26,7 @@ import { SyncProviderId } from '../../../op-log/sync-providers/provider.const';
 import { SyncProviderManager } from '../../../op-log/sync-providers/provider-manager.service';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { GlobalConfigService } from '../../config/global-config.service';
+import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
 import {
   getCaptureImportErrorReason,
   NativeCaptureImporter,
@@ -205,6 +206,9 @@ export class AgentCaptureService {
       ...active,
       deviceId: this._deviceId(),
       defaultEstimate: this._globalConfig.cfg()?.timeTracking.defaultEstimate || 0,
+      defaultRemindOption:
+        this._globalConfig.cfg()?.reminder.defaultTaskRemindOption ??
+        DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption!,
       assertUnchanged: (context) => {
         // The epoch bumps only after a provider swap completes; the identity
         // check covers the moment in between.

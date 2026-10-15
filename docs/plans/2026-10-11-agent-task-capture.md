@@ -66,6 +66,13 @@ the app syncs." It never claims the task exists.
 Public once shipped: adding optional fields is compatible, removing or
 renaming is not. If #10251 lands, it uses the same limits.
 
+Added Oct 15 2026: optional `dueDate` (`YYYY-MM-DD`) and `dueTime` (`HH:MM`,
+needs `dueDate`). They travel as optional fields of the v1 payload, so
+released apps ignore them and add the task unscheduled. The importing device
+resolves them in its own time zone into `dueDay`, or `dueWithTime` plus the
+default reminder, inside the one `addTask`; an invalid value is dropped, not
+the task. The retry window keys on them too.
+
 ## Flow
 
 1. Settings → SuperSync → **"Let AI assistants add tasks"** (off by default).
@@ -347,7 +354,7 @@ Each step has its check; the next starts only after it passes.
 
 ## Out of scope
 
-Reading tasks remotely, editing, project/tag/due date, DCR, generic CIMD
+Reading tasks remotely, editing, project/tag, repeating tasks, DCR, generic CIMD
 fetching, WebSocket push for captures, server-created ops, non-SuperSync
 providers.
 
