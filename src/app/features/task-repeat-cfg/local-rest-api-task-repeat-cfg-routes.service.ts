@@ -19,6 +19,7 @@ import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
 import { GlobalConfigService } from '../config/global-config.service';
 import { Task } from '../tasks/task.model';
 import { TaskService } from '../tasks/task.service';
+import { getTaskPriority } from '../tasks/task-priority.const';
 import { getDefaultSkipOverdue } from './dialog-edit-task-repeat-cfg/get-default-skip-overdue';
 import { getQuickSettingUpdates } from './dialog-edit-task-repeat-cfg/get-quick-setting-updates';
 import { getTaskRepeatCfgChanges } from './dialog-edit-task-repeat-cfg/get-task-repeat-cfg-changes';
@@ -244,6 +245,7 @@ export class LocalRestApiTaskRepeatCfgRoutesService implements LocalRestApiFeatu
       notes: task.notes || undefined,
       tagIds: unique(task.tagIds),
       defaultEstimate: task.timeEstimate,
+      priority: getTaskPriority(task.priority),
     };
 
     const built = this._applySchedule(requestId, initial, {

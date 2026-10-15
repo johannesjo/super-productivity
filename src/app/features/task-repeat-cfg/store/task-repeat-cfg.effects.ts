@@ -742,6 +742,9 @@ export class TaskRepeatCfgEffects {
                     //     });
                     //   }
                     // }
+                    if ('priority' in changes) {
+                      changesForArchiveTask.priority = changes.priority ?? null;
+                    }
                     if (changes.tagIds) {
                       changesForArchiveTask.tagIds = changes.tagIds;
                     }
@@ -812,8 +815,9 @@ export class TaskRepeatCfgEffects {
     if (changes.tagIds) {
       this._taskService.updateTags(task, changes.tagIds);
     }
-    if (changes.title || changes.notes) {
+    if (changes.title || changes.notes || 'priority' in changes) {
       this._taskService.update(task.id, {
+        ...('priority' in changes ? { priority: changes.priority ?? null } : {}),
         ...(changes.title
           ? {
               title: changes.title,

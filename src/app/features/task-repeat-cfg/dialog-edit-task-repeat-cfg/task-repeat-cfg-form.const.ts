@@ -208,6 +208,20 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
 
 export const TASK_REPEAT_CFG_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
   {
+    key: 'priority',
+    type: 'select',
+    resetOnHide: false,
+    templateOptions: {
+      label: T.F.TASK.CMP.PRIORITY,
+      options: [
+        { value: null, label: T.F.TASK.CMP.PRIORITY_NONE },
+        { value: 1, label: T.F.TASK.CMP.PRIORITY_LOW },
+        { value: 2, label: T.F.TASK.CMP.PRIORITY_MEDIUM },
+        { value: 3, label: T.F.TASK.CMP.PRIORITY_HIGH },
+      ],
+    },
+  },
+  {
     key: 'defaultEstimate',
     type: 'duration',
     templateOptions: {
