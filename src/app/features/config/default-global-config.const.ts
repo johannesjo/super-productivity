@@ -53,9 +53,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isConfirmBeforeExit: false,
     isConfirmBeforeExitWithoutFinishDay: true,
     isMinimizeToTray: false,
-    // NOTE: isAutoStartOnSystemStartup is intentionally NOT defaulted here. Electron
-    // applies the value on every launch, so a default would remove login items users
-    // set up in their OS (#5572).
     isCheckForUpdates: true,
     isTrayShowCurrentCountdown: true,
     startOfNextDay: 0,

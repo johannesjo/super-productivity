@@ -33,6 +33,11 @@ const getRelaunchExecPath = (): string | undefined => {
   return existsSync(wrapperPath) ? wrapperPath : undefined;
 };
 
+const isLoginItemSupported = (): boolean => {
+  const distChannel = getDistChannel();
+  return !!distChannel && LOGIN_ITEM_CHANNELS.includes(distChannel);
+};
+
 export const initAppControlIpc = (): void => {
   ipcMain.on(IPC.SHUTDOWN_NOW, quitApp);
   ipcMain.on(IPC.EXIT, (ev, exitCode: number) => app.exit(exitCode));
@@ -51,16 +56,6 @@ export const initAppControlIpc = (): void => {
     setIsTrayShowCurrentCountdown(!!cfg.misc.isTrayShowCurrentCountdown);
     refreshIndicator();
 
-    const isAutoStart = cfg.misc.isAutoStartOnSystemStartup;
-    const distChannel = getDistChannel();
-    if (
-      isAutoStart !== undefined &&
-      distChannel &&
-      LOGIN_ITEM_CHANNELS.includes(distChannel)
-    ) {
-      app.setLoginItemSettings({ openAtLogin: isAutoStart });
-    }
-
     if (cfg.misc.isUseCustomWindowTitleBar !== undefined) {
       await saveSimpleStore(
         SimpleStoreKey.IS_USE_CUSTOM_WINDOW_TITLE_BAR,
@@ -71,6 +66,21 @@ export const initAppControlIpc = (): void => {
 
   ipcMain.on(IPC.TRANSFER_SETTINGS_TO_ELECTRON, updateSettings);
   ipcMain.on(IPC.UPDATE_SETTINGS, updateSettings);
+
+  // Start on system startup (#5572) is this device's OS login item, read and
+  // written directly, never synced: a synced value would apply on every desktop.
+  ipcMain.handle(
+    IPC.GET_OPEN_AT_LOGIN,
+    () => isLoginItemSupported() && app.getLoginItemSettings().openAtLogin,
+  );
+  ipcMain.handle(IPC.SET_OPEN_AT_LOGIN, (ev, isOpenAtLogin: unknown) => {
+    if (!isLoginItemSupported()) {
+      return false;
+    }
+    app.setLoginItemSettings({ openAtLogin: isOpenAtLogin === true });
+    // The OS can refuse (macOS 13+ may require approval), so report its state.
+    return app.getLoginItemSettings().openAtLogin;
+  });
 
   ipcMain.on(IPC.SHOW_OR_FOCUS, (ev, opts?: { isReminder?: boolean }) => {
     const mainWin = getWin();

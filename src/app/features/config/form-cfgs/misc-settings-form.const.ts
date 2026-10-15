@@ -45,11 +45,9 @@ export const MISC_SETTINGS_FORM_CFG: ConfigFormSection<MiscConfig> = {
     ...((distChannel && LOGIN_ITEM_CHANNELS.includes(distChannel)
       ? [
           {
-            key: 'isAutoStartOnSystemStartup',
-            type: 'checkbox',
-            templateOptions: {
-              label: T.GCF.MISC.IS_AUTO_START_ON_SYSTEM_STARTUP,
-            },
+            // Keyless: this device's OS login item, read and written over IPC,
+            // never in the synced misc config.
+            type: 'login-item-setting',
           },
         ]
       : []) as LimitedFormlyFieldConfig<MiscConfig>[]),

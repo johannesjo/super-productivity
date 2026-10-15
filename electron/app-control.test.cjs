@@ -15,6 +15,8 @@ let refreshIndicatorCalls;
 let localRestApiConfig;
 let focusCalls;
 let loginItemCalls;
+let osOpenAtLogin;
+let isOsRefusingLoginItem;
 let nextDistChannel;
 
 const resetModule = () => {
@@ -28,12 +30,19 @@ const installMocks = () => {
         app: {
           exit: () => {},
           relaunch: () => {},
+          getLoginItemSettings: () => ({ openAtLogin: osOpenAtLogin }),
           setLoginItemSettings: (settings) => {
             loginItemCalls.push(settings);
+            if (!isOsRefusingLoginItem) {
+              osOpenAtLogin = settings.openAtLogin;
+            }
           },
         },
         ipcMain: {
           on: (eventName, handler) => {
+            ipcHandlers.set(eventName, handler);
+          },
+          handle: (eventName, handler) => {
             ipcHandlers.set(eventName, handler);
           },
         },
@@ -54,6 +63,8 @@ const installMocks = () => {
           LOCK_SCREEN: 'LOCK_SCREEN',
           SET_PROGRESS_BAR: 'SET_PROGRESS_BAR',
           FLASH_FRAME: 'FLASH_FRAME',
+          GET_OPEN_AT_LOGIN: 'GET_OPEN_AT_LOGIN',
+          SET_OPEN_AT_LOGIN: 'SET_OPEN_AT_LOGIN',
         },
       };
     }
@@ -173,6 +184,8 @@ test.beforeEach(() => {
   localRestApiConfig = undefined;
   focusCalls = [];
   loginItemCalls = [];
+  osOpenAtLogin = false;
+  isOsRefusingLoginItem = false;
   nextDistChannel = 'mac-dmg';
 
   installMocks();
@@ -236,31 +249,33 @@ test('settings update falls back to legacy misc tray task setting', async () => 
   assert.equal(refreshIndicatorCalls, 1);
 });
 
-test('settings update applies start on login on supported builds (#5572)', async () => {
+test('the login item is read and written directly on supported builds (#5572)', async () => {
   const { initAppControlIpc } = loadAppControlModule();
   initAppControlIpc();
-  const updateSettings = ipcHandlers.get('UPDATE_SETTINGS');
+  const getOpenAtLogin = ipcHandlers.get('GET_OPEN_AT_LOGIN');
+  const setOpenAtLogin = ipcHandlers.get('SET_OPEN_AT_LOGIN');
 
-  await updateSettings({}, { misc: { isAutoStartOnSystemStartup: true } });
+  assert.equal(await getOpenAtLogin({}), false);
+  assert.equal(await setOpenAtLogin({}, true), true);
+  assert.equal(await getOpenAtLogin({}), true);
   nextDistChannel = 'win-nsis';
-  await updateSettings({}, { misc: { isAutoStartOnSystemStartup: false } });
+  assert.equal(await setOpenAtLogin({}, false), false);
 
   assert.deepEqual(loginItemCalls, [{ openAtLogin: true }, { openAtLogin: false }]);
 });
 
-test('settings update leaves the login item alone while start on login is unset (#5572)', async () => {
+test('setting the login item reports what the OS accepted (#5572)', async () => {
   const { initAppControlIpc } = loadAppControlModule();
   initAppControlIpc();
+  isOsRefusingLoginItem = true;
 
-  await ipcHandlers.get('TRANSFER_SETTINGS_TO_ELECTRON')({}, { misc: {} });
-
-  assert.deepEqual(loginItemCalls, []);
+  assert.equal(await ipcHandlers.get('SET_OPEN_AT_LOGIN')({}, true), false);
 });
 
-test('settings update skips start on login on unsupported builds (#5572)', async () => {
+test('the login item is left alone on unsupported builds (#5572)', async () => {
   const { initAppControlIpc } = loadAppControlModule();
   initAppControlIpc();
-  const updateSettings = ipcHandlers.get('UPDATE_SETTINGS');
+  osOpenAtLogin = true;
 
   for (const channel of [
     'linux-native',
@@ -270,8 +285,25 @@ test('settings update skips start on login on unsupported builds (#5572)', async
     null,
   ]) {
     nextDistChannel = channel;
-    await updateSettings({}, { misc: { isAutoStartOnSystemStartup: true } });
+    assert.equal(await ipcHandlers.get('GET_OPEN_AT_LOGIN')({}), false);
+    assert.equal(await ipcHandlers.get('SET_OPEN_AT_LOGIN')({}, false), false);
   }
+
+  assert.deepEqual(loginItemCalls, []);
+});
+
+test('synced settings never change the login item (#5572)', async () => {
+  const { initAppControlIpc } = loadAppControlModule();
+  initAppControlIpc();
+
+  await ipcHandlers.get('UPDATE_SETTINGS')(
+    {},
+    { misc: { isAutoStartOnSystemStartup: false } },
+  );
+  await ipcHandlers.get('TRANSFER_SETTINGS_TO_ELECTRON')(
+    {},
+    { misc: { isAutoStartOnSystemStartup: true } },
+  );
 
   assert.deepEqual(loginItemCalls, []);
 });
