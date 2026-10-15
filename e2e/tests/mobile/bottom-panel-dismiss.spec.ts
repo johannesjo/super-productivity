@@ -149,4 +149,89 @@ test.describe('Mobile bottom panel dismissal', () => {
       await expect(sheet).not.toHaveClass(/dragging|closing/);
     });
   }
+
+  test('regrab during dismissal does not leave body selection disabled', async ({
+    page,
+  }) => {
+    await openPanel(page);
+    await drag(page);
+    await page.mouse.up();
+    const header = page.locator('.bottom-panel-header');
+    await header.evaluate((element) => {
+      element.addEventListener(
+        'pointerdown',
+        () => element.setAttribute('data-regrab-received', 'true'),
+        { once: true },
+      );
+    });
+    const box = await header.boundingBox();
+    expect(box).not.toBeNull();
+    const halfWidth = box!.width / 2;
+    const halfHeight = box!.height / 2;
+    await page.mouse.move(box!.x + halfWidth, box!.y + halfHeight);
+    await page.mouse.down();
+    expect(await header.getAttribute('data-regrab-received')).toBe('true');
+    // Hold past destruction: pointerup must not be needed to restore selection.
+    await page.waitForTimeout(700);
+    const openBeforeRelease = await page.locator('mat-bottom-sheet-container').count();
+    await page.mouse.up();
+    const selection = await page.evaluate(() => document.body.style.userSelect);
+    await test.info().attach('regrab-state', {
+      body: JSON.stringify({ openBeforeRelease, selection }),
+      contentType: 'application/json',
+    });
+    expect(selection).toBe('');
+  });
+
+  test('pointer cancellation leaves resized panel open', async ({ page }) => {
+    await openPanel(page);
+    await page.locator('.bottom-panel-header').evaluate((el) => {
+      el.addEventListener(
+        'pointerdown',
+        (event) => {
+          (window as Window & { bottomPanelPointerId: number }).bottomPanelPointerId = (
+            event as PointerEvent
+          ).pointerId;
+        },
+        { once: true },
+      );
+    });
+    const initial = await page.locator('mat-bottom-sheet-container').boundingBox();
+    await drag(page);
+    await page.evaluate(() => {
+      document.dispatchEvent(
+        new PointerEvent('pointercancel', {
+          pointerId: (window as Window & { bottomPanelPointerId: number })
+            .bottomPanelPointerId,
+        }),
+      );
+    });
+    await page.mouse.up();
+    await page.waitForTimeout(700);
+    const sheet = page.locator('mat-bottom-sheet-container');
+    await expect(sheet).toBeVisible();
+    await expect(sheet).not.toHaveClass(/dragging|closing/);
+    const resized = await sheet.boundingBox();
+    expect(resized!.height).toBeCloseTo(initial!.height - 120, 0);
+    expect(await page.evaluate(() => document.body.style.userSelect)).toBe('');
+  });
+
+  test('upward expansion can be regrabbed and held at resized height', async ({
+    page,
+  }) => {
+    await openPanel(page);
+    await drag(page, -120);
+    await page.mouse.up();
+    await page.waitForTimeout(50);
+    await drag(page, 30);
+    await page.waitForTimeout(100);
+    const sheet = page.locator('mat-bottom-sheet-container');
+    const held = await sheet.boundingBox();
+    await page.mouse.up();
+    await page.waitForTimeout(700);
+    await expect(sheet).toBeVisible();
+    const released = await sheet.boundingBox();
+    expect(released!.height).toBeCloseTo(held!.height, 0);
+    await expect(sheet).not.toHaveClass(/dragging|closing/);
+  });
 });
