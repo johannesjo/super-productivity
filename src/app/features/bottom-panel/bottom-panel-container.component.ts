@@ -231,6 +231,9 @@ export class BottomPanelContainerComponent implements AfterViewInit, OnDestroy {
     // would otherwise reset _startY/_startHeight to the new pointer's
     // values, corrupting the in-progress gesture.
     if (this._activePointerId !== null) return;
+    // Dismissal is committed. Regrabbing before destruction would leave
+    // text selection disabled when the pointerup listener is removed.
+    if (this._getSheetContainer()?.classList.contains('closing')) return;
 
     this._activePointerId = event.pointerId;
     // Pin subsequent move/up/cancel for this pointer to the header so the
