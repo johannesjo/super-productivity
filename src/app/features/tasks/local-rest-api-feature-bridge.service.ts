@@ -4,15 +4,18 @@ import { LocalRestApiFeatureBridge } from '../../core/electron/local-rest-api-fe
 import { TaskLog } from '../../core/log';
 import { IssueService } from '../issue/issue.service';
 import { IssueProviderKey } from '../issue/issue.model';
+import { syncTimeSpent } from '../time-tracking/store/time-tracking.actions';
 import { addSubTask } from './store/task.actions';
 import { Task } from './task.model';
 import { TaskService } from './task.service';
+import { TaskTimeSyncService } from './task-time-sync.service';
 
 /** Features-side implementation of `LOCAL_REST_API_FEATURE_BRIDGE`. */
 @Injectable()
 export class LocalRestApiFeatureBridgeService implements LocalRestApiFeatureBridge {
   private readonly _issueService = inject(IssueService);
   private readonly _taskService = inject(TaskService);
+  private readonly _taskTimeSync = inject(TaskTimeSyncService);
   private readonly _store = inject(Store);
 
   issueLink(
@@ -35,5 +38,12 @@ export class LocalRestApiFeatureBridgeService implements LocalRestApiFeatureBrid
     TaskLog.log('addSubTaskTo', { taskId: task.id, parentId });
     this._store.dispatch(addSubTask({ task, parentId, isIgnoreShortSyntax: true }));
     return task.id;
+  }
+
+  /** Same steps as `TaskService.addTimeSpentAndSync`, but for any day. */
+  addTimeSpentOnDay(task: Task, durationMs: number, date: string): void {
+    this._taskTimeSync.flushOne(task.id);
+    this._taskService.addTimeSpent(task, durationMs, date);
+    this._store.dispatch(syncTimeSpent({ taskId: task.id, date, duration: durationMs }));
   }
 }

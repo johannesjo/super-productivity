@@ -228,7 +228,7 @@ describe('LocalRestApiHandlerService', () => {
 
     featureBridgeMock = jasmine.createSpyObj<LocalRestApiFeatureBridge>(
       'LocalRestApiFeatureBridge',
-      ['issueLink', 'addLiteralSubTask'],
+      ['issueLink', 'addLiteralSubTask', 'addTimeSpentOnDay'],
     );
     featureBridgeMock.issueLink.and.returnValue(Promise.resolve(''));
 
@@ -2448,6 +2448,132 @@ describe('LocalRestApiHandlerService', () => {
 
         expect(response.body.ok).toBe(false);
         expect(response.status).toBe(404);
+      });
+    });
+
+    describe('POST /tasks/:id/time', () => {
+      const HOUR_MS = 60 * 60 * 1000;
+      const DAY_MS = 24 * HOUR_MS;
+
+      const expectInvalidInput = async (body: unknown): Promise<void> => {
+        const getByIdOnceSpy = jasmine
+          .createSpy('getByIdOnce$')
+          .and.returnValue(of(createMockTask('task-1')));
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => getByIdOnceSpy,
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('POST', '/tasks/task-1/time', { body }),
+        );
+
+        expect(response.status).toBe(400);
+        expect((response.body as any).error.code).toBe('INVALID_INPUT');
+        // Body is validated before the task is looked up.
+        expect(getByIdOnceSpy).not.toHaveBeenCalled();
+        expect(featureBridgeMock.addTimeSpentOnDay).not.toHaveBeenCalled();
+      };
+
+      it('should add time spent on the given day and return the task', async () => {
+        const mockTask = createMockTask('task-1');
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('POST', '/tasks/task-1/time', {
+            body: { date: '2026-05-10', duration: HOUR_MS },
+          }),
+        );
+
+        expect(response.status).toBe(200);
+        expect(response.body.ok).toBe(true);
+        expect((response.body as any).data.id).toBe('task-1');
+        expect(featureBridgeMock.addTimeSpentOnDay).toHaveBeenCalledOnceWith(
+          mockTask,
+          HOUR_MS,
+          '2026-05-10',
+        );
+      });
+
+      it('should accept exactly 24h', async () => {
+        const mockTask = createMockTask('task-1');
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('POST', '/tasks/task-1/time', {
+            body: { date: '2026-05-10', duration: DAY_MS },
+          }),
+        );
+
+        expect(response.status).toBe(200);
+        expect(featureBridgeMock.addTimeSpentOnDay).toHaveBeenCalledOnceWith(
+          mockTask,
+          DAY_MS,
+          '2026-05-10',
+        );
+      });
+
+      it('should return 400 for a non-object body', async () => {
+        await expectInvalidInput([{ date: '2026-05-10', duration: HOUR_MS }]);
+      });
+
+      it('should return 400 for a missing body', async () => {
+        await expectInvalidInput(undefined);
+      });
+
+      it('should return 400 for a missing date', async () => {
+        await expectInvalidInput({ duration: HOUR_MS });
+      });
+
+      it('should return 400 for a malformed date', async () => {
+        await expectInvalidInput({ date: '10.05.2026', duration: HOUR_MS });
+      });
+
+      it('should return 400 for an impossible calendar date', async () => {
+        await expectInvalidInput({ date: '2026-02-30', duration: HOUR_MS });
+      });
+
+      it('should return 400 for a non-number duration', async () => {
+        await expectInvalidInput({ date: '2026-05-10', duration: '3600000' });
+      });
+
+      it('should return 400 for a non-integer duration', async () => {
+        await expectInvalidInput({ date: '2026-05-10', duration: 1.5 });
+      });
+
+      it('should return 400 for a non-finite duration', async () => {
+        await expectInvalidInput({ date: '2026-05-10', duration: Infinity });
+      });
+
+      it('should return 400 for a zero duration', async () => {
+        await expectInvalidInput({ date: '2026-05-10', duration: 0 });
+      });
+
+      it('should return 400 for a negative duration', async () => {
+        await expectInvalidInput({ date: '2026-05-10', duration: -HOUR_MS });
+      });
+
+      it('should return 400 for a duration over 24h', async () => {
+        await expectInvalidInput({ date: '2026-05-10', duration: DAY_MS + 1 });
+      });
+
+      it('should return 404 for a non-existent task', async () => {
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(undefined),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('POST', '/tasks/non-existent/time', {
+            body: { date: '2026-05-10', duration: HOUR_MS },
+          }),
+        );
+
+        expect(response.status).toBe(404);
+        expect((response.body as any).error.code).toBe('TASK_NOT_FOUND');
+        expect(featureBridgeMock.addTimeSpentOnDay).not.toHaveBeenCalled();
       });
     });
 

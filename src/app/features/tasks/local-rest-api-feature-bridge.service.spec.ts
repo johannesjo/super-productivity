@@ -1,20 +1,27 @@
 import { TestBed } from '@angular/core/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { IssueService } from '../issue/issue.service';
+import { syncTimeSpent } from '../time-tracking/store/time-tracking.actions';
 import { LocalRestApiFeatureBridgeService } from './local-rest-api-feature-bridge.service';
 import { addSubTask } from './store/task.actions';
 import { Task } from './task.model';
 import { TaskService } from './task.service';
+import { TaskTimeSyncService } from './task-time-sync.service';
 
 describe('LocalRestApiFeatureBridgeService', () => {
   let service: LocalRestApiFeatureBridgeService;
   let taskServiceMock: jasmine.SpyObj<TaskService>;
   let issueServiceMock: jasmine.SpyObj<IssueService>;
+  let taskTimeSyncMock: jasmine.SpyObj<TaskTimeSyncService>;
   let dispatchSpy: jasmine.Spy;
 
   beforeEach(() => {
     taskServiceMock = jasmine.createSpyObj<TaskService>('TaskService', [
       'createNewTaskWithDefaults',
+      'addTimeSpent',
+    ]);
+    taskTimeSyncMock = jasmine.createSpyObj<TaskTimeSyncService>('TaskTimeSyncService', [
+      'flushOne',
     ]);
     issueServiceMock = jasmine.createSpyObj<IssueService>('IssueService', ['issueLink']);
 
@@ -23,6 +30,7 @@ describe('LocalRestApiFeatureBridgeService', () => {
         LocalRestApiFeatureBridgeService,
         { provide: TaskService, useValue: taskServiceMock },
         { provide: IssueService, useValue: issueServiceMock },
+        { provide: TaskTimeSyncService, useValue: taskTimeSyncMock },
         provideMockStore(),
       ],
     });
@@ -67,5 +75,33 @@ describe('LocalRestApiFeatureBridgeService', () => {
     expect(action.task.id).toBe('literal-sub');
     expect(action.parentId).toBe('parent-1');
     expect(action.isIgnoreShortSyntax).toBe(true);
+  });
+
+  it('should add time spent on a given day like addTimeSpentAndSync', () => {
+    const task = { id: 'task-1' } as Task;
+    const callOrder: string[] = [];
+    taskTimeSyncMock.flushOne.and.callFake(() => {
+      callOrder.push('flushOne');
+    });
+    taskServiceMock.addTimeSpent.and.callFake(() => {
+      callOrder.push('addTimeSpent');
+    });
+    dispatchSpy.and.callFake(() => {
+      callOrder.push('dispatch');
+    });
+
+    service.addTimeSpentOnDay(task, 3600000, '2026-05-10');
+
+    expect(taskTimeSyncMock.flushOne).toHaveBeenCalledOnceWith('task-1');
+    expect(taskServiceMock.addTimeSpent).toHaveBeenCalledOnceWith(
+      task,
+      3600000,
+      '2026-05-10',
+    );
+    expect(dispatchSpy).toHaveBeenCalledOnceWith(
+      syncTimeSpent({ taskId: 'task-1', date: '2026-05-10', duration: 3600000 }),
+    );
+    // Pending batched time is flushed first, as in addTimeSpentAndSync.
+    expect(callOrder).toEqual(['flushOne', 'addTimeSpent', 'dispatch']);
   });
 });

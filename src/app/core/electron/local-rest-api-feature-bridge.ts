@@ -15,6 +15,12 @@ export interface LocalRestApiFeatureBridge {
 
   /** Adds a subtask whose title is kept as is (no short syntax); returns its id. */
   addLiteralSubTask(parentId: string, fields: object): string;
+
+  /**
+   * Adds time spent on `date` (YYYY-MM-DD) the way the app's own tracking
+   * does, so `timeSpentOnDay`, the parent roll-up and sync stay consistent.
+   */
+  addTimeSpentOnDay(task: object, durationMs: number, date: string): void;
 }
 
 export const LOCAL_REST_API_FEATURE_BRIDGE =

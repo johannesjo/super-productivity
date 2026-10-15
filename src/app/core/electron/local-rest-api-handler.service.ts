@@ -352,6 +352,34 @@ const ISSUE_URL_TIMEOUT_MS = 3000;
 const isValidTimestamp = (value: unknown): value is number =>
   typeof value === 'number' && Number.isFinite(value) && new Date(value).getTime() > 0;
 
+/** One day cannot hold more tracked time than this. */
+const MAX_TIME_SPENT_PER_DAY_MS = 24 * 60 * 60 * 1000;
+
+/**
+ * Validates a `POST /tasks/:id/time` body: `{ date: 'YYYY-MM-DD', duration: ms }`.
+ * Returns the parsed values, or the message for a 400 response.
+ */
+const parseAddTimeSpentBody = (
+  body: unknown,
+): { date: string; duration: number } | { error: string } => {
+  if (!isRecord(body)) {
+    return { error: 'Body must be a JSON object with date and duration' };
+  }
+  const { date, duration } = body;
+  if (typeof date !== 'string' || !isValidDBDateStr(date)) {
+    return { error: 'date must be a valid YYYY-MM-DD date' };
+  }
+  if (
+    typeof duration !== 'number' ||
+    !Number.isInteger(duration) ||
+    duration <= 0 ||
+    duration > MAX_TIME_SPENT_PER_DAY_MS
+  ) {
+    return { error: 'duration must be a positive integer of milliseconds, at most 24h' };
+  }
+  return { date, duration };
+};
+
 const isTaskInToday = (
   task: Task,
   todayStr: string,
@@ -993,6 +1021,20 @@ export class LocalRestApiHandlerService {
 
       this._taskService.setCurrentId(taskId);
       return createSuccessResponse(requestId, 200, { currentTaskId: taskId });
+    }
+
+    if (segments.length === 3 && segments[2] === 'time' && method === 'POST') {
+      const parsed = parseAddTimeSpentBody(body);
+      if ('error' in parsed) {
+        return createErrorResponse(requestId, 400, 'INVALID_INPUT', parsed.error);
+      }
+      const task = await this._getTaskById(taskId);
+      if (!task) {
+        return createErrorResponse(requestId, 404, 'TASK_NOT_FOUND', 'Task not found');
+      }
+
+      this._featureBridge.addTimeSpentOnDay(task, parsed.duration, parsed.date);
+      return createSuccessResponse(requestId, 200, await this._getTaskById(taskId));
     }
 
     if (segments.length === 3 && segments[2] === 'archive' && method === 'POST') {
