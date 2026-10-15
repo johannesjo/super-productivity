@@ -5,6 +5,7 @@ import {
   getSuperSyncConfig,
   createSimulatedClient,
   closeClient,
+  archiveDoneTasks,
   type SimulatedE2EClient,
 } from '../../utils/supersync-helpers';
 
@@ -103,24 +104,10 @@ test.describe('@supersync Daily Summary Sync', () => {
       await taskBLocator.hover();
       await taskBLocator.locator('done-toggle').click();
 
-      // Archive Tasks (Finish Day)
-      const finishDayBtn = clientA.page.locator('.e2e-finish-day');
-      await finishDayBtn.click();
-
-      // Wait for Daily Summary
-      await clientA.page.waitForURL(/daily-summary/);
-
-      // Click "Save and go home" to archive
-      const saveAndGoHomeBtn = clientA.page.locator(
-        'daily-summary button[mat-flat-button]:has(mat-icon:has-text("wb_sunny"))',
-      );
-      await saveAndGoHomeBtn.waitFor({ state: 'visible' });
-      await saveAndGoHomeBtn.click();
-
-      // Wait for Work View (Archived)
-      // Use negative lookahead so we don't match the CURRENT /daily-summary URL —
-      // /(active\/tasks|tag\/TODAY)/ would match tag/TODAY/daily-summary immediately.
-      await clientA.page.waitForURL(/(active\/tasks|tag\/TODAY(?!\/daily-summary))/);
+      // Archive Tasks (Finish Day). The helper retries the click: Finish Day
+      // shifts down while the last done task animates into "Completed Tasks",
+      // so a single click can land on empty space.
+      await archiveDoneTasks(clientA);
       console.log('Client A archived tasks.');
 
       // Sync A (upload archive)
@@ -224,24 +211,8 @@ test.describe('@supersync Daily Summary Sync', () => {
         await taskLocator.locator('done-toggle').click();
       }
 
-      // Click finish day - wait for button to be visible and stable
-      const finishDayBtn = client.page.locator('.e2e-finish-day');
-      await finishDayBtn.waitFor({ state: 'visible', timeout: 10000 });
-      await finishDayBtn.click();
-
-      // Wait for Daily Summary
-      await client.page.waitForURL(/daily-summary/);
-
-      // Click "Save and go home" to archive and trigger sync
-      const saveAndGoHomeBtn = client.page.locator(
-        'daily-summary button[mat-flat-button]:has(mat-icon:has-text("wb_sunny"))',
-      );
-      await saveAndGoHomeBtn.waitFor({ state: 'visible' });
-      await saveAndGoHomeBtn.click();
-
-      // Wait for navigation back to work view
-      // Use negative lookahead so we don't match the CURRENT /daily-summary URL.
-      await client.page.waitForURL(/(active\/tasks|tag\/TODAY(?!\/daily-summary))/);
+      // Finish day, then "Save and go home" to archive and trigger sync
+      await archiveDoneTasks(client);
 
       // Wait a moment for any async effects to complete
       await client.page.waitForTimeout(1000);

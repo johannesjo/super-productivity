@@ -97,6 +97,10 @@ are required arrays (use `[]` when unused), while `description` is optional.
 Do not rely on the installer's deliberately minimal runtime checks to infer the
 TypeScript contract.
 
+Of the declared permissions, the app checks only `nodeExecution`, `http`
+together with `allowedHosts`, and `deleteProject`. The rest are shown in the
+plugin's details but not enforced; see [Security Considerations](#security-considerations).
+
 ### Complete Manifest Example
 
 ```json

@@ -42,6 +42,19 @@ describe('ConfigSectionComponent onAction', () => {
 
   afterEach(() => fixture?.destroy());
 
+  it('splits row actions from button actions', () => {
+    const button = makeAction(() => undefined);
+    const row: ConfigSectionAction = { ...makeAction(() => undefined), isRow: true };
+    component.section = {
+      title: '',
+      key: 'appFeatures',
+      actions: [button, row],
+    } as ConfigFormSection<Record<string, unknown>>;
+
+    expect(component.rowActions()).toEqual([row]);
+    expect(component.buttonActions()).toEqual([button]);
+  });
+
   it('does not enter pending state for a synchronous (void) action', () => {
     const onClick = jasmine.createSpy('onClick');
     const action = makeAction(onClick);

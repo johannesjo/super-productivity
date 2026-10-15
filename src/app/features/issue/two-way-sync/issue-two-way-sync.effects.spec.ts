@@ -23,6 +23,10 @@ import { DeletedTaskIssueSidecarService } from './deleted-task-issue-sidecar.ser
 import { DeletedTagTitlesSidecarService } from './deleted-tag-titles-sidecar.service';
 import { deleteTag } from '../../tag/store/tag.actions';
 import { selectAllTasks } from '../../tasks/store/task.selectors';
+import { selectShortSyntaxConfig } from '../../config/store/global-config.reducer';
+import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
+import { selectAllTagsWithoutMyDay } from '../../tag/store/tag.reducer';
+import { selectUnarchivedProjects } from '../../project/store/project.selectors';
 import {
   REMOTE_ISSUE_DELETE_DEFER_MS,
   TASK_DELETE_UNDO_WINDOW_MS,
@@ -144,6 +148,7 @@ describe('IssueTwoWaySyncEffects', () => {
       'fetchIssue',
       'pushChanges',
       'extractSyncValues',
+      'deleteIssue',
     ]);
 
     TestBed.configureTestingModule({
@@ -151,7 +156,15 @@ describe('IssueTwoWaySyncEffects', () => {
         IssueTwoWaySyncEffects,
         provideMockActions(() => actions$),
         provideMockStore({
-          selectors: [{ selector: selectEnabledIssueProviders, value: [] }],
+          selectors: [
+            { selector: selectEnabledIssueProviders, value: [] },
+            {
+              selector: selectShortSyntaxConfig,
+              value: DEFAULT_GLOBAL_CONFIG.shortSyntax,
+            },
+            { selector: selectAllTagsWithoutMyDay, value: [] },
+            { selector: selectUnarchivedProjects, value: [] },
+          ],
         }),
         { provide: LOCAL_ACTIONS, useValue: actions$ },
         { provide: TaskService, useValue: taskServiceSpy },
@@ -1285,6 +1298,29 @@ describe('IssueTwoWaySyncEffects', () => {
       adapterRegistry.unregister('TEST_PROVIDER');
     }));
 
+    it('should delete the Plainspace task through the registered Plainspace adapter', fakeAsync(() => {
+      const deleteIssueSpy = TestBed.inject(PlainspaceSyncAdapterService)
+        .deleteIssue as jasmine.Spy;
+      deleteIssueSpy.and.resolveTo(undefined);
+      const cfg = createMockIssueProvider();
+      issueProviderServiceSpy.getCfgOnce$.and.returnValue(of(cfg));
+
+      const task = createMockTask({
+        id: 'task-1',
+        issueType: 'PLAINSPACE',
+        issueId: 'ps-task-1',
+        issueProviderId: 'provider-1',
+        subTaskIds: [],
+      }) as TaskWithSubTasks;
+      (task as any).subTasks = [];
+
+      effects.deleteIssueOnTaskDelete$.subscribe();
+      actions$.next(TaskSharedActions.deleteTask({ task }));
+      tick(REMOTE_ISSUE_DELETE_DEFER_MS);
+
+      expect(deleteIssueSpy).toHaveBeenCalledWith('ps-task-1', cfg);
+    }));
+
     it('should not call deleteIssue when adapter does not support it', fakeAsync(() => {
       const adapter = createMockAdapter();
       // Adapter without deleteIssue
@@ -2256,5 +2292,120 @@ describe('IssueTwoWaySyncEffects', () => {
 
       adapterRegistry.unregister('TEST_PROVIDER');
     }));
+
+    describe('short-syntax title (#10024)', () => {
+      let createIssueSpy: jasmine.Spy;
+      let cfg: IssueProvider;
+
+      const addTask = (task: Task, isIgnoreShortSyntax?: boolean): void => {
+        actions$.next(
+          TaskSharedActions.addTask({
+            task,
+            workContextId: 'project-1',
+            workContextType: WorkContextType.PROJECT,
+            isAddToBacklog: false,
+            isAddToBottom: false,
+            isIgnoreShortSyntax,
+          }),
+        );
+      };
+
+      beforeEach(() => {
+        createIssueSpy = jasmine.createSpy('createIssue').and.resolveTo({
+          issueId: 'new-issue-1',
+          issueNumber: 42,
+          issueData: {},
+        });
+        adapterRegistry.register(
+          'TEST_PROVIDER',
+          createMockAdapter({
+            createIssue: createIssueSpy,
+            getFieldMappings: jasmine.createSpy('getFieldMappings').and.returnValue([]),
+            getSyncConfig: jasmine.createSpy('getSyncConfig').and.returnValue({}),
+          }),
+        );
+        store.overrideSelector(selectEnabledIssueProviders, [
+          createMockIssueProvider({
+            id: 'provider-1',
+            issueProviderKey: 'TEST_PROVIDER' as any,
+            defaultProjectId: 'project-1',
+            pluginConfig: { isAutoCreateIssues: true },
+          } as any),
+        ]);
+        store.refreshState();
+        cfg = createMockIssueProvider({
+          id: 'provider-1',
+          issueProviderKey: 'TEST_PROVIDER' as any,
+        });
+        issueProviderServiceSpy.getCfgOnce$.and.returnValue(of(cfg));
+        effects.autoCreateIssueOnTaskAdd$.subscribe();
+      });
+
+      afterEach(() => {
+        adapterRegistry.unregister('TEST_PROVIDER');
+      });
+
+      it('should create the issue and keep the local title without the tokens', fakeAsync(() => {
+        const task = createMockTask({
+          id: 'task-new',
+          title: 'Write report #work',
+          projectId: 'project-1',
+          parentId: undefined,
+          issueId: undefined,
+        });
+        // Short syntax has not landed yet when the request resolves.
+        taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+
+        addTask(task);
+        tick();
+
+        expect(createIssueSpy).toHaveBeenCalledWith('Write report', cfg);
+        expect(taskServiceSpy.update).toHaveBeenCalledWith(
+          'task-new',
+          jasmine.objectContaining({ title: '#42 Write report' }),
+        );
+      }));
+
+      it('should keep a title renamed while the request was in flight', fakeAsync(() => {
+        const task = createMockTask({
+          id: 'task-new',
+          title: 'Write report #work',
+          projectId: 'project-1',
+          parentId: undefined,
+          issueId: undefined,
+        });
+        taskServiceSpy.getByIdOnce$.and.returnValue(
+          of({ ...task, title: 'Write the report' }),
+        );
+
+        addTask(task);
+        tick();
+
+        expect(taskServiceSpy.update).toHaveBeenCalledWith(
+          'task-new',
+          jasmine.objectContaining({ title: '#42 Write the report' }),
+        );
+      }));
+
+      it('should use the raw title when short syntax is ignored', fakeAsync(() => {
+        const task = createMockTask({
+          id: 'task-new',
+          title: 'Fix #hash handling',
+          projectId: 'project-1',
+          parentId: undefined,
+          issueId: undefined,
+        });
+        taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+
+        addTask(task, true);
+        tick();
+
+        expect(createIssueSpy).toHaveBeenCalledWith('Fix #hash handling', cfg);
+        expect(taskServiceSpy.update).toHaveBeenCalledWith(
+          'task-new',
+          jasmine.objectContaining({ title: '#42 Fix #hash handling' }),
+        );
+      }));
+    });
   });
 });

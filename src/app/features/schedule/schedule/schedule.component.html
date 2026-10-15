@@ -76,7 +76,7 @@
   <div class="date-nav-group">
     <button
       mat-icon-button
-      (click)="goToPreviousPeriod()"
+      (click)="navigatePrevious()"
       [disabled]="isViewingToday()"
       [attr.aria-label]="
         (isMonthView()
@@ -111,7 +111,7 @@
 
     <button
       mat-icon-button
-      (click)="goToNextPeriod()"
+      (click)="navigateNext()"
       [attr.aria-label]="
         (isMonthView()
           ? T.F.SCHEDULE.NEXT_MONTH
@@ -150,6 +150,31 @@
       [firstDayOfWeek]="firstDayOfWeek()"
       [deadlineTasksByDay]="deadlineTasksByDay()"
     ></schedule-month>
+  } @else if (isDayView()) {
+    @if (currentDayPage(); as current) {
+      <swipe-pager
+        [prev]="prevDayPage() ?? null"
+        [current]="current"
+        [next]="nextDayPage() ?? null"
+        [trackKey]="dayPageKey"
+        [(isWarm)]="isPagerWarm"
+        (navigate)="onDayPagerNavigate($event)"
+      >
+        <ng-template
+          [swipePagerPage]="current"
+          let-page
+        >
+          <schedule-week
+            [events]="page.events"
+            [beyondBudget]="page.beyondBudget"
+            [daysToShow]="page.daysToShow"
+            [workStartEnd]="workStartEnd() || null"
+            [currentTimeRow]="page.day === _todayDateStr() ? nowRow() : null"
+            [todayDateStr]="_todayDateStr()"
+          ></schedule-week>
+        </ng-template>
+      </swipe-pager>
+    }
   } @else {
     <schedule-week
       [events]="events()"

@@ -704,9 +704,7 @@ describe('getNewestPossibleDueDate()', () => {
         });
         const today = dateStrToUtcDate('2021-03-01');
         const startDate = dateStrToUtcDate('2020-02-29');
-        // The function doesn't handle leap year edge case for Feb 29 -> Feb 28 conversion
-        // It will return March 1st instead since it sets the date directly
-        const expected = dateStrToUtcDate('2021-03-01');
+        const expected = dateStrToUtcDate('2021-02-28');
         expected.setHours(12, 0, 0, 0);
 
         const result = getNewestPossibleDueDate(
@@ -823,6 +821,76 @@ describe('getNewestPossibleDueDate()', () => {
         );
         expect(result).toEqual(expected);
       });
+    });
+  });
+
+  describe('YEARLY leap-day regression (#10679)', () => {
+    it('does not recreate the 2024 leap-day occurrence before the 2025 occurrence', () => {
+      const cfg = dummyRepeatable('ID-10679', {
+        repeatCycle: 'YEARLY',
+        repeatEvery: 1,
+        startDate: '2024-02-29',
+        lastTaskCreationDay: '2024-02-29',
+      });
+
+      expect(getNewestPossibleDueDate(cfg, new Date(2025, 0, 1))).toBeNull();
+    });
+
+    it('uses February 28 in a non-leap year, including on the due day', () => {
+      const cfg = dummyRepeatable('ID-10679', {
+        repeatCycle: 'YEARLY',
+        repeatEvery: 1,
+        startDate: '2024-02-29',
+        lastTaskCreationDay: '2024-02-29',
+      });
+
+      expect(getNewestPossibleDueDate(cfg, new Date(2025, 1, 27))).toBeNull();
+      expect(getNewestPossibleDueDate(cfg, new Date(2025, 1, 28))).toEqual(
+        new Date(2025, 1, 28, 12),
+      );
+      expect(getNewestPossibleDueDate(cfg, new Date(2025, 2, 1))).toEqual(
+        new Date(2025, 1, 28, 12),
+      );
+      expect(
+        getNewestPossibleDueDate(
+          { ...cfg, lastTaskCreationDay: '2025-02-28' },
+          new Date(2025, 2, 1),
+        ),
+      ).toBeNull();
+    });
+
+    it('returns February 29 again in the next leap year', () => {
+      const cfg = dummyRepeatable('ID-10679', {
+        repeatCycle: 'YEARLY',
+        repeatEvery: 1,
+        startDate: '2024-02-29',
+        lastTaskCreationDay: '2027-02-28',
+      });
+
+      expect(getNewestPossibleDueDate(cfg, new Date(2028, 1, 28))).toBeNull();
+      expect(getNewestPossibleDueDate(cfg, new Date(2028, 1, 29))).toEqual(
+        new Date(2028, 1, 29, 12),
+      );
+    });
+
+    it('respects repeatEvery across non-leap and leap years', () => {
+      const cfg = dummyRepeatable('ID-10679', {
+        repeatCycle: 'YEARLY',
+        repeatEvery: 2,
+        startDate: '2024-02-29',
+        lastTaskCreationDay: '2024-02-29',
+      });
+
+      expect(getNewestPossibleDueDate(cfg, new Date(2025, 2, 1))).toBeNull();
+      expect(getNewestPossibleDueDate(cfg, new Date(2026, 1, 28))).toEqual(
+        new Date(2026, 1, 28, 12),
+      );
+      expect(
+        getNewestPossibleDueDate(
+          { ...cfg, lastTaskCreationDay: '2026-02-28' },
+          new Date(2028, 1, 29),
+        ),
+      ).toEqual(new Date(2028, 1, 29, 12));
     });
   });
 

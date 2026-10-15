@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
+import android.view.HapticFeedbackConstants
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.widget.Toast
@@ -16,6 +17,7 @@ import com.superproductivity.superproductivity.BuildConfig
 import com.superproductivity.superproductivity.FullscreenActivity.Companion.WINDOW_INTERFACE_PROPERTY
 import com.superproductivity.superproductivity.app.LaunchDecider
 import com.superproductivity.superproductivity.review.InAppReview
+import com.superproductivity.superproductivity.service.BackgroundReminderSettingsStore
 import com.superproductivity.superproductivity.service.BackgroundSyncCredentialStore
 import com.superproductivity.superproductivity.service.FocusModeForegroundService
 import com.superproductivity.superproductivity.service.ForegroundServiceFailure
@@ -112,6 +114,30 @@ class JavaScriptInterface(
         activity.runOnUiThread {
             InAppReview.request(activity)
         }
+    }
+
+    // Tactile confirmation for touch gestures. performHapticFeedback follows the
+    // system "touch feedback" setting and needs no VIBRATE permission. Unknown
+    // types are ignored so a newer bundle can't crash an older shell's mapping.
+    @Suppress("unused")
+    @JavascriptInterface
+    fun performHapticFeedback(type: String) {
+        val constant = when (type) {
+            "confirm" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                HapticFeedbackConstants.CONFIRM
+            } else {
+                HapticFeedbackConstants.VIRTUAL_KEY
+            }
+            "threshold" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE
+            } else {
+                HapticFeedbackConstants.CLOCK_TICK
+            }
+            "longPress" -> HapticFeedbackConstants.LONG_PRESS
+            else -> return
+        }
+        // JavascriptInterface calls arrive on a background thread.
+        webView.post { webView.performHapticFeedback(constant) }
     }
 
     @Suppress("unused")
@@ -604,6 +630,18 @@ class JavaScriptInterface(
         safeCall("Failed to clear SuperSync credentials") {
             BackgroundSyncCredentialStore.clear(activity)
             SyncReminderScheduler.cancel(activity)
+        }
+    }
+
+    /**
+     * Mirrors the reminder settings [com.superproductivity.superproductivity.service.SyncReminderWorker]
+     * must honor when it schedules alarms from synced ops while the app is closed.
+     */
+    @Suppress("unused")
+    @JavascriptInterface
+    fun setBackgroundReminderSettings(isDisabled: Boolean, useAlarmStyle: Boolean) {
+        safeCall("Failed to set background reminder settings") {
+            BackgroundReminderSettingsStore.save(activity, isDisabled, useAlarmStyle)
         }
     }
 

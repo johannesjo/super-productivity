@@ -6,6 +6,7 @@ import {
   dropTaskDrag as drop,
   createDragSection as createSection,
 } from '../../utils/task-multi-drag';
+import { flushPendingWrites } from '../../utils/waits';
 
 test.describe('Multi-task drag', () => {
   test('moves a group into a section, between sections, and back to root in order', async ({
@@ -63,6 +64,7 @@ test.describe('Multi-task drag', () => {
       ...order,
       names[2],
     ]);
+    await flushPendingWrites(page);
     await page.reload();
     await workViewPage.waitForTaskList();
     await expect(page.locator('.no-section task .task-title')).toHaveText([
@@ -110,6 +112,7 @@ test.describe('Multi-task drag', () => {
 
     await expect(section('Left').locator('task')).toHaveCount(0);
     await expect(section('Right').locator('task .task-title')).toHaveText(order);
+    await flushPendingWrites(page);
     await page.reload();
     await workViewPage.waitForTaskList();
     await expect(section('Right').locator('task .task-title')).toHaveText(order);
@@ -178,6 +181,7 @@ test.describe('Multi-task drag', () => {
     await expect(page.locator('.no-section task')).toHaveCount(0);
     await expect(section('Left').locator('task')).toHaveCount(0);
     await expect(section('Right').locator('task')).toHaveCount(0);
+    await flushPendingWrites(page);
     await page.reload();
     await workViewPage.waitForTaskList();
     await expect(section('Destination').locator('task .task-title')).toHaveText(names);

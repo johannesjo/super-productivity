@@ -8,7 +8,7 @@ This directory contains tools and examples for developing plugins for Super Prod
 # Build all plugins
 npm run build
 
-# Install dependencies for all plugins
+# Install dependencies for all plugins from the shared lockfile (npm ci)
 npm run install:all
 
 # Clean build artifacts
@@ -18,12 +18,26 @@ npm run clean:dist
 npm run list
 ```
 
+Every plugin folder (and `issue-provider-kit`) is an npm workspace of this
+directory: one `package-lock.json` and one `node_modules` here serve all plugins.
+`npm install` from any plugin folder updates that shared lockfile; commit it with
+the plugin's `package.json`. This directory is deliberately not a workspace of
+the repository root, so plugin tooling stays out of the app's install.
+
+- Declare everything a plugin imports in its own `package.json`. Hoisting can make
+  an undeclared package resolve anyway, and nothing checks for that.
+- npm 10 (bundled with Node 22) installs from the lockfile fine but crashes when
+  resolving vitest 4 from scratch; regenerate the lockfile from scratch only with
+  npm 11. A from-scratch regeneration also bumps every dependency within its range,
+  including the libraries bundled into the shipped plugins (Solid, Tiptap, Vite's
+  output) — prefer targeted `npm install <pkg>@<version>` updates.
+
 ## Getting Started
 
 ### Prerequisites
 
-- Node.js 18 or higher
-- npm or yarn
+- Node.js 20.19+ (CI uses 22; Vite 7/8 need it)
+- npm (the shared lockfile is npm's)
 - TypeScript knowledge (recommended)
 
 ### Quick Start

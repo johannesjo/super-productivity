@@ -208,6 +208,25 @@ export const waitForStatePersistence = async (page: Page): Promise<void> => {
 };
 
 /**
+ * Wait until every captured op is written to IndexedDB. Ops are written
+ * asynchronously, so a reload right after a change can drop the last ones.
+ * Needs the E2E helpers that non-production builds expose in `main.ts`.
+ */
+export const flushPendingWrites = async (page: Page): Promise<void> => {
+  await page.evaluate(async () => {
+    const helpers = (
+      window as unknown as {
+        __e2eTestHelpers?: { flushPendingWrites: () => Promise<unknown> };
+      }
+    ).__e2eTestHelpers;
+    if (!helpers) {
+      throw new Error('E2E test helpers are not exposed');
+    }
+    await helpers.flushPendingWrites();
+  });
+};
+
+/**
  * Wait until every open `mat-menu` panel has finished its enter animation.
  *
  * The panel scales from 0.8 to 1 over 120ms, so every item slides down while it

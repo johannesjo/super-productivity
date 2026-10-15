@@ -2,6 +2,7 @@
   class="week-header"
   [class.isInPanel]="isInPanel()"
 >
+  <ng-content select="[weekHeaderStart]"></ng-content>
   <div class="week-header-dates">
     <div class="filler"><!--for time --></div>
     @for (day of daysToShow(); track $index) {
@@ -58,6 +59,7 @@
       </div>
     }
   </div>
+  <ng-content select="[weekHeaderEnd]"></ng-content>
 </header>
 
 <div

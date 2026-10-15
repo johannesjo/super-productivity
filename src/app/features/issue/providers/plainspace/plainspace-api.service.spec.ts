@@ -137,6 +137,23 @@ describe('PlainspaceApiService', () => {
     expect(await p).toBeNull();
   });
 
+  it('deleteTask$ DELETEs the task', async () => {
+    const p = firstValueFrom(service.deleteTask$('a', cfg));
+    const req = httpMock.expectOne(`${BASE}/tasks/a`);
+    expect(req.request.method).toBe('DELETE');
+    expect(req.request.headers.get('Authorization')).toBe('Bearer pat_test');
+    req.flush(null, { status: 204, statusText: 'No Content' });
+    await expectAsync(p).toBeResolved();
+  });
+
+  it('deleteTask$ propagates failures so the delete effect can report them', async () => {
+    const p = firstValueFrom(service.deleteTask$('a', cfg));
+    httpMock
+      .expectOne(`${BASE}/tasks/a`)
+      .flush('boom', { status: 500, statusText: 'Server Error' });
+    await expectAsync(p).toBeRejectedWith(jasmine.objectContaining({ status: 500 }));
+  });
+
   // #9988: the connect dialog must be able to tell "the server rejected this
   // token" from "we never got an answer" — collapsing both into one message is
   // what made a transport failure look like a mistyped token.

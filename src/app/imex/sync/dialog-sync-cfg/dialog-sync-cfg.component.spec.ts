@@ -691,6 +691,9 @@ describe('DialogSyncCfgComponent', () => {
         encryptKey: 'stale-super-sync-key',
         isEncryptionEnabled: true,
       };
+      // The setup-encryption dialog is lazy-loaded with a native import(),
+      // which fakeAsync cannot flush; skipping it is not what this test covers.
+      spyOn(component as any, '_collectFileBasedSetupEncryptionKey').and.resolveTo(null);
 
       component.ngAfterViewInit();
       tick();
