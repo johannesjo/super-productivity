@@ -192,16 +192,52 @@ describe('LocalRestApiNoteRoutesService', () => {
       expect(created.projectId).toBe('p2');
       const passed = noteServiceMock.add.calls.mostRecent().args[0] as Partial<Note>;
       expect(passed.id).toBe(created.id);
-      expect(passed).toEqual({ content: 'Hello', projectId: 'p2', id: created.id });
+      expect(passed).toEqual({
+        content: 'Hello',
+        projectId: 'p2',
+        isPinnedToToday: false,
+        id: created.id,
+      });
       expect(noteServiceMock.getByIdOnce$).not.toHaveBeenCalled();
     });
 
-    it('leaves project and pin to the view defaults when neither is given', async () => {
-      const response = await handle(request('POST', '/notes', { content: 'Hello' }));
+    it('passes project and pin explicitly so the view in use does not decide', async () => {
+      // NoteService.add falls back to the active context for missing fields.
+      await handle(
+        request('POST', '/notes', { content: 'Pinned', isPinnedToToday: true }),
+      );
+      expect(noteServiceMock.add.calls.mostRecent().args[0]).toEqual(
+        jasmine.objectContaining({ projectId: null, isPinnedToToday: true }),
+      );
+
+      await handle(request('POST', '/notes', { content: 'In p1', projectId: 'p1' }));
+      expect(noteServiceMock.add.calls.mostRecent().args[0]).toEqual(
+        jasmine.objectContaining({ projectId: 'p1', isPinnedToToday: false }),
+      );
+    });
+
+    it('creates a pinned note without a project when projectId is left out', async () => {
+      const response = await handle(
+        request('POST', '/notes', { content: 'Hello', isPinnedToToday: true }),
+      );
       expect(response.status).toBe(201);
-      const passed = noteServiceMock.add.calls.mostRecent().args[0] as Partial<Note>;
-      expect('projectId' in passed).toBe(false);
-      expect('isPinnedToToday' in passed).toBe(false);
+      expect(data<Note>(response)).toEqual(
+        jasmine.objectContaining({ projectId: null, isPinnedToToday: true }),
+      );
+    });
+
+    it('creates a note in the given project, pinned when asked', async () => {
+      const response = await handle(
+        request('POST', '/notes', {
+          content: 'Hello',
+          projectId: 'p2',
+          isPinnedToToday: true,
+        }),
+      );
+      expect(response.status).toBe(201);
+      expect(data<Note>(response)).toEqual(
+        jasmine.objectContaining({ projectId: 'p2', isPinnedToToday: true }),
+      );
     });
 
     it('creates a note pinned to Today without a project', async () => {
@@ -219,6 +255,7 @@ describe('LocalRestApiNoteRoutesService', () => {
 
     it('rejects a note that would show up nowhere', async () => {
       for (const body of [
+        { content: 'Hello' },
         { content: 'Hello', projectId: null },
         { content: 'Hello', isPinnedToToday: false },
         { content: 'Hello', projectId: null, isPinnedToToday: false },
@@ -321,18 +358,40 @@ describe('LocalRestApiNoteRoutesService', () => {
       expect(data<Note>(response).projectId).toBe('p2');
     });
 
-    it('moves a Today note into a project', async () => {
+    it('moves a Today note into a project and keeps it pinned', async () => {
       const response = await handle(
-        request('PATCH', '/notes/today', { projectId: 'p1', isPinnedToToday: false }),
+        request('PATCH', '/notes/today', { projectId: 'p1' }),
       );
       expect(response.status).toBe(200);
       expect(noteServiceMock.moveToOtherProject).toHaveBeenCalledTimes(1);
-      expect(noteServiceMock.update).toHaveBeenCalledOnceWith('today', {
-        isPinnedToToday: false,
-      });
+      expect(noteServiceMock.update).not.toHaveBeenCalled();
       expect(data<Note>(response)).toEqual(
-        jasmine.objectContaining({ projectId: 'p1', isPinnedToToday: false }),
+        jasmine.objectContaining({ projectId: 'p1', isPinnedToToday: true }),
       );
+    });
+
+    it('rejects a move combined with other changes (one request, one op)', async () => {
+      for (const body of [
+        { projectId: 'p2', content: 'Changed' },
+        { projectId: 'p2', isPinnedToToday: true },
+        { projectId: 'p2', content: 'Note n1', isPinnedToToday: false },
+      ]) {
+        const response = await handle(request('PATCH', '/notes/n1', body));
+        expect(response.status).toBe(400);
+        expect(errorCode(response)).toBe('INVALID_INPUT');
+      }
+      expectNoDispatch();
+    });
+
+    it('treats the current projectId as no move next to other changes', async () => {
+      const response = await handle(
+        request('PATCH', '/notes/n1', { projectId: 'p1', content: 'Changed' }),
+      );
+      expect(response.status).toBe(200);
+      expect(noteServiceMock.moveToOtherProject).not.toHaveBeenCalled();
+      expect(noteServiceMock.update).toHaveBeenCalledOnceWith('n1', {
+        content: 'Changed',
+      });
     });
 
     it('dispatches nothing for unchanged values', async () => {

@@ -1,11 +1,12 @@
 import { Injectable, inject } from '@angular/core';
 import { nanoid } from 'nanoid';
 import { firstValueFrom } from 'rxjs';
-import typia, { IValidation } from 'typia';
+import typia from 'typia';
 import {
   LocalRestApiRequestPayload,
   LocalRestApiResponsePayload,
 } from '../../../../electron/shared-with-frontend/local-rest-api.model';
+import { parseLocalRestApiBody } from '../../core/electron/local-rest-api-body';
 import { LocalRestApiFeatureRoutes } from '../../core/electron/local-rest-api-feature-routes';
 import {
   createErrorResponse,
@@ -37,13 +38,6 @@ const WRITABLE_KEYS: ReadonlySet<string> = new Set([
   'projectId',
   'isPinnedToToday',
 ]);
-
-type Result<T> =
-  | { ok: true; value: T }
-  | { ok: false; response: LocalRestApiResponsePayload };
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
 
 const getQueryParam = (
   query: Record<string, string | string[]>,
@@ -124,8 +118,12 @@ export class LocalRestApiNoteRoutesService implements LocalRestApiFeatureRoutes 
     requestId: string,
     body: unknown,
   ): Promise<LocalRestApiResponsePayload> {
-    const parsed = this._parseBody(requestId, body, (b) =>
-      typia.validate<CreateNoteFields>(b),
+    const parsed = parseLocalRestApiBody(
+      requestId,
+      body,
+      WRITABLE_KEYS,
+      (b) => typia.validate<CreateNoteFields>(b),
+      'note',
     );
     if (!parsed.ok) {
       return parsed.response;
@@ -135,25 +133,22 @@ export class LocalRestApiNoteRoutesService implements LocalRestApiFeatureRoutes 
     if (!fields.content.trim()) {
       return this._invalid(requestId, 'content must be a non-empty string');
     }
-    // Without either field the note goes where "Add note" puts it: into the
-    // project in view, or pinned to Today. Set explicitly, the note must still
-    // show up somewhere.
-    if (
-      ('projectId' in fields || 'isPinnedToToday' in fields) &&
-      typeof fields.projectId !== 'string' &&
-      fields.isPinnedToToday !== true
-    ) {
+    // Both fields are passed explicitly: NoteService.add otherwise fills them
+    // from the view the user has open. The note must show up somewhere.
+    const projectId = fields.projectId ?? null;
+    const isPinnedToToday = fields.isPinnedToToday ?? false;
+    if (projectId === null && !isPinnedToToday) {
       return this._invalid(
         requestId,
         'A note needs a projectId or isPinnedToToday: true',
       );
     }
-    if (typeof fields.projectId === 'string' && !this._projectExists(fields.projectId)) {
+    if (projectId !== null && !this._projectExists(projectId)) {
       return this._projectNotFound(requestId);
     }
 
     const id = nanoid();
-    this._noteService.add({ ...fields, id });
+    this._noteService.add({ content: fields.content, projectId, isPinnedToToday, id });
 
     return createSuccessResponse(requestId, 201, await this._getNote(id));
   }
@@ -163,8 +158,12 @@ export class LocalRestApiNoteRoutesService implements LocalRestApiFeatureRoutes 
     noteId: string,
     body: unknown,
   ): Promise<LocalRestApiResponsePayload> {
-    const parsed = this._parseBody(requestId, body, (b) =>
-      typia.validate<UpdateNoteFields>(b),
+    const parsed = parseLocalRestApiBody(
+      requestId,
+      body,
+      WRITABLE_KEYS,
+      (b) => typia.validate<UpdateNoteFields>(b),
+      'note',
     );
     if (!parsed.ok) {
       return parsed.response;
@@ -177,6 +176,14 @@ export class LocalRestApiNoteRoutesService implements LocalRestApiFeatureRoutes 
     }
 
     const isMove = projectId !== undefined && projectId !== note.projectId;
+    // A move is its own op (moveNoteToOtherProject), so combined with other
+    // changes one request would write two ops.
+    if (isMove && (rest.content !== undefined || rest.isPinnedToToday !== undefined)) {
+      return this._invalid(
+        requestId,
+        'Change projectId on its own request, without content or isPinnedToToday',
+      );
+    }
     if (isMove && !this._projectExists(projectId)) {
       return this._projectNotFound(requestId);
     }
@@ -194,6 +201,7 @@ export class LocalRestApiNoteRoutesService implements LocalRestApiFeatureRoutes 
       // Not a plain update: moving also moves the id between the projects'
       // note lists.
       this._noteService.moveToOtherProject(note, projectId);
+      return createSuccessResponse(requestId, 200, await this._getNote(noteId));
     }
     const changes: Partial<Note> = {};
     if (rest.content !== undefined && rest.content !== note.content) {
@@ -224,46 +232,6 @@ export class LocalRestApiNoteRoutesService implements LocalRestApiFeatureRoutes 
     this._noteService.remove(note);
 
     return createSuccessResponse(requestId, 200, { deleted: true, id: noteId });
-  }
-
-  private _parseBody<T>(
-    requestId: string,
-    body: unknown,
-    validate: (body: Record<string, unknown>) => IValidation<T>,
-  ): Result<T> {
-    if (!isRecord(body)) {
-      return {
-        ok: false,
-        response: this._invalid(requestId, 'Request body must be a JSON object'),
-      };
-    }
-
-    const unsupported = Object.keys(body).filter((key) => !WRITABLE_KEYS.has(key));
-    if (unsupported.length > 0) {
-      return {
-        ok: false,
-        response: createErrorResponse(
-          requestId,
-          400,
-          'UNSUPPORTED_FIELD',
-          `Field(s) cannot be set through this endpoint: ${unsupported.join(', ')}`,
-          { fields: unsupported },
-        ),
-      };
-    }
-
-    const validation = validate(body);
-    if (!validation.success) {
-      return {
-        ok: false,
-        response: this._invalid(
-          requestId,
-          'One or more note fields have an invalid type',
-          validation.errors.map(({ path, expected }) => ({ path, expected })),
-        ),
-      };
-    }
-    return { ok: true, value: validation.data };
   }
 
   /**
