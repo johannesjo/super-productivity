@@ -149,6 +149,54 @@ describe('LocalRestApiTagRoutesService', () => {
       expect(tagServiceMock.addTag).toHaveBeenCalledOnceWith({ title: 'X', icon: null });
     });
 
+    it('strips a leading # like the task editor and short syntax do', async () => {
+      for (const title of ['#errands', ' ## errands ']) {
+        tagServiceMock.addTag.calls.reset();
+        tags$.next(tags$.value.filter((t) => t.id !== 'new-tag'));
+
+        const response = await handle(request('POST', '/tags', { title }));
+
+        expect(response.status).withContext(title).toBe(201);
+        expect(tagServiceMock.addTag).toHaveBeenCalledOnceWith({ title: 'errands' });
+      }
+    });
+
+    it('keeps a # inside the title', async () => {
+      await handle(request('POST', '/tags', { title: 'C#' }));
+
+      expect(tagServiceMock.addTag).toHaveBeenCalledOnceWith({ title: 'C#' });
+    });
+
+    it('rejects a title that is only #', async () => {
+      for (const title of ['#', ' # ', '###']) {
+        const response = await handle(request('POST', '/tags', { title }));
+        expect(response.status).withContext(title).toBe(400);
+        expect(errorCode(response)).toBe('INVALID_INPUT');
+      }
+      expectNoWrite();
+    });
+
+    it('refuses a title an existing tag has, ignoring case and a leading #', async () => {
+      for (const title of ['Tag t1', 'tag T1', '#TAG T1', ' Tag t1 ']) {
+        const response = await handle(request('POST', '/tags', { title }));
+        expect(response.status).withContext(title).toBe(409);
+        expect(errorCode(response)).toBe('TAG_EXISTS');
+        expect(response.body.ok ? undefined : response.body.error.details).toEqual({
+          id: 't1',
+          title: 'Tag t1',
+        });
+      }
+      expectNoWrite();
+    });
+
+    it('refuses the title of a built-in tag', async () => {
+      const response = await handle(request('POST', '/tags', { title: TODAY_TAG.title }));
+
+      expect(response.status).toBe(409);
+      expect(errorCode(response)).toBe('TAG_EXISTS');
+      expectNoWrite();
+    });
+
     it('requires a title', async () => {
       const response = await handle(request('POST', '/tags', { icon: 'label' }));
 
@@ -204,10 +252,11 @@ describe('LocalRestApiTagRoutesService', () => {
       );
 
       expect(response.status).toBe(200);
-      expect(tagServiceMock.updateTag).toHaveBeenCalledOnceWith('t1', {
-        title: 'Renamed',
-        icon: null,
-      });
+      expect(tagServiceMock.updateTag).toHaveBeenCalledOnceWith(
+        't1',
+        { title: 'Renamed', icon: null },
+        true,
+      );
       const tag = data<Tag>(response);
       expect(tag.title).toBe('Renamed');
       expect(tag.icon).toBeNull();
@@ -216,7 +265,50 @@ describe('LocalRestApiTagRoutesService', () => {
     it('updates only the icon', async () => {
       await handle(request('PATCH', '/tags/t1', { icon: 'star' }));
 
-      expect(tagServiceMock.updateTag).toHaveBeenCalledOnceWith('t1', { icon: 'star' });
+      expect(tagServiceMock.updateTag).toHaveBeenCalledOnceWith(
+        't1',
+        { icon: 'star' },
+        true,
+      );
+    });
+
+    it('strips a leading # from a new title', async () => {
+      await handle(request('PATCH', '/tags/t1', { title: '#renamed' }));
+
+      expect(tagServiceMock.updateTag).toHaveBeenCalledOnceWith(
+        't1',
+        { title: 'renamed' },
+        true,
+      );
+    });
+
+    it('rejects a new title that is only #', async () => {
+      const response = await handle(request('PATCH', '/tags/t1', { title: '#' }));
+
+      expect(response.status).toBe(400);
+      expect(errorCode(response)).toBe('INVALID_INPUT');
+      expectNoWrite();
+    });
+
+    it('refuses renaming to the title of another tag', async () => {
+      tags$.next([...tags$.value, createTag('t2', { title: 'Errands' })]);
+
+      const response = await handle(request('PATCH', '/tags/t1', { title: '#errands' }));
+
+      expect(response.status).toBe(409);
+      expect(errorCode(response)).toBe('TAG_EXISTS');
+      expect(response.body.ok ? undefined : response.body.error.details).toEqual({
+        id: 't2',
+        title: 'Errands',
+      });
+      expectNoWrite();
+    });
+
+    it('allows changing the case of its own title', async () => {
+      const response = await handle(request('PATCH', '/tags/t1', { title: 'TAG T1' }));
+
+      expect(response.status).toBe(200);
+      expect(data<Tag>(response).title).toBe('TAG T1');
     });
 
     it('returns the unchanged tag for an empty body without writing', async () => {

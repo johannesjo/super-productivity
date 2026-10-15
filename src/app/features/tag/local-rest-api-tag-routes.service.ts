@@ -5,6 +5,10 @@ import {
   LocalRestApiRequestPayload,
   LocalRestApiResponsePayload,
 } from '../../../../electron/shared-with-frontend/local-rest-api.model';
+import {
+  LocalRestApiResult,
+  parseLocalRestApiBody,
+} from '../../core/electron/local-rest-api-body';
 import { LocalRestApiFeatureRoutes } from '../../core/electron/local-rest-api-feature-routes';
 import {
   createErrorResponse,
@@ -25,12 +29,13 @@ interface CreateTagFields extends UpdateTagFields {
 
 const WRITABLE_KEYS: ReadonlySet<string> = new Set(['title', 'icon']);
 
-type Result<T> =
-  | { ok: true; value: T }
-  | { ok: false; response: LocalRestApiResponsePayload };
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
+/**
+ * Trims and drops leading '#', which a user types out of habit: the task
+ * editor's tag field and short syntax strip it too, so a tag created here
+ * matches one typed as `#errands`.
+ */
+const normalizeTagTitle = (title: string): string =>
+  title.trim().replace(/^#+/, '').trim();
 
 /**
  * Local REST API write routes under `/tags`. `GET /tags` is served by the core
@@ -79,6 +84,13 @@ export class LocalRestApiTagRoutesService implements LocalRestApiFeatureRoutes {
     }
     const { title, icon } = parsed.value;
 
+    // The task editor's tag field reuses a tag of the same title instead of
+    // adding a second one; a caller that wants that gets the id from here.
+    const existing = await this._findTagByTitle(title);
+    if (existing) {
+      return this._tagExists(requestId, existing);
+    }
+
     // Like the create-tag dialog: color and theme come from the defaults.
     const tagId = this._tagService.addTag({
       title,
@@ -110,8 +122,17 @@ export class LocalRestApiTagRoutesService implements LocalRestApiFeatureRoutes {
       return this._tagNotFound(requestId);
     }
 
+    if (parsed.value.title !== undefined) {
+      const existing = await this._findTagByTitle(parsed.value.title);
+      if (existing && existing.id !== tagId) {
+        return this._tagExists(requestId, existing);
+      }
+    }
+
     if (Object.keys(parsed.value).length > 0) {
-      this._tagService.updateTag(tagId, parsed.value);
+      // The caller gets the result in the response; the app's "Tag updated"
+      // snack would only interrupt whoever is using it.
+      this._tagService.updateTag(tagId, parsed.value, true);
     }
 
     return createSuccessResponse(requestId, 200, await this._getTag(tagId));
@@ -142,59 +163,48 @@ export class LocalRestApiTagRoutesService implements LocalRestApiFeatureRoutes {
 
   /**
    * Rejects a non-object body and keys other than title and icon, then
-   * type-checks the rest. A title, where given, is trimmed and must not end up
-   * empty.
+   * type-checks the rest. A title, where given, is normalized like one typed
+   * in the app and must not end up empty.
    */
   private _parseBody<T extends UpdateTagFields>(
     requestId: string,
     body: unknown,
     validate: (body: Record<string, unknown>) => IValidation<T>,
-  ): Result<T> {
-    if (!isRecord(body)) {
-      return {
-        ok: false,
-        response: this._invalid(requestId, 'Request body must be a JSON object'),
-      };
+  ): LocalRestApiResult<T> {
+    const parsed = parseLocalRestApiBody(requestId, body, WRITABLE_KEYS, validate, 'tag');
+    if (!parsed.ok || parsed.value.title === undefined) {
+      return parsed;
     }
-
-    const unsupported = Object.keys(body).filter((key) => !WRITABLE_KEYS.has(key));
-    if (unsupported.length > 0) {
-      return {
-        ok: false,
-        response: createErrorResponse(
-          requestId,
-          400,
-          'UNSUPPORTED_FIELD',
-          `Field(s) cannot be set through this endpoint: ${unsupported.join(', ')}`,
-          { fields: unsupported },
-        ),
-      };
-    }
-
-    const validation = validate(body);
-    if (!validation.success) {
+    const title = normalizeTagTitle(parsed.value.title);
+    if (!title) {
       return {
         ok: false,
         response: this._invalid(
           requestId,
-          'One or more tag fields have an invalid type',
-          validation.errors.map(({ path, expected }) => ({ path, expected })),
+          'title must be a non-empty string, not counting a leading #',
         ),
       };
     }
+    return { ok: true, value: { ...parsed.value, title } };
+  }
 
-    const fields = validation.data;
-    if (fields.title === undefined) {
-      return { ok: true, value: fields };
-    }
-    const title = fields.title.trim();
-    if (!title) {
-      return {
-        ok: false,
-        response: this._invalid(requestId, 'title must be a non-empty string'),
-      };
-    }
-    return { ok: true, value: { ...fields, title } };
+  /**
+   * Case-insensitive, as short syntax matches `#Errands` to a tag "errands".
+   */
+  private async _findTagByTitle(title: string): Promise<Tag | undefined> {
+    const wanted = title.toLowerCase();
+    const tags = await firstValueFrom(this._tagService.tags$);
+    return tags.find((tag) => tag.title.toLowerCase() === wanted);
+  }
+
+  private _tagExists(requestId: string, existing: Tag): LocalRestApiResponsePayload {
+    return createErrorResponse(
+      requestId,
+      409,
+      'TAG_EXISTS',
+      'A tag with this title already exists',
+      { id: existing.id, title: existing.title },
+    );
   }
 
   /**

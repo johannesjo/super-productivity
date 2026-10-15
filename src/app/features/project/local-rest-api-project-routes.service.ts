@@ -1,10 +1,15 @@
 import { Injectable, inject } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { firstValueFrom } from 'rxjs';
 import typia, { IValidation } from 'typia';
 import {
   LocalRestApiRequestPayload,
   LocalRestApiResponsePayload,
 } from '../../../../electron/shared-with-frontend/local-rest-api.model';
+import {
+  LocalRestApiResult,
+  parseLocalRestApiBody,
+} from '../../core/electron/local-rest-api-body';
 import { LocalRestApiFeatureRoutes } from '../../core/electron/local-rest-api-feature-routes';
 import {
   createErrorResponse,
@@ -13,6 +18,9 @@ import {
 import { INBOX_PROJECT } from './project.const';
 import { Project } from './project.model';
 import { ProjectService } from './project.service';
+import { TaskArchiveService } from '../archive/task-archive.service';
+import { selectAllTaskRepeatCfgs } from '../task-repeat-cfg/store/task-repeat-cfg.selectors';
+import { TimeTrackingService } from '../time-tracking/time-tracking.service';
 
 interface UpdateProjectFields {
   title?: string;
@@ -25,12 +33,24 @@ interface CreateProjectFields extends UpdateProjectFields {
 
 const WRITABLE_KEYS: ReadonlySet<string> = new Set(['title', 'icon']);
 
-type Result<T> =
-  | { ok: true; value: T }
-  | { ok: false; response: LocalRestApiResponsePayload };
+/** What `DELETE /projects/:id` would take with it; any non-zero count blocks it. */
+interface ProjectContents {
+  taskCount: number;
+  backlogTaskCount: number;
+  archivedTaskCount: number;
+  noteCount: number;
+  repeatCfgCount: number;
+  timeTrackingDayCount: number;
+}
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
+const CONTENT_LABELS: Record<keyof ProjectContents, string> = {
+  taskCount: 'tasks',
+  backlogTaskCount: 'backlog tasks',
+  archivedTaskCount: 'archived tasks',
+  noteCount: 'notes',
+  repeatCfgCount: 'repeat configs',
+  timeTrackingDayCount: 'time-tracking data',
+};
 
 /**
  * Local REST API write routes under `/projects`. `GET /projects` is served by
@@ -40,6 +60,9 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 @Injectable()
 export class LocalRestApiProjectRoutesService implements LocalRestApiFeatureRoutes {
   private readonly _projectService = inject(ProjectService);
+  private readonly _store = inject(Store);
+  private readonly _taskArchiveService = inject(TaskArchiveService);
+  private readonly _timeTrackingService = inject(TimeTrackingService);
 
   async handle(
     request: LocalRestApiRequestPayload,
@@ -105,18 +128,21 @@ export class LocalRestApiProjectRoutesService implements LocalRestApiFeatureRout
     }
 
     if (Object.keys(parsed.value).length > 0) {
-      this._projectService.update(projectId, parsed.value);
+      // The caller gets the result in the response; the app's "Project
+      // updated" snack would only interrupt whoever is using it.
+      this._projectService.update(projectId, parsed.value, true);
     }
 
     return createSuccessResponse(requestId, 200, await this._getProject(projectId));
   }
 
   /**
-   * Refuses a project that still has tasks rather than cascading onto them:
-   * the app's "Delete project" deletes its tasks, backlog and subtasks, and a
-   * REST caller cannot see what that would take with it. What does go with
-   * the project is what the app's delete removes too: its notes, sections,
-   * archived tasks and time-tracking data.
+   * Only deletes a project that holds nothing. The app's "Delete project"
+   * also deletes its tasks, backlog, archived tasks, notes, repeat configs and
+   * time-tracking data, on every synced device and beyond undo, after a
+   * confirm dialog a REST caller never sees. So any of those refuses the
+   * delete with 409 PROJECT_NOT_EMPTY and the counts. Sections do not block:
+   * with no tasks left they are empty headings, and they go with the project.
    */
   private async _handleDelete(
     requestId: string,
@@ -138,16 +164,22 @@ export class LocalRestApiProjectRoutesService implements LocalRestApiFeatureRout
       return this._projectNotFound(requestId);
     }
 
-    if (project.taskIds.length > 0 || project.backlogTaskIds.length > 0) {
+    const contents = await this._getContents(project);
+    const blockers = (Object.keys(contents) as (keyof ProjectContents)[]).filter(
+      (key) => contents[key] > 0,
+    );
+    if (blockers.length > 0) {
+      const what = blockers.map((key) => CONTENT_LABELS[key]).join(', ');
+      // Nothing in this API removes time-tracking data, so say where it can go.
+      const hint = contents.timeTrackingDayCount
+        ? '; time-tracking data can only be removed by deleting the project in the app'
+        : '';
       return createErrorResponse(
         requestId,
-        400,
+        409,
         'PROJECT_NOT_EMPTY',
-        'Project has tasks; move or delete them first, then delete the project',
-        {
-          taskCount: project.taskIds.length,
-          backlogTaskCount: project.backlogTaskIds.length,
-        },
+        `Project still has ${what}; remove them before deleting the project${hint}`,
+        contents,
       );
     }
 
@@ -165,52 +197,54 @@ export class LocalRestApiProjectRoutesService implements LocalRestApiFeatureRout
     requestId: string,
     body: unknown,
     validate: (body: Record<string, unknown>) => IValidation<T>,
-  ): Result<T> {
-    if (!isRecord(body)) {
-      return {
-        ok: false,
-        response: this._invalid(requestId, 'Request body must be a JSON object'),
-      };
+  ): LocalRestApiResult<T> {
+    const parsed = parseLocalRestApiBody(
+      requestId,
+      body,
+      WRITABLE_KEYS,
+      validate,
+      'project',
+    );
+    if (!parsed.ok || parsed.value.title === undefined) {
+      return parsed;
     }
-
-    const unsupported = Object.keys(body).filter((key) => !WRITABLE_KEYS.has(key));
-    if (unsupported.length > 0) {
-      return {
-        ok: false,
-        response: createErrorResponse(
-          requestId,
-          400,
-          'UNSUPPORTED_FIELD',
-          `Field(s) cannot be set through this endpoint: ${unsupported.join(', ')}`,
-          { fields: unsupported },
-        ),
-      };
-    }
-
-    const validation = validate(body);
-    if (!validation.success) {
-      return {
-        ok: false,
-        response: this._invalid(
-          requestId,
-          'One or more project fields have an invalid type',
-          validation.errors.map(({ path, expected }) => ({ path, expected })),
-        ),
-      };
-    }
-
-    const fields = validation.data;
-    if (fields.title === undefined) {
-      return { ok: true, value: fields };
-    }
-    const title = fields.title.trim();
+    const title = parsed.value.title.trim();
     if (!title) {
       return {
         ok: false,
         response: this._invalid(requestId, 'title must be a non-empty string'),
       };
     }
-    return { ok: true, value: { ...fields, title } };
+    return { ok: true, value: { ...parsed.value, title } };
+  }
+
+  /**
+   * Counts what ProjectService.remove() would delete with the project. Loads
+   * the whole task archive; acceptable for a delete.
+   */
+  private async _getContents(project: Project): Promise<ProjectContents> {
+    const [archive, repeatCfgs, timeTracking] = await Promise.all([
+      this._taskArchiveService.load(),
+      firstValueFrom(this._store.select(selectAllTaskRepeatCfgs)),
+      firstValueFrom(this._timeTrackingService.state$),
+    ]);
+    const archivedTaskCount = (archive.ids as string[]).filter(
+      (id) => archive.entities[id]?.projectId === project.id,
+    ).length;
+    const projectTimeTracking = Object.prototype.hasOwnProperty.call(
+      timeTracking.project,
+      project.id,
+    )
+      ? timeTracking.project[project.id]
+      : undefined;
+    return {
+      taskCount: project.taskIds.length,
+      backlogTaskCount: project.backlogTaskIds.length,
+      archivedTaskCount,
+      noteCount: project.noteIds.length,
+      repeatCfgCount: repeatCfgs.filter((cfg) => cfg.projectId === project.id).length,
+      timeTrackingDayCount: Object.keys(projectTimeTracking ?? {}).length,
+    };
   }
 
   /**
