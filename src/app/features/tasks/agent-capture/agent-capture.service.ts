@@ -20,6 +20,7 @@ import {
 } from 'rxjs';
 import { IS_ELECTRON } from '../../../app.constants';
 import { Log } from '../../../core/log';
+import { DateService } from '../../../core/date/date.service';
 import { SyncWrapperService } from '../../../imex/sync/sync-wrapper.service';
 import { SyncEpochChangedError } from '../../../op-log/core/errors/sync-errors';
 import { SyncProviderId } from '../../../op-log/sync-providers/provider.const';
@@ -59,6 +60,7 @@ export class AgentCaptureService {
   private _providerManager = inject(SyncProviderManager);
   private _syncWrapper = inject(SyncWrapperService);
   private _importer = inject(NativeCaptureImporter);
+  private _dateService = inject(DateService);
   private _source = createSuperSyncCaptureSource({
     startRun: () => this._startRun(),
     dispatch: (action) => this._store.dispatch(action),
@@ -209,6 +211,7 @@ export class AgentCaptureService {
       defaultRemindOption:
         this._globalConfig.cfg()?.reminder.defaultTaskRemindOption ??
         DEFAULT_GLOBAL_CONFIG.reminder.defaultTaskRemindOption!,
+      todayStr: this._dateService.todayStr(),
       assertUnchanged: (context) => {
         // The epoch bumps only after a provider swap completes; the identity
         // check covers the moment in between.

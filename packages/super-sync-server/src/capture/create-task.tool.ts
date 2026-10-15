@@ -2,12 +2,18 @@ import {
   CAPTURE_DAILY_LIMIT_TEXT,
   CAPTURE_NOTES_MAX_BYTES,
   CAPTURE_QUEUE_FULL_TEXT,
+  CAPTURE_REPEAT_EVERY_MAX,
   CAPTURE_REVOKED_TEXT,
   CAPTURE_SAVED_TEXT,
   CAPTURE_SWITCHED_OFF_TEXT,
   CAPTURE_TITLE_MAX_CHARS,
 } from './capture.const';
-import { enqueueCapture } from './capture-queue.store';
+import {
+  CAPTURE_REPEAT_CYCLES,
+  CAPTURE_WEEKDAYS,
+  CaptureRepeat,
+  enqueueCapture,
+} from './capture-queue.store';
 import { AuthenticatedGrant } from './capture-grant.store';
 import { isGrantDailyCapReached, recordGrantCreate } from './capture-rate-limit';
 import { isRecentCapture, recordCapture, withGrantLock } from './capture-retry-window';
@@ -17,16 +23,16 @@ const DUE_DATE_PATTERN = '^\\d{4}-\\d{2}-\\d{2}$';
 const DUE_TIME_PATTERN = '^([01]\\d|2[0-3]):[0-5]\\d$';
 
 /**
- * `create_task(title, notes?, dueDate?, dueTime?)`: the only tool. Public once
- * shipped: optional fields may be added, nothing removed or renamed.
+ * `create_task(title, notes?, dueDate?, dueTime?, repeat?)`: the only tool.
+ * Public once shipped: optional fields may be added, nothing removed or renamed.
  */
 export const CREATE_TASK_TOOL: McpToolDefinition = {
   name: 'create_task',
   description:
     'Add a task to the Inbox in Super Productivity. Text is kept literally: ' +
     '#tags, +projects and dates in the title or notes are not parsed; pass ' +
-    'dueDate (and optionally dueTime) to schedule the task. This tool cannot ' +
-    'read tasks.',
+    'dueDate (and optionally dueTime) to schedule the task, and repeat to make ' +
+    'it recurring. This tool cannot read tasks.',
   inputSchema: {
     type: 'object',
     properties: {
@@ -55,6 +61,32 @@ export const CREATE_TASK_TOOL: McpToolDefinition = {
           'with no time.',
         pattern: DUE_TIME_PATTERN,
       },
+      repeat: {
+        type: 'object',
+        description:
+          'Optional: make the task recurring, starting on dueDate (or today). ' +
+          'dueTime, if given, is the time of every occurrence. A monthly or ' +
+          "yearly task repeats on the start day's date.",
+        properties: {
+          cycle: { type: 'string', enum: [...CAPTURE_REPEAT_CYCLES] },
+          every: {
+            type: 'integer',
+            description: `Repeat every N cycles, 1 to ${CAPTURE_REPEAT_EVERY_MAX}. Default 1.`,
+            minimum: 1,
+            maximum: CAPTURE_REPEAT_EVERY_MAX,
+          },
+          weekdays: {
+            type: 'array',
+            description:
+              "Weekly only: the days it repeats on. Default: the start day's weekday.",
+            items: { type: 'string', enum: [...CAPTURE_WEEKDAYS] },
+            minItems: 1,
+            uniqueItems: true,
+          },
+        },
+        required: ['cycle'],
+        additionalProperties: false,
+      },
     },
     required: ['title'],
     additionalProperties: false,
@@ -74,9 +106,11 @@ export type CreateTaskArgs = {
   dueDate?: string;
   /** `HH:MM`, 24-hour; only with `dueDate`. */
   dueTime?: string;
+  repeat?: CaptureRepeat;
 };
 
-const ARG_NAMES = ['title', 'notes', 'dueDate', 'dueTime'];
+const ARG_NAMES = ['title', 'notes', 'dueDate', 'dueTime', 'repeat'];
+const REPEAT_KEYS = ['cycle', 'every', 'weekdays'];
 const DUE_DATE_RE = new RegExp(DUE_DATE_PATTERN);
 const DUE_TIME_RE = new RegExp(DUE_TIME_PATTERN);
 
@@ -113,6 +147,52 @@ const validateDue = (
   return { dueDate, dueTime };
 };
 
+const isOneOf = <T extends string>(list: readonly T[], value: unknown): value is T =>
+  typeof value === 'string' && (list as readonly string[]).includes(value);
+
+/**
+ * Returns the repeat in canonical form (no `every: 1`, weekdays in Monday-first
+ * order), so identical retries share one retry-window key; or the error message.
+ */
+const validateRepeat = (value: unknown): CaptureRepeat | undefined | string => {
+  if (value === undefined) return undefined;
+  if (typeof value !== 'object' || value === null || Array.isArray(value)) {
+    return 'repeat must be an object';
+  }
+  const r = value as Record<string, unknown>;
+  const unknownKey = Object.keys(r).find((key) => !REPEAT_KEYS.includes(key));
+  if (unknownKey !== undefined) return `Unknown argument: repeat.${unknownKey}`;
+  if (!isOneOf(CAPTURE_REPEAT_CYCLES, r.cycle)) {
+    return `repeat.cycle must be one of ${CAPTURE_REPEAT_CYCLES.join(', ')}`;
+  }
+  const repeat: CaptureRepeat = { cycle: r.cycle };
+  if (r.every !== undefined) {
+    if (
+      typeof r.every !== 'number' ||
+      !Number.isInteger(r.every) ||
+      r.every < 1 ||
+      r.every > CAPTURE_REPEAT_EVERY_MAX
+    ) {
+      return `repeat.every must be a whole number from 1 to ${CAPTURE_REPEAT_EVERY_MAX}`;
+    }
+    if (r.every > 1) repeat.every = r.every;
+  }
+  if (r.weekdays !== undefined) {
+    if (r.cycle !== 'weekly') return 'repeat.weekdays needs cycle weekly';
+    const days = r.weekdays;
+    if (
+      !Array.isArray(days) ||
+      days.length === 0 ||
+      !days.every((day) => isOneOf(CAPTURE_WEEKDAYS, day)) ||
+      new Set(days).size !== days.length
+    ) {
+      return `repeat.weekdays must be distinct days out of ${CAPTURE_WEEKDAYS.join(', ')}`;
+    }
+    repeat.weekdays = CAPTURE_WEEKDAYS.filter((day) => days.includes(day));
+  }
+  return repeat;
+};
+
 /** Returns the validated arguments, or the message to send back as a tool error. */
 export const validateCreateTaskArgs = (
   args: Record<string, unknown>,
@@ -126,8 +206,11 @@ export const validateCreateTaskArgs = (
   if (titleChars === 0 || titleChars > CAPTURE_TITLE_MAX_CHARS) {
     return `title must be 1 to ${CAPTURE_TITLE_MAX_CHARS} characters`;
   }
-  const due = validateDue(args);
-  if (typeof due === 'string') return due;
+  const dueOnly = validateDue(args);
+  if (typeof dueOnly === 'string') return dueOnly;
+  const repeat = validateRepeat(args.repeat);
+  if (typeof repeat === 'string') return repeat;
+  const due = repeat ? { ...dueOnly, repeat } : dueOnly;
   if (args.notes === undefined) return { title, ...due };
   if (typeof args.notes !== 'string') return 'notes must be a string';
   if (Buffer.byteLength(args.notes, 'utf8') > CAPTURE_NOTES_MAX_BYTES) {
@@ -156,9 +239,11 @@ export const runCreateTask = async (
       v: 1,
       title: args.title,
       ...(args.notes === undefined ? {} : { notes: args.notes }),
-      // Optional v1 fields: released apps ignore them and add the task unscheduled.
+      // Optional v1 fields: released apps ignore them and add a one-off,
+      // unscheduled task.
       ...(args.dueDate === undefined ? {} : { dueDate: args.dueDate }),
       ...(args.dueTime === undefined ? {} : { dueTime: args.dueTime }),
+      ...(args.repeat === undefined ? {} : { repeat: args.repeat }),
       createdAt: Date.now(),
       client: grant.clientName,
     });

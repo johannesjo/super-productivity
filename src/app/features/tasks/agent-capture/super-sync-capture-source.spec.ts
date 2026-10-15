@@ -13,6 +13,7 @@ import {
   toCaptureTask,
 } from './super-sync-capture-source';
 import { TaskReminderOptionId } from '../task.model';
+import { addTaskRepeatCfgToTask } from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 
 /**
  * The key and item are the vector pinned in sync-core's capture-open.spec.ts
@@ -55,6 +56,7 @@ describe('createSuperSyncCaptureSource', () => {
       deviceId: 'dev-1',
       defaultEstimate: 0,
       defaultRemindOption: TaskReminderOptionId.AtStart,
+      todayStr: '2026-10-15',
       assertUnchanged: (context) => {
         if (!isCurrent) throw new Error(`changed at ${context}`);
       },
@@ -148,6 +150,67 @@ describe('createSuperSyncCaptureSource', () => {
         remindAt: due - tenMinutes,
       }),
     );
+  });
+
+  it('dispatches no repeat config for a one-off capture', async () => {
+    provider.claimCaptures.and.resolveTo(ok());
+    const src = source();
+    const [capture] = await src.getPending();
+    src.createTask(capture);
+    expect(dispatch).toHaveBeenCalledTimes(1);
+  });
+
+  it('makes a recurring capture repeatable right after its addTask', async () => {
+    provider.claimCaptures.and.resolveTo(ok());
+    const src = source();
+    await src.getPending();
+    src.createTask({
+      id: 'task-1',
+      task: {
+        title: 'Standup',
+        createdAt: 1,
+        dueDay: '2026-10-19',
+        dueTime: [9, 5],
+        repeat: { cycle: 'WEEKLY', every: 1, weekdays: [1, 2, 3, 4, 5] },
+      },
+    });
+    expect(dispatch).toHaveBeenCalledTimes(2);
+    const [[addTask], [addRepeat]] = dispatch.calls.allArgs() as [
+      [ReturnType<typeof TaskSharedActions.addTask>],
+      [ReturnType<typeof addTaskRepeatCfgToTask>],
+    ];
+    expect(addTask.type).toBe(TaskSharedActions.addTask.type);
+    expect(addRepeat.type).toBe(addTaskRepeatCfgToTask.type);
+    expect(addRepeat.taskId).toBe('task-1');
+    expect(addRepeat.startTime).toBe('09:05');
+    expect(addRepeat.remindAt).toBe(TaskReminderOptionId.AtStart);
+    expect(addRepeat.taskRepeatCfg).toEqual(
+      jasmine.objectContaining({
+        title: 'Standup',
+        projectId: INBOX_PROJECT.id,
+        repeatCycle: 'WEEKLY',
+        startDate: '2026-10-19',
+        monday: true,
+        friday: true,
+        saturday: false,
+      }),
+    );
+  });
+
+  it("starts an undated series on this device's today", async () => {
+    provider.claimCaptures.and.resolveTo(ok());
+    const src = source();
+    await src.getPending();
+    src.createTask({
+      id: 'task-1',
+      task: { title: 'Stretch', createdAt: 1, repeat: { cycle: 'DAILY', every: 1 } },
+    });
+    const addRepeat = dispatch.calls.mostRecent().args[0] as ReturnType<
+      typeof addTaskRepeatCfgToTask
+    >;
+    expect(addRepeat.taskRepeatCfg.startDate).toBe('2026-10-15');
+    expect(addRepeat.startTime).toBeUndefined();
+    expect(addRepeat.remindAt).toBeUndefined();
   });
 
   it('adds no reminder when the default is to not remind', async () => {
@@ -251,6 +314,18 @@ describe('toCaptureTask', () => {
       createdAt: 1,
       dueDay: '2026-10-16',
       dueTime: [18, 5],
+    });
+  });
+
+  it('reads an optional repeat', () => {
+    expect(toCaptureTask({ ...base, repeat: { cycle: 'monthly', every: 3 } })).toEqual({
+      title: 'Dentist',
+      createdAt: 1,
+      repeat: { cycle: 'MONTHLY', every: 3 },
+    });
+    expect(toCaptureTask({ ...base, repeat: { cycle: 'hourly' } })).toEqual({
+      title: 'Dentist',
+      createdAt: 1,
     });
   });
 

@@ -174,6 +174,52 @@ describe('validateCreateTaskArgs', () => {
     ).toEqual({ title: 'a', dueDate: '2028-02-29', dueTime: '09:30' });
   });
 
+  it('keeps a repeat in canonical form', () => {
+    expect(
+      validateCreateTaskArgs({
+        title: 'a',
+        repeat: { cycle: 'weekly', every: 2, weekdays: ['fri', 'mon'] },
+      }),
+    ).toEqual({
+      title: 'a',
+      repeat: { cycle: 'weekly', every: 2, weekdays: ['mon', 'fri'] },
+    });
+    expect(
+      validateCreateTaskArgs({
+        title: 'a',
+        dueDate: '2026-10-16',
+        dueTime: '09:30',
+        repeat: { cycle: 'monthly', every: 1 },
+      }),
+    ).toEqual({
+      title: 'a',
+      dueDate: '2026-10-16',
+      dueTime: '09:30',
+      repeat: { cycle: 'monthly' },
+    });
+  });
+
+  it('refuses a bad repeat', () => {
+    for (const repeat of [
+      'daily',
+      null,
+      [],
+      {},
+      { cycle: 'hourly' },
+      { cycle: 'daily', every: 0 },
+      { cycle: 'daily', every: 100 },
+      { cycle: 'daily', every: 1.5 },
+      { cycle: 'daily', every: '2' },
+      { cycle: 'daily', weekdays: ['mon'] },
+      { cycle: 'weekly', weekdays: [] },
+      { cycle: 'weekly', weekdays: ['monday'] },
+      { cycle: 'weekly', weekdays: ['mon', 'mon'] },
+      { cycle: 'weekly', interval: 2 },
+    ]) {
+      expect(typeof validateCreateTaskArgs({ title: 'a', repeat })).toBe('string');
+    }
+  });
+
   it('refuses a bad due day or time', () => {
     for (const due of [
       { dueTime: '09:30' },

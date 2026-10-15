@@ -37,7 +37,7 @@ const toolCall = (
   id: number,
   title: string,
   notes?: string,
-  due: { dueDate?: string; dueTime?: string } = {},
+  due: { dueDate?: string; dueTime?: string; repeat?: Record<string, unknown> } = {},
 ): Record<string, unknown> => ({
   jsonrpc: '2.0',
   id,
@@ -197,13 +197,20 @@ describe('capture routes (PGlite)', () => {
     expect(grants[0].pendingCount).toBe(1);
   });
 
-  it('seals the due day and time, and keeps the same title on other days apart', async () => {
+  it('seals due day, time and repeat, and keeps differing schedules apart', async () => {
     await api('PUT', '/key', { publicKey: key.publicKey });
     const token = await newToken();
     const due = { dueDate: '2026-10-16', dueTime: '09:30' };
     await mcp(token, toolCall(1, 'Dentist', undefined, due));
     await mcp(token, toolCall(2, 'Dentist', undefined, due));
     await mcp(token, toolCall(3, 'Dentist', undefined, { dueDate: '2026-10-17' }));
+    await mcp(
+      token,
+      toolCall(4, 'Dentist', undefined, {
+        dueDate: '2026-10-17',
+        repeat: { cycle: 'weekly', weekdays: ['fri', 'mon'] },
+      }),
+    );
 
     const claim = (
       await api('POST', '/claim', {
@@ -217,6 +224,10 @@ describe('capture routes (PGlite)', () => {
     expect(payloads).toEqual([
       expect.objectContaining({ v: 1, title: 'Dentist', ...due }),
       expect.objectContaining({ v: 1, title: 'Dentist', dueDate: '2026-10-17' }),
+      expect.objectContaining({
+        dueDate: '2026-10-17',
+        repeat: { cycle: 'weekly', weekdays: ['mon', 'fri'] },
+      }),
     ]);
     expect(payloads[1].dueTime).toBeUndefined();
   });

@@ -10,6 +10,13 @@ import { INBOX_PROJECT } from '../../project/project.const';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { DEFAULT_TASK, Task, TaskReminderOptionId } from '../task.model';
 import { remindOptionToMilliseconds } from '../util/remind-option-to-milliseconds';
+import { addTaskRepeatCfgToTask } from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
+import { nanoid } from 'nanoid';
+import {
+  CaptureRepeat,
+  parseCaptureRepeat,
+  toCaptureRepeatCfg,
+} from './capture-repeat-cfg';
 import { NativeCaptureSource } from '../native-capture/native-capture-importer.service';
 
 /** Never rename: installs keep their receipts under it. */
@@ -38,6 +45,7 @@ export interface AgentCapture {
     dueDay?: string;
     /** `[hours, minutes]` on `dueDay`, in this device's time zone. */
     dueTime?: [number, number];
+    repeat?: CaptureRepeat;
   } | null;
 }
 
@@ -50,6 +58,8 @@ export interface AgentCaptureRun {
   defaultEstimate: number;
   /** Applied to a capture with a time, as when scheduling in the app. */
   defaultRemindOption: TaskReminderOptionId;
+  /** This device's logical today, `YYYY-MM-DD`: where an undated series starts. */
+  todayStr: string;
   /** Throws SyncEpochChangedError once the account, provider or password changed. */
   assertUnchanged: (context: string) => void;
 }
@@ -57,7 +67,11 @@ export interface AgentCaptureRun {
 export interface SuperSyncCaptureSourceDeps {
   /** Called once per claim, in one synchronous block; null skips the run. */
   startRun: () => AgentCaptureRun | null;
-  dispatch: (action: ReturnType<typeof TaskSharedActions.addTask>) => void;
+  dispatch: (
+    action:
+      | ReturnType<typeof TaskSharedActions.addTask>
+      | ReturnType<typeof addTaskRepeatCfgToTask>,
+  ) => void;
 }
 
 /**
@@ -90,8 +104,12 @@ export const createSuperSyncCaptureSource = (
     },
     isValid: (capture) => capture.task !== null,
     createTask: (capture) => {
-      const { defaultEstimate, defaultRemindOption } = currentRun('createTask');
-      deps.dispatch(addInboxTaskAction(capture, defaultEstimate, defaultRemindOption));
+      const active = currentRun('createTask');
+      deps.dispatch(
+        addInboxTaskAction(capture, active.defaultEstimate, active.defaultRemindOption),
+      );
+      const repeatAction = addRepeatCfgAction(capture, active);
+      if (repeatAction) deps.dispatch(repeatAction);
     },
     acknowledge: async (id) => {
       const { provider, deviceId } = currentRun('acknowledge');
@@ -200,7 +218,14 @@ export const toCaptureTask = (payload: unknown): AgentCapture['task'] => {
       ? neutralizeAutoloadMedia([...p.notes].slice(0, NOTES_MAX_CHARS).join(''))
       : '';
   const createdAt = typeof p.createdAt === 'number' ? p.createdAt : Date.now();
-  return { title, ...(notes ? { notes } : {}), createdAt, ...toDue(p) };
+  const repeat = parseCaptureRepeat(p.repeat);
+  return {
+    title,
+    ...(notes ? { notes } : {}),
+    createdAt,
+    ...toDue(p),
+    ...(repeat ? { repeat } : {}),
+  };
 };
 
 /**
@@ -253,5 +278,37 @@ const addInboxTaskAction = (
     isAddToBacklog: false,
     isAddToBottom: true,
     isIgnoreShortSyntax: true,
+  });
+};
+
+const pad2 = (n: number): string => String(n).padStart(2, '0');
+
+/**
+ * Makes a recurring capture's task repeatable, as the add-task bar does after
+ * its addTask: the same action, so the same effects pick the first occurrence.
+ */
+const addRepeatCfgAction = (
+  capture: AgentCapture,
+  run: AgentCaptureRun,
+): ReturnType<typeof addTaskRepeatCfgToTask> | null => {
+  const task = capture.task as NonNullable<AgentCapture['task']>;
+  if (!task.repeat) return null;
+  const startTime = task.dueTime
+    ? `${pad2(task.dueTime[0])}:${pad2(task.dueTime[1])}`
+    : undefined;
+  const cfg = toCaptureRepeatCfg(task.repeat, {
+    title: task.title,
+    notes: task.notes,
+    projectId: INBOX_PROJECT.id,
+    startDay: task.dueDay ?? run.todayStr,
+    startTime,
+    defaultEstimate: run.defaultEstimate,
+    remindOption: run.defaultRemindOption,
+  });
+  return addTaskRepeatCfgToTask({
+    taskId: capture.id,
+    taskRepeatCfg: { ...cfg, id: nanoid() },
+    startTime: cfg.startTime,
+    remindAt: cfg.remindAt,
   });
 };

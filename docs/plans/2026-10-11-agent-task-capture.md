@@ -73,6 +73,14 @@ resolves them in its own time zone into `dueDay`, or `dueWithTime` plus the
 default reminder, inside the one `addTask`; an invalid value is dropped, not
 the task. The retry window keys on them too.
 
+Also added: optional `repeat: { cycle, every?, weekdays? }` (cycle
+`daily | weekly | monthly | yearly`, `every` 1–99, `weekdays` weekly only).
+The importing device makes the new task repeatable with the add-task bar's
+own `addTaskRepeatCfgToTask` right after the `addTask` (no new action), so
+the existing effects pick the first occurrence. An invalid `repeat` is
+dropped, leaving a one-off task. The tool stays write-only: its only answer
+is "Saved", so no task or setting data reaches the assistant.
+
 ## Flow
 
 1. Settings → SuperSync → **"Let AI assistants add tasks"** (off by default).
@@ -354,7 +362,7 @@ Each step has its check; the next starts only after it passes.
 
 ## Out of scope
 
-Reading tasks remotely, editing, project/tag, repeating tasks, DCR, generic CIMD
+Reading tasks remotely, editing, project/tag, DCR, generic CIMD
 fetching, WebSocket push for captures, server-created ops, non-SuperSync
 providers.
 
