@@ -14,7 +14,9 @@ export const setDueTaskBadge = (count: number, iconDataUrl?: string): void => {
     if (count && (!icon || icon.isEmpty())) return;
     if (icon && (icon.getSize().width !== 64 || icon.getSize().height !== 64)) return;
     const win = getWin();
-    const description = count ? `${count} tasks due today or overdue` : '';
+    const description = count
+      ? `${count} ${count === 1 ? 'task' : 'tasks'} due today or overdue`
+      : '';
     const badge = windowBadges.get(win);
     if (badge) {
       badge.icon = icon;

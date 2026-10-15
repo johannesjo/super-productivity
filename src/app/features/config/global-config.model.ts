@@ -26,12 +26,12 @@ export type MiscConfig = Readonly<{
   isConfirmBeforeExit: boolean;
   isConfirmBeforeExitWithoutFinishDay: boolean;
   isMinimizeToTray: boolean;
+  /** Desktop only; absent in older persisted settings, defaults to off. */
+  isShowDueTaskBadge?: boolean;
   // Legacy: the local REST API switch is device-local now (Electron main's
   // simple store), because a synced switch started the listener on every
   // desktop. Nothing reads or writes this anymore; kept optional so synced data
   // from older clients keeps validating.
-  /** Desktop only; absent in older persisted settings, defaults to off. */
-  isShowDueTaskBadge?: boolean;
   isLocalRestApiEnabled?: boolean;
   // Desktop-only daily check for a newer GitHub release (#5463). Optional
   // because it was added later; a missing key means ON (see UpdateCheckService).

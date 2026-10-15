@@ -78,3 +78,15 @@ test('does not restore a stale badge after it is disabled or the count reaches z
     [null, ''],
   ]);
 });
+
+test('uses singular and plural Windows overlay descriptions and clears at zero', () => {
+  if (process.platform !== 'win32') return;
+  overlays.length = 0;
+  setDueTaskBadge(1, 'test-png');
+  setDueTaskBadge(2, 'test-png');
+  setDueTaskBadge(0);
+  assert.deepEqual(
+    overlays.map(([, description]) => description),
+    ['1 task due today or overdue', '2 tasks due today or overdue', ''],
+  );
+});
