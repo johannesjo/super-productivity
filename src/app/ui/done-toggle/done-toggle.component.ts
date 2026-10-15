@@ -1,5 +1,7 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { isMultiSelectModifierEvent } from '../../util/is-multi-select-modifier-event';
+import { isTouchActive } from '../../util/input-intent';
+import { performHapticFeedback } from '../../util/haptic-feedback';
 
 @Component({
   selector: 'done-toggle',
@@ -37,11 +39,18 @@ export class DoneToggleComponent {
   readonly isMultiSelectAware = input<boolean>(false);
   readonly toggled = output<void>();
 
+  readonly isTouchActive = isTouchActive;
+
   onClick(ev: MouseEvent): void {
     // A modifier click selects the task row instead of toggling done; let it
     // bubble to the row.
     if (this.isMultiSelectAware() && isMultiSelectModifierEvent(ev)) {
       return;
+    }
+    // Confirm completing a task by tap, like a native checkbox. Not on undo,
+    // and not for keyboard or mouse toggles.
+    if (this.isTouchActive() && !this.isDone()) {
+      performHapticFeedback('confirm');
     }
     this.toggled.emit();
     ev.stopPropagation();

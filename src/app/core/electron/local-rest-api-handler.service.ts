@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
 import { firstValueFrom } from 'rxjs';
 import typia from 'typia';
@@ -15,10 +16,13 @@ import { TagService } from '../../features/tag/tag.service';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports -- grandfathered layer-boundary debt
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { DateService } from '../date/date.service';
+import { DataInitStateService } from '../data-init/data-init-state.service';
 import { isTodayWithOffset } from '../../util/is-today.util';
 import { isValidDBDateStr } from '../../util/get-db-date-str';
 import { IssueLog } from '../log';
 import { LOCAL_REST_API_FEATURE_BRIDGE } from './local-rest-api-feature-bridge';
+import { LOCAL_REST_API_FEATURE_ROUTES } from './local-rest-api-feature-routes';
+import { createErrorResponse, createSuccessResponse } from './local-rest-api-response';
 
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports -- grandfathered layer-boundary debt
@@ -335,38 +339,6 @@ const getQueryParamAsBoolean = (
   return value.toLowerCase() === 'true';
 };
 
-const createErrorResponse = (
-  requestId: string,
-  status: number,
-  code: string,
-  message: string,
-  details?: unknown,
-): LocalRestApiResponsePayload => ({
-  requestId,
-  status,
-  body: {
-    ok: false,
-    error: {
-      code,
-      message,
-      details,
-    },
-  },
-});
-
-const createSuccessResponse = (
-  requestId: string,
-  status: number,
-  data: unknown,
-): LocalRestApiResponsePayload => ({
-  requestId,
-  status,
-  body: {
-    ok: true,
-    data,
-  },
-});
-
 type TaskSource = 'active' | 'archived' | 'all';
 
 /**
@@ -401,7 +373,16 @@ export class LocalRestApiHandlerService {
   private readonly _tagService = inject(TagService);
   private readonly _dateService = inject(DateService);
   private readonly _featureBridge = inject(LOCAL_REST_API_FEATURE_BRIDGE);
+  private readonly _featureRoutes =
+    inject(LOCAL_REST_API_FEATURE_ROUTES, { optional: true }) ?? [];
   private readonly _store = inject(Store);
+  // The main process only knows the renderer has booted, which happens before
+  // the data is loaded — answering then would serve an empty task list as if it
+  // were the user's data, and let a write land on top of half-hydrated state.
+  private readonly _isDataLoaded = toSignal(
+    inject(DataInitStateService).isAllDataLoadedInitially$,
+    { initialValue: false },
+  );
   private _isInitialized = false;
 
   private _dispatchDeadlineChange(taskId: string, change: DeadlineChange): void {
@@ -465,6 +446,15 @@ export class LocalRestApiHandlerService {
     const { method, path, requestId, body, query } = payload;
     const segments = path.split('/').filter(Boolean);
 
+    if (this._isDataLoaded() !== true) {
+      return createErrorResponse(
+        requestId,
+        503,
+        'APP_NOT_READY',
+        'App data is still loading',
+      );
+    }
+
     if (method === 'GET' && path === '/status') {
       return this._handleGetStatus(requestId);
     }
@@ -503,6 +493,13 @@ export class LocalRestApiHandlerService {
 
     if (method === 'GET' && path === '/tags') {
       return this._handleListTags(requestId, query);
+    }
+
+    for (const routes of this._featureRoutes) {
+      const response = await routes.handle(payload);
+      if (response) {
+        return response;
+      }
     }
 
     return createErrorResponse(requestId, 404, 'NOT_FOUND', 'Route not found');
@@ -626,7 +623,14 @@ export class LocalRestApiHandlerService {
     } else if (source === 'all') {
       tasks = await this._taskService.getAllTasksEverywhere();
     } else {
-      tasks = await firstValueFrom(this._taskService.allTasks$);
+      // Archiving a project leaves its tasks in the store; the app hides them
+      // everywhere, so "active" does too.
+      const [allTasks, archivedProjects] = await Promise.all([
+        firstValueFrom(this._taskService.allTasks$),
+        firstValueFrom(this._projectService.archived$),
+      ]);
+      const archivedIds = new Set(archivedProjects.map((p) => p.id));
+      tasks = allTasks.filter((t) => !t.projectId || !archivedIds.has(t.projectId));
     }
 
     let filtered = tasks;
@@ -809,7 +813,14 @@ export class LocalRestApiHandlerService {
     if (segments.length === 2) {
       if (method === 'GET') {
         const task = await this._getTaskById(taskId);
-        if (!task) {
+        // `source=active` hides a task of an archived project, as the list does.
+        const isHidden =
+          !!task?.projectId &&
+          getQueryParam(query, 'source') === 'active' &&
+          (await firstValueFrom(this._projectService.archived$)).some(
+            (p) => p.id === task.projectId,
+          );
+        if (!task || isHidden) {
           return createErrorResponse(requestId, 404, 'TASK_NOT_FOUND', 'Task not found');
         }
         // Opt-in: some providers fetch the issue over the network to build

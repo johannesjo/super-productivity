@@ -31,9 +31,11 @@
 
   // Show additional buttons on focus/hover (desktop)
   //&:focus-within .additional-btns,
-  &:hover .additional-btns {
-    visibility: visible;
-    pointer-events: auto;
+  @include hoverWithPointer {
+    .additional-btns {
+      visibility: visible;
+      pointer-events: auto;
+    }
   }
 
   // Folder header drop zone styling
@@ -89,8 +91,7 @@
     padding: var(--s-half) !important;
   }
 
-  &:focus,
-  &:hover {
+  @include interactiveHighlight {
     background-color: var(--sidenav-hover-bg);
     color: var(--sidenav-text-hover);
   }

@@ -139,8 +139,7 @@ task-priority-indicator {
   &.isEditable {
     cursor: pointer;
 
-    &:hover,
-    &:focus-visible {
+    @include hoverWithPointer {
       .time {
         color: var(--text-color);
       }
@@ -150,6 +149,10 @@ task-priority-indicator {
       outline: var(--focus-ring-width) solid var(--focus-ring-color);
       outline-offset: var(--focus-ring-offset);
       border-radius: var(--radius-xs);
+
+      .time {
+        color: var(--text-color);
+      }
     }
   }
 
@@ -367,8 +370,10 @@ done-toggle {
   box-shadow: none;
   background: var(--bg-lighter) !important;
 
-  :host:hover & {
-    opacity: 1;
+  @media (hover: hover) {
+    :host:hover & {
+      opacity: 1;
+    }
   }
 
   mat-icon {
@@ -414,13 +419,16 @@ done-toggle {
   position: relative;
 }
 
-// Overdue indicator = the schedule icon itself, in the danger color. Driven by
-// the semantic :host.isOverdue host state rather than Material's `color="warn"`
-// modifier class, so the cue is decoupled from Material's theming internals and
-// reads the same across light/dark/custom themes. !important wins over the
-// Material icon-color token.
-:host.isOverdue .schedule-btn mat-icon {
-  color: var(--c-warn) !important;
+// Only overdue schedules are colored; all other dates keep the default color.
+.schedule-btn[data-scheduled-date-color='overdue'] {
+  mat-icon {
+    // The overdue state takes precedence over Material's icon-color token.
+    color: var(--c-warn) !important;
+  }
+
+  .time-badge {
+    color: var(--c-warn);
+  }
 }
 
 // Time conflict indicator: a danger "!" shown next to the schedule control,

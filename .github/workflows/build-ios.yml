@@ -4,11 +4,19 @@ on:
     tags:
       - v*
   workflow_dispatch:
-    inputs: {}
+    inputs:
+      build_only:
+        description: 'Build and export IPA without uploading to App Store Connect'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
 
 jobs:
   ios-app-store-release:
     runs-on: macos-26
+    timeout-minutes: 45
     env:
       UNSPLASH_KEY: ${{ secrets.UNSPLASH_KEY }}
       UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
@@ -31,11 +39,11 @@ jobs:
       - name: Configure iOS signing
         uses: ./.github/actions/setup-ios-signing
         with:
-          mac_certs: ${{ secrets.mac_certs }}
-          mac_certs_password: ${{ secrets.mac_certs_password }}
-          ios_provision_profile: ${{ secrets.IOS_PROVISION_PROFILE }}
-          ios_share_provision_profile: ${{ secrets.IOS_SHARE_PROVISION_PROFILE }}
-          ios_widget_provision_profile: ${{ secrets.IOS_WIDGET_PROVISION_PROFILE }}
+          mac_certs: ${{ secrets.apple_distribution_cert }}
+          mac_certs_password: ${{ secrets.apple_distribution_cert_password }}
+          ios_provision_profile: ${{ secrets.IOS_APP_STORE_PROFILE }}
+          ios_share_provision_profile: ${{ secrets.IOS_SHARE_APP_STORE_PROFILE }}
+          ios_widget_provision_profile: ${{ secrets.IOS_WIDGET_APP_STORE_PROFILE }}
 
       - name: Get npm cache directory
         id: npm-cache-dir
@@ -165,7 +173,7 @@ jobs:
         # .ruby-version file in the repo the action errors out rather than
         # using system Ruby. bundler-cache runs `bundle install` and caches the
         # ~210-gem fastlane tree so it isn't reinstalled each run.
-        uses: ruby/setup-ruby@a0102e0972be65f351c307e2d64b9314a57c8073 # v1.324.0
+        uses: ruby/setup-ruby@14594264cd68ce8a2345dd349bc3d138a4ef85c8 # v1.327.0
         with:
           ruby-version: '3.3'
           bundler-cache: true
@@ -179,6 +187,7 @@ jobs:
       # build (TestFlight). The "-" check is case-insensitive by construction,
       # unlike contains(...,'RC'); the repo's RC tags are mostly lowercase.
       - name: Upload to App Store Connect and submit for review
+        if: ${{ !inputs.build_only }}
         env:
           ASC_KEY_ID: ${{ secrets.mac_api_key_id }}
           ASC_ISSUER_ID: ${{ secrets.mac_api_key_issuer_id }}

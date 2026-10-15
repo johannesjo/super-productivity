@@ -543,7 +543,8 @@
         "OAUTH_DISCONNECTED": "Compte OAuth déconnecté.",
         "OAUTH_FAILED": "Échec de l'authentification.",
         "REMOTE_ISSUE_DELETED": "Le ticket distant a été supprimé. Supprimer la tâche liée \"{{taskTitle}}\" ?",
-        "REMOTE_ISSUE_DELETED_WITH_TIME": "Le ticket distant a été supprimé, mais la tâche \"{{taskTitle}}\" contient du temps suivi. Supprimer quand même ?"
+        "REMOTE_ISSUE_DELETED_WITH_TIME": "Le ticket distant a été supprimé, mais la tâche \"{{taskTitle}}\" contient du temps suivi. Supprimer quand même ?",
+        "POST_TIME_SUCCESS": "{{providerName}} : Entrée de temps créée avec succès pour {{issueTitle}}"
       },
       "TWO_WAY_SYNC": {
         "AUTO_CREATE_TAGS": "Créer automatiquement des balises pour les étiquettes synchronisées",
@@ -572,6 +573,15 @@
         "POLLING_MODE_DESCRIPTION": "Quand interroger : seulement lorsque le projet ou l'étiquette concerné est ouvert, ou toujours en arrière-plan",
         "POLLING_MODE_WHEN_PROJECT_OPEN": "Quand le contexte est ouvert",
         "POLLING_MODE_ALWAYS": "Toujours (en arrière-plan)"
+      },
+      "DIALOG_TRACK_TIME": {
+        "ACTIVITY": "Activité",
+        "STARTED": "Commencé",
+        "TIME_SPENT": "Temps passé",
+        "INVALID_DATE": "La valeur saisie n'est pas une date !",
+        "POST_TIME": "Enregistrer le temps",
+        "SUBMIT_TIME_FOR": "Soumettre le temps à {{providerName}} pour",
+        "TITLE": "{{providerName}} : Soumettre le journal de travail"
       }
     },
     "ISSUE_PANEL": {
@@ -795,33 +805,6 @@
         "REMINDER_NEEDS_TEXT": "Écrivez une réflexion avant de demander un rappel",
         "REMINDER_TASK_TITLE": "Revoir la note de réflexion",
         "TITLE": "Note de réflexion"
-      }
-    },
-    "NEXTCLOUD_DECK": {
-      "ISSUE_CONTENT": {
-        "LABELS": "Étiquettes",
-        "ASSIGNED_USERS": "Utilisateurs assignés",
-        "DECK_DESCRIPTION": "Description Deck",
-        "STACK": "Pile"
-      },
-      "FORM": {
-        "BASE_URL": "URL de base Nextcloud",
-        "FILTER_BY_ASSIGNEE": "Importer uniquement les cartes qui me sont assignées",
-        "IS_TRANSITION_ISSUES_ENABLED": "Synchroniser le statut d'achèvement et le titre vers Nextcloud Deck",
-        "PASSWORD": "Mot de passe d'application Nextcloud",
-        "POLL_INTERVAL_MINUTES": "Intervalle de sondage (minutes)",
-        "TITLE_TEMPLATE": "Modèle de titre de tâche",
-        "TITLE_TEMPLATE_DESCRIPTION": "Variables : {CARD_TITLE}, {BOARD}, {COLUMN}, {ID}, {LABELS}. Exemple : [{BOARD}: {COLUMN}] {CARD_TITLE}. Laissez vide pour utiliser uniquement le titre de la carte.",
-        "USERNAME": "Nom d'utilisateur Nextcloud"
-      },
-      "FORM_SECTION": {
-        "HELP": "Configurez votre intégration Nextcloud Deck pour importer des cartes en tant que tâches. Utilisez un mot de passe d'application pour l'authentification."
-      },
-      "S": {
-        "BOARD_NOT_FOUND": "Nextcloud Deck : Tableau introuvable",
-        "CARD_NOT_FOUND": "Nextcloud Deck : La carte \"{{issueId}}\" semble avoir été supprimée du serveur.",
-        "ERR_CREDENTIALS_MISSING": "Veuillez d'abord saisir l'URL Nextcloud, le nom d'utilisateur et le mot de passe.",
-        "ERR_LOAD_BOARDS": "Échec du chargement des tableaux Deck. Vérifiez vos identifiants."
       }
     },
     "NOTE": {
@@ -1082,44 +1065,6 @@
       "NO_DATA": "Pas de données pour l'année en cours",
       "PAGE_TITLE": "Historique rapide",
       "WEEK_TITLE": "Semaine {{nr}} ({{timeSpent}})"
-    },
-    "REDMINE": {
-      "DIALOG_TRACK_TIME": {
-        "ACTIVITY": "Activité",
-        "STARTED": "Commencé",
-        "TIME_SPENT": "Temps passé",
-        "INVALID_DATE": "La valeur saisie n'est pas une date !",
-        "POST_TIME": "Enregistrer le temps",
-        "SUBMIT_TIME_FOR": "Soumettre le temps à Redmine pour",
-        "TITLE": "Redmine : Soumettre le journal de travail"
-      },
-      "FORM": {
-        "API_KEY": "clé d'accès à l'API",
-        "HOST": "Hôte (ex : https://redmine.org)",
-        "PROJECT_ID": "Identifiant du projet",
-        "PROJECT_ID_DESCRIPTION": "Peut être trouvé dans une partie de l'URL, lors de la visualisation du projet dans le navigateur.",
-        "SCOPE": "Portée",
-        "SCOPE_ALL": "Tout",
-        "SCOPE_ASSIGNED": "Assigné à moi-même",
-        "SCOPE_CREATED": "Créé par moi",
-        "IS_SHOW_TIME_TRACKING_DIALOG": "Afficher la boîte de dialogue de suivi du temps pour Redmine",
-        "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Nécessite que le module de suivi du temps soit activé pour le projet Redmine",
-        "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Afficher la boîte de dialogue de suivi du temps à la fin des sous-tâches"
-      },
-      "FORM_SECTION": {
-        "HELP": "<p>Ici, vous pouvez configurer SuperProductivity pour répertorier les tickets Redmine ouverts (soit la version en ligne, soit une instance auto-hébergée) pour un projet spécifique dans le panneau de création de tâches de la vue de planification quotidienne. Ils seront répertoriés sous forme de suggestions et fourniront un lien vers le problème ainsi que plus d'informations à ce sujet.</p><p>Vous pouvez aussi importer automatiquement tous les problèmes ouverts.</p>",
-        "TITLE": "Redmine"
-      },
-      "ISSUE_CONTENT": {
-        "AUTHOR": "Auteur",
-        "DESCRIPTION": "Description",
-        "MARK_AS_CHECKED": "Marquer les mises à jour comme cochées",
-        "PRIORITY": "Priorité",
-        "STATUS": "Statut"
-      },
-      "S": {
-        "POST_TIME_SUCCESS": "Redmine : Entrée de temps créée avec succès pour {{issueTitle}}"
-      }
     },
     "REFLECTION_NOTE": {
       "ACTION_DISMISS": "Rejeter",
@@ -1609,7 +1554,7 @@
         "ERROR_DATA_IS_CURRENTLY_WRITTEN": "Les données distantes sont en cours d'écriture",
         "ERROR_PERMISSION": "Accès au fichier refusé. Veuillez vérifier les permissions de votre système de fichiers.",
         "ERROR_PERMISSION_FLATPAK": "Accès au fichier refusé. Accordez la permission du système de fichiers via Flatseal ou utilisez un chemin à l'intérieur de ~ / .var / app /",
-        "ERROR_PERMISSION_SNAP": "Accès au fichier refusé. Exécutez 'snap connect super-productivity:home' ou utilisez un chemin à l'intérieur de ~\\/snap\\/super-productivity\\/common\\/",
+        "ERROR_PERMISSION_SNAP": "Accès au fichier refusé. Exécutez 'snap connect super-productivity:home' ou utilisez un chemin à l'intérieur de ~/snap/super-productivity/common/",
         "ERROR_REMOTE_RESPONSE_NOT_SYNC_DATA": "Le serveur de synchronisation a répondu par une page web au lieu de tes données de synchronisation (par ex. une page de connexion, de proxy ou d'erreur). Tes données distantes sont probablement intactes — vérifie l'URL du serveur, tes identifiants et le réseau, puis réessaie. Si le problème persiste, tu peux écraser les données distantes via Paramètres de synchronisation → Forcer l'écrasement.",
         "FORCE_UPLOAD_FAILED": "Impossible d'écraser les données du serveur. Vos modifications locales restent disponibles.",
         "HYDRATION_FALLBACK_RECOVERY": "Échec du chargement des données enregistrées — affichage des éléments récupérés depuis le journal local. Les éléments manquants peuvent être récupérés par une synchronisation complète ou l'importation d'une sauvegarde.",
@@ -2127,7 +2072,7 @@
         "REMINDER_ADDED": "Tâche planifiée \"{{title}}\"",
         "REMINDER_DELETED": "Rappel supprimé pour la tâche",
         "REMINDER_UPDATED": "Rappel mis à jour pour la tâche \"{{title}}\"",
-        "TASK_ALREADY_EXISTS": "La tâche <strong>{{title}}<\\/strong> existe déjà",
+        "TASK_ALREADY_EXISTS": "La tâche <strong>{{title}}</strong> existe déjà",
         "TASK_CREATED": "Tâche créée \"{{taskTitle}}\"",
         "DEADLINE_REMOVED": "Échéance supprimée",
         "DEADLINE_SET": "Échéance définie pour le {{date}}"
@@ -2844,7 +2789,7 @@
       "IS_OVERLAY_INDICATOR_ENABLED": "Activer la fenêtre d'indicateur en superposition (Linux/desktop GNOME)",
       "IS_SHOW_TIP_LONGER": "Afficher le conseil de productivité au démarrage de l'application un peu plus longtemps",
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Afficher le compte à rebours actuel dans la barre d'état / menu (mac de bureau uniquement)",
-      "IS_USE_CUSTOM_WINDOW_TITLE_BAR": "Utiliser une barre de titre personnalisée (Windows\\/Linux uniquement)",
+      "IS_USE_CUSTOM_WINDOW_TITLE_BAR": "Utiliser une barre de titre personnalisée (Windows/Linux uniquement)",
       "IS_USE_CUSTOM_WINDOW_TITLE_BAR_HINT": "Nécessite un redémarrage pour prendre effet",
       "IS_VERTICAL_ACTION_BAR": "Barre d'actions verticale sur le côté (expérimentale)",
       "IS_VERTICAL_ACTION_BAR_HINT": "Déplace les boutons d'action de l'en-tête dans une bande verticale sur le bord droit de la fenêtre. Version de bureau uniquement.",

@@ -47,12 +47,12 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     defaultProjectId: INBOX_PROJECT.id,
     isMarkdownFormattingInNotesEnabled: true,
     notesTemplate: defaultTaskNotesTemplate,
+    priorityIconPreset: 'chevrons',
   },
   misc: {
     isConfirmBeforeExit: false,
     isConfirmBeforeExitWithoutFinishDay: true,
     isMinimizeToTray: false,
-    isLocalRestApiEnabled: false,
     isCheckForUpdates: true,
     isTrayShowCurrentCountdown: true,
     startOfNextDay: 0,
@@ -240,8 +240,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     // TODO maybe enable later if it works well
     isCompressionEnabled: false,
     isEncryptionEnabled: false,
-    // SPAP-11: opt-in split-file ("Surgical") sync. Default OFF (single-file v2).
-    isUseSplitSyncFiles: false,
+    // Absent: join the remote format; empty folders get EMPTY_FOLDER_SYNC_FORMAT.
     encryptKey: null,
     syncProvider: null,
     syncInterval: minute,

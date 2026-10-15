@@ -43,6 +43,7 @@ import {
   InvalidFilePrefixError,
   JsonParseError,
   SyncDataCorruptedError,
+  ClientUpdateRequiredSPError,
   UploadRevToMatchMismatchAPIError,
   WebDavNativeRequestError,
   EncryptNoPasswordError,
@@ -2293,6 +2294,25 @@ describe('SyncWrapperService', () => {
       expect(callArgs['actionFn']).toBeUndefined();
     });
 
+    it('asks to update the app when the server requires a newer version, without signing out', async () => {
+      mockSyncService.downloadRemoteOps.and.returnValue(
+        Promise.reject(new ClientUpdateRequiredSPError()),
+      );
+
+      const result = await service.sync();
+
+      expect(result).toBe('HANDLED_ERROR');
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('ERROR');
+      expect(mockProviderManager.clearAuthCredentials).not.toHaveBeenCalled();
+      expect(mockSnackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          msg: T.F.SYNC.S.VERSION_TOO_OLD,
+          actionStr: T.PS.UPDATE_APP,
+          type: 'ERROR',
+        }),
+      );
+    });
+
     describe('LocalDataConflictError handling', () => {
       beforeEach(() => {
         mockOpLogStore.getVectorClockEntry.and.returnValue(
@@ -2891,6 +2911,32 @@ describe('SyncWrapperService', () => {
       );
       expect(mockSnackService.open).not.toHaveBeenCalled();
       expect(mockProviderManager.setSyncStatus).not.toHaveBeenCalledWith('ERROR');
+    });
+
+    it('should surface uploads rejected cycle after cycle once (#10808)', async () => {
+      mockSyncService.uploadPendingOps.and.returnValue(
+        Promise.reject(new UploadRevToMatchMismatchAPIError('retries exhausted')),
+      );
+      const rejectedNotices = (): number =>
+        mockSnackService.open.calls
+          .allArgs()
+          .filter(
+            ([params]) =>
+              typeof params === 'object' &&
+              params.msg === T.F.SYNC.S.UPLOAD_REJECTED_REPEATEDLY,
+          ).length;
+
+      expect(await service.sync()).toBe('HANDLED_ERROR');
+      expect(await service.sync()).toBe('HANDLED_ERROR');
+      expect(rejectedNotices()).toBe(0);
+      expect(mockProviderManager.setSyncStatus).not.toHaveBeenCalledWith('ERROR');
+
+      expect(await service.sync()).toBe('HANDLED_ERROR');
+      expect(await service.sync()).toBe('HANDLED_ERROR');
+      expect(rejectedNotices()).toBe(1);
+      expect(mockProviderManager.setSyncStatus.calls.mostRecent().args).toEqual([
+        'ERROR',
+      ]);
     });
 
     it('should explain a rejected plaintext remote for a user-triggered encrypted sync', async () => {
