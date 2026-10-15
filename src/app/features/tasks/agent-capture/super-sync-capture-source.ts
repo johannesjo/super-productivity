@@ -10,6 +10,7 @@ import { INBOX_PROJECT } from '../../project/project.const';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { DEFAULT_TASK, Task, TaskReminderOptionId } from '../task.model';
 import { remindOptionToMilliseconds } from '../util/remind-option-to-milliseconds';
+import { isValidDBDateStr } from '../../../util/get-db-date-str';
 import { addTaskRepeatCfgToTask } from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 import { nanoid } from 'nanoid';
 import {
@@ -25,7 +26,6 @@ export const AGENT_CAPTURE_RECEIPTS_KEY = 'sp-agent-capture-receipts';
 // Server limits (capture.const.ts), re-checked before a payload becomes a synced task.
 const TITLE_MAX_CHARS = 500;
 const NOTES_MAX_CHARS = 8 * 1024;
-const DUE_DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
 const DUE_TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
 /** The server has no capture routes (feature off, rollback, other server). */
@@ -171,19 +171,8 @@ export const neutralizeAutoloadMedia = (notes: string): string =>
   // `!+`: dropping one `!` of `!![` would leave a working `![`.
   notes.replace(/!+\[/g, '[').replace(AUTOLOAD_TAG, '&lt;');
 
-/** Rejects shapes like 2026-02-30 that the pattern lets through. */
-const parseDueDay = (value: unknown): string | undefined => {
-  if (typeof value !== 'string') return undefined;
-  const m = DUE_DATE_RE.exec(value);
-  if (!m) return undefined;
-  const [year, month, day] = [Number(m[1]), Number(m[2]), Number(m[3])];
-  const utc = new Date(Date.UTC(year, month - 1, day));
-  return utc.getUTCFullYear() === year &&
-    utc.getUTCMonth() === month - 1 &&
-    utc.getUTCDate() === day
-    ? value
-    : undefined;
-};
+const parseDueDay = (value: unknown): string | undefined =>
+  typeof value === 'string' && isValidDBDateStr(value) ? value : undefined;
 
 const parseDueTime = (value: unknown): [number, number] | undefined => {
   if (typeof value !== 'string') return undefined;
