@@ -333,27 +333,6 @@
   @include schedule-deadline.badge-count(var(--bg-lighter));
 }
 
-.deadline-card {
-  --deadline-task-accent: var(--color-warning);
-  --deadline-task-border: 3px solid var(--color-warning);
-  --deadline-task-bg: color-mix(
-    in srgb,
-    var(--color-warning) 12%,
-    var(--schedule-event-bg)
-  );
-  --planner-item-height: calc(var(--schedule-row-height) * 4);
-
-  align-self: stretch;
-  min-width: 0;
-  margin: 0 var(--s-half) var(--s-quarter) var(--s-half);
-  position: relative;
-  z-index: 3;
-
-  @include mq(xs, max) {
-    --planner-item-height: calc(var(--schedule-row-height-mobile) * 4);
-  }
-}
-
 .time {
   grid-column: 1;
   align-self: end;

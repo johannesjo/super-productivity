@@ -163,15 +163,6 @@
     }
   }
 
-  <!-- Deadline cards -->
-  @for (deadline of deadlineCards(); track deadline.task.id) {
-    <planner-deadline-task
-      class="deadline-card"
-      [task]="deadline.task"
-      [style]="deadline.style"
-    ></planner-deadline-task>
-  }
-
   @if (
     (!isTaskDragActive() || isCtrlPressed()) && newTaskPlaceholder();
     as newTaskPlaceholder
