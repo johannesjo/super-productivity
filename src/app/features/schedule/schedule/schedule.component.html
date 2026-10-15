@@ -171,6 +171,7 @@
             [workStartEnd]="workStartEnd() || null"
             [currentTimeRow]="page.day === _todayDateStr() ? nowRow() : null"
             [todayDateStr]="_todayDateStr()"
+            [deadlineTasksByDay]="deadlineTasksByDay()"
           ></schedule-week>
         </ng-template>
       </swipe-pager>

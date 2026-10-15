@@ -1513,6 +1513,36 @@ describe('ScheduleComponent', () => {
       expect(el.querySelector('schedule-month')).toBeFalsy();
     });
 
+    it('passes deadline tasks to the paged day view badge', fakeAsync(() => {
+      const store = TestBed.inject(MockStore);
+      store.overrideSelector(
+        selectMapOfAllTasksInActiveProjects,
+        new Map<string, Task>([
+          [
+            'task-1',
+            {
+              ...DEFAULT_TASK,
+              id: 'task-1',
+              projectId: 'project-1',
+              title: 'Day-view deadline',
+              deadlineDay: '2026-01-20',
+            },
+          ],
+        ]),
+      );
+      store.refreshState();
+      mockScheduleService.getDaysToShow.and.returnValue(['2026-01-20']);
+      mockLayoutService.selectedTimeView.set('day');
+
+      fixture.detectChanges();
+      tick();
+      fixture.detectChanges();
+
+      const el: HTMLElement = fixture.nativeElement;
+      expect(el.querySelector('schedule-week .deadline-badge')).toBeTruthy();
+      expect(el.querySelector('schedule-week planner-deadline-task')).toBeFalsy();
+    }));
+
     it('has a day-view toggle button that selects day mode', () => {
       const el: HTMLElement = fixture.nativeElement;
       const dayBtn = el.querySelector<HTMLButtonElement>(
