@@ -57,6 +57,7 @@
           },
           "configurations": {
             "development": {
+              "externalDependencies": ["marked-katex-extension"],
               "budgets": [
                 {
                   "type": "anyComponentStyle",

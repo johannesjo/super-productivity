@@ -56,7 +56,6 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     // NOTE: isAutoStartOnSystemStartup is intentionally NOT defaulted here. Electron
     // applies the value on every launch, so a default would remove login items users
     // set up in their OS (#5572).
-    isLocalRestApiEnabled: false,
     isCheckForUpdates: true,
     isTrayShowCurrentCountdown: true,
     startOfNextDay: 0,

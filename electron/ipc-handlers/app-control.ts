@@ -16,7 +16,6 @@ import { errorHandlerWithFrontendInform } from '../error-handler-with-frontend-i
 import { GlobalConfigState } from '../../src/app/features/config/global-config.model';
 import { saveSimpleStore } from '../simple-store';
 import { SimpleStoreKey } from '../shared-with-frontend/simple-store.const';
-import { updateLocalRestApiConfig } from '../local-rest-api';
 import {
   getDistChannel,
   LOGIN_ITEM_CHANNELS,
@@ -51,7 +50,6 @@ export const initAppControlIpc = (): void => {
     );
     setIsTrayShowCurrentCountdown(!!cfg.misc.isTrayShowCurrentCountdown);
     refreshIndicator();
-    updateLocalRestApiConfig(cfg);
 
     const isAutoStart = cfg.misc.isAutoStartOnSystemStartup;
     const distChannel = getDistChannel();

@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { of } from 'rxjs';
+import { BehaviorSubject, of } from 'rxjs';
 import { LocalRestApiHandlerService } from './local-rest-api-handler.service';
 import { TaskService } from '../../features/tasks/task.service';
 import { TaskArchiveService } from '../../features/archive/task-archive.service';
@@ -18,6 +18,7 @@ import {
 } from './local-rest-api-feature-routes';
 import { TODAY_TAG } from '../../features/tag/tag.const';
 import { DateService } from '../date/date.service';
+import { DataInitStateService } from '../data-init/data-init-state.service';
 import { Task, TaskWithSubTasks, TaskArchive } from '../../features/tasks/task.model';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import {
@@ -38,6 +39,7 @@ import {
 } from '../../features/focus-mode/store/focus-mode.reducer';
 
 describe('LocalRestApiHandlerService', () => {
+  let isDataLoaded$: BehaviorSubject<boolean>;
   let service: LocalRestApiHandlerService;
   let taskServiceMock: jasmine.SpyObj<TaskService>;
   let taskArchiveServiceMock: jasmine.SpyObj<TaskArchiveService>;
@@ -201,6 +203,7 @@ describe('LocalRestApiHandlerService', () => {
       ['add', 'update', 'remove', 'archive'],
       {
         list$: of([]),
+        archived$: of([]),
       },
     );
     Object.defineProperty(projectServiceMock, 'list', {
@@ -231,6 +234,8 @@ describe('LocalRestApiHandlerService', () => {
 
     featureRoutes = [];
 
+    isDataLoaded$ = new BehaviorSubject<boolean>(true);
+
     TestBed.configureTestingModule({
       providers: [
         LocalRestApiHandlerService,
@@ -241,6 +246,10 @@ describe('LocalRestApiHandlerService', () => {
         { provide: DateService, useValue: dateServiceMock },
         { provide: LOCAL_REST_API_FEATURE_BRIDGE, useValue: featureBridgeMock },
         { provide: LOCAL_REST_API_FEATURE_ROUTES, useValue: featureRoutes },
+        {
+          provide: DataInitStateService,
+          useValue: { isAllDataLoadedInitially$: isDataLoaded$ },
+        },
         provideMockStore({ initialState: { focusMode: initialFocusModeState } }),
       ],
     });
@@ -266,6 +275,29 @@ describe('LocalRestApiHandlerService', () => {
       const firstHandler = requestHandler;
       service.init();
       expect(requestHandler).toBe(firstHandler);
+    });
+  });
+
+  describe('readiness', () => {
+    beforeEach(() => {
+      service.init();
+    });
+
+    it('answers APP_NOT_READY until the app data has loaded', async () => {
+      isDataLoaded$.next(false);
+      const notReady = await sendRequestAndWait(createRequest('GET', '/tasks'));
+      expect(notReady.status).toBe(503);
+      expect(notReady.body).toEqual(
+        jasmine.objectContaining({
+          ok: false,
+          error: jasmine.objectContaining({ code: 'APP_NOT_READY' }),
+        }),
+      );
+      expect(taskServiceMock.add).not.toHaveBeenCalled();
+
+      isDataLoaded$.next(true);
+      const ready = await sendRequestAndWait(createRequest('GET', '/tasks'));
+      expect(ready.status).toBe(200);
     });
   });
 
@@ -656,6 +688,21 @@ describe('LocalRestApiHandlerService', () => {
         expect(response.body.ok).toBe(true);
         expect(response.status).toBe(200);
         expectTaskIds(response, ['task-1', 'task-2']);
+      });
+
+      it('should leave out tasks of archived projects by default', async () => {
+        const tasks = [
+          createMockTask('task-1', { projectId: 'live' }),
+          createMockTask('task-2', { projectId: 'shelved' }),
+        ];
+        Object.defineProperty(taskServiceMock, 'allTasks$', { get: () => of(tasks) });
+        Object.defineProperty(projectServiceMock, 'archived$', {
+          get: () => of([{ id: 'shelved', isArchived: true } as Project]),
+        });
+
+        const response = await sendRequestAndWait(createRequest('GET', '/tasks'));
+
+        expectTaskIds(response, ['task-1']);
       });
 
       it('should filter tasks by query', async () => {
@@ -1360,6 +1407,25 @@ describe('LocalRestApiHandlerService', () => {
         expect(response.body.ok).toBe(false);
         expect(response.status).toBe(404);
         expect((response.body as any).error.code).toBe('TASK_NOT_FOUND');
+      });
+
+      it('should hide a task of an archived project only when source=active', async () => {
+        const shelvedTask = createMockTask('task-1', { projectId: 'shelved' });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(shelvedTask),
+        });
+        Object.defineProperty(projectServiceMock, 'archived$', {
+          get: () => of([{ id: 'shelved', isArchived: true } as Project]),
+        });
+
+        const active = await sendRequestAndWait(
+          createRequest('GET', '/tasks/task-1', { query: { source: 'active' } }),
+        );
+        const plain = await sendRequestAndWait(createRequest('GET', '/tasks/task-1'));
+
+        expect(active.status).toBe(404);
+        expect((active.body as any).error.code).toBe('TASK_NOT_FOUND');
+        expect(plain.status).toBe(200);
       });
 
       describe('issueUrl', () => {
