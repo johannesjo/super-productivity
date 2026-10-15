@@ -10,14 +10,20 @@ import {
   SyncStatusChangePayload,
 } from '../../../op-log/sync-providers/provider-manager.service';
 import { GlobalConfigService } from '../../config/global-config.service';
-import { CaptureKeyConfig, SyncConfig } from '../../config/global-config.model';
+import {
+  CaptureKeyConfig,
+  GlobalConfigState,
+  SyncConfig,
+} from '../../config/global-config.model';
+import { DateService } from '../../../core/date/date.service';
+import { TaskReminderOptionId } from '../task.model';
 import {
   NativeCaptureImporter,
   NativeCaptureImportResult,
 } from '../native-capture/native-capture-importer.service';
 import { Log } from '../../../core/log';
 import { AgentCaptureService } from './agent-capture.service';
-import { CaptureUnsupportedError } from './super-sync-capture-source';
+import { AgentCaptureRun, CaptureUnsupportedError } from './super-sync-capture-source';
 
 describe('AgentCaptureService', () => {
   const KEY: CaptureKeyConfig = { v: 1, privateKeyPkcs8: 'priv', publicKeySpki: 'pub' };
@@ -25,6 +31,7 @@ describe('AgentCaptureService', () => {
   let syncing$: BehaviorSubject<boolean>;
   let syncStatus$: BehaviorSubject<SyncStatusChangePayload>;
   let syncCfg: ReturnType<typeof signal<Partial<SyncConfig> | undefined>>;
+  let globalCfg: ReturnType<typeof signal<GlobalConfigState | undefined>>;
   let provider: {
     id: SyncProviderId;
     registerCaptureKey: jasmine.Spy;
@@ -81,6 +88,7 @@ describe('AgentCaptureService', () => {
     syncing$ = new BehaviorSubject(false);
     syncStatus$ = new BehaviorSubject<SyncStatusChangePayload>('UNKNOWN_OR_CHANGED');
     syncCfg = signal<Partial<SyncConfig> | undefined>({ captureKey: KEY });
+    globalCfg = signal<GlobalConfigState | undefined>(undefined);
     provider = {
       id: SyncProviderId.SuperSync,
       registerCaptureKey: jasmine.createSpy().and.callFake(async () => {
@@ -100,6 +108,7 @@ describe('AgentCaptureService', () => {
           provide: GlobalConfigService,
           useValue: {
             sync: syncCfg,
+            cfg: globalCfg,
             updateSection: jasmine
               .createSpy('updateSection')
               .and.callFake((_: string, cfg: Partial<SyncConfig>) => {
@@ -116,6 +125,7 @@ describe('AgentCaptureService', () => {
             assertSyncEpochUnchanged: () => undefined,
           },
         },
+        { provide: DateService, useValue: { todayStr: () => '2026-10-15' } },
         {
           provide: SyncWrapperService,
           useValue: { isSyncInProgress$: syncing$ },
@@ -254,5 +264,33 @@ describe('AgentCaptureService', () => {
     provider.disableCaptureKey.and.rejectWith(new Error('offline'));
     await expectAsync(service.switchOff()).toBeRejected();
     expect(calls).toEqual([]);
+  });
+  describe('the run handed to the capture source', () => {
+    // The source's only way in: it calls this at the start of each claim.
+    const startRun = (): AgentCaptureRun | null =>
+      (service as unknown as { _startRun: () => AgentCaptureRun | null })._startRun();
+
+    it("schedules with this device's today and the user's reminder default", () => {
+      globalCfg.set({
+        timeTracking: { defaultEstimate: 900_000 },
+        reminder: { defaultTaskRemindOption: TaskReminderOptionId.m10 },
+      } as unknown as GlobalConfigState);
+      expect(startRun()).toEqual(
+        jasmine.objectContaining({
+          todayStr: '2026-10-15',
+          defaultEstimate: 900_000,
+          defaultRemindOption: TaskReminderOptionId.m10,
+        }),
+      );
+    });
+
+    it('falls back to the app defaults before the config has loaded', () => {
+      expect(startRun()).toEqual(
+        jasmine.objectContaining({
+          defaultEstimate: 0,
+          defaultRemindOption: TaskReminderOptionId.AtStart,
+        }),
+      );
+    });
   });
 });
