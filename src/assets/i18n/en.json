@@ -3058,6 +3058,7 @@
   },
   "MIGRATE": {
     "C_DOWNLOAD_BACKUP": "Do you want to download a backup of your legacy data (can be used with older versions of Super Productivity)?",
+    "C_IMPORT_PRE_V13_DATA": "Data from Super Productivity 12 or older was found on this device ({{tasks}} tasks, {{projects}} projects), but this version did not carry it over. Import it now? A copy is offered as a download first.\n\nIf you cancel, the old data stays untouched and you will be asked again while the app is empty.",
     "DETECTED_LEGACY": "Detected legacy data. We will migrate it for you!",
     "DIALOG_MESSAGE": "We're updating how your data is stored for improved sync reliability. A backup will be downloaded automatically.",
     "DIALOG_TITLE": "Migrating Your Data",
