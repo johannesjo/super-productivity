@@ -36,7 +36,6 @@
       : $safeNavigationMigration(filteredTasks()?.length)
   "
   [attr.data-id]="listModelId()"
-  [attr.data-section-id]="sectionId()"
   [class.is-multi-dragging]="multiDrag.isListGroupDrag()"
   class="task-list-inner"
 >
@@ -44,7 +43,6 @@
     <task
       [isInSubTaskList]="isSubTaskList()"
       [isBacklog]="isBacklog()"
-      [sectionId]="sectionId()"
       [task]="task"
       cdkDrag
       [cdkDragStartDelay]="dragDelayForTouch()"
