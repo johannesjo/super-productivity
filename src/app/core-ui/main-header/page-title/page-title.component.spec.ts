@@ -173,7 +173,7 @@ describe('PageTitleComponent', () => {
       expect(c.isSpecialSection()).toBe(true);
     });
 
-    it('is true for /all-tasks', () => {
+    it('is false for /all-tasks', () => {
       const c = setupComponent('/all-tasks');
       expect(c.isSpecialSection()).toBe(false);
     });

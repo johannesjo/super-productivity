@@ -353,7 +353,7 @@ export class WorkViewComponent implements OnInit, OnDestroy {
   );
 
   // Section Logic
-  sections = toSignal(
+  private _activeContextSections = toSignal(
     this.workContextService.activeWorkContextId$.pipe(
       switchMap((id) =>
         id
@@ -362,6 +362,23 @@ export class WorkViewComponent implements OnInit, OnDestroy {
       ),
     ),
     { initialValue: [] as readonly Section[] },
+  );
+
+  /**
+   * Sections are Today's affordance, and an All Tasks page switches the active
+   * context to Today while showing every project's tasks. Reading the active
+   * context's sections there would render Today's sections — with their
+   * edit/delete menus — over a list that is not Today, and dropping a project
+   * task into one would store a non-Today task id in a Today section (synced,
+   * so the task appears in that section as soon as it is planned for today).
+   * Gate them off with the other Today-only panels (Overdue, Later Today);
+   * every consumer — template, `undoneTasksBySection`, `dropSection` and
+   * `_expandCollapsedContainerFor` — reads this signal, so they stay in step.
+   */
+  sections = computed(() =>
+    this.isDisableTodayPanels()
+      ? ([] as readonly Section[])
+      : this._activeContextSections(),
   );
 
   undoneTasksBySection = computed(() => {

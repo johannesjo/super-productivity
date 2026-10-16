@@ -168,6 +168,7 @@
                     listId="PARENT"
                     listModelId="UNDONE"
                     [groupTagId]="group.tagId"
+                    [isSortingDisabled]="isDisableTodayPanels()"
                   ></task-list>
                 </collapsible>
               }
@@ -254,6 +255,7 @@
                 [tasks]="customized.list"
                 listId="PARENT"
                 listModelId="UNDONE"
+                [isSortingDisabled]="isDisableTodayPanels()"
               ></task-list>
             }
           }
@@ -377,6 +379,7 @@
                   [tasks]="doneTasks()"
                   listId="PARENT"
                   listModelId="DONE"
+                  [isSortingDisabled]="isDisableTodayPanels()"
                 ></task-list>
                 <div class="finish-day-button-wrapper">
                   @if (hasDoneTasks() && (!isOnTodayList() || !isFinishDayEnabled())) {

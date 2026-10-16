@@ -379,6 +379,7 @@ describe('WorkViewComponent', () => {
     const setup = async (
       sections: Section[],
       undone: TaskWithSubTasks[],
+      isDisableTodayPanels = false,
     ): Promise<WorkViewComponent> => {
       configureWorkViewTestBed({
         sectionService: {
@@ -393,6 +394,7 @@ describe('WorkViewComponent', () => {
       fixture.componentRef.setInput('undoneTasks', undone);
       fixture.componentRef.setInput('doneTasks', []);
       fixture.componentRef.setInput('backlogTasks', []);
+      fixture.componentRef.setInput('isDisableTodayPanels', isDisableTodayPanels);
       fixture.detectChanges();
       return fixture.componentInstance;
     };
@@ -450,6 +452,34 @@ describe('WorkViewComponent', () => {
       const result = cmp.undoneTasksBySection();
       expect(result.dict).toEqual({});
       expect(result.noSection.map((t) => t.id)).toEqual(['a', 'b']);
+    });
+
+    it('renders no sections on an All Tasks-style page, even when the active context has some', async () => {
+      // All Tasks switches the active context to Today, so Today's sections
+      // would otherwise render over a list that is not Today — with their
+      // edit/delete menus — and dropping a project task into one would store a
+      // non-Today task id in a Today section (a synced write).
+      const cmp = await setup(
+        [buildSection('s1', ['a'])],
+        [buildTask('a'), buildTask('b')],
+        true,
+      );
+
+      expect(cmp.sections()).toEqual([]);
+      const result = cmp.undoneTasksBySection();
+      expect(result.dict).toEqual({});
+      expect(result.noSection.map((t) => t.id)).toEqual(['a', 'b']);
+    });
+
+    it('still renders sections when Today panels are on', async () => {
+      // The guard must key on the page, not disable sections everywhere.
+      const cmp = await setup(
+        [buildSection('s1', ['a'])],
+        [buildTask('a'), buildTask('b')],
+      );
+
+      expect(cmp.sections().map((s) => s.id)).toEqual(['s1']);
+      expect(cmp.undoneTasksBySection().dict['s1'].map((t) => t.id)).toEqual(['a']);
     });
   });
 
