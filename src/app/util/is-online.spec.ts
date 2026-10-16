@@ -187,6 +187,12 @@ describe('isOnline utilities', () => {
       // At most one new value (offline) should have been added
       expect(values.length).toBeLessThanOrEqual(initialLength + 1);
 
+      // isOnline$ is an app-wide shareReplay(1): leaving it offline would make
+      // every later spec in the run (e.g. the main header's sync button) see
+      // the app as offline.
+      window.dispatchEvent(new Event('online'));
+      tick(1100);
+
       sub.unsubscribe();
       discardPeriodicTasks();
     }));
