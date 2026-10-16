@@ -8,6 +8,9 @@ import { Log } from '../log';
  * into `pf` on first start; that migration was removed in v17.0.0 (04728267e),
  * so a profile that jumps from v12 or older straight to v17+ boots empty while
  * its data is still here (#7345).
+ *
+ * Transitional: the group it helps (v12-or-older profiles that never opened
+ * v17+) only shrinks. Remove this service and its startup hook after 2027-10.
  */
 const DB_NAME = 'SUP';
 const STORE_NAME = 'SUP_STORE';
