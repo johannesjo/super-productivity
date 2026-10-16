@@ -270,6 +270,7 @@ const SHARED_FIELDS: Readonly<Record<string, Readonly<Record<string, string>>>> 
     _deferredProcessingChain: 'settled at every step boundary: _settle drains it',
   },
   OperationCaptureService: { PENDING_WARNING_THRESHOLD: CONSTANT },
+  OperationLogMigrationService: { completionDisplayMs: CONSTANT },
   OperationWriteFlushService: {
     MAX_WAIT_TIME: CONSTANT,
     MAX_CUTOFF_ATTEMPTS: CONSTANT,
@@ -421,10 +422,22 @@ class FuzzClock {
   }
 }
 
+/**
+ * A class's source name. The esbuild test bundle renames classes it hoists or
+ * dedupes (`_State`, `LockService2`), which `name` would otherwise report; a
+ * name the tables above list (`DomRendererFactory2`) is kept as is.
+ */
+const sourceClassName = (name: string): string => {
+  const bare = name.replace(/^_/, '');
+  const isListed =
+    FRAMEWORK_CLASSES.has(bare) || bare in SHARED_CLASSES || bare in SHARED_FIELDS;
+  return isListed ? bare : bare.replace(/\d+$/, '');
+};
+
 /** A dialog stub: records every dialog and closes it with `onOpen`'s answer. */
 const recordingDialog = (onOpen: (name: string) => unknown): Partial<MatDialog> => ({
   open: ((component: { name?: string }) => {
-    const answer = onOpen(component?.name ?? 'dialog');
+    const answer = onOpen(component?.name ? sourceClassName(component.name) : 'dialog');
     return { afterClosed: () => of(answer), close: () => undefined };
   }) as unknown as MatDialog['open'],
   openDialogs: [],
@@ -491,7 +504,7 @@ export class SyncFuzzHarness {
     (jasmine.isSpy(crypto.getRandomValues)
       ? (crypto.getRandomValues as jasmine.Spy)
       : spyOn(crypto, 'getRandomValues')
-    ).and.callFake((array: Uint8Array) => {
+    ).and.callFake((array: Uint8Array<ArrayBuffer>) => {
       const random = this._seededRandom;
       if (!random || !(array instanceof Uint8Array)) return getRandomValues(array);
       for (let i = 0; i < array.length; i++) array[i] = Math.floor(random() * 256);
@@ -702,7 +715,9 @@ export class SyncFuzzHarness {
       const values: Record<string, unknown> = {};
       for (const name of names) {
         if (!(name in instance)) {
-          throw new Error(`SyncFuzz: ${instance.constructor.name}.${name} is gone`);
+          throw new Error(
+            `SyncFuzz: ${sourceClassName(instance.constructor.name)}.${name} is gone`,
+          );
         }
         values[name] = structuredClone(fieldsOf(instance)[name]);
       }
@@ -796,7 +811,8 @@ export class SyncFuzzHarness {
     const unlisted: string[] = [];
     for (const instance of values) {
       if (!instance || typeof instance !== 'object' || Array.isArray(instance)) continue;
-      const name = instance.constructor?.name;
+      const rawName = instance.constructor?.name;
+      const name = rawName && sourceClassName(rawName);
       if (!name || name === 'Object' || FRAMEWORK_CLASSES.has(name)) continue;
       if (SHARED_CLASSES[name]) continue;
       const device = this._deviceFieldNames.get(instance);

@@ -164,6 +164,25 @@ describe('TaskContextMenuInnerComponent', () => {
     store.resetSelectors();
   });
 
+  describe('touch selection entry point', () => {
+    for (const [name, selectable, inDetails, expected] of [
+      ['planner card', true, false, true],
+      ['opted-out card', false, false, false],
+      ['detail panel card', true, true, false],
+    ] as const) {
+      it(`recognizes ${name}`, fakeAsync(() => {
+        const container = document.createElement(inDetails ? 'task-detail-panel' : 'div');
+        const card = document.createElement('planner-task');
+        if (selectable) card.setAttribute('data-task-selectable', 'true');
+        container.appendChild(card);
+        card.appendChild(fixture.nativeElement);
+        component.ngAfterViewInit();
+        expect(component.isInTaskRow).toBe(expected);
+        flush();
+      }));
+    }
+  });
+
   describe('enterSelectionMode()', () => {
     it('enters touch selection mode with the task selected', () => {
       const multiSelect = TestBed.inject(TaskMultiSelectService);
@@ -435,6 +454,21 @@ describe('TaskContextMenuInnerComponent', () => {
   });
 
   describe('deleteTask()', () => {
+    // #8583: Enter in the delete confirm deletes the task.
+    it('focuses the confirm button of the delete dialog', () => {
+      const openSpy = spyOn(TestBed.inject(MatDialog), 'open').and.callThrough();
+      component.task = { ...DEFAULT_TASK, id: 'T1', projectId: 'P1' };
+
+      void component.deleteTask();
+
+      expect(openSpy).toHaveBeenCalledWith(
+        jasmine.anything(),
+        jasmine.objectContaining({
+          data: jasmine.objectContaining({ isFocusConfirm: true }),
+        }),
+      );
+    });
+
     // #9946: the selector returns undefined for a task that is gone from the
     // store; removing an id-less stub used to wipe every top-level task.
     it('removes nothing when the task is gone from the store', fakeAsync(() => {

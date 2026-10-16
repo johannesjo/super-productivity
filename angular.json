@@ -57,6 +57,7 @@
           },
           "configurations": {
             "development": {
+              "externalDependencies": ["marked-katex-extension"],
               "budgets": [
                 {
                   "type": "anyComponentStyle",
@@ -68,7 +69,8 @@
               "sourceMap": true,
               "namedChunks": false,
               "aot": false,
-              "serviceWorker": "ngsw-config.json"
+              "serviceWorker": "ngsw-config.json",
+              "externalDependencies": ["marked-katex-extension"]
             },
             "production": {
               "baseHref": "",
@@ -232,7 +234,7 @@
           }
         },
         "test": {
-          "builder": "@angular-devkit/build-angular:karma",
+          "builder": "@angular/build:karma",
           "options": {
             "main": "src/test.ts",
             "polyfills": ["zone.js", "zone.js/testing", "src/polyfills.ts"],

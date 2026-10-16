@@ -26,6 +26,10 @@ export type MiscConfig = Readonly<{
   isConfirmBeforeExit: boolean;
   isConfirmBeforeExitWithoutFinishDay: boolean;
   isMinimizeToTray: boolean;
+  // Legacy: the local REST API switch is device-local now (Electron main's
+  // simple store), because a synced switch started the listener on every
+  // desktop. Nothing reads or writes this anymore; kept optional so synced data
+  // from older clients keeps validating.
   isLocalRestApiEnabled?: boolean;
   // Desktop-only daily check for a newer GitHub release (#5463). Optional
   // because it was added later; a missing key means ON (see UpdateCheckService).
@@ -225,6 +229,16 @@ export type SoundConfig = Readonly<{
   volume: number;
 }>;
 
+/**
+ * Base64 DER encodings; see sync-core `capture-open.ts` for the format.
+ * `v` is open-ended so typia accepts a future version; clients skip it.
+ */
+export type CaptureKeyConfig = Readonly<{
+  v: number;
+  privateKeyPkcs8: string;
+  publicKeySpki: string;
+}>;
+
 export type SyncConfig = Readonly<{
   isEnabled: boolean;
   isEncryptionEnabled?: boolean;
@@ -238,6 +252,12 @@ export type SyncConfig = Readonly<{
   syncProvider: SyncProviderId | null;
   syncInterval: number;
   isManualSyncOnly?: boolean;
+  /**
+   * Agent task capture key pair (SuperSync). Synced on purpose: every device
+   * opens captures sealed to it. Absent or null means capture is off; null is
+   * what switching off writes, since an absent field does not travel.
+   */
+  captureKey?: CaptureKeyConfig | null;
 
   /* NOTE: view model for form only*/
   encryptKey?: string | null;
@@ -418,6 +438,11 @@ export type CustomCfgSection =
 export interface ConfigSectionAction {
   label: string;
   icon?: string;
+  /**
+   * Renders as a full-width row styled like the section's fields (icon, label,
+   * chevron) instead of a button below them — for navigating somewhere else.
+   */
+  isRow?: boolean;
   onClick: () => void | Promise<void>;
 }
 

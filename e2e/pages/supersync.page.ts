@@ -208,7 +208,10 @@ export class SuperSyncPage extends BasePage {
     this.syncBtn = page.locator('button.sync-btn');
     this.providerSelect = page.locator('formly-field-mat-select mat-select');
     this.baseUrlInput = page.locator('.e2e-baseUrl input');
-    this.accessTokenInput = page.locator('.e2e-accessToken textarea');
+    // Current clients render an input (#10784); released clients a textarea.
+    this.accessTokenInput = page.locator(
+      '.e2e-accessToken input, .e2e-accessToken textarea',
+    );
     this.presenceDeviceNameInput = page.locator('.e2e-presenceDeviceName input');
     this.enableEncryptionBtn = page.locator('.e2e-enable-encryption-btn button');
     this.disableEncryptionBtn = page.locator('.e2e-disable-encryption-btn button');
@@ -1366,6 +1369,14 @@ export class SuperSyncPage extends BasePage {
    *
    * Prerequisites: SuperSync must already be configured without encryption
    */
+  /** Opens the sync settings dialog with the saved SuperSync config loaded. */
+  async openSuperSyncSettings(): Promise<Locator> {
+    await this.clickSyncBtn({ button: 'right', noWaitAfter: true });
+    await this.providerSelect.waitFor({ state: 'visible', timeout: 10000 });
+    await this.selectSuperSyncProviderWithRetry();
+    return this.page.locator('dialog-sync-cfg');
+  }
+
   async enableEncryption(password: string): Promise<void> {
     const enableEncryptionDialog = this.page.locator('dialog-enable-encryption');
 
@@ -1718,6 +1729,15 @@ export class SuperSyncPage extends BasePage {
   }
 
   /**
+   * Starts a sync and waits for a successful ops response, but not for the
+   * in-sync check: work that adds ops as soon as a sync ends (the agent
+   * capture import) keeps the check hidden until the next sync.
+   */
+  async startSync(): Promise<void> {
+    await this._triggerSuperSyncCycle(30000);
+  }
+
+  /**
    * Wait for an ongoing sync operation to complete.
    * Useful when sync is triggered automatically (e.g., after data changes).
    * Fails if the whole-dataset conflict dialog appears, like triggerSync().
@@ -2012,6 +2032,54 @@ export class SuperSyncPage extends BasePage {
     }
 
     return false;
+  }
+
+  /**
+   * Waits for the app's sync window (remote apply + post-sync cooldown) to close,
+   * then flushes captured writes. Effects deferred with waitForSyncWindow() run
+   * when the window closes (e.g. a day change during sync → setTodayStr$ →
+   * TODAY_TAG repair), so their ops are in SUP_OPS before the pending count is
+   * read instead of racing it. No-op when the e2e test helpers are not exposed.
+   */
+  private async _waitForSyncWindowToClose(timeout = 10000): Promise<void> {
+    type HelperWindow = Window & {
+      __e2eTestHelpers?: {
+        hydrationState: {
+          isInSyncWindow$: {
+            subscribe: (next: (inWindow: boolean) => void) => { unsubscribe: () => void };
+          };
+        };
+        flushPendingWrites: () => Promise<unknown>;
+      };
+    };
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    await Promise.race([
+      this.page
+        .evaluate(async () => {
+          const helpers = (window as HelperWindow).__e2eTestHelpers;
+          if (!helpers) return;
+          // Same gate waitForSyncWindow() consumes, so deferred effects have
+          // dispatched by the time it emits false to this later subscriber.
+          await new Promise<void>((resolve) => {
+            const subscription = helpers.hydrationState.isInSyncWindow$.subscribe(
+              (inWindow) => {
+                if (!inWindow) {
+                  queueMicrotask(() => subscription.unsubscribe());
+                  resolve();
+                }
+              },
+            );
+          });
+          await helpers.flushPendingWrites();
+        })
+        .catch((err) => {
+          console.log(`[syncAndWait] Could not wait for sync window: ${String(err)}`);
+        }),
+      new Promise<void>((resolve) => {
+        timer = setTimeout(resolve, timeout);
+      }),
+    ]);
+    clearTimeout(timer);
   }
 
   private async _getUnsyncedOperationCount(): Promise<number | null> {
@@ -2311,7 +2379,10 @@ export class SuperSyncPage extends BasePage {
       // syncAndWait() leaves unsyncedCount > 0 even though the engine has nothing
       // left to upload. Run a bounded set of extra cycles so callers observe a truly
       // quiescent state. (supersync-cross-entity "Task with subtasks" flake)
+      // Each read waits for the post-sync cooldown first: ops deferred until it
+      // ends would otherwise land between two reads (supersync-day-change-10291).
       for (let flush = 0; flush < 3; flush++) {
+        await this._waitForSyncWindowToClose();
         const pending = await this._getUnsyncedOperationCount();
         if (pending === null || pending === 0) {
           break;
@@ -2330,6 +2401,7 @@ export class SuperSyncPage extends BasePage {
         await this._waitForSyncCompletion({ timeout: 10000, ...dialogChoices });
       }
 
+      await this._waitForSyncWindowToClose();
       const remainingPending = await this._getUnsyncedOperationCount();
       if (remainingPending === null) {
         throw new Error('Could not verify that SuperSync drained all pending operations');

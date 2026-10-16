@@ -412,6 +412,7 @@ export class OperationLogSyncService {
         startupOpIdsToDiscard,
         {
           repairBaseServerSeq: result.lastServerSeqToPersist,
+          rebaseKeptTimeDeltas: syncProvider.providerMode === 'superSyncOps',
           conflictRecheck: {
             isNeverSynced: isNeverSyncedAtSyncStart,
             preCapturedPendingOps: result.selectedPendingOps ?? [],
@@ -501,19 +502,18 @@ export class OperationLogSyncService {
 
     const pendingAcknowledgementSeqs = result.pendingAcknowledgementSeqs ?? [];
     if (pendingAcknowledgementSeqs.length > 0) {
-      // #9074: the deferred ack is a local persist — a stale cycle must not
-      // mark ops synced after a destructive config change (they'd never
-      // re-upload to the new epoch's target).
+      // #9074: never acknowledge ops against a changed sync target.
       this.providerManager.assertSyncEpochUnchanged(
         options?.fenceEpoch,
         'deferred acknowledgement',
       );
-      await this.opLogStore.markSynced(pendingAcknowledgementSeqs);
+      await this.opLogStore.markSynced(
+        pendingAcknowledgementSeqs,
+        result.pendingAcknowledgementOriginals,
+      );
     }
 
-    // STEP 2: Handle server-rejected operations
-    // handleRejectedOps may create merged ops for concurrent modifications.
-    // These need to be uploaded, so we add them to localWinOpsCreated.
+    // STEP 2: resolve rejections and count merged ops needing upload.
     // Pass a download callback so the handler can trigger downloads for concurrent mods.
     //
     // NOTE: This must NOT run after a SYNC_IMPORT conflict dialog resolution (USE_LOCAL,
@@ -1221,6 +1221,7 @@ export class OperationLogSyncService {
       startupOpIdsToDiscard,
       {
         repairBaseServerSeq: result.latestServerSeq,
+        rebaseKeptTimeDeltas: syncProvider.providerMode === 'superSyncOps',
         ignoredLocalFullStateOpIds: options?.ignoredLocalFullStateOpIds,
         conflictRecheck: { isNeverSynced: options?.isNeverSynced },
         fenceEpoch: options?.fenceEpoch,
@@ -1359,6 +1360,7 @@ export class OperationLogSyncService {
     startupOpIds: string[],
     options?: {
       repairBaseServerSeq?: number;
+      rebaseKeptTimeDeltas?: boolean;
       ignoredLocalFullStateOpIds?: readonly string[];
       conflictRecheck?: {
         isNeverSynced?: boolean;
@@ -1423,18 +1425,15 @@ export class OperationLogSyncService {
                   }
                 : {}),
               ...(beforeFullStateApply ? { beforeFullStateApply } : {}),
+              ...(options?.rebaseKeptTimeDeltas ? { rebaseKeptTimeDeltas: true } : {}),
               ...(options?.fenceEpoch !== undefined
                 ? { fenceEpoch: options.fenceEpoch }
                 : {}),
             },
           );
           if (options?.deferredRepairOpId && !preApplyRepairDeferred) {
-            // The skipped snapshot carried the fix for corruption this client
-            // most likely shares (it applied the same ops). Heal it here:
-            // processRemoteOps only validates when it applied something, and a
-            // batch holding just the repair applies nothing. Inside
-            // runWithBaseServerSeq so any repair this produces is causal — a
-            // legacy one would make receivers drop concurrent ops.
+            // Heal even when the deferred repair was the only op. Keep its causal
+            // server context so receivers preserve their concurrent work.
             deferredRepairHealFailed =
               !(await this.remoteOpsProcessingService.validateAfterSync());
           }

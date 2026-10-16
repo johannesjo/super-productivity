@@ -405,56 +405,78 @@ describe('RemoteOpsProcessingService', () => {
       ]);
     });
 
-    it('should log conflict identities without logging operation payloads', async () => {
-      const localOp = {
-        id: 'local-op',
-        entityType: 'TASK',
-        entityId: 'task-1',
-        payload: { title: 'private local title' },
-      } as Operation;
-      const remoteOp = {
-        id: 'remote-op',
-        entityType: 'TASK',
-        entityId: 'task-1',
-        payload: { title: 'private remote title' },
-        schemaVersion: 1,
-      } as Operation;
-      spyOn(service, 'detectConflicts').and.resolveTo({
-        nonConflicting: [],
-        conflicts: [
-          {
-            entityType: 'TASK',
-            entityId: 'task-1',
-            localOps: [localOp],
-            remoteOps: [remoteOp],
-            suggestedResolution: 'manual',
-          },
-        ],
-      });
-      conflictResolutionServiceSpy.autoResolveConflictsLWW.and.resolveTo({
-        localWinOpsCreated: 0,
-      });
-      vectorClockServiceSpy.getEntityFrontier.and.resolveTo(new Map());
-      const warnSpy = spyOn(OpLog, 'warn');
+    for (const rebaseKeptTimeDeltas of [false, true]) {
+      it(`should log only conflict identities and forward the rebase policy (${rebaseKeptTimeDeltas})`, async () => {
+        const localOp = {
+          id: 'local-op',
+          entityType: 'TASK',
+          entityId: 'task-1',
+          payload: { title: 'private local title' },
+        } as Operation;
+        const remoteOp = {
+          id: 'remote-op',
+          entityType: 'TASK',
+          entityId: 'task-1',
+          payload: { title: 'private remote title' },
+          schemaVersion: 1,
+        } as Operation;
+        spyOn(service, 'detectConflicts').and.resolveTo({
+          nonConflicting: [],
+          conflicts: [
+            {
+              entityType: 'TASK',
+              entityId: 'task-1',
+              localOps: [localOp],
+              remoteOps: [remoteOp],
+              suggestedResolution: 'manual',
+            },
+          ],
+        });
+        conflictResolutionServiceSpy.autoResolveConflictsLWW.and.resolveTo({
+          localWinOpsCreated: 0,
+        });
+        vectorClockServiceSpy.getEntityFrontier.and.resolveTo(new Map());
+        const warnSpy = spyOn(OpLog, 'warn');
 
-      await service.processRemoteOps([remoteOp]);
+        await service.processRemoteOps([remoteOp], {
+          rebaseKeptTimeDeltas,
+          fenceEpoch: 37,
+        });
+        const resolutionOptions =
+          conflictResolutionServiceSpy.autoResolveConflictsLWW.calls.mostRecent().args[2];
+        expect(resolutionOptions?.rebaseKeptTimeDeltas).toBe(
+          rebaseKeptTimeDeltas ? true : undefined,
+        );
+        if (rebaseKeptTimeDeltas) {
+          const assertFence = spyOn(
+            TestBed.inject(SyncProviderManager),
+            'assertSyncEpochUnchanged',
+          ).and.throwError('epoch changed');
+          expect(() => resolutionOptions?.assertFence?.('kept time deltas')).toThrowError(
+            'epoch changed',
+          );
+          expect(assertFence).toHaveBeenCalledWith(37, 'kept time deltas');
+        } else {
+          expect(resolutionOptions?.assertFence).toBeUndefined();
+        }
 
-      const summary = warnSpy.calls
-        .allArgs()
-        .find(([message]) => String(message).includes('Detected 1 conflicts'))?.[1];
-      expect(summary).toEqual({
-        conflicts: [
-          {
-            entityType: 'TASK',
-            entityId: 'task-1',
-            localOpIds: ['local-op'],
-            remoteOpIds: ['remote-op'],
-            suggestedResolution: 'manual',
-          },
-        ],
+        const summary = warnSpy.calls
+          .allArgs()
+          .find(([message]) => String(message).includes('Detected 1 conflicts'))?.[1];
+        expect(summary).toEqual({
+          conflicts: [
+            {
+              entityType: 'TASK',
+              entityId: 'task-1',
+              localOpIds: ['local-op'],
+              remoteOpIds: ['remote-op'],
+              suggestedResolution: 'manual',
+            },
+          ],
+        });
+        expect(JSON.stringify(summary)).not.toContain('private');
       });
-      expect(JSON.stringify(summary)).not.toContain('private');
-    });
+    }
 
     // #10377: a pending reorder that crossed an applied remote op is reissued
     // before it can upload stale, on every provider.

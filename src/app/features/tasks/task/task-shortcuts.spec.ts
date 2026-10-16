@@ -32,6 +32,7 @@ import { PlannerService } from '../../planner/planner.service';
 import { AddSubtaskInputService } from '../add-subtask-input/add-subtask-input.service';
 import { TaskDuplicateService } from '../task-duplicate.service';
 import { TaskMultiSelectService } from '../task-multi-select.service';
+import { SectionService } from '../../section/section.service';
 
 describe('TaskComponent shortcut handling', () => {
   let fixture: import('@angular/core/testing').ComponentFixture<TaskComponent>;
@@ -152,6 +153,13 @@ describe('TaskComponent shortcut handling', () => {
         { provide: TaskService, useValue: taskServiceSpy },
         { provide: TaskDuplicateService, useValue: taskDuplicateServiceSpy },
         {
+          provide: SectionService,
+          useValue: jasmine.createSpyObj('SectionService', [
+            'moveTaskToTop',
+            'moveTaskToBottom',
+          ]),
+        },
+        {
           provide: TaskRepeatCfgService,
           useValue: jasmine.createSpyObj('TaskRepeatCfgService', [
             'getTaskRepeatCfgById$',
@@ -210,7 +218,7 @@ describe('TaskComponent shortcut handling', () => {
           provide: DateService,
           useValue: jasmine.createSpyObj(
             'DateService',
-            ['isToday', 'getLogicalTodayDate'],
+            ['isToday', 'getLogicalTodayDate', 'getStartOfNextDayDiffMs'],
             {
               isToday: () => false,
             },
@@ -220,6 +228,7 @@ describe('TaskComponent shortcut handling', () => {
           provide: GlobalTrackingIntervalService,
           useValue: jasmine.createSpyObj('GlobalTrackingIntervalService', [], {
             todayDateStr: signal('2026-05-05'),
+            clockTimestamp: signal(new Date(2026, 4, 5, 12).getTime()),
           }),
         },
         {
@@ -254,6 +263,59 @@ describe('TaskComponent shortcut handling', () => {
     fixture.componentRef.setInput('task', createSubTask(''));
     fixture.componentRef.setInput('isInSubTaskList', true);
     fixture.componentRef.setInput('isBacklog', false);
+  });
+
+  describe('scheduled-date badge colors', () => {
+    beforeEach(() => {
+      const dateService = TestBed.inject(DateService) as jasmine.SpyObj<DateService>;
+      dateService.getStartOfNextDayDiffMs.and.returnValue(0);
+    });
+
+    it('updates when the shared logical day changes', () => {
+      fixture.componentRef.setInput('task', {
+        ...createTopLevelTask('Task'),
+        dueDay: '2026-05-06',
+      });
+      expect(component.scheduledDateColor()).toBe('');
+      const clock = TestBed.inject(GlobalTrackingIntervalService);
+      (clock.todayDateStr as WritableSignal<string>).set('2026-05-06');
+      expect(component.scheduledDateColor()).toBe('');
+      (clock.todayDateStr as WritableSignal<string>).set('2026-05-07');
+      expect(component.scheduledDateColor()).toBe('overdue');
+    });
+
+    it('updates an untouched timed task when the shared clock reaches its time', () => {
+      const clock = TestBed.inject(GlobalTrackingIntervalService);
+      const scheduled = new Date(2026, 4, 5, 13).getTime();
+      fixture.componentRef.setInput('task', {
+        ...createTopLevelTask('Task'),
+        dueWithTime: scheduled,
+      });
+      expect(component.scheduledDateColor()).toBe('');
+      (clock.clockTimestamp as WritableSignal<number>).set(scheduled);
+      expect(component.scheduledDateColor()).toBe('overdue');
+    });
+
+    it('removes schedule colors while tracking and restores the current state on pause', () => {
+      const clock = TestBed.inject(GlobalTrackingIntervalService);
+      const currentId = taskServiceSpy.currentTaskId as unknown as WritableSignal<
+        string | null
+      >;
+      const scheduled = new Date(2026, 4, 5, 13).getTime();
+      fixture.componentRef.setInput('task', {
+        ...createTopLevelTask('Task'),
+        dueWithTime: scheduled,
+      });
+      expect(component.scheduledDateColor()).toBe('');
+      currentId.set('top-1');
+      expect(component.scheduledDateColor()).toBe('');
+      (clock.clockTimestamp as WritableSignal<number>).set(scheduled + 1);
+      expect(component.scheduledDateColor()).toBe('');
+      currentId.set(null);
+      expect(component.scheduledDateColor()).toBe('overdue');
+      currentId.set('some-other-task');
+      expect(component.scheduledDateColor()).toBe('overdue');
+    });
   });
 
   describe('touch selection mode', () => {
@@ -894,6 +956,37 @@ describe('TaskComponent shortcut handling', () => {
       component.moveToBacklogWithFocus();
 
       expect(projectService.moveTaskToBacklog).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('move to top/bottom in a section', () => {
+    let sectionService: jasmine.SpyObj<SectionService>;
+
+    beforeEach(() => {
+      sectionService = TestBed.inject(SectionService) as jasmine.SpyObj<SectionService>;
+      fixture.componentRef.setInput('task', createTopLevelTask('Move me'));
+      fixture.componentRef.setInput('isInSubTaskList', false);
+    });
+
+    it('moves within the rendered section', () => {
+      fixture.componentRef.setInput('sectionId', 'sec-2');
+
+      component.moveTaskToTop();
+      component.moveTaskToBottom();
+
+      expect(sectionService.moveTaskToTop).toHaveBeenCalledWith('sec-2', 'top-1');
+      expect(sectionService.moveTaskToBottom).toHaveBeenCalledWith('sec-2', 'top-1');
+      expect(taskServiceSpy.moveToTop).not.toHaveBeenCalled();
+      expect(taskServiceSpy.moveToBottom).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the work-context move when not rendered in a section', () => {
+      component.moveTaskToTop();
+      component.moveTaskToBottom();
+
+      expect(taskServiceSpy.moveToTop).toHaveBeenCalledWith('top-1', undefined, false);
+      expect(taskServiceSpy.moveToBottom).toHaveBeenCalledWith('top-1', undefined, false);
+      expect(sectionService.moveTaskToTop).not.toHaveBeenCalled();
     });
   });
 

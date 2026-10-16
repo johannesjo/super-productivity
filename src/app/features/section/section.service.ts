@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { nanoid } from 'nanoid';
 import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, take } from 'rxjs/operators';
 import { Section } from './section.model';
 import { isValidSectionContext, sanitizeSectionTitle } from './section.util';
 import { WorkContextType } from '../work-context/work-context.model';
@@ -14,7 +14,10 @@ import {
   updateSection,
   updateSectionOrder,
 } from './store/section.actions';
-import { selectSectionsByContextIdMap } from './store/section.selectors';
+import {
+  selectAllSections,
+  selectSectionsByContextIdMap,
+} from './store/section.selectors';
 
 const EMPTY_SECTIONS: readonly Section[] = Object.freeze([]);
 
@@ -90,6 +93,24 @@ export class SectionService {
         sourceSectionId,
       }),
     );
+  }
+
+  moveTaskToTop(targetSectionId: string, taskId: string): void {
+    this.addTaskToSection(targetSectionId, taskId, null, targetSectionId);
+  }
+
+  moveTaskToBottom(targetSectionId: string, taskId: string): void {
+    // The store is BehaviorSubject-backed, so take(1) resolves synchronously.
+    let taskIds: readonly string[] = [];
+    this._store
+      .select(selectAllSections)
+      .pipe(take(1))
+      .subscribe((sections) => {
+        taskIds = sections.find((s) => s.id === targetSectionId)?.taskIds ?? [];
+      });
+    const others = taskIds.filter((tId) => tId !== taskId);
+    const afterTaskId = others.length ? others[others.length - 1] : null;
+    this.addTaskToSection(targetSectionId, taskId, afterTaskId, targetSectionId);
   }
 
   /**

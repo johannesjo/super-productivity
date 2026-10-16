@@ -10,18 +10,23 @@
  * overlapping fields. Released clients since v18.15.0 apply `'patch'` as a
  * merge (`updateOne`), so no marker, wire key or schema bump is needed.
  *
- * No Angular, no I/O.
+ * No Angular; persistence is supplied by the caller.
  */
 
 import { deepEqual, extractActionPayload } from '@sp/sync-core';
 import { ActionType, isLwwUpdatePayload, OpType } from '../core/operation.types';
-import type { EntityConflict, Operation, VectorClock } from '../core/operation.types';
+import type { EntityConflict, Operation } from '../core/operation.types';
 import type { EntityType } from '../core/operation.types';
 import { RECREATE_FALLBACK } from '../core/recreate-fallback.const';
+import type {
+  MixedSourceWrittenOperation,
+  OperationLogStoreService,
+} from '../persistence/operation-log-store.service';
 import {
   compareVectorClocks,
   mergeVectorClocks,
   VectorClockComparison,
+  VectorClock,
 } from '../../core/util/vector-clock';
 import { isMultiEntityOperation } from '../util/get-op-entity-ids.util';
 import {
@@ -34,6 +39,11 @@ import {
   SYNC_TIME_SPENT_FIELDS,
   writesNoTaskTime,
 } from './conflict-disjoint-merge.util';
+
+import {
+  timePreservingTaskIds,
+  isTimelessTaskPatch,
+} from './time-preserving-task-snapshot.util';
 
 /**
  * Fields whose clear a v18.15.0–v18.21.x receiver would drop from a patch
@@ -120,7 +130,7 @@ const rowFields = (op: Operation): string[] | undefined => {
  * - Both sides wrote a real (non-noise) field; a noise-only side is left to
  *   whole-entity LWW, which loses nothing real.
  * - Time stays out of the re-sent fields: a local `syncTimeSpent` delta is kept
- *   and rebased instead (`keptLocalTimeDeltas`). A remote delta,
+ *   with its original identity (`keptLocalTimeDeltas`). A remote delta,
  *   `removeTimeSpent` (clamps, so it does not commute), or a delta beside an
  *   absolute write of the time fields refuses.
  * - Re-sent fields that clear a reminder field refuse (`REMINDER_FIELDS`),
@@ -306,9 +316,9 @@ export const aggregateEntityConflict = (conflicts: EntityConflict[]): EntityConf
 /**
  * The local `syncTimeSpent` deltas of patched conflicts. They are not
  * rejected: rejecting one and re-sending a copy would add the time twice on
- * restart, since replay is status-blind. Instead they stay pending and move
- * past the remote sides' clocks in place (`rebasePendingLocalOps`, with the
- * patch after them), so each uploads once and replays once.
+ * restart, since replay is status-blind. They stay pending with their original
+ * ID and payload. File providers retain the clock too; SuperSync can rebase
+ * with authenticated receipt recovery when an upload response was lost.
  */
 export const keptLocalTimeDeltas = (
   conflicts: EntityConflict[],
@@ -319,38 +329,92 @@ export const keptLocalTimeDeltas = (
     const deltas = localOps.filter(isSyncTimeSpentOp);
     if (deltas.length === 0) continue;
     deltas.forEach((op) => opIds.add(op.id));
-    for (const op of remoteOps) {
-      clockToDominate = mergeVectorClocks(clockToDominate, op.vectorClock);
+    for (const remote of remoteOps) {
+      clockToDominate = mergeVectorClocks(clockToDominate, remote.vectorClock);
     }
   }
   return { opIds, clockToDominate };
 };
 
 /**
- * Remote-win conflicts whose local time deltas survive the win, each narrowed
+ * Kept deltas SuperSync re-clocks eagerly: beside merged patches and readable
+ * remote wins. Undefined when there is none.
+ */
+export const keptTimeDeltasToRebase = (
+  merged: { conflict: EntityConflict }[],
+  resolutions: { conflict: EntityConflict; winner: 'local' | 'remote' }[],
+): { opIds: Set<string>; clockToDominate: VectorClock } | undefined => {
+  const kept = keptLocalTimeDeltas([
+    ...merged.map((m) => m.conflict),
+    ...timeDeltasSurvivingRemoteWins(resolutions, 'task'),
+  ]);
+  return kept.opIds.size > 0 ? kept : undefined;
+};
+
+type OpLogAppender = Pick<
+  OperationLogStoreService,
+  'appendBatchSkipDuplicates' | 'appendMixedSourceBatchSkipDuplicates'
+>;
+type RebaseKept = NonNullable<
+  Parameters<OperationLogStoreService['appendMixedSourceBatchSkipDuplicates']>[1]
+>['rebaseKept'];
+
+/**
+ * Writes LWW remote winners as pending rows. With `rebaseKept`, the kept deltas
+ * re-clock in the same commit: a crash between two commits would leave a stale
+ * delta that the server rejects and folds into an absolute update (#10614).
+ */
+export const appendRemoteWinners = async (
+  store: OpLogAppender,
+  ops: Operation[],
+  rebaseKept: RebaseKept,
+): Promise<MixedSourceWrittenOperation[]> => {
+  const options = { pendingApply: true };
+  if (rebaseKept) {
+    const batch = { ops, source: 'remote' as const, options };
+    return (await store.appendMixedSourceBatchSkipDuplicates([batch], { rebaseKept }))
+      .written;
+  }
+  const { writtenOps, seqs } = await store.appendBatchSkipDuplicates(
+    ops,
+    'remote',
+    options,
+  );
+  return writtenOps.map((op, i) => ({ op, seq: seqs[i], source: 'remote' }));
+};
+
+/**
+ * Conflicts whose local time deltas survive LWW, each narrowed
  * to those deltas for `keptLocalTimeDeltas` (decision 7, D10, #10378). Every
  * op of a TASK conflict is a `syncTimeSpent` delta or writes no time field
  * (`writesNoTaskTime`), so the winner leaves the deltas' time as it is: they
- * stay pending and move past the winner, while the side's other ops lose as
- * before. A delta a remote op's clock covers loses too: the remote device
+ * stay pending unchanged, while the side's other ops lose as before. A delta
+ * a remote op's clock covers loses too: the remote device
  * had seen it, so it was delivered and counts once already (a lost upload
- * response; keeping it would re-send it with a rebased clock, which the
- * server rejects as INVALID_OP_ID with a sync error). A clock can also cover
- * a delta by inherited knowledge only (D10 refined, case 3); no trace has
+ * response). A clock can also cover a delta by inherited knowledge only
+ * (D10 refined, case 3); no trace has
  * shown that losing time, since a concurrent op of the same crossing keeps
  * the delta (time-delta-kept-beside-timeless-winner.integration.spec.ts).
- * Rows and other time writers keep whole-entity LWW.
+ * Eligible local snapshots omit time and keep their deltas too. Timeless patch
+ * rows qualify by keys; replacements and other time writers retain whole-entity LWW.
  */
-export const timeDeltasSurvivingRemoteWins = (
+export const timeDeltasSurvivingLww = (
   resolutions: { conflict: EntityConflict; winner: 'local' | 'remote' }[],
   payloadKey: string,
-): EntityConflict[] =>
-  resolutions.flatMap(({ conflict, winner }) => {
+  nonConflictingOps: Operation[] = [],
+): EntityConflict[] => {
+  const eligible = timePreservingTaskIds(
+    resolutions.map((resolution) => resolution.conflict),
+    nonConflictingOps,
+  );
+  return resolutions.flatMap(({ conflict, winner }) => {
     const { entityId, localOps, remoteOps } = conflict;
     const isTimeless = (op: Operation): boolean =>
-      isSyncTimeSpentOp(op) || writesNoTaskTime(op, payloadKey, entityId);
+      isSyncTimeSpentOp(op) ||
+      writesNoTaskTime(op, payloadKey, entityId) ||
+      (eligible.has(entityId) && isTimelessTaskPatch(op, entityId));
     if (
-      winner !== 'remote' ||
+      (winner !== 'remote' && !eligible.has(entityId)) ||
       conflict.entityType !== 'TASK' ||
       remoteOps.length === 0 ||
       ![...localOps, ...remoteOps].every(isTimeless)
@@ -360,55 +424,38 @@ export const timeDeltasSurvivingRemoteWins = (
     const deltas = localOps.filter(
       (op) =>
         isSyncTimeSpentOp(op) &&
-        remoteOps.every(
-          (remote) =>
-            compareVectorClocks(op.vectorClock, remote.vectorClock) ===
-            VectorClockComparison.CONCURRENT,
-        ),
+        (winner === 'local' ||
+          remoteOps.every(
+            (remote) =>
+              compareVectorClocks(op.vectorClock, remote.vectorClock) ===
+              VectorClockComparison.CONCURRENT,
+          )),
     );
     return deltas.length > 0 ? [{ ...conflict, localOps: deltas }] : [];
   });
+};
 
 /**
- * Moves the pending kept deltas past the remote sides' clocks in place (id,
- * seq and payload stay), together with the patches written after them, so
- * each patch still dominates the deltas it follows. Runs after the patches
- * are durable: a crash before it leaves the deltas pending with their old
- * clocks, which the server rejects into the ordinary rejection paths. A delta
- * that is no longer pending (a no-pending crossing's retained op) already
- * uploaded and stays as it is.
+ * Eager rebasing is narrower than keeping a delta pending: only readable remote
+ * winners commute here. Moving a delta past its local-win snapshot can cause the
+ * server to reject that snapshot and replace additive history with absolute time.
+ * Opaque timeless rows retain the ordinary rejection path too.
  */
-export const rebaseKeptTimeDeltas = async (
-  store: {
-    getOpById: (
-      opId: string,
-    ) => Promise<{ source: string; syncedAt?: number; rejectedAt?: number } | undefined>;
-    rebasePendingLocalOps: (
-      opIds: readonly string[],
-      clockToDominate: VectorClock,
-    ) => Promise<unknown>;
-  },
-  kept: { opIds: Set<string>; clockToDominate: VectorClock },
-  patchOpIds: string[],
-): Promise<void> => {
-  const pendingDeltaIds: string[] = [];
-  for (const opId of kept.opIds) {
-    const entry = await store.getOpById(opId);
-    if (
-      entry?.source === 'local' &&
-      entry.syncedAt === undefined &&
-      entry.rejectedAt === undefined
-    ) {
-      pendingDeltaIds.push(opId);
-    }
-  }
-  if (pendingDeltaIds.length > 0) {
-    await store.rebasePendingLocalOps(
-      [...pendingDeltaIds, ...patchOpIds],
-      kept.clockToDominate,
-    );
-  }
-};
+export const timeDeltasSurvivingRemoteWins = (
+  resolutions: { conflict: EntityConflict; winner: 'local' | 'remote' }[],
+  payloadKey: string,
+): EntityConflict[] =>
+  timeDeltasSurvivingLww(
+    resolutions.filter(
+      ({ conflict, winner }) =>
+        winner === 'remote' &&
+        [...conflict.localOps, ...conflict.remoteOps].every(
+          (op) =>
+            isSyncTimeSpentOp(op) || writesNoTaskTime(op, payloadKey, conflict.entityId),
+        ),
+    ),
+    payloadKey,
+  );
 
 /**
  * `SupersededOperationResolverService`: the fields a server-rejected group of

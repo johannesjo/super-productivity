@@ -172,11 +172,7 @@
       }
     ],
     "primary": "field-reverted:note.isLock",
-    "signatures": [
-      "divergence:.note.todayOrder.*",
-      "field-reverted:note.isLock",
-      "today-notes:listed-not-pinned"
-    ],
+    "signatures": ["field-reverted:note.isLock"],
     "rejections": []
   },
   {
@@ -202,7 +198,7 @@
   },
   {
     "class": "whole-entity-lww-drops-fields",
-    "ref": "fixed by #10415 (regression pin); since #10422 the losing rename leaves only the kept delta, which uploads after one rejection and rebase",
+    "ref": "fixed by #10415 (regression pin); since #10422 the losing rename leaves only the kept delta; #10523 rebases it before upload, avoiding its concurrent rejection",
     "name": "tracked time is lost to a later concurrent rename",
     "steps": [
       {
@@ -228,7 +224,7 @@
   },
   {
     "class": "lww-update-skips-today-order",
-    "ref": "#10379",
+    "ref": "fixed for #10379 by #10659 (regression pin)",
     "name": "a note unpinned on one device and edited later on another stays pinned but out of Today there",
     "steps": [
       {
@@ -250,13 +246,12 @@
         "a": ["editNote", "n1", "content", "A4"]
       }
     ],
-    "primary": "today-notes:pinned-not-listed",
-    "signatures": ["divergence:.note.todayOrder.*", "today-notes:pinned-not-listed"],
+    "signatures": [],
     "rejections": []
   },
   {
     "class": "lww-update-skips-today-order",
-    "ref": "#10379",
+    "ref": "fixed for #10379 by #10659 (regression pin)",
     "name": "a note edited on one device and unpinned and edited later on another stays in Today there, unpinned",
     "steps": [
       {
@@ -281,13 +276,12 @@
         "a": ["editNote", "n1", "content", "B6"]
       }
     ],
-    "primary": "today-notes:listed-not-pinned",
-    "signatures": ["divergence:.note.todayOrder.*", "today-notes:listed-not-pinned"],
+    "signatures": [],
     "rejections": []
   },
   {
     "class": "commuting-edit-beside-local-win",
-    "ref": "fixed by #10398 (regression pin)",
+    "ref": "fixed by #10398 (regression pin); #10523 rebases the kept delta before upload, avoiding its concurrent rejection",
     "name": "a task notes edit downloaded beside a done toggle the device wins survives on the writing device",
     "steps": [
       {
@@ -1398,7 +1392,7 @@
   },
   {
     "class": "remote-win-patch-timestamp",
-    "ref": "fixed by #10422 (regression pin): review of #10428, finding 1",
+    "ref": "fixed by #10422 (regression pin): review of #10428, finding 1; #10523 rebases the kept delta before upload, avoiding its concurrent rejection",
     "name": "a remote win re-sends the loser's notes at their own time beside its own kept delta",
     "steps": [
       {

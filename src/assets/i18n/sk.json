@@ -208,7 +208,7 @@
         "POLL_INTERVAL_MINUTES": "Interval zisťovania zmien (v minútach)"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Here you can configure SuperProductivity to list uncompleted CalDav todos for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the todo as well as more information about it.</p> <p>In addition you can automatically add and sync all uncompleted todos to your task backlog.</p><p>To make it work for nextcloud on mobile and web, you might need to whitelist \"https://app.super-productivity.com\" via the nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>.</p>"
+        "HELP": "<p>Here you can configure SuperProductivity to list uncompleted CalDav todos for a specific project in the task creation panel in the daily planning view. They will be listed as suggestions and will provide a link to the todo as well as more information about it.</p> <p>In addition you can automatically add and sync all uncompleted todos to your task backlog.</p><p>To make it work for nextcloud on mobile and web, you might need to whitelist \"https://app.super-productivity.com\" via the nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword</a>.</p>"
       },
       "ISSUE_CONTENT": {
         "DESCRIPTION": "Popis",
@@ -537,7 +537,8 @@
         "OAUTH_FAILED": "Overenie zlyhalo.",
         "OAUTH_FAILED_WITH_DETAIL": "Overenie zlyhalo: {{detail}}",
         "REMOTE_ISSUE_DELETED": "Vzdialený problém bol odstránený. Odstrániť prepojenú úlohu \"{{taskTitle}}\"?",
-        "REMOTE_ISSUE_DELETED_WITH_TIME": "Vzdialený problém bol odstránený, ale pri úlohe \"{{taskTitle}}\" je sledovaný čas. Napriek tomu ju odstrániť?"
+        "REMOTE_ISSUE_DELETED_WITH_TIME": "Vzdialený problém bol odstránený, ale pri úlohe \"{{taskTitle}}\" je sledovaný čas. Napriek tomu ju odstrániť?",
+        "POST_TIME_SUCCESS": "{{providerName}}: Záznam času pre {{issueTitle}} bol úspešne vytvorený"
       },
       "TWO_WAY_SYNC": {
         "AUTO_CREATE_ISSUES": "Automaticky vytvárať úlohy pre nové úlohy",
@@ -566,6 +567,15 @@
         "POLLING_MODE_DESCRIPTION": "Kedy zisťovať zmeny: iba ak je otvorený príslušný projekt alebo značka, alebo vždy na pozadí",
         "POLLING_MODE_WHEN_PROJECT_OPEN": "Keď je kontext otvorený",
         "POLLING_MODE_ALWAYS": "Vždy (na pozadí)"
+      },
+      "DIALOG_TRACK_TIME": {
+        "ACTIVITY": "Aktivita",
+        "TIME_SPENT": "Strávený čas",
+        "INVALID_DATE": "Zadaná hodnota nie je dátum\\!",
+        "POST_TIME": "Odoslať čas",
+        "STARTED": "Začaté",
+        "SUBMIT_TIME_FOR": "Odoslať čas do {{providerName}} pre",
+        "TITLE": "{{providerName}}: Odoslať záznam práce"
       }
     },
     "ISSUE_PANEL": {
@@ -789,33 +799,6 @@
         "REMINDER_NEEDS_TEXT": "Napíšte reflexiu predtým, než požiadate o pripomienku",
         "REMINDER_TASK_TITLE": "Znovu navštívte poznámku reflexie",
         "TITLE": "Poznámka reflexie"
-      }
-    },
-    "NEXTCLOUD_DECK": {
-      "ISSUE_CONTENT": {
-        "LABELS": "Štítky",
-        "ASSIGNED_USERS": "Priradení používatelia",
-        "DECK_DESCRIPTION": "Popis karty Deck",
-        "STACK": "Zásobník"
-      },
-      "FORM": {
-        "BASE_URL": "Základná URL adresa Nextcloud",
-        "FILTER_BY_ASSIGNEE": "Importovať len karty priradené mne",
-        "IS_TRANSITION_ISSUES_ENABLED": "Synchronizovať stav dokončenia a názov späť do Nextcloud Deck",
-        "PASSWORD": "Vaše heslo aplikácie Nextcloud",
-        "POLL_INTERVAL_MINUTES": "Interval kontroly (minúty)",
-        "TITLE_TEMPLATE": "Šablóna názvu úlohy",
-        "TITLE_TEMPLATE_DESCRIPTION": "Premenné: {CARD_TITLE}, {BOARD}, {COLUMN}, {ID}, {LABELS}. Príklad: [{BOARD}: {COLUMN}] {CARD_TITLE}. Nechajte prázdne pre samotný názov karty.",
-        "USERNAME": "Vaše používateľské meno Nextcloud"
-      },
-      "FORM_SECTION": {
-        "HELP": "Nakonfigurujte integráciu Nextcloud Deck na import kariet ako úloh. Na autentifikáciu použite heslo aplikácie."
-      },
-      "S": {
-        "BOARD_NOT_FOUND": "Nextcloud Deck: Nástenka nebola nájdená",
-        "CARD_NOT_FOUND": "Nextcloud Deck: Karta \"{{issueId}}\" bola zrejme odstránená zo servera.",
-        "ERR_CREDENTIALS_MISSING": "Najprv zadajte URL adresu Nextcloud, používateľské meno a heslo.",
-        "ERR_LOAD_BOARDS": "Nepodarilo sa načítať nástenky Deck. Skontrolujte prihlasovacie údaje."
       }
     },
     "NOTE": {
@@ -1077,44 +1060,6 @@
       "PAGE_TITLE": "Rýchla história",
       "WEEK_TITLE": "Týždeň {{nr}} ({{timeSpent}})"
     },
-    "REDMINE": {
-      "DIALOG_TRACK_TIME": {
-        "ACTIVITY": "Aktivita",
-        "TIME_SPENT": "Strávený čas",
-        "INVALID_DATE": "Zadaná hodnota nie je dátum\\!",
-        "POST_TIME": "Odoslať čas",
-        "STARTED": "Začaté",
-        "SUBMIT_TIME_FOR": "Odoslať čas do Redmine pre",
-        "TITLE": "Redmine: Odoslať záznam práce"
-      },
-      "FORM": {
-        "API_KEY": "Prístupový kľúč API",
-        "HOST": "Hostiteľ (napr.: https://redmine.org)",
-        "PROJECT_ID": "Identifikátor projektu",
-        "PROJECT_ID_DESCRIPTION": "Môže sa nájsť ako súčasť URL, keď sa projekt zobrazuje v prehliadači.",
-        "SCOPE": "Rozsah",
-        "SCOPE_ALL": "Všetky",
-        "SCOPE_ASSIGNED": "Priradené mne",
-        "SCOPE_CREATED": "Vytvorené mnou",
-        "IS_SHOW_TIME_TRACKING_DIALOG": "Zobraziť dialóg sledovania času pre hlásenie do Redmine",
-        "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Vyžaduje povolený modul sledovania času v projekte Redmine",
-        "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Zobraziť dialóg sledovania času pri dokončení podúloh"
-      },
-      "FORM_SECTION": {
-        "HELP": "<p>Tu môžete nakonfigurovať program SuperProductivity tak, aby na paneli vytvárania úloh v zobrazení denného plánovania zobrazoval zoznam otvorených problémov Redmine (buď jeho online verzie, alebo samostatne hostovanej inštancie) pre konkrétny projekt. Budú uvedené ako návrhy a budú obsahovať odkaz na problém, ako aj ďalšie informácie o ňom.</p><p>Okrem toho môžete automaticky importovať všetky otvorené problémy.</p>",
-        "TITLE": "Redmine"
-      },
-      "ISSUE_CONTENT": {
-        "AUTHOR": "Autor",
-        "DESCRIPTION": "Popis",
-        "MARK_AS_CHECKED": "Označiť aktualizácie ako skontrolované",
-        "PRIORITY": "Priorita",
-        "STATUS": "Stav"
-      },
-      "S": {
-        "POST_TIME_SUCCESS": "Redmine: Záznam času pre {{issueTitle}} bol úspešne vytvorený"
-      }
-    },
     "REFLECTION_NOTE": {
       "ACTION_DISMISS": "Zrušiť",
       "MSG": "Poznámka k reflexii: ({{date}}): {{content}}"
@@ -1122,7 +1067,7 @@
     "REMINDER": {
       "COUNTDOWN_BANNER": {
         "START_NOW": "Začnite hneď teraz",
-        "TXT": "<strong>{{title}}<\\/strong> začína o <strong>{{start}}<\\/strong>!",
+        "TXT": "<strong>{{title}}</strong> začína o <strong>{{start}}</strong>!",
         "TXT_MULTIPLE": {
           "OTHER": "<strong>{{title}}</strong> začína na <strong>{{start}}</strong>!<br> (a {{nrOfOtherBanners}} ďalšie úlohy sú splatné)",
           "ONE": "<strong>{{title}}</strong> začína o <strong>{{start}}</strong>!<br> (a {{nrOfOtherBanners}} ďalšia úloha je naplánovaná)"
@@ -1454,7 +1399,7 @@
         },
         "TITLE": "Synchronizácia",
         "WEB_DAV": {
-          "CORS_INFO": "<strong>Making it work on MOBILE and in the browser:</strong> To make this work for mobile or the browser you need to whitelist Super Productivity for CORS requests for your Nextcloud instance. This can have negative security implications! Please <a href='https://github.com/nextcloud/server/issues/3131'>refer to this thread for more information</a>. One approach to make this work on mobile is whitelisting \"https://app.super-productivity.com\" via the nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>. Use at your own risk!</p>",
+          "CORS_INFO": "<strong>Making it work on MOBILE and in the browser:</strong> To make this work for mobile or the browser you need to whitelist Super Productivity for CORS requests for your Nextcloud instance. This can have negative security implications! Please <a href='https://github.com/nextcloud/server/issues/3131'>refer to this thread for more information</a>. One approach to make this work on mobile is whitelisting \"https://app.super-productivity.com\" via the nextcloud app <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword</a>. Use at your own risk!</p>",
           "D_SYNC_FOLDER_PATH": "Cesta relatívna k koreňu WebDAV servera, kde budú uložené synchronizačné súbory (napr. ' /super-productivity' alebo ' /'). Toto NIE je interná cesta vášho servera.",
           "INFO": "Implementácie WebDAV sa bohužiaľ veľmi líšia. Super Productivity je známy tým, že dobre funguje s Nextcloud, <strong>ale nemusí fungovať s vaším poskytovateľom</strong>.",
           "L_BASE_URL": "Základná URL adresa",
@@ -1539,8 +1484,8 @@
         "ERROR_CORS": "Chyba synchronizácie WebDAV: Sieťová požiadavka zlyhala.\n\nMôže to byť problém s CORS. Prosím, uistite sa:\n Vaše WebDAV server umožňuje požiadavky z rôznych zdrojov\n URL servera je správna a prístupná\n Máte funkčné internetové pripojenie",
         "ERROR_DATA_IS_CURRENTLY_WRITTEN": "Vzdialené dáta sa momentálne zapisujú",
         "ERROR_PERMISSION": "Prístup k súboru zamietnutý. Skontrolujte, prosím, oprávnenia súborového systému.",
-        "ERROR_PERMISSION_FLATPAK": "Prístup k súboru zamietnutý. Udeľte oprávnenie k súborovému systému cez Flatseal alebo použite cestu v rámci ~\\/var\\/app\\/",
-        "ERROR_PERMISSION_SNAP": "Prístup k súboru zamietnutý. Spustite 'snap connect super-productivity:home' alebo použite cestu v rámci ~\\/snap\\/super-productivity\\/common\\/",
+        "ERROR_PERMISSION_FLATPAK": "Prístup k súboru zamietnutý. Udeľte oprávnenie k súborovému systému cez Flatseal alebo použite cestu v rámci ~/var/app/",
+        "ERROR_PERMISSION_SNAP": "Prístup k súboru zamietnutý. Spustite 'snap connect super-productivity:home' alebo použite cestu v rámci ~/snap/super-productivity/common/",
         "ERROR_REMOTE_RESPONSE_NOT_SYNC_DATA": "Synchronizačný server odpovedal webovou stránkou namiesto tvojich synchronizačných údajov (napr. prihlasovacou, proxy alebo chybovou stránkou). Vzdialené údaje sú pravdepodobne v poriadku — skontroluj URL servera, prihlasovacie údaje a sieť a skús to znova. Ak problém pretrváva, môžeš vzdialené údaje prepísať cez Nastavenia synchronizácie → Vynútiť prepísanie.",
         "INCOMPLETE_CFG": "Overenie pre synchronizáciu zlyhalo. Prosím, skontrolujte svoju konfiguráciu!",
         "REMOTE_NOT_ENCRYPTED": "Synchronizované údaje nie sú šifrované, ale na tomto zariadení je šifrovanie zapnuté, takže boli odmietnuté. Ak si šifrovanie vypol na inom zariadení, vypni ho pre pokračovanie aj tu v nastaveniach synchronizácie.",
@@ -2121,7 +2066,7 @@
         "REMINDER_ADDED": "Scheduled task \"{{title}}\"",
         "REMINDER_DELETED": "Deleted reminder for task",
         "REMINDER_UPDATED": "Updated reminder for task \"{{title}}\"",
-        "TASK_ALREADY_EXISTS": "Úloha <strong>{{title}}<\\/strong> už existuje",
+        "TASK_ALREADY_EXISTS": "Úloha <strong>{{title}}</strong> už existuje",
         "TASK_CREATED": "Created task \"{{taskTitle}}\"",
         "DEADLINE_REMOVED": "Termín bol odstránený",
         "DEADLINE_SET": "Termín nastavený na {{date}}"

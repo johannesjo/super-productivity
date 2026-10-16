@@ -5,6 +5,10 @@ implemented (see [Implementation](#implementation-pr-1)); "How it works today"
 below describes the code before it. Tracker: #10393, queue item 1. Findings:
 #10382.
 
+**Sections:** [Problem](#problem) · [How it works today](#how-it-works-today) · [Options](#options) · [Released clients and graceful degradation](#released-clients-and-graceful-degradation) · [Fuzz pins and E2E proof](#fuzz-pins-and-e2e-proof) · [Recommendation](#recommendation) · [Decisions for @johannesjo](#decisions-for-johannesjo) · [Outcome](#outcome) · [Implementation (PR 1)](#implementation-pr-1) · [Per-field winners (#10422)](#per-field-winners-10422)
+
+Line numbers: `rg -n '^#{1,3} ' <this file>`, then read one section with `sed -n`.
+
 ## Problem
 
 After a conflict, the resolving device uploads a replace-mode `[X] LWW Update`
@@ -80,8 +84,8 @@ unless noted.
    - `'patch'` or any other mode, including none → `updateOne`;
    - an absent entity → `addOne` with the `RECREATE_FALLBACK` backfill. NOTE is
      added raw, and a marked `recreatesEntityAfterDelete` patch is ignored.
-   - Tasks keep their project, tag and Today lists in step. Nothing keeps
-     `note.todayOrder` in step.
+   - Tasks keep their project, tag and Today lists in step; notes keep
+     `note.todayOrder` in step with `isPinnedToToday` (#10379).
 9. The envelope is `LwwUpdatePayload`
    ([`operation.types.ts`](../../packages/sync-core/src/operation.types.ts)).
    Its flat `actionPayload` extracts as `{}`, so the merge sees a resolution op
@@ -143,10 +147,10 @@ hydration must replay identically.
 - **A patch:**
   - omits the time fields;
   - applies the remote deltas;
-  - keeps the local delta out of the rejected set and rebases it in place past
-    the resolution clock (`rebasePendingLocalOps`, as
-    `SupersededOperationResolverService` already does). Its id, seq and
-    payload stay, so it uploads once and replays once.
+  - keeps the local delta out of the rejected set with its original ID, clock
+    and payload. Only a confirmed SuperSync conflict rejection permits an
+    in-place clock rebase (`rebaseCommutingTimeDeltaRejections`); a lost
+    response retries unchanged. File providers deduplicate the original ID.
 - **Not a new op.** Restart replay is status-blind
   ([`operation-log-hydrator.service.ts`](../../src/app/op-log/persistence/operation-log-hydrator.service.ts)),
   so a rejected original plus a re-sent copy would add the time twice.
@@ -165,8 +169,8 @@ hydration must replay identically.
 - **Today's merge would fix both note pins** once NOTE has a
   `RECREATE_FALLBACK` entry (lock vs pin, content vs pin): their fields are
   disjoint.
-- **A clean regression pin also needs `todayOrder` upkeep** in
-  `lwwUpdateMetaReducer`. Otherwise `divergence:.note.todayOrder.*` stays.
+- **`todayOrder` upkeep in `lwwUpdateMetaReducer`**, which a clean regression
+  pin also needs, landed in #10659 (#10379).
 
 ## Released clients and graceful degradation
 
@@ -181,9 +185,10 @@ Checked with `git show v18.15.0:` and `git show v19.1.0:`.
 **The hazards of sending a `'patch'` where a `'replace'` went before:**
 
 1. **Clears.** v18.15.0 ignores `clearedFields`, and v19.1.0 applies it. The
-   v18.22.0 boundary is from
-   [contributor-sync-model.md](./contributor-sync-model.md) ("Clearing a
-   field", #9776), not checked against a tag.
+   LWW payload apply (`clearedFields` in `operation-converter.util.ts`) first
+   shipped in v18.21.2 (`633a27b`, checked with
+   `git tag --contains`); [contributor-sync-model.md](./contributor-sync-model.md)
+   ("Clearing a field", #9776) rounds this to v18.22.0.
    - An older receiver keeps a stale value, e.g. a cleared `dueWithTime` or
      `reminderId`, where `setOne` cleared it.
    - This is the same documented residual as `asPatchSnapshotIfTypeShadowed`.
@@ -218,14 +223,14 @@ Expected outcomes are by code reading and have not been run. Each fix PR turns
 its pins into regression pins and leaves all others unchanged, including those
 of #10380 and #10381.
 
-| Pin                                                         | A (pieces 1–3)               | B                                | C                         | NOTE admission                         |
-| ----------------------------------------------------------- | ---------------------------- | -------------------------------- | ------------------------- | -------------------------------------- |
-| done status lost when both devices rename                   | fixed                        | — (superseded path unchanged)    | —                         | —                                      |
-| tracked time lost to a later concurrent rename              | fixed, via the rebased delta | —                                | with A                    | —                                      |
-| note lock lost to an unpin; note content loses to an unpin  | —                            | lock only; `todayOrder` diverges | —                         | fixed, if `todayOrder` is kept in step |
-| habit count lost to a rename; habit rename loses to a count | —                            | —                                | —                         | —                                      |
-| two devices tracking one unscheduled task (#10378)          | —                            | —                                | time, local-win direction | —                                      |
-| task rename loses to tracking (#10260)                      | —                            | —                                | —                         | —                                      |
+| Pin                                                         | A (pieces 1–3)               | B                             | C                         | NOTE admission                                 |
+| ----------------------------------------------------------- | ---------------------------- | ----------------------------- | ------------------------- | ---------------------------------------------- |
+| done status lost when both devices rename                   | fixed                        | — (superseded path unchanged) | —                         | —                                              |
+| tracked time lost to a later concurrent rename              | fixed, via the rebased delta | —                             | with A                    | —                                              |
+| note lock lost to an unpin; note content loses to an unpin  | —                            | lock only                     | —                         | fixed (`todayOrder` kept in step since #10659) |
+| habit count lost to a rename; habit rename loses to a count | —                            | —                             | —                         | —                                              |
+| two devices tracking one unscheduled task (#10378)          | —                            | —                             | time, local-win direction | —                                              |
+| task rename loses to tracking (#10260)                      | —                            | —                             | —                         | —                                              |
 
 **Start from an E2E** (rule 12: both conflict directions, both timestamp
 winners):
@@ -302,7 +307,8 @@ Decided by @johannesjo on 2026-09-30 ([#10393](https://github.com/super-producti
 5. **Resolution ops as input:** no; the no-re-merge contract stays. Narrowed
    by decisions 5a and 5a extended below: a conflict may read a row's keys,
    never its values.
-6. **Opaque ops:** stay on whole-entity LWW.
+6. **Opaque ops:** stay on whole-entity LWW, with the narrow time-preserving
+   exception below.
 7. **Time on a remote win:** ~~local-win direction only, for now.~~ Replaced
    on 2026-10-01 ([#10393](https://github.com/super-productivity/super-productivity/issues/10393#issuecomment-5936659621)):
    a pending time delta survives a remote win whose winner writes no time
@@ -313,22 +319,25 @@ Decided by @johannesjo on 2026-09-30 ([#10393](https://github.com/super-producti
    [#10393](https://github.com/super-productivity/super-productivity/issues/10393#issuecomment-5948107121)):
    a delta also commutes with ops that provably write no time field
    (`writesNoTaskTime` in `conflict-disjoint-merge.util.ts`): readable
-   single-task edits without a time key, and the opaque actions admitted in
+   single-task edits without a time key, timeless patch rows checked only
+   by their field keys, and the opaque actions admitted in
    `TIMELESS_OPAQUE_TASK_ACTIONS`, today only the `planTasksForToday` that
    tracking an unscheduled task emits (its reducer spec proves it writes no
    time). So a remote delta beside a pending auto-plan applies without a
    conflict, and a local win's snapshot folds it in; on a remote win whose
-   ops all write no time, the local deltas stay pending and are rebased past
+   ops all write no time, the local deltas stay pending unchanged beside
    the winner (`timeDeltasSurvivingRemoteWins`). The same crossing with
    no pending side (#9073), where a device's own auto-plan and delta were
    already synced when the other device's accepted delta arrives, commutes
-   too: there a local win emitted a snapshot whose merged clock claimed the
+   too, including retained histories mixing those patch rows, readable
+   timeless edits and deltas. One side must contain only deltas: a delta
+   beside overlapping non-time writes on both sides does not admit them.
+   There a local win emitted a snapshot whose merged clock claimed the
    remote delta without its time, so every device lost it (the 2000/5000
    history in the harness spec below; E2E in
    `supersync-time-delta-auto-plan-crossing.spec.ts`). A delta a remote op's
    clock covers loses: that device had seen it, so it was delivered and
-   counts once (keeping it re-sends it with a rebased clock, which the server
-   rejects as `INVALID_OP_ID` with a sync error). D10 refined (#10393) asks to
+   counts once. D10 refined (#10393) asks to
    keep a delta whose coverage is only inherited knowledge; the harness spec
    `time-delta-kept-beside-timeless-winner.integration.spec.ts` builds such a
    clock through the real paths, and a concurrent op of the same crossing
@@ -340,6 +349,38 @@ Decided by @johannesjo on 2026-09-30 ([#10393](https://github.com/super-producti
    downloads the other side while its own tick is pending lacks it and still
    resolves by whole-entity LWW, so the released E2E only covers a released
    tracker that uploads first.
+
+**Decision 6, narrow time-preserving exception (2026-10-04, task 3).**
+On the foundation of #10499, an existing TASK conflict containing only original
+`syncTimeSpent` deltas and operations proven to write no task time may keep its
+original deltas separate from its non-time winner. This includes the existing
+`planTasksForToday` proof and single-task non-time patch rows inspected by keys
+and `clearedFields` only. Overlapping scheduling writes still conflict normally.
+
+A qualifying local winner uses the same current-state snapshot, per-operation
+winner, timestamp, vector clock and batch position as before, but emits a patch
+without `timeSpent` or `timeSpentOnDay`. Missing optional fields are explicit
+clears. Eligibility covers every conflict and other incoming operation for that
+task in the batch; an absolute time edit, deletion/recreation, multi-entity write,
+or unproven opaque operation keeps the existing path. Original deltas travel
+separately on either winner side; no second additive operation is synthesized.
+
+After an explicit server rejection, a newer applied full non-time winner may
+supersede this device's rejected non-time snapshot. Only after proving the
+existing LWW winner, coverage of its write/clear keys, and complete commuting
+history may retry handling retire that obsolete snapshot and rebase the
+original delta. Unknown upload outcomes retain the original operation unchanged.
+An intervening absolute time write or task reassignment does not satisfy this
+proof. Retiring the snapshot does not remove it from durable replay.
+
+This does not permit extracting per-action payloads, reading incoming resolution
+values, merging resolution rows, or building a derived field index (decisions
+3, 5 and 11). Existing time-bearing replacements and active older resolvers
+remain capable of erasing time. Readers before v18.21.2 ignore patch clears
+and may keep a stale optional value; decision 3 covers this as the same
+residual with the same end date, the enforced version floor (#10397). A
+`'replace'` here instead would lose tracked time (#10393 open question 6,
+decided 2026-10-06).
 
 **Decision 5a (2026-10-01, #10421).** Asked whether rule 1 below stays within
 decision 5, @johannesjo answered: "Ponder in sub agent and act according to
@@ -364,7 +405,7 @@ known habit trade (`noReorder:20725006`); otherwise TASK only.
 ## Implementation (PR 1)
 
 [`conflict-field-patch.util.ts`](../../src/app/op-log/sync/conflict-field-patch.util.ts)
-holds the rules; `ConflictResolutionService._tryCreateFieldPatch` builds the op.
+holds the rules; `ConflictLocalWinOpsService._tryCreateFieldPatch` builds the op.
 
 - **Overlap:** every update-vs-update conflict of a TASK, PROJECT, TAG or
   SIMPLE_COUNTER whose ops are readable resolves per field (#10422, see
@@ -385,10 +426,28 @@ holds the rules; `ConflictResolutionService._tryCreateFieldPatch` builds the op.
   their order on this device is not fixed, so that crossing can still diverge
   (residual, as before #10438).
 - **Time:** a local `syncTimeSpent` delta is neither in the patch nor
-  rejected. It stays pending and is rebased in place past the remote sides,
-  together with the patch after it (`rebaseKeptTimeDeltas`). A remote delta,
-  `removeTimeSpent`, or a delta beside an absolute time write keeps the
-  whole-entity path.
+  rejected. File providers keep its original identity after a lost response.
+  SuperSync rebases kept deltas for released-client compatibility, with
+  [verified receipt recovery](time-delta-retry-recovery.md) if the original was
+  already stored. The separate `rebaseCommutingTimeDeltaRejections` path requires
+  an explicit conflict rejection and an applied, acknowledged timeless patch (including the
+  same client's successor), only when all intervening task operations commute.
+  It reads incoming patch keys, never their values (D5a). A rejected group of
+  this client's deltas and replacement rows can also retry in its original
+  order when every crossed content edit leaves each replacement unchanged.
+  This narrow proof compares the author's own pending replacement values; it
+  neither merges resolution rows nor emits new fields. Retained history must
+  be complete through the state-cache frontier, so compaction cannot hide a
+  scheduling or relationship change. An earlier stored row is skipped only
+  when the pending operation's clock proves it was already observed; append
+  order alone is insufficient. On that rejection path, every moved
+  row must be explicitly rejected; an accepted or ambiguously uploaded
+  companion prevents the move. Incoming replacements, absolute time writes
+  and unproven crossings retain their fallback. File providers retry unchanged
+  and deduplicate by operation ID. Ordinary field patches still refuse a
+  remote delta, `removeTimeSpent`, or a delta beside an absolute time write.
+  See the [regression tracker](./time-delta-retry-regressions.md) for the exact
+  frozen traces and rejected alternatives.
 - **Clock:** the patch also dominates the batch's commuting single-entity ops
   on its entity (e.g. a third client's delta), or the server rejects it as
   concurrent. It carries none of their fields.
@@ -508,7 +567,7 @@ rows of the same single entity, resolves per field:
    of the same field (timestamp, then clientId) is re-sent as a `'patch'`
    row, at the timestamp of the op that wrote it (`localWinningFieldGroups`,
    one row per such op, oldest first). The original local ops are rejected; a
-   local time delta stays pending and is rebased (unchanged).
+   local time delta stays pending unchanged until a confirmed server rejection.
 3. A remote readable op writes the fields of its change; a remote `'patch'`
    row writes its keys (`actionPayload`, `clearedFields`); a `'replace'` row
    writes every field.

@@ -16,6 +16,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { TaskService } from '../task.service';
+import { SectionService } from '../../section/section.service';
 import { TaskDuplicateService } from '../task-duplicate.service';
 import { TaskMultiSelectService } from '../task-multi-select.service';
 import { TaskMoveToProjectService } from '../task-move-to-project.service';
@@ -91,6 +92,10 @@ import { isDeadlineApproaching as isDeadlineApproachingFn } from '../util/is-dea
 import { TaskContextMenuComponent } from '../task-context-menu/task-context-menu.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ICAL_TYPE, PLAINSPACE_TYPE } from '../../issue/issue.const';
+import {
+  getTaskDeleteConfirmData,
+  isTaskDeleteConfirmRequired,
+} from '../util/get-task-delete-confirm';
 import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
@@ -124,6 +129,7 @@ import {
 } from '../add-subtask-input/add-subtask-input.component';
 import { AddSubtaskInputService } from '../add-subtask-input/add-subtask-input.service';
 import { getSubTaskTimeLeftForDisplay } from '../util/get-sub-task-time-left-for-display';
+import { getScheduledDateColor } from '../util/get-scheduled-date-color';
 
 const isInteractiveTarget = (target: EventTarget | null): boolean =>
   target instanceof Element &&
@@ -182,6 +188,7 @@ const isInteractiveTarget = (target: EventTarget | null): boolean =>
 })
 export class TaskComponent implements OnDestroy, AfterViewInit {
   private readonly _taskService = inject(TaskService);
+  private readonly _sectionService = inject(SectionService);
   private readonly _taskDuplicateService = inject(TaskDuplicateService);
   private readonly _matDialog = inject(MatDialog);
   private readonly _location = inject(Location);
@@ -209,6 +216,8 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   task = input.required<TaskWithSubTasks>();
   isBacklog = input<boolean>(false);
+  // Section list this row is rendered in, null for non-section lists.
+  sectionId = input<string | null>(null);
   isInSubTaskList = input<boolean>(false);
   showDoneAnimation = signal(false);
   showUndoneAnimation = signal(false);
@@ -287,6 +296,19 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     return (
       (t.dueWithTime && this._dateService.isToday(t.dueWithTime)) ||
       (t.dueDay && t.dueDay === todayStr)
+    );
+  });
+  scheduledDateColor = computed(() => {
+    const task = this.task();
+    if (task.isDone || this.isCurrent() || (!task.dueDay && !task.dueWithTime)) {
+      return '';
+    }
+    return getScheduledDateColor(
+      task,
+      this.globalTrackingIntervalService.todayDateStr(),
+      this._dateService.getStartOfNextDayDiffMs(),
+      // Only timed tasks depend on the clock, with no per-row subscription.
+      task.dueWithTime ? this.globalTrackingIntervalService.clockTimestamp() : 0,
     );
   });
   hasTimeConflict = computed(() => {
@@ -501,7 +523,12 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     if (
       !isMultiSelectModifierEvent(ev) &&
       this._multiSelect.isActive() &&
-      !this._multiSelect.isTouchSelectionMode()
+      !this._multiSelect.isTouchSelectionMode() &&
+      !(
+        this._multiSelect.has(this.task().id) &&
+        !this.task().parentId &&
+        this._multiSelect.count() > 1
+      )
     ) {
       this._multiSelect.clear();
     }
@@ -519,6 +546,9 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
       return;
     }
     const isModifierClick = isMultiSelectModifierEvent(ev);
+    // Defer clearing a selected parent until click so CDK can start a group drag.
+    if (!isModifierClick && !this._multiSelect.isTouchSelectionMode())
+      this._multiSelect.clear();
     const isTouchTap = !isModifierClick && this._multiSelect.isTouchSelectionMode();
     if (
       (!isModifierClick && !isTouchTap) ||
@@ -750,14 +780,10 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     const isConfirmBeforeTaskDelete =
       this._configService.cfg()?.tasks?.isConfirmBeforeDelete ?? true;
 
-    if (isConfirmBeforeTaskDelete) {
+    if (isTaskDeleteConfirmRequired(this.task(), isConfirmBeforeTaskDelete)) {
       this._matDialog
         .open(DialogConfirmComponent, {
-          data: {
-            okTxt: T.F.TASK.D_CONFIRM_DELETE.OK,
-            message: T.F.TASK.D_CONFIRM_DELETE.MSG,
-            translateParams: { title: this.task().title },
-          },
+          data: getTaskDeleteConfirmData(this.task()),
         })
         .afterClosed()
         .pipe(takeUntilDestroyed(this._destroyRef))
@@ -829,15 +855,25 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   moveTaskToTop(): void {
-    this._moveAndRefocus((id, parentId, isBacklog) =>
-      this._taskService.moveToTop(id, parentId, isBacklog),
-    );
+    this._moveAndRefocus((id, parentId, isBacklog) => {
+      const sectionId = this.sectionId();
+      if (sectionId) {
+        this._sectionService.moveTaskToTop(sectionId, id);
+      } else {
+        this._taskService.moveToTop(id, parentId, isBacklog);
+      }
+    });
   }
 
   moveTaskToBottom(): void {
-    this._moveAndRefocus((id, parentId, isBacklog) =>
-      this._taskService.moveToBottom(id, parentId, isBacklog),
-    );
+    this._moveAndRefocus((id, parentId, isBacklog) => {
+      const sectionId = this.sectionId();
+      if (sectionId) {
+        this._sectionService.moveTaskToBottom(sectionId, id);
+      } else {
+        this._taskService.moveToBottom(id, parentId, isBacklog);
+      }
+    });
   }
 
   handleArrowUp(): void {
@@ -1129,6 +1165,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   toggleTaskDone(): void {
+    if (!this._multiSelect.isTouchSelectionMode()) this._multiSelect.clear();
     window.clearTimeout(this._doneAnimationTimeout);
     this.focusNext(true, true);
     this._doneAnimationTimeout = this._taskService.toggleDoneWithAnimation(
@@ -1250,6 +1287,15 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
         id: this.task().id,
       }),
     );
+  }
+
+  clearSelectionOnTitleClick(event: MouseEvent): void {
+    if (
+      !isInteractiveTarget(event.target) &&
+      !isMultiSelectModifierEvent(event) &&
+      !this._multiSelect.isTouchSelectionMode()
+    )
+      this._multiSelect.clear();
   }
 
   titleBarClick(event: MouseEvent): void {
