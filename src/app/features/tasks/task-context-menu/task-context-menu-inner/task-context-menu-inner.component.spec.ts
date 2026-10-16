@@ -67,6 +67,7 @@ describe('TaskContextMenuInnerComponent', () => {
       'remove',
       'getTasksWithSubTasksByRepeatCfgId$',
       'getArchiveTasksForRepeatCfgId',
+      'update',
     ]);
     taskService.currentTaskId.and.returnValue('some-id');
     taskDuplicateService = jasmine.createSpyObj<TaskDuplicateService>(
@@ -161,6 +162,25 @@ describe('TaskContextMenuInnerComponent', () => {
   afterEach(() => {
     selectTaskByIdWithSubTaskData.release();
     store.resetSelectors();
+  });
+
+  describe('touch selection entry point', () => {
+    for (const [name, selectable, inDetails, expected] of [
+      ['planner card', true, false, true],
+      ['opted-out card', false, false, false],
+      ['detail panel card', true, true, false],
+    ] as const) {
+      it(`recognizes ${name}`, fakeAsync(() => {
+        const container = document.createElement(inDetails ? 'task-detail-panel' : 'div');
+        const card = document.createElement('planner-task');
+        if (selectable) card.setAttribute('data-task-selectable', 'true');
+        container.appendChild(card);
+        card.appendChild(fixture.nativeElement);
+        component.ngAfterViewInit();
+        expect(component.isInTaskRow).toBe(expected);
+        flush();
+      }));
+    }
   });
 
   describe('enterSelectionMode()', () => {
@@ -310,6 +330,72 @@ describe('TaskContextMenuInnerComponent', () => {
     });
   });
 
+  describe('priority submenu', () => {
+    const menuItems = (selector: string): HTMLElement[] =>
+      Array.from(
+        document.querySelectorAll<HTMLElement>(`.cdk-overlay-container ${selector}`),
+      );
+    const openPriorityMenu = (): HTMLElement[] => {
+      component.contextMenuTrigger()?.openMenu();
+      fixture.detectChanges();
+      tick();
+      const trigger = menuItems('[mat-menu-item]').find((el) =>
+        el.textContent?.trim().endsWith(T.F.TASK.CMP.PRIORITY),
+      );
+      expect(trigger).toBeDefined();
+      trigger!.click();
+      fixture.detectChanges();
+      tick();
+      return menuItems('[role="menuitemradio"]');
+    };
+    const closeMenus = (): void => {
+      component.contextMenuTrigger()?.closeMenu();
+      flush();
+    };
+
+    it('lists None, Low, Medium, High and checks only the current level', fakeAsync(() => {
+      component.taskSet = { ...DEFAULT_TASK, id: 'task-1', priority: 'medium' } as Task;
+      fixture.detectChanges();
+
+      const items = openPriorityMenu();
+
+      expect(items.map((el) => el.textContent)).toEqual([
+        jasmine.stringContaining(T.F.TASK.CMP.PRIORITY_NONE),
+        jasmine.stringContaining(T.F.TASK.CMP.PRIORITY_LOW),
+        jasmine.stringContaining(T.F.TASK.CMP.PRIORITY_MEDIUM),
+        jasmine.stringContaining(T.F.TASK.CMP.PRIORITY_HIGH),
+      ]);
+      expect(items.map((el) => el.getAttribute('aria-checked'))).toEqual([
+        'false',
+        'false',
+        'true',
+        'false',
+      ]);
+      expect(items[2].textContent).toContain('check');
+      // Opening focuses the current level, so Enter keeps it.
+      expect(document.activeElement).toBe(items[2]);
+      expect(items[1].querySelector('task-priority-indicator')).not.toBeNull();
+      items[2].click();
+      flush();
+      expect(taskService.update).not.toHaveBeenCalled();
+      closeMenus();
+    }));
+
+    it('sets the numeric level, and clears with null', fakeAsync(() => {
+      component.taskSet = { ...DEFAULT_TASK, id: 'task-1', priority: 'medium' } as Task;
+      fixture.detectChanges();
+
+      openPriorityMenu()[3].click();
+      flush();
+      expect(taskService.update).toHaveBeenCalledWith('task-1', { priority: 3 });
+
+      openPriorityMenu()[0].click();
+      flush();
+      expect(taskService.update).toHaveBeenCalledWith('task-1', { priority: null });
+      closeMenus();
+    }));
+  });
+
   describe('duplicate()', () => {
     it('delegates a task without subtasks directly to TaskDuplicateService', async () => {
       const mockTask: Task = {
@@ -368,6 +454,21 @@ describe('TaskContextMenuInnerComponent', () => {
   });
 
   describe('deleteTask()', () => {
+    // #8583: Enter in the delete confirm deletes the task.
+    it('focuses the confirm button of the delete dialog', () => {
+      const openSpy = spyOn(TestBed.inject(MatDialog), 'open').and.callThrough();
+      component.task = { ...DEFAULT_TASK, id: 'T1', projectId: 'P1' };
+
+      void component.deleteTask();
+
+      expect(openSpy).toHaveBeenCalledWith(
+        jasmine.anything(),
+        jasmine.objectContaining({
+          data: jasmine.objectContaining({ isFocusConfirm: true }),
+        }),
+      );
+    });
+
     // #9946: the selector returns undefined for a task that is gone from the
     // store; removing an id-less stub used to wipe every top-level task.
     it('removes nothing when the task is gone from the store', fakeAsync(() => {
@@ -512,6 +613,38 @@ describe('TaskContextMenuInnerComponent', () => {
       component.focusFirstSubmenuItem(menu);
 
       expect(menu.focusFirstItem).toHaveBeenCalledWith('program');
+    });
+  });
+
+  describe('focusCheckedSubmenuItem()', () => {
+    const fakeItem = (
+      ariaChecked: string | null,
+    ): { focus: jasmine.Spy; _getHostElement: () => HTMLElement } => {
+      const el = document.createElement('button');
+      if (ariaChecked !== null) {
+        el.setAttribute('aria-checked', ariaChecked);
+      }
+      return { focus: jasmine.createSpy('focus'), _getHostElement: () => el };
+    };
+
+    it('focuses the checked item', () => {
+      const items = [fakeItem('false'), fakeItem('true'), fakeItem('false')];
+      const menu = { _allItems: items, focusFirstItem: jasmine.createSpy() };
+
+      component.focusCheckedSubmenuItem(menu as unknown as MatMenu);
+
+      expect(items[1].focus).toHaveBeenCalledWith('program');
+      expect(menu.focusFirstItem).not.toHaveBeenCalled();
+    });
+
+    it('falls back to the first item when nothing is checked', () => {
+      const items = [fakeItem(null), fakeItem('false')];
+      const menu = { _allItems: items, focusFirstItem: jasmine.createSpy() };
+
+      component.focusCheckedSubmenuItem(menu as unknown as MatMenu);
+
+      expect(menu.focusFirstItem).toHaveBeenCalledWith('program');
+      expect(items[0].focus).not.toHaveBeenCalled();
     });
   });
 

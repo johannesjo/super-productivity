@@ -5,8 +5,10 @@ import { CurrentProviderPrivateCfg } from '../../../op-log/core/types/sync.types
 import type { SuperSyncPrivateCfg } from '@sp/sync-providers/super-sync';
 import type { DropboxPrivateCfg } from '@sp/sync-providers/dropbox';
 import type { WebdavPrivateCfg } from '@sp/sync-providers/webdav';
+import { ReminderConfig } from '../../config/global-config.model';
 import {
   bridgeCommandEqual,
+  getBackgroundReminderSettings,
   getSuperSyncCredentialBridgeCommand,
   SuperSyncCredentialBridgeCommand,
 } from './android-sync-bridge.effects';
@@ -223,5 +225,33 @@ describe('AndroidSyncBridgeEffects - credential mirroring logic', () => {
 
       sub.unsubscribe();
     });
+  });
+});
+
+describe('AndroidSyncBridgeEffects - reminder settings mirroring logic', () => {
+  const reminderCfg = (overrides: Partial<ReminderConfig>): ReminderConfig => ({
+    isCountdownBannerEnabled: true,
+    countdownDuration: 60000,
+    ...overrides,
+  });
+
+  it('defaults to enabled, non-alarm-style when the config is missing', () => {
+    expect(getBackgroundReminderSettings(undefined)).toEqual({
+      isDisabled: false,
+      useAlarmStyle: false,
+    });
+  });
+
+  it('mirrors disabled reminders', () => {
+    expect(
+      getBackgroundReminderSettings(reminderCfg({ disableReminders: true })).isDisabled,
+    ).toBe(true);
+  });
+
+  it('mirrors alarm-style reminders', () => {
+    expect(
+      getBackgroundReminderSettings(reminderCfg({ useAlarmStyleReminders: true }))
+        .useAlarmStyle,
+    ).toBe(true);
   });
 });

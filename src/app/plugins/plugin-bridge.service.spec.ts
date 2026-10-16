@@ -33,8 +33,10 @@ import { TranslateService } from '@ngx-translate/core';
 import { SyncWrapperService } from '../imex/sync/sync-wrapper.service';
 import { GlobalThemeService } from '../core/theme/global-theme.service';
 import { PluginIssueProviderRegistryService } from './issue-provider/plugin-issue-provider-registry.service';
+import { IssueProviderPluginDefinition } from './issue-provider/plugin-issue-provider.model';
 import { IssueSyncAdapterRegistryService } from '../features/issue/two-way-sync/issue-sync-adapter-registry.service';
 import { PluginHttpService } from './issue-provider/plugin-http.service';
+import { PluginService } from './plugin.service';
 import { getDbDateStr } from '../util/get-db-date-str';
 import { DataInitService } from '../core/data-init/data-init.service';
 import { Log } from '../core/log';
@@ -45,6 +47,9 @@ import { INBOX_PROJECT } from '../features/project/project.const';
 import { Project } from '../features/project/project.model';
 import { PluginTaskContextMenuRegistryService } from './plugin-task-context-menu-registry.service';
 import { PluginManifest } from '@super-productivity/plugin-api';
+import { TaskMoveToProjectService } from '../features/tasks/task-move-to-project.service';
+import { TaskRepeatCfgService } from '../features/task-repeat-cfg/task-repeat-cfg.service';
+import { TaskRepeatCfg } from '../features/task-repeat-cfg/task-repeat-cfg.model';
 
 describe('PluginBridgeService - Counter Methods', () => {
   let service: PluginBridgeService;
@@ -97,10 +102,18 @@ describe('PluginBridgeService - Counter Methods', () => {
         { provide: Router, useValue: {} },
         { provide: TranslateService, useValue: {} },
         { provide: SyncWrapperService, useValue: {} },
-        { provide: GlobalThemeService, useValue: {} },
+        {
+          provide: GlobalThemeService,
+          useValue: jasmine.createSpyObj('GlobalThemeService', ['hasPluginIcon']),
+        },
+        {
+          provide: PluginService,
+          useValue: jasmine.createSpyObj('PluginService', ['getPluginPath']),
+        },
         {
           provide: PluginIssueProviderRegistryService,
           useValue: jasmine.createSpyObj('PluginIssueProviderRegistryService', [
+            'register',
             'getRegisteredKey',
             'unregister',
           ]),
@@ -372,6 +385,60 @@ describe('PluginBridgeService - Counter Methods', () => {
 
       expect(taskContextMenuRegistry.unregisterPlugin).toHaveBeenCalledOnceWith(
         manifest.id,
+      );
+    });
+  });
+
+  describe('issue provider key reservation (#8842)', () => {
+    const definition = {
+      getHeaders: () => ({}),
+      searchIssues: async () => [],
+      getById: async () => ({}),
+      getIssueLink: () => '',
+      issueDisplay: [],
+      configFields: [],
+    } as unknown as IssueProviderPluginDefinition;
+    let registry: jasmine.SpyObj<PluginIssueProviderRegistryService>;
+
+    const registerAs = (pluginPath: string, issueProviderKey: string): void => {
+      const pluginService = TestBed.inject(
+        PluginService,
+      ) as jasmine.SpyObj<PluginService>;
+      pluginService.getPluginPath.and.returnValue(pluginPath);
+      const manifest = {
+        id: 'test-plugin',
+        name: 'Test Plugin',
+        issueProvider: { issueProviderKey },
+      } as PluginManifest;
+      service.createBoundMethods(manifest.id, manifest).registerIssueProvider(definition);
+    };
+
+    beforeEach(() => {
+      registry = TestBed.inject(
+        PluginIssueProviderRegistryService,
+      ) as jasmine.SpyObj<PluginIssueProviderRegistryService>;
+    });
+
+    it('rejects a custom key from an uploaded plugin', () => {
+      for (const key of ['GITHUB', 'plugin:caldav-calendar-provider']) {
+        expect(() => registerAs('uploaded://test-plugin', key)).toThrowError(
+          /Plugin cannot register under/,
+        );
+      }
+      expect(registry.register).not.toHaveBeenCalled();
+    });
+
+    it('lets a bundled plugin register under its migrated key', () => {
+      registerAs('assets/bundled-plugins/github-issue-provider', 'GITHUB');
+
+      expect(registry.register).toHaveBeenCalledOnceWith(
+        jasmine.objectContaining({ issueProviderKey: 'GITHUB' }),
+      );
+    });
+
+    it('rejects a built-in key even from a bundled plugin', () => {
+      expect(() => registerAs('assets/bundled-plugins/test-plugin', 'JIRA')).toThrowError(
+        /Plugin cannot register under/,
       );
     });
   });
@@ -1158,5 +1225,102 @@ describe('PluginBridgeService - deleteProject', () => {
     await expectAsync(ungranted.deleteProject('project-1')).toBeRejectedWithError(
       /does not declare the "deleteProject" permission/,
     );
+  });
+});
+
+// #10489: a plugin move must take the same path as a UI move, so a recurring
+// task's repeat config and other instances follow it to the new project.
+describe('PluginBridgeService - updateTask() with a new projectId', () => {
+  let service: PluginBridgeService;
+  let taskService: jasmine.SpyObj<TaskService>;
+  let repeatCfgService: jasmine.SpyObj<TaskRepeatCfgService>;
+  let dialogOpen: jasmine.Spy;
+  let store: MockStore;
+  const instance = (id: string): TaskWithSubTasks =>
+    ({
+      ...DEFAULT_TASK,
+      id,
+      projectId: 'p1',
+      repeatCfgId: 'cfg',
+      subTasks: [],
+    }) as TaskWithSubTasks;
+  const task = instance('t1');
+  const otherInstance = instance('t2');
+
+  beforeEach(() => {
+    taskService = jasmine.createSpyObj<TaskService>(
+      'TaskService',
+      [
+        'moveToProject',
+        'update',
+        'getTasksWithSubTasksByRepeatCfgId$',
+        'getArchiveTasksForRepeatCfgId',
+        'updateArchiveTasks',
+      ],
+      { allTasks$: of([]), selectedTask$: of(null) },
+    );
+    taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(
+      of([task, otherInstance]),
+    );
+    taskService.getArchiveTasksForRepeatCfgId.and.resolveTo([]);
+    repeatCfgService = jasmine.createSpyObj<TaskRepeatCfgService>(
+      'TaskRepeatCfgService',
+      ['getTaskRepeatCfgByIdAllowUndefined$', 'updateTaskRepeatCfg'],
+    );
+    repeatCfgService.getTaskRepeatCfgByIdAllowUndefined$.and.returnValue(
+      of({ id: 'cfg' } as TaskRepeatCfg),
+    );
+    dialogOpen = jasmine.createSpy('open');
+
+    TestBed.configureTestingModule({
+      providers: [
+        PluginBridgeService,
+        provideMockStore(),
+        { provide: SnackService, useValue: {} },
+        { provide: NotifyService, useValue: {} },
+        { provide: MatDialog, useValue: { open: dialogOpen } },
+        { provide: PluginHooksService, useValue: {} },
+        { provide: TaskService, useValue: taskService },
+        { provide: TaskRepeatCfgService, useValue: repeatCfgService },
+        { provide: WorkContextService, useValue: { activeWorkContext$: of(null) } },
+        {
+          provide: ProjectService,
+          useValue: { list$: of([{ id: 'p2' }]), getByIdOnce$: () => of({ id: 'p2' }) },
+        },
+        { provide: TagService, useValue: {} },
+        { provide: PluginUserPersistenceService, useValue: {} },
+        { provide: PluginConfigService, useValue: {} },
+        { provide: TaskArchiveService, useValue: {} },
+        { provide: Router, useValue: {} },
+        { provide: TranslateService, useValue: { instant: (key: string) => key } },
+        { provide: SyncWrapperService, useValue: {} },
+        { provide: GlobalThemeService, useValue: {} },
+        { provide: PluginIssueProviderRegistryService, useValue: {} },
+        { provide: IssueSyncAdapterRegistryService, useValue: {} },
+        { provide: PluginHttpService, useValue: {} },
+        { provide: DataInitService, useValue: {} },
+      ],
+    });
+
+    service = TestBed.inject(PluginBridgeService);
+    store = TestBed.inject(MockStore);
+    store.overrideSelector(selectTaskByIdWithSubTaskData, task);
+  });
+
+  it('moves through TaskMoveToProjectService without a confirmation', async () => {
+    const moveSpy = spyOn(
+      TestBed.inject(TaskMoveToProjectService),
+      'moveToProject',
+    ).and.callThrough();
+
+    await service.updateTask('t1', { projectId: 'p2' });
+
+    expect(moveSpy).toHaveBeenCalledOnceWith(task, 'p2', { isSkipConfirm: true });
+    expect(dialogOpen).not.toHaveBeenCalled();
+    expect(repeatCfgService.updateTaskRepeatCfg).toHaveBeenCalledOnceWith('cfg', {
+      projectId: 'p2',
+    });
+    expect(taskService.moveToProject).toHaveBeenCalledWith(task, 'p2');
+    expect(taskService.moveToProject).toHaveBeenCalledWith(otherInstance, 'p2');
   });
 });

@@ -79,6 +79,15 @@ export class PlainspaceSyncAdapterService implements IssueSyncAdapter<Plainspace
     };
   }
 
+  /**
+   * Deletes the task in Plainspace when its SP task is deleted (via the generic
+   * `deleteIssueOnTaskDelete$` effects, after the undo window). Without this the
+   * next poll re-imports the still-assigned task, so it can never be deleted.
+   */
+  async deleteIssue(issueId: string, cfg: PlainspaceCfg): Promise<void> {
+    await firstValueFrom(this._api.deleteTask$(issueId, cfg));
+  }
+
   async fetchIssue(
     issueId: string,
     cfg: PlainspaceCfg,

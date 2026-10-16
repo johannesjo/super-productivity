@@ -43,7 +43,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install yamllint pymarkdownlnt
+          # Pinned: a new linter release must not turn master red (and block the wiki sync).
+          python -m pip install yamllint==1.38.0 pymarkdownlnt==0.9.41
 
       - name: Add Problem Matcher (for Annotations)
         id: problem_matcher

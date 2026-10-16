@@ -3,7 +3,7 @@ import { existsSync } from 'fs';
 import { dirname, join } from 'path';
 import { IPC } from '../shared-with-frontend/ipc-events.const';
 import { getWin } from '../main-window';
-import { quitApp, showOrFocus } from '../various-shared';
+import { raiseForReminder, quitApp, showOrFocus } from '../various-shared';
 import {
   getIsLocked,
   setIsMinimizeToTray,
@@ -16,7 +16,6 @@ import { errorHandlerWithFrontendInform } from '../error-handler-with-frontend-i
 import { GlobalConfigState } from '../../src/app/features/config/global-config.model';
 import { saveSimpleStore } from '../simple-store';
 import { SimpleStoreKey } from '../shared-with-frontend/simple-store.const';
-import { updateLocalRestApiConfig } from '../local-rest-api';
 
 // On Linux, packaged builds ship a shell wrapper (`superproductivity`) next
 // to the Electron ELF (`superproductivity-bin`) that injects
@@ -47,7 +46,6 @@ export const initAppControlIpc = (): void => {
     );
     setIsTrayShowCurrentCountdown(!!cfg.misc.isTrayShowCurrentCountdown);
     refreshIndicator();
-    updateLocalRestApiConfig(cfg);
 
     if (cfg.misc.isUseCustomWindowTitleBar !== undefined) {
       await saveSimpleStore(
@@ -60,9 +58,13 @@ export const initAppControlIpc = (): void => {
   ipcMain.on(IPC.TRANSFER_SETTINGS_TO_ELECTRON, updateSettings);
   ipcMain.on(IPC.UPDATE_SETTINGS, updateSettings);
 
-  ipcMain.on(IPC.SHOW_OR_FOCUS, () => {
+  ipcMain.on(IPC.SHOW_OR_FOCUS, (ev, opts?: { isReminder?: boolean }) => {
     const mainWin = getWin();
-    showOrFocus(mainWin);
+    if (opts?.isReminder) {
+      raiseForReminder(mainWin);
+    } else {
+      showOrFocus(mainWin);
+    }
   });
 
   ipcMain.on(IPC.LOCK_SCREEN, () => {

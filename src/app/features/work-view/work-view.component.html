@@ -90,11 +90,13 @@
       }
 
       @if (pluginEmbedId(); as embedId) {
-        <plugin-index
-          [directPluginId]="embedId"
-          [showFullUI]="false"
-          [skipCleanupOnDestroy]="true"
-        ></plugin-index>
+        @defer (on immediate) {
+          <plugin-index
+            [directPluginId]="embedId"
+            [showFullUI]="false"
+            [skipCleanupOnDestroy]="true"
+          ></plugin-index>
+        }
       } @else {
         <div class="task-list-wrapper">
           @if (!(workContextService.isHasTasksToWorkOn$ | async)) {
@@ -163,7 +165,9 @@
                     [tasks]="customized.grouped[groupKey]"
                     listId="PARENT"
                     listModelId="UNDONE"
-                    [groupTagId]="customized.groupTagIdByKey?.[groupKey]"
+                    [groupTagId]="
+                      $safeNavigationMigration(customized.groupTagIdByKey?.[groupKey])
+                    "
                   ></task-list>
                 </collapsible>
               }
@@ -171,6 +175,7 @@
               @let bySection = undoneTasksBySection();
               <div
                 class="sections-wrapper"
+                data-section-selection-scope
                 cdkDropList
                 [cdkDropListEnterPredicate]="acceptSectionDragOnly"
                 (cdkDropListDropped)="dropSection($event)"
@@ -409,8 +414,10 @@
                 [isGroup]="true"
               >
                 <div class="repeat-cfg-list">
-                  @for (repeatCfg of repeatCfgsForContext(); track repeatCfg.id) {
-                    <repeat-cfg-preview [repeatCfg]="repeatCfg"></repeat-cfg-preview>
+                  @defer (on immediate) {
+                    @for (repeatCfg of repeatCfgsForContext(); track repeatCfg.id) {
+                      <repeat-cfg-preview [repeatCfg]="repeatCfg"></repeat-cfg-preview>
+                    }
                   }
                 </div>
               </collapsible>
@@ -459,7 +466,7 @@
         <split
           (posChanged)="splitInputPos = $event"
           [containerEl]="containerEl"
-          [counter]="backlogTasks()?.length"
+          [counter]="$safeNavigationMigration(backlogTasks()?.length)"
           [isAnimateBtn]="isTriggerBacklogIconAni$ | async"
           [splitBottomEl]="splitBottomEl"
           [splitPos]="splitInputPos"

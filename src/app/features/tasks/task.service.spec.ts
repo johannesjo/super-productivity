@@ -1112,6 +1112,46 @@ describe('TaskService', () => {
       expect(addCall![0].date).toBe(syncCall![0].date);
     });
 
+    it('should not mark time for today as back-filled', () => {
+      const task = createMockTask('task-1');
+
+      service.addTimeSpentAndSync(task, 5000, '2026-01-05');
+
+      expect(store.dispatch).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          type: '[TimeTracking] Add time spent',
+          date: '2026-01-05',
+          isBackfill: false,
+        }),
+      );
+    });
+
+    it('should add and sync time for a past day as back-filled', () => {
+      const task = createMockTask('task-1');
+      const flushOneSpy = spyOn(taskTimeSync, 'flushOne');
+
+      service.addTimeSpentAndSync(task, 5000, '2026-01-02');
+
+      expect(flushOneSpy).toHaveBeenCalledWith('task-1');
+      expect(store.dispatch).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          type: '[TimeTracking] Add time spent',
+          task,
+          duration: 5000,
+          date: '2026-01-02',
+          isBackfill: true,
+        }),
+      );
+      expect(store.dispatch).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          type: '[TimeTracking] Sync time spent',
+          taskId: 'task-1',
+          duration: 5000,
+          date: '2026-01-02',
+        }),
+      );
+    });
+
     it('should not dispatch when duration is zero', () => {
       const task = createMockTask('task-1');
       (store.dispatch as jasmine.Spy).calls.reset();

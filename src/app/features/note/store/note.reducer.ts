@@ -102,12 +102,17 @@ const _reducer = createReducer<NoteState>(
 
   on(updateNote, (state, { note }) => {
     if ('isPinnedToToday' in note.changes) {
+      // A pin prepends only an absent note: replay applies a rejected pin and
+      // then its reissue.
+      const isListed = state.todayOrder.includes(note.id as string);
       return {
         ...state,
         ...adapter.updateOne(note, state),
-        todayOrder: note.changes.isPinnedToToday
-          ? [note.id as string, ...state.todayOrder]
-          : state.todayOrder.filter((id) => id !== note.id),
+        todayOrder: !note.changes.isPinnedToToday
+          ? state.todayOrder.filter((id) => id !== note.id)
+          : isListed
+            ? state.todayOrder
+            : [note.id as string, ...state.todayOrder],
       };
     }
     return adapter.updateOne(note, state);

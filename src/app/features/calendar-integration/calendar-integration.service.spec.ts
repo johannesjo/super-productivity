@@ -32,10 +32,6 @@ import { PluginHttpService } from '../../plugins/issue-provider/plugin-http.serv
 import { IssueProviderPluginDefinition } from '../../plugins/issue-provider/plugin-issue-provider.model';
 import { IssueProviderPluginType } from '../issue/issue.model';
 import { NotIcalResponseError } from '../schedule/ical/is-likely-ical';
-// Static import forces ical.js into the main test bundle so the dynamic
-// import() inside loadIcalModule resolves from the webpack module cache
-// without a JSONP chunk request — which times out in Karma's test runner.
-import 'ical.js';
 import { loadIcalModule } from '../schedule/ical/ical-lazy-loader';
 import { CalendarIntegrationEvent } from './calendar-integration.model';
 import { HiddenCalendarEventsService } from './hidden-calendar-events.service';

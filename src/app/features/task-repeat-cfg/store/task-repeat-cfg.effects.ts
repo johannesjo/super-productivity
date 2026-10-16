@@ -24,7 +24,7 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
 import { T } from '../../../t.const';
 import { Update } from '@ngrx/entity';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
-import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
+import { getRepeatDueWithTime } from './get-repeat-due-with-time.util';
 import { isValidSplitTime } from '../../../util/is-valid-split-time';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { TaskArchiveService } from '../../archive/task-archive.service';
@@ -45,55 +45,7 @@ import { devError } from '../../../util/dev-error';
 import { getFirstRepeatOccurrence } from './get-first-repeat-occurrence.util';
 import { getNextRepeatOccurrence } from './get-next-repeat-occurrence.util';
 import { clampPastTimedOccurrence } from './clamp-past-timed-occurrence.util';
-
-// Exhaustive classification: `true` = editing this field changes which day
-// occurrences land on, so rescheduleTaskOnRepeatCfgUpdate$ must relocate the
-// live instance. Exhaustiveness makes a new TaskRepeatCfgCopy field a compile
-// error here until classified — the open-ended list this replaces silently
-// missed the monthly anchor fields for years.
-// Load-bearing `false` entries: lastTaskCreation* (the effect re-dispatches
-// them; `true` would re-enter it), quickSetting (derived UI value — the mapped
-// pattern fields carry the actual change), deletedInstanceDates (written by
-// the delete-instance flow, which removes the live task itself).
-const SCHEDULE_AFFECTING_BY_FIELD: Record<keyof TaskRepeatCfgCopy, boolean> = {
-  id: false,
-  projectId: false,
-  lastTaskCreation: false,
-  lastTaskCreationDay: false,
-  title: false,
-  tagIds: false,
-  order: false,
-  defaultEstimate: false,
-  startTime: false,
-  remindAt: false,
-  isPaused: true,
-  quickSetting: false,
-  repeatCycle: true,
-  startDate: true,
-  repeatEvery: true,
-  monday: true,
-  tuesday: true,
-  wednesday: true,
-  thursday: true,
-  friday: true,
-  saturday: true,
-  sunday: true,
-  monthlyWeekOfMonth: true,
-  monthlyWeekday: true,
-  monthlyLastDay: true,
-  notes: false,
-  shouldInheritSubtasks: false,
-  repeatFromCompletionDate: false,
-  waitForCompletion: false,
-  disableAutoUpdateSubtasks: false,
-  subTaskTemplates: false,
-  deletedInstanceDates: false,
-  skipOverdue: false,
-};
-
-const SCHEDULE_AFFECTING_FIELDS = (
-  Object.keys(SCHEDULE_AFFECTING_BY_FIELD) as (keyof TaskRepeatCfgCopy)[]
-).filter((field) => SCHEDULE_AFFECTING_BY_FIELD[field]);
+import { SCHEDULE_AFFECTING_FIELDS } from './schedule-affecting-fields.const';
 
 @Injectable()
 export class TaskRepeatCfgEffects {
@@ -122,17 +74,20 @@ export class TaskRepeatCfgEffects {
             const calculatedTargetDate = clampPastTimedOccurrence(
               getFirstRepeatOccurrence(taskRepeatCfg),
               taskRepeatCfg,
+              this._dateService.todayStr(),
             );
 
             // Use calculated date if available, otherwise fall back to existing logic
+            const startOfNextDayDiffMs = this._dateService.getStartOfNextDayDiffMs();
             const targetDayTimestamp = calculatedTargetDate
               ? calculatedTargetDate.getTime()
               : (task.dueDay && dateStrToUtcDate(task.dueDay).getTime()) ||
-                task.dueWithTime ||
-                Date.now();
-            const dateTime = getDateTimeFromClockString(
+                (task.dueWithTime && task.dueWithTime - startOfNextDayDiffMs) ||
+                this._dateService.getLogicalTodayDate().getTime();
+            const dateTime = getRepeatDueWithTime(
               startTime as string,
               targetDayTimestamp,
+              startOfNextDayDiffMs,
             );
 
             // Only skip auto-removal from today if the task is scheduled for today
@@ -205,6 +160,7 @@ export class TaskRepeatCfgEffects {
         const firstOccurrence = clampPastTimedOccurrence(
           getFirstRepeatOccurrence(taskRepeatCfg),
           taskRepeatCfg,
+          this._dateService.todayStr(),
         );
         const firstOccurrenceStr = firstOccurrence
           ? this._dateService.todayStr(firstOccurrence)
@@ -334,8 +290,13 @@ export class TaskRepeatCfgEffects {
                     // occurrence on or after today. The strictly-future variant
                     // always skipped today, stranding a still-valid daily
                     // instance on tomorrow and advancing lastTaskCreationDay past
-                    // today (#7951).
-                    getNextRepeatOccurrence(fullCfg, new Date(), { inclusive: true });
+                    // today (#7951). Logical today, so a late-night slot before
+                    // the day boundary stays on its own night (#3378).
+                    getNextRepeatOccurrence(
+                      fullCfg,
+                      this._dateService.getLogicalTodayDate(),
+                      { inclusive: true },
+                    );
 
                 if (undoneInstances.length === 0) {
                   // No live instance to reschedule. But when startDate moved
@@ -389,12 +350,16 @@ export class TaskRepeatCfgEffects {
                 // upcoming today is kept on today.
                 let targetOccurrence = firstOccurrence;
                 if (isTimedTask && targetOccurrence) {
-                  const slot = getDateTimeFromClockString(
+                  const slot = getRepeatDueWithTime(
                     fullCfg.startTime as string,
-                    targetOccurrence.getTime(),
+                    targetOccurrence,
+                    this._dateService.getStartOfNextDayDiffMs(),
                   );
                   if (slot < Date.now()) {
-                    const nextOccurrence = getNextRepeatOccurrence(fullCfg, new Date());
+                    const nextOccurrence = getNextRepeatOccurrence(
+                      fullCfg,
+                      this._dateService.getLogicalTodayDate(),
+                    );
                     if (nextOccurrence) {
                       targetOccurrence = nextOccurrence;
                     }
@@ -414,10 +379,11 @@ export class TaskRepeatCfgEffects {
                 if (isTimedTask) {
                   const targetDayTimestamp = targetOccurrence
                     ? targetOccurrence.getTime()
-                    : Date.now();
-                  const dateTime = getDateTimeFromClockString(
+                    : this._dateService.getLogicalTodayDate().getTime();
+                  const dateTime = getRepeatDueWithTime(
                     fullCfg.startTime as string,
                     targetDayTimestamp,
+                    this._dateService.getStartOfNextDayDiffMs(),
                   );
                   const scheduledForToday = this._dateService.isToday(dateTime);
 
@@ -825,9 +791,12 @@ export class TaskRepeatCfgEffects {
       isValidSplitTime(completeCfg.startTime) &&
       this._dateService.isToday(task.created)
     ) {
-      const dateTime = getDateTimeFromClockString(
+      // the instance was created today, so place it on the logical day, not on
+      // the calendar date (which is already tomorrow before the day boundary)
+      const dateTime = getRepeatDueWithTime(
         completeCfg.startTime as string,
-        new Date(),
+        this._dateService.getLogicalTodayDate(),
+        this._dateService.getStartOfNextDayDiffMs(),
       );
       if (task.remindAt) {
         this._taskService.reScheduleTask({

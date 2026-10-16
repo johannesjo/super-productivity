@@ -37,12 +37,18 @@ import { PluginBridgeService } from '../../plugin-bridge.service';
 import { CollapsibleComponent } from '../../../ui/collapsible/collapsible.component';
 import { LanguageCode } from '../../../core/locale.constants';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
-import { confirmDialog } from '../../../util/native-dialogs';
+import { escapeHtml } from '../../../util/escape-html';
+import { getUploadedPluginIds } from '../../plugin-state.model';
+import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import { firstValueFrom } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { Router } from '@angular/router';
 import { selectAll as selectAllIssueProviders } from '../../../features/issue/store/issue-provider.selectors';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
 import COMMUNITY_PLUGINS_DATA from '../../../../assets/community-plugins.json';
+import { PluginApiAccess, PluginSecurityService } from '../../plugin-security';
+import { DEV_ONLY_BUNDLED_PLUGIN_IDS } from '../../bundled-plugins.const';
+import { environment } from '../../../../environments/environment';
 
 interface CommunityPlugin {
   name: string;
@@ -94,6 +100,7 @@ export class PluginManagementComponent {
   private readonly _router = inject(Router);
   private readonly _layoutService = inject(LayoutService);
   private readonly _pluginBridge = inject(PluginBridgeService);
+  private readonly _pluginSecurity = inject(PluginSecurityService);
   private readonly _snackService = inject(SnackService);
   private readonly _allIssueProviders = this._store.selectSignal(selectAllIssueProviders);
 
@@ -164,19 +171,51 @@ export class PluginManagementComponent {
     return plugins;
   });
 
+  // Development and E2E builds (plain `ng build`) are not `production`, so they list them.
+  private readonly _isShowDevPlugins = !environment.production;
+  // Dev-only plugins seen enabled stay listed, so disabling one does not make it vanish.
+  // Filled from inside pluginGroups (via isPluginListed); it only ever grows while this
+  // page is open, so re-running the computed gives the same result.
+  private readonly _shownDevPluginIds = new Set<string>();
+
+  // Uploaded plugins, then built-in integrations (issue and calendar providers), then
+  // other built-ins, each in load order. Grouped by origin and type rather than enabled
+  // state, so a card never moves while its toggle is used.
+  readonly pluginGroups = computed(() => {
+    const plugins = this.allPlugins().filter((p) => this._isListed(p));
+    const states = this._pluginService.pluginStates();
+    const isUploaded = (p: PluginInstance): boolean =>
+      states.get(p.manifest.id)?.type === 'uploaded';
+    const builtIn = plugins.filter((p) => !isUploaded(p));
+    return [
+      { titleKey: T.PLUGINS.GROUP_UPLOADED, plugins: plugins.filter(isUploaded) },
+      {
+        titleKey: T.PLUGINS.GROUP_INTEGRATIONS,
+        plugins: builtIn.filter((p) => this.isIssueProviderPlugin(p)),
+      },
+      {
+        titleKey: T.PLUGINS.GROUP_OTHER,
+        plugins: builtIn.filter((p) => !this.isIssueProviderPlugin(p)),
+      },
+    ].filter((group) => group.plugins.length > 0);
+  });
+
   // Upload state
   readonly isUploading = signal<boolean>(false);
   readonly uploadError = signal<string | null>(null);
 
   onPluginToggle(plugin: PluginInstance, event: MatSlideToggleChange): void {
     if (event.checked) {
-      this.enablePlugin(plugin);
+      this.enablePlugin(plugin, event);
     } else {
       this.disablePlugin(plugin, event);
     }
   }
 
-  private async enablePlugin(plugin: PluginInstance): Promise<void> {
+  private async enablePlugin(
+    plugin: PluginInstance,
+    event: MatSlideToggleChange,
+  ): Promise<void> {
     PluginLog.log('Enabling plugin:', plugin.manifest.id);
 
     try {
@@ -189,7 +228,8 @@ export class PluginManagementComponent {
           'User denied Node.js execution permission for plugin:',
           plugin.manifest.id,
         );
-        // Reset the toggle state
+        // The toggle switched itself on on click; turn it back off since nothing was enabled
+        event.source.checked = false;
         return;
       }
 
@@ -222,14 +262,12 @@ export class PluginManagementComponent {
     );
     if (attachedProviders.length > 0) {
       if (
-        !confirmDialog(
-          this._translateService.instant(T.PLUGINS.CONFIRM_DISABLE_WITH_ISSUE_PROVIDERS, {
-            count: attachedProviders.length,
-            name: plugin.manifest.name,
-          }),
-        )
+        !(await this._confirmInDialog(T.PLUGINS.CONFIRM_DISABLE_WITH_ISSUE_PROVIDERS, {
+          count: attachedProviders.length,
+          name: escapeHtml(plugin.manifest.name),
+        }))
       ) {
-        // Reset toggle back to enabled since user cancelled
+        // The toggle switched itself off on click; turn it back on since the user cancelled
         event.source.checked = true;
         return;
       }
@@ -246,6 +284,10 @@ export class PluginManagementComponent {
     } catch (error) {
       PluginLog.err('Failed to disable plugin:', error);
     }
+  }
+
+  private _isListed(plugin: PluginInstance): boolean {
+    return isPluginListed(plugin, this._isShowDevPlugins, this._shownDevPluginIds);
   }
 
   isPluginLoading(plugin: PluginInstance): boolean {
@@ -298,8 +340,13 @@ export class PluginManagementComponent {
       return;
     }
 
-    this.isUploading.set(true);
     this.uploadError.set(null);
+    if (!(await this._confirmInstall())) {
+      input.value = '';
+      return;
+    }
+
+    this.isUploading.set(true);
 
     try {
       const plugin = await this._pluginService.loadPluginFromZip(file);
@@ -328,6 +375,20 @@ export class PluginManagementComponent {
   }
 
   async clearPluginCache(): Promise<void> {
+    // Counts the same plugins clearUploadedPluginsFromMemory removes. With none
+    // installed, nothing visible is lost, so the cache is cleared without asking.
+    const uploadedCount = getUploadedPluginIds(this._pluginService.pluginStates()).length;
+    if (
+      uploadedCount > 0 &&
+      !(await this._confirmInDialog(
+        T.PLUGINS.CONFIRM_CLEAR_CACHE,
+        { count: uploadedCount },
+        T.PLUGINS.CLEAR_PLUGIN_CACHE,
+      ))
+    ) {
+      return;
+    }
+
     try {
       this.isUploading.set(true);
       this.uploadError.set(null);
@@ -360,12 +421,13 @@ export class PluginManagementComponent {
   }
 
   async removeUploadedPlugin(plugin: PluginInstance): Promise<void> {
+    // The name comes from the uploaded ZIP and the dialog renders the message as HTML.
     if (
-      !confirmDialog(
-        this._translateService.instant(T.PLUGINS.CONFIRM_REMOVE, {
-          name: plugin.manifest.name,
-        }),
-      )
+      !(await this._confirmInDialog(
+        T.PLUGINS.CONFIRM_REMOVE,
+        { name: escapeHtml(plugin.manifest.name) },
+        T.PLUGINS.REMOVE,
+      ))
     ) {
       return;
     }
@@ -387,6 +449,48 @@ export class PluginManagementComponent {
     } finally {
       this.isUploading.set(false);
     }
+  }
+
+  /** Resolves true only for the OK button; Cancel, Esc and backdrop resolve false. */
+  // Uploaded code is unreviewed, so the full risk list is shown here, right before it
+  // is installed, instead of above every plugin on the page.
+  private async _confirmInstall(): Promise<boolean> {
+    const t = (key: string): string => escapeHtml(this._translateService.instant(key));
+    const risks = [
+      T.PLUGINS.RISK_DATA_ACCESS,
+      T.PLUGINS.RISK_MALICIOUS_CODE,
+      T.PLUGINS.RISK_SYSTEM_ACCESS,
+      T.PLUGINS.RISK_PERFORMANCE,
+    ];
+    const message =
+      `<p>${t(T.PLUGINS.SECURITY_WARNING)}</p>` +
+      `<ul>${risks.map((risk) => `<li>${t(risk)}</li>`).join('')}</ul>` +
+      `<p>${t(T.PLUGINS.RECOMMENDATION)}</p>`;
+    const result = await firstValueFrom(
+      this._dialog
+        .open(DialogConfirmComponent, {
+          restoreFocus: true,
+          data: { message, okTxt: T.PLUGINS.INSTALL_PLUGIN },
+        })
+        .afterClosed(),
+    );
+    return result === true;
+  }
+
+  private async _confirmInDialog(
+    message: string,
+    translateParams: Record<string, string | number>,
+    okTxt?: string,
+  ): Promise<boolean> {
+    const result = await firstValueFrom(
+      this._dialog
+        .open(DialogConfirmComponent, {
+          restoreFocus: true,
+          data: { message, translateParams, okTxt },
+        })
+        .afterClosed(),
+    );
+    return result === true;
   }
 
   getPluginDescription(plugin: PluginInstance): string {
@@ -432,24 +536,29 @@ export class PluginManagementComponent {
    * effect when the plugin also declares the `http` capability — the bridge rejects `request`
    * without it — so the UI must not advertise "network access" for `allowedHosts` alone.
    */
-  getNetworkReachHosts(plugin: PluginInstance): string[] {
-    const hosts = plugin.manifest.allowedHosts;
-    return plugin.manifest.permissions?.includes('http') && hosts?.length ? hosts : [];
+  getApiAccess(plugin: PluginInstance): PluginApiAccess[] {
+    return this._pluginSecurity.getDeclaredApiAccess(plugin.manifest);
+  }
+
+  /** Declared permissions not described by getApiAccess (nothing checks them). */
+  getOtherPermissions(plugin: PluginInstance): string[] {
+    const described = new Set(this.getApiAccess(plugin).map((a) => a.permission));
+    return (plugin.manifest.permissions ?? []).filter((p) => !described.has(p));
+  }
+
+  getDetailsTitle(plugin: PluginInstance): string {
+    const details = this._translateService.instant(T.PLUGINS.DETAILS);
+    const summary = this.getPermissionsHooksTitle(plugin);
+    return summary ? `${details} · ${summary}` : details;
   }
 
   getPermissionsHooksTitle(plugin: PluginInstance): string {
     const parts: string[] = [];
     const pCount = plugin.manifest.permissions?.length || 0;
     const hCount = plugin.manifest.hooks?.length || 0;
-    const aCount = this.getNetworkReachHosts(plugin).length;
 
     if (pCount > 0) {
       parts.push(`${this._translateService.instant(T.PLUGINS.PERMISSIONS)} (${pCount})`);
-    }
-    if (aCount > 0) {
-      parts.push(
-        `${this._translateService.instant(T.PLUGINS.ALLOWED_HOSTS)} (${aCount})`,
-      );
     }
     if (hCount > 0) {
       parts.push(`${this._translateService.instant(T.PLUGINS.HOOKS)} (${hCount})`);
@@ -515,12 +624,10 @@ export class PluginManagementComponent {
       }
     } catch (error) {
       PluginLog.err('Failed to open config dialog:', error);
-      // Show error to user
-      this.uploadError.set(
-        error instanceof Error
-          ? error.message
-          : this._translateService.instant(T.PLUGINS.FAILED_TO_LOAD_CONFIG),
-      );
+      // A snack, not `uploadError`: that one renders in the "Install Plugin" card,
+      // far from the plugin whose settings button was clicked. The thrown messages
+      // are untranslated developer text, so they stay in the log above.
+      this._snackService.open({ type: 'ERROR', msg: T.PLUGINS.FAILED_TO_LOAD_CONFIG });
     }
   }
 
@@ -566,3 +673,22 @@ export class PluginManagementComponent {
     return languages.includes(currentLang);
   }
 }
+
+/**
+ * Whether the plugins page lists `plugin`. Dev-only bundled plugins are listed only when
+ * `isShowDevPlugins` is set or once seen enabled; `shownDevPluginIds` remembers the latter.
+ */
+export const isPluginListed = (
+  plugin: PluginInstance,
+  isShowDevPlugins: boolean,
+  shownDevPluginIds: Set<string>,
+): boolean => {
+  const id = plugin.manifest.id;
+  if (isShowDevPlugins || !DEV_ONLY_BUNDLED_PLUGIN_IDS.has(id)) {
+    return true;
+  }
+  if (plugin.isEnabled) {
+    shownDevPluginIds.add(id);
+  }
+  return shownDevPluginIds.has(id);
+};

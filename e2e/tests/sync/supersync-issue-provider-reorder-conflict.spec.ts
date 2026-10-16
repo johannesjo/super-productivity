@@ -134,10 +134,26 @@ const openPanel = async (page: Page): Promise<void> => {
 const drag = async (page: Page): Promise<void> => {
   await openPanel(page);
   const tabs = page.locator('issue-panel .tab-header-item.cdk-drag');
-  await tabs.nth(0).hover();
-  const from = await tabs.nth(0).boundingBox();
-  const to = await tabs.nth(1).boundingBox();
-  if (!from || !to) throw new Error('Provider drag targets missing');
+  // The tabs keep sliding in after they render, and CDK sorts against the rects
+  // it caches when the drag starts. A stale target lands one slot too far, so
+  // measure only once two reads a poll interval apart agree.
+  let boxes: { x: number; y: number; width: number; height: number }[] = [];
+  let previous = '';
+  await expect
+    .poll(async () => {
+      boxes = await tabs.evaluateAll((els) =>
+        els.map((el) => {
+          const { x, y, width, height } = el.getBoundingClientRect();
+          return { x, y, width, height };
+        }),
+      );
+      const current = JSON.stringify(boxes);
+      const settled = current === previous;
+      previous = current;
+      return settled;
+    })
+    .toBe(true);
+  const [from, to] = boxes;
   const halfWidth = from.width / 2;
   const halfHeight = from.height / 2;
   const x = from.x + halfWidth;
@@ -146,7 +162,9 @@ const drag = async (page: Page): Promise<void> => {
   await page.mouse.down();
   await page.mouse.move(x + 6, y);
   await expect(page.locator('.cdk-drag-preview')).toBeVisible();
-  await page.mouse.move(to.x + to.width - 3, y, { steps: 20 });
+  // Release on the target's centre, half a tab clear of the slot after it.
+  const halfTargetWidth = to.width / 2;
+  await page.mouse.move(to.x + halfTargetWidth, y, { steps: 20 });
   await page.mouse.up();
   await expect(page.locator('.cdk-drag-preview')).toBeHidden();
 };

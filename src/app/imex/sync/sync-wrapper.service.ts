@@ -24,7 +24,6 @@ import {
   LegacySyncFormatDetectedError,
   IncompleteRemoteOperationsError,
   PlaintextWhenEncryptionExpectedError,
-  SyncDataCorruptedError,
   UploadRevToMatchMismatchAPIError,
   ForceUploadFailedError,
   ForceUploadPendingOpsError,
@@ -68,11 +67,16 @@ import { ReminderService } from '../../features/reminder/reminder.service';
 import { DialogHandleDecryptErrorComponent } from './dialog-handle-decrypt-error/dialog-handle-decrypt-error.component';
 import { DialogEnterEncryptionPasswordComponent } from './dialog-enter-encryption-password/dialog-enter-encryption-password.component';
 import { SyncLog } from '../../core/log';
+import { SyncUploadRejectionNoticeService } from './sync-upload-rejection-notice.service';
 import { promiseTimeout } from '../../util/promise-timeout';
 import { devError } from '../../util/dev-error';
 import { alertDialog, confirmDialog } from '../../util/native-dialogs';
 import { UserInputWaitStateService } from './user-input-wait-state.service';
 import { SYNC_WAIT_TIMEOUT_MS } from './sync.const';
+import {
+  isSyncIncompatibleVersionError,
+  SyncIncompatibleVersionNoticeService,
+} from './sync-incompatible-version-notice.service';
 import { SuperSyncStatusService } from '../../op-log/sync/super-sync-status.service';
 import { SuperSyncWebSocketService } from '../../op-log/sync/super-sync-websocket.service';
 import { WsTriggeredDownloadService } from '../../op-log/sync/ws-triggered-download.service';
@@ -126,6 +130,8 @@ export class SyncWrapperService {
 
   private _reminderService = inject(ReminderService);
   private _userInputWaitState = inject(UserInputWaitStateService);
+  private _incompatibleVersionNotice = inject(SyncIncompatibleVersionNoticeService);
+  private _uploadRejectionNotice = inject(SyncUploadRejectionNoticeService);
   private _superSyncStatusService = inject(SuperSyncStatusService);
   private _superSyncWsService = inject(SuperSyncWebSocketService);
   private _wsDownloadService = inject(WsTriggeredDownloadService);
@@ -1058,16 +1064,8 @@ export class SyncWrapperService {
           actionStr: T.F.SYNC.S.BTN_FORCE_OVERWRITE,
         });
         return 'HANDLED_ERROR';
-      } else if (error instanceof SyncDataCorruptedError) {
-        // Incompatible remote format. No force-upload: it would destroy a newer one (#8764).
-        this._providerManager.setSyncStatus('ERROR');
-        this._snackService.open({
-          msg: error.isRemoteNewer
-            ? T.F.SYNC.S.VERSION_TOO_OLD
-            : T.F.SYNC.S.ERROR_SYNC_VERSION_MISMATCH,
-          type: 'ERROR',
-          config: { duration: 12000 },
-        });
+      } else if (isSyncIncompatibleVersionError(error)) {
+        this._incompatibleVersionNotice.show(error);
         return 'HANDLED_ERROR';
       } else if (error instanceof LegacySyncFormatDetectedError) {
         // Remote has v16.x pfapi files (__meta_) but no sync-data.json. Usual cause:
@@ -1253,14 +1251,11 @@ export class SyncWrapperService {
         });
         return 'HANDLED_ERROR';
       } else if (error instanceof UploadRevToMatchMismatchAPIError) {
-        // Another client uploaded between our download and upload — self-healing.
-        // The next sync cycle will download their ops first, then upload successfully.
-        // Do not show an error snackbar; just mark as UNKNOWN_OR_CHANGED so the
-        // next sync cycle triggers and resolves the state.
+        // Usually a concurrent upload the next cycle heals; streaks surface (#10808).
         SyncLog.log(
           'SyncWrapperService: Concurrent upload detected, will retry on next sync cycle',
         );
-        this._providerManager.setSyncStatus('UNKNOWN_OR_CHANGED');
+        this._uploadRejectionNotice.onUploadRejected();
         return 'HANDLED_ERROR';
       } else if (error instanceof FileSyncTargetChangedError) {
         // The file sync target (provider/account/folder) changed while this

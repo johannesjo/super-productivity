@@ -68,6 +68,7 @@
       <div class="header-action-group primary-action-group">
         @if (isDataLoaded() && isTimeTrackingEnabled()) {
           <play-button
+            [isMobile]="isXs()"
             [currentTaskId]="currentTaskId()"
             [hasTrackableTasks]="hasTrackableTasks()"
           ></play-button>
@@ -162,7 +163,8 @@
         <plugin-header-btns class="secondary-header-action"></plugin-header-btns>
 
         <!-- One action, one home: below 600px the bottom nav's panels menu
-             lists these, so the header must not render them as well. Rendering
+             lists these (or shows a lone one as a nav button), so the header
+             must not render them as well. Rendering
              both put the same plugin button in two places on a phone at once. -->
         @if (!hasBottomNav()) {
           <plugin-side-panel-btns
