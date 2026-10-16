@@ -21,6 +21,7 @@ Read by section, not whole: the long sync docs open with a **Sections** index an
 - Sync, op-log, vector clocks → [sync index](docs/sync-and-op-log/README.md), then only the relevant contracts. Effects/reducers/bulk dispatch touching synced state → [`contributor-sync-model.md`](docs/sync-and-op-log/contributor-sync-model.md). Judging whether a sync bug is real / how severe → [`sync-severity-triage.md`](docs/sync-and-op-log/sync-severity-triage.md)
 - E2E tests → [`e2e/AGENTS.md`](e2e/AGENTS.md); marketing videos → [`e2e/store-video/AGENTS.md`](e2e/store-video/AGENTS.md)
 - Load-bearing decisions → [`ARCHITECTURE-DECISIONS.md`](ARCHITECTURE-DECISIONS.md)
+- Designing a user-facing feature or writing its plan → [`docs/feature-review-guide.md`](docs/feature-review-guide.md) § Does it earn its place? and § Prior art
 - Reviewing a feature or PR → [`docs/feature-review-guide.md`](docs/feature-review-guide.md); editing a type in `packages/plugin-api/`, `packages/shared-schema/`, `packages/sync-core/`, `src/app/op-log/core/`, or a model a `MODEL_CONFIGS` slice persists → its § Long-term cost of a change
 
 ## Core commands
