@@ -21,7 +21,6 @@ const MODEL_KEYS = [
   'reminders',
   'planner',
   'boards',
-  'bookmark',
   'project',
   'issueProvider',
   'tag',
@@ -73,8 +72,7 @@ export class LegacySupDbService {
           data[key] = value;
         }
       }
-      const archivedIds = (data.taskArchive as { ids?: unknown[] }).ids;
-      const hasArchivedTasks = Array.isArray(archivedIds) && archivedIds.length > 0;
+      const hasArchivedTasks = hasMeaningfulStateData({ task: data.taskArchive });
       return hasMeaningfulStateData(data) || hasArchivedTasks ? data : null;
     } finally {
       db.close();

@@ -20,7 +20,6 @@ import { OperationLogStoreService } from '../../op-log/persistence/operation-log
 import { OperationLogSyncService } from '../../op-log/sync/operation-log-sync.service';
 import { LegacyPfDbService } from '../persistence/legacy-pf-db.service';
 import { LegacySupDbService } from '../persistence/legacy-sup-db.service';
-import { summarizeBackupStr } from '../../imex/local-backup/backup-ring.util';
 import { confirmDialog } from '../../util/native-dialogs';
 import { download } from '../../util/download';
 import { BannerId } from '../banner/banner.model';
@@ -303,25 +302,24 @@ export class StartupService {
     if (!legacyData) {
       return false;
     }
-    const legacyDataStr = JSON.stringify(legacyData);
-    const summary = summarizeBackupStr(legacyDataStr);
-    // Pre-v14 archives live in `taskArchive`, which the summary does not count.
-    const archivedTaskIds = (legacyData.taskArchive as { ids?: unknown[] }).ids;
-    const archivedTaskCount = Array.isArray(archivedTaskIds) ? archivedTaskIds.length : 0;
+    const idCount = (slice: unknown): number => {
+      const ids = (slice as { ids?: unknown } | undefined)?.ids;
+      return Array.isArray(ids) ? ids.length : 0;
+    };
     const msg = this._translateService.instant(T.MIGRATE.C_IMPORT_PRE_V13_DATA, {
-      tasks: (summary?.taskCount ?? 0) + archivedTaskCount,
-      projects: summary?.projectCount ?? 0,
+      tasks: idCount(legacyData.task) + idCount(legacyData.taskArchive),
+      projects: idCount(legacyData.project),
     });
     if (!confirmDialog(msg)) {
       Log.log('StartupService: pre-v13 data import declined');
       return false;
     }
     try {
-      await download('sp-pre-v13-data.json', legacyDataStr);
+      await download('sp-pre-v13-data.json', JSON.stringify(legacyData));
     } catch (e) {
       Log.err('StartupService: pre-v13 data download failed', e);
     }
-    return this._localBackupService.restoreBackupStr(legacyDataStr);
+    return this._localBackupService.restoreBackupStr(JSON.stringify(legacyData));
   }
 
   /**

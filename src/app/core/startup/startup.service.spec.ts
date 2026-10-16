@@ -273,7 +273,7 @@ describe('StartupService', () => {
     });
 
     it('should initialise local backups on startup for existing data', fakeAsync(() => {
-      opLogStore.loadStateCache.and.resolveTo({} as never);
+      opLogStore.getLastSeq.and.resolveTo(1);
 
       service.init();
       flush();

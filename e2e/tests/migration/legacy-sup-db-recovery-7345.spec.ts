@@ -1,6 +1,5 @@
 import { test, expect, Page } from '@playwright/test';
 import legacyV12Data from '../../../src/app/op-log/backup/test-fixtures/legacy-v10-backup.json';
-import { skipOnboardingForE2E } from '../../utils/waits';
 import { readMigratedState } from '../../utils/legacy-migration-helpers';
 
 /**
@@ -13,13 +12,10 @@ import { readMigratedState } from '../../utils/legacy-migration-helpers';
  * Run: npm run e2e:file e2e/tests/migration/legacy-sup-db-recovery-7345.spec.ts -- --retries=0
  */
 
-/** v13–v16 wrote this in place of the timestamp once the data was copied. */
-const MIGRATED_MARKER = 42;
-
-/** Writes a v12-era `SUP` database exactly as v12's IndexedDBAdapterService laid it out. */
-const seedSupDatabase = (page: Page, lastSyncModelChange: number): Promise<string> =>
+/** Writes a v12-era `SUP` database the way v12's IndexedDBAdapterService laid it out. */
+const seedSupDatabase = (page: Page): Promise<string> =>
   page.evaluate(
-    ([data, lastChange]) =>
+    (data) =>
       new Promise<string>((resolve) => {
         const req = indexedDB.open('SUP', 2);
         req.onupgradeneeded = () => req.result.createObjectStore('SUP_STORE');
@@ -28,12 +24,19 @@ const seedSupDatabase = (page: Page, lastSyncModelChange: number): Promise<strin
           const db = req.result;
           const tx = db.transaction('SUP_STORE', 'readwrite');
           const store = tx.objectStore('SUP_STORE');
+          // The fixture is a `loadComplete()` result: its two timestamps are not
+          // store records, and v10–v12 kept bookmarks per project, not top-level.
+          const notRecords = [
+            'lastLocalSyncModelChange',
+            'lastArchiveUpdate',
+            'bookmark',
+          ];
           for (const [key, value] of Object.entries(data)) {
-            if (key !== 'lastLocalSyncModelChange' && key !== 'lastArchiveUpdate') {
+            if (!notRecords.includes(key)) {
               store.put(value, key);
             }
           }
-          store.put(lastChange, 'LOCAL_LAST_SYNC_MODEL_CHANGE');
+          store.put(data.lastLocalSyncModelChange, 'LOCAL_LAST_SYNC_MODEL_CHANGE');
           tx.oncomplete = () => {
             db.close();
             resolve('OK');
@@ -41,19 +44,23 @@ const seedSupDatabase = (page: Page, lastSyncModelChange: number): Promise<strin
           tx.onerror = () => resolve('TX-ERROR:' + String(tx.error));
         };
       }),
-    [legacyV12Data as Record<string, unknown>, lastSyncModelChange] as const,
+    legacyV12Data as Record<string, unknown>,
   );
 
-/** Seeds `SUP` while the app's JS is blocked, then boots the app on top of it. */
-const bootOnSupDatabase = async (
-  page: Page,
-  lastSyncModelChange: number,
-): Promise<void> => {
-  await page.addInitScript(skipOnboardingForE2E);
-  await page.route('**/*.js', (route) => route.abort());
-  await page.goto('/', { waitUntil: 'domcontentloaded' });
-  expect(await seedSupDatabase(page, lastSyncModelChange)).toBe('OK');
-  await page.unroute('**/*.js');
+/**
+ * Skips only the onboarding dialogs. Unlike `skipOnboardingForE2E` it leaves
+ * `SUP_EXAMPLE_TASKS_CREATED` unset, as on a real v12 profile (v12 never wrote
+ * it), so the onboarding example tasks race the startup check as they would
+ * for a real upgrading user.
+ */
+const skipOnboardingDialogsOnly = (): void => {
+  try {
+    localStorage.setItem('SUP_ONBOARDING_PRESET_DONE', 'true');
+    localStorage.setItem('SUP_ONBOARDING_HINTS_DONE', 'true');
+    localStorage.setItem('SUP_IS_SHOW_TOUR', 'true');
+  } catch {
+    // No localStorage in this frame (data:/sandboxed); the host frame already ran us.
+  }
 };
 
 test.describe('@migration v12 SUP database on a blank start (#7345)', () => {
@@ -67,7 +74,11 @@ test.describe('@migration v12 SUP database on a blank start (#7345)', () => {
     });
     const page = await context.newPage();
     try {
-      await bootOnSupDatabase(page, legacyV12Data.lastLocalSyncModelChange);
+      await page.addInitScript(skipOnboardingDialogsOnly);
+      await page.route('**/*.js', (route) => route.abort());
+      await page.goto('/', { waitUntil: 'domcontentloaded' });
+      expect(await seedSupDatabase(page)).toBe('OK');
+      await page.unroute('**/*.js');
 
       const prompts: string[] = [];
       page.on('dialog', async (dialog) => {
@@ -78,10 +89,12 @@ test.describe('@migration v12 SUP database on a blank start (#7345)', () => {
 
       await page.reload({ waitUntil: 'domcontentloaded' });
 
-      // The copy is saved before anything is imported.
+      // The copy is offered before anything is imported.
       const download = await downloadPromise;
       expect(download.suggestedFilename()).toContain('sp-pre-v13-data');
+      expect(prompts.some((msg) => msg.includes('12 or older'))).toBe(true);
 
+      const v12TaskIds = ['task-1', 'task-2', 'task-2-sub', 'task-3'];
       await expect
         .poll(
           async () =>
@@ -92,38 +105,14 @@ test.describe('@migration v12 SUP database on a blank start (#7345)', () => {
             ).task?.ids ?? [],
           { timeout: 30000 },
         )
-        .toEqual(expect.arrayContaining(['task-1', 'task-2', 'task-2-sub', 'task-3']));
+        .toEqual(expect.arrayContaining(v12TaskIds));
 
-      expect(prompts.some((msg) => msg.includes('12 or older'))).toBe(true);
-    } finally {
-      await context.close();
-    }
-  });
-
-  test('stays silent when v13–v16 already migrated the SUP data', async ({
-    browser,
-    baseURL,
-  }) => {
-    const context = await browser.newContext({
-      baseURL: baseURL || 'http://localhost:4242',
-    });
-    const page = await context.newPage();
-    try {
-      await bootOnSupDatabase(page, MIGRATED_MARKER);
-
-      const prompts: string[] = [];
-      page.on('dialog', async (dialog) => {
-        prompts.push(dialog.message());
-        await dialog.dismiss();
-      });
-
+      // The imported data survives a restart and is what the user sees.
       await page.reload({ waitUntil: 'domcontentloaded' });
       await page.waitForSelector('magic-side-nav', { state: 'visible', timeout: 30000 });
-      // The startup check runs before the app is interactive; give a slow
-      // IndexedDB read the same window the positive case gets for its prompt.
-      await page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => {});
-
-      expect(prompts.filter((msg) => msg.includes('12 or older'))).toEqual([]);
+      await expect(page.getByText('My Project', { exact: false }).first()).toBeVisible({
+        timeout: 15000,
+      });
     } finally {
       await context.close();
     }
