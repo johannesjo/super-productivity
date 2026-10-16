@@ -52,8 +52,12 @@ const UNKNOWN_TAG_GROUP_KEY = 'Unknown tag';
 export interface CustomizedTaskGroup {
   key: string;
   tasks: TaskWithSubTasks[];
-  /** Tag grouping only: drag-to-retag target, see `groupTagIdByKey`. */
-  tagId?: string | null;
+  /**
+   * Drag-to-retag target for tag groups, see `groupTagIdByKey`. `null` for every
+   * other grouping: `task-list` treats only `undefined` as "not a group list",
+   * so `TaskMultiDragService.canDrop` must keep rejecting group drops here.
+   */
+  tagId: string | null;
 }
 
 /** Result of {@link TaskViewCustomizerService.customizeUndoneTasks}. */
@@ -264,7 +268,7 @@ export class TaskViewCustomizerService {
           ? this._orderGroupKeys(grouped, group.type).map((key) => ({
               key,
               tasks: grouped[key],
-              ...(groupTagIdByKey ? { tagId: groupTagIdByKey[key] } : {}),
+              tagId: groupTagIdByKey?.[key] ?? null,
             }))
           : undefined;
 
