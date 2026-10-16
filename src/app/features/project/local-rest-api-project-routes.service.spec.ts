@@ -1,5 +1,4 @@
 import { TestBed } from '@angular/core/testing';
-import { provideMockStore, MockStore } from '@ngrx/store/testing';
 import { of } from 'rxjs';
 import { LocalRestApiProjectRoutesService } from './local-rest-api-project-routes.service';
 import { ProjectService } from './project.service';
@@ -13,8 +12,6 @@ import {
 describe('LocalRestApiProjectRoutesService', () => {
   let service: LocalRestApiProjectRoutesService;
   let projectServiceMock: jasmine.SpyObj<ProjectService>;
-  let store: MockStore;
-  let dispatchSpy: jasmine.Spy;
 
   const createProject = (id: string, overrides: Record<string, unknown> = {}): Project =>
     ({
@@ -86,12 +83,9 @@ describe('LocalRestApiProjectRoutesService', () => {
       providers: [
         LocalRestApiProjectRoutesService,
         { provide: ProjectService, useValue: projectServiceMock },
-        provideMockStore({ initialState: {} }),
       ],
     });
     service = TestBed.inject(LocalRestApiProjectRoutesService);
-    store = TestBed.inject(MockStore);
-    dispatchSpy = spyOn(store, 'dispatch');
   });
 
   describe('routing', () => {
@@ -107,12 +101,15 @@ describe('LocalRestApiProjectRoutesService', () => {
     });
 
     it('ignores project sub-routes it does not know', async () => {
-      expect(
-        await service.handle(request('POST', '/projects/p1/unknown')),
-      ).toBeUndefined();
-      expect(
-        await service.handle(request('GET', '/projects/p1/unknown')),
-      ).toBeUndefined();
+      for (const [method, path] of [
+        ['POST', '/projects/p1/unknown'],
+        ['GET', '/projects/p1/unknown'],
+        // Plain archive was dropped from the API (#8036 removed it from the UI).
+        ['POST', '/projects/p1/archive'],
+        ['POST', '/projects/p1/unarchive'],
+      ]) {
+        expect(await service.handle(request(method, path))).toBeUndefined();
+      }
     });
 
     it('answers 405 for a known path with an unsupported verb', async () => {
@@ -123,8 +120,6 @@ describe('LocalRestApiProjectRoutesService', () => {
         ['DELETE', '/projects', 'GET, POST'],
         ['PUT', '/projects/p1', 'GET, PATCH, DELETE'],
         ['POST', '/projects/p1', 'GET, PATCH, DELETE'],
-        ['GET', '/projects/p1/archive', 'POST'],
-        ['DELETE', '/projects/p1/unarchive', 'POST'],
       ];
       for (const [method, path, allowed] of cases) {
         const response = await service.handle(request(method, path));
@@ -223,7 +218,7 @@ describe('LocalRestApiProjectRoutesService', () => {
       expect(projectServiceMock.add).not.toHaveBeenCalled();
     });
 
-    it('strips isArchived silently (use /archive instead)', async () => {
+    it('strips isArchived silently (archive is not part of this API)', async () => {
       setProjectStore([createProject('new-project-id', { title: 'X' })]);
 
       const response = await handle(
@@ -342,64 +337,6 @@ describe('LocalRestApiProjectRoutesService', () => {
       expect(response.status).toBe(400);
       expect(errorCode(response)).toBe('UNSUPPORTED_FIELD');
       expect(projectServiceMock.remove).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('POST /projects/:id/archive and /unarchive', () => {
-    it('archives an active project via the dedicated action', async () => {
-      setProjectStore([createProject('p1', { isArchived: false })]);
-
-      const response = await handle(request('POST', '/projects/p1/archive'));
-
-      expect(response.status).toBe(200);
-      expect(data<unknown>(response)).toEqual({ id: 'p1', archived: true });
-      expect(dispatchSpy).toHaveBeenCalledOnceWith(
-        jasmine.objectContaining({ id: 'p1' }),
-      );
-    });
-
-    it('unarchives an archived project', async () => {
-      setProjectStore([createProject('p1', { isArchived: true })]);
-
-      const response = await handle(request('POST', '/projects/p1/unarchive'));
-
-      expect(response.status).toBe(200);
-      expect(data<unknown>(response)).toEqual({ id: 'p1', archived: false });
-    });
-
-    it('is idempotent when already in the requested state', async () => {
-      setProjectStore([createProject('p1', { isArchived: true })]);
-
-      const response = await handle(request('POST', '/projects/p1/archive'));
-
-      expect(response.status).toBe(200);
-      expect(data<unknown>(response)).toEqual({ id: 'p1', archived: true });
-      // No dispatch for a no-op: the state already matches.
-      expect(dispatchSpy).not.toHaveBeenCalled();
-    });
-
-    it('rejects archiving the Inbox before dispatching anything', async () => {
-      // The project reducer ignores archiveProject for the Inbox, so the
-      // endpoint must refuse rather than answer 200 for a change that never
-      // happens. The Inbox is present: this is a rejection, not a not-found.
-      setProjectStore([createProject(INBOX_PROJECT.id, { isArchived: false })]);
-
-      const response = await handle(
-        request('POST', `/projects/${INBOX_PROJECT.id}/archive`),
-      );
-
-      expect(response.status).toBe(400);
-      expect(errorCode(response)).toBe('UNSUPPORTED_FIELD');
-      expect(dispatchSpy).not.toHaveBeenCalled();
-    });
-
-    it('returns 404 for unknown and prototype ids', async () => {
-      for (const id of ['missing', '__proto__']) {
-        const response = await handle(request('POST', `/projects/${id}/archive`));
-        expect(response.status).toBe(404);
-        expect(errorCode(response)).toBe('PROJECT_NOT_FOUND');
-      }
-      expect(dispatchSpy).not.toHaveBeenCalled();
     });
   });
 });

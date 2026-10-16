@@ -1,5 +1,4 @@
 import { Injectable, inject } from '@angular/core';
-import { Store } from '@ngrx/store';
 import { firstValueFrom } from 'rxjs';
 import typia from 'typia';
 import {
@@ -14,7 +13,6 @@ import {
 import { INBOX_PROJECT } from './project.const';
 import { Project } from './project.model';
 import { ProjectService } from './project.service';
-import { archiveProject, unarchiveProject } from './store/project.actions';
 
 /** Keep project REST writes to scalar/basic fields. Task and note lists are reducer-owned. */
 const ALLOWED_PROJECT_FIELDS = new Set<string>([
@@ -109,7 +107,6 @@ const projectNotFound = (requestId: string): LocalRestApiResponsePayload =>
 @Injectable()
 export class LocalRestApiProjectRoutesService implements LocalRestApiFeatureRoutes {
   private readonly _projectService = inject(ProjectService);
-  private readonly _store = inject(Store);
 
   async handle(
     request: LocalRestApiRequestPayload,
@@ -146,18 +143,9 @@ export class LocalRestApiProjectRoutesService implements LocalRestApiFeatureRout
       return this._methodNotAllowed(requestId, ['GET', 'PATCH', 'DELETE']);
     }
 
-    if (segments.length === 3) {
-      const [, projectId, action] = segments;
-      if (action !== 'archive' && action !== 'unarchive') {
-        // Not a route this feature owns — let the core handler answer 404.
-        return undefined;
-      }
-      if (method !== 'POST') {
-        return this._methodNotAllowed(requestId, ['POST']);
-      }
-      return this._handleArchive(requestId, projectId, action === 'archive');
-    }
-
+    // Anything deeper (`/projects/:id/archive`, `/complete`, …) is not part of
+    // this API. Plain archive was removed from the UI in #8036 because it hides
+    // a project's unfinished tasks with no prompt; let the core handler 404.
     return undefined;
   }
 
@@ -273,43 +261,6 @@ export class LocalRestApiProjectRoutesService implements LocalRestApiFeatureRout
     // Today.
     await this._projectService.remove(project);
     return createSuccessResponse(requestId, 200, { id: projectId, deleted: true });
-  }
-
-  private async _handleArchive(
-    requestId: string,
-    projectId: string,
-    isArchive: boolean,
-  ): Promise<LocalRestApiResponsePayload> {
-    // Refuse before the store lookup: the reducer ignores archiveProject for
-    // the Inbox, so a 200 here would report a change that never happens.
-    if (isArchive && projectId === INBOX_PROJECT.id) {
-      return createErrorResponse(
-        requestId,
-        400,
-        'UNSUPPORTED_FIELD',
-        'The Inbox project cannot be archived',
-      );
-    }
-
-    const project = await this._getProjectById(projectId);
-    if (!project) {
-      return projectNotFound(requestId);
-    }
-
-    if (isArchive ? project.isArchived : !project.isArchived) {
-      // Already in the requested state — idempotent no-op.
-      return createSuccessResponse(requestId, 200, {
-        id: projectId,
-        archived: project.isArchived,
-      });
-    }
-
-    // Dedicated persistent action, not a plain updateProject: mirrors the task
-    // pattern so any future archive side effects fire from one place.
-    this._store.dispatch(
-      isArchive ? archiveProject({ id: projectId }) : unarchiveProject({ id: projectId }),
-    );
-    return createSuccessResponse(requestId, 200, { id: projectId, archived: isArchive });
   }
 
   /**
