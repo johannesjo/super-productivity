@@ -29,6 +29,8 @@ export const FOCUS_MODE_FORM_CFG: ConfigFormSection<FocusModeConfig> = {
       key: 'focusModeSoundVolume',
       type: 'slider',
       hideExpression: "!model.focusModeSound || model.focusModeSound === 'off'",
+      // keep the chosen volume when the sound is switched off and on again
+      resetOnHide: false,
       templateOptions: {
         type: 'number',
         min: 0,
