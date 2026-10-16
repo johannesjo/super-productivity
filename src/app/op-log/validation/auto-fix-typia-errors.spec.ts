@@ -766,8 +766,8 @@ describe('autoFixTypiaErrors — against REAL typia validation (#9139)', () => {
   //
   // This is why an empty theme is STICKIER than a missing one: a missing theme
   // self-heals on the next validation pass, `{}` is invisible to validation
-  // forever. The settings dialog stopped writing `{}` in #9156, but data
-  // already stored that way stays until the read side merges over the default.
+  // forever. The settings dialog stopped writing `{}` in #9156, and replaces a
+  // stored `{}` with the default on its next save or cancel; until then it stays.
   it('DOCUMENTS #9156: an empty or partial theme is invisible to validation', () => {
     expect(isValid(buildTag((t) => (t.theme = {})))).toBe(true);
     expect(
