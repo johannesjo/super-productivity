@@ -8168,6 +8168,37 @@ describe('ConflictResolutionService', () => {
         }
       });
 
+      it('folds only the winners before a restore; later ones apply to the restored task as they are', () => {
+        const restore: Operation = {
+          ...createOpWithTimestamp('restore', 'client-b', 3000),
+          actionType: ActionType.TASK_SHARED_RESTORE,
+          payload: {
+            actionPayload: { task: deletedTask, subTasks: [] },
+            entityChanges: [],
+          },
+        };
+        const later = [delta('d2', 1500, 4000), rename('r1', 'Renamed', 5000)];
+        const remoteOps = [delta('d1', 2000, 2000), restore, ...later];
+        const conflicts = remoteOps.map((op) =>
+          createConflict('task-1', [localDelete()], [op]),
+        );
+        const convertWinner = TestBed.inject(
+          ConflictEntityStateService,
+        )._remoteWinnerConverter(
+          conflicts.map((conflict) => ({ winner: 'remote' as const, conflict })),
+        );
+
+        const [d1, ...rest] = conflicts.flatMap(convertWinner);
+
+        expect(d1.actionType).toBe('[TASK] LWW Update');
+        expect(extractActionPayload(d1.payload)).toEqual({
+          ...deletedTask,
+          timeSpent: 2500,
+          timeSpentOnDay: { [DAY]: 2500 },
+        });
+        expect(rest).toEqual([restore, ...later]);
+      });
+
       it('leaves out a remote op of the entity whose conflict the local delete won', () => {
         const lost = createConflict('task-1', [localDelete()], [delta('d0', 700, 500)]);
         const won = createConflict('task-1', [localDelete()], [delta('d1', 2000, 2000)]);
