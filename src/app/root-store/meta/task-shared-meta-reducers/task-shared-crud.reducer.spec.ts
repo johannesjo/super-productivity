@@ -2831,6 +2831,61 @@ describe('taskSharedCrudMetaReducer', () => {
 
   describe('parent/sub-task tag interaction', () => {
     describe('convertToMainTask action', () => {
+      const convertWontDoSubTask = (
+        subTaskOverrides: Partial<Task>,
+        isDone: boolean,
+      ): Task => {
+        const testState = createStateWithExistingTasks(
+          ['parent-task', 'sub-task'],
+          [],
+          ['parent-task'],
+        );
+        testState[TASK_FEATURE_NAME].entities['parent-task'] = createMockTask({
+          id: 'parent-task',
+          subTaskIds: ['sub-task'],
+          tagIds: ['tag1'],
+        });
+        testState[TASK_FEATURE_NAME].entities['sub-task'] = createMockTask({
+          id: 'sub-task',
+          parentId: 'parent-task',
+          tagIds: [],
+          ...subTaskOverrides,
+        });
+
+        metaReducer(
+          testState,
+          TaskSharedActions.convertToMainTask({
+            task: testState[TASK_FEATURE_NAME].entities['sub-task'] as Task,
+            parentTagIds: ['tag1'],
+            isPlanForToday: false,
+            isDone,
+          }),
+        );
+        const passedState = mockReducer.calls.mostRecent().args[0] as RootState;
+        return passedState[TASK_FEATURE_NAME].entities['sub-task'] as Task;
+      };
+
+      it("should clear isWontDo when a won't-do sub-task is dropped outside DONE", () => {
+        const task = convertWontDoSubTask({ isDone: true, isWontDo: true }, false);
+
+        expect(task.isDone).toBe(false);
+        expect(task.isWontDo).toBeUndefined();
+      });
+
+      it("should keep isWontDo when a won't-do sub-task is dropped on DONE", () => {
+        const task = convertWontDoSubTask({ isDone: true, isWontDo: true }, true);
+
+        expect(task.isDone).toBe(true);
+        expect(task.isWontDo).toBe(true);
+      });
+
+      it('should not revive a stale isWontDo when an undone sub-task is dropped on DONE', () => {
+        const task = convertWontDoSubTask({ isDone: false, isWontDo: true }, true);
+
+        expect(task.isDone).toBe(true);
+        expect(task.isWontDo).toBeUndefined();
+      });
+
       it('should keep parent tags when converting sub-task to main task with same tag', () => {
         // Setup: parent and sub-task exist, parent is in tag
         const testState = createStateWithExistingTasks(
