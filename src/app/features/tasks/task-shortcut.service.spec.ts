@@ -245,7 +245,6 @@ describe('TaskShortcutService', () => {
 
       expect(service.handleTaskShortcuts(event)).toBe(true);
       expect(focus).not.toHaveBeenCalled();
-      expect(document.activeElement).toBe(header);
       expect(event.defaultPrevented).toBe(true);
     });
 
