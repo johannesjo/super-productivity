@@ -154,6 +154,10 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   isBacklog = input(false);
   isSubTaskList = input(false);
 
+  sectionId = computed<string | null>(() => {
+    const id = this.listModelId();
+    return this.listId() === 'PARENT' && !RESERVED_LIST_IDS.has(id) ? id : null;
+  });
   currentTaskId = toSignal(this._taskService.currentTaskId$);
   dropModelDataForList = computed<DropModelDataForList>(() => {
     return {

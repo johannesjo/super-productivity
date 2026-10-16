@@ -43,6 +43,7 @@ import {
 } from 'rxjs/operators';
 import { Project } from '../../../project/project.model';
 import { TaskService } from '../../task.service';
+import { SectionService } from '../../../section/section.service';
 import { MatDialog } from '@angular/material/dialog';
 import { IssueService } from '../../../issue/issue.service';
 import { SnackService } from '../../../../core/snack/snack.service';
@@ -124,6 +125,7 @@ import { PluginTaskContextMenuTarget } from '@super-productivity/plugin-api';
 export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   private readonly _datePipe = inject(LocaleDatePipe);
   private readonly _taskService = inject(TaskService);
+  private readonly _sectionService = inject(SectionService);
   private readonly _matDialog = inject(MatDialog);
   private readonly _issueService = inject(IssueService);
   private readonly _elementRef = inject(ElementRef);
@@ -184,6 +186,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
 
   isCurrent: boolean = false;
   isBacklog: boolean = false;
+  sectionId: string | null = null;
   isInSubTaskList: boolean = false;
   /** Multi-select needs a rendered `<task>` row outside the detail panel. */
   isInTaskRow: boolean = false;
@@ -236,6 +239,10 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
 
   ngAfterViewInit(): void {
     this.isBacklog = !!this._elementRef.nativeElement.closest('.backlog');
+    this.sectionId =
+      (this._elementRef.nativeElement as HTMLElement).closest<HTMLElement>(
+        '.task-list-inner',
+      )?.dataset['sectionId'] ?? null;
     // Subtask reorder only changes the parent's subTaskIds, so move to
     // top/bottom is only offered where that order is on screen — a subtask
     // rendered flat in a tag or Today list would reorder invisibly.
@@ -581,10 +588,18 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   }
 
   moveToTop(): void {
+    if (this.sectionId) {
+      this._sectionService.moveTaskToTop(this.sectionId, this.task.id);
+      return;
+    }
     this._taskService.moveToTop(this.task.id, this.task.parentId, this.isBacklog);
   }
 
   moveToBottom(): void {
+    if (this.sectionId) {
+      this._sectionService.moveTaskToBottom(this.sectionId, this.task.id);
+      return;
+    }
     this._taskService.moveToBottom(this.task.id, this.task.parentId, this.isBacklog);
   }
 
