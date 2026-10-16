@@ -23,6 +23,10 @@ import { selectSyncConfig } from '../../features/config/store/global-config.redu
 import { selectEnabledIssueProviders } from '../../features/issue/store/issue-provider.selectors';
 import { RatePromptService } from '../../features/dialog-please-rate/rate-prompt.service';
 import { JiraElectronBridgeService } from '../../features/issue/providers/jira/jira-electron-bridge.service';
+import { OperationLogStoreService } from '../../op-log/persistence/operation-log-store.service';
+import { CURRENT_SCHEMA_VERSION } from '../../op-log/persistence/schema-migration.service';
+import { ActionType, EntityType, OpType } from '../../op-log/core/operation.types';
+import { uuidv7 } from '../../util/uuid-v7';
 
 describe('StartupService', () => {
   let service: StartupService;
@@ -233,6 +237,138 @@ describe('StartupService', () => {
           delete (window as Partial<Window>).ea;
         }
       }
+    });
+  });
+
+  // #7892: which boots may offer (on mobile: silently run) a backup restore.
+  // Drives _initBackups against the REAL op-log store on IndexedDB, so the
+  // gate sees the same state-cache / op-log rows a device boot would.
+  describe('_initBackups restore gating', () => {
+    let opLogStore: OperationLogStoreService;
+    let localBackup: jasmine.SpyObj<LocalBackupService>;
+    let legacyPfDb: jasmine.SpyObj<LegacyPfDbService>;
+
+    const runInitBackups = (): Promise<void> =>
+      (service as unknown as { _initBackups: () => Promise<void> })._initBackups();
+
+    const appendLocalOp = (): Promise<number> =>
+      opLogStore.append({
+        id: uuidv7(),
+        actionType: '[Task] Update' as ActionType,
+        opType: OpType.Update,
+        entityType: 'TASK' as EntityType,
+        entityId: 'task1',
+        payload: { title: 'x' },
+        clientId: 'testClient',
+        vectorClock: { testClient: 1 },
+        timestamp: Date.now(),
+        schemaVersion: CURRENT_SCHEMA_VERSION,
+      });
+
+    const saveStateCache = (state: unknown): Promise<void> =>
+      opLogStore.saveStateCache({
+        state,
+        lastAppliedOpSeq: 0,
+        vectorClock: {},
+        compactedAt: Date.now(),
+        schemaVersion: CURRENT_SCHEMA_VERSION,
+      });
+
+    beforeEach(async () => {
+      opLogStore = TestBed.inject(OperationLogStoreService);
+      await opLogStore.init();
+      await opLogStore._clearAllDataForTesting();
+      localBackup = TestBed.inject(
+        LocalBackupService,
+      ) as jasmine.SpyObj<LocalBackupService>;
+      legacyPfDb = TestBed.inject(LegacyPfDbService) as jasmine.SpyObj<LegacyPfDbService>;
+      // Native mobile boot (IS_ELECTRON is false under Karma).
+      Object.assign(service as object, { _platformService: { isNative: true } });
+    });
+
+    afterEach(async () => {
+      await opLogStore._clearAllDataForTesting();
+    });
+
+    it('offers the restore on a blank store (no state cache, empty op-log)', async () => {
+      await runInitBackups();
+
+      expect(localBackup.askForFileStoreBackupIfAvailable).toHaveBeenCalledTimes(1);
+      expect(localBackup.init).toHaveBeenCalledTimes(1);
+    });
+
+    it('starts the backup timer only after the restore has finished', async () => {
+      let resolveRestore!: () => void;
+      localBackup.askForFileStoreBackupIfAvailable.and.returnValue(
+        new Promise<void>((r) => (resolveRestore = r)),
+      );
+
+      const done = runInitBackups();
+      await new Promise((r) => setTimeout(r, 50));
+      expect(localBackup.askForFileStoreBackupIfAvailable).toHaveBeenCalled();
+      expect(localBackup.init).not.toHaveBeenCalled();
+
+      resolveRestore();
+      await done;
+      expect(localBackup.init).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not offer the restore when the op-log holds ops the hydrator replays', async () => {
+      await appendLocalOp();
+
+      await runInitBackups();
+
+      expect(localBackup.askForFileStoreBackupIfAvailable).not.toHaveBeenCalled();
+      expect(localBackup.init).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not offer the restore when a state cache exists', async () => {
+      await saveStateCache({ task: {}, project: {}, globalConfig: {} });
+
+      await runInitBackups();
+
+      expect(localBackup.askForFileStoreBackupIfAvailable).not.toHaveBeenCalled();
+      expect(localBackup.init).toHaveBeenCalledTimes(1);
+    });
+
+    // Gap C2 (#7892), kept as is: the gate keys off the state-cache ROW, so a
+    // structurally invalid cache over an empty op-log still blocks the offer
+    // (the hydrator then fails recovery and boots empty). An empty op-log under
+    // a cache needs compaction to have pruned every op, which only happens to
+    // synced ops — so this needs sync configured, where the remote holds the data.
+    it('does not offer the restore for a corrupt state cache over an empty op-log', async () => {
+      await saveStateCache({ garbage: true });
+
+      await runInitBackups();
+
+      expect(localBackup.askForFileStoreBackupIfAvailable).not.toHaveBeenCalled();
+    });
+
+    it('leaves a blank store with legacy data to the migration', async () => {
+      legacyPfDb.hasUsableEntityData.and.resolveTo(true);
+
+      await runInitBackups();
+
+      expect(localBackup.askForFileStoreBackupIfAvailable).not.toHaveBeenCalled();
+      expect(localBackup.init).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not offer the restore when the legacy check fails', async () => {
+      legacyPfDb.hasUsableEntityData.and.rejectWith(new Error('pf unreadable'));
+
+      await runInitBackups();
+
+      expect(localBackup.askForFileStoreBackupIfAvailable).not.toHaveBeenCalled();
+      expect(localBackup.init).toHaveBeenCalledTimes(1);
+    });
+
+    it('does nothing on web (no local backups there)', async () => {
+      Object.assign(service as object, { _platformService: { isNative: false } });
+
+      await runInitBackups();
+
+      expect(localBackup.askForFileStoreBackupIfAvailable).not.toHaveBeenCalled();
+      expect(localBackup.init).not.toHaveBeenCalled();
     });
   });
 

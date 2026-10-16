@@ -22,6 +22,7 @@ import {
   countAllTasksInBackupStr,
   isUsableBackupStr,
   selectBestBackupStr,
+  shouldKeepPrevBackupSlot,
   summarizeBackupStr,
 } from './backup-ring.util';
 import { DEFAULT_MAX_BACKUP_FILES } from '../../../../electron/shared-with-frontend/backup-file-cleanup.util';
@@ -501,6 +502,24 @@ export class LocalBackupService {
     return true;
   }
 
+  // #7892: true when the ring must keep its previous slot (see
+  // shouldKeepPrevBackupSlot) rather than promote the current primary into it.
+  private _keepPrevSlot(
+    existing: string,
+    prev: string | null,
+    platform: 'Android' | 'iOS',
+  ): boolean {
+    if (!shouldKeepPrevBackupSlot(existing, prev)) {
+      return false;
+    }
+    Log.warn(
+      `LocalBackupService: keeping ${platform} previous backup ` +
+        `(${countAllTasksInBackupStr(prev)} tasks) instead of rotating in the much ` +
+        `smaller current one (${countAllTasksInBackupStr(existing) ?? 0} tasks). #7892.`,
+    );
+    return true;
+  }
+
   // Returns true when a backup was actually written, false when the A3 guard
   // skipped it (so the caller knows whether to advance the last-backup time).
   private async _backupAndroid(data: AppDataComplete): Promise<boolean> {
@@ -521,7 +540,15 @@ export class LocalBackupService {
     if (this._guardNearEmptyOverwrite(data, existing, 'Android')) {
       return false;
     }
-    if (existing) {
+    // A failed read of the previous slot falls back to normal rotation (null).
+    if (
+      existing &&
+      !this._keepPrevSlot(
+        existing,
+        await this._loadAndroidDbValueSafe(ANDROID_DB_KEY_PREV),
+        'Android',
+      )
+    ) {
       await this._nativeDbSave(ANDROID_DB_KEY_PREV, existing);
     }
     const json = JSON.stringify(data);
@@ -553,7 +580,14 @@ export class LocalBackupService {
       return false;
     }
     try {
-      if (existing) {
+      if (
+        existing &&
+        !this._keepPrevSlot(
+          existing,
+          await this._readIOSFileOrNull(IOS_BACKUP_PREV_FILENAME),
+          'iOS',
+        )
+      ) {
         await this._writeIOSFile(IOS_BACKUP_PREV_FILENAME, existing);
       }
       await this._writeIOSFile(IOS_BACKUP_FILENAME, JSON.stringify(data));

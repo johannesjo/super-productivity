@@ -170,3 +170,32 @@ export const selectBestBackupStr = (
   // still try to parse/surface it; treat empty strings as "no backup" (null).
   return primary || prev || null;
 };
+
+/**
+ * Write-path rule for the two-generation mobile ring (#7892): true when the
+ * next backup write must leave the previous slot as it is instead of promoting
+ * the current primary into it.
+ *
+ * Plain newest-first rotation loses a good backup two writes after the live
+ * store restarts near-empty without being restored (a failed or declined
+ * startup restore): the first write promotes the good backup to the previous
+ * slot, the second pushes it out. The A3 guard only delays that until the
+ * user has re-entered a few tasks. So while the current primary holds less
+ * than half the tasks of the previous slot, the previous slot is kept; normal
+ * rotation resumes once the data has grown back. A corrupt primary counts as
+ * empty. The price is that after a deliberate large delete the previous slot
+ * keeps the older, larger generation until the data grows back.
+ *
+ * Restore stays newest-first (`selectBestBackupStr`); the kept generation is
+ * reachable from the Settings backups list.
+ */
+export const shouldKeepPrevBackupSlot = (
+  primary: string | null | undefined,
+  prev: string | null | undefined,
+): boolean => {
+  const prevTaskCount = countAllTasksInBackupStr(prev);
+  if (!prevTaskCount) {
+    return false;
+  }
+  return (countAllTasksInBackupStr(primary) ?? 0) * 2 < prevTaskCount;
+};

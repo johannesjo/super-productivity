@@ -1428,4 +1428,168 @@ describe('LocalBackupService', () => {
       expect(saveSpy).not.toHaveBeenCalledWith(PREV, jasmine.anything());
     });
   });
+
+  describe('mobile ring keeps the last substantial generation (#7892 gap B)', () => {
+    type RingSeams = {
+      _backup: () => Promise<void>;
+      _nativeDbLoad: (key: string) => Promise<string | null>;
+      _nativeDbSave: (key: string, value: string) => Promise<void>;
+      _readIOSFileRaw: (path: string) => Promise<string>;
+      _iosFileExists: (path: string) => Promise<boolean>;
+      _writeIOSFile: (path: string, data: string) => Promise<void>;
+    };
+    const seams = (): RingSeams => service as unknown as RingSeams;
+
+    const makeState = (taskCount: number, prefix: string = 't'): AppDataComplete =>
+      ({
+        task: {
+          ids: Array.from({ length: taskCount }, (_, i) => `${prefix}${i}`),
+          entities: {},
+        },
+        project: { ids: [], entities: {} },
+        tag: { ids: [], entities: {} },
+        note: { ids: [], entities: {} },
+        archiveYoung: DEFAULT_ARCHIVE,
+        archiveOld: DEFAULT_ARCHIVE,
+      }) as unknown as AppDataComplete;
+
+    const taskCountsInSlots = (kv: Map<string, string>, keys: string[]): number[] =>
+      keys.map((k) => {
+        const raw = kv.get(k);
+        return raw
+          ? (JSON.parse(raw) as { task: { ids: string[] } }).task.ids.length
+          : -1;
+      });
+
+    /**
+     * Runs the real `_backup()` once per live state, in order — the way the 5 min
+     * interval / 30 s debounce trigger would after a blank boot that was NOT
+     * auto-restored (import failed, synced backup declined at the prompt, ...).
+     */
+    const runBackupCycles = async (states: AppDataComplete[]): Promise<void> => {
+      for (const s of states) {
+        stateSnapshotServiceSpy.getAllSyncModelDataFromStoreAsync.and.resolveTo(s);
+        await seams()._backup();
+      }
+    };
+
+    // blank boot → onboarding example task → user starts over with a few tasks
+    const AFTER_UNRESTORED_BLANK_BOOT = [
+      makeState(0),
+      makeState(1, 'ex'),
+      makeState(3, 'n'),
+      makeState(4, 'n'),
+      makeState(5, 'n'),
+    ];
+
+    describe('Android', () => {
+      let kv: Map<string, string>;
+
+      beforeEach(() => {
+        (service as unknown as LocalBackupServiceWithPlatformFlags)._isAndroidWebView =
+          true;
+        kv = new Map();
+        spyOn(seams(), '_nativeDbLoad').and.callFake(async (k) => kv.get(k) ?? null);
+        spyOn(seams(), '_nativeDbSave').and.callFake(async (k, v) => {
+          kv.set(k, v);
+        });
+      });
+
+      it('still holds the 50-task backup after the store restarted near-empty', async () => {
+        kv.set('backup', JSON.stringify(makeState(50)));
+        kv.set('backup_prev', JSON.stringify(makeState(49)));
+
+        await runBackupCycles(AFTER_UNRESTORED_BLANK_BOOT);
+
+        const [latest, previous] = taskCountsInSlots(kv, ['backup', 'backup_prev']);
+        expect(latest).toBe(5);
+        expect(previous).toBe(50);
+        // ...and it is reachable from Settings → backups list.
+        const slots = await service.listMobileBackupSlots();
+        expect(slots.map((s) => s.slot)).toEqual(['latest', 'previous']);
+      });
+
+      it('keeps a small (light-user) backup the A3 guard does not cover', async () => {
+        // 6 tasks is below SUBSTANTIAL_EXISTING_TASKS, so A3 lets the lone
+        // example-task state overwrite it on the first cycle.
+        kv.set('backup', JSON.stringify(makeState(6)));
+
+        await runBackupCycles([
+          makeState(0),
+          makeState(1, 'ex'),
+          makeState(2),
+          makeState(2),
+        ]);
+
+        expect(taskCountsInSlots(kv, ['backup', 'backup_prev'])).toEqual([2, 6]);
+      });
+
+      it('resumes normal newest-first rotation once the data has grown back', async () => {
+        kv.set('backup', JSON.stringify(makeState(50)));
+
+        await runBackupCycles([
+          makeState(3),
+          makeState(10),
+          makeState(30),
+          makeState(31),
+        ]);
+
+        expect(taskCountsInSlots(kv, ['backup', 'backup_prev'])).toEqual([31, 30]);
+      });
+
+      it('rotates normally while the data grows', async () => {
+        await runBackupCycles([makeState(3), makeState(4), makeState(5)]);
+
+        expect(taskCountsInSlots(kv, ['backup', 'backup_prev'])).toEqual([5, 4]);
+      });
+
+      it('falls back to normal rotation when the previous slot cannot be read', async () => {
+        kv.set('backup', JSON.stringify(makeState(3)));
+        kv.set('backup_prev', JSON.stringify(makeState(50)));
+        (seams()._nativeDbLoad as jasmine.Spy).and.callFake(async (k: string) => {
+          if (k === 'backup_prev') {
+            throw new Error('read failed');
+          }
+          return kv.get(k) ?? null;
+        });
+
+        await runBackupCycles([makeState(4)]);
+
+        expect(taskCountsInSlots(kv, ['backup', 'backup_prev'])).toEqual([4, 3]);
+      });
+    });
+
+    describe('iOS', () => {
+      let files: Map<string, string>;
+
+      beforeEach(() => {
+        platformServiceSpy.isIOS.and.returnValue(true);
+        files = new Map();
+        spyOn(seams(), '_readIOSFileRaw').and.callFake(async (p) => {
+          const v = files.get(p);
+          if (v === undefined) {
+            throw new Error('File does not exist');
+          }
+          return v;
+        });
+        spyOn(seams(), '_iosFileExists').and.callFake(async (p) => files.has(p));
+        spyOn(seams(), '_writeIOSFile').and.callFake(async (p, d) => {
+          files.set(p, d);
+        });
+      });
+
+      it('still holds the 50-task backup after the store restarted near-empty', async () => {
+        files.set('super-productivity-backup.json', JSON.stringify(makeState(50)));
+
+        await runBackupCycles(AFTER_UNRESTORED_BLANK_BOOT);
+
+        expect(
+          taskCountsInSlots(files, [
+            'super-productivity-backup.json',
+            'super-productivity-backup.prev.json',
+          ]),
+        ).toEqual([5, 50]);
+      });
+    });
+  });
 });
