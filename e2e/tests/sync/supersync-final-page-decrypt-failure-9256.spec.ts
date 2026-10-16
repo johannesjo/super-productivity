@@ -9,7 +9,11 @@ import { encrypt } from '@sp/sync-core';
 import type { Dialog, Page } from '@playwright/test';
 import { test, expect } from '../../fixtures/supersync.fixture';
 import { SettingsPage } from '../../pages/settings.page';
-import { normalizeDialogMessage, translationRegex } from '../../utils/i18n-strings';
+import {
+  normalizeDialogMessage,
+  translationRegex,
+  translationText,
+} from '../../utils/i18n-strings';
 import {
   SUPERSYNC_BASE_URL,
   closeClient,
@@ -505,139 +509,175 @@ test.describe('@supersync @encryption #9256 final-page decrypt failure', () => {
       if (clientB) await closeClient(clientB);
     }
   });
-  test('warns before Force Overwrite deletes the remote ops this device could not decrypt', async ({
-    browser,
-    baseURL,
-    testRunId,
-  }) => {
-    test.setTimeout(150000);
-    let clientA: SimulatedE2EClient | null = null;
-    let clientB: SimulatedE2EClient | null = null;
-    let stopAcceptingFreshConfirm: (() => void) | null = null;
+  // #10864: "Sign out other devices" leaves the server untouched, so it must
+  // not retire the warning even though it bumps the sync epoch.
+  for (const signOutOthersFirst of [false, true]) {
+    test(`warns before Force Overwrite deletes the remote ops this device could not decrypt${signOutOthersFirst ? ' (after signing out other devices)' : ''}`, async ({
+      browser,
+      baseURL,
+      testRunId,
+    }) => {
+      test.setTimeout(150000);
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+      let stopAcceptingFreshConfirm: (() => void) | null = null;
 
-    try {
-      const user = await createTestUser(testRunId);
-      const encryptionPassword = `issue-9256-overwrite-${testRunId}`;
-      const syncConfig = {
-        ...getSuperSyncConfig(user),
-        isEncryptionEnabled: true,
-        password: encryptionPassword,
-      };
-      const taskName = `Prefix-task-${testRunId}`;
+      try {
+        const user = await createTestUser(testRunId);
+        const encryptionPassword = `issue-9256-overwrite-${testRunId}`;
+        const syncConfig = {
+          ...getSuperSyncConfig(user),
+          isEncryptionEnabled: true,
+          password: encryptionPassword,
+        };
+        const taskName = `Prefix-task-${testRunId}`;
 
-      clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
-      await clientA.workView.waitForTaskList();
-      await clientA.workView.addTask(taskName);
-      await clientA.sync.setupSuperSync(syncConfig);
-      await clientA.sync.syncAndWait();
+        clientA = await createSimulatedClient(browser, baseURL!, 'A', testRunId);
+        await clientA.workView.waitForTaskList();
+        await clientA.workView.addTask(taskName);
+        await clientA.sync.setupSuperSync(syncConfig);
+        await clientA.sync.syncAndWait();
 
-      const validHistory = await downloadServerHistory(user.token);
-      const corruptSuffix = await uploadCorruptSuffix(
-        user.token,
-        testRunId,
-        encryptionPassword,
-        validHistory,
-      );
-      const opIdsBefore = [
-        ...validHistory.ops.map(({ op }) => op.id),
-        corruptSuffix.opId,
-      ].sort();
-      await closeClient(clientA);
-      clientA = null;
+        const validHistory = await downloadServerHistory(user.token);
+        const corruptSuffix = await uploadCorruptSuffix(
+          user.token,
+          testRunId,
+          encryptionPassword,
+          validHistory,
+        );
+        const opIdsBefore = [
+          ...validHistory.ops.map(({ op }) => op.id),
+          corruptSuffix.opId,
+        ].sort();
+        await closeClient(clientA);
+        clientA = null;
 
-      clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
-      // Put the valid history and the corrupt op on separate pages, as in the
-      // first test, so the valid page is kept as a prefix.
-      await routeSuperSyncOps(clientB.page, async (route) => {
-        if (route.request().method() !== 'GET') {
-          await route.continue();
-          return;
-        }
-        const url = new URL(route.request().url());
-        url.searchParams.set('limit', String(validHistory.ops.length));
-        await route.fulfill({ response: await route.fetch({ url: url.toString() }) });
-      });
-      stopAcceptingFreshConfirm = acceptFreshClientConfirm(clientB.page);
-      await clientB.sync.setupSuperSync({
-        ...syncConfig,
-        waitForInitialSync: false,
-      });
+        clientB = await createSimulatedClient(browser, baseURL!, 'B', testRunId);
+        // Put the valid history and the corrupt op on separate pages, as in the
+        // first test, so the valid page is kept as a prefix.
+        await routeSuperSyncOps(clientB.page, async (route) => {
+          if (route.request().method() !== 'GET') {
+            await route.continue();
+            return;
+          }
+          const url = new URL(route.request().url());
+          url.searchParams.set('limit', String(validHistory.ops.length));
+          await route.fulfill({ response: await route.fetch({ url: url.toString() }) });
+        });
+        stopAcceptingFreshConfirm = acceptFreshClientConfirm(clientB.page);
+        await clientB.sync.setupSuperSync({
+          ...syncConfig,
+          waitForInitialSync: false,
+        });
 
-      const decryptErrorDialog = clientB.page.locator('dialog-handle-decrypt-error');
-      await expect(decryptErrorDialog).toBeVisible({ timeout: 30000 });
-      // The kept prefix is applied: this device now counts as synced, so the
-      // #9931 "holds nothing" refusal no longer protects the server.
-      await expect(clientB.page.locator(`task:has-text("${taskName}")`)).toBeVisible();
-      await decryptErrorDialog
-        .getByRole('button', { name: 'Cancel', exact: true })
-        .click();
-      await expect(decryptErrorDialog).not.toBeVisible();
-
-      // Accept the generic Force Overwrite confirm like a user who wants to
-      // start over; decline anything else and record it.
-      const declinedMessages: string[] = [];
-      const forceUploadConfirm = translationRegex('F.SYNC.C.FORCE_UPLOAD');
-      const overwriteHandler = async (dialog: Dialog): Promise<void> => {
-        if (dialog.type() !== 'confirm') return;
-        const message = normalizeDialogMessage(dialog.message());
-        if (forceUploadConfirm.test(message)) {
-          await dialog.accept().catch(() => {});
-          return;
-        }
-        if (FRESH_CLIENT_CONFIRM.test(message)) return;
-        declinedMessages.push(message);
-        await dialog.dismiss().catch(() => {});
-      };
-      clientB.page.on('dialog', overwriteHandler);
-
-      await clientB.sync.syncBtn.click({ button: 'right', noWaitAfter: true });
-      await clientB.sync.providerSelect.waitFor({ state: 'visible', timeout: 10000 });
-      const forceOverwriteButton = clientB.page.getByRole('button', {
-        name: 'Force Overwrite',
-        exact: true,
-      });
-      if (!(await forceOverwriteButton.isVisible().catch(() => false))) {
-        await clientB.page
-          .locator('.collapsible-header')
-          .filter({ hasText: 'Advanced' })
+        const decryptErrorDialog = clientB.page.locator('dialog-handle-decrypt-error');
+        await expect(decryptErrorDialog).toBeVisible({ timeout: 30000 });
+        // The kept prefix is applied: this device now counts as synced, so the
+        // #9931 "holds nothing" refusal no longer protects the server.
+        await expect(clientB.page.locator(`task:has-text("${taskName}")`)).toBeVisible();
+        await decryptErrorDialog
+          .getByRole('button', { name: 'Cancel', exact: true })
           .click();
-      }
-      await expect(forceOverwriteButton).toBeVisible();
-      await forceOverwriteButton.click();
+        await expect(decryptErrorDialog).not.toBeVisible();
 
-      const serverOpIds = async (): Promise<string[]> =>
-        (await downloadServerHistory(user.token)).ops.map(({ op }) => op.id).sort();
-      // Settles either way: the warning was declined, or the overwrite ran.
-      await expect
-        .poll(
-          async () =>
-            declinedMessages.length > 0 ||
-            (await serverOpIds()).join() !== opIdsBefore.join(),
-          { timeout: 30000 },
-        )
-        .toBe(true);
-      clientB.page.off('dialog', overwriteHandler);
+        // Accept the generic Force Overwrite confirm like a user who wants to
+        // start over; decline anything else and record it.
+        const declinedMessages: string[] = [];
+        const forceUploadConfirm = translationRegex('F.SYNC.C.FORCE_UPLOAD');
+        const overwriteHandler = async (dialog: Dialog): Promise<void> => {
+          if (dialog.type() !== 'confirm') return;
+          const message = normalizeDialogMessage(dialog.message());
+          if (forceUploadConfirm.test(message)) {
+            await dialog.accept().catch(() => {});
+            return;
+          }
+          if (FRESH_CLIENT_CONFIRM.test(message)) return;
+          declinedMessages.push(message);
+          await dialog.dismiss().catch(() => {});
+        };
+        clientB.page.on('dialog', overwriteHandler);
 
-      // Without the guard the clean-slate upload deletes every server op,
-      // including the tail no device has decrypted yet.
-      expect(await serverOpIds()).toEqual(opIdsBefore);
-      expect(declinedMessages).toEqual([
-        expect.stringMatching(
-          translationRegex(
-            'F.SYNC.D_UNDECRYPTABLE_REMOTE.TITLE',
-            'F.SYNC.D_UNDECRYPTABLE_REMOTE.MESSAGE',
+        await clientB.sync.syncBtn.click({ button: 'right', noWaitAfter: true });
+        await clientB.sync.providerSelect.waitFor({ state: 'visible', timeout: 10000 });
+        if (signOutOthersFirst) {
+          await clientB.page
+            .getByRole('button', { name: translationText('F.SYNC.BTN_SHOW_DEVICES') })
+            .click();
+          await clientB.page
+            .getByRole('button', {
+              name: translationText('F.SYNC.D_DEVICES.BTN_SIGN_OUT_OTHERS'),
+            })
+            .click();
+          await clientB.page
+            .locator('dialog-confirm')
+            .getByRole('button', {
+              name: translationText('F.SYNC.D_DEVICES.SIGN_OUT_CONFIRM_OK'),
+            })
+            .click();
+          await expect(clientB.page.locator('dialog-sync-devices')).not.toBeVisible({
+            timeout: 15000,
+          });
+          // Settings closes after a sign-out (its form holds the revoked token).
+          await expect(clientB.sync.providerSelect).not.toBeVisible({ timeout: 15000 });
+          await clientB.sync.syncBtn.click({ button: 'right', noWaitAfter: true });
+          await clientB.sync.providerSelect.waitFor({ state: 'visible', timeout: 10000 });
+        }
+        const forceOverwriteButton = clientB.page.getByRole('button', {
+          name: 'Force Overwrite',
+          exact: true,
+        });
+        if (!(await forceOverwriteButton.isVisible().catch(() => false))) {
+          await clientB.page
+            .locator('.collapsible-header')
+            .filter({ hasText: 'Advanced' })
+            .click();
+        }
+        await expect(forceOverwriteButton).toBeVisible();
+        await forceOverwriteButton.click();
+
+        // Token-independent: signing out other devices revokes `user.token`.
+        const serverOpIds = async (): Promise<string[]> => {
+          const response = await fetch(
+            `${SUPERSYNC_BASE_URL}/api/test/user/${user.userId}/ops?limit=1000`,
+          );
+          if (!response.ok) {
+            throw new Error(`Failed to list server ops: ${response.status}`);
+          }
+          const body = (await response.json()) as { ops: { id: string }[] };
+          return body.ops.map(({ id }) => id).sort();
+        };
+        // Settles either way: the warning was declined, or the overwrite ran.
+        await expect
+          .poll(
+            async () =>
+              declinedMessages.length > 0 ||
+              (await serverOpIds()).join() !== opIdsBefore.join(),
+            { timeout: 30000 },
+          )
+          .toBe(true);
+        clientB.page.off('dialog', overwriteHandler);
+
+        // Without the guard the clean-slate upload deletes every server op,
+        // including the tail no device has decrypted yet.
+        expect(await serverOpIds()).toEqual(opIdsBefore);
+        expect(declinedMessages).toEqual([
+          expect.stringMatching(
+            translationRegex(
+              'F.SYNC.D_UNDECRYPTABLE_REMOTE.TITLE',
+              'F.SYNC.D_UNDECRYPTABLE_REMOTE.MESSAGE',
+            ),
           ),
-        ),
-      ]);
-      // It names how many remote ops are at stake: the lone corrupt op.
-      expect(declinedMessages[0]).toContain('at least 1 change');
-    } finally {
-      stopAcceptingFreshConfirm?.();
-      if (clientA) await closeClient(clientA);
-      if (clientB) {
-        await unrouteSuperSyncOps(clientB.page).catch(() => {});
-        await closeClient(clientB);
+        ]);
+        // It names how many remote ops are at stake: the lone corrupt op.
+        expect(declinedMessages[0]).toContain('at least 1 change');
+      } finally {
+        stopAcceptingFreshConfirm?.();
+        if (clientA) await closeClient(clientA);
+        if (clientB) {
+          await unrouteSuperSyncOps(clientB.page).catch(() => {});
+          await closeClient(clientB);
+        }
       }
-    }
-  });
+    });
+  }
 });

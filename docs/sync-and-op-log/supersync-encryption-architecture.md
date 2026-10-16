@@ -397,7 +397,8 @@ holding a kept prefix counts as synced, so the empty-device refusal no longer
 protects the undecryptable tail. While the last SuperSync download stopped at
 ops this device could not decrypt
 (`OperationLogDownloadService.getUndecryptableRemoteOps`, in memory, retired
-when a download reaches the head or the sync epoch moves), Force Overwrite,
+when a download reaches the head, the active provider changes, or a clean
+slate is accepted; not on a mere sync-epoch bump, #10864), Force Overwrite,
 Change Password, "Use Local Data" and USE_LOCAL in the import- and
 data-conflict dialogs first ask for
 an explicit confirmation naming those ops

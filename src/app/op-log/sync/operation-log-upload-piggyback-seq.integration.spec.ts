@@ -345,6 +345,7 @@ describe('OperationLogSyncService + OperationLogUploadService — piggyback seq 
             'downloadRemoteOps',
             'hasUnseenRemoteOps',
             'getUndecryptableRemoteOps',
+            'clearUndecryptableRemoteOps',
           ]),
         },
         {

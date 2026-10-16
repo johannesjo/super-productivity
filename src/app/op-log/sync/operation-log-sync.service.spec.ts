@@ -373,6 +373,7 @@ describe('OperationLogSyncService', () => {
           useValue: jasmine.createSpyObj('OperationLogDownloadService', [
             'downloadRemoteOps',
             'getUndecryptableRemoteOps',
+            'clearUndecryptableRemoteOps',
           ]),
         },
         { provide: LockService, useValue: lockServiceSpy },
@@ -4953,6 +4954,10 @@ describe('OperationLogSyncService', () => {
       );
       expect(opLogStoreSpy.getOpById).toHaveBeenCalledOnceWith('force-import');
       expect(result).toEqual({ hasUnresolvedOps: false });
+      // #9256: the clean slate deleted the ops this device could not decrypt.
+      expect(
+        TestBed.inject(OperationLogDownloadService).clearUndecryptableRemoteOps,
+      ).toHaveBeenCalled();
     });
 
     it('should upload pending ops after creating SYNC_IMPORT', async () => {
@@ -5023,6 +5028,10 @@ describe('OperationLogSyncService', () => {
       await expectAsync(service.forceUploadLocalState(mockProvider)).toBeRejectedWith(
         error,
       );
+      // The server was not replaced, so the undecryptable ops are still there.
+      expect(
+        TestBed.inject(OperationLogDownloadService).clearUndecryptableRemoteOps,
+      ).not.toHaveBeenCalled();
     });
 
     it('should reject when mandatory encryption blocks the force upload', async () => {

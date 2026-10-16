@@ -15,6 +15,7 @@ import {
 } from '../core/errors/sync-errors';
 import { OperationLogStoreService } from '../persistence/operation-log-store.service';
 import { SyncLocalStateService } from './sync-local-state.service';
+import { OperationLogDownloadService } from './operation-log-download.service';
 
 type SyncImportConflictActions = {
   useLocal: () => Promise<ForceUploadResult>;
@@ -34,6 +35,7 @@ export class SyncImportConflictCoordinatorService {
   private uploadService = inject(OperationLogUploadService);
   private opLogStore = inject(OperationLogStoreService);
   private syncLocalStateService = inject(SyncLocalStateService);
+  private downloadService = inject(OperationLogDownloadService);
 
   async handleSyncImportConflict(
     dialogData: SyncImportConflictData,
@@ -113,6 +115,8 @@ export class SyncImportConflictCoordinatorService {
       );
     }
 
+    // The clean slate deleted the server ops this device could not decrypt.
+    this.downloadService.clearUndecryptableRemoteOps();
     OpLog.normal('SyncImportConflictCoordinatorService: Force upload complete.');
     return { hasUnresolvedOps: uploadResult.rejectedCount > 0 };
   }

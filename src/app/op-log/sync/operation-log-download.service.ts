@@ -73,8 +73,8 @@ export interface UndecryptableRemoteOps {
 }
 
 interface UndecryptableRemoteOpsMarker extends UndecryptableRemoteOps {
-  /** `syncEpoch` when set; any destructive config change retires the marker. */
-  syncEpoch: number;
+  /** Active provider when set; a provider switch retires the marker. */
+  providerId: string | undefined;
 }
 
 /**
@@ -205,16 +205,24 @@ export class OperationLogDownloadService implements OnDestroy {
 
   /**
    * Set while the last SuperSync download stopped at ops this device could not
-   * decrypt, until a download reaches the server head or the sync epoch moves
-   * (provider switch, password change, force upload). In memory only: after a
-   * restart the next sync attempt re-arms it.
+   * decrypt, until a download reaches the server head, the active provider
+   * changes, or a clean slate replaced the server
+   * ({@link clearUndecryptableRemoteOps}). Deliberately not tied to the sync
+   * epoch: non-destructive guarded operations and overwrites that failed also
+   * bump it, and the ops would still be on the server (#10864). In memory
+   * only: after a restart the next sync attempt re-arms it.
    */
   getUndecryptableRemoteOps(): UndecryptableRemoteOps | null {
     const marker = this._undecryptableRemoteOps;
-    if (!marker || marker.syncEpoch !== this.providerManager.syncEpoch) {
+    if (!marker || marker.providerId !== this.providerManager.getActiveProvider()?.id) {
       return null;
     }
     return { opCount: marker.opCount };
+  }
+
+  /** A clean slate replaced the server, so the undecryptable ops are gone. */
+  clearUndecryptableRemoteOps(): void {
+    this._undecryptableRemoteOps = null;
   }
 
   ngOnDestroy(): void {
@@ -295,9 +303,6 @@ export class OperationLogDownloadService implements OnDestroy {
     // where enabling encryption deletes + re-uploads all data encrypted, so no
     // legitimate plaintext op remains. Config intent is stable across a
     // gap-reset re-fetch, so compute once here.
-    // The undecryptable-ops marker belongs to the epoch this run started in: a
-    // destructive change bumps the epoch first, then drains this run.
-    const runSyncEpoch = this.providerManager.syncEpoch;
     const isEncryptionExpected =
       !!syncProvider.isEncryptionMandatory &&
       !!(await syncProvider.isEncryptionEnabled?.());
@@ -616,7 +621,7 @@ export class OperationLogDownloadService implements OnDestroy {
             if (syncProvider.providerMode === 'superSyncOps') {
               this._undecryptableRemoteOps = {
                 opCount: encryptedOpsInPage,
-                syncEpoch: runSyncEpoch,
+                providerId: this.providerManager.getActiveProvider()?.id,
               };
             }
             if (error instanceof OperationDecryptionError) {

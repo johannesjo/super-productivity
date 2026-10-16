@@ -38,7 +38,12 @@ describe('OperationLogDownloadService', () => {
   let mockEncryptionService: jasmine.SpyObj<OperationEncryptionService>;
   let mockSuperSyncStatusService: jasmine.SpyObj<SuperSyncStatusService>;
   let mockClientIdProvider: { loadClientId: jasmine.Spy };
-  let mockProviderManager: { configEpoch: number; syncEpoch?: number };
+  let mockProviderManager: {
+    configEpoch: number;
+    syncEpoch?: number;
+    getActiveProvider: () => { id: string } | null;
+  };
+  let activeProvider: { id: string } | null;
 
   beforeEach(() => {
     mockOpLogStore = jasmine.createSpyObj('OperationLogStoreService', [
@@ -60,7 +65,8 @@ describe('OperationLogDownloadService', () => {
         .and.returnValue(Promise.resolve('test-client-id')),
     };
 
-    mockProviderManager = { configEpoch: 0 };
+    activeProvider = { id: 'SuperSync' };
+    mockProviderManager = { configEpoch: 0, getActiveProvider: () => activeProvider };
 
     // Mock OpLog
     spyOn(OpLog, 'warn');
@@ -526,7 +532,6 @@ describe('OperationLogDownloadService', () => {
 
         beforeEach(() => {
           spyOn(OpLog, 'error');
-          mockProviderManager.syncEpoch = 3;
           mockApiProvider.getEncryptKey = jasmine
             .createSpy('getEncryptKey')
             .and.resolveTo('key');
@@ -556,26 +561,34 @@ describe('OperationLogDownloadService', () => {
           expect(service.getUndecryptableRemoteOps()).toBeNull();
         });
 
-        it('is retired when the sync epoch moves (switch, password change, force upload)', async () => {
+        it('survives a sync-epoch bump that left the server untouched (#10864)', async () => {
+          // "Sign out all other devices" and an overwrite that failed after its
+          // bump both move the epoch; the undecryptable ops are still there.
           mockApiProvider.downloadOps.and.resolveTo(failingPage);
           mockEncryptionService.decryptOperations.and.rejectWith(decryptFailure);
           await expectAsync(service.downloadRemoteOps(mockApiProvider)).toBeRejected();
 
           mockProviderManager.syncEpoch = 4;
 
+          expect(service.getUndecryptableRemoteOps()).toEqual({ opCount: 2 });
+        });
+
+        it('is retired when the active provider changes', async () => {
+          mockApiProvider.downloadOps.and.resolveTo(failingPage);
+          mockEncryptionService.decryptOperations.and.rejectWith(decryptFailure);
+          await expectAsync(service.downloadRemoteOps(mockApiProvider)).toBeRejected();
+
+          activeProvider = { id: 'WebDAV' };
+
           expect(service.getUndecryptableRemoteOps()).toBeNull();
         });
 
-        it('keeps the epoch the run started in when it moves mid-download', async () => {
-          // A force upload bumps the epoch, then drains this run before its
-          // clean slate deletes the ops; the marker must not outlive it.
-          mockApiProvider.downloadOps.and.callFake(async () => {
-            mockProviderManager.syncEpoch = 4;
-            return failingPage;
-          });
+        it('is retired once a clean slate replaced the server', async () => {
+          mockApiProvider.downloadOps.and.resolveTo(failingPage);
           mockEncryptionService.decryptOperations.and.rejectWith(decryptFailure);
-
           await expectAsync(service.downloadRemoteOps(mockApiProvider)).toBeRejected();
+
+          service.clearUndecryptableRemoteOps();
 
           expect(service.getUndecryptableRemoteOps()).toBeNull();
         });
