@@ -1,12 +1,12 @@
 import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
-import { Observable, of, throwError } from 'rxjs';
+import { firstValueFrom, Observable, of, throwError } from 'rxjs';
 import { Action } from '@ngrx/store';
 import { TaskRepeatCfgEffects } from './task-repeat-cfg.effects';
 import { TaskService } from '../../tasks/task.service';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
 import { DateService } from '../../../core/date/date.service';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef } from '@angular/material/dialog';
 import { TaskArchiveService } from '../../archive/task-archive.service';
 import { AddTasksForTomorrowService } from '../../add-tasks-for-tomorrow/add-tasks-for-tomorrow.service';
 import { addTaskRepeatCfgToTask, updateTaskRepeatCfg } from './task-repeat-cfg.actions';
@@ -90,6 +90,7 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
       'getByIdsLive$',
       'getArchiveTasksForRepeatCfgId',
       'update',
+      'updateArchiveTasks',
     ]);
 
     const taskRepeatCfgServiceSpy = jasmine.createSpyObj('TaskRepeatCfgService', [
@@ -142,6 +143,34 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
       expect(actual).toEqual(expected);
     });
   });
+
+  for (const priority of [3, null] as const) {
+    it(`updates live and archived instance priorities to ${priority} after confirmation`, async () => {
+      actions$ = of(
+        updateTaskRepeatCfg({
+          taskRepeatCfg: { id: mockRepeatCfg.id, changes: { priority } },
+          isAskToUpdateAllTaskInstances: true,
+        }),
+      );
+      taskService.getTasksByRepeatCfgId$.and.returnValue(of([mockTask]));
+      taskService.getArchiveTasksForRepeatCfgId.and.returnValue(
+        Promise.resolve([{ ...mockTask, id: 'archived-instance' }]),
+      );
+      taskRepeatCfgService.getTaskRepeatCfgById$.and.returnValue(
+        of({ ...mockRepeatCfg, priority }),
+      );
+      (TestBed.inject(MatDialog) as jasmine.SpyObj<MatDialog>).open.and.returnValue({
+        afterClosed: () => of(true),
+      } as MatDialogRef<unknown>);
+
+      await firstValueFrom(effects.checkToUpdateAllTaskInstances$);
+
+      expect(taskService.update).toHaveBeenCalledWith(mockTask.id, { priority });
+      expect(taskService.updateArchiveTasks).toHaveBeenCalledWith([
+        { id: 'archived-instance', changes: { priority } },
+      ]);
+    });
+  }
 
   describe('Helper Methods', () => {
     it('should convert tasks to subtask templates', () => {

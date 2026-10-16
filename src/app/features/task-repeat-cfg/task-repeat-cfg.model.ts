@@ -1,5 +1,5 @@
 import { EntityState } from '@ngrx/entity';
-import { TaskReminderOptionId } from '../tasks/task.model';
+import { Task, TaskReminderOptionId } from '../tasks/task.model';
 import { getDbDateStr } from '../../util/get-db-date-str';
 
 export const TASK_REPEAT_WEEKDAY_MAP: (keyof TaskRepeatCfg)[] = [
@@ -46,6 +46,8 @@ export interface TaskRepeatCfgCopy {
    */
   order: number;
   defaultEstimate?: number;
+  /** Default for new occurrences; absent on older configs means no priority. */
+  priority?: Task['priority'];
   startTime?: string;
   remindAt?: TaskReminderOptionId;
 
