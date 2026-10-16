@@ -503,20 +503,25 @@ export class LocalBackupService {
   }
 
   // #7892: true when the ring must keep its previous slot (see
-  // shouldKeepPrevBackupSlot) rather than promote the current primary into it.
-  private _keepPrevSlot(
+  // shouldKeepPrevBackupSlot) rather than promote `existing` into it. A failed
+  // read keeps it too: skipping only the prev write never stops backups, while
+  // rotating on uncertainty could drop the generation this protects.
+  private async _keepPrevSlot(
     existing: string,
-    prev: string | null,
+    readPrev: () => Promise<string | null>,
     platform: 'Android' | 'iOS',
-  ): boolean {
+  ): Promise<boolean> {
+    let prev: string | null;
+    try {
+      prev = await readPrev();
+    } catch (e) {
+      Log.err(`LocalBackupService: keeping ${platform} previous backup — unreadable`, e);
+      return true;
+    }
     if (!shouldKeepPrevBackupSlot(existing, prev)) {
       return false;
     }
-    Log.warn(
-      `LocalBackupService: keeping ${platform} previous backup ` +
-        `(${countAllTasksInBackupStr(prev)} tasks) instead of rotating in the much ` +
-        `smaller current one (${countAllTasksInBackupStr(existing) ?? 0} tasks). #7892.`,
-    );
+    Log.log(`LocalBackupService: keeping larger ${platform} previous backup. #7892`);
     return true;
   }
 
@@ -540,14 +545,13 @@ export class LocalBackupService {
     if (this._guardNearEmptyOverwrite(data, existing, 'Android')) {
       return false;
     }
-    // A failed read of the previous slot falls back to normal rotation (null).
     if (
       existing &&
-      !this._keepPrevSlot(
+      !(await this._keepPrevSlot(
         existing,
-        await this._loadAndroidDbValueSafe(ANDROID_DB_KEY_PREV),
+        () => this._nativeDbLoad(ANDROID_DB_KEY_PREV),
         'Android',
-      )
+      ))
     ) {
       await this._nativeDbSave(ANDROID_DB_KEY_PREV, existing);
     }
@@ -582,11 +586,11 @@ export class LocalBackupService {
     try {
       if (
         existing &&
-        !this._keepPrevSlot(
+        !(await this._keepPrevSlot(
           existing,
-          await this._readIOSFileOrNull(IOS_BACKUP_PREV_FILENAME),
+          () => this._readIOSExistingSlotOrThrow(IOS_BACKUP_PREV_FILENAME),
           'iOS',
-        )
+        ))
       ) {
         await this._writeIOSFile(IOS_BACKUP_PREV_FILENAME, existing);
       }

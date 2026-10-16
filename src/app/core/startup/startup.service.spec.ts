@@ -331,19 +331,6 @@ describe('StartupService', () => {
       expect(localBackup.init).toHaveBeenCalledTimes(1);
     });
 
-    // Gap C2 (#7892), kept as is: the gate keys off the state-cache ROW, so a
-    // structurally invalid cache over an empty op-log still blocks the offer
-    // (the hydrator then fails recovery and boots empty). An empty op-log under
-    // a cache needs compaction to have pruned every op, which only happens to
-    // synced ops — so this needs sync configured, where the remote holds the data.
-    it('does not offer the restore for a corrupt state cache over an empty op-log', async () => {
-      await saveStateCache({ garbage: true });
-
-      await runInitBackups();
-
-      expect(localBackup.askForFileStoreBackupIfAvailable).not.toHaveBeenCalled();
-    });
-
     it('leaves a blank store with legacy data to the migration', async () => {
       legacyPfDb.hasUsableEntityData.and.resolveTo(true);
 

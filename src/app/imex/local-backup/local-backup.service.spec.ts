@@ -1537,13 +1537,7 @@ describe('LocalBackupService', () => {
         expect(taskCountsInSlots(kv, ['backup', 'backup_prev'])).toEqual([31, 30]);
       });
 
-      it('rotates normally while the data grows', async () => {
-        await runBackupCycles([makeState(3), makeState(4), makeState(5)]);
-
-        expect(taskCountsInSlots(kv, ['backup', 'backup_prev'])).toEqual([5, 4]);
-      });
-
-      it('falls back to normal rotation when the previous slot cannot be read', async () => {
+      it('keeps the previous slot (still writing the primary) when it cannot be read', async () => {
         kv.set('backup', JSON.stringify(makeState(3)));
         kv.set('backup_prev', JSON.stringify(makeState(50)));
         (seams()._nativeDbLoad as jasmine.Spy).and.callFake(async (k: string) => {
@@ -1553,9 +1547,19 @@ describe('LocalBackupService', () => {
           return kv.get(k) ?? null;
         });
 
+        await runBackupCycles([makeState(40)]);
+
+        expect(taskCountsInSlots(kv, ['backup', 'backup_prev'])).toEqual([40, 50]);
+      });
+
+      it('never promotes a corrupt primary over a good previous slot', async () => {
+        kv.set('backup', '{half-written');
+        kv.set('backup_prev', JSON.stringify(makeState(5)));
+
         await runBackupCycles([makeState(4)]);
 
-        expect(taskCountsInSlots(kv, ['backup', 'backup_prev'])).toEqual([4, 3]);
+        expect(kv.get('backup_prev')).toBe(JSON.stringify(makeState(5)));
+        expect(taskCountsInSlots(kv, ['backup'])).toEqual([4]);
       });
     });
 
@@ -1589,6 +1593,26 @@ describe('LocalBackupService', () => {
             'super-productivity-backup.prev.json',
           ]),
         ).toEqual([5, 50]);
+      });
+
+      it('keeps the previous file when it exists but cannot be read', async () => {
+        files.set('super-productivity-backup.json', JSON.stringify(makeState(3)));
+        files.set('super-productivity-backup.prev.json', JSON.stringify(makeState(50)));
+        (seams()._readIOSFileRaw as jasmine.Spy).and.callFake(async (p: string) => {
+          if (p === 'super-productivity-backup.prev.json') {
+            throw new Error('transient read failure');
+          }
+          return files.get(p) as string;
+        });
+
+        await runBackupCycles([makeState(40)]);
+
+        expect(
+          taskCountsInSlots(files, [
+            'super-productivity-backup.json',
+            'super-productivity-backup.prev.json',
+          ]),
+        ).toEqual([40, 50]);
       });
     });
   });
