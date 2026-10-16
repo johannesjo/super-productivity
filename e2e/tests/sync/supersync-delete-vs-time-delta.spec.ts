@@ -73,6 +73,7 @@ type TaskView = {
   timeSpent: unknown;
   timeSpentOnDay: unknown;
   strayKeys: string[];
+  content?: unknown;
 } | null;
 
 /** The live task whose title contains `name`, or null when there is none. */
@@ -103,11 +104,15 @@ const readTask = async (client: SimulatedE2EClient, name: string): Promise<TaskV
           value['title'].includes(taskName),
       );
       if (!isRecord(task)) return null;
+      // `modified` is the local apply time, not synced content.
+      const content: Record<string, unknown> = { ...task };
+      delete content['modified'];
       return {
         title: task['title'] as string,
         timeSpent: task['timeSpent'],
         timeSpentOnDay: task['timeSpentOnDay'],
         strayKeys: stray.filter((key) => key in task),
+        content,
       };
     },
     { taskName: name, stray: STRAY_KEYS },
@@ -119,6 +124,7 @@ const expected = (title: string, time: number): TaskView => ({
   timeSpent: time,
   timeSpentOnDay: { [DAY]: time },
   strayKeys: [],
+  content: expect.anything(),
 });
 
 /** A and B share a synced task; background sync is off on both. */
@@ -164,25 +170,33 @@ const expectEverywhere = async (
   clients: SimulatedE2EClient[],
 ): Promise<void> => {
   const existing = [...clients];
-  for (const client of existing) {
-    expect.soft(await readTask(client, taskName), client.clientName).toEqual(want);
-  }
+  const views = new Map<string, TaskView>();
+  const check = async (client: SimulatedE2EClient, label: string): Promise<void> => {
+    const view = await readTask(client, taskName);
+    views.set(label, view);
+    expect.soft(view, label).toEqual(want);
+  };
+  for (const client of existing) await check(client, client.clientName);
 
   const clientC = await createSimulatedClient(browser, baseURL, 'C', testRunId);
   clients.push(clientC);
   await clientC.sync.setupSuperSync(syncConfig);
   await clientC.sync.syncAndWait();
   if (want) await waitForTask(clientC.page, taskName);
-  expect.soft(await readTask(clientC, taskName), 'fresh C').toEqual(want);
+  await check(clientC, 'fresh C');
 
   for (const client of existing) {
     await client.page.reload();
     await client.workView.waitForTaskList();
     await blockBackgroundSync(client);
     if (want) await waitForTask(client.page, taskName);
-    expect
-      .soft(await readTask(client, taskName), `${client.clientName} after restart`)
-      .toEqual(want);
+    await check(client, `${client.clientName} after restart`);
+  }
+
+  // Every other synced field matches too, not only title and time.
+  const reference = views.get('fresh C')?.content;
+  for (const [label, view] of views) {
+    expect.soft(view?.content, `${label} vs fresh C`).toEqual(reference);
   }
 };
 

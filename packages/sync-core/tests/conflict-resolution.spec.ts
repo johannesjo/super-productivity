@@ -1340,6 +1340,39 @@ describe('convertLocalDeleteRemoteUpdatesToLww', () => {
       expect(states(result)).toEqual([final, final, final]);
     });
 
+    it('folds nothing without a deleted entity: a replacement stays, the rest cannot recreate', () => {
+      const replacement = createOp({
+        id: 'remote-lww',
+        actionType: '[TASK] LWW Update',
+        payload: {
+          actionPayload: { id: 'task-1', title: 'Snapshot', time: 1 },
+          entityChanges: [],
+          lwwUpdateMode: 'replace',
+        },
+      });
+      const later = rename('r1', 'Renamed');
+      const missing: string[] = [];
+      const result = convertLocalDeleteRemoteUpdatesToLww(
+        createConflict(
+          [createOp({ id: 'local-delete', opType: OpType.Delete, payload: {} })],
+          [replacement, later],
+        ),
+        { ...options, onMissingBaseEntity: ({ remoteOp }) => missing.push(remoteOp.id) },
+      );
+
+      expect(result).toEqual([
+        {
+          ...replacement,
+          payload: {
+            ...(replacement.payload as object),
+            recreatesEntityAfterDelete: true,
+          },
+        },
+        later,
+      ]);
+      expect(missing).toEqual(['r1']);
+    });
+
     it('lets a replacement winner reset the state the later winners build on', () => {
       const replacement = createOp({
         id: 'remote-lww',

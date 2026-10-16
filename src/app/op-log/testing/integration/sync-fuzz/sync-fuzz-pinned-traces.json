@@ -536,6 +536,44 @@
     "rejections": []
   },
   {
+    "class": "delete-vs-delta-recreate",
+    "ref": "regression pin for #10380: deltas on both sides of an archive and restore",
+    "name": "a task deleted on one device and tracked, done, archived, restored, tracked and renamed on another keeps all of it",
+    "steps": [
+      {
+        "d": "A",
+        "a": ["deleteTask", "t1"]
+      },
+      {
+        "d": "B",
+        "a": ["track", "t1", 2000]
+      },
+      {
+        "d": "B",
+        "a": ["doneTask", "t1", true]
+      },
+      {
+        "d": "B",
+        "a": ["archiveTask", "t1"]
+      },
+      {
+        "d": "B",
+        "a": ["restoreTask", "t1"]
+      },
+      {
+        "d": "B",
+        "a": ["track", "t1", 1500]
+      },
+      {
+        "d": "B",
+        "a": ["renameTask", "t1", "R"],
+        "s": 1
+      }
+    ],
+    "signatures": [],
+    "rejections": []
+  },
+  {
     "class": "list-order-divergence",
     "ref": "#10381",
     "name": "a task recreated after delete-vs-rename sits at different project positions",

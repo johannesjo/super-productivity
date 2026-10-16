@@ -175,7 +175,8 @@ export const convertLocalDeleteRemoteUpdatesToLww = <
   for (const remoteOp of updateOps) {
     const lwwPayload = lwwPayloadOf(remoteOp);
     if (lwwPayload?.lwwUpdateMode === 'replace') {
-      entity = { ...extractActionPayload(lwwPayload) };
+      // Only folded onto a deleted entity: without one, nothing is folded.
+      if (entity) entity = { ...extractActionPayload(lwwPayload) };
       continue;
     }
     if (!entity) continue;
@@ -196,9 +197,8 @@ export const convertLocalDeleteRemoteUpdatesToLww = <
     //
     // Unreachable today, but NOT because "singletons never emit deletes": they
     // do — menuTreeDeleteFolder emits MENU_TREE + OpType.Delete with a folderId
-    // entityId. The actual guard is `entity` staying undefined (no earlier
-    // LWW replace winner, and extractEntityFromPayload finding nothing in
-    // that delete payload: no `menuTree` key, no id-matching
+    // entityId. The actual guard is `entity` above: extractEntityFromPayload
+    // finds nothing in that delete payload (no `menuTree` key, no id-matching
     // array element, no top-level `id` — the field is named `folderId`), so this
     // branch is skipped. That means renaming such a payload field to `id`, or
     // adding a singleton delete that carries its entity, ARMS this line. Migrate
@@ -214,8 +214,9 @@ export const convertLocalDeleteRemoteUpdatesToLww = <
     }
 
     const lwwPayload = lwwPayloadOf(remoteOp);
-    // A lone replacement already is the final state: keep its payload as is.
-    if (lwwPayload?.lwwUpdateMode === 'replace' && updateOps.length === 1) {
+    // A lone replacement already is the final state, and without a deleted
+    // entity a replacement is all there is: keep its payload as is.
+    if (lwwPayload?.lwwUpdateMode === 'replace' && (updateOps.length === 1 || !entity)) {
       return {
         ...remoteOp,
         payload: { ...lwwPayload, recreatesEntityAfterDelete: true },
