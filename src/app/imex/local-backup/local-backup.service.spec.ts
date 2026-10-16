@@ -1144,6 +1144,13 @@ describe('LocalBackupService', () => {
       (service as unknown as LocalBackupServiceWithPlatformFlags)._isAndroidWebView =
         true;
     };
+    // Native ring slots as the startup restore reads them.
+    const setSlots = (latest: string | null, previous: string | null = null): void => {
+      spyOn(
+        service as unknown as { _nativeDbLoad: (k: string) => Promise<string | null> },
+        '_nativeDbLoad',
+      ).and.callFake(async (k: string) => (k === 'backup' ? latest : previous));
+    };
 
     beforeEach(() => {
       backupServiceSpy.importCompleteBackup.and.resolveTo();
@@ -1159,7 +1166,7 @@ describe('LocalBackupService', () => {
         task: { ids: ['task1'], entities: {} },
         project: { ids: ['project1'], entities: {} },
       });
-      spyOn(service, 'loadBackupAndroid').and.resolveTo(backupData);
+      setSlots(backupData);
 
       await service.askForFileStoreBackupIfAvailable();
 
@@ -1186,9 +1193,7 @@ describe('LocalBackupService', () => {
 
     it('does not show the auto-restore snack when the import fails', async () => {
       setAndroidMode();
-      spyOn(service, 'loadBackupAndroid').and.resolveTo(
-        JSON.stringify({ task: { ids: ['task1'], entities: {} } }),
-      );
+      setSlots(JSON.stringify({ task: { ids: ['task1'], entities: {} } }));
       backupServiceSpy.importCompleteBackup.and.rejectWith(new Error('boom'));
 
       await service.askForFileStoreBackupIfAvailable();
@@ -1200,7 +1205,7 @@ describe('LocalBackupService', () => {
 
     it('falls back to the informed prompt for a non-empty but unusable backup', async () => {
       setAndroidMode();
-      spyOn(service, 'loadBackupAndroid').and.resolveTo('{corrupt');
+      setSlots('{corrupt');
       (window.confirm as jasmine.Spy).and.returnValue(false);
 
       await service.askForFileStoreBackupIfAvailable();
@@ -1211,7 +1216,7 @@ describe('LocalBackupService', () => {
 
     it('does NOT auto-restore a data-less (valid JSON) backup — falls back to prompt', async () => {
       setAndroidMode();
-      spyOn(service, 'loadBackupAndroid').and.resolveTo(
+      setSlots(
         JSON.stringify({
           task: { ids: [], entities: {} },
           project: { ids: [], entities: {} },
@@ -1236,7 +1241,7 @@ describe('LocalBackupService', () => {
       // Usable data, but the backup shows sync was enabled: auto-restoring would
       // re-baseline the sync account and could drop other devices' work, so it
       // must require explicit confirmation.
-      spyOn(service, 'loadBackupAndroid').and.resolveTo(
+      setSlots(
         JSON.stringify({
           task: { ids: ['task1'], entities: {} },
           project: { ids: ['project1'], entities: {} },
@@ -1256,7 +1261,7 @@ describe('LocalBackupService', () => {
 
     it('auto-restores a usable backup whose sync is explicitly disabled', async () => {
       setAndroidMode();
-      spyOn(service, 'loadBackupAndroid').and.resolveTo(
+      setSlots(
         JSON.stringify({
           task: { ids: ['task1'], entities: {} },
           globalConfig: { sync: { isEnabled: false, syncProvider: null } },
@@ -1271,13 +1276,60 @@ describe('LocalBackupService', () => {
 
     it('does nothing (no prompt, no import) when no backup exists', async () => {
       setAndroidMode();
-      spyOn(service, 'loadBackupAndroid').and.resolveTo('');
+      setSlots('');
 
       await service.askForFileStoreBackupIfAvailable();
 
       expect(window.confirm).not.toHaveBeenCalled();
       expect(backupServiceSpy.importCompleteBackup).not.toHaveBeenCalled();
       expect(snackServiceSpy.open).not.toHaveBeenCalled();
+    });
+
+    it('prompts instead of auto-restoring when only the previous slot is usable (#7892)', async () => {
+      setAndroidMode();
+      const previous = JSON.stringify({ task: { ids: ['old1', 'old2'], entities: {} } });
+      setSlots('{half-written', previous);
+      (window.confirm as jasmine.Spy).and.returnValue(true);
+
+      await service.askForFileStoreBackupIfAvailable();
+
+      expect(window.confirm).toHaveBeenCalled();
+      expect(translateServiceSpy.instant).toHaveBeenCalledWith(
+        T.CONFIRM.RESTORE_FILE_BACKUP_MOBILE,
+        { tasks: 2, projects: 0 },
+      );
+      expect(backupServiceSpy.importCompleteBackup).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          task: jasmine.objectContaining({ ids: ['old1', 'old2'] }),
+        }),
+        false,
+        true,
+        true,
+        false,
+        undefined,
+        true,
+      );
+    });
+
+    it('auto-restores the latest slot even when a previous one exists', async () => {
+      setAndroidMode();
+      setSlots(
+        JSON.stringify({ task: { ids: ['new1'], entities: {} } }),
+        JSON.stringify({ task: { ids: ['old1', 'old2'], entities: {} } }),
+      );
+
+      await service.askForFileStoreBackupIfAvailable();
+
+      expect(window.confirm).not.toHaveBeenCalled();
+      expect(backupServiceSpy.importCompleteBackup).toHaveBeenCalledWith(
+        jasmine.objectContaining({ task: jasmine.objectContaining({ ids: ['new1'] }) }),
+        false,
+        true,
+        true,
+        false,
+        undefined,
+        true,
+      );
     });
   });
 

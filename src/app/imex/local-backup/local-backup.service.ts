@@ -127,10 +127,7 @@ export class LocalBackupService {
     // Restore from the newest usable ring slot (#7901). Returns '' when nothing
     // usable exists (degrades to the existing import-error snack rather than
     // throwing on the startup path).
-    const [primary, prev] = await Promise.all([
-      this._loadAndroidDbValueSafe(ANDROID_DB_KEY),
-      this._loadAndroidDbValueSafe(ANDROID_DB_KEY_PREV),
-    ]);
+    const [primary, prev] = await this._readMobileSlots();
     return selectBestBackupStr(primary, prev) ?? '';
   }
 
@@ -169,10 +166,7 @@ export class LocalBackupService {
   }
 
   async loadBackupIOS(): Promise<string> {
-    const [primary, prev] = await Promise.all([
-      this._readIOSFileOrNull(IOS_BACKUP_FILENAME),
-      this._readIOSFileOrNull(IOS_BACKUP_PREV_FILENAME),
-    ]);
+    const [primary, prev] = await this._readMobileSlots();
     // Mirror loadBackupAndroid: return '' rather than throwing when nothing
     // usable exists. askForFileStoreBackupIfAvailable() runs from the
     // fire-and-forget _initBackups() at startup, so a throw here would surface as
@@ -188,17 +182,7 @@ export class LocalBackupService {
     if (!this._isAndroidWebView && !this._platformService.isIOS()) {
       return [];
     }
-    const [latest, previous] = await Promise.all(
-      this._isAndroidWebView
-        ? [
-            this._loadAndroidDbValueSafe(ANDROID_DB_KEY),
-            this._loadAndroidDbValueSafe(ANDROID_DB_KEY_PREV),
-          ]
-        : [
-            this._readIOSFileOrNull(IOS_BACKUP_FILENAME),
-            this._readIOSFileOrNull(IOS_BACKUP_PREV_FILENAME),
-          ],
-    );
+    const [latest, previous] = await this._readMobileSlots();
     // Same gate as the Settings restore: a corrupt slot is never offered.
     const slots: MobileBackupSlot[] = [];
     if (latest && isUsableBackupStr(latest)) {
@@ -213,6 +197,21 @@ export class LocalBackupService {
   /** Imports a raw backup blob (file or mobile slot); false + snack on failure. */
   restoreBackupStr(backupData: string): Promise<boolean> {
     return this._importBackup(backupData);
+  }
+
+  /** Both raw mobile ring slots, latest first; an unreadable slot reads as null. */
+  private _readMobileSlots(): Promise<[string | null, string | null]> {
+    return Promise.all(
+      this._isAndroidWebView
+        ? [
+            this._loadAndroidDbValueSafe(ANDROID_DB_KEY),
+            this._loadAndroidDbValueSafe(ANDROID_DB_KEY_PREV),
+          ]
+        : [
+            this._readIOSFileOrNull(IOS_BACKUP_FILENAME),
+            this._readIOSFileOrNull(IOS_BACKUP_PREV_FILENAME),
+          ],
+    );
   }
 
   /** Newest usable backup blob for the current mobile platform ('' if none). */
@@ -261,12 +260,19 @@ export class LocalBackupService {
     // work — so a synced backup must go through the informed prompt and let the
     // user decide (they may prefer to re-pull from the server). Corrupt /
     // data-less / synced backups all fall through to the prompt below.
-    const backupData = await this._loadBestMobileBackupStr();
+    const [latest, previous] = await this._readMobileSlots();
+    const backupData = selectBestBackupStr(latest, previous);
     if (!backupData) {
       // Nothing usable to restore — stay silent rather than prompt for nothing.
       return;
     }
-    if (isUsableBackupStr(backupData) && !backupStrHasSyncEnabled(backupData)) {
+    // Only the latest slot restores silently: the previous one can be much older,
+    // as the ring keeps a larger generation there after a big shrink (#7892).
+    if (
+      backupData === latest &&
+      isUsableBackupStr(backupData) &&
+      !backupStrHasSyncEnabled(backupData)
+    ) {
       Log.log('mobile backupData auto-restored, length: ' + backupData.length);
       const didImport = await this._importBackup(backupData);
       if (didImport) {
@@ -282,8 +288,8 @@ export class LocalBackupService {
       }
       return;
     }
-    // Corrupt, data-less, or sync-configured backup: don't silently act — surface
-    // the informed prompt so the user decides.
+    // Corrupt, data-less, sync-configured or previous-slot backup: don't silently
+    // act — surface the informed prompt so the user decides.
     if (confirmDialog(this._restoreMobilePromptMsg(backupData))) {
       Log.log('mobile backupData loaded, length: ' + backupData.length);
       await this._importBackup(backupData);

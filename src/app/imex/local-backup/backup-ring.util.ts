@@ -154,7 +154,9 @@ export const backupStrHasSyncEnabled = (str: string | null | undefined): boolean
  * empty/corrupt (e.g. a half-written eviction artifact) — NOT to second-guess a
  * legitimately smaller newer backup (a bulk-archive or delete makes the newer
  * generation smaller, and silently restoring the older/larger one would
- * resurrect data the user removed). See issue #7901.
+ * resurrect data the user removed). See issue #7901. Note the previous slot is
+ * not always one cycle older: `shouldKeepPrevBackupSlot` can hold an older,
+ * larger generation there.
  */
 export const selectBestBackupStr = (
   primary: string | null | undefined,
