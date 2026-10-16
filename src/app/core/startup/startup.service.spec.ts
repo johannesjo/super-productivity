@@ -13,6 +13,7 @@ import { ChromeExtensionInterfaceService } from '../chrome-extension-interface/c
 import { ProjectService } from '../../features/project/project.service';
 import { TrackingReminderService } from '../../features/tracking-reminder/tracking-reminder.service';
 import { LegacyPfDbService } from '../persistence/legacy-pf-db.service';
+import { OperationLogStoreService } from '../../op-log/persistence/operation-log-store.service';
 import { DataInitStateService } from '../data-init/data-init-state.service';
 import { CustomThemeService } from '../theme/custom-theme.service';
 import { of } from 'rxjs';
@@ -234,6 +235,52 @@ describe('StartupService', () => {
         }
       }
     });
+  });
+
+  // Regression guard for #4137/#7345: v11.1.0–v12.0.1 shipped with local
+  // backups never initialised, so a later data loss had nothing to restore.
+  describe('local backup initialisation', () => {
+    let localBackupService: jasmine.SpyObj<LocalBackupService>;
+    let opLogStore: jasmine.SpyObj<OperationLogStoreService>;
+
+    beforeEach(() => {
+      localBackupService = TestBed.inject(
+        LocalBackupService,
+      ) as jasmine.SpyObj<LocalBackupService>;
+      opLogStore = jasmine.createSpyObj('OperationLogStoreService', [
+        'loadStateCache',
+        'getLastSeq',
+        'isRawRebuildIncomplete',
+        'loadRawRebuildRecovery',
+      ]);
+      opLogStore.isRawRebuildIncomplete.and.resolveTo(false);
+      opLogStore.loadRawRebuildRecovery.and.resolveTo(null);
+      Object.assign(service as object, {
+        _opLogStore: opLogStore,
+        _platformService: { isNative: true },
+      });
+    });
+
+    it('should initialise local backups on startup for existing data', fakeAsync(() => {
+      opLogStore.loadStateCache.and.resolveTo({} as never);
+
+      service.init();
+      flush();
+
+      expect(localBackupService.init).toHaveBeenCalledTimes(1);
+      expect(localBackupService.askForFileStoreBackupIfAvailable).not.toHaveBeenCalled();
+    }));
+
+    it('should offer a backup restore and then initialise backups on a blank store', fakeAsync(() => {
+      opLogStore.loadStateCache.and.resolveTo(null);
+      opLogStore.getLastSeq.and.resolveTo(0);
+
+      service.init();
+      flush();
+
+      expect(localBackupService.askForFileStoreBackupIfAvailable).toHaveBeenCalled();
+      expect(localBackupService.init).toHaveBeenCalledTimes(1);
+    }));
   });
 
   describe('raw rebuild recovery', () => {
