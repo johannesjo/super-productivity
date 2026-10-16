@@ -1,10 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
-import typia, { IValidation } from 'typia';
+import typia from 'typia';
 import {
   LocalRestApiRequestPayload,
   LocalRestApiResponsePayload,
 } from '../../../../electron/shared-with-frontend/local-rest-api.model';
+import {
+  LocalRestApiResult,
+  parseLocalRestApiBody,
+} from '../../core/electron/local-rest-api-body';
 import { LocalRestApiFeatureRoutes } from '../../core/electron/local-rest-api-feature-routes';
 import {
   createErrorResponse,
@@ -92,13 +96,6 @@ const MAX_REPEAT_EVERY = 1000;
  */
 const MIN_START_DATE = '1000-01-01';
 
-type Result<T> =
-  | { ok: true; value: T }
-  | { ok: false; response: LocalRestApiResponsePayload };
-
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null && !Array.isArray(value);
-
 const getQueryParam = (
   query: Record<string, string | string[]>,
   key: string,
@@ -180,8 +177,12 @@ export class LocalRestApiTaskRepeatCfgRoutesService implements LocalRestApiFeatu
     requestId: string,
     body: unknown,
   ): Promise<LocalRestApiResponsePayload> {
-    const parsed = this._parseBody(requestId, body, CREATE_KEYS, (b) =>
-      typia.validate<CreateRepeatCfgFields>(b),
+    const parsed = parseLocalRestApiBody(
+      requestId,
+      body,
+      CREATE_KEYS,
+      (b) => typia.validate<CreateRepeatCfgFields>(b),
+      'repeat config',
     );
     if (!parsed.ok) {
       return parsed.response;
@@ -277,8 +278,12 @@ export class LocalRestApiTaskRepeatCfgRoutesService implements LocalRestApiFeatu
     cfgId: string,
     body: unknown,
   ): Promise<LocalRestApiResponsePayload> {
-    const parsed = this._parseBody(requestId, body, UPDATE_KEYS, (b) =>
-      typia.validate<UpdateRepeatCfgFields>(b),
+    const parsed = parseLocalRestApiBody(
+      requestId,
+      body,
+      UPDATE_KEYS,
+      (b) => typia.validate<UpdateRepeatCfgFields>(b),
+      'repeat config',
     );
     if (!parsed.ok) {
       return parsed.response;
@@ -319,8 +324,8 @@ export class LocalRestApiTaskRepeatCfgRoutesService implements LocalRestApiFeatu
     if (Object.keys(changes).length > 0) {
       // `false`, as the dialog passes for these fields: it only asks to
       // update all instances (in a confirmation dialog) when title, notes,
-      // tags, estimate, time or reminder change, which this route does not
-      // accept.
+      // tags, priority, estimate, time or reminder change, which this route
+      // does not accept.
       this._taskRepeatCfgService.updateTaskRepeatCfg(cfgId, changes, false);
     }
 
@@ -352,7 +357,7 @@ export class LocalRestApiTaskRepeatCfgRoutesService implements LocalRestApiFeatu
     requestId: string,
     base: Omit<TaskRepeatCfgCopy, 'id'>,
     schedule: ScheduleFields & { quickSetting: RepeatQuickSetting },
-  ): Result<Omit<TaskRepeatCfgCopy, 'id'>> {
+  ): LocalRestApiResult<Omit<TaskRepeatCfgCopy, 'id'>> {
     const { quickSetting, startDate, ...custom } = schedule;
     const customKeys = Object.keys(custom);
     if (quickSetting !== 'CUSTOM' && customKeys.length > 0) {
@@ -437,47 +442,6 @@ export class LocalRestApiTaskRepeatCfgRoutesService implements LocalRestApiFeatu
       };
     }
     return { ok: true, value: result };
-  }
-
-  private _parseBody<T>(
-    requestId: string,
-    body: unknown,
-    allowedKeys: ReadonlySet<string>,
-    validate: (body: Record<string, unknown>) => IValidation<T>,
-  ): Result<T> {
-    if (!isRecord(body)) {
-      return {
-        ok: false,
-        response: this._invalid(requestId, 'Request body must be a JSON object'),
-      };
-    }
-
-    const unsupported = Object.keys(body).filter((key) => !allowedKeys.has(key));
-    if (unsupported.length > 0) {
-      return {
-        ok: false,
-        response: createErrorResponse(
-          requestId,
-          400,
-          'UNSUPPORTED_FIELD',
-          `Field(s) cannot be set through this endpoint: ${unsupported.join(', ')}`,
-          { fields: unsupported },
-        ),
-      };
-    }
-
-    const validation = validate(body);
-    if (!validation.success) {
-      return {
-        ok: false,
-        response: this._invalid(
-          requestId,
-          'One or more repeat config fields have an invalid type',
-          validation.errors.map(({ path, expected }) => ({ path, expected })),
-        ),
-      };
-    }
-    return { ok: true, value: validation.data };
   }
 
   /**

@@ -145,6 +145,23 @@ describe('TaskListComponent', () => {
     fixture.detectChanges();
   });
 
+  describe('sectionId', () => {
+    it('is null for reserved parent lists', () => {
+      expect(component.sectionId()).toBeNull();
+    });
+
+    it('is the list model id for a section parent list', () => {
+      fixture.componentRef.setInput('listModelId', 'sec-1');
+      expect(component.sectionId()).toBe('sec-1');
+    });
+
+    it('is null for subtask lists keyed by a parent task id', () => {
+      fixture.componentRef.setInput('listId', 'SUB');
+      fixture.componentRef.setInput('listModelId', 'parent-1');
+      expect(component.sectionId()).toBeNull();
+    });
+  });
+
   describe('enterPredicate', () => {
     describe('subtasks in parent-level DONE/UNDONE lists', () => {
       it('should allow subtask to reorder within UNDONE', () => {
