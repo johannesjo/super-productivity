@@ -471,12 +471,16 @@ describe('OperationLogDownloadService', () => {
             decryptedOpsInEarlierBatches: 0,
             passwordEvidence: 'confirmed-for-some-operations',
             failureCount: 1,
+            // The fixture payloads are not base64, so no salt is readable.
+            decryptedSaltCount: 0,
           },
           {
             opId: 'op-corrupt',
             encryptedBatchIndex: 1,
             stage: 'decrypt',
             serverSeq: 42,
+            clientId: 'c1',
+            payloadLength: 'private-encrypted-payload'.length,
           },
         );
         const serializedLogCalls = JSON.stringify(errorSpy.calls.allArgs());
@@ -563,6 +567,8 @@ describe('OperationLogDownloadService', () => {
             encryptedBatchIndex: 0,
             stage: 'decrypt',
             serverSeq: 3,
+            clientId: 'c1',
+            payloadLength: 'ciphertext-op-final'.length,
           },
         );
       });

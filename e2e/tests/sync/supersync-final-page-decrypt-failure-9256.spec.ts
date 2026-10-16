@@ -31,6 +31,7 @@ type DownloadHistory = ReturnType<typeof SuperSyncDownloadOpsResponseSchema.pars
 
 interface CorruptSuffix {
   opId: string;
+  clientId: string;
   serverSeq: number;
   encryptedPayload: string;
 }
@@ -120,6 +121,7 @@ const uploadCorruptSuffix = async (
   }
   return {
     opId: corruptOp.id,
+    clientId,
     serverSeq,
     encryptedPayload,
   };
@@ -160,7 +162,10 @@ const isExpectedDiagnosticSummary = (
     'decryptedOpsInEarlierBatches',
     'passwordEvidence',
     'failureCount',
+    'decryptedSaltCount',
   ]) &&
+  // Client A's session encrypted the valid page under one salt.
+  value.decryptedSaltCount === (decryptedOpsInEarlierBatches > 0 ? 1 : 0) &&
   // The failing batch is the lone corrupt op on the final page; pages decrypted
   // before it IN THE SAME RUN are what prove the password is not globally wrong.
   value.encryptedOperationCount === 1 &&
@@ -181,9 +186,19 @@ const isExpectedDiagnosticFailure = (
     'stage',
     'errorName',
     'serverSeq',
+    'clientId',
+    'payloadLength',
+    'saltFingerprint',
+    'saltDecryptedInRun',
   ]) &&
   value.opId === corruptSuffix.opId &&
   value.serverSeq === corruptSuffix.serverSeq &&
+  value.clientId === corruptSuffix.clientId &&
+  value.payloadLength === corruptSuffix.encryptedPayload.length &&
+  typeof value.saltFingerprint === 'string' &&
+  /^[0-9a-f]{8}$/.test(value.saltFingerprint) &&
+  // The fixture was encrypted outside client A's session, under its own salt.
+  value.saltDecryptedInRun === false &&
   value.encryptedBatchIndex === 0 &&
   value.stage === 'decrypt' &&
   // AES-GCM auth failure — corruption/wrong key, not an environment failure.

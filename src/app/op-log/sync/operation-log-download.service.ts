@@ -28,7 +28,10 @@ import {
   OperationDecryptionError,
   OperationEncryptionService,
 } from './operation-encryption.service';
-import { buildDecryptFailureLogArgs } from './operation-decrypt-failure-log.util';
+import {
+  buildDecryptFailureLogArgs,
+  readPayloadSaltKey,
+} from './operation-decrypt-failure-log.util';
 import { DecryptNoPasswordError } from '../core/errors/sync-errors';
 import { assertOpsEncryptedWhenExpected } from './assert-ops-encryption-expected';
 import { SuperSyncStatusService } from './super-sync-status.service';
@@ -366,6 +369,9 @@ export class OperationLogDownloadService implements OnDestroy {
       // earlier pages of THIS run prove the key even when nothing in a later
       // failing batch decrypts (e.g. a single corrupt op on the final page).
       let decryptedOpsInEarlierBatches = 0;
+      // Salts of those ops, so the log can say whether a failing op shares a
+      // salt (and so likely the key) with ops that decrypted (#9256).
+      const saltKeysDecryptedEarlier = new Set<string>();
 
       while (hasMore) {
         iterationCount++;
@@ -453,6 +459,7 @@ export class OperationLogDownloadService implements OnDestroy {
           // The re-fetched key may differ (password change clean slate), so
           // pre-reset decrypts are no evidence for the key used after it.
           decryptedOpsInEarlierBatches = 0;
+          saltKeysDecryptedEarlier.clear();
 
           // CRITICAL: Re-fetch encryption key after gap detection.
           // Gap usually means server was wiped (e.g., password change clean slate),
@@ -558,18 +565,28 @@ export class OperationLogDownloadService implements OnDestroy {
           }
 
           // Decrypt encrypted operations - let DecryptError propagate to sync-wrapper handler
+          const encryptedPayloadsInPage = syncOps
+            .filter((op) => op.isPayloadEncrypted)
+            .map((op) => op.payload);
           try {
             syncOps = await this.encryptionService.decryptOperations(syncOps, encryptKey);
             decryptedOpsInEarlierBatches += encryptedOpsInPage;
+            for (const payload of encryptedPayloadsInPage) {
+              const saltKey = readPayloadSaltKey(payload);
+              if (saltKey !== undefined) {
+                saltKeysDecryptedEarlier.add(saltKey);
+              }
+            }
           } catch (error) {
             if (error instanceof OperationDecryptionError) {
               OpLog.error(
                 'OperationLogDownloadService: Encrypted operation batch could not be processed.',
-                ...buildDecryptFailureLogArgs(
+                ...(await buildDecryptFailureLogArgs(
                   error.diagnosis,
                   newServerOps.filter((serverOp) => serverOp.op.isPayloadEncrypted),
                   decryptedOpsInEarlierBatches,
-                ),
+                  saltKeysDecryptedEarlier,
+                )),
               );
               if (
                 isDecryptedPrefixKeepable({
