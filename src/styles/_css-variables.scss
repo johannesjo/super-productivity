@@ -48,7 +48,8 @@
   // -----------------------------
   // CapacitorMainActivity.pushStatusBarOverlap measures the top overlap on
   // API < 35 / WebView < 140. Prefer it over SystemBars' injected 0px, which
-  // otherwise hides the status-bar padding on those devices (#8508 / #8283).
+  // hid the status-bar padding on those devices up to Capacitor 8.5.1
+  // (#8508 / #8283); from 8.5.2 SystemBars pads natively there and it reads 0.
   // Leave it invalid until native code publishes a measurement: `initial`
   // enables the var() fallback on other platforms and modern WebViews.
   --android-status-bar-overlap: initial;
@@ -68,10 +69,9 @@
   // the full inset for native Android in styles.scss. Reads through the shared
   // --safe-area-bottom (not raw env()) so this tracks the same source as the
   // header/side-nav/body insets and all bottom-inset UI behaves uniformly across
-  // SystemBars WebView bands. Caveat: on the narrow API >= 35 / WebView < 140
-  // band the shared source can double-count vs SystemBars' native padding (a
-  // cosmetic gap, not an overlap — see the device-matrix risks in
-  // docs/android-edge-to-edge-keyboard.md).
+  // SystemBars WebView bands. Where SystemBars pads natively (WebView < 140) it
+  // writes 0px into the source, so the two do not stack — see
+  // docs/android-edge-to-edge-keyboard.md ("Capacitor 8.5.2+").
   --bottom-nav-safe-area: calc(var(--safe-area-bottom) / 2);
 
   // Keyboard geometry. Android / mobile web write `--keyboard-height` here from
