@@ -1,5 +1,5 @@
 import { signal, WritableSignal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { Router } from '@angular/router';
@@ -23,6 +23,7 @@ import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confir
 type PluginManifestWithAuthor = PluginManifest & { author?: string };
 
 describe('PluginManagementComponent', () => {
+  let fixture: ComponentFixture<PluginManagementComponent>;
   let component: PluginManagementComponent;
   let routerNavigateSpy: jasmine.Spy;
   let layoutToggleSpy: jasmine.Spy;
@@ -92,7 +93,8 @@ describe('PluginManagementComponent', () => {
       ],
     });
 
-    component = TestBed.createComponent(PluginManagementComponent).componentInstance;
+    fixture = TestBed.createComponent(PluginManagementComponent);
+    component = fixture.componentInstance;
   });
 
   it('returns trimmed plugin author from the manifest', () => {
@@ -298,6 +300,69 @@ describe('PluginManagementComponent', () => {
         isEnabled: true,
       }),
     ).toEqual(['http']);
+  });
+
+  describe('community plugins card', () => {
+    const normalize = (text: string | null | undefined): string =>
+      (text ?? '').replace(/\s+/g, ' ').trim();
+    const plugin = {
+      name: 'X',
+      shortDescription: '',
+      url: 'https://example.com',
+      author: 'someone',
+      authorUrl: 'https://example.com/someone',
+      stars: 3,
+    };
+
+    beforeEach(() => {
+      // A non-English language, so the test fails if a string stays hardcoded.
+      const translateService = TestBed.inject(TranslateService);
+      translateService.setTranslation('tr', {
+        PLUGINS: {
+          AUTHORED_BY: '{{author}} tarafından',
+          COMMUNITY_GET_LISTED: 'Eklentinizi burada listeleyin',
+          COMMUNITY_PLUGINS: 'Topluluk eklentileri',
+          COMMUNITY_STARS: '{{count}} yıldız',
+          COMMUNITY_WARNING: 'Topluluk eklentileri incelenmez.',
+        },
+      });
+      translateService.use('tr');
+      // A fixture instead of the real community-plugins.json, whose first entry
+      // may lack the optional authorUrl or stars.
+      component.communityPlugins.set([plugin]);
+      fixture.detectChanges();
+    });
+
+    const card = (): HTMLElement =>
+      fixture.nativeElement.querySelector('.community-plugins-card');
+
+    it('translates the title, warning and add-your-plugin link', () => {
+      expect(normalize(card().querySelector('mat-card-title')?.textContent)).toBe(
+        'Topluluk eklentileri',
+      );
+      expect(normalize(card().querySelector('.community-warning')?.textContent)).toBe(
+        'Topluluk eklentileri incelenmez.',
+      );
+      const addYoursLink = card().querySelector<HTMLAnchorElement>(
+        'a[href$="community-plugins.json"]',
+      );
+      expect(normalize(addYoursLink?.textContent)).toBe(
+        'add Eklentinizi burada listeleyin',
+      );
+    });
+
+    it('links the translated author line to the author', () => {
+      const authorLink = card().querySelector('.community-plugin-item .plugin-author a');
+
+      expect(normalize(authorLink?.textContent)).toBe(`${plugin.author} tarafından`);
+      expect(authorLink?.getAttribute('href')).toBe(plugin.authorUrl);
+    });
+
+    it('translates the stars label', () => {
+      const stars = card().querySelector('.community-plugin-item .plugin-stars');
+
+      expect(stars?.getAttribute('aria-label')).toBe(`${plugin.stars} yıldız`);
+    });
   });
 
   it('navigates to the work view and opens the issue panel', async () => {

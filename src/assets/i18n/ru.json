@@ -3287,7 +3287,11 @@
     "ICON_TOO_LARGE": "Значок плагина слишком большой (макс. {{maxSize}} КБ)",
     "INDEX_HTML_TOO_LARGE": "index.html плагина слишком большой (макс. {{maxSize}} КБ)",
     "NODE_EXECUTION_BRIDGE_UNAVAILABLE": "Не удалось подключиться к мосту выполнения Node.js. Попробуйте отключить и снова включить плагин.",
-    "PLUGIN_LOAD_FAILED": "Не удалось загрузить плагин «{{pluginName}}»: {{error}}"
+    "PLUGIN_LOAD_FAILED": "Не удалось загрузить плагин «{{pluginName}}»: {{error}}",
+    "COMMUNITY_PLUGINS": "Плагины сообщества",
+    "COMMUNITY_WARNING": "Команда Super Productivity не проверяет плагины сообщества. Устанавливайте их на свой страх и риск.",
+    "COMMUNITY_STARS": "Звёзд: {{count}}",
+    "COMMUNITY_GET_LISTED": "Добавить свой плагин в этот список"
   },
   "PM": {
     "TITLE": "Метрики проекта",
