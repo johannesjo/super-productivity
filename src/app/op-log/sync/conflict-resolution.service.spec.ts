@@ -8167,6 +8167,25 @@ describe('ConflictResolutionService', () => {
           });
         }
       });
+
+      it('leaves out a remote op of the entity whose conflict the local delete won', () => {
+        const lost = createConflict('task-1', [localDelete()], [delta('d0', 700, 500)]);
+        const won = createConflict('task-1', [localDelete()], [delta('d1', 2000, 2000)]);
+        const convertWinner = TestBed.inject(
+          ConflictEntityStateService,
+        )._remoteWinnerConverter([
+          { winner: 'local', conflict: lost },
+          { winner: 'remote', conflict: won },
+        ]);
+
+        const [result] = convertWinner(won);
+
+        expect(extractActionPayload(result.payload)).toEqual({
+          ...deletedTask,
+          timeSpent: 2500,
+          timeSpentOnDay: { [DAY]: 2500 },
+        });
+      });
     });
 
     it('should convert remote UPDATE to LWW Update with merged entity when local DELETE has flat payload', () => {
