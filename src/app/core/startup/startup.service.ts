@@ -314,12 +314,13 @@ export class StartupService {
       Log.log('StartupService: pre-v13 data import declined');
       return false;
     }
+    const legacyDataStr = JSON.stringify(legacyData);
     try {
-      await download('sp-pre-v13-data.json', JSON.stringify(legacyData));
+      await download('sp-pre-v13-data.json', legacyDataStr);
     } catch (e) {
       Log.err('StartupService: pre-v13 data download failed', e);
     }
-    return this._localBackupService.restoreBackupStr(JSON.stringify(legacyData));
+    return this._localBackupService.restoreBackupStr(legacyDataStr);
   }
 
   /**
