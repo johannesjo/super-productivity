@@ -209,6 +209,7 @@ const DEVICE_FIELDS: ReadonlyArray<readonly [ProviderToken<object>, readonly str
       [
         'hasWarnedClockDrift',
         '_hasUnseenRemoteOps',
+        '_undecryptableRemoteOps',
         '_lastAnnouncedCheckpointSeq',
         'forcedDownloadCheckpoint',
         'clockDriftTimeoutId',
