@@ -14,9 +14,11 @@ import { waitForMenuSettled } from '../../utils/waits';
 
 /**
  * A task finished as "won't do" on one client and un-done on the other has to
- * end up in the same state on both, whichever client syncs first. A won't-do
- * task is `isDone` plus `isWontDo`, so a field-level merge that took the newer
- * `isDone: false` but kept the older `isWontDo` would leave a stale flag.
+ * end up in the same state on both, whichever client syncs first and whichever
+ * edit is newer. A won't-do task is `isDone` plus `isWontDo`, so a field-level
+ * merge that took the newer `isDone: false` but kept the older `isWontDo` would
+ * leave a stale flag, and one that took the newer `isDone: true` without its
+ * `isWontDo` would turn the won't-do into a plain completion.
  */
 
 const markUndone = async (
@@ -75,9 +77,13 @@ const getStoredState = (
     return task ? { isDone: !!task.isDone, isWontDo: !!task.isWontDo } : null;
   }, taskName);
 
+const SCENARIOS = (['undone', 'wontDo'] as const).flatMap((newerEdit) =>
+  (['wontDo', 'undone'] as const).map((firstToSync) => ({ newerEdit, firstToSync })),
+);
+
 test.describe("@supersync Won't do vs un-done convergence", () => {
-  for (const firstToSync of ['wontDo', 'undone'] as const) {
-    test(`converges when the ${firstToSync} client syncs first`, async ({
+  for (const { newerEdit, firstToSync } of SCENARIOS) {
+    test(`converges when the ${newerEdit} edit is newer and the ${firstToSync} client syncs first`, async ({
       browser,
       baseURL,
       testRunId,
@@ -96,7 +102,7 @@ test.describe("@supersync Won't do vs un-done convergence", () => {
         await clientB.sync.setupSuperSync(syncConfig);
 
         // Both clients start with the task completed.
-        const taskName = `WontDo-${firstToSync}-${testRunId}`;
+        const taskName = `WontDo-${newerEdit}-${firstToSync}-${testRunId}`;
         await clientA.workView.addTask(taskName);
         await markTaskDone(clientA, taskName);
         await clientA.sync.syncAndWait();
@@ -104,10 +110,17 @@ test.describe("@supersync Won't do vs un-done convergence", () => {
         await waitForTask(clientB.page, taskName);
         await expect(getDoneTaskElement(clientB, taskName)).toHaveCount(1);
 
-        // Concurrently: A turns it into won't do, B reopens it.
-        await markUndone(clientA, taskName);
-        await finishAsWontDo(clientA, taskName);
-        await markUndone(clientB, taskName);
+        // Concurrently: A turns it into won't do, B reopens it. The edit made
+        // last is the newer one.
+        if (newerEdit === 'undone') {
+          await markUndone(clientA, taskName);
+          await finishAsWontDo(clientA, taskName);
+          await markUndone(clientB, taskName);
+        } else {
+          await markUndone(clientB, taskName);
+          await markUndone(clientA, taskName);
+          await finishAsWontDo(clientA, taskName);
+        }
 
         const [first, second] =
           firstToSync === 'wontDo' ? [clientA, clientB] : [clientB, clientA];
@@ -120,6 +133,21 @@ test.describe("@supersync Won't do vs un-done convergence", () => {
         const stateB = await getStoredState(clientB, taskName);
         expect(stateA).not.toBeNull();
         expect(stateB).toEqual(stateA);
+
+        if (newerEdit === 'wontDo') {
+          // A's won't-do is the later edit, so it wins on both clients and
+          // keeps its `isWontDo`.
+          expect(stateA).toEqual({ isDone: true, isWontDo: true });
+          for (const client of [clientA, clientB]) {
+            await expect(
+              getDoneTaskElement(client, taskName).locator(
+                'done-toggle .done-check--cross',
+              ),
+            ).toHaveCount(1);
+          }
+          return;
+        }
+
         // B's reopen is the later edit, so it wins on both clients, and un-doing
         // the task also clears A's older `isWontDo`.
         expect(stateA).toEqual({ isDone: false, isWontDo: false });
