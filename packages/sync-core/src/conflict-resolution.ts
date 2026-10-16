@@ -179,18 +179,14 @@ export const convertLocalDeleteRemoteUpdatesToLww = <
       continue;
     }
     if (!entity) continue;
-    const additive = lwwPayload
-      ? undefined
-      : options.applyAdditiveUpdate?.(entity, remoteOp);
-    const updateChanges = additive
-      ? {}
-      : lwwPayload
-        ? extractActionPayload(lwwPayload)
-        : extractUpdateChanges(
-            remoteOp.payload,
-            resolvePayloadKey(remoteOp.entityType, options.payloadKey),
-            conflict.entityId,
-          );
+    const updateChanges = lwwPayload
+      ? extractActionPayload(lwwPayload)
+      : (options.applyAdditiveUpdate?.(entity, remoteOp) ??
+        extractUpdateChanges(
+          remoteOp.payload,
+          resolvePayloadKey(remoteOp.entityType, options.payloadKey),
+          conflict.entityId,
+        ));
     // NOTE (#9256): this still classifies "is a singleton" by `entityId === '*'`,
     // the same conflation the host fixed by switching to a storage-pattern check
     // (see isLwwPayloadIdCanonical). A singleton with a COMPOSITE conflict id
@@ -200,16 +196,16 @@ export const convertLocalDeleteRemoteUpdatesToLww = <
     //
     // Unreachable today, but NOT because "singletons never emit deletes": they
     // do — menuTreeDeleteFolder emits MENU_TREE + OpType.Delete with a folderId
-    // entityId. The actual guard is `entity` above: extractEntityFromPayload
-    // finds nothing in that delete payload (no `menuTree` key, no id-matching
+    // entityId. The actual guard is `entity` staying undefined (no earlier
+    // LWW replace winner, and extractEntityFromPayload finding nothing in
+    // that delete payload: no `menuTree` key, no id-matching
     // array element, no top-level `id` — the field is named `folderId`), so this
     // branch is skipped. That means renaming such a payload field to `id`, or
     // adding a singleton delete that carries its entity, ARMS this line. Migrate
     // to a storage-pattern predicate before either happens.
-    const base = additive ?? entity;
     entity = options.isSingletonEntityId?.(conflict.entityId)
-      ? { ...base, ...updateChanges }
-      : { ...base, ...updateChanges, id: conflict.entityId };
+      ? { ...entity, ...updateChanges }
+      : { ...entity, ...updateChanges, id: conflict.entityId };
   }
 
   return conflict.remoteOps.map((remoteOp) => {

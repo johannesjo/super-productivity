@@ -86,26 +86,35 @@ export class ConflictEntityStateService {
 
   /**
    * `_convertToLWWUpdatesIfNeeded` for the remote winners of `resolutions`.
-   * Detection makes one conflict per remote op, so a locally deleted entity's
-   * winners are collected across its conflicts and converted together (#10380).
+   * Detection makes one conflict per remote op, so each entity's winners are
+   * converted as one conflict: every converted op must carry all of them, or
+   * the one applied last erases the others (#10380).
    */
   _remoteWinnerConverter(
     resolutions: { winner: 'local' | 'remote'; conflict: EntityConflict }[],
   ): (conflict: EntityConflict) => Operation[] {
-    const winnersByEntity = new Map<string, Operation[]>();
+    const byEntity = new Map<string, EntityConflict>();
     for (const { winner, conflict } of resolutions) {
       if (winner !== 'remote') continue;
       const key = toEntityKey(conflict.entityType, conflict.entityId);
-      winnersByEntity.set(key, [
-        ...(winnersByEntity.get(key) ?? []),
-        ...conflict.remoteOps,
-      ]);
-    }
-    return (conflict) =>
-      this._convertToLWWUpdatesIfNeeded(
-        conflict,
-        winnersByEntity.get(toEntityKey(conflict.entityType, conflict.entityId)),
+      const prev = byEntity.get(key);
+      byEntity.set(
+        key,
+        prev
+          ? {
+              ...prev,
+              localOps: [...prev.localOps, ...conflict.localOps],
+              remoteOps: [...prev.remoteOps, ...conflict.remoteOps],
+            }
+          : conflict,
       );
+    }
+    const converted = new Map(
+      [...byEntity.values()]
+        .flatMap((merged) => this._convertToLWWUpdatesIfNeeded(merged))
+        .map((op) => [op.id, op]),
+    );
+    return (conflict) => conflict.remoteOps.map((op) => converted.get(op.id) ?? op);
   }
 
   /**
@@ -113,15 +122,8 @@ export class ConflictEntityStateService {
    *
    * Generic updates become LWW snapshots. Archive/restore actions already recreate
    * state and retain their type so archive side effects receive the semantic payload.
-   *
-   * Detection makes one conflict per remote op, so `entityRemoteWinnerOps` passes
-   * every winning remote op on this entity, in server order: each converted op
-   * must carry all of them, or the one applied last erases the others (#10380).
    */
-  _convertToLWWUpdatesIfNeeded(
-    conflict: EntityConflict,
-    entityRemoteWinnerOps: Operation[] = conflict.remoteOps,
-  ): Operation[] {
+  _convertToLWWUpdatesIfNeeded(conflict: EntityConflict): Operation[] {
     // Check if local side has a DELETE operation
     const hasLocalDelete = conflict.localOps.some((op) => op.opType === OpType.Delete);
 
@@ -130,16 +132,19 @@ export class ConflictEntityStateService {
       return conflict.remoteOps;
     }
 
-    const ownOpIds = new Set(conflict.remoteOps.map((op) => op.id));
-    const winnerOps = conflict.remoteOps.every((op) =>
-      entityRemoteWinnerOps.some((winner) => winner.id === op.id),
-    )
-      ? entityRemoteWinnerOps
-      : conflict.remoteOps;
-    const convertibleRemoteOps = winnerOps.filter(
+    // A winning archive or restore applies by its own payload, and a restore
+    // returns the task to state: only the winners before the first of them
+    // apply to the deleted task. Later ones apply to the restored task as they
+    // are; folding them in would overwrite what the restore set.
+    const barrier = conflict.remoteOps.findIndex(
       (op) =>
-        op.actionType !== ActionType.TASK_SHARED_MOVE_TO_ARCHIVE &&
-        op.actionType !== ActionType.TASK_SHARED_RESTORE &&
+        op.actionType === ActionType.TASK_SHARED_MOVE_TO_ARCHIVE ||
+        op.actionType === ActionType.TASK_SHARED_RESTORE,
+    );
+    const convertibleRemoteOps = (
+      barrier < 0 ? conflict.remoteOps : conflict.remoteOps.slice(0, barrier)
+    ).filter(
+      (op) =>
         // A multi-entity row must never be rewritten into a single-entity LWW
         // replace: it would drop the row's effect on every other entity, and
         // the converted copy shares the original's op id across several
@@ -152,11 +157,11 @@ export class ConflictEntityStateService {
         // case) while the bulk row still applies to its other entities.
         getOpEntityIds(op).length <= 1,
     );
-    if (!convertibleRemoteOps.some((op) => ownOpIds.has(op.id))) {
+    if (convertibleRemoteOps.length === 0) {
       return conflict.remoteOps;
     }
 
-    for (const remoteOp of convertibleRemoteOps.filter((op) => ownOpIds.has(op.id))) {
+    for (const remoteOp of convertibleRemoteOps) {
       if (remoteOp.opType === OpType.Update) {
         OpLog.log(
           `ConflictResolutionService: Converting remote UPDATE to LWW Update for ` +
@@ -186,8 +191,6 @@ export class ConflictEntityStateService {
             ? foldSyncTimeSpentDeltas(conflict.entityId, entity, [op])
             : undefined,
         onMissingBaseEntity: ({ localDeletePayloadKeys, remoteOp }) => {
-          // The other conflicts of this entity log their own ops.
-          if (!ownOpIds.has(remoteOp.id)) return;
           // Fallback: no full base entity available. Returning the op unchanged
           // is equivalent to rewriting actionType to LWW Update — both no-op at
           // the consumer because the payload lacks a top-level id (the LWW path

@@ -506,6 +506,36 @@
     "rejections": []
   },
   {
+    "class": "delete-vs-delta-recreate",
+    "ref": "regression pin for #10380: winners after a restore apply to the restored task, not folded onto the deleted one",
+    "name": "a task deleted on one device and done, archived, restored and renamed on another keeps the restored state",
+    "steps": [
+      {
+        "d": "A",
+        "a": ["deleteTask", "t1"]
+      },
+      {
+        "d": "B",
+        "a": ["doneTask", "t1", true]
+      },
+      {
+        "d": "B",
+        "a": ["archiveTask", "t1"]
+      },
+      {
+        "d": "B",
+        "a": ["restoreTask", "t1"]
+      },
+      {
+        "d": "B",
+        "a": ["renameTask", "t1", "R"],
+        "s": 1
+      }
+    ],
+    "signatures": [],
+    "rejections": []
+  },
+  {
     "class": "list-order-divergence",
     "ref": "#10381",
     "name": "a task recreated after delete-vs-rename sits at different project positions",
