@@ -15,55 +15,20 @@ const MIN_TIMEOUT = 1000;
 const MAX_TIMEOUT = 120000;
 
 /**
- * WebDAV/CalDAV verbs that Java's `HttpURLConnection` (the engine behind
+ * WebDAV/CalDAV verbs that Android's `HttpURLConnection` (the engine behind
  * Capacitor's native `CapacitorHttp`, which intercepts every non-GET/HEAD/
- * OPTIONS/TRACE XHR on-device) refuses with `ProtocolException`. On native
- * platforms these are issued through the OkHttp/URLSession-backed executor
- * instead, which accepts arbitrary method strings. Standard verbs keep using the
- * normal `HttpClient` path (it handles JSON + works on every platform).
+ * OPTIONS/TRACE XHR on-device) refuses with `ProtocolException`. Its allow-list
+ * (AOSP's OkHttp-based impl) is OPTIONS/GET/HEAD/POST/PUT/DELETE/TRACE/PATCH. On
+ * native platforms these are issued through the OkHttp/URLSession-backed
+ * executor instead, which accepts arbitrary method strings. Standard verbs,
+ * including `PATCH`, keep using the normal `HttpClient` path (it handles JSON +
+ * works on every platform).
  *
- * Scoped to the verbs plugins actually need on-device: CalDAV discovery + event
- * query (`PROPFIND`, `REPORT`, #8558) and `PATCH` for the GitHub and Google
- * Calendar issue providers (#8579). Entries MUST stay within the set the native
- * `WebDavHttp` plugin implements (e.g. it rejects `MKCALENDAR`).
- *
- * Retries: on Android the native executor retries a request once on an
- * `IOException` for every method except `PUT`, so a `PATCH` may reach the server
- * twice. The current callers send field-setting patches, where a repeat is
- * harmless; idempotency is the caller's responsibility.
+ * Scoped to the verbs the CalDAV calendar plugin actually uses (discovery +
+ * event query). Entries MUST stay within the set the native `WebDavHttp` plugin
+ * implements (e.g. it rejects `MKCALENDAR`). See issues #8558 and #8579.
  */
-const NATIVE_HTTP_METHODS = new Set(['PROPFIND', 'REPORT', 'PATCH']);
-
-/**
- * Whether `body` is sent as JSON: plain objects/arrays are, while string /
- * FormData / Blob / URLSearchParams / ArrayBuffer(View) bodies are passed
- * through as-is — stringifying those would corrupt them.
- */
-const isJsonRequestBody = (body: unknown): boolean =>
-  body != null &&
-  !(
-    typeof body === 'string' ||
-    body instanceof FormData ||
-    body instanceof Blob ||
-    body instanceof URLSearchParams ||
-    body instanceof ArrayBuffer ||
-    ArrayBuffer.isView(body)
-  );
-
-/**
- * `HttpClient` auto-sets `Content-Type: application/json` for JSON bodies;
- * `fetch` and the native executor do not (the Android executor would even label
- * the body `application/xml`), so mirror it. A caller-supplied content type, in
- * any casing, always wins.
- */
-const withJsonContentType = (headers: Record<string, string>): Record<string, string> => {
-  if (Object.keys(headers).some((h) => h.toLowerCase() === 'content-type')) {
-    return headers;
-  }
-  const out = { ...headers };
-  out['Content-Type'] = 'application/json';
-  return out;
-};
+const NATIVE_HTTP_METHODS = new Set(['PROPFIND', 'REPORT']);
 
 /**
  * Whether plugin HTTP runs in a native Capacitor context. Injectable so tests
@@ -276,8 +241,8 @@ export class PluginHttpService {
    * plugin status checks (e.g. 404 on delete, 429/503 retry) behave identically.
    *
    * Note: `options.timeout` is not honored here — the native executor uses its
-   * own fixed timeout (~30s). Acceptable for the current CalDAV and
-   * issue-provider callers, which set no custom timeout.
+   * own fixed timeout (~30s). Acceptable for the current CalDAV callers, which
+   * set no custom timeout.
    */
   private async _requestViaNativeHttp<T>(
     method: string,
@@ -301,7 +266,7 @@ export class PluginHttpService {
     const res = await this._nativeHttp({
       url: finalUrl,
       method,
-      headers: isJsonRequestBody(body) ? withJsonContentType(headers) : headers,
+      headers,
       data,
       responseType: options?.responseType === 'text' ? 'text' : 'json',
     });
@@ -363,11 +328,30 @@ export class PluginHttpService {
     );
     const isText = options?.responseType === 'text';
 
-    const isJsonBody = isJsonRequestBody(body);
+    // Only JSON-serialize plain objects/arrays. fetch handles string / FormData /
+    // Blob / URLSearchParams / ArrayBuffer(View) bodies natively — stringifying
+    // those would corrupt them (a regression vs the HttpClient path).
+    const isStructuredBody =
+      typeof body === 'string' ||
+      body instanceof FormData ||
+      body instanceof Blob ||
+      body instanceof URLSearchParams ||
+      body instanceof ArrayBuffer ||
+      ArrayBuffer.isView(body);
+    const isJsonBody = body != null && !isStructuredBody;
     const requestBody: BodyInit | undefined =
       body == null ? undefined : isJsonBody ? JSON.stringify(body) : (body as BodyInit);
 
-    const outHeaders = isJsonBody ? withJsonContentType(headers) : headers;
+    // HttpClient auto-sets Content-Type: application/json for object bodies; fetch
+    // does not, so mirror it (only for the JSON case, and without clobbering a
+    // caller-supplied content type — never for FormData/Blob/etc).
+    const outHeaders: Record<string, string> = { ...headers };
+    if (
+      isJsonBody &&
+      !Object.keys(outHeaders).some((h) => h.toLowerCase() === 'content-type')
+    ) {
+      outHeaders['Content-Type'] = 'application/json';
+    }
 
     // The timer must cover the whole exchange, including the body read — clearing
     // it as soon as headers arrive would let a slow-drip body stall forever.
