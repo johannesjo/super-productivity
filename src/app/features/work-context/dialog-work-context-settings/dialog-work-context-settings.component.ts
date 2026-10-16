@@ -70,12 +70,18 @@ export class DialogWorkContextSettingsComponent {
 
   constructor() {
     const entity = this._data.entity;
-    // #9156: `{ ...undefined }` is `{}`, which validation accepts and never heals
-    const defaultTheme = getDefaultWorkContextTheme(
-      this._data.isProject ? WorkContextType.PROJECT : WorkContextType.TAG,
-      entity.id,
-    );
-    const theme = { ...defaultTheme, ...entity.theme };
+    // #9156: `{ ...undefined }` is `{}`, which validation accepts and never heals,
+    // so a missing or empty theme starts from the default. A partial theme is
+    // kept as stored: merging defaults into it would change how it renders, e.g.
+    // legacy themes lack `isDisableBackgroundTint`, which TODAY's default sets.
+    const storedTheme: WorkContextThemeCfg =
+      entity.theme && Object.keys(entity.theme).length > 0
+        ? entity.theme
+        : getDefaultWorkContextTheme(
+            this._data.isProject ? WorkContextType.PROJECT : WorkContextType.TAG,
+            entity.id,
+          );
+    const theme = { ...storedTheme };
     let tagColor: string | null | undefined;
     // For tags: align the displayed Tag Color and Primary fields with
     // the tag's actually rendered color. If one is missing or still at
@@ -99,7 +105,7 @@ export class DialogWorkContextSettingsComponent {
     // original store state instead of pushing the prefilled values.
     this._originalEntityData = {
       ...entity,
-      theme: { ...defaultTheme, ...entity.theme },
+      theme: { ...storedTheme },
     } as Project | Tag;
     // If the user opens settings on a tag whose stored theme.primary
     // matches the auto-default (or has just been prefilled to tag.color),

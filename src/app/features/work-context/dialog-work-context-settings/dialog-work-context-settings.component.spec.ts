@@ -11,6 +11,7 @@ import { DEFAULT_PROJECT } from '../../project/project.const';
 import { DEFAULT_TAG, TODAY_TAG } from '../../tag/tag.const';
 import { Project } from '../../project/project.model';
 import { Tag } from '../../tag/tag.model';
+import { WorkContextThemeCfg } from '../work-context.model';
 
 describe('DialogWorkContextSettingsComponent', () => {
   let projectService: jasmine.SpyObj<ProjectService>;
@@ -64,6 +65,37 @@ describe('DialogWorkContextSettingsComponent', () => {
     expect(tagService.updateTag).toHaveBeenCalledWith(
       'TODAY',
       jasmine.objectContaining({ theme: TODAY_TAG.theme }),
+    );
+  });
+
+  it('should write an empty theme back as the default theme on cancel', () => {
+    const entity = { ...DEFAULT_PROJECT, id: 'p1', theme: {} } as unknown as Project;
+
+    setup({ isProject: true, entity }).cancelEdit();
+
+    expect(projectService.update).toHaveBeenCalledWith(
+      'p1',
+      jasmine.objectContaining({ theme: DEFAULT_PROJECT.theme }),
+      true,
+    );
+  });
+
+  it('should write a partial theme back unchanged on cancel', () => {
+    // Legacy TODAY theme from before `isDisableBackgroundTint` existed: merging
+    // TODAY's default into it would switch the background tint off.
+    const legacyTheme: WorkContextThemeCfg = {
+      isAutoContrast: true,
+      primary: TODAY_TAG.theme.primary,
+      huePrimary: '400',
+    };
+    const entity = { ...TODAY_TAG, theme: legacyTheme } as unknown as Tag;
+
+    setup({ isProject: false, entity }).cancelEdit();
+
+    const written = tagService.updateTag.calls.mostRecent().args[1].theme;
+    expect(written).toEqual(legacyTheme);
+    expect(written).not.toEqual(
+      jasmine.objectContaining({ isDisableBackgroundTint: true }),
     );
   });
 
