@@ -8082,6 +8082,93 @@ describe('ConflictResolutionService', () => {
       expect(result).toEqual([remoteOp]);
     });
 
+    describe('winning syncTimeSpent deltas (#10380)', () => {
+      const DAY = '2026-07-13';
+      const deleted = {
+        id: 'task-1',
+        title: 'Deleted',
+        projectId: 'proj-1',
+        timeSpent: 500,
+        timeSpentOnDay: { [DAY]: 500 },
+        subTaskIds: [],
+        subTasks: [],
+      };
+      const localDelete = (): Operation => ({
+        ...createOpWithTimestamp('local-del', 'client-a', 1000, OpType.Delete),
+        actionType: ActionType.TASK_SHARED_DELETE,
+        payload: { actionPayload: { task: deleted }, entityChanges: [] },
+      });
+      // The shape operation capture records for syncTimeSpent.
+      const delta = (id: string, duration: number, timestamp: number): Operation => ({
+        ...createOpWithTimestamp(id, 'client-b', timestamp),
+        actionType: ActionType.TIME_TRACKING_SYNC_TIME_SPENT,
+        payload: {
+          actionPayload: { taskId: 'task-1', date: DAY, duration },
+          entityChanges: [
+            {
+              entityType: 'TASK',
+              entityId: 'task-1',
+              opType: OpType.Update,
+              changes: { taskId: 'task-1', date: DAY, duration },
+            },
+          ],
+        },
+      });
+      const rename = (id: string, title: string, timestamp: number): Operation => ({
+        ...createOpWithTimestamp(id, 'client-b', timestamp),
+        actionType: ActionType.TASK_SHARED_UPDATE,
+        payload: {
+          actionPayload: { task: { id: 'task-1', changes: { title } } },
+          entityChanges: [],
+        },
+      });
+      const convert = (remoteOps: Operation[]): Operation[] =>
+        (TestBed.inject(ConflictEntityStateService) as any)._convertToLWWUpdatesIfNeeded(
+          createConflict('task-1', [localDelete()], remoteOps),
+        );
+      const deletedTask: Record<string, unknown> = { ...deleted };
+      delete deletedTask['subTasks'];
+
+      it('adds the delta to the recreated task instead of reading its arguments as fields', () => {
+        const [result] = convert([delta('d1', 2000, 2000)]);
+
+        expect(result.actionType).toBe('[TASK] LWW Update');
+        expect(extractActionPayload(result.payload)).toEqual({
+          ...deletedTask,
+          timeSpent: 2500,
+          timeSpentOnDay: { [DAY]: 2500 },
+        });
+      });
+
+      it('gives each winner of the entity, one conflict per op, the state after all of them', () => {
+        const remoteOps = [
+          delta('d1', 2000, 2000),
+          rename('r1', 'Renamed', 3000),
+          delta('d2', 1500, 4000),
+        ];
+        const conflicts = remoteOps.map((op) =>
+          createConflict('task-1', [localDelete()], [op]),
+        );
+        const convertWinner = TestBed.inject(
+          ConflictEntityStateService,
+        )._remoteWinnerConverter(
+          conflicts.map((conflict) => ({ winner: 'remote' as const, conflict })),
+        );
+
+        const result = conflicts.flatMap(convertWinner);
+
+        expect(result.map((op) => op.id)).toEqual(['d1', 'r1', 'd2']);
+        for (const op of result) {
+          expect(extractActionPayload(op.payload)).toEqual({
+            ...deletedTask,
+            title: 'Renamed',
+            timeSpent: 4000,
+            timeSpentOnDay: { [DAY]: 4000 },
+          });
+        }
+      });
+    });
+
     it('should convert remote UPDATE to LWW Update with merged entity when local DELETE has flat payload', () => {
       const fullEntity = {
         id: 'task-1',
