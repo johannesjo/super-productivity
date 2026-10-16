@@ -20,7 +20,7 @@ const MAX_TIMEOUT = 120000;
  * OPTIONS/TRACE XHR on-device) refuses with `ProtocolException`. Its allow-list
  * (AOSP's OkHttp-based impl) is OPTIONS/GET/HEAD/POST/PUT/DELETE/TRACE/PATCH. On
  * native platforms these are issued through the OkHttp/URLSession-backed
- * executor instead, which accepts arbitrary method strings. Standard verbs,
+ * `WebDavHttp` executor instead, which supports the WebDAV verbs. Standard verbs,
  * including `PATCH`, keep using the normal `HttpClient` path (it handles JSON +
  * works on every platform).
  *
