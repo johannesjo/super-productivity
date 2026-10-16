@@ -1,6 +1,41 @@
 import { test, expect } from '../../fixtures/test.fixture';
 
 test.describe('Subtask inline input', () => {
+  test('offers visible subtask creation beneath expanded lists', async ({
+    page,
+    workViewPage,
+    taskPage,
+  }) => {
+    await workViewPage.waitForTaskList();
+    await workViewPage.addTask('Inline parent');
+    const parent = taskPage.getTaskByText('Inline parent');
+    await parent.focus();
+    await page.keyboard.press('a');
+    const draft = parent.locator('.e2e-add-subtask-input');
+    await draft.fill('First child');
+    await draft.press('Enter');
+    await draft.press('Escape');
+    const addSubtask = parent
+      .locator('.add-subtask-action')
+      .getByRole('button', { name: 'Add subtask', exact: true });
+    await expect(addSubtask).toHaveClass(/task-list-add-action/);
+    await addSubtask.click();
+    await expect(draft).toBeFocused();
+    await expect(addSubtask).toBeHidden();
+    await draft.fill('Second child');
+    await draft.press('Enter');
+    await draft.press('Escape');
+    await expect(parent.locator('.sub-tasks task')).toHaveCount(2);
+    await expect(addSubtask).toBeVisible();
+    await taskPage.markTaskAsDone(parent.locator('.sub-tasks task').first());
+    await parent.locator('.toggle-sub-tasks-btn').click();
+    await expect(addSubtask).toBeVisible();
+    await parent.locator('.toggle-sub-tasks-btn').click();
+    await expect(addSubtask).toBeHidden();
+    await parent.locator('.toggle-sub-tasks-btn').click();
+    await expect(addSubtask).toBeVisible();
+  });
+
   test('keeps the draft input focused for rapid subtask creation', async ({
     page,
     workViewPage,
