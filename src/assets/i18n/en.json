@@ -1353,6 +1353,10 @@
         "USE_REMOTE": "Use Server Data",
         "USE_REMOTE_CONFIRM": "This replaces this device's data with the server's and discards {{count}} local change(s). Continue?"
       },
+      "D_UNDECRYPTABLE_REMOTE": {
+        "MESSAGE": "Your sync server holds at least {{count}} change(s) that this device could not decrypt and has not applied. They may be your work from another device, saved under a different or older encryption password.\n\nOverwriting the server deletes them permanently, and this device cannot bring them back.\n\nBefore you overwrite, export a backup and try your older encryption passwords with Retry Decrypt. Only continue if you are sure you no longer need these changes.",
+        "TITLE": "Some synced data could not be decrypted"
+      },
       "FORM": {
         "BTN_CHANGE_PASSWORD": "Change Password",
         "BTN_DISABLE_ENCRYPTION": "Disable Encryption",

@@ -30,8 +30,12 @@ describe('DialogChangeEncryptionPasswordComponent', () => {
     mockSyncLocalStateService = jasmine.createSpyObj('SyncLocalStateService', [
       'hasNothingWorthUploading',
       'warnNothingWorthUploading',
+      'confirmOverwriteOfUndecryptableRemoteOps',
     ]);
     mockSyncLocalStateService.hasNothingWorthUploading.and.resolveTo(false);
+    mockSyncLocalStateService.confirmOverwriteOfUndecryptableRemoteOps.and.returnValue(
+      true,
+    );
     mockEncryptionPasswordChangeService = jasmine.createSpyObj(
       'EncryptionPasswordChangeService',
       ['changePassword'],
@@ -269,6 +273,20 @@ describe('DialogChangeEncryptionPasswordComponent', () => {
       expect(component.isLoading()).toBe(false);
     });
 
+    it('stops when the user declines deleting undecryptable remote ops', async () => {
+      mockSyncLocalStateService.confirmOverwriteOfUndecryptableRemoteOps.and.returnValue(
+        false,
+      );
+      component.newPassword = 'password123';
+      component.confirmPassword = 'password123';
+
+      await component.confirm();
+
+      expect(mockEncryptionPasswordChangeService.changePassword).not.toHaveBeenCalled();
+      expect(mockDialogRef.close).not.toHaveBeenCalled();
+      expect(component.isLoading()).toBe(false);
+    });
+
     it('does not consult the guard for file-based providers', async () => {
       // Those re-encrypt in place; no clean slate, so nothing to protect.
       component.providerType = 'file-based';
@@ -280,6 +298,9 @@ describe('DialogChangeEncryptionPasswordComponent', () => {
       await component.confirm();
 
       expect(mockSyncLocalStateService.hasNothingWorthUploading).not.toHaveBeenCalled();
+      expect(
+        mockSyncLocalStateService.confirmOverwriteOfUndecryptableRemoteOps,
+      ).not.toHaveBeenCalled();
     });
   });
 });

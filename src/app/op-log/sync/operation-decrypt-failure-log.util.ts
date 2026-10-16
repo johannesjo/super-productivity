@@ -50,9 +50,9 @@ export interface DecryptFailureLogEntry {
   saltFingerprint?: string;
   /**
    * Whether an op with the SAME salt decrypted in this run. One device session
-   * encrypts with one salt per password, so `true` with an auth failure points
-   * at damaged data under the right key; `false` points at a different key
-   * (another password or device session) — never proof either way.
+   * encrypts with one salt per password, so `true` with an auth failure means
+   * the same derived key and points at damaged data. `false` only says another
+   * session wrote it: under a different password, or the same one and damaged.
    */
   saltDecryptedInRun?: boolean;
 }

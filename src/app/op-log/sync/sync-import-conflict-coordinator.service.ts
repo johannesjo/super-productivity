@@ -14,6 +14,7 @@ import {
   ForceUploadPendingOpsError,
 } from '../core/errors/sync-errors';
 import { OperationLogStoreService } from '../persistence/operation-log-store.service';
+import { SyncLocalStateService } from './sync-local-state.service';
 
 type SyncImportConflictActions = {
   useLocal: () => Promise<ForceUploadResult>;
@@ -32,6 +33,7 @@ export class SyncImportConflictCoordinatorService {
   private serverMigrationService = inject(ServerMigrationService);
   private uploadService = inject(OperationLogUploadService);
   private opLogStore = inject(OperationLogStoreService);
+  private syncLocalStateService = inject(SyncLocalStateService);
 
   async handleSyncImportConflict(
     dialogData: SyncImportConflictData,
@@ -43,6 +45,12 @@ export class SyncImportConflictCoordinatorService {
 
     switch (resolution) {
       case 'USE_LOCAL':
+        // #9256: the force upload deletes remote ops this device could not
+        // decrypt (a kept prefix can raise this dialog); declining is CANCEL.
+        if (!this.syncLocalStateService.confirmOverwriteOfUndecryptableRemoteOps()) {
+          OpLog.normal(`${logPrefix}: USE_LOCAL declined over undecryptable remote ops.`);
+          return 'CANCEL';
+        }
         OpLog.normal(`${logPrefix}: User chose USE_LOCAL. Force uploading local state.`);
         if ((await actions.useLocal()).hasUnresolvedOps) {
           throw new ForceUploadPendingOpsError(

@@ -74,6 +74,22 @@ const isOpCoveredByLocalClock = (
  * or another device moves between attempts without making a scanned page
  * unsafe.
  */
+/**
+ * Remote ops this device downloaded but could not decrypt (#9256). Every
+ * destructive overwrite (Force Overwrite, Change Password, Use Local Data)
+ * runs a clean slate that makes the server delete them, and once a decrypted
+ * prefix was applied the #9931 "holds nothing" refusal no longer fires.
+ */
+export interface UndecryptableRemoteOps {
+  /** Encrypted ops on the failing page: a lower bound on what is at stake. */
+  opCount: number;
+}
+
+interface UndecryptableRemoteOpsMarker extends UndecryptableRemoteOps {
+  /** `syncEpoch` when set; any destructive config change retires the marker. */
+  syncEpoch: number;
+}
+
 interface ForcedDownloadCheckpoint {
   key: string;
   sinceSeq: number;
@@ -176,6 +192,8 @@ export class OperationLogDownloadService implements OnDestroy {
 
   private forcedDownloadCheckpoint: ForcedDownloadCheckpoint | null = null;
 
+  private _undecryptableRemoteOps: UndecryptableRemoteOpsMarker | null = null;
+
   /**
    * True while a SuperSync backlog is only partly downloaded (#8763). The
    * rejection handler must not resolve conflicts locally meanwhile: judged
@@ -183,6 +201,20 @@ export class OperationLogDownloadService implements OnDestroy {
    */
   hasUnseenRemoteOps(): boolean {
     return this._hasUnseenRemoteOps;
+  }
+
+  /**
+   * Set while the last SuperSync download stopped at ops this device could not
+   * decrypt, until a download reaches the server head or the sync epoch moves
+   * (provider switch, password change, force upload). In memory only: after a
+   * restart the next sync attempt re-arms it.
+   */
+  getUndecryptableRemoteOps(): UndecryptableRemoteOps | null {
+    const marker = this._undecryptableRemoteOps;
+    if (!marker || marker.syncEpoch !== this.providerManager.syncEpoch) {
+      return null;
+    }
+    return { opCount: marker.opCount };
   }
 
   ngOnDestroy(): void {
@@ -578,6 +610,12 @@ export class OperationLogDownloadService implements OnDestroy {
               }
             }
           } catch (error) {
+            if (syncProvider.providerMode === 'superSyncOps') {
+              this._undecryptableRemoteOps = {
+                opCount: encryptedOpsInPage,
+                syncEpoch: this.providerManager.syncEpoch,
+              };
+            }
             if (error instanceof OperationDecryptionError) {
               OpLog.error(
                 'OperationLogDownloadService: Encrypted operation batch could not be processed.',
@@ -797,6 +835,7 @@ export class OperationLogDownloadService implements OnDestroy {
       // short of the server head, so it must not count as a completed check.
       if (!decryptErrorAfterKeptPrefix) {
         this.superSyncStatusService.markRemoteChecked();
+        this._undecryptableRemoteOps = null;
       }
       this._lastAnnouncedCheckpointSeq = 0;
     } else if (checkpointSeq !== this._lastAnnouncedCheckpointSeq) {
