@@ -8,7 +8,9 @@
 # the API 30-34 / WebView < 140 band #9316 was reported in, which no device on
 # hand covers. ImeInsetShimInstrumentedTest asserts the mechanism there (explicit
 # WebView height == keyboard top) as well as the symptom (web content ends above
-# the keyboard). Only that test runs here; the full suite already ran on API 35.
+# the keyboard); StartupOverlayInsetInstrumentedTest checks the native startup
+# overlay sits above the bars and the keyboard exactly once in this band's
+# SystemBars branch. Only those two run here; the full suite already ran on API 35.
 # See docs/android-edge-to-edge-keyboard.md.
 #
 # A file, not an inline `script:` block — see run-android-checks.sh for why.
@@ -44,7 +46,7 @@ adb logcat -c || true
 # >= 140 the gate flips to the SystemBars branch and the test would stay green
 # while the #9316 band silently lost its only coverage. With the pin it fails.
 timeout 480 ./gradlew :app:connectedPlayDebugAndroidTest \
-  -Pandroid.testInstrumentationRunnerArguments.class=com.superproductivity.superproductivity.ImeInsetShimInstrumentedTest \
+  -Pandroid.testInstrumentationRunnerArguments.class=com.superproductivity.superproductivity.ImeInsetShimInstrumentedTest,com.superproductivity.superproductivity.StartupOverlayInsetInstrumentedTest \
   -Pandroid.testInstrumentationRunnerArguments.expectShim=true
 status=$?
 if [ "$status" -eq 124 ]; then
@@ -59,4 +61,4 @@ fi
 # On green, echo what the test measured so the job log documents which owner
 # insetted the WebView and by how much — geometry and versions only.
 echo "IME inset shim check passed on API 34:"
-adb logcat -d -s SUPKeyboardTest | tail -n 8 || true
+adb logcat -d -s SUPKeyboardTest SUPOverlayTest | tail -n 12 || true

@@ -343,7 +343,7 @@ class StartupOverlayManager(private val activity: android.app.Activity) {
         // line (measured). The input bar adds 36dp on top to clear the web
         // add-task-bar's action-button row. Fine-tune here if a device shows a
         // small constant offset (these are now device-independent of nav type).
-        private const val FAB_GAP_DP = 6
-        private const val BAR_GAP_DP = 6 + 36
+        internal const val FAB_GAP_DP = 6
+        internal const val BAR_GAP_DP = 6 + 36
     }
 }
