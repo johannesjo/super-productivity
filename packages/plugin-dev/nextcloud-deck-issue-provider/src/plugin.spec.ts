@@ -218,3 +218,59 @@ describe('Nextcloud Deck Plugin - notes mapping', () => {
     expect(notes.toTaskValue('Desc', { issueId: '1' })).toBe('Desc');
   });
 });
+
+// Some Deck servers list stacks without their cards (#7299)
+describe('Nextcloud Deck Plugin - stacks without cards', () => {
+  const createHttpWithoutCards = (): ReturnType<typeof createHttp> => {
+    const http = createHttp();
+    http.get.mockImplementation(async (url: string) => {
+      if (url === `${API}/boards/7/stacks`) {
+        return STACKS.map(({ id, title }) => ({ id, title }));
+      }
+      const stack = STACKS.find((s) => url === `${API}/boards/7/stacks/${s.id}`);
+      if (stack) {
+        return stack;
+      }
+      throw new Error('unexpected url ' + url);
+    });
+    return http;
+  };
+  const calledUrls = (http: ReturnType<typeof createHttp>): string[] =>
+    http.get.mock.calls.map((c) => c[0] as string);
+
+  it('loads the cards of imported stacks only', async () => {
+    const http = createHttpWithoutCards();
+    const res = await definition.getNewIssuesForBacklog!(
+      { ...baseCfg, importStackIds: ['1', '2', '3'], doneStackId: '3' },
+      http,
+    );
+    expect(ids(res)).toEqual(['11', '21']);
+    expect(calledUrls(http)).toEqual([
+      `${API}/boards/7/stacks`,
+      `${API}/boards/7/stacks/1`,
+      `${API}/boards/7/stacks/2`,
+    ]);
+  });
+
+  it('finds the card for getById', async () => {
+    const issue = await definition.getById('21', baseCfg, createHttpWithoutCards());
+    expect(issue).toEqual(expect.objectContaining({ id: '21', stackTitle: 'Doing' }));
+  });
+
+  it('returns the requested cards for getByIds', async () => {
+    const res = await definition.getByIds!(
+      ['11', '31'],
+      baseCfg,
+      createHttpWithoutCards(),
+    );
+    expect(ids(res)).toEqual(['11', '31']);
+  });
+
+  it('treats a stack without cards in its details as empty', async () => {
+    const http = createHttp();
+    http.get.mockImplementation(async (url: string) =>
+      url === `${API}/boards/7/stacks` ? [{ id: 1, title: 'Todo' }] : { id: 1 },
+    );
+    expect(await definition.searchIssues('', baseCfg, http)).toEqual([]);
+  });
+});

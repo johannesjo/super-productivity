@@ -84,6 +84,27 @@ const getBoardId = (cfg: DeckConfig): string => {
 const fetchStacks = (cfg: DeckConfig, http: PluginHttp): Promise<DeckStack[]> =>
   http.get<DeckStack[]>(`${getApiUrl(cfg)}/boards/${getBoardId(cfg)}/stacks`);
 
+// Some Deck servers omit `cards` from the stacks list (#7299), so those stacks
+// are loaded one by one. `isNeeded` skips stacks whose cards are never read.
+const fetchStacksWithCards = async (
+  cfg: DeckConfig,
+  http: PluginHttp,
+  isNeeded: (stack: DeckStack) => boolean = () => true,
+): Promise<DeckStack[]> => {
+  const stacks = await fetchStacks(cfg, http);
+  return Promise.all(
+    stacks.map(async (stack) => {
+      if (Array.isArray(stack.cards) || !isNeeded(stack)) {
+        return stack;
+      }
+      const details = await http.get<DeckStack>(
+        `${getApiUrl(cfg)}/boards/${getBoardId(cfg)}/stacks/${stack.id}`,
+      );
+      return { ...stack, cards: details?.cards || [] };
+    }),
+  );
+};
+
 const formatTitle = (
   card: DeckCard,
   stack: DeckStack,
@@ -154,7 +175,7 @@ const fetchOpenCards = async (
   http: PluginHttp,
 ): Promise<PluginSearchResult[]> => {
   const [stacks, boardTitle] = await Promise.all([
-    fetchStacks(cfg, http),
+    fetchStacksWithCards(cfg, http, (stack) => isImportedStack(stack, cfg)),
     fetchBoardTitle(cfg, http),
   ]);
   return stacks
@@ -171,7 +192,7 @@ const findCard = async (
   cfg: DeckConfig,
   http: PluginHttp,
 ): Promise<{ card: DeckCard; stack: DeckStack }> => {
-  const stacks = await fetchStacks(cfg, http);
+  const stacks = await fetchStacksWithCards(cfg, http);
   for (const stack of stacks) {
     const card = (stack.cards || []).find((c) => String(c.id) === cardId);
     if (card) {
@@ -297,7 +318,7 @@ registerIssueProvider({
     const cfg = asCfg(config);
     const ids = new Set(issueIds);
     const [stacks, boardTitle] = await Promise.all([
-      fetchStacks(cfg, http),
+      fetchStacksWithCards(cfg, http),
       fetchBoardTitle(cfg, http),
     ]);
     return stacks.flatMap((stack) =>
