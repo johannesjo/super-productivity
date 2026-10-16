@@ -638,10 +638,11 @@ export class LocalBackupService {
         true,
         false, // isSkipPreImportBackup
         undefined, // requiredImportBackupId
-        // Every caller restores this device's own auto-backup (Electron backup
-        // dir, mobile ring slots): state that was already live here. Refusing
-        // it for errors repair cannot fix would leave the user no way back
-        // after local data loss (#8279). Picked files use FileImexComponent.
+        // Every caller restores state that was already live on this device:
+        // its own auto-backup (Electron backup dir, mobile ring slots) or its
+        // never-migrated v12-or-older `SUP` database (#7345). Refusing it for
+        // errors repair cannot fix would leave the user no way back after local
+        // data loss (#8279). Picked files use FileImexComponent.
         true, // isOwnStateRestore
       );
       // This profile's notes were just replaced wholesale (Electron startup
