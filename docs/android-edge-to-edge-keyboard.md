@@ -49,6 +49,17 @@ Passthrough is still `WebView major >= 140 && viewport-fit=cover`. Per band, wit
 | API ≥ 35, WebView < 140 | inside DecorView padded by system bars + IME           | 0px                                  | off                                                                |
 | API < 35, WebView < 140 | inside DecorView padded by system bars + IME (**new**) | 0px                                  | on, but measure the inset that is already there and change nothing |
 
+Measured on the CI emulators (2026-10, 640 px root, density 1.0;
+`StartupOverlayInsetInstrumentedTest` / `ImeInsetShimInstrumentedTest` logs):
+
+| Emulator            | Branch      | DecorView padding (rest → IME up) | Overlay before fix                  | Overlay after fix                                  |
+| ------------------- | ----------- | --------------------------------- | ----------------------------------- | -------------------------------------------------- |
+| API 35, WebView 124 | non-passth. | `0,24,0,24` → `0,24,0,259`        | FAB bottom 586, expected 610 (−24)  | FAB 610; bar 339 above keyboard top 381; 574 after |
+| API 34, WebView 113 | non-passth. | `0,24,0,0` → `0,24,0,235`         | (not reached — API 35 failed first) | FAB 634; bar 363 above keyboard top 405; 598 after |
+
+Neither CI image reaches passthrough (WebView ≥ 140), the branch current
+devices take — that one is on the device checklist.
+
 Consequences we handled:
 
 - **Startup overlay was lifted twice.** `StartupOverlayManager` added the nav-bar

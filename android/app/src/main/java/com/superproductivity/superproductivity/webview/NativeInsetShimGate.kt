@@ -17,8 +17,10 @@ package com.superproductivity.superproductivity.webview
  * branch 2 as well: the WebView already ends at the keyboard top and below the
  * status bar. The shims still run there, but both are absolute, resize-detecting
  * measurements, so they land where the WebView already is and change nothing —
- * measured on the API 34 / WebView 113 CI emulator (2026-10): WebView top 24 px
- * (status bar), bottom at the keyboard top before and after the shim's write.
+ * measured on the API 34 / WebView 113 CI emulator (2026-10): SystemBars padded
+ * the DecorView `0,24,0,0` at rest and `0,24,0,235` with the IME up (640 px root,
+ * keyboard top at 405), so the WebView already spanned 24..405 when the shim wrote
+ * its 381 px height.
  * They are kept, not removed, because nothing in the field has confirmed branch 2
  * on a real device in the band yet, and because they are what covers it again if
  * Capacitor is ever pinned back to <= 8.5.1. Remove them in a follow-up once
