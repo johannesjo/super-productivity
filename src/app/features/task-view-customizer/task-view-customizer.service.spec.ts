@@ -874,7 +874,10 @@ describe('TaskViewCustomizerService', () => {
       ]);
     });
 
-    it('emits non-tag groups in ascending order without retag targets', async () => {
+    // `null`, not `undefined`: `TaskMultiDragService.canDrop` only treats
+    // `undefined` as a droppable list, so `undefined` here would let multi-select
+    // drops into these groups strip the tasks' sections.
+    it('emits non-tag groups in ascending order with a null retag target', async () => {
       service.setGroup({ type: GROUP_OPTION_TYPE.project, label: 'Project' });
       const sink = collect();
       TestBed.tick();
@@ -882,7 +885,7 @@ describe('TaskViewCustomizerService', () => {
 
       const result = sink.emissions[sink.emissions.length - 1];
       expect(groupKeys(result)).toEqual(['No project', 'Project A', 'Project B']);
-      expect(result.groups!.every((group) => !('tagId' in group))).toBeTrue();
+      expect(result.groups!.every((group) => group.tagId === null)).toBeTrue();
     });
 
     // The group order used to be recomputed in the template on every change
