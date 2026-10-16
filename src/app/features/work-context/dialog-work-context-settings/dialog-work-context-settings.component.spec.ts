@@ -80,6 +80,24 @@ describe('DialogWorkContextSettingsComponent', () => {
     );
   });
 
+  it('should write a theme holding only undefined values back as the default on cancel', () => {
+    // Older versions of this dialog stored this for a theme-less tag without a
+    // color; sync JSON drops it to `{}`.
+    const entity = {
+      ...DEFAULT_TAG,
+      id: 't1',
+      color: undefined,
+      theme: { primary: undefined },
+    } as unknown as Tag;
+
+    setup({ isProject: false, entity }).cancelEdit();
+
+    expect(tagService.updateTag).toHaveBeenCalledWith(
+      't1',
+      jasmine.objectContaining({ theme: DEFAULT_TAG.theme }),
+    );
+  });
+
   it('should write a partial theme back unchanged on cancel', () => {
     // Legacy TODAY theme from before `isDisableBackgroundTint` existed: merging
     // TODAY's default into it would switch the background tint off.

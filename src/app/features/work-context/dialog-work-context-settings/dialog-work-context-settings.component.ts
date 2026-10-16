@@ -71,11 +71,13 @@ export class DialogWorkContextSettingsComponent {
   constructor() {
     const entity = this._data.entity;
     // #9156: `{ ...undefined }` is `{}`, which validation accepts and never heals,
-    // so a missing or empty theme starts from the default. A partial theme is
+    // so a missing or empty theme starts from the default. "Empty" includes
+    // keys holding only `undefined` (older versions of this dialog stored
+    // `{ primary: undefined }`; sync JSON turns it into `{}`). A partial theme is
     // kept as stored: merging defaults into it would change how it renders, e.g.
     // legacy themes lack `isDisableBackgroundTint`, which TODAY's default sets.
     const storedTheme: WorkContextThemeCfg =
-      entity.theme && Object.keys(entity.theme).length > 0
+      entity.theme && Object.values(entity.theme).some((v) => v !== undefined)
         ? entity.theme
         : getDefaultWorkContextTheme(
             this._data.isProject ? WorkContextType.PROJECT : WorkContextType.TAG,
