@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { openDB } from 'idb';
 import { LegacySupDbService } from './legacy-sup-db.service';
-import legacyV12Data from '../../op-log/backup/test-fixtures/legacy-v10-backup.json';
+import legacyV10Backup from '../../op-log/backup/test-fixtures/legacy-v10-backup.json';
 import { isLegacyBackupData } from '../../op-log/backup/migrate-legacy-backup';
 import { isDataRepairPossible } from '../../op-log/validation/is-data-repair-possible.util';
 import { AppDataComplete } from '../../op-log/model/model-config';
@@ -40,12 +40,12 @@ const supDbExists = async (): Promise<boolean> =>
  */
 const NOT_RECORDS = ['lastLocalSyncModelChange', 'lastArchiveUpdate', 'bookmark'];
 const v12Records = (): Record<string, unknown> => {
-  const models = Object.entries(legacyV12Data).filter(
+  const models = Object.entries(legacyV10Backup).filter(
     ([key]) => !NOT_RECORDS.includes(key),
   );
   return {
     ...Object.fromEntries(models),
-    LOCAL_LAST_SYNC_MODEL_CHANGE: legacyV12Data.lastLocalSyncModelChange,
+    LOCAL_LAST_SYNC_MODEL_CHANGE: legacyV10Backup.lastLocalSyncModelChange,
   };
 };
 
@@ -73,10 +73,10 @@ describe('LegacySupDbService', () => {
     const data = await service.loadUnmigratedData();
 
     expect(data).not.toBeNull();
-    expect((data!.task as { ids: string[] }).ids).toEqual(legacyV12Data.task.ids);
+    expect((data!.task as { ids: string[] }).ids).toEqual(legacyV10Backup.task.ids);
     expect((data!.project as { ids: string[] }).ids).toEqual(['proj-1']);
-    expect(data!.taskArchive).toEqual(legacyV12Data.taskArchive);
-    expect(data!.globalConfig).toEqual(legacyV12Data.globalConfig);
+    expect(data!.taskArchive).toEqual(legacyV10Backup.taskArchive);
+    expect(data!.globalConfig).toEqual(legacyV10Backup.globalConfig);
     expect('LOCAL_LAST_SYNC_MODEL_CHANGE' in data!).toBe(false);
   });
 
@@ -89,7 +89,7 @@ describe('LegacySupDbService', () => {
   it('should return null when the profile holds no user data', async () => {
     await seedSupDb({
       LOCAL_LAST_SYNC_MODEL_CHANGE: 1705341600000,
-      globalConfig: legacyV12Data.globalConfig,
+      globalConfig: legacyV10Backup.globalConfig,
       task: { ids: [], entities: {} },
       project: { ids: [], entities: {} },
     });
@@ -98,7 +98,7 @@ describe('LegacySupDbService', () => {
   });
 
   it('should fill the slices the import requires when records are missing', async () => {
-    await seedSupDb({ taskArchive: legacyV12Data.taskArchive });
+    await seedSupDb({ taskArchive: legacyV10Backup.taskArchive });
 
     const data = (await service.loadUnmigratedData())!;
 
@@ -110,7 +110,7 @@ describe('LegacySupDbService', () => {
   it('should keep a minimal profile (tasks only) on the legacy import path', async () => {
     await seedSupDb({
       LOCAL_LAST_SYNC_MODEL_CHANGE: 1705341600000,
-      task: legacyV12Data.task,
+      task: legacyV10Backup.task,
     });
 
     const data = (await service.loadUnmigratedData())!;

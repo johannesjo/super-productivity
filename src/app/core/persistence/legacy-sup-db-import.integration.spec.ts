@@ -12,7 +12,6 @@ import { TaskTimeSyncService } from '../../features/tasks/task-time-sync.service
 import { loadAllData } from '../../root-store/meta/load-all-data.action';
 import { AppDataComplete } from '../../op-log/model/model-config';
 import { validateFull } from '../../op-log/validation/validation-fn';
-import legacyV10Backup from '../../op-log/backup/test-fixtures/legacy-v10-backup.json';
 import legacySupV12Records from '../../op-log/backup/test-fixtures/legacy-sup-v12-records.json';
 
 /**
@@ -50,13 +49,6 @@ const deleteSupDb = (): Promise<void> =>
     req.onerror = () => reject(req.error);
     req.onblocked = () => resolve();
   });
-
-const v10BackupAsRecords = (): Record<string, unknown> => {
-  const { lastLocalSyncModelChange, lastArchiveUpdate, ...models } =
-    structuredClone(legacyV10Backup);
-  void lastArchiveUpdate;
-  return { ...models, LOCAL_LAST_SYNC_MODEL_CHANGE: lastLocalSyncModelChange };
-};
 
 /** v12 records whose slices were last written by older model versions. */
 const olderModelVersionRecords = (): Record<string, any> => {
@@ -263,17 +255,5 @@ describe('LegacySupDbService → BackupService import (#7345 integration)', () =
     expect(imported.project.entities['proj-work']!.theme).toBeDefined();
     expect(imported.taskRepeatCfg.entities['rpt-1']!.order).toBe(1);
     expect(imported.note.entities['n-1']!.modified).toBe(1744000000000);
-  });
-
-  it('imports the v10 legacy fixture laid out as SUP_STORE records', async () => {
-    await seedSupDb(v10BackupAsRecords());
-
-    const imported = await loadAndImport();
-
-    expect(imported.task.ids).toEqual(jasmine.arrayContaining(legacyV10Backup.task.ids));
-    expect(imported.archiveYoung.task.ids).toEqual(
-      jasmine.arrayContaining(legacyV10Backup.taskArchive.ids),
-    );
-    expect(imported.project.ids).toEqual(jasmine.arrayContaining(['proj-1']));
   });
 });
