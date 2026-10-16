@@ -62,19 +62,6 @@ const isOpCoveredByLocalClock = (
 };
 
 /**
- * Resume point of the rejected-ops forced seq-0 download, which only collects
- * op clocks and on a long history spans dozens of pages. On mobile the network
- * drops when the app is backgrounded; restarting from seq 0 every sync meant it
- * never finished.
- *
- * Only pages that yielded NO new op are covered (all their ops are applied
- * here), so resuming skips nothing but their clocks, kept merged in
- * `mergedClock`. In memory, keyed on client id + `configEpoch` (moves on any
- * sync-target or credential change) — not on the cursor, which an active user
- * or another device moves between attempts without making a scanned page
- * unsafe.
- */
-/**
  * Remote ops this device downloaded but could not decrypt (#9256). Every
  * destructive overwrite (Force Overwrite, Change Password, Use Local Data)
  * runs a clean slate that makes the server delete them, and once a decrypted
@@ -90,6 +77,19 @@ interface UndecryptableRemoteOpsMarker extends UndecryptableRemoteOps {
   syncEpoch: number;
 }
 
+/**
+ * Resume point of the rejected-ops forced seq-0 download, which only collects
+ * op clocks and on a long history spans dozens of pages. On mobile the network
+ * drops when the app is backgrounded; restarting from seq 0 every sync meant it
+ * never finished.
+ *
+ * Only pages that yielded NO new op are covered (all their ops are applied
+ * here), so resuming skips nothing but their clocks, kept merged in
+ * `mergedClock`. In memory, keyed on client id + `configEpoch` (moves on any
+ * sync-target or credential change) — not on the cursor, which an active user
+ * or another device moves between attempts without making a scanned page
+ * unsafe.
+ */
 interface ForcedDownloadCheckpoint {
   key: string;
   sinceSeq: number;
@@ -295,6 +295,9 @@ export class OperationLogDownloadService implements OnDestroy {
     // where enabling encryption deletes + re-uploads all data encrypted, so no
     // legitimate plaintext op remains. Config intent is stable across a
     // gap-reset re-fetch, so compute once here.
+    // The undecryptable-ops marker belongs to the epoch this run started in: a
+    // destructive change bumps the epoch first, then drains this run.
+    const runSyncEpoch = this.providerManager.syncEpoch;
     const isEncryptionExpected =
       !!syncProvider.isEncryptionMandatory &&
       !!(await syncProvider.isEncryptionEnabled?.());
@@ -613,7 +616,7 @@ export class OperationLogDownloadService implements OnDestroy {
             if (syncProvider.providerMode === 'superSyncOps') {
               this._undecryptableRemoteOps = {
                 opCount: encryptedOpsInPage,
-                syncEpoch: this.providerManager.syncEpoch,
+                syncEpoch: runSyncEpoch,
               };
             }
             if (error instanceof OperationDecryptionError) {

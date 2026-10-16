@@ -19,7 +19,7 @@ describe('buildDecryptFailureLogArgs', () => {
   const payloadWithSalt = (saltByte: number, bodyLength = 20): string => {
     let bytes = '';
     for (let i = 0; i < 16; i++) bytes += String.fromCharCode((saltByte + i) % 256);
-    for (let i = 0; i < 12 + bodyLength; i++) bytes += String.fromCharCode(i);
+    for (let i = 0; i < 12 + bodyLength; i++) bytes += String.fromCharCode(i % 256);
     return btoa(bytes);
   };
 
@@ -209,6 +209,8 @@ describe('buildDecryptFailureLogArgs', () => {
       expect(readPayloadSaltKey('too-short')).toBeUndefined();
       expect(readPayloadSaltKey('not base64 at all, but long enough')).toBeUndefined();
       expect(readPayloadSaltKey({ some: 'object' })).toBeUndefined();
+      // atob drops whitespace, so 24 chars can decode to fewer than 16 bytes.
+      expect(readPayloadSaltKey('AAAA AAAA AAAA AAAA AAAA')).toBeUndefined();
     });
 
     it('logs clientId, payload length and a salt fingerprint, never the payload', async () => {
@@ -299,6 +301,56 @@ describe('buildDecryptFailureLogArgs', () => {
       expect(args[0].decryptedSaltCount).toBe(2);
       expect(args[1].saltDecryptedInRun).toBe(true);
       expect(args[2].saltDecryptedInRun).toBe(true);
+    });
+
+    it('counts no salts from a batch an envelope failure aborted before decrypting', async () => {
+      // Only the bad envelope is listed; the valid item was never decrypted.
+      const args = await buildDecryptFailureLogArgs(
+        diagnosisWith({
+          encryptedOperationCount: 2,
+          passwordEvidence: 'not-tested',
+          failures: [
+            { operationId: 'op-bad', encryptedBatchIndex: 0, stage: 'envelope' },
+          ],
+        }),
+        [
+          encryptedServerOp(1, 'op-bad', payloadWithSalt(0x80)),
+          encryptedServerOp(2, 'op-unseen', payloadWithSalt(0x90)),
+        ],
+        0,
+      );
+
+      expect(args[0].decryptedSaltCount).toBe(0);
+    });
+
+    it('keeps an entry with every new field at maximal size under the export cap', async () => {
+      const [, entry] = await buildDecryptFailureLogArgs(
+        diagnosisWith({
+          failures: [
+            {
+              operationId: 'z'.repeat(255),
+              encryptedBatchIndex: Number.MAX_SAFE_INTEGER,
+              stage: 'envelope',
+              errorName: 'WebCryptoNotAvailableError',
+            },
+          ],
+        }),
+        // A sparse view: only the attributed index matters for the entry.
+        Object.assign([], {
+          [Number.MAX_SAFE_INTEGER]: encryptedServerOp(
+            Number.MAX_SAFE_INTEGER,
+            'z'.repeat(255),
+            payloadWithSalt(0x11, 100_000),
+            'c'.repeat(255),
+          ),
+        }),
+        Number.MAX_SAFE_INTEGER,
+      );
+
+      expect(entry.clientId?.length).toBe(64);
+      expect(entry.saltFingerprint).toMatch(/^[0-9a-f]{8}$/);
+      expect(entry.saltDecryptedInRun).toBe(false);
+      expect(JSON.stringify(entry).length).toBeLessThan(MAX_DATA_LENGTH);
     });
 
     it('attributes no envelope fields when the envelope at the index carries another op', async () => {

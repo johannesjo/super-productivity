@@ -298,9 +298,6 @@ describe('DialogChangeEncryptionPasswordComponent', () => {
       await component.confirm();
 
       expect(mockSyncLocalStateService.hasNothingWorthUploading).not.toHaveBeenCalled();
-      expect(
-        mockSyncLocalStateService.confirmOverwriteOfUndecryptableRemoteOps,
-      ).not.toHaveBeenCalled();
     });
   });
 });

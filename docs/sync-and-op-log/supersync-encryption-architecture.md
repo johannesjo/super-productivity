@@ -398,7 +398,8 @@ protects the undecryptable tail. While the last SuperSync download stopped at
 ops this device could not decrypt
 (`OperationLogDownloadService.getUndecryptableRemoteOps`, in memory, retired
 when a download reaches the head or the sync epoch moves), Force Overwrite,
-Change Password, "Use Local Data" and import-conflict USE_LOCAL first ask for
+Change Password, "Use Local Data" and USE_LOCAL in the import- and
+data-conflict dialogs first ask for
 an explicit confirmation naming those ops
 (`SyncLocalStateService.confirmOverwriteOfUndecryptableRemoteOps`).
 

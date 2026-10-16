@@ -69,7 +69,8 @@ const clampId = (id: string): string =>
  * Hex of the 16-byte Argon2id salt that prefixes an encrypted payload, or
  * undefined when the payload is not a decodable base64 string of that shape.
  * The salt is not secret (it travels in every ciphertext); it is kept only in
- * memory and logged solely as a truncated hash.
+ * memory and logged solely as a truncated hash. A legacy PBKDF2 payload has no
+ * salt, so its "salt" is IV + ciphertext bytes and never matches another op's.
  */
 export const readPayloadSaltKey = (payload: unknown): string | undefined => {
   if (typeof payload !== 'string' || payload.length < SALT_BASE64_PREFIX_LENGTH) {
@@ -77,6 +78,10 @@ export const readPayloadSaltKey = (payload: unknown): string | undefined => {
   }
   try {
     const prefix = atob(payload.slice(0, SALT_BASE64_PREFIX_LENGTH));
+    // atob drops whitespace, so 24 chars can decode to fewer than 16 bytes.
+    if (prefix.length < SALT_BYTE_LENGTH) {
+      return undefined;
+    }
     let hex = '';
     for (let i = 0; i < SALT_BYTE_LENGTH; i++) {
       hex += prefix.charCodeAt(i).toString(16).padStart(2, '0');
@@ -107,8 +112,9 @@ const fingerprintSaltKey = async (saltKey: string): Promise<string | undefined> 
 
 /**
  * Salt keys of the ops in a failed batch that nonetheless decrypted. A batch
- * that decrypted nothing contributes none; otherwise every item without a
- * decrypt- or envelope-stage failure got past AES-GCM (parse failures did).
+ * that decrypted nothing contributes none: an envelope failure aborts it before
+ * any decrypt while listing only the bad envelopes. Otherwise every item
+ * without a decrypt-stage failure got past AES-GCM (parse failures did).
  */
 const collectDecryptedSaltKeysInBatch = (
   diagnosis: OperationBatchDecryptionDiagnosis,

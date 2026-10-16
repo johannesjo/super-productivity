@@ -566,6 +566,20 @@ describe('OperationLogDownloadService', () => {
           expect(service.getUndecryptableRemoteOps()).toBeNull();
         });
 
+        it('keeps the epoch the run started in when it moves mid-download', async () => {
+          // A force upload bumps the epoch, then drains this run before its
+          // clean slate deletes the ops; the marker must not outlive it.
+          mockApiProvider.downloadOps.and.callFake(async () => {
+            mockProviderManager.syncEpoch = 4;
+            return failingPage;
+          });
+          mockEncryptionService.decryptOperations.and.rejectWith(decryptFailure);
+
+          await expectAsync(service.downloadRemoteOps(mockApiProvider)).toBeRejected();
+
+          expect(service.getUndecryptableRemoteOps()).toBeNull();
+        });
+
         it('is not set for file-based providers', async () => {
           mockApiProvider.providerMode = 'fileSnapshotOps';
           mockApiProvider.downloadOps.and.resolveTo(failingPage);
@@ -825,6 +839,19 @@ describe('OperationLogDownloadService', () => {
             jasmine.objectContaining({ decryptedOpsInEarlierBatches: 2 }),
             jasmine.objectContaining({ opId: 'op-bad' }),
           );
+        });
+
+        it('arms the undecryptable remote ops marker for a kept prefix', async () => {
+          spyOn(OpLog, 'error');
+          serveGoodPageThenBadPage();
+
+          const result = await service.downloadRemoteOps(mockApiProvider, {
+            keepDecryptedPrefix: true,
+          });
+
+          expect(result.success && result.decryptErrorAfterKeptPrefix).toBeTruthy();
+          // The prefix stopped short of the head, so it must not retire the marker.
+          expect(service.getUndecryptableRemoteOps()).toEqual({ opCount: 1 });
         });
 
         it('still throws when the failing page is the first page of the run', async () => {

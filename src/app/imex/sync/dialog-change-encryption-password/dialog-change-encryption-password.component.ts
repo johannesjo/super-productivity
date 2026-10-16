@@ -117,10 +117,8 @@ export class DialogChangeEncryptionPasswordComponent {
       }
       // #9256: the same clean slate deletes remote ops this device could not
       // decrypt; a synced device passes the check above, so warn explicitly.
-      if (
-        this.providerType !== 'file-based' &&
-        !this._syncLocalStateService.confirmOverwriteOfUndecryptableRemoteOps()
-      ) {
+      // Never set for file-based providers.
+      if (!this._syncLocalStateService.confirmOverwriteOfUndecryptableRemoteOps()) {
         this.isLoading.set(false);
         return;
       }
