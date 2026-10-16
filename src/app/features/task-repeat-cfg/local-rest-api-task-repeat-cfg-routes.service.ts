@@ -223,7 +223,7 @@ export class LocalRestApiTaskRepeatCfgRoutesService implements LocalRestApiFeatu
     }
 
     // Like the repeat dialog for a task: defaults, the task's day and time,
-    // and title, notes, tags and estimate copied from the task.
+    // and title, notes, tags, estimate and priority copied from the task.
     const startTime = task.dueWithTime
       ? clockStringFromDate(task.dueWithTime)
       : undefined;
