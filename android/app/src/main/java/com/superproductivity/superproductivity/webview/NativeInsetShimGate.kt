@@ -17,7 +17,8 @@ package com.superproductivity.superproductivity.webview
  * branch 2 as well: the WebView already ends at the keyboard top and below the
  * status bar. The shims still run there, but both are absolute, resize-detecting
  * measurements, so they land where the WebView already is and change nothing —
- * measured on the API 34 / WebView 113 CI emulator (2026-10): SystemBars padded
+ * measured on the API 34 / WebView 113 CI emulator (2026-10, Actions run
+ * 38892553227, `SUPOverlayTest` logcat): SystemBars padded
  * the DecorView `0,24,0,0` at rest and `0,24,0,235` with the IME up (640 px root,
  * keyboard top at 405), so the WebView already spanned 24..405 when the shim wrote
  * its 381 px height.

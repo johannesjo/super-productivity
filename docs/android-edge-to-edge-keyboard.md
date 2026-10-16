@@ -50,7 +50,8 @@ Passthrough is still `WebView major >= 140 && viewport-fit=cover`. Per band, wit
 | API < 35, WebView < 140 | inside DecorView padded by system bars + IME (**new**) | 0px                                  | on, but measure the inset that is already there and change nothing |
 
 Measured on the CI emulators (2026-10, 640 px root, density 1.0;
-`StartupOverlayInsetInstrumentedTest` / `ImeInsetShimInstrumentedTest` logs):
+`SUPOverlayTest` / `SUPKeyboardTest` logcat lines — "before fix" from Actions run
+38891696163 on 3730e05, "after fix" from run 38892553227 on 072cacf):
 
 | Emulator            | Branch      | DecorView padding (rest → IME up) | Overlay before fix                  | Overlay after fix                                  |
 | ------------------- | ----------- | --------------------------------- | ----------------------------------- | -------------------------------------------------- |
@@ -78,6 +79,12 @@ Consequences we handled:
   padded they write the height the WebView already has and publish 0px. Kept as
   the fallback for a Capacitor pin back to ≤ 8.5.1 until real devices in the band
   confirm the new branch; see `NativeInsetShimGate`.
+- **Not handled, check on a device:** the listener now sits on the DecorView, so
+  it replaces `DecorView.onApplyWindowInsets`, where the framework updates its
+  status/nav-bar colour views. The padded bar strips show the window background
+  instead — the theme colour once `NavigationBarPlugin.setWebViewBackgroundColor`
+  has run, `@color/windowBackground` before boot. Check the bar colours at cold
+  start on API 28–34.
 - The **"API ≥ 35 + WebView < 140 double-count"** risk below is gone by
   construction: outside passthrough the vars are 0px, and there is no initial
   real-px injection any more.
