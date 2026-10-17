@@ -55,7 +55,10 @@
 }
 
 // Keep the focused card distinct even when it is current or multi-selected.
-:host:focus {
+// Mouse intent plus `:focus-visible` — see _task-base.scss for why a bare
+// `:focus` would leave the ring stuck on a tapped card.
+:host-context(.isMousePrimary):focus,
+:host:focus-visible {
   outline: var(--focus-ring-width) solid var(--palette-primary-400) !important;
   outline-offset: calc(-1 * var(--focus-ring-width));
 }
@@ -92,6 +95,10 @@ done-toggle {
   margin-left: var(--s-half);
   align-self: center;
   cursor: pointer;
+}
+
+task-priority-indicator {
+  margin-right: var(--s-half);
 }
 
 .wrap {

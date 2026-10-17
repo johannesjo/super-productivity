@@ -91,7 +91,7 @@ $check-len: 18;
   }
 
   &.is-current:not(.is-done) {
-    &:hover {
+    @include hoverWithPointer {
       .done-shape {
         opacity: 0.6;
       }
@@ -102,7 +102,7 @@ $check-len: 18;
     }
   }
 
-  &:hover {
+  @include hoverWithPointer {
     .done-shape {
       opacity: 0.6;
     }

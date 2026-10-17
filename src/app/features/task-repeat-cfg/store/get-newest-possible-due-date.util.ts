@@ -1,7 +1,6 @@
 import { TASK_REPEAT_WEEKDAY_MAP, TaskRepeatCfg } from '../task-repeat-cfg.model';
 import { getDiffInDays } from '../../../util/get-diff-in-days';
 import { getDiffInMonth } from '../../../util/get-diff-in-month';
-import { getDiffInYears } from '../../../util/get-diff-in-years';
 import { getDiffInWeeks } from '../../../util/get-diff-in-weeks';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { getEffectiveLastTaskCreationDay } from './get-effective-last-task-creation-day.util';
@@ -11,10 +10,11 @@ import {
   hasNthWeekdayAnchor,
 } from './get-nth-weekday-of-month.util';
 import { Log } from '../../../core/log';
+import { capDateAtRepeatUntilDay } from './repeat-until-day.util';
 
 export const getNewestPossibleDueDate = (
   taskRepeatCfg: TaskRepeatCfg,
-  today: Date,
+  todayIn: Date,
 ): Date | null => {
   // FOR DEBUG
   // return new Date();
@@ -26,6 +26,9 @@ export const getNewestPossibleDueDate = (
     return null;
   }
 
+  // Past the end date, look back from the end date instead: an occurrence on
+  // or before it that was never created is still due, anything later is not.
+  const today = capDateAtRepeatUntilDay(taskRepeatCfg, todayIn);
   const checkDate = new Date(today);
   // Get the effective last task creation day with fallback logic
   const startDateStr = getEffectiveRepeatStartDate(taskRepeatCfg);
@@ -136,7 +139,11 @@ export const getNewestPossibleDueDate = (
       );
 
       if (today.getDate() < adjustedDayForCurrentMonth) {
-        // The repeat day hasn't occurred yet this month, so check previous month
+        // The repeat day hasn't occurred yet this month, so check previous
+        // month. Step back from day 1: setMonth on a day the previous month
+        // lacks overflows forward (Mar 30 → "Feb 30" → Mar 2), landing the
+        // scan back in the current month and past the capped end day (#10091).
+        checkDate.setDate(1);
         checkDate.setMonth(checkDate.getMonth() - 1);
       }
       setDateSafely(checkDate, dayOfMonthRepeat);
@@ -150,6 +157,8 @@ export const getNewestPossibleDueDate = (
         if (diffInMonth % taskRepeatCfg.repeatEvery === 0) {
           return checkDate;
         }
+        // Same day-1 guard as above for the in-loop month step
+        checkDate.setDate(1);
         checkDate.setMonth(checkDate.getMonth() - 1);
         setDateSafely(checkDate, dayOfMonthRepeat);
       }
@@ -160,19 +169,26 @@ export const getNewestPossibleDueDate = (
       const nrOfYearsToCheck = taskRepeatCfg.repeatEvery;
       const dayOfMonthRepeat = startDateDate.getDate();
       const monthOfMonthRepeat = startDateDate.getMonth();
-      checkDate.setDate(1);
-      checkDate.setMonth(monthOfMonthRepeat);
-      checkDate.setDate(dayOfMonthRepeat);
+      const todayAtNoon = new Date(checkDate);
+      const setYearlyDate = (date: Date): void => {
+        date.setDate(1);
+        date.setMonth(monthOfMonthRepeat);
+        const lastDayOfMonth = new Date(
+          date.getFullYear(),
+          monthOfMonthRepeat + 1,
+          0,
+        ).getDate();
+        date.setDate(Math.min(dayOfMonthRepeat, lastDayOfMonth));
+      };
 
-      if (today.getMonth() < monthOfMonthRepeat) {
+      setYearlyDate(checkDate);
+      if (checkDate > todayAtNoon) {
         checkDate.setFullYear(checkDate.getFullYear() - 1);
-      }
-      if (today.getMonth() === monthOfMonthRepeat && today.getDate() < dayOfMonthRepeat) {
-        checkDate.setFullYear(checkDate.getFullYear() - 1);
+        setYearlyDate(checkDate);
       }
 
       for (let i = 0; i < nrOfYearsToCheck; i++) {
-        const diffInYears = getDiffInYears(startDateDate, checkDate);
+        const diffInYears = checkDate.getFullYear() - startDateDate.getFullYear();
 
         if (checkDate <= lastTaskCreation || diffInYears < 0) {
           break;
@@ -181,6 +197,7 @@ export const getNewestPossibleDueDate = (
           return checkDate;
         }
         checkDate.setFullYear(checkDate.getFullYear() - 1);
+        setYearlyDate(checkDate);
       }
       return null;
     }

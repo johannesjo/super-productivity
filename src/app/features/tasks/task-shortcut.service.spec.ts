@@ -188,6 +188,85 @@ describe('TaskShortcutService', () => {
     }
   });
 
+  describe('group header navigation', () => {
+    let group: HTMLElement;
+    let header: HTMLElement;
+    let task: HTMLElement;
+
+    beforeEach(() => {
+      group = document.createElement('collapsible');
+      group.className = 'is-group';
+      header = document.createElement('div');
+      header.className = 'collapsible-header';
+      header.tabIndex = 0;
+      task = document.createElement('task');
+      task.tabIndex = 0;
+      group.append(header, task);
+      document.body.appendChild(group);
+      stubActiveElement(header);
+    });
+
+    afterEach(() => group.remove());
+
+    it('continues to the next task from a group header with J', () => {
+      const focus = spyOn(task, 'focus');
+      const event = createKeyboardEvent('j');
+
+      expect(service.handleTaskShortcuts(event)).toBe(true);
+      expect(focus).toHaveBeenCalled();
+      expect(event.defaultPrevented).toBe(true);
+    });
+
+    it('returns to the previous task from a group header with K', () => {
+      group.prepend(task);
+      const focus = spyOn(task, 'focus');
+
+      expect(service.handleTaskShortcuts(createKeyboardEvent('k'))).toBe(true);
+      expect(focus).toHaveBeenCalled();
+    });
+
+    it('uses the configured navigation shortcut instead of hardcoded J', () => {
+      mockConfigService.cfg.set({
+        keyboard: { ...defaultKeyboardConfig, selectNextTask: 'Ctrl+N' },
+      });
+      const focus = spyOn(task, 'focus');
+
+      expect(service.handleTaskShortcuts(createKeyboardEvent('j'))).toBe(false);
+      expect(focus).not.toHaveBeenCalled();
+      expect(
+        service.handleTaskShortcuts(createKeyboardEvent('n', 'KeyN', { ctrlKey: true })),
+      ).toBe(true);
+      expect(focus).toHaveBeenCalled();
+    });
+
+    it('keeps focus on the first header when there is no preceding row', () => {
+      const event = createKeyboardEvent('k');
+      const focus = spyOn(task, 'focus');
+
+      expect(service.handleTaskShortcuts(event)).toBe(true);
+      expect(focus).not.toHaveBeenCalled();
+      expect(event.defaultPrevented).toBe(true);
+    });
+
+    it('keeps focus on the last header when there is no following row', () => {
+      group.prepend(task);
+      const event = createKeyboardEvent('j');
+      const focus = spyOn(task, 'focus');
+
+      expect(service.handleTaskShortcuts(event)).toBe(true);
+      expect(focus).not.toHaveBeenCalled();
+      expect(event.defaultPrevented).toBe(true);
+    });
+
+    it('does not treat a control within a header as the focused group', () => {
+      const button = document.createElement('button');
+      header.appendChild(button);
+      stubActiveElement(button);
+
+      expect(service.handleTaskShortcuts(createKeyboardEvent('j'))).toBe(false);
+    });
+  });
+
   describe('handleTaskShortcuts - togglePlay (Y key)', () => {
     describe('when focused task exists', () => {
       it('should delegate to focused task component togglePlayPause method', () => {
@@ -1141,6 +1220,93 @@ describe('TaskShortcutService', () => {
       service.handleTaskShortcuts(ev);
       expect(mockMultiSelect.clear).toHaveBeenCalled();
       expect(mockBulkActions['toggleDone']).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('Escape unfocuses the focused task', () => {
+    it('blurs the focused row and consumes the event', () => {
+      const el = setFocusedTask('task-1');
+      const blurSpy = spyOn(el, 'blur');
+      const ev = createKeyboardEvent('Escape', 'Escape');
+
+      expect(service.handleTaskShortcuts(ev)).toBeTrue();
+      expect(blurSpy).toHaveBeenCalled();
+      // Time tracking is untouched — Escape only drops keyboard focus.
+      expect(mockTaskService.setCurrentId).not.toHaveBeenCalled();
+      expect(mockTaskService.toggleStartTask).not.toHaveBeenCalled();
+      // Not defaultPrevented, so other document-level Escape handlers still run.
+      expect(ev.defaultPrevented).toBeFalse();
+    });
+
+    it('blurs a row inside the detail panel too', () => {
+      detailPanelEl = document.createElement('task-detail-panel');
+      document.body.appendChild(detailPanelEl);
+      const el = setFocusedTask('task-1');
+      detailPanelEl.appendChild(el);
+      const blurSpy = spyOn(el, 'blur');
+
+      expect(service.handleTaskShortcuts(createKeyboardEvent('Escape', 'Escape'))).toBe(
+        true,
+      );
+      expect(blurSpy).toHaveBeenCalled();
+    });
+
+    it('blurs a focused child of the row (e.g. a hover control)', () => {
+      const el = setFocusedTask('task-1');
+      const btn = document.createElement('button');
+      el.appendChild(btn);
+      stubActiveElement(btn);
+      const blurSpy = spyOn(btn, 'blur');
+
+      expect(service.handleTaskShortcuts(createKeyboardEvent('Escape', 'Escape'))).toBe(
+        true,
+      );
+      expect(blurSpy).toHaveBeenCalled();
+    });
+
+    it('clears an active selection first, keeping focus for a second Escape', () => {
+      const el = setFocusedTask('task-1');
+      const blurSpy = spyOn(el, 'blur');
+      mockMultiSelect.isActive.set(true);
+      mockMultiSelect.isSelecting.set(true);
+
+      expect(service.handleTaskShortcuts(createKeyboardEvent('Escape', 'Escape'))).toBe(
+        true,
+      );
+      expect(mockMultiSelect.clear).toHaveBeenCalled();
+      expect(blurSpy).not.toHaveBeenCalled();
+
+      mockMultiSelect.isSelecting.set(false);
+      mockMultiSelect.isActive.set(false);
+      expect(service.handleTaskShortcuts(createKeyboardEvent('Escape', 'Escape'))).toBe(
+        true,
+      );
+      expect(blurSpy).toHaveBeenCalled();
+    });
+
+    it('does nothing without a focused task', () => {
+      expect(service.handleTaskShortcuts(createKeyboardEvent('Escape', 'Escape'))).toBe(
+        false,
+      );
+    });
+
+    it('ignores Escape with modifiers', () => {
+      const el = setFocusedTask('task-1');
+      const blurSpy = spyOn(el, 'blur');
+
+      // metaKey matters most: Cmd+key is the one combo ShortcutService lets
+      // through from inputs, so a title edit must not lose focus to it.
+      [
+        { shiftKey: true },
+        { ctrlKey: true },
+        { altKey: true },
+        { metaKey: true },
+      ].forEach((init) => {
+        expect(
+          service.handleTaskShortcuts(createKeyboardEvent('Escape', 'Escape', init)),
+        ).toBe(false);
+      });
+      expect(blurSpy).not.toHaveBeenCalled();
     });
   });
 });

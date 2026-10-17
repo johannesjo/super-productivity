@@ -13,6 +13,8 @@ import { getDomFocusedTaskId } from './get-dom-focused-task-id';
 import { TaskMultiSelectService } from './task-multi-select.service';
 import { TaskBulkActionService } from './task-bulk-action.service';
 import { taskToMarkdownChecklist } from './task-to-markdown-checklist';
+import { GROUP_NAV_SELECTOR } from '../../ui/collapsible/collapsible.component';
+import { findAdjacentFocusable } from '../../util/find-adjacent-focusable';
 
 type TaskId = string;
 
@@ -58,7 +60,7 @@ export class TaskShortcutService {
   );
 
   /**
-   * Handles task-specific keyboard shortcuts if a task is currently focused.
+   * Handles task actions and navigation from focused task rows or group headers.
    *
    * @param ev - The keyboard event
    * @returns True if the shortcut was handled, false otherwise
@@ -134,6 +136,24 @@ export class TaskShortcutService {
       }
       // If no focused task, return false to let ShortcutService handle global fallback
       return false;
+    }
+
+    // Group headers are part of task navigation but have no focused task id.
+    const focusedElement = document.activeElement;
+    if (
+      focusedElement instanceof HTMLElement &&
+      focusedElement.matches('collapsible.is-group > .collapsible-header')
+    ) {
+      const direction = checkKeyCombo(ev, keys.selectPreviousTask)
+        ? 'prev'
+        : checkKeyCombo(ev, keys.selectNextTask)
+          ? 'next'
+          : null;
+      if (direction) {
+        findAdjacentFocusable(focusedElement, direction, GROUP_NAV_SELECTOR)?.focus();
+        ev.preventDefault();
+        return true;
+      }
     }
 
     // All other shortcuts require a focused task
@@ -356,6 +376,17 @@ export class TaskShortcutService {
       this._handleTaskShortcut(focusedTaskId, 'moveTaskToBottom');
       ev.preventDefault();
       ev.stopPropagation();
+      return true;
+    }
+
+    // Escape releases the task row: keyboard focus goes back to the page, so the
+    // focus border disappears and arrow keys stop navigating the list. Runs last
+    // so every configured task shortcut wins over it. Deliberately no
+    // preventDefault: returning true already stops ShortcutService, while other
+    // document-level Escape handlers (the onboarding hint skips on Escape, but
+    // only when the event was not defaultPrevented) must still get their turn.
+    if (ev.key === 'Escape' && !ev.ctrlKey && !ev.metaKey && !ev.altKey && !ev.shiftKey) {
+      (document.activeElement as HTMLElement | null)?.blur();
       return true;
     }
 

@@ -23,6 +23,7 @@ import {
 import { WorkContextService } from '../../work-context/work-context.service';
 import { ProjectService } from '../../project/project.service';
 import { signal } from '@angular/core';
+import type { WritableSignal } from '@angular/core';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { DateService } from '../../../core/date/date.service';
@@ -30,18 +31,30 @@ import { DateAdapter } from '@angular/material/core';
 import { DEFAULT_PANEL_CFG } from '../boards.const';
 import { BoardsActions } from '../store/boards.actions';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
+import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 
 const PLANNER_TASK_PROVIDERS = [
   {
     provide: GlobalConfigService,
     useValue: {
       cfg: () => null,
+      localization: () => ({}),
       appFeatures: () => ({ isTimeTrackingEnabled: false }),
     },
   },
   {
     provide: DateService,
-    useValue: { todayStr: () => '2026-09-12' },
+    useValue: {
+      todayStr: () => '2026-09-12',
+      getStartOfNextDayDiffMs: () => 0,
+    },
+  },
+  {
+    provide: GlobalTrackingIntervalService,
+    useFactory: () => ({
+      todayDateStr: signal('2026-09-12'),
+      clockTimestamp: signal(new Date(2026, 8, 12, 12).getTime()),
+    }),
   },
   {
     provide: DateAdapter,
@@ -81,6 +94,7 @@ describe('BoardPanelComponent - Backlog Feature', () => {
       tagIds: [],
       created: Date.now(),
       subTaskIds: [],
+      dueDay: '2026-09-12',
     } as TaskCopy,
     {
       id: mockNonBacklogTaskId,
@@ -144,7 +158,7 @@ describe('BoardPanelComponent - Backlog Feature', () => {
     })
       .overrideComponent(PlannerTaskComponent, {
         set: {
-          template: '<div>Mock Task</div>',
+          template: '<ng-content></ng-content><div>Mock Task</div>',
           inputs: ['task'],
         },
       })
@@ -160,6 +174,40 @@ describe('BoardPanelComponent - Backlog Feature', () => {
 
     fixture.componentRef.setInput('panelCfg', mockPanelCfg as BoardPanelCfg);
     fixture.detectChanges();
+  });
+
+  it('keeps Board Today controls at the default color', () => {
+    const task = component.tasks()[0];
+    expect(component.scheduledDateColor(task)).toBe('');
+
+    const button = fixture.nativeElement.querySelector(
+      '.schedule-btn',
+    ) as HTMLElement | null;
+    expect(button).not.toBeNull();
+    expect(button!.getAttribute('data-scheduled-date-color')).toBe('');
+    const icon = button!.querySelector('mat-icon') as HTMLElement;
+    const badge = button!.querySelector('.time-badge') as HTMLElement;
+    expect(getComputedStyle(badge).color).toBe(getComputedStyle(icon).color);
+  });
+
+  it('refreshes timed Board colors at expiry and suppresses them while tracking', () => {
+    const interval = TestBed.inject(GlobalTrackingIntervalService) as unknown as {
+      clockTimestamp: WritableSignal<number>;
+    };
+    const currentTaskId = TestBed.inject(TaskService).currentTaskId as WritableSignal<
+      string | null
+    >;
+    const dueWithTime = new Date(2026, 8, 12, 12, 1).getTime();
+    const task = { ...component.tasks()[0], dueDay: undefined, dueWithTime };
+    expect(component.scheduledDateColor(task)).toBe('');
+    interval.clockTimestamp.set(dueWithTime);
+    expect(component.scheduledDateColor(task)).toBe('overdue');
+    currentTaskId.set(task.id);
+    expect(component.scheduledDateColor(task)).toBe('');
+    currentTaskId.set(null);
+    expect(component.scheduledDateColor(task)).toBe('overdue');
+    expect(component.scheduledDateColor({ ...task, isDone: true })).toBe('');
+    expect(component.scheduledDateColor({ ...task, dueWithTime: undefined })).toBe('');
   });
 
   it('should only include backlog tasks when backlogState is OnlyBacklog', () => {
@@ -569,6 +617,26 @@ describe('BoardPanelComponent - Tag match mode, sort, inline-create computeds', 
   });
 
   describe('sortBy', () => {
+    for (const sortBy of [undefined, 'title'] as const) {
+      it(`preserves saved order and appends new tasks with sortBy=${sortBy}`, async () => {
+        await setup([
+          mkTask({ id: 'new-a' }),
+          mkTask({ id: 'a' }),
+          mkTask({ id: 'b' }),
+          mkTask({ id: 'new-b' }),
+        ]);
+        fixture.componentRef.setInput('panelCfg', {
+          ...DEFAULT_PANEL_CFG,
+          taskIds: ['missing', 'b', 'a', 'b'],
+          sortBy,
+        });
+        fixture.detectChanges();
+
+        // All titles are equal: explicit sorting must retain the manual tie order.
+        expect(component.tasks().map((t) => t.id)).toEqual(['b', 'a', 'new-a', 'new-b']);
+      });
+    }
+
     it('sorts by title ascending', async () => {
       await setup([
         mkTask({ id: 'c', title: 'Charlie' }),
@@ -1243,5 +1311,71 @@ describe('BoardPanelComponent - drop()', () => {
     });
 
     expect(updateTagsSpy).toHaveBeenCalledOnceWith(task, ['keep', 'need']);
+  });
+});
+
+/**
+ * `addButton()` feeds focus recovery and `onAddButtonKeydown`, which turns
+ * ArrowLeft/Right into a jump to the neighbouring panel. Matching any
+ * `add-task-inline button` meant that once the inline form was expanded the
+ * first match became a button inside `<add-task-bar>` — so arrow keys typed
+ * while adding a task jumped panels. Only the collapsed add button is marked.
+ */
+describe('BoardPanelComponent - add button lookup', () => {
+  const setupWithAddTaskTemplate = async (
+    template: string,
+  ): Promise<BoardPanelComponent> => {
+    await TestBed.configureTestingModule({
+      teardown: { destroyAfterEach: true },
+      imports: [
+        BoardPanelComponent,
+        TranslateModule.forRoot({
+          loader: { provide: TranslateLoader, useClass: TranslateNoOpLoader },
+        }),
+      ],
+      providers: [
+        ...PLANNER_TASK_PROVIDERS,
+        provideMockStore({}),
+        provideMockActions(() => new ReplaySubject(1)),
+        {
+          provide: Store,
+          useValue: { select: () => of([]), dispatch: jasmine.createSpy('dispatch') },
+        },
+        { provide: TaskService, useValue: { currentTaskId: signal(null) } },
+        { provide: MatDialog, useValue: {} },
+        { provide: WorkContextService, useValue: {} },
+        { provide: ProjectService, useValue: { getProjectsWithoutId$: () => of([]) } },
+      ],
+    })
+      .overrideComponent(PlannerTaskComponent, {
+        set: { template: '<div>Mock Task</div>', inputs: ['task'] },
+      })
+      .overrideComponent(AddTaskInlineComponent, { set: { template } })
+      .compileComponents();
+
+    const fixture = TestBed.createComponent(BoardPanelComponent);
+    fixture.componentRef.setInput('panelCfg', {
+      ...DEFAULT_PANEL_CFG,
+      id: 'panel',
+      taskIds: [],
+    } as BoardPanelCfg);
+    fixture.detectChanges();
+    return fixture.componentInstance;
+  };
+
+  it('finds the collapsed add button', async () => {
+    const component = await setupWithAddTaskTemplate(
+      '<div><button data-add-task-btn>Add</button></div>',
+    );
+    expect(component.addButton()).not.toBeNull();
+  });
+
+  // The add-task bar that replaces the collapsed button carries its own
+  // buttons; an unmarked one must not be mistaken for the add button.
+  it('finds nothing while the add-task bar is open', async () => {
+    const component = await setupWithAddTaskTemplate(
+      '<div class="add-task-bar-stub"><button>Some bar control</button></div>',
+    );
+    expect(component.addButton()).toBeNull();
   });
 });

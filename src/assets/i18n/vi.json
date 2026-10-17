@@ -221,7 +221,7 @@
         "TWO_WAY_SYNC_TITLE": "Hướng đồng bộ tiêu đề"
       },
       "FORM_SECTION": {
-        "HELP": "<p>Tại đây bạn có thể cấu hình Super Productivity để liệt kê các công việc CalDAV chưa hoàn thành cho một dự án cụ thể trong bảng tạo công việc ở chế độ xem lên kế hoạch hàng ngày. Chúng sẽ được liệt kê làm gợi ý và cung cấp liên kết đến công việc cũng như thêm thông tin về nó.</p><p>Ngoài ra, bạn có thể tự động thêm và đồng bộ tất cả công việc chưa hoàn thành vào tồn đọng công việc của bạn.</p><p>Để hoạt động với Nextcloud trong ứng dụng web, bạn có thể cần cho phép \"https://app.super-productivity.com\" trong ứng dụng Nextcloud <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword<a>.</p>"
+        "HELP": "<p>Tại đây bạn có thể cấu hình Super Productivity để liệt kê các công việc CalDAV chưa hoàn thành cho một dự án cụ thể trong bảng tạo công việc ở chế độ xem lên kế hoạch hàng ngày. Chúng sẽ được liệt kê làm gợi ý và cung cấp liên kết đến công việc cũng như thêm thông tin về nó.</p><p>Ngoài ra, bạn có thể tự động thêm và đồng bộ tất cả công việc chưa hoàn thành vào tồn đọng công việc của bạn.</p><p>Để hoạt động với Nextcloud trong ứng dụng web, bạn có thể cần cho phép \"https://app.super-productivity.com\" trong ứng dụng Nextcloud <a href='https://apps.nextcloud.com/apps/webapppassword'>webapppassword</a>.</p>"
       },
       "ISSUE_CONTENT": {
         "DESCRIPTION": "Mô tả",
@@ -312,11 +312,11 @@
       "C": {
         "DONT_QUIT": "Đừng thoát",
         "FINISH_DAY": "Kết thúc ngày",
-        "QUIT": "Kết thúc ngày",
-        "TITLE": "Kết thúc ngày",
+        "QUIT": "Thoát",
+        "TITLE": "Kết thúc ngày trước khi thoát",
         "UNARCHIVED_TASKS": {
-          "ONE": "Kết thúc ngày",
-          "OTHER": "Kết thúc ngày"
+          "ONE": "1 công việc đã hoàn thành trong danh sách Hôm nay chưa được chuyển vào kho lưu trữ.",
+          "OTHER": "{{nr}} công việc đã hoàn thành trong danh sách Hôm nay chưa được chuyển vào kho lưu trữ."
         }
       }
     },
@@ -548,7 +548,8 @@
         "OAUTH_FAILED_WITH_DETAIL": "Xác thực thất bại: {{detail}}",
         "REMOTE_ISSUE_DELETED": "Sự cố từ xa đã bị xóa. Xóa công việc liên kết \"{{taskTitle}}\"?",
         "REMOTE_ISSUE_DELETED_WITH_TIME": "Sự cố từ xa đã bị xóa nhưng công việc \"{{taskTitle}}\" có thời gian đã theo dõi. Xóa dù sao?",
-        "TWO_WAY_SYNC_PUSH_FAILED": "Đẩy đồng bộ hai chiều thất bại: {{errorMsg}}"
+        "TWO_WAY_SYNC_PUSH_FAILED": "Đẩy đồng bộ hai chiều thất bại: {{errorMsg}}",
+        "POST_TIME_SUCCESS": "{{providerName}}: Đã tạo mục cho {{issueTitle}}"
       },
       "TWO_WAY_SYNC": {
         "AUTO_CREATE_ISSUES": "Tự động tạo sự cố cho công việc mới",
@@ -584,6 +585,15 @@
         "RELOAD_OPTIONS": "Tải lại tùy chọn",
         "SETUP_TITLE": "Thiết lập cấu hình {{title}}",
         "TEST_CONNECTION": "Kiểm tra kết nối"
+      },
+      "DIALOG_TRACK_TIME": {
+        "ACTIVITY": "Hoạt động",
+        "INVALID_DATE": "Không phải ngày!",
+        "POST_TIME": "Đăng thời gian",
+        "STARTED": "Đã bắt đầu",
+        "SUBMIT_TIME_FOR": "Gửi lên {{providerName}} cho",
+        "TIME_SPENT": "Đã dùng",
+        "TITLE": "{{providerName}}: Gửi nhật ký"
       }
     },
     "ISSUE_PANEL": {
@@ -807,33 +817,6 @@
         "REMINDER_NEEDS_TEXT": "Viết suy ngẫm trước",
         "REMINDER_TASK_TITLE": "Xem lại suy ngẫm",
         "TITLE": "Ghi chú suy ngẫm"
-      }
-    },
-    "NEXTCLOUD_DECK": {
-      "FORM": {
-        "BASE_URL": "URL cơ sở Nextcloud",
-        "FILTER_BY_ASSIGNEE": "Chỉ nhập thẻ được giao cho tôi",
-        "IS_TRANSITION_ISSUES_ENABLED": "Đồng bộ trạng thái về Nextcloud Deck",
-        "PASSWORD": "Mật khẩu ứng dụng Nextcloud",
-        "POLL_INTERVAL_MINUTES": "Khoảng kiểm tra (phút)",
-        "TITLE_TEMPLATE": "Mẫu tiêu đề công việc",
-        "TITLE_TEMPLATE_DESCRIPTION": "Biến: {CARD_TITLE}, {BOARD}, {COLUMN}, {ID}, {LABELS}.",
-        "USERNAME": "Tên người dùng Nextcloud"
-      },
-      "FORM_SECTION": {
-        "HELP": "Cấu hình tích hợp Nextcloud Deck để nhập thẻ làm công việc."
-      },
-      "ISSUE_CONTENT": {
-        "ASSIGNED_USERS": "Người được giao",
-        "DECK_DESCRIPTION": "Mô tả Deck",
-        "LABELS": "Nhãn",
-        "STACK": "Ngăn xếp"
-      },
-      "S": {
-        "BOARD_NOT_FOUND": "Nextcloud Deck: Không tìm thấy bảng",
-        "CARD_NOT_FOUND": "Nextcloud Deck: Thẻ đã bị xóa trên máy chủ.",
-        "ERR_CREDENTIALS_MISSING": "Nhập URL, tên và mật khẩu Nextcloud trước.",
-        "ERR_LOAD_BOARDS": "Không thể tải bảng Deck! Kiểm tra thông tin của bạn."
       }
     },
     "NOTE": {
@@ -1095,44 +1078,6 @@
       "PAGE_TITLE": "Lịch sử nhanh",
       "WEEK_TITLE": "Tuần {{nr}} ({{timeSpent}})"
     },
-    "REDMINE": {
-      "DIALOG_TRACK_TIME": {
-        "ACTIVITY": "Hoạt động",
-        "INVALID_DATE": "Không phải ngày!",
-        "POST_TIME": "Đăng thời gian",
-        "STARTED": "Đã bắt đầu",
-        "SUBMIT_TIME_FOR": "Gửi lên Redmine cho",
-        "TIME_SPENT": "Đã dùng",
-        "TITLE": "Redmine: Gửi nhật ký"
-      },
-      "FORM": {
-        "API_KEY": "Khóa API",
-        "HOST": "Máy chủ (ví dụ: https://redmine.org)",
-        "IS_SHOW_TIME_TRACKING_DIALOG": "Hiện hộp thoại báo cáo Redmine",
-        "IS_SHOW_TIME_TRACKING_DIALOG_DESCRIPTION": "Mô tả",
-        "IS_SHOW_TIME_TRACKING_DIALOG_FOR_EACH_SUB_TASK": "Hiện hộp thoại khi việc con hoàn thành",
-        "PROJECT_ID": "ID dự án",
-        "PROJECT_ID_DESCRIPTION": "Mô tả",
-        "SCOPE": "Phạm vi",
-        "SCOPE_ALL": "Tất cả",
-        "SCOPE_ASSIGNED": "Giao cho tôi",
-        "SCOPE_CREATED": "Tôi tạo"
-      },
-      "FORM_SECTION": {
-        "HELP": "<p>Cấu hình Super Productivity liệt kê sự cố Redmine.</p><p>Tự động nhập tất cả sự cố mở.</p>",
-        "TITLE": "Redmine"
-      },
-      "ISSUE_CONTENT": {
-        "AUTHOR": "Tác giả",
-        "DESCRIPTION": "Mô tả",
-        "MARK_AS_CHECKED": "Đánh dấu đã kiểm tra",
-        "PRIORITY": "Ưu tiên",
-        "STATUS": "Trạng thái"
-      },
-      "S": {
-        "POST_TIME_SUCCESS": "Đăng thời gian"
-      }
-    },
     "REFLECTION_NOTE": {
       "ACTION_DISMISS": "Bỏ qua",
       "MSG": "Ghi chú suy ngẫm: ({{date}}): {{content}}"
@@ -1326,7 +1271,7 @@
         "LOCAL": "Cục bộ",
         "LOCAL_REMOTE": "Cục bộ -> Từ xa",
         "NEVER": "Không bao giờ",
-        "OVERWRITE_WARNING": "CẢNH BÁO: Dữ liệu {{targetName}} có {{targetChanges}} thay đổi. Ghi đè? Không thể hoàn tác.",
+        "OVERWRITE_WARNING": "CẢNH BÁO: Dữ liệu {{targetName}} có khoảng {{targetChanges}} thay đổi trong khi dữ liệu {{sourceName}} chỉ có {{sourceChanges}} thay đổi. Bạn có chắc muốn ghi đè dữ liệu {{targetName}} bằng phiên bản {{sourceName}} không?",
         "OVERWRITE_WARNING_UNKNOWN": "CẢNH BÁO: Thiết bị này không thể xác định dữ liệu {{targetName}} có bao nhiêu thay đổi chưa đồng bộ (không có bản ghi về lần đồng bộ trước). Ghi đè dữ liệu {{targetName}} bằng phiên bản {{sourceName}} có thể loại bỏ các thay đổi. Bạn có chắc không?",
         "REMOTE": "Từ xa",
         "RESULT": "Kết quả",
@@ -1386,14 +1331,14 @@
         "FORCE_OVERWRITE_CONFIRM": "Xóa dữ liệu máy chủ và tải lên với mật khẩu này. Tiếp tục?",
         "FORCE_OVERWRITE_INFO": "Muốn giữ dữ liệu cục bộ? Có thể ghi đè máy chủ.",
         "FORCE_OVERWRITE_TITLE": "Ghi đè dữ liệu máy chủ?",
-        "MESSAGE": "Máy chủ chứa dữ liệu mã hóa. Nhập mật khẩu để giải mã.",
+        "MESSAGE": "Máy chủ đồng bộ chứa dữ liệu đã mã hóa, nhưng thiết bị này chưa được cấu hình mật khẩu mã hóa. Vui lòng nhập mật khẩu mã hóa của bạn để giải mã và đồng bộ dữ liệu.",
         "PASSWORD_LABEL": "Mật khẩu mã hóa",
-        "TITLE": "Cấu hình đồng bộ"
+        "TITLE": "Cần mật khẩu mã hóa"
       },
       "D_FRESH_CLIENT_CONFIRM": {
-        "MESSAGE": "Máy chủ chứa dữ liệu mã hóa. Nhập mật khẩu để giải mã.",
+        "MESSAGE": "Đây có vẻ là một bản cài đặt mới. Đã tìm thấy dữ liệu từ xa với {{count}} thay đổi. Bạn có muốn tải xuống và ghi đè dữ liệu cục bộ bằng dữ liệu đó không?",
         "OK": "Tải dữ liệu từ xa",
-        "TITLE": "Cấu hình đồng bộ"
+        "TITLE": "Đồng bộ lần đầu"
       },
       "D_INCOMPLETE_SYNC": {
         "BTN_CLOSE_APP": "Đóng ứng dụng",
@@ -1414,8 +1359,8 @@
         "TITLE": "Cấu hình đồng bộ"
       },
       "D_LOCAL_DATA_REPLACE_CONFIRM": {
-        "MESSAGE": "Máy chủ chứa dữ liệu mã hóa. Nhập mật khẩu để giải mã.",
-        "TITLE": "Cấu hình đồng bộ"
+        "MESSAGE": "Bạn có {{count}} thay đổi cục bộ chưa được đồng bộ và chúng sẽ bị thay thế bởi dữ liệu từ xa. Bạn có muốn tiếp tục không?",
+        "TITLE": "Thay thế dữ liệu cục bộ?"
       },
       "D_NOTHING_TO_UPLOAD": {
         "MESSAGE": "Không có gì bị thay đổi — dữ liệu trên máy chủ đồng bộ của bạn vẫn còn đó.\n\nThiết bị này chưa bao giờ hoàn tất một lần đồng bộ, nên nó không giữ bản sao dữ liệu nào mà ứng dụng có thể thấy. Việc ghi đè sẽ thay thế mọi thứ trên máy chủ bằng một thiết bị trống, và điều đó không thể hoàn tác.\n\nHãy thử lại mật khẩu mã hóa của bạn ở đây — mật khẩu cũ thường vẫn dùng được. Nếu bạn không nhớ, hãy giữ nguyên thiết bị này và máy chủ đúng như hiện tại rồi báo cáo vấn đề thay vì ghi đè; lịch sử của bạn vẫn nằm trên máy chủ.\n\nNếu bạn thực sự muốn xóa máy chủ đồng bộ và bắt đầu lại, hãy đóng cửa sổ này và dùng Buộc ghi đè trong Cài đặt → Đồng bộ & Sao lưu → Đồng bộ.",
@@ -1444,10 +1389,10 @@
         "WARNING": "Thay thế TẤT CẢ dữ liệu hiện tại. Không thể hoàn tác!"
       },
       "D_SERVER_MIGRATION_CONFIRM": {
-        "CONFIRM": "Xác nhận",
-        "MESSAGE": "Máy chủ chứa dữ liệu mã hóa. Nhập mật khẩu để giải mã.",
+        "CONFIRM": "Thay thế dữ liệu máy chủ",
+        "MESSAGE": "Máy chủ đồng bộ này đã chứa dữ liệu — rất có thể từ các thiết bị khác của bạn. Chọn <strong>Thay thế dữ liệu máy chủ</strong> sẽ <strong>ghi đè toàn bộ dữ liệu trên máy chủ và trên mọi thiết bị khác</strong> bằng bản sao cục bộ của thiết bị này. Đây <strong>không phải là hợp nhất</strong>. Chọn <strong>Hủy</strong> để tải dữ liệu của máy chủ xuống (nên chọn cách này, trừ khi bạn chắc chắn thiết bị này có phiên bản mới nhất).",
         "SKIP": "Hủy",
-        "TITLE": "Cấu hình đồng bộ"
+        "TITLE": "Máy chủ đã chứa dữ liệu"
       },
       "D_SYNC_IMPORT_CONFLICT": {
         "FILTERED_CHANGES": "Thay đổi liên quan",
@@ -1479,11 +1424,11 @@
           "AUTH_SUCCESS": "Xác thực Dropbox thành công!",
           "BTN_AUTHENTICATE": "Xác thực",
           "BTN_REAUTHENTICATE": "Xác thực lại",
-          "INFO_TEXT": "<strong>Cảnh báo:</strong> Không dùng Syncthing/Resilio để đồng bộ thư mục này.",
+          "INFO_TEXT": "Dropbox sử dụng OAuth. Khi bạn lưu cài đặt, Dropbox sẽ được mở trong trình duyệt để bạn cấp quyền truy cập.",
           "L_ACCESS_TOKEN": "Token truy cập (từ mã xác thực)",
           "REAUTH_SUCCESS": "Xác thực Dropbox thành công!",
-          "STATUS_CONFIGURED": "Trạng thái",
-          "STATUS_NOT_CONFIGURED": "Trạng thái"
+          "STATUS_CONFIGURED": "Dropbox đã được cấu hình và sẵn sàng đồng bộ",
+          "STATUS_NOT_CONFIGURED": "Chưa được cấu hình - hãy xác thực để bật đồng bộ"
         },
         "FILE_BASED": {
           "BTN_CHANGE_PASSWORD": "Đổi mật khẩu",
@@ -1553,14 +1498,14 @@
         "L_SYNC_PROVIDER": "Nhà cung cấp",
         "L_USE_SPLIT_SYNC_FILES": "Đồng bộ phân tách (thử nghiệm) – Đồng bộ nhanh hơn nhờ bố cục tệp thao tác/ảnh chụp nhanh tách biệt. Sau khi bật, tất cả thiết bị đồng bộ thư mục này cũng phải bật tùy chọn này.",
         "LOCAL_FILE": {
-          "INFO_TEXT": "<strong>Cảnh báo:</strong> Không dùng Syncthing/Resilio để đồng bộ thư mục này.",
+          "INFO_TEXT": "<strong>Cảnh báo:</strong> <strong>Không</strong> dùng các công cụ đồng bộ tệp như Syncthing, Resilio hoặc tương tự để đồng bộ thư mục này giữa các thiết bị — chúng <strong>sẽ</strong> gây hỏng dữ liệu và xung đột. Để đồng bộ nhiều thiết bị, hãy dùng SuperSync, Nextcloud hoặc Dropbox.",
           "L_SYNC_FILE_PATH_PERMISSION_VALIDATION": "Cần quyền truy cập",
           "L_SYNC_FOLDER_PATH": "Đường dẫn đồng bộ",
           "S_COMMIT_FOLDER_ERROR": "Không thể lưu thư mục đồng bộ đã chọn. Thư mục có thể đã bị di chuyển hoặc xóa — vui lòng chọn lại."
         },
         "PASSWORD_SET_INFO": "🔒 Đã đặt mật khẩu.",
         "SUPER_SYNC": {
-          "ACCESS_TOKEN_DESCRIPTION": "Mô tả",
+          "ACCESS_TOKEN_DESCRIPTION": "Dán token cho tài khoản SuperSync của bạn. Trên thiết bị khác, hãy dùng lại token này hoặc đăng nhập lại để lấy token mới.",
           "BTN_CHANGE_PASSWORD": "Đổi mật khẩu",
           "BTN_DISABLE_ENCRYPTION": "Tắt mã hóa",
           "BTN_ENABLE_ENCRYPTION": "Bật mã hóa",
@@ -1572,7 +1517,7 @@
           "DISABLE_ENCRYPTION_ITEM_2": "Tải lại không mã hóa",
           "DISABLE_ENCRYPTION_ITEM_3": "Đồng bộ không mã hóa",
           "DISABLE_ENCRYPTION_NOT_READY": "Chưa bật đồng bộ.",
-          "DISABLE_ENCRYPTION_NOTE": "Dữ liệu cục bộ sẽ KHÔNG bị xóa.",
+          "DISABLE_ENCRYPTION_NOTE": "Dữ liệu cục bộ sẽ KHÔNG bị xóa. Bạn có thể bật lại mã hóa bất cứ lúc nào.",
           "DISABLE_ENCRYPTION_SUCCESS": "Đã tắt mã hóa",
           "DISABLE_ENCRYPTION_SUPERSYNC_ONLY": "Chỉ cho SuperSync.",
           "DISABLE_ENCRYPTION_TITLE": "Tắt mã hóa?",
@@ -1584,7 +1529,7 @@
           "ENABLE_ENCRYPTION_ITEM_2": "Tải lại với mã hóa",
           "ENABLE_ENCRYPTION_ITEM_3": "Cần mật khẩu trên thiết bị khác",
           "ENABLE_ENCRYPTION_NOT_READY": "Chưa bật đồng bộ.",
-          "ENABLE_ENCRYPTION_NOTE": "Dữ liệu cục bộ sẽ KHÔNG bị xóa.",
+          "ENABLE_ENCRYPTION_NOTE": "Dữ liệu cục bộ sẽ KHÔNG bị xóa. Bạn có thể tắt mã hóa bất cứ lúc nào.",
           "ENABLE_ENCRYPTION_PASSWORD_REQUIRED": "Nhập mật khẩu trước.",
           "ENABLE_ENCRYPTION_SUCCESS": "Đã bật mã hóa",
           "ENABLE_ENCRYPTION_SUPERSYNC_ONLY": "Chỉ cho SuperSync.",
@@ -1597,7 +1542,7 @@
           "FORCE_OVERWRITE_CONFIRM": "Xóa dữ liệu máy chủ và tải lên với mật khẩu này. Tiếp tục?",
           "FORCE_OVERWRITE_INFO": "Muốn giữ dữ liệu cục bộ? Có thể ghi đè máy chủ.",
           "FORCE_OVERWRITE_TITLE": "Ghi đè dữ liệu máy chủ?",
-          "INFO_TEXT": "<strong>Cảnh báo:</strong> Không dùng Syncthing/Resilio để đồng bộ thư mục này.",
+          "INFO_TEXT": "SuperSync giữ cho công việc của bạn được đồng bộ theo thời gian thực trên mọi thiết bị. Dữ liệu của bạn được lưu trữ an toàn trên máy chủ đồng bộ. Lưu ý: SuperSync hiện đang trong giai đoạn Beta.",
           "L_ACCESS_TOKEN": "Token truy cập",
           "L_CHANGE_ENCRYPTION_PASSWORD": "Đổi mật khẩu mã hóa",
           "L_CONFIRM_PASSWORD": "Xác nhận mật khẩu",
@@ -1612,7 +1557,7 @@
           "PASSWORDS_DONT_MATCH": "Mật khẩu không khớp",
           "PRESENCE_DEVICE_NAME_DESCRIPTION": "Hiển thị trong nhãn theo dõi thời gian trên các thiết bị khác của bạn, ví dụ \"Laptop công việc\", để phân biệt hai máy tính để bàn. Được gửi kèm trạng thái theo dõi (được mã hóa khi bật mã hóa đồng bộ). Để trống để dùng tên nền tảng hiển thị sẵn.",
           "REMOVE_ENCRYPTION_WARNING": "Xóa dữ liệu máy chủ và tải lại không mã hóa.",
-          "SERVER_URL_DESCRIPTION": "Mô tả",
+          "SERVER_URL_DESCRIPTION": "Giữ nguyên để dùng máy chủ chính thức, hoặc nhập URL máy chủ tùy chỉnh",
           "SETUP_DISABLE_SUPERSYNC_BTN": "Tắt SuperSync",
           "SETUP_ENCRYPTION_BTN": "Đặt mật khẩu",
           "SETUP_ENCRYPTION_PASSWORD_WARNING": "Dùng cùng mật khẩu mọi thiết bị.",
@@ -1625,9 +1570,9 @@
           "L_LOGIN_NAME": "Tên đăng nhập / email (tùy chọn)",
           "L_SERVER_URL": "URL máy chủ Nextcloud",
           "LOGIN_NAME_DESCRIPTION": "Chỉ điền trường này nếu máy chủ yêu cầu tên đăng nhập khác với tên người dùng ở trên, ví dụ như địa chỉ email.",
-          "SERVER_URL_DESCRIPTION": "Mô tả",
+          "SERVER_URL_DESCRIPTION": "ví dụ: https://cloud.example.com hoặc https://example.com/nextcloud",
           "L_APP_PASSWORD": "Mật khẩu ứng dụng",
-          "APP_PASSWORD_DESCRIPTION": "Mô tả",
+          "APP_PASSWORD_DESCRIPTION": "Vào Nextcloud → Cài đặt → Bảo mật → Mật khẩu ứng dụng để tạo một mật khẩu",
           "L_DETECT_USER_ID": "Phát hiện ID người dùng",
           "S_DETECT_USER_ID_NEED_LOGIN": "Trước tiên, hãy nhập URL máy chủ, thông tin đăng nhập (Tên người dùng hoặc Tên đăng nhập / email) và Mật khẩu ứng dụng.",
           "S_DETECT_USER_ID_SUCCESS": "Đã tìm thấy ID người dùng Nextcloud của bạn: {{userId}}. ID này đã được điền vào trường Tên người dùng.",
@@ -1737,7 +1682,7 @@
         "RESTORE_ENCRYPTED": "Không thể khôi phục từ lịch sử máy chủ khi bật mã hóa đầu cuối. Máy chủ không thể đọc dữ liệu đã mã hóa của bạn để khôi phục trạng thái tại một thời điểm trước đó.",
         "RESTORE_ERROR": "Khôi phục thất bại",
         "RESTORE_SUCCESS": "Khôi phục thành công",
-        "SERVER_MIGRATION_VALIDATION_FAILED": "Xác thực thất bại.",
+        "SERVER_MIGRATION_VALIDATION_FAILED": "Không thể di chuyển dữ liệu lên máy chủ - xác thực dữ liệu cục bộ thất bại. Vui lòng thử nhập một bản sao lưu.",
         "SPLIT_FORMAT_ENABLE_SETTING": "Thư mục đồng bộ này đã được nâng cấp sang định dạng tệp phân tách. Hãy bật Đồng bộ phân tách trong cài đặt Đồng bộ để tiếp tục.",
         "STORAGE_QUOTA_EXCEEDED": "Đầy bộ nhớ đồng bộ!",
         "STORAGE_RECOVERED_AFTER_COMPACTION": "Đã dọn dẹp bộ nhớ.",
@@ -1767,7 +1712,7 @@
         "CREATED_SUCCESS": "Đã tạo sao lưu",
         "DELETE_FAILED": "Xóa sao lưu thất bại",
         "DELETED_SUCCESS": "Đã xóa sao lưu",
-        "DESCRIPTION": "Mô tả",
+        "DESCRIPTION": "Bản sao lưu tự động được tạo trước khi tải dữ liệu từ máy chủ từ xa trong quá trình đồng bộ. Các bản sao lưu được sắp xếp trong 4 ô thông minh: 2 bản gần đây nhất, 1 bản đầu tiên của hôm nay và 1 bản đầu tiên của ngày trước hôm nay.",
         "LAST_CHANGE_PREFIX": "Đổi cuối:",
         "LOADING": "Đang tải...",
         "NO_BACKUPS": "Chưa có sao lưu.",
@@ -2905,8 +2850,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Âm thanh nhắc nhở nghỉ",
+      "DING": "Tiếng chuông",
       "DONE_SOUND": "Âm thanh hoàn thành công việc",
       "IS_INCREASE_DONE_PITCH": "Tăng cao độ cho mỗi công việc hoàn thành",
+      "SMALL_DING": "Tiếng chuông nhỏ",
+      "SOUND_1": "Âm thanh 1",
+      "SOUND_2": "Âm thanh 2",
+      "SOUND_3": "Âm thanh 3",
+      "SOUND_4": "Âm thanh 4",
+      "SOUND_5": "Âm thanh 5",
+      "SOUND_6": "Âm thanh 6",
+      "SOUND_7": "Âm thanh 7",
       "TITLE": "Âm thanh",
       "TRACK_TIME_SOUND": "Âm thanh nhắc nhở theo dõi thời gian",
       "VOLUME": "Âm lượng"
@@ -3115,15 +3069,15 @@
     "PRESETS": {
       "SIMPLE_TODO": {
         "TITLE": "Bạn muốn sử dụng Super Productivity như thế nào?",
-        "DESCRIPTION": "Mô tả"
+        "DESCRIPTION": "Trình quản lý công việc gọn gàng với dự án, thẻ và ghi chú. Không có gì thừa."
       },
       "TIME_TRACKER": {
         "TITLE": "Bạn muốn sử dụng Super Productivity như thế nào?",
-        "DESCRIPTION": "Mô tả"
+        "DESCRIPTION": "Theo dõi thời gian hoàn thành công việc. Rất phù hợp để tính giờ công hoặc hiểu thời gian của bạn trôi vào đâu."
       },
       "PRODUCTIVITY_PRO": {
         "TITLE": "Bạn muốn sử dụng Super Productivity như thế nào?",
-        "DESCRIPTION": "Mô tả"
+        "DESCRIPTION": "Lên kế hoạch cho ngày của bạn, xây dựng thói quen, tập trung sâu và theo dõi thời gian. Tất cả ở một nơi."
       }
     },
     "HINTS": {
@@ -3326,7 +3280,7 @@
     "UNABLE_TO_PERSIST_DATA": "Không thể lưu trữ dữ liệu vào bộ nhớ plugin",
     "UNKNOWN_ERROR": "Đã xảy ra lỗi không xác định",
     "UPLOAD_PLUGIN_INSTRUCTION": "Tải lên tệp ZIP plugin để cài đặt:",
-    "VALIDATION_FAILED": "Xác thực thất bại",
+    "VALIDATION_FAILED": "Xác thực thất bại: {{errors}}",
     "NODE_EXECUTION_BRIDGE_UNAVAILABLE": "Không thể kết nối với cầu nối thực thi Node.js. Vui lòng thử tắt rồi bật lại plugin.",
     "PLUGIN_LOAD_FAILED": "Không thể tải plugin \"{{pluginName}}\": {{error}}"
   },

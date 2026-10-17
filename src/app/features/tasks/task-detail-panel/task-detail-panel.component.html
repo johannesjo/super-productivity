@@ -29,7 +29,7 @@
       (collapseParent)="collapseParent()"
       (keyPress)="onItemKeyPress($event)"
       [expanded]="isSubTasksExpanded()"
-      (expandedChange)="isSubTasksExpanded.set($event)"
+      (expandedChange)="onSubTasksExpandedChange($event)"
       (afterExpand)="onSubTasksAfterExpand()"
       [type]="'panel'"
     >
@@ -38,7 +38,7 @@
         @if (task().subTasks?.length) {
           <span>{{
             T.F.TASK.ADDITIONAL_INFO.SUB_TASKS
-              | translate: { nr: task().subTasks?.length }
+              | translate: { nr: $safeNavigationMigration(task().subTasks?.length) }
           }}</span>
         } @else {
           <span>{{ T.F.TASK.ADDITIONAL_INFO.SUB_TASKS_EMPTY | translate }}</span>

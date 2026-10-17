@@ -1,5 +1,6 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { PGlite } from '@electric-sql/pglite';
+import Fastify from 'fastify';
 
 /**
  * Real-Postgres coverage for `DeviceService.touchDevice`.
@@ -23,6 +24,25 @@ import { SYNC_DEVICES_DDL } from './sync-devices-ddl.helper';
 const mocks = vi.hoisted(() => {
   const state: { db: PGlite | null } = { db: null };
   const prisma = {
+    syncDevice: {
+      findMany: async (args: { where: { lastSeenAt: { gt: bigint } } }) => {
+        const result = await state.db!.query<{
+          userId: number;
+          appVersion: string | null;
+        }>(
+          'SELECT user_id AS "userId", app_version AS "appVersion" FROM sync_devices WHERE last_seen_at > $1::bigint',
+          [args.where.lastSeenAt.gt.toString()],
+        );
+        return result.rows;
+      },
+      deleteMany: async (args: { where: { lastSeenAt: { lt: bigint } } }) => {
+        const result = await state.db!.query(
+          'DELETE FROM sync_devices WHERE last_seen_at < $1::bigint',
+          [args.where.lastSeenAt.lt.toString()],
+        );
+        return { count: result.affectedRows ?? 0 };
+      },
+    },
     $executeRaw: async (
       strings: TemplateStringsArray,
       ...values: unknown[]
@@ -41,9 +61,14 @@ const mocks = vi.hoisted(() => {
 });
 
 vi.mock('../src/db', () => ({ prisma: mocks.prisma }));
+vi.mock('../src/auth', () => ({
+  verifyToken: async () => ({ valid: true, userId: 7, email: 'test@test.local' }),
+}));
 
 const { DeviceService } = await import('../src/sync/services/device.service');
-const { DEVICE_TOUCH_THROTTLE_MS } = await import('../src/sync/sync.types');
+const { getSyncService } = await import('../src/sync/sync.service');
+const { syncRoutes } = await import('../src/sync/sync.routes');
+const { DEVICE_TOUCH_THROTTLE_MS, RETENTION_MS } = await import('../src/sync/sync.types');
 
 type Row = {
   client_id: string;
@@ -75,6 +100,7 @@ describe('DeviceService.touchDevice (real Postgres)', () => {
   });
 
   afterEach(async () => {
+    vi.restoreAllMocks();
     vi.useRealTimers();
     await db.close();
   });
@@ -133,7 +159,7 @@ describe('DeviceService.touchDevice (real Postgres)', () => {
       ]);
     });
 
-    it('never overwrites a known version with NULL (WebSocket heartbeat touches carry none)', async () => {
+    it('preserves a known version when a heartbeat omits it', async () => {
       vi.setSystemTime(1_000_000);
       await service.touchDevice(7, 'E_abc123', '18.22.0');
 
@@ -170,16 +196,19 @@ describe('DeviceService.touchDevice (real Postgres)', () => {
       expect(rows[0].app_version).toBe('18.22.0');
     });
 
-    it('still writes nothing for an unchanged version inside the throttle window', async () => {
-      vi.setSystemTime(1_000_000);
-      await service.touchDevice(7, 'E_abc123', '18.22.0');
+    it.each(['18.22.0', null])(
+      'does not rewrite unchanged version %s inside the throttle window',
+      async (version) => {
+        vi.setSystemTime(1_000_000);
+        await service.touchDevice(7, 'E_abc123', version);
 
-      vi.setSystemTime(1_000_000 + DEVICE_TOUCH_THROTTLE_MS - 1);
-      await service.touchDevice(7, 'E_abc123', '18.22.0');
+        vi.setSystemTime(1_000_000 + DEVICE_TOUCH_THROTTLE_MS - 1);
+        await service.touchDevice(7, 'E_abc123', version);
 
-      const rows = await readAll();
-      expect(num(rows[0].last_seen_at)).toBe(1_000_000);
-    });
+        const rows = await readAll();
+        expect(num(rows[0].last_seen_at)).toBe(1_000_000);
+      },
+    );
   });
 
   it('keeps devices and accounts separate', async () => {
@@ -194,5 +223,81 @@ describe('DeviceService.touchDevice (real Postgres)', () => {
       '7:E_abc123',
       '8:E_abc123',
     ]);
+  });
+
+  // Characterizations of known gaps, not evidence that checkpoints are safe.
+  // The ORM adapters above execute the service's time predicates against stored
+  // rows; touchDevice's shipped SQL and the gate classifier run unchanged.
+  describe('checkpoint gate limitations (#9962)', () => {
+    it('reports safe after an old device ages out, then unsafe only after it returns', async () => {
+      const firstSeen = 1_000_000;
+      vi.setSystemTime(firstSeen);
+      await service.touchDevice(7, 'A_modern', '19.0.0');
+      // A pre-reporting client can retain unsynced edits while offline.
+      await service.touchDevice(7, 'B_old');
+      expect((await service.summarizeCheckpointGate(0)).safeAccounts).toBe(0);
+
+      const now = firstSeen + RETENTION_MS + 1;
+      const cutoff = now - RETENTION_MS;
+      vi.setSystemTime(now);
+      await service.touchDevice(7, 'A_modern', '19.0.0');
+      expect(await service.deleteStaleDevices(cutoff)).toBe(1);
+      expect((await service.summarizeCheckpointGate(cutoff)).safeAccounts).toBe(1);
+
+      // A cadence could now create a checkpoint. Re-registering the old device
+      // cannot undo a checkpoint already stored for it to download.
+      await service.touchDevice(7, 'B_old');
+      expect((await service.summarizeCheckpointGate(cutoff)).safeAccounts).toBe(0);
+    });
+  });
+
+  // Exercise the HTTP route, SyncService and shipped SQL together. Only auth
+  // and the unrelated operation read are stubbed; version recording is real.
+  describe('download version reporting (#9962)', () => {
+    it.each([
+      { query: '', elapsed: 1 },
+      { query: '', elapsed: DEVICE_TOUCH_THROTTLE_MS + 1 },
+      { query: '&appVersion=invalid', elapsed: 1 },
+    ])(
+      'clears a remembered version for "$query" after $elapsed ms',
+      async ({ query, elapsed }) => {
+        vi.useFakeTimers({ toFake: ['Date'] });
+        vi.setSystemTime(1_000_000);
+        const syncService = getSyncService();
+        vi.spyOn(syncService, 'getOpsSinceWithSeq').mockResolvedValue({
+          ops: [],
+          latestSeq: 0,
+          gapDetected: false,
+        });
+        // Observe the real promise so the fire-and-forget write finishes before
+        // reading the row; do not replace the implementation under test.
+        const touches = vi.spyOn(DeviceService.prototype, 'touchDevice');
+        const app = Fastify();
+        await app.register(syncRoutes, { prefix: '/api/sync' });
+        const download = async (versionQuery: string): Promise<void> => {
+          const response = await app.inject({
+            method: 'GET',
+            url: `/api/sync/ops?sinceSeq=0&excludeClient=A_modern${versionQuery}`,
+            headers: { authorization: 'Bearer test-token' },
+          });
+          expect(response.statusCode).toBe(200);
+          await Promise.all(touches.mock.results.map((result) => result.value));
+        };
+
+        try {
+          await download('&appVersion=19.0.0');
+          expect((await service.summarizeCheckpointGate(0)).safeAccounts).toBe(1);
+
+          vi.setSystemTime(1_000_000 + elapsed);
+          await download(query);
+          const rows = await readAll();
+          expect(rows[0].app_version).toBeNull();
+          expect(num(rows[0].last_seen_at)).toBe(1_000_000 + elapsed);
+          expect((await service.summarizeCheckpointGate(0)).safeAccounts).toBe(0);
+        } finally {
+          await app.close();
+        }
+      },
+    );
   });
 });

@@ -192,8 +192,24 @@ stays: `background` on a task row is contested (the `isCurrent` chain and the
 `isSelected` `!important` rule win over it, and several bundled themes force it with
 `!important`), and author backgrounds are dropped in forced-colors mode while outlines
 survive. Never make a row state depend on `background` alone. The task open in the
-detail panel uses the neutral `--task-c-selected-bg`. Row focus uses `:focus` to cover
-scripted navigation, including when that task's detail panel is open.
+detail panel uses the neutral `--task-c-selected-bg`.
+
+Focus rings on rows and other focusable containers (anything carrying a `tabindex`,
+as opposed to a button or control — those keep the `.focus-ring` utility from the Focus
+Ring section below) pair `:host-context(.isMousePrimary):focus` with `:focus-visible`.
+Never a bare `:focus`: rows carry `tabindex="0"`, so a tap focuses them and the ring
+then stays on the tapped row for the rest of the session. The two halves split the
+work — the mouse-intent one covers clicks plus the scripted navigation and focus
+restoration that follow them, and `:focus-visible` covers keyboards, including on a
+touch device, where only a pen otherwise sets mouse intent. `.isNoTouchOnly` is not a
+usable guard here: it only excludes pure touch devices, so iPads and touchscreen
+laptops (`hybrid` for detect-it) still get the stuck ring.
+
+Known edge of the mouse-intent half: on a hybrid device, a row that was tapped and left
+focused picks up its ring once the user moves the mouse and intent flips back. Dropping
+to `:focus-visible` alone removes that, at the cost of no ring on plain mouse clicks —
+the ring on click is the deliberate choice here. Where a cue must show regardless of
+input, use a class instead (see `highlight-searched-task`).
 
 ## Shadows & Elevation
 
@@ -236,19 +252,19 @@ Quickest adoption — add the `.focus-ring` utility class from `util.scss`, whic
 
 ## Z-Index Layers
 
-| Variable                 | Value | Purpose                  |
-| ------------------------ | ----- | ------------------------ |
-| `--z-check-done`         | 11    | Task done checkbox       |
-| `--z-main-header`        | 12    | Main header              |
-| `--z-task-title-focus`   | 32    | Focused task title       |
-| `--z-multi-select-bar`   | 45    | Multi-select action bar  |
-| `--z-mobile-bottom-nav`  | 50    | Mobile bottom navigation |
-| `--z-side-nav`           | 60    | Side navigation          |
-| `--z-backdrop`           | 222   | Backdrop overlay         |
-| `--z-add-task-bar`       | 999   | Add task bar             |
-| `--z-search-bar`         | 999   | Search bar               |
-| `--z-onboarding-presets` | 999   | Onboarding preset screen |
-| `--z-tour`               | 1001  | Tour overlay             |
+| Variable                | Value | Purpose                  |
+| ----------------------- | ----- | ------------------------ |
+| `--z-check-done`        | 11    | Task done checkbox       |
+| `--z-main-header`       | 12    | Main header              |
+| `--z-task-title-focus`  | 32    | Focused task title       |
+| `--z-multi-select-bar`  | 45    | Multi-select action bar  |
+| `--z-mobile-bottom-nav` | 50    | Mobile bottom navigation |
+| `--z-side-nav`          | 60    | Side navigation          |
+| `--z-backdrop`          | 222   | Backdrop overlay         |
+| `--z-add-task-bar`      | 999   | Add task bar             |
+| `--z-search-bar`        | 999   | Search bar               |
+| `--z-tour`              | 1001  | Tour overlay             |
+| `--z-onboarding-hint`   | 1100  | First-run hints          |
 
 ## Layout Variables
 

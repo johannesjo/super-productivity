@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
 import { CaldavCfg } from './caldav.model';
 // @ts-ignore
-import DavClient, { namespaces as NS } from '@nextcloud/cdav-library';
+import type DavClient from '@nextcloud/cdav-library';
 // @ts-ignore
-import Calendar from 'cdav-library/models/calendar';
+import type Calendar from 'cdav-library/models/calendar';
 import { loadIcalModule } from '../../../schedule/ical/ical-lazy-loader';
 
 import { from, Observable, throwError } from 'rxjs';
@@ -18,6 +18,10 @@ import { throwHandledError } from '../../../../util/throw-handled-error';
 import { IssueLog } from '../../../../core/log';
 import { Capacitor } from '@capacitor/core';
 import { WebDavHttp } from '../../../../op-log/sync-providers/file-based/webdav/capacitor-webdav-http';
+
+// Loaded on first use to keep the library out of the initial bundle.
+// @ts-ignore
+const loadCdavLibrary = (): Promise<any> => import('@nextcloud/cdav-library');
 
 /** Subset of the XMLHttpRequest surface that @nextcloud/cdav-library v1.5.3 actually uses. */
 interface XhrLike {
@@ -131,6 +135,7 @@ export class CaldavClientService {
     calendar: Calendar,
     filterOpen: boolean,
   ): Promise<CalDavTaskData[]> {
+    const { namespaces: NS } = await loadCdavLibrary();
     const query = {
       name: [NS.IETF_CALDAV, 'comp-filter'],
       attributes: [['name', 'VCALENDAR']],
@@ -164,6 +169,7 @@ export class CaldavClientService {
     calendar: Calendar,
     taskUid: string,
   ): Promise<CalDavTaskData[]> {
+    const { namespaces: NS } = await loadCdavLibrary();
     const query = {
       name: [NS.IETF_CALDAV, 'comp-filter'],
       attributes: [['name', 'VCALENDAR']],
@@ -290,6 +296,7 @@ export class CaldavClientService {
     if (this._clientCache.has(client_key)) {
       return this._clientCache.get(client_key) as ClientCache;
     } else {
+      const { default: DavClient } = await loadCdavLibrary();
       const client = new DavClient(
         {
           rootUrl: cfg.caldavUrl,

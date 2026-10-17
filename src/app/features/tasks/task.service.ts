@@ -882,31 +882,27 @@ export class TaskService {
     duration: number,
     date: string = this._dateService.todayStr(),
     isFromTrackingReminder = false,
+    isBackfill = false,
   ): void {
-    this._store.dispatch(
-      TimeTrackingActions.addTimeSpent({ task, date, duration, isFromTrackingReminder }),
-    );
+    const props = { task, date, duration, isFromTrackingReminder, isBackfill };
+    this._store.dispatch(TimeTrackingActions.addTimeSpent(props));
   }
 
   /**
    * Adds time spent to a task AND dispatches the persistent syncTimeSpent action.
    * Use this instead of addTimeSpent when the caller is NOT using BatchedTimeSyncAccumulator
    * (e.g. idle dialog, tracking reminder). The tick path uses the accumulator instead.
+   * A `date` other than today is back-filled (see `isBackfill` on `addTimeSpent`).
    */
-  addTimeSpentAndSync(task: Task, duration: number): void {
+  addTimeSpentAndSync(task: Task, duration: number, date?: string): void {
     if (duration <= 0) {
       return;
     }
     this._taskTimeSync.flushOne(task.id);
-    const date = this._dateService.todayStr();
-    this.addTimeSpent(task, duration, date);
-    this._store.dispatch(
-      syncTimeSpent({
-        taskId: task.id,
-        date,
-        duration,
-      }),
-    );
+    const today = this._dateService.todayStr();
+    const day = date ?? today;
+    this.addTimeSpent(task, duration, day, false, day !== today);
+    this._store.dispatch(syncTimeSpent({ taskId: task.id, date: day, duration }));
   }
 
   removeTimeSpent(
@@ -991,6 +987,7 @@ export class TaskService {
       } else {
         // when on a tag such as today, we simply remove the tag instead of attempting to move to archive
         const tagToRemove = this._workContextService.activeWorkContextId;
+        // eslint-disable-next-line local-rules/no-user-content-in-logs -- grandfathered log baseline (2026-09), not yet triaged
         TaskLog.log('[TaskService] Removing tag from subtasks:', tagToRemove);
         subTasks.forEach((st) => {
           this.updateTags(

@@ -6,7 +6,9 @@ import {
   effect,
   ElementRef,
   inject,
+  Signal,
   signal,
+  viewChild,
 } from '@angular/core';
 import { fromEvent } from 'rxjs';
 import { select, Store } from '@ngrx/store';
@@ -45,12 +47,25 @@ import { DateTimeFormatService } from '../../../core/date-time-format/date-time-
 import { getWeekNumber } from '../../../util/get-week-number';
 import { parseDbDateStr } from '../../../util/parse-db-date-str';
 import { anchorContextNow } from '../anchor-context-now';
+import {
+  SwipePagerComponent,
+  SwipePagerPageDirective,
+} from '../../../ui/swipe-pager/swipe-pager.component';
+import {
+  ScheduleDayPage,
+  scheduleDayPageKey,
+  shiftDayStr,
+  toScheduleDayPage,
+} from '../schedule-day-page';
+import { DateService } from '../../../core/date/date.service';
 
 @Component({
   selector: 'schedule',
   imports: [
     ScheduleWeekComponent,
     ScheduleMonthComponent,
+    SwipePagerComponent,
+    SwipePagerPageDirective,
     MatIconButton,
     MatIcon,
     MatTooltip,
@@ -78,6 +93,7 @@ export class ScheduleComponent {
   private _globalTrackingIntervalService = inject(GlobalTrackingIntervalService);
   private _globalConfigService = inject(GlobalConfigService);
   private _dateTimeFormatService = inject(DateTimeFormatService);
+  private _dateService = inject(DateService);
   private _translate = inject(TranslateService);
   private _hiddenCalendarProviders = inject(HiddenCalendarProvidersService);
   private _elRef = inject<ElementRef<HTMLElement>>(ElementRef);
@@ -104,6 +120,8 @@ export class ScheduleComponent {
     this._hiddenCalendarProviders.toggle(providerId);
   }
 
+  private _scrollWrapper = viewChild<ElementRef<HTMLElement>>('scrollWrapper');
+
   private _currentTimeViewMode = computed(() => this.layoutService.selectedTimeView());
   isMonthView = computed(() => this._currentTimeViewMode() === 'month');
   isDayView = computed(() => this._currentTimeViewMode() === 'day');
@@ -115,9 +133,20 @@ export class ScheduleComponent {
   // True when today falls within the currently displayed range.
   // Disables the "today" reset button and suppresses navigation jumps.
   isViewingToday = computed(() => {
-    if (this._selectedDate() === null) return true;
+    const selectedDate = this._selectedDate();
+    if (selectedDate === null) return true;
     const todayStr = this._todayDateStr();
-    return todayStr ? this.daysToShow().includes(todayStr) : false;
+    if (!todayStr) return false;
+    if (this.isMonthView()) {
+      // Compare the month, not the grid: the grid's padding days can include
+      // today while showing the next month, which locked navigation (#10451)
+      const today = parseDbDateStr(todayStr);
+      return (
+        selectedDate.getFullYear() === today.getFullYear() &&
+        selectedDate.getMonth() === today.getMonth()
+      );
+    }
+    return this.daysToShow().includes(todayStr);
   });
 
   protected _todayDateStr = toSignal(this._globalTrackingIntervalService.todayDateStr$);
@@ -141,29 +170,13 @@ export class ScheduleComponent {
   });
 
   private _daysToShowCount = computed(() => {
-    const size = this._windowSize();
     const selectedView = this._currentTimeViewMode();
-    const width = size.width;
-    const height = size.height;
 
     if (selectedView === 'day') return 1;
 
-    if (selectedView === 'month') {
-      const availableHeight = height - SCHEDULE_CONSTANTS.MONTH_VIEW.HEADER_OFFSET;
-      const minHeightPerWeek =
-        width < SCHEDULE_CONSTANTS.BREAKPOINTS.TABLET
-          ? SCHEDULE_CONSTANTS.MONTH_VIEW.MIN_HEIGHT_PER_WEEK_MOBILE
-          : SCHEDULE_CONSTANTS.MONTH_VIEW.MIN_HEIGHT_PER_WEEK_DESKTOP;
-      const maxWeeks = Math.floor(availableHeight / minHeightPerWeek);
-
-      if (maxWeeks < SCHEDULE_CONSTANTS.MONTH_VIEW.MIN_WEEKS) {
-        return SCHEDULE_CONSTANTS.MONTH_VIEW.MIN_WEEKS;
-      } else if (maxWeeks > SCHEDULE_CONSTANTS.MONTH_VIEW.MAX_WEEKS) {
-        return SCHEDULE_CONSTANTS.MONTH_VIEW.MAX_WEEKS;
-      } else {
-        return maxWeeks;
-      }
-    }
+    // Month view derives its own count from the displayed month, in `daysToShow`
+    // below: it needs `selectedDate` and `firstDayOfWeek`, neither of which is
+    // read here.
 
     // Week view: always 7 days
     return 7;
@@ -177,9 +190,16 @@ export class ScheduleComponent {
     this._todayDateStr();
 
     if (selectedView === 'month') {
+      // Rows follow the month, never the window height. Deriving them from
+      // available space is what #9449 was filed for: a day left out of
+      // `daysToShow` gets no events computed at all, so a task on it vanished
+      // rather than merely being clipped. 4-6 rows spans every
+      // month/firstDayOfWeek pair, and `weeksToShow` carries the same number
+      // into the grid's `--nr-of-weeks`, so the tracks follow the days.
+      const firstDayOfWeek = this.firstDayOfWeek();
       return this.scheduleService.getMonthDaysToShow(
-        count,
-        this.firstDayOfWeek(),
+        this.scheduleService.getMonthWeeksToShow(firstDayOfWeek, selectedDate),
+        firstDayOfWeek,
         selectedDate,
       );
     }
@@ -307,12 +327,7 @@ export class ScheduleComponent {
   beyondBudget = computed(() => this._eventsAndBeyondBudget().beyondBudgetDays);
   monthEvents = computed(() => this.events().concat(...this.beyondBudget()));
 
-  currentTimeRow = computed(() => {
-    // Only show current time indicator when viewing today
-    if (!this.isViewingToday()) {
-      return null;
-    }
-
+  nowRow = computed(() => {
     // Trigger re-computation every 2 minutes
     this.scheduleService.scheduleRefreshTick();
     const now = new Date();
@@ -322,6 +337,84 @@ export class ScheduleComponent {
     const hoursToday = hours + minutes / 60;
     return Math.round(hoursToday * FH);
   });
+
+  // Only show current time indicator when viewing today
+  currentTimeRow = computed(() => (this.isViewingToday() ? this.nowRow() : null));
+
+  // Day view pages through days by swiping (SwipePagerComponent). Neighbouring
+  // days are only computed once the pager is warm: when idle on a touch device,
+  // on first touch, or when the prev/next buttons animate through it.
+  isPagerWarm = signal(false);
+  readonly dayPageKey = scheduleDayPageKey;
+  private _dayPager = viewChild(SwipePagerComponent);
+
+  currentDayPage = computed<ScheduleDayPage | undefined>(() => {
+    const day = this.daysToShow()[0];
+    return day ? toScheduleDayPage(day, this.scheduleDays()) : undefined;
+  });
+  // Like goToPreviousPeriod, never pages into the past.
+  prevDayPage = this._createDayPage(
+    computed(() => {
+      const day = this.daysToShow()[0];
+      return day && this.isDayView() && this.isPagerWarm() && !this.isViewingToday()
+        ? shiftDayStr(day, -1)
+        : undefined;
+    }),
+  );
+  nextDayPage = this._createDayPage(
+    computed(() => {
+      const day = this.daysToShow()[0];
+      return day && this.isDayView() && this.isPagerWarm()
+        ? shiftDayStr(day, 1)
+        : undefined;
+    }),
+  );
+
+  onDayPagerNavigate(page: ScheduleDayPage): void {
+    // Like goToPreviousPeriod, landing on (logical) today is the "today" mode.
+    const today = this._todayDateStr();
+    this._selectedDate.set(today && page.day > today ? parseDbDateStr(page.day) : null);
+  }
+
+  // The nav buttons slide the day view like a swipe does.
+  navigatePrevious(): void {
+    const pager = this._dayPager();
+    if (this.isDayView() && pager) {
+      pager.go(-1);
+    } else {
+      this.goToPreviousPeriod();
+    }
+  }
+
+  navigateNext(): void {
+    const pager = this._dayPager();
+    if (this.isDayView() && pager) {
+      pager.go(1);
+    } else {
+      this.goToNextPeriod();
+    }
+  }
+
+  // Same inputs as scheduleDays for a single day, anchored to the day the same
+  // way _contextNow is. Only the "now" for today's page can differ, by up to
+  // the 2-minute refresh tick that _contextNow is cached for.
+  private _createDayPage(
+    day: Signal<string | undefined>,
+  ): Signal<ScheduleDayPage | undefined> {
+    return computed(() => {
+      const d = day();
+      if (!d) {
+        return undefined;
+      }
+      const scheduleDays = this.scheduleService.createScheduleDaysWithContext({
+        daysToShow: [d],
+        contextNow: anchorContextNow(d, Date.now()),
+        realNow: Date.now(),
+        currentTaskId: this.taskService.currentTaskId() ?? null,
+      });
+      return toScheduleDayPage(d, scheduleDays);
+    });
+  }
 
   goToPreviousPeriod(): void {
     // Never navigate into the past — the displayed range must include today or later
@@ -343,8 +436,9 @@ export class ScheduleComponent {
       previousPeriod.setDate(currentDate.getDate() - daysToSkip);
       previousPeriod.setHours(0, 0, 0, 0);
 
-      // If going back would land on or before today, snap to "today view" (null)
-      const todayMidnight = new Date();
+      // If going back would land on or before today, snap to "today view" (null).
+      // Today is the logical day the today view shows, as in goToNextPeriod.
+      const todayMidnight = this._dateService.getLogicalTodayDate();
       todayMidnight.setHours(0, 0, 0, 0);
       if (previousPeriod.getTime() <= todayMidnight.getTime()) {
         this._selectedDate.set(null);
@@ -355,7 +449,7 @@ export class ScheduleComponent {
   }
 
   goToNextPeriod(): void {
-    const currentDate = this._selectedDate() || new Date();
+    const currentDate = this._selectedDate() || this._dateService.getLogicalTodayDate();
     const selectedView = this._currentTimeViewMode();
 
     if (selectedView === 'month') {
@@ -391,6 +485,19 @@ export class ScheduleComponent {
     this.isHScrolled.set(el.scrollLeft > 0);
   }
 
+  // The month grid is taller than the wrapper on a short window, so a scroll
+  // position carried over from week view clamps to the bottom and opens the
+  // month with its first row above the viewport (#9463 review). scrollTo is
+  // safe here where _scrollAnchorToTop's measured offsets would not be, since
+  // a fixed origin is independent of the warpRoute scale.
+  private _resetScrollWrapper(): void {
+    this._scrollWrapper()?.nativeElement.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'instant',
+    });
+  }
+
   // Scroll one of the schedule's time anchors to the top of the scroll-wrapper.
   //
   // The framing (lead above the target, and clearance for the sticky time
@@ -404,11 +511,12 @@ export class ScheduleComponent {
   // is in flight overshoots by the animation's current scale.
   //
   // The lookup is scoped to this component's own element: the right panel
-  // embeds a second schedule-week that renders its own #current-time.
+  // embeds a second schedule-week that renders its own #current-time. The day
+  // view's swipe pager renders neighbouring days too; those are inert.
   private _scrollAnchorToTop(elementId: string): void {
-    const element = this._elRef.nativeElement.querySelector(
-      `#${elementId}`,
-    ) as HTMLElement | null;
+    const element = Array.from(
+      this._elRef.nativeElement.querySelectorAll<HTMLElement>(`#${elementId}`),
+    ).find((el) => !el.closest('[inert]'));
 
     element?.scrollIntoView({ block: 'start', inline: 'start', behavior: 'instant' });
   }
@@ -440,6 +548,8 @@ export class ScheduleComponent {
             this.currentTimeRow() !== null ? 'current-time' : 'work-start',
           ),
         );
+      } else {
+        setTimeout(() => this._resetScrollWrapper());
       }
     });
   }

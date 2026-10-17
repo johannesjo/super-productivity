@@ -11,7 +11,7 @@ import { SnackService } from '../../core/snack/snack.service';
 import { DateService } from '../../core/date/date.service';
 import { GlobalConfigService } from '../config/global-config.service';
 import { WorkContextService } from '../work-context/work-context.service';
-import { Task, TaskReminderOptionId, TaskWithSubTasks } from './task.model';
+import { Task, TaskPriority, TaskReminderOptionId, TaskWithSubTasks } from './task.model';
 import {
   selectTaskEntities,
   selectTaskByIdWithSubTaskData,
@@ -30,6 +30,11 @@ import { truncate } from '../../util/truncate';
 import { remindOptionToMilliseconds } from './util/remind-option-to-milliseconds';
 import { getDeadlineAutoPlanFields } from './util/get-deadline-auto-plan-fields';
 import { playDoneSound } from './util/play-done-sound';
+import {
+  getTaskDeleteConfirmData,
+  isTaskDeleteConfirmRequired,
+} from './util/get-task-delete-confirm';
+import { PLAINSPACE_TYPE } from '../issue/issue.const';
 import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
 import { TranslateService, TranslateStore } from '@ngx-translate/core';
 import { getPluralKey } from '../../util/get-plural-key';
@@ -41,9 +46,12 @@ import {
   resolveTagIntent,
   splitParentOnly,
 } from './task-bulk-action.util';
+import { TASK_PRIORITY_LABEL_KEY, getTaskPriority } from './task-priority.const';
 import { isTouchActive } from '../../util/input-intent';
 import { LocaleDatePipe } from '../../ui/pipes/locale-date.pipe';
 import { msToString } from '../../ui/duration/ms-to-string.pipe';
+import { ADD_TASK_INLINE_BTN_SELECTOR } from '../planner/add-task-inline/add-task-inline.const';
+import { getNextPlannerAddButton } from '../planner/get-next-planner-add-button';
 
 interface DateTimePick {
   date: Date | null;
@@ -153,8 +161,10 @@ export class TaskBulkActionService {
 
   /**
    * More than one task always confirms, regardless of `isConfirmBeforeDelete`:
-   * there is no undo for a bulk delete yet. A single selected task takes the
-   * normal single-task path (setting + undo snack).
+   * there is no undo for a bulk delete yet. For the same reason that confirm
+   * keeps the default initial focus on Cancel, so Delete then Enter cannot
+   * remove a whole selection. A single selected task takes the normal
+   * single-task path (setting + undo snack).
    *
    * Top-level tasks go through `deleteTasks` in one op. A subtask whose parent
    * survives goes through the singular `deleteTask` instead: older clients'
@@ -178,7 +188,9 @@ export class TaskBulkActionService {
           data: {
             okTxt: T.F.TASK.MULTI_SELECT.D_CONFIRM_DELETE.OK,
             message: this._plural(
-              'F.TASK.MULTI_SELECT.D_CONFIRM_DELETE.MSG',
+              tasks.some((t) => t.issueType === PLAINSPACE_TYPE)
+                ? 'F.TASK.MULTI_SELECT.D_CONFIRM_DELETE.MSG_PLAINSPACE'
+                : 'F.TASK.MULTI_SELECT.D_CONFIRM_DELETE.MSG',
               tasks.length,
             ),
             translateParams: { count: tasks.length },
@@ -207,15 +219,11 @@ export class TaskBulkActionService {
   private async _deleteSingle(task: Task): Promise<void> {
     const isConfirmBeforeDelete =
       this._globalConfigService.cfg()?.tasks?.isConfirmBeforeDelete ?? true;
-    if (isConfirmBeforeDelete) {
+    if (isTaskDeleteConfirmRequired(task, isConfirmBeforeDelete)) {
       const isConfirm = await firstValueFrom(
         this._matDialog
           .open(DialogConfirmComponent, {
-            data: {
-              okTxt: T.F.TASK.D_CONFIRM_DELETE.OK,
-              message: T.F.TASK.D_CONFIRM_DELETE.MSG,
-              translateParams: { title: truncate(task.title) },
-            },
+            data: getTaskDeleteConfirmData(task, truncate(task.title)),
           })
           .afterClosed(),
       );
@@ -235,9 +243,14 @@ export class TaskBulkActionService {
 
   // ---- PROJECT ----------------------------------------------------------
 
-  async moveToProject(projectId: string): Promise<void> {
+  async moveToProject(projectId: string, taskIds?: readonly string[]): Promise<void> {
+    const resolved = taskIds
+      ? taskIds
+          .map((id) => this._taskEntities()[id])
+          .filter((task): task is Task => !!task)
+      : this._resolveInVisualOrder();
     const { eligible, skippedSubtasks } = splitParentOnly(
-      dedupeSubtasksOfSelectedParents(this._resolveInVisualOrder()),
+      dedupeSubtasksOfSelectedParents(resolved),
     );
     const tasks = dedupeByRepeatCfg(eligible.filter((t) => t.projectId !== projectId));
     if (!tasks.length) {
@@ -563,6 +576,33 @@ export class TaskBulkActionService {
     this._finish();
   }
 
+  // ---- PRIORITY ---------------------------------------------------------
+
+  /** Sets one priority on every selected task, or clears it with `null`. */
+  async setPriority(priority: TaskPriority | null): Promise<void> {
+    const tasks = this._resolveInVisualOrder().filter(
+      (t) => getTaskPriority(t.priority) !== priority,
+    );
+    if (!tasks.length) {
+      this._snackNothingToDo();
+      return;
+    }
+    await this._runSuppressed(() =>
+      tasks.forEach((t) => this._taskService.update(t.id, { priority })),
+    );
+    if (priority) {
+      this._snack(
+        'PRIORITY_SET',
+        tasks.length,
+        { priority: this._translateService.instant(TASK_PRIORITY_LABEL_KEY[priority]) },
+        'priority_high',
+      );
+    } else {
+      this._snack('PRIORITY_CLEARED', tasks.length);
+    }
+    this._finish();
+  }
+
   // ---- BACKLOG ----------------------------------------------------------
 
   async moveToBacklog(): Promise<void> {
@@ -761,13 +801,19 @@ export class TaskBulkActionService {
     const selectedPlannerRow = rows.find(
       (row) => row.matches('planner-task') && selected.has(idOf(row)),
     );
-    return (
-      selectedPlannerRow
-        ?.closest<HTMLElement>(
-          'planner-day[data-planner-selection-scope], [data-board-selection-scope]',
-        )
-        ?.querySelector<HTMLElement>('add-task-inline button') ?? null
+    const rowScope = selectedPlannerRow?.closest<HTMLElement>(
+      '[data-planner-selection-scope], [data-board-selection-scope]',
     );
+    if (!rowScope) {
+      return null;
+    }
+    const inScope = rowScope.querySelector<HTMLElement>(ADD_TASK_INLINE_BTN_SELECTOR);
+    if (inScope || rowScope.matches('[data-board-selection-scope]')) {
+      // Board panels stop here even with nothing to offer: reaching into a
+      // sibling panel is the cross-panel jump this fallback exists to avoid.
+      return inScope ?? null;
+    }
+    return getNextPlannerAddButton(rowScope);
   }
 
   /**

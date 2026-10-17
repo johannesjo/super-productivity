@@ -186,6 +186,45 @@ describe('TaskMultiSelectService', () => {
       expect(service.selectionScope()).toBeNull();
     });
 
+    it('keeps the originating panel when the anchor row is deselected', () => {
+      const [, right] = boardRows();
+      const scope = right[0].parentElement;
+      stubActiveElement(right[0]);
+      service.toggle('shared');
+      stubActiveElement(right[1]);
+      service.toggle('middle');
+
+      // Deselecting the anchor while the rest of the selection stays put must
+      // not drop the scope: focus moves into the bulk menu after an action, so
+      // selectionScope() is what keeps the post-action focus search inside this
+      // panel instead of widening it to the whole document.
+      service.toggle('middle');
+      stubActiveElement(document.body);
+
+      expect(selected()).toEqual(['shared']);
+      expect(service.anchorId()).toBeNull();
+      expect(service.selectionScope()).toBe(scope);
+    });
+
+    it('re-points a retained scope that holds none of the remaining selection', () => {
+      const [left, right] = boardRows();
+      stubActiveElement(left[1]);
+      service.toggle('left');
+      stubActiveElement(right[1]);
+      service.toggle('middle');
+      expect(service.selectionScope()).toBe(right[1].parentElement);
+
+      // Deselecting the anchor leaves the selection entirely in the OTHER
+      // panel. Keeping the anchor's panel would scope the post-action focus
+      // search to a panel with nothing selected in it, and it would then find
+      // no target at all — worse than no scope, which at least widens.
+      service.toggle('middle');
+      stubActiveElement(document.body);
+
+      expect(selected()).toEqual(['left']);
+      expect(service.selectionScope()).toBe(left[1].parentElement);
+    });
+
     it('extends a moved selection from its original anchor in the destination', () => {
       const [left, right] = boardRows();
       left[1].dataset.taskId = 'middle';
@@ -213,6 +252,32 @@ describe('TaskMultiSelectService', () => {
       expect(selected()).toEqual(['p3']);
     });
     it('selects the target alone when there is no anchor', () => {
+      service.selectRange('c');
+      expect(selected()).toEqual(['c']);
+      expect(service.anchorId()).toBe('c');
+    });
+
+    // #10143: a plain click only focuses a row, so it has to anchor the range.
+    it('starts the range at the focused row when nothing is selected', () => {
+      focusRow('a');
+      service.selectRange('c');
+      expect(selected()).toEqual(['a', 'b', 'c']);
+      expect(service.anchorId()).toBe('a');
+    });
+
+    it('starts the range at the focused row after the anchor was deselected', () => {
+      service.toggle('a');
+      service.toggle('c');
+      service.toggle('c');
+      expect(service.anchorId()).toBeNull();
+      focusRow('c');
+      service.selectRange('d');
+      expect(selected()).toEqual(['c', 'd']);
+      expect(service.anchorId()).toBe('c');
+    });
+
+    it('selects the target alone when the focused row is in another list', () => {
+      focusRow('e');
       service.selectRange('c');
       expect(selected()).toEqual(['c']);
       expect(service.anchorId()).toBe('c');
@@ -248,10 +313,83 @@ describe('TaskMultiSelectService', () => {
       expect(service.anchorId()).toBe('e');
     });
 
+    // No range can be built across lists, but the user still held Ctrl to ADD.
+    // Replacing the selection there threw away everything already picked.
+    it('keeps the existing selection when an additive target is in another list', () => {
+      service.toggle('a');
+      service.toggle('c');
+      service.selectRange('e', true);
+      expect(selected()).toEqual(['a', 'c', 'e']);
+      expect(service.anchorId()).toBe('e');
+    });
+
     it('ranges inside a subtask list when the anchor is a subtask', () => {
       service.toggle('b1');
       service.selectRange('b2');
       expect(selected()).toEqual(['b1', 'b2']);
+    });
+  });
+
+  describe('section ranges', () => {
+    beforeEach(() => {
+      const scope = document.createElement('div');
+      scope.setAttribute('data-section-selection-scope', '');
+      const main = root.querySelector('.task-list-inner[data-list-id="PARENT"]')!;
+      root.prepend(scope);
+      scope.append(main);
+      const section = document.createElement('div');
+      section.innerHTML =
+        '<div class="task-list-inner" data-list-id="PARENT"><task data-task-id="f" tabindex="0"></task><task data-task-id="g" tabindex="0"></task></div>';
+      scope.append(section);
+    });
+
+    it('ranges from root to a section without including subtasks or done tasks', () => {
+      service.toggle('c');
+      service.selectRange('g');
+      expect(selected()).toEqual(['c', 'd', 'f', 'g']);
+    });
+
+    it('ranges upward across sections and shrinks back to its anchor', () => {
+      service.toggle('g');
+      service.selectRange('b');
+      expect(selected()).toEqual(['b', 'c', 'd', 'f', 'g']);
+      service.selectRange('f');
+      expect(selected()).toEqual(['f', 'g']);
+      expect(service.anchorId()).toBe('g');
+    });
+
+    it('keeps an existing selection with additive cross-section ranges', () => {
+      service.toggle('a');
+      service.toggle('d');
+      service.selectRange('g', true);
+      expect(selected()).toEqual(['a', 'd', 'f', 'g']);
+    });
+
+    it('excludes destroyed parent rows still animating out of a section', () => {
+      const removed = root.querySelector<HTMLElement>('[data-task-id="f"]')!;
+      service.removeWhenUnrendered('f', removed);
+      service.toggle('d');
+      service.selectRange('g');
+      expect(selected()).toEqual(['d', 'g']);
+    });
+
+    it('starts a local keyboard range when focus is in another section', () => {
+      service.toggle('a');
+      focusRow('f');
+      expect(extend('down')?.dataset.taskId).toBe('g');
+      expect(selected()).toEqual(['g']);
+      expect(service.anchorId()).toBe('g');
+    });
+
+    it('keeps subtask ranges and keyboard navigation within their own lists', () => {
+      service.toggle('b1');
+      service.selectRange('g');
+      expect(selected()).toEqual(['g']);
+      service.clear();
+      focusRow('d');
+      expect(extend('down')).toBeNull();
+      service.selectAllInListOfFocused();
+      expect(selected()).toEqual(['a', 'b', 'c', 'd']);
     });
   });
 

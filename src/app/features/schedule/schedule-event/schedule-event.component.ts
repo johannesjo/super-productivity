@@ -43,6 +43,7 @@ import { DateTimeFormatService } from '../../../core/date-time-format/date-time-
 import { FH } from '../schedule.const';
 import { CalendarEventActionsService } from '../../calendar-integration/calendar-event-actions.service';
 import { isTouchActive } from '../../../util/input-intent';
+import { isLinkTarget } from '../../../util/dom-element';
 
 const FIVE_MINUTES_IN_MS = 5 * 60 * 1000;
 
@@ -371,8 +372,7 @@ export class ScheduleEventComponent implements AfterViewInit, OnDestroy {
   });
 
   async clickHandler(event: MouseEvent): Promise<void> {
-    const target = event.target as HTMLElement | null;
-    if (target?.tagName === 'A' || target?.closest('a')) {
+    if (isLinkTarget(event.target)) {
       return; // Let link clicks propagate without opening the schedule event panel
     }
     // Prevent opening dialog when resizing or just finished resizing

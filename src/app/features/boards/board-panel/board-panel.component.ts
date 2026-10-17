@@ -72,6 +72,11 @@ import { TaskBulkActionService } from '../../tasks/task-bulk-action.service';
 import { reorderBoardTasks } from '../reorder-board-tasks';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { checkKeyCombo } from '../../../util/check-key-combo';
+import { ADD_TASK_INLINE_BTN_SELECTOR } from '../../planner/add-task-inline/add-task-inline.const';
+import { getScheduledDateColor } from '../../tasks/util/get-scheduled-date-color';
+import type { ScheduledDateColor } from '../../tasks/util/get-scheduled-date-color';
+import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
+import { DateService } from '../../../core/date/date.service';
 
 export interface BoardPanelNavigation {
   direction: -1 | 1 | 'up' | 'down';
@@ -119,6 +124,8 @@ export class BoardPanelComponent implements TaskCardList {
   taskService = inject(TaskService);
   _matDialog = inject(MatDialog);
   readonly multiSelect = inject(TaskMultiSelectService);
+  private readonly _trackingInterval = inject(GlobalTrackingIntervalService);
+  private readonly _dateService = inject(DateService);
   private _element = inject<ElementRef<HTMLElement>>(ElementRef);
   private _injector = inject(Injector);
   private _destroyRef = inject(DestroyRef);
@@ -131,7 +138,7 @@ export class BoardPanelComponent implements TaskCardList {
   }
 
   addButton(): HTMLElement | null {
-    return this._element.nativeElement.querySelector('add-task-inline button');
+    return this._element.nativeElement.querySelector(ADD_TASK_INLINE_BTN_SELECTOR);
   }
 
   focusRow(index: number, taskId?: string): void {
@@ -305,6 +312,13 @@ export class BoardPanelComponent implements TaskCardList {
     const panelCfg = this.panelCfg();
     const orderedTasks: TaskCopy[] = [];
     const nonOrderedTasks: TaskCopy[] = [];
+    const taskOrder = new Map<string, number>();
+    panelCfg.taskIds.forEach((id, index) => {
+      // Preserve indexOf's first-occurrence ordering for repeated IDs.
+      if (!taskOrder.has(id)) {
+        taskOrder.set(id, index);
+      }
+    });
 
     // Hoist the backlog predicate out of the filter callback so it's allocated
     // once per recompute, not once per task.
@@ -314,8 +328,8 @@ export class BoardPanelComponent implements TaskCardList {
     );
 
     allFilteredTasks.forEach((task) => {
-      const index = panelCfg.taskIds.indexOf(task.id);
-      if (index > -1) {
+      const index = taskOrder.get(task.id);
+      if (index !== undefined) {
         orderedTasks[index] = task;
       } else {
         nonOrderedTasks.push(task);
@@ -524,6 +538,22 @@ export class BoardPanelComponent implements TaskCardList {
 
     this._checkToScheduledTask(panelCfg, taskId);
     this._checkBacklogState(panelCfg, taskId);
+  }
+
+  scheduledDateColor(task: TaskCopy): ScheduledDateColor {
+    if (
+      task.isDone ||
+      this.taskService.currentTaskId() === task.id ||
+      (!task.dueDay && !task.dueWithTime)
+    ) {
+      return '';
+    }
+    return getScheduledDateColor(
+      task,
+      this._trackingInterval.todayDateStr(),
+      this._dateService.getStartOfNextDayDiffMs(),
+      task.dueWithTime ? this._trackingInterval.clockTimestamp() : 0,
+    );
   }
 
   scheduleTask(task: TaskCopy, ev?: MouseEvent): void {

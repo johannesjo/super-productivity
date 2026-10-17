@@ -16,12 +16,15 @@ import { COMPACTION_THRESHOLD } from '../core/operation-log.const';
 import {
   bufferDeferredAction,
   clearDeferredActions,
+  DEFERRED_ACTIONS_RELOAD_WARNING_THRESHOLD,
   getDeferredActions,
 } from './operation-capture.meta-reducer';
 import { ClientIdService } from '../../core/util/client-id.service';
+import { reducerFailureGuardMetaReducer } from '../../root-store/meta/reducer-failure-guard.meta-reducer';
 import { OperationCaptureService } from './operation-capture.service';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { T } from '../../t.const';
+import { SnackParams } from '../../core/snack/snack.model';
 import { updateGlobalConfigSection } from '../../features/config/store/global-config.actions';
 
 describe('OperationLogEffects', () => {
@@ -127,6 +130,73 @@ describe('OperationLogEffects', () => {
     clearDeferredActions();
   });
 
+  describe('notifyStuckDeferredBuffer$ (#8297)', () => {
+    beforeEach(() => {
+      // devError (dev build) alerts and throws when confirm() returns true.
+      if (!jasmine.isSpy(window.alert)) {
+        spyOn(window, 'alert');
+      }
+      const confirmSpy = jasmine.isSpy(window.confirm)
+        ? (window.confirm as jasmine.Spy)
+        : spyOn(window, 'confirm');
+      confirmSpy.and.returnValue(false);
+    });
+
+    afterEach(() => {
+      (window.confirm as jasmine.Spy).and.returnValue(true);
+    });
+
+    it('should show one sticky error once the deferred buffer looks stuck', () => {
+      const actions = Array.from(
+        { length: DEFERRED_ACTIONS_RELOAD_WARNING_THRESHOLD },
+        () => createPersistentAction(ActionType.TASK_SHARED_UPDATE),
+      );
+      actions.forEach((a) => bufferDeferredAction(a));
+      actions$ = of(actions[actions.length - 1], actions[0]);
+
+      effects.notifyStuckDeferredBuffer$.subscribe();
+
+      expect(mockSnackService.open).toHaveBeenCalledTimes(1);
+      expect(mockSnackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          type: 'ERROR',
+          msg: T.F.SYNC.S.DEFERRED_ACTIONS_STUCK,
+          config: { duration: 0 },
+        }),
+      );
+    });
+
+    it('should close the notice once the deferred buffer drains', async () => {
+      const actions = Array.from(
+        { length: DEFERRED_ACTIONS_RELOAD_WARNING_THRESHOLD },
+        () => createPersistentAction(ActionType.TASK_SHARED_UPDATE),
+      );
+      actions.forEach((a) => bufferDeferredAction(a));
+      actions$ = of(actions[actions.length - 1]);
+      effects.notifyStuckDeferredBuffer$.subscribe();
+      const { showWhile$ } = mockSnackService.open.calls.mostRecent()
+        .args[0] as SnackParams;
+      const shown: unknown[] = [];
+      (showWhile$ as Observable<unknown>).subscribe((v) => shown.push(v));
+
+      await effects.processDeferredActions();
+      // The settle ping runs on the serialization chain, one tick after `run`.
+      await Promise.resolve();
+
+      expect(shown).toEqual([true, false]);
+    });
+
+    it('should stay quiet below the threshold', () => {
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
+      bufferDeferredAction(action);
+      actions$ = of(action);
+
+      effects.notifyStuckDeferredBuffer$.subscribe();
+
+      expect(mockSnackService.open).not.toHaveBeenCalled();
+    });
+  });
+
   describe('persistOperation$', () => {
     it('should persist operation for persistent action', (done) => {
       const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
@@ -167,6 +237,27 @@ describe('OperationLogEffects', () => {
       effects.persistOperation$.subscribe({
         complete: () => {
           expect(mockOpLogStore.appendWithVectorClockOverwrite).not.toHaveBeenCalled();
+          done();
+        },
+      });
+    });
+
+    it('should skip actions the reducer rejected (#10195): no op, no pending decrement', (done) => {
+      // Run the real guard over a throwing reducer so the action is marked the
+      // same way it is in the app (rejected by instance, no pending increment).
+      const action = createPersistentAction(ActionType.TASK_SHARED_UPDATE);
+      (window.confirm as jasmine.Spy).and.returnValue(false);
+      reducerFailureGuardMetaReducer<unknown>(() => {
+        throw new Error('reducer boom');
+      })({}, action);
+      (window.confirm as jasmine.Spy).and.returnValue(true);
+      actions$ = of(action);
+
+      effects.persistOperation$.subscribe({
+        complete: () => {
+          expect(mockOpLogStore.appendWithVectorClockOverwrite).not.toHaveBeenCalled();
+          expect(mockOpLogStore.append).not.toHaveBeenCalled();
+          expect(mockOperationCaptureService.decrementPending).not.toHaveBeenCalled();
           done();
         },
       });
@@ -909,6 +1000,34 @@ describe('OperationLogEffects', () => {
         }),
         'local',
       );
+    });
+
+    it('should keep entityChanges: [] for a deferred write (pinned wire shape)', async () => {
+      // Deferred writes have never gone through the extractor. Keeping them
+      // opaque is deliberate: released clients merge a non-empty syncTimeSpent
+      // entityChanges as field values, so widening extraction to deferred
+      // writes would expose more ops to that path (#8758 stays open).
+      const action = createPersistentAction(
+        ActionType.TIME_TRACKING_SYNC_TIME_SPENT,
+        false,
+        {
+          taskId: 'task-1',
+          date: '2026-09-12',
+          duration: 60000,
+        },
+      );
+      mockOperationCaptureService.extractEntityChanges.calls.reset();
+
+      bufferDeferredAction(action);
+      await effects.processDeferredActions();
+
+      const deferredOp =
+        mockOpLogStore.appendWithVectorClockOverwrite.calls.mostRecent().args[0];
+      expect(mockOperationCaptureService.extractEntityChanges).not.toHaveBeenCalled();
+      expect(deferredOp.payload).toEqual({
+        actionPayload: { taskId: 'task-1', date: '2026-09-12', duration: 60000 },
+        entityChanges: [],
+      });
     });
 
     it('should do nothing when no deferred actions are buffered', async () => {
