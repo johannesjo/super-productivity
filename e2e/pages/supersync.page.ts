@@ -222,8 +222,8 @@ export class SuperSyncPage extends BasePage {
     // also match the badge that released clients render.
     this.syncCheckIcon = page.locator(cssSelectors.SYNC_UPLOADED);
     this.syncConfirmedIcon = page.locator(cssSelectors.SYNC_REMOTE_CONFIRMED);
-    // Error state shows sync_problem icon (no special class, just the icon name)
-    this.syncErrorIcon = page.locator('.sync-btn mat-icon:has-text("sync_problem")');
+    // Error state shows the sync error icon (also matches released clients)
+    this.syncErrorIcon = page.locator(cssSelectors.SYNC_ERROR);
     // Legacy Angular fresh-client dialog elements. Keep this locator scoped so a
     // different generic confirmation can never be accepted as a sync prompt.
     this.freshClientDialog = page

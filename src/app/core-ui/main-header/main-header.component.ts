@@ -186,7 +186,7 @@ export class MainHeaderComponent implements OnDestroy {
     { initialValue: false },
   );
   isOnline = toSignal(isOnline$);
-  // State-aware tooltip for the sync button: the icon alone (sync_problem /
+  // State-aware tooltip for the sync button: the icon alone (sync_error /
   // wifi_off) signals a problem but never explains it. Surfacing the state in
   // the tooltip is the ambient counterpart to suppressing the transient
   // network snack on automatic syncs — a persistent problem stays discoverable
@@ -213,26 +213,28 @@ export class MainHeaderComponent implements OnDestroy {
     }
     return T.MH.TRIGGER_SYNC;
   });
-  // One glyph per state, nothing drawn over it. A badge inside the 24px ring
-  // collided with the arrows and could not get a backing disc, because the
-  // header background varies (#10427). Same precedence as `syncTooltip`.
+  // One icon per state, nothing drawn over it (#10427). All but `wifi_off` are
+  // the SVG icons in `BUILT_IN_SVG_ICONS`: one sync ring at the header's icon
+  // size, with a check, "!" or slash inside, so the arrows stay identical
+  // across states and in-sync differs from pending only by the check.
+  // Same precedence as `syncTooltip`.
   syncIcon = computed(() => {
     if (!this.syncIsEnabledAndReady()) {
-      return 'sync_disabled';
+      return 'sync_off';
     }
     if (!this.isOnline()) {
       return 'wifi_off';
     }
     if (this.syncState() === 'ERROR') {
-      return 'sync_problem';
+      return 'sync_error';
     }
     if (this.isSyncInProgress()) {
-      return 'sync';
+      return 'sync_ring';
     }
-    return this.hasNoPendingOps() ? 'cloud_done' : 'sync';
+    return this.hasNoPendingOps() ? 'sync_done' : 'sync_ring';
   });
   isSyncIconSpinning = computed(
-    () => this.syncIcon() === 'sync' && !!this.isSyncInProgress(),
+    () => this.syncIcon() === 'sync_ring' && !!this.isSyncInProgress(),
   );
   // Test hook for the E2E sync helpers, which wait on these states. 'local':
   // every local change is uploaded. 'remote': the remote was also checked
