@@ -97,6 +97,10 @@ are required arrays (use `[]` when unused), while `description` is optional.
 Do not rely on the installer's deliberately minimal runtime checks to infer the
 TypeScript contract.
 
+Of the declared permissions, the app checks only `nodeExecution`, `http`
+together with `allowedHosts`, and `deleteProject`. The rest are shown in the
+plugin's details but not enforced; see [Security Considerations](#security-considerations).
+
 ### Complete Manifest Example
 
 ```json
@@ -383,8 +387,9 @@ PluginAPI.showSnack({
   msg: 'Operation completed!',
   type: 'SUCCESS', // SUCCESS, ERROR, INFO, WARNING
   ico: 'check', // Optional Material icon
-  actionStr: 'Undo', // Optional action button
-  actionFn: () => console.log('Undo clicked'),
+  // Optional action button; the snack then stays visible longer.
+  // plugin.js only: functions cannot cross the iframe message boundary.
+  action: { label: 'Undo', onClick: () => console.log('Undo clicked') },
 });
 
 // System notification
@@ -453,6 +458,29 @@ PluginAPI.registerMenuEntry({
   },
 });
 ```
+
+#### Task Context Menu Entry
+
+Task context-menu entries can only be registered from host-side `plugin.js` code.
+The callback receives only the selected task ID; use the task API to read or
+update the task when needed.
+
+```javascript
+PluginAPI.registerTaskContextMenuEntry({
+  id: 'copy-external-link', // Unique within this plugin
+  label: 'Copy external link',
+  icon: 'link', // Optional Material icon ligature name (custom SVGs are not supported)
+  showFor: ['TASK'], // Optional: TASK, SUBTASK, or both when omitted; [] is invalid
+  onClick: ({ taskId }) => {
+    console.log('Selected task:', taskId);
+  },
+});
+```
+
+Entries appear under **Plugin actions** in the task's context menu. Labels contain at
+most 80 characters; add a short plugin-specific prefix yourself when disambiguation is
+needed. Re-registering the same `id` replaces the previous entry, and all entries are
+removed when the plugin unloads.
 
 #### Side Panel Button
 
@@ -652,7 +680,8 @@ Consent handling differs by plugin type:
   (forcing a fresh prompt) when you **disable**, **uninstall**, or **re-upload** the
   plugin, so replacing a plugin's code under the same id always re-asks. To revoke access
   without removing the plugin, simply disable it.
-- **Built-in plugins** (e.g. `sync-md`) keep the per-session prompt and are not persisted.
+- **Built-in plugins** (e.g. `sync-md`) use the same ask-once consent, shown with the
+  verified on-disk name. Disabling the plugin clears it.
 
 > **Plugin id constraints (for `nodeExecution`):** the consent grant keys on your
 > manifest `id`, so it must be a single safe token — no whitespace, control/bidi
@@ -795,10 +824,10 @@ Iframe plugins receive a filtered `window.PluginAPI` object injected into `index
 The iframe can use the injected task/project/tag APIs, dialog and notification APIs,
 navigation helpers, persistence helpers, counters, action dispatch, `registerHook()`,
 and `registerWorkContextHeaderButton()`. Callback-heavy registration methods such as
-`registerHeaderButton()`, `registerMenuEntry()`, `registerSidePanelButton()`,
-`registerShortcut()`/`unregisterShortcut()`, and `registerConfigHandler()` must be
-called from host-side `plugin.js` code. APIs not injected into the iframe are
-unavailable, even if they exist on the host-side plugin bridge.
+`registerHeaderButton()`, `registerMenuEntry()`, `registerTaskContextMenuEntry()`,
+`registerSidePanelButton()`, `registerShortcut()`/`unregisterShortcut()`, and
+`registerConfigHandler()` must be called from host-side `plugin.js` code. APIs not
+injected into the iframe are unavailable, even if they exist on the host-side plugin bridge.
 
 `executeNodeScript()` is proxied through the host bridge for iframe plugins when
 the desktop app grants the plugin `nodeExecution` permission.

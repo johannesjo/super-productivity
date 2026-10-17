@@ -44,14 +44,15 @@
   <div
     class="nav-children"
     role="list"
+    [id]="'group-' + item().id"
     draggable="false"
-    [@.disabled]="!shouldAnimateExpandCollapse()"
     [@expandCollapse]
   >
     <tree-dnd
       [nodes]="treeNodes()"
       (nodesChange)="onTreeUpdated($event)"
-      [indent]="16"
+      [indent]="treeIndent()"
+      [baseIndent]="treeIndent()"
     >
       <!-- Template for folder nodes -->
       <ng-template
@@ -88,7 +89,7 @@
           class="nav-child-item"
           [class.draggable]="node.data?.k !== MenuTreeKind.TAG"
         >
-          @switch (node.data?.k) {
+          @switch ($safeNavigationMigration(node.data?.k)) {
             @case (MenuTreeKind.PROJECT) {
               <nav-item
                 [workContext]="node.data.project"

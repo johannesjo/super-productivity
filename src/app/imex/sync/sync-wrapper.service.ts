@@ -24,7 +24,6 @@ import {
   LegacySyncFormatDetectedError,
   IncompleteRemoteOperationsError,
   PlaintextWhenEncryptionExpectedError,
-  SyncDataCorruptedError,
   UploadRevToMatchMismatchAPIError,
   ForceUploadFailedError,
   ForceUploadPendingOpsError,
@@ -33,6 +32,7 @@ import {
   UnsupportedMultiEntityConflictError,
 } from '../../op-log/core/errors/sync-errors';
 import { MAX_LWW_REUPLOAD_RETRIES } from '../../op-log/core/operation-log.const';
+import { countTransientRejections } from '../../op-log/sync/upload-outcome.util';
 import { SyncConfig } from '../../features/config/global-config.model';
 import { TranslateService } from '@ngx-translate/core';
 import { MatDialog, MatDialogRef } from '@angular/material/dialog';
@@ -67,11 +67,16 @@ import { ReminderService } from '../../features/reminder/reminder.service';
 import { DialogHandleDecryptErrorComponent } from './dialog-handle-decrypt-error/dialog-handle-decrypt-error.component';
 import { DialogEnterEncryptionPasswordComponent } from './dialog-enter-encryption-password/dialog-enter-encryption-password.component';
 import { SyncLog } from '../../core/log';
+import { SyncUploadRejectionNoticeService } from './sync-upload-rejection-notice.service';
 import { promiseTimeout } from '../../util/promise-timeout';
 import { devError } from '../../util/dev-error';
 import { alertDialog, confirmDialog } from '../../util/native-dialogs';
 import { UserInputWaitStateService } from './user-input-wait-state.service';
 import { SYNC_WAIT_TIMEOUT_MS } from './sync.const';
+import {
+  isSyncIncompatibleVersionError,
+  SyncIncompatibleVersionNoticeService,
+} from './sync-incompatible-version-notice.service';
 import { SuperSyncStatusService } from '../../op-log/sync/super-sync-status.service';
 import { SuperSyncWebSocketService } from '../../op-log/sync/super-sync-websocket.service';
 import { WsTriggeredDownloadService } from '../../op-log/sync/ws-triggered-download.service';
@@ -100,7 +105,6 @@ export type ForceUploadTriggerSource =
   | 'InvalidFilePrefixError'
   | 'JsonParseError'
   | 'LegacySyncFormatDetectedError'
-  | 'DecryptError'
   | 'unknown';
 
 /**
@@ -126,6 +130,8 @@ export class SyncWrapperService {
 
   private _reminderService = inject(ReminderService);
   private _userInputWaitState = inject(UserInputWaitStateService);
+  private _incompatibleVersionNotice = inject(SyncIncompatibleVersionNoticeService);
+  private _uploadRejectionNotice = inject(SyncUploadRejectionNoticeService);
   private _superSyncStatusService = inject(SuperSyncStatusService);
   private _superSyncWsService = inject(SuperSyncWebSocketService);
   private _wsDownloadService = inject(WsTriggeredDownloadService);
@@ -624,6 +630,7 @@ export class SyncWrapperService {
           forceFromSeq0: isProviderSwitch || undefined,
           isNeverSynced: isNeverSyncedAtSyncStart,
           fenceEpoch,
+          keepDecryptedPrefix: true,
         },
       );
       // Auth is confirmed working if download didn't throw AuthFailSPError.
@@ -745,12 +752,19 @@ export class SyncWrapperService {
         downloadResult.kind === 'ops_processed' ? downloadResult.localWinOpsCreated : 0;
       const uploadLwwOps =
         uploadResult.kind === 'completed' ? uploadResult.localWinOpsCreated : 0;
+      // A transient server rejection (INTERNAL_ERROR, e.g. a Postgres
+      // serialization conflict) leaves the op pending with nothing scheduled to
+      // re-send it until the next sync trigger — a whole auto-sync interval, and
+      // the header keeps showing unsynced changes meanwhile. The server asked for
+      // a retry, so fold those ops into the same bounded re-upload loop.
+      const uploadTransientOps =
+        uploadResult.kind === 'completed' ? countTransientRejections(uploadResult) : 0;
       let lwwRetries = 0;
-      let pendingLwwOps = downloadLwwOps + uploadLwwOps;
+      let pendingLwwOps = downloadLwwOps + uploadLwwOps + uploadTransientOps;
       while (pendingLwwOps > 0 && lwwRetries < MAX_LWW_REUPLOAD_RETRIES) {
         lwwRetries++;
         SyncLog.log(
-          `SyncWrapperService: Re-uploading ${pendingLwwOps} local-win op(s) from LWW ` +
+          `SyncWrapperService: Re-uploading ${pendingLwwOps} pending op(s) (LWW local-win or transiently rejected) ` +
             `(attempt ${lwwRetries}/${MAX_LWW_REUPLOAD_RETRIES})...`,
         );
         // Re-thread isNeverSyncedAtSyncStart (the snapshot captured BEFORE the
@@ -783,7 +797,9 @@ export class SyncWrapperService {
           completedUploadResults.push(reuploadResult);
         }
         pendingLwwOps =
-          reuploadResult.kind === 'completed' ? reuploadResult.localWinOpsCreated : 0;
+          reuploadResult.kind === 'completed'
+            ? reuploadResult.localWinOpsCreated + countTransientRejections(reuploadResult)
+            : 0;
       }
       if (completedUploadResults.some((result) => result.blockedByRejectedFullState)) {
         SyncLog.err(
@@ -1048,16 +1064,8 @@ export class SyncWrapperService {
           actionStr: T.F.SYNC.S.BTN_FORCE_OVERWRITE,
         });
         return 'HANDLED_ERROR';
-      } else if (error instanceof SyncDataCorruptedError) {
-        // Remote file format version is incompatible (could be older or newer than local).
-        // Do NOT offer force-upload: if remote is newer, overwriting would destroy newer data.
-        // Users should ensure all devices run the same app version.
-        this._providerManager.setSyncStatus('ERROR');
-        this._snackService.open({
-          msg: T.F.SYNC.S.ERROR_SYNC_VERSION_MISMATCH,
-          type: 'ERROR',
-          config: { duration: 12000 },
-        });
+      } else if (isSyncIncompatibleVersionError(error)) {
+        this._incompatibleVersionNotice.show(error);
         return 'HANDLED_ERROR';
       } else if (error instanceof LegacySyncFormatDetectedError) {
         // Remote has v16.x pfapi files (__meta_) but no sync-data.json. Usual cause:
@@ -1243,14 +1251,11 @@ export class SyncWrapperService {
         });
         return 'HANDLED_ERROR';
       } else if (error instanceof UploadRevToMatchMismatchAPIError) {
-        // Another client uploaded between our download and upload — self-healing.
-        // The next sync cycle will download their ops first, then upload successfully.
-        // Do not show an error snackbar; just mark as UNKNOWN_OR_CHANGED so the
-        // next sync cycle triggers and resolves the state.
+        // Usually a concurrent upload the next cycle heals; streaks surface (#10808).
         SyncLog.log(
           'SyncWrapperService: Concurrent upload detected, will retry on next sync cycle',
         );
-        this._providerManager.setSyncStatus('UNKNOWN_OR_CHANGED');
+        this._uploadRejectionNotice.onUploadRejected();
         return 'HANDLED_ERROR';
       } else if (error instanceof FileSyncTargetChangedError) {
         // The file sync target (provider/account/folder) changed while this
@@ -1364,6 +1369,7 @@ export class SyncWrapperService {
     // Diagnostic: stamp the originating error/dialog so we can correlate
     // "what stuck the user" with "what they recovered with" in shared logs.
     SyncLog.log('SyncWrapperService: forceUpload called - uploading local state', {
+      // eslint-disable-next-line local-rules/no-user-content-in-logs -- grandfathered log baseline (2026-09), not yet triaged
       triggerSource,
     });
 
@@ -1633,9 +1639,6 @@ export class SyncWrapperService {
         if (result?.isReSync) {
           this._suppressEncryptionDialogs = false;
           this.sync();
-        } else if (result?.isForceUpload) {
-          this._suppressEncryptionDialogs = false;
-          this.forceUpload('DecryptError');
         } else {
           // User cancelled — suppress future dialogs so they can navigate to settings
           this._suppressEncryptionDialogs = true;
@@ -1663,6 +1666,8 @@ export class SyncWrapperService {
         error instanceof LocalDataConflictError ? error : undefined;
       const unsyncedCount =
         snapshotConflict?.unsyncedCount ?? (await this._opLogStore.getUnsynced()).length;
+      // #9391: LocalDataConflictError w/ 0 pending ops = fresh client w/ store data.
+      const countUnknown = !!snapshotConflict && !unsyncedCount;
       const vcEntry = await this._opLogStore.getVectorClockEntry();
       const localClock = vcEntry?.clock;
       const localLastUpdate = vcEntry?.lastUpdate || Date.now();
@@ -1681,12 +1686,12 @@ export class SyncWrapperService {
           revMap: {},
           crossModelVersion: 1,
           mainModelData: snapshotConflict?.remoteSnapshotState ?? {},
-          isFullData: !!snapshotConflict,
+          isFullData: !!snapshotConflict?.remoteSnapshotState,
           vectorClock: snapshotConflict?.remoteVectorClock,
         },
         local: {
           lastUpdate: localLastUpdate,
-          lastUpdateAction: `${unsyncedCount} local changes pending`,
+          lastUpdateAction: countUnknown ? '?' : `${unsyncedCount} local changes pending`,
           revMap: {},
           crossModelVersion: 1,
           // Op-log errors lack a last-synced timestamp; the dialog shows Never.
@@ -1695,7 +1700,7 @@ export class SyncWrapperService {
           vectorClock: localClock,
           lastSyncedVectorClock: snapshotConflict?.lastSyncedVectorClock ?? null,
         },
-        localUnsyncedOpsCount: unsyncedCount,
+        localUnsyncedOpsCount: countUnknown ? undefined : unsyncedCount,
       };
 
       SyncLog.log('SyncWrapperService: Opening data conflict dialog', {

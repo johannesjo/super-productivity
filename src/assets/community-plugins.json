@@ -174,5 +174,21 @@
     "author": "InitialCrow",
     "authorUrl": "https://github.com/InitialCrow",
     "stars": 0
+  },
+  {
+    "name": "Caffeine Tracker",
+    "shortDescription": "Track caffeine intake and correlate it with task completions, focus, and habits in Super Productivity.",
+    "url": "https://github.com/BigWebstas/sp-caffiene-tracker",
+    "author": "BigWebstas",
+    "authorUrl": "https://github.com/BigWebstas",
+    "stars": 0
+  },
+  {
+    "name": "Auto Tag Manager",
+    "shortDescription": "Automatically applies tags to tasks based on keywords in the task title.",
+    "url": "https://github.com/owarimono/super-productivity-auto-tag",
+    "author": "owarimono",
+    "authorUrl": "https://github.com/owarimono",
+    "stars": 0
   }
 ]

@@ -90,11 +90,13 @@
       }
 
       @if (pluginEmbedId(); as embedId) {
-        <plugin-index
-          [directPluginId]="embedId"
-          [showFullUI]="false"
-          [skipCleanupOnDestroy]="true"
-        ></plugin-index>
+        @defer (on immediate) {
+          <plugin-index
+            [directPluginId]="embedId"
+            [showFullUI]="false"
+            [skipCleanupOnDestroy]="true"
+          ></plugin-index>
+        }
       } @else {
         <div class="task-list-wrapper">
           @if (!(workContextService.isHasTasksToWorkOn$ | async)) {
@@ -146,24 +148,23 @@
                whichever container holds the target, and it mirrors these
                conditions to know which ones are on screen. (#8780) -->
           @if (customizedUndoneTasks(); as customized) {
-            @if (customized.grouped) {
-              @for (
-                groupKey of customizerService.getOrderedGroupKeys(customized.grouped);
-                track groupKey
-              ) {
+            @if (customized.groups) {
+              @for (group of customized.groups; track group.key) {
                 <collapsible
                   class="task-section"
-                  [title]="groupKey | scheduledDateGroup: todayStr()"
+                  [title]="group.key | scheduledDateGroup: todayStr()"
                   [isIconBefore]="true"
-                  [isExpanded]="!customizerService.collapsedGroupIds().includes(groupKey)"
-                  (isExpandedChange)="customizerService.toggleGroupExpansion(groupKey)"
+                  [isExpanded]="
+                    !customizerService.collapsedGroupIds().includes(group.key)
+                  "
+                  (isExpandedChange)="customizerService.toggleGroupExpansion(group.key)"
                   [isGroup]="true"
                 >
                   <task-list
-                    [tasks]="customized.grouped[groupKey]"
+                    [tasks]="group.tasks"
                     listId="PARENT"
                     listModelId="UNDONE"
-                    [groupTagId]="customized.groupTagIdByKey?.[groupKey]"
+                    [groupTagId]="group.tagId"
                   ></task-list>
                 </collapsible>
               }
@@ -171,6 +172,7 @@
               @let bySection = undoneTasksBySection();
               <div
                 class="sections-wrapper"
+                data-section-selection-scope
                 cdkDropList
                 [cdkDropListEnterPredicate]="acceptSectionDragOnly"
                 (cdkDropListDropped)="dropSection($event)"
@@ -409,8 +411,10 @@
                 [isGroup]="true"
               >
                 <div class="repeat-cfg-list">
-                  @for (repeatCfg of repeatCfgsForContext(); track repeatCfg.id) {
-                    <repeat-cfg-preview [repeatCfg]="repeatCfg"></repeat-cfg-preview>
+                  @defer (on immediate) {
+                    @for (repeatCfg of repeatCfgsForContext(); track repeatCfg.id) {
+                      <repeat-cfg-preview [repeatCfg]="repeatCfg"></repeat-cfg-preview>
+                    }
                   }
                 </div>
               </collapsible>
@@ -459,7 +463,7 @@
         <split
           (posChanged)="splitInputPos = $event"
           [containerEl]="containerEl"
-          [counter]="backlogTasks()?.length"
+          [counter]="$safeNavigationMigration(backlogTasks()?.length)"
           [isAnimateBtn]="isTriggerBacklogIconAni$ | async"
           [splitBottomEl]="splitBottomEl"
           [splitPos]="splitInputPos"

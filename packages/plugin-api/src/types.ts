@@ -14,6 +14,29 @@ export interface PluginMenuEntryCfg {
   onClick: () => void;
 }
 
+export type PluginTaskContextMenuTarget = 'TASK' | 'SUBTASK';
+
+export interface PluginTaskContextMenuContext {
+  readonly taskId: string;
+}
+
+/**
+ * A plugin action shown in the task context menu's dedicated plugin submenu.
+ * Register from plugin.js; callback registrations are not supported in iframe
+ * index.html files.
+ */
+export interface PluginTaskContextMenuEntryCfg {
+  /** Unique within this plugin. */
+  id: string;
+  /** A non-empty action label of at most 80 characters. */
+  label: string;
+  /** Optional Material icon ligature name. Custom SVG assets are not supported. */
+  icon?: string;
+  /** Defaults to both regular tasks and subtasks when omitted; an empty array is invalid. */
+  showFor?: readonly PluginTaskContextMenuTarget[];
+  onClick: (context: PluginTaskContextMenuContext) => void | Promise<void>;
+}
+
 export enum PluginHooks {
   TASK_CREATED = 'taskCreated',
   TASK_COMPLETE = 'taskComplete',
@@ -71,6 +94,16 @@ export interface SnackCfg {
   msg: string;
   type?: 'SUCCESS' | 'ERROR' | 'WARNING' | 'INFO';
   ico?: string;
+  /**
+   * Optional action button; the snack stays visible longer when set.
+   * plugin.js only — functions cannot cross the iframe postMessage boundary.
+   */
+  action?: SnackActionCfg;
+}
+
+export interface SnackActionCfg {
+  label: string;
+  onClick: () => void;
 }
 
 export type SnackCfgLimited = SnackCfg;
@@ -522,6 +555,9 @@ export interface PluginAPI {
 
   registerMenuEntry(menuEntryCfg: Omit<PluginMenuEntryCfg, 'pluginId'>): void;
 
+  /** Register an action in the task context menu's plugin submenu. */
+  registerTaskContextMenuEntry(cfg: PluginTaskContextMenuEntryCfg): void;
+
   registerConfigHandler(handler: () => void): void;
 
   registerShortcut(
@@ -652,6 +688,12 @@ export interface PluginAPI {
   selectTask(taskId: string): Promise<void>;
 
   reInitData(): Promise<void>;
+
+  /**
+   * Update a task. Changing `projectId` moves it like the UI does: subtasks
+   * follow, and for a recurring task the repeat config and every instance
+   * (archived ones included) move without a confirmation.
+   */
   updateTask(taskId: string, updates: Partial<Task>): Promise<void>;
 
   addTask(taskData: PluginCreateTaskData): Promise<string>;
@@ -762,8 +804,8 @@ export interface PluginAPI {
   // download file
   downloadFile(filename: string, data: string): Promise<void>;
 
-  // node execution (Electron desktop only; currently grantable only to packaged
-  // built-in plugins with nodeExecution permission after main-process user consent)
+  // node execution (Electron desktop only; requires the nodeExecution permission and
+  // main-process user consent)
   executeNodeScript?(request: PluginNodeScriptRequest): Promise<PluginNodeScriptResult>;
 
   // action execution - dispatch NgRx actions (limited to allowed subset)

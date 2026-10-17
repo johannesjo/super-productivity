@@ -4,13 +4,18 @@ import { setCurrentTask, unsetCurrentTask } from './task.actions';
 import { select, Store } from '@ngrx/store';
 import {
   filter,
+  map,
   startWith,
   take,
   tap,
   throttleTime,
   withLatestFrom,
 } from 'rxjs/operators';
-import { selectCurrentTask, selectTaskEntities } from './task.selectors';
+import {
+  selectCurrentTask,
+  selectCurrentTaskId,
+  selectTaskEntities,
+} from './task.selectors';
 import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import { GlobalConfigService } from '../../config/global-config.service';
 import {
@@ -183,6 +188,11 @@ export class TaskElectronEffects {
     () =>
       this._actions$.pipe(
         ofType(TimeTrackingActions.addTimeSpent),
+        // The bar shows the tracked task's progress; time added to any other
+        // task (e.g. back-filled via the Local REST API) must not drive it.
+        withLatestFrom(this._store$.select(selectCurrentTaskId)),
+        filter(([{ task }, currentTaskId]) => task.id === currentTaskId),
+        map(([action]) => action),
         // The OS taskbar progress bar moves imperceptibly per second; throttling
         // collapses 1 IPC/sec into ~1 IPC/3s. Leading+trailing keeps the first
         // tick after start instant and the final value at the end of a window.

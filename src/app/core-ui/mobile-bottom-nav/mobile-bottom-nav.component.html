@@ -13,17 +13,17 @@
   >
     <mat-icon>wb_sunny</mat-icon>
   </button>
-
-  <button
-    mat-button
-    class="nav-button"
-    routerLink="/planner"
-    routerLinkActive="active"
-    [attr.aria-label]="T.MH.PLANNER | translate"
-  >
-    <mat-icon>edit_calendar</mat-icon>
-  </button>
-
+  @if (isPlannerEnabled()) {
+    <button
+      mat-button
+      class="nav-button"
+      routerLink="/planner"
+      routerLinkActive="active"
+      [attr.aria-label]="T.MH.PLANNER | translate"
+    >
+      <mat-icon>edit_calendar</mat-icon>
+    </button>
+  }
   <button
     mat-fab
     class="add-task-button"
@@ -36,7 +36,57 @@
     <mat-icon>add</mat-icon>
   </button>
 
-  @if (hasSidePanelMenuItems()) {
+  @if (sidePanelItemCount() === 1) {
+    <!-- A menu with a single entry is just an extra tap: show the entry itself. -->
+    @if (sidePanelButtons()[0]; as button) {
+      <button
+        mat-button
+        class="nav-button"
+        [class.active]="activePluginId() === button.pluginId && isShowPluginPanel()"
+        [attr.aria-pressed]="activePluginId() === button.pluginId && isShowPluginPanel()"
+        (click)="onPluginButtonClick(button)"
+        [attr.aria-label]="button.label"
+      >
+        <plugin-icon
+          [pluginId]="button.pluginId"
+          [fallbackIcon]="button.icon || 'extension'"
+        ></plugin-icon>
+      </button>
+    } @else if (isScheduleDayPanelEnabled()) {
+      <button
+        mat-button
+        class="nav-button e2e-toggle-schedule-day-panel"
+        [class.active]="isShowScheduleDayPanel()"
+        [attr.aria-pressed]="isShowScheduleDayPanel()"
+        (click)="toggleScheduleDayPanel()"
+        [attr.aria-label]="T.BN.SHOW_SCHEDULE | translate"
+      >
+        <mat-icon>schedule</mat-icon>
+      </button>
+    } @else if (isIssuesPanelEnabled()) {
+      <button
+        mat-button
+        class="nav-button e2e-toggle-issue-provider-panel"
+        [class.active]="isShowIssuePanel()"
+        [attr.aria-pressed]="isShowIssuePanel()"
+        (click)="toggleIssuePanel()"
+        [attr.aria-label]="T.BN.SHOW_ISSUE_PANEL | translate"
+      >
+        <mat-icon>webhook</mat-icon>
+      </button>
+    } @else if (isProjectNotesEnabled()) {
+      <button
+        mat-button
+        class="nav-button e2e-toggle-notes-btn"
+        [class.active]="isShowNotes()"
+        [attr.aria-pressed]="isShowNotes()"
+        (click)="toggleNotes()"
+        [attr.aria-label]="T.BN.SHOW_NOTES | translate"
+      >
+        <mat-icon>comment</mat-icon>
+      </button>
+    }
+  } @else if (sidePanelItemCount() > 1) {
     <button
       mat-button
       class="nav-button"

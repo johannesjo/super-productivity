@@ -394,11 +394,26 @@ class CapacitorMainActivity : BridgeActivity() {
             // Sanitize to prevent JS injection (only allow alphanumeric, dash, underscore)
             val sanitizedId = reminderTaskId.replace(Regex("[^a-zA-Z0-9_-]"), "")
             Log.d("SP_REMINDER", "Reminder tap: taskId=$sanitizedId")
+            // Deadline taps carry their type so the frontend clears the deadline
+            // reminder, not the task reminder. Other taps stay a plain id, which
+            // keeps them working for a JS bundle that predates the typed form.
+            val isDeadline = intent.getStringExtra("REMINDER_TYPE") == "DEADLINE"
+            val tapPayload = if (isDeadline) {
+                org.json.JSONObject()
+                    .put("taskId", sanitizedId)
+                    .put("reminderType", "DEADLINE")
+                    .toString()
+            } else {
+                sanitizedId
+            }
             // Persist for pull-based retrieval (WebView may not be ready on cold start)
-            com.superproductivity.superproductivity.widget.ReminderTapQueue.setTaskId(this, sanitizedId)
-            // Also try push-based delivery (works on warm start)
-            callJSInterfaceFunctionIfExists("next", "onReminderTap$", "'$sanitizedId'")
+            com.superproductivity.superproductivity.widget.ReminderTapQueue.setTaskId(this, tapPayload)
+            // Also try push-based delivery (works on warm start). Both forms only
+            // contain the sanitized id and a constant, so they are safe to inline.
+            val jsArg = if (isDeadline) tapPayload else "'$sanitizedId'"
+            callJSInterfaceFunctionIfExists("next", "onReminderTap$", jsArg)
             intent.removeExtra("REMINDER_TASK_ID")
+            intent.removeExtra("REMINDER_TYPE")
             return
         }
 
@@ -572,12 +587,15 @@ class CapacitorMainActivity : BridgeActivity() {
      *
      * Context: Android edge-to-edge inset handling is owned by Capacitor's
      * built-in SystemBars now (the `@capawesome` edge-to-edge plugin was removed).
-     * SystemBars only pads the WebView for the IME on **WebView >= 140**
-     * (passthrough) or **API >= 35**; outside that it applies nothing, the window
-     * does NOT resize for the IME, and the `position: fixed` add-task bar sits
+     * Up to Capacitor 8.5.1 SystemBars only padded for the IME on **WebView >= 140**
+     * (passthrough) or **API >= 35**; outside that it applied nothing, the window
+     * does NOT resize for the IME, and the `position: fixed` add-task bar sat
      * behind the keyboard. This shim covers exactly that gap — see
      * [NativeInsetShimGate] for why the gate is the complement of SystemBars'
-     * two ownership branches, so the two never double-count.
+     * two ownership branches. From 8.5.2 SystemBars pads the DecorView for the IME
+     * on every API level, so in the gated band this now measures a WebView that is
+     * already at the keyboard top and writes the height it already has (kept as a
+     * fallback; see [NativeInsetShimGate]).
      *
      * We must NOT correct this via `bottomMargin` or `padding` (a margin writer
      * fights whatever owns the insets, and WebView padding does not move the web
@@ -631,35 +649,30 @@ class CapacitorMainActivity : BridgeActivity() {
      * reads 0 and self-disables where the WebView is already inset).
      *
      * Edge-to-edge insets are owned by Capacitor's built-in SystemBars now. On
-     * **API >= 35** it injects the real `--safe-area-inset-*` px, and on
-     * **WebView >= 140** the WebView's own `env(safe-area-inset-*)` is correct
-     * (passthrough). But on the **WebView < 140** tail under enforced edge-to-edge
-     * the WebView extends under the status bar while `env(safe-area-inset-top)`
-     * resolves to 0 (old WebViews map only display cutouts into safe-area insets,
-     * not the status bar) — so the web side has no top inset and content overlaps
-     * the status bar.
+     * **WebView >= 140** the WebView's own `env(safe-area-inset-*)` is correct and
+     * SystemBars mirrors it into `--safe-area-inset-*` (passthrough). Up to
+     * Capacitor 8.5.1, on the **WebView < 140 / API < 35** tail nothing inset the
+     * WebView: it extended under the status bar while `env(safe-area-inset-top)`
+     * resolved to 0 (old WebViews map only display cutouts into safe-area insets,
+     * not the status bar) — so the web side had no top inset and content
+     * overlapped the status bar. From 8.5.2 SystemBars pads the DecorView for the
+     * status bar there too, so this measures 0 (see below) and stays inert.
      *
      * We measure the overlap natively and publish it as the `--android-status-bar-
      * overlap` CSS var, which the web side folds into `--safe-area-top` via
-     * `var(--safe-area-inset-top, max(env(...), var(--android-status-bar-overlap)))`.
+     * `var(--android-status-bar-overlap, var(--safe-area-inset-top, env(...)))`.
      * The overlap is how much of the status bar covers the WebView: `rect.top`
      * (top of the visible display frame = status-bar height, reliable on API 28,
      * the same frame the keyboard path uses) minus the WebView's top on screen
      * (`getLocationOnScreen`: 0 when edge-to-edge, == status-bar height once
      * inset). So it is the status-bar height when the WebView is NOT inset and 0
-     * once it is — `max()` never double-counts. Physical px → CSS px via display
+     * once it is — no insets are added together. Physical px → CSS px via display
      * density; deduped so the per-layout listener does not spam evaluateJavascript.
      *
-     * Shares [NativeInsetShimGate] with the keyboard shim so it never fights
-     * SystemBars; on API >= 35 the injected --safe-area-inset-top wins via var()
-     * precedence and the published var is ignored regardless.
-     *
-     * Known gap, pre-existing (follow-up, not #9316): SystemBars 8.4 also injects
-     * `--safe-area-inset-top: 0px` inline on its non-passthrough path at every API
-     * level, so the SCSS `var(--safe-area-inset-top, max(env(), var(--android-
-     * status-bar-overlap)))` fallback resolves to 0px and the var published here
-     * is shadowed on exactly the band this runs on. See the note under "header
-     * draws BEHIND the status bar" in docs/android-edge-to-edge-keyboard.md.
+     * Shares [NativeInsetShimGate] with the keyboard shim. Only where SystemBars
+     * leaves the insets unowned do we publish this override; elsewhere CSS falls
+     * back to SystemBars / env(). Giving the measurement precedence prevents
+     * SystemBars' injected 0px from shadowing it on API < 35 / WebView < 140.
      */
     private fun pushStatusBarOverlap(rect: Rect) {
         if (!shouldRunNativeInsetShim()) return

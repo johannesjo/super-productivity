@@ -47,6 +47,11 @@ export enum LS {
   // purpose: other devices run other builds.
   UPDATE_CHECK_DISMISSED_VERSION = 'SUP_UPDATE_CHECK_DISMISSED_VERSION',
 
+  // Per-install delay (ms) added to Android due-date notifications so devices
+  // don't all hit SuperSync at the same second. Device-local on purpose: the
+  // point is that it differs between devices.
+  DUE_DATE_NOTIFICATION_OFFSET_MS = 'SUP_DUE_DATE_NOTIFICATION_OFFSET_MS',
+
   // Epoch ms until which the "encrypt your SuperSync account" migration banner
   // stays hidden. Set when the user picks "Later" (or opens the flow), so — unlike
   // a permanent dismiss — an unencrypted E2EE-intended account is re-nudged calmly
@@ -67,6 +72,8 @@ export enum LS {
   // NOTE: key is different, but we keep it to avoid showing it again
   IS_SKIP_TOUR = 'SUP_IS_SHOW_TOUR',
 
+  // Historic name (the old preset screen): now set once the first real task is
+  // added, so a reload after that does not start onboarding over.
   ONBOARDING_PRESET_DONE = 'SUP_ONBOARDING_PRESET_DONE',
   ONBOARDING_HINTS_DONE = 'SUP_ONBOARDING_HINTS_DONE',
 
@@ -81,6 +88,7 @@ export enum LS {
 
   FOCUS_MODE_MODE = 'FOCUS_MODE_MODE',
   LAST_COUNTDOWN_DURATION = 'LAST_COUNTDOWN_DURATION',
+  FOCUS_MODE_SESSION = 'FOCUS_MODE_SESSION',
 
   DARK_MODE = 'DARK_MODE',
   CUSTOM_THEME = 'CUSTOM_THEME',
@@ -88,6 +96,8 @@ export enum LS {
   SELECTED_BOARD = 'SELECTED_BOARD',
   DONE_TASKS_HIDDEN = 'DONE_TASKS_HIDDEN',
   EXAMPLE_TASKS_CREATED = 'SUP_EXAMPLE_TASKS_CREATED',
+  // IDs of the seeded example tasks, so onboarding points at them only while they exist
+  EXAMPLE_TASK_IDS = 'SUP_EXAMPLE_TASK_IDS',
   LATER_TODAY_TASKS_HIDDEN = 'LATER_TODAY_TASKS_HIDDEN',
   OVERDUE_TASKS_HIDDEN = 'OVERDUE_TASKS_HIDDEN',
   REPEAT_CFGS_HIDDEN = 'REPEAT_CFGS_HIDDEN',

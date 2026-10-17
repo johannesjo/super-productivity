@@ -43,6 +43,7 @@ import {
   InvalidFilePrefixError,
   JsonParseError,
   SyncDataCorruptedError,
+  ClientUpdateRequiredSPError,
   UploadRevToMatchMismatchAPIError,
   WebDavNativeRequestError,
   EncryptNoPasswordError,
@@ -876,7 +877,12 @@ describe('SyncWrapperService', () => {
 
       expect(mockSyncService.downloadRemoteOps).toHaveBeenCalledWith(
         mockSyncCapableProvider,
-        { forceFromSeq0: true, isNeverSynced: false, fenceEpoch: 0 },
+        {
+          forceFromSeq0: true,
+          isNeverSynced: false,
+          fenceEpoch: 0,
+          keepDecryptedPrefix: true,
+        },
       );
     });
 
@@ -890,7 +896,12 @@ describe('SyncWrapperService', () => {
 
       expect(mockSyncService.downloadRemoteOps).toHaveBeenCalledWith(
         mockSyncCapableProvider,
-        { forceFromSeq0: undefined, isNeverSynced: false, fenceEpoch: 0 },
+        {
+          forceFromSeq0: undefined,
+          isNeverSynced: false,
+          fenceEpoch: 0,
+          keepDecryptedPrefix: true,
+        },
       );
     });
 
@@ -901,7 +912,12 @@ describe('SyncWrapperService', () => {
 
       expect(mockSyncService.downloadRemoteOps).toHaveBeenCalledWith(
         mockSyncCapableProvider,
-        { forceFromSeq0: undefined, isNeverSynced: false, fenceEpoch: 0 },
+        {
+          forceFromSeq0: undefined,
+          isNeverSynced: false,
+          fenceEpoch: 0,
+          keepDecryptedPrefix: true,
+        },
       );
     });
 
@@ -2256,11 +2272,11 @@ describe('SyncWrapperService', () => {
       expect(callArgs['actionFn']).toBeUndefined();
     });
 
-    it('should handle SyncDataCorruptedError for newer remote version (no force-overwrite, same message)', async () => {
+    it('should ask to update the app for a newer remote version (no force-overwrite) (#8764)', async () => {
       // version 3 > FILE_VERSION 2 — remote is from a future app version
       mockSyncService.downloadRemoteOps.and.returnValue(
         Promise.reject(
-          new SyncDataCorruptedError('Unsupported version: 3', 'sync-data.json'),
+          new SyncDataCorruptedError('Unsupported version: 3', 'sync-data.json', true),
         ),
       );
 
@@ -2269,13 +2285,32 @@ describe('SyncWrapperService', () => {
       expect(result).toBe('HANDLED_ERROR');
       expect(mockSnackService.open).toHaveBeenCalledWith(
         jasmine.objectContaining({
-          msg: T.F.SYNC.S.ERROR_SYNC_VERSION_MISMATCH,
+          msg: T.F.SYNC.S.VERSION_TOO_OLD,
           type: 'ERROR',
         }),
       );
       // No force-upload button — overwriting a newer remote would destroy data
       const callArgs = mockSnackService.open.calls.mostRecent().args[0];
       expect(callArgs['actionFn']).toBeUndefined();
+    });
+
+    it('asks to update the app when the server requires a newer version, without signing out', async () => {
+      mockSyncService.downloadRemoteOps.and.returnValue(
+        Promise.reject(new ClientUpdateRequiredSPError()),
+      );
+
+      const result = await service.sync();
+
+      expect(result).toBe('HANDLED_ERROR');
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('ERROR');
+      expect(mockProviderManager.clearAuthCredentials).not.toHaveBeenCalled();
+      expect(mockSnackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          msg: T.F.SYNC.S.VERSION_TOO_OLD,
+          actionStr: T.PS.UPDATE_APP,
+          type: 'ERROR',
+        }),
+      );
     });
 
     describe('LocalDataConflictError handling', () => {
@@ -2331,6 +2366,89 @@ describe('SyncWrapperService', () => {
           data: ConflictData;
         };
         expect(dialogConfig.data.remote.lastUpdate).toBe(remoteLastModified);
+      });
+
+      it('does not present an ops-only remote side as full data (#9391)', async () => {
+        // Shape thrown for a fresh client that received remote ops, no snapshot.
+        const conflictError = new LocalDataConflictError(1, null, undefined, null);
+        mockSyncService.downloadRemoteOps.and.rejectWith(conflictError);
+        mockMatDialog.open.and.returnValue({
+          afterClosed: () => of(undefined),
+        } as MatDialogRef<DialogSyncConflictComponent>);
+
+        await service.sync();
+
+        const dialogConfig = mockMatDialog.open.calls.mostRecent().args[1] as {
+          data: ConflictData;
+        };
+        expect(dialogConfig.data.remote.isFullData).toBe(false);
+        expect(dialogConfig.data.localUnsyncedOpsCount).toBe(1);
+      });
+
+      it('reports a wholly fresh ops-only local count as unknown, not 0 (#9391)', async () => {
+        // Wholly fresh client: meaningful store data but no pending ops at all.
+        const conflictError = new LocalDataConflictError(0, null, undefined, null);
+        mockSyncService.downloadRemoteOps.and.rejectWith(conflictError);
+        mockMatDialog.open.and.returnValue({
+          afterClosed: () => of(undefined),
+        } as MatDialogRef<DialogSyncConflictComponent>);
+
+        await service.sync();
+
+        const { data } = mockMatDialog.open.calls.mostRecent().args[1] as {
+          data: ConflictData;
+        };
+        // Undefined + no last-synced clock → the dialog renders "unknown" and
+        // confirms both overwrite choices.
+        expect(data.localUnsyncedOpsCount).toBeUndefined();
+        expect(data.local.lastSyncedVectorClock).toBeNull();
+        expect(data.local.lastUpdateAction).toBe('?');
+      });
+
+      it('reports a fresh snapshot conflict local count as unknown, not 0 (#9391)', async () => {
+        // File-based fresh join: meaningful store data, no pending ops, remote snapshot.
+        const conflictError = new LocalDataConflictError(
+          0,
+          { tasks: [] },
+          { clientB: 5 },
+          null,
+        );
+        mockSyncService.downloadRemoteOps.and.rejectWith(conflictError);
+        mockMatDialog.open.and.returnValue({
+          afterClosed: () => of(undefined),
+        } as MatDialogRef<DialogSyncConflictComponent>);
+
+        await service.sync();
+
+        const { data } = mockMatDialog.open.calls.mostRecent().args[1] as {
+          data: ConflictData;
+        };
+        expect(data.localUnsyncedOpsCount).toBeUndefined();
+        expect(data.local.lastUpdateAction).toBe('?');
+      });
+
+      it('still presents a remote snapshot as full data', async () => {
+        const conflictError = new LocalDataConflictError(
+          3,
+          { tasks: [{ id: 'remote-task' }] },
+          { clientB: 5 },
+        );
+        mockSyncService.downloadRemoteOps.and.rejectWith(conflictError);
+        mockMatDialog.open.and.returnValue({
+          afterClosed: () => of(undefined),
+        } as MatDialogRef<DialogSyncConflictComponent>);
+
+        await service.sync();
+
+        const dialogConfig = mockMatDialog.open.calls.mostRecent().args[1] as {
+          data: ConflictData;
+        };
+        expect(dialogConfig.data.remote.isFullData).toBe(true);
+        expect(dialogConfig.data.remote.mainModelData).toEqual({
+          tasks: [{ id: 'remote-task' }],
+        } as unknown as ConflictData['remote']['mainModelData']);
+        expect(dialogConfig.data.remote.lastUpdateAction).toBe('Remote data');
+        expect(dialogConfig.data.localUnsyncedOpsCount).toBe(3);
       });
 
       it('should call forceUploadLocalState when user chooses USE_LOCAL', async () => {
@@ -2793,6 +2911,32 @@ describe('SyncWrapperService', () => {
       );
       expect(mockSnackService.open).not.toHaveBeenCalled();
       expect(mockProviderManager.setSyncStatus).not.toHaveBeenCalledWith('ERROR');
+    });
+
+    it('should surface uploads rejected cycle after cycle once (#10808)', async () => {
+      mockSyncService.uploadPendingOps.and.returnValue(
+        Promise.reject(new UploadRevToMatchMismatchAPIError('retries exhausted')),
+      );
+      const rejectedNotices = (): number =>
+        mockSnackService.open.calls
+          .allArgs()
+          .filter(
+            ([params]) =>
+              typeof params === 'object' &&
+              params.msg === T.F.SYNC.S.UPLOAD_REJECTED_REPEATEDLY,
+          ).length;
+
+      expect(await service.sync()).toBe('HANDLED_ERROR');
+      expect(await service.sync()).toBe('HANDLED_ERROR');
+      expect(rejectedNotices()).toBe(0);
+      expect(mockProviderManager.setSyncStatus).not.toHaveBeenCalledWith('ERROR');
+
+      expect(await service.sync()).toBe('HANDLED_ERROR');
+      expect(await service.sync()).toBe('HANDLED_ERROR');
+      expect(rejectedNotices()).toBe(1);
+      expect(mockProviderManager.setSyncStatus.calls.mostRecent().args).toEqual([
+        'ERROR',
+      ]);
     });
 
     it('should explain a rejected plaintext remote for a user-triggered encrypted sync', async () => {
@@ -3649,6 +3793,71 @@ describe('SyncWrapperService', () => {
 
       const result = await service.sync();
 
+      expect(result).toBe(SyncStatus.UpdateRemote);
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith(
+        'UNKNOWN_OR_CHANGED',
+      );
+      expect(mockProviderManager.setSyncStatus).not.toHaveBeenCalledWith('IN_SYNC');
+    });
+
+    it('should immediately re-upload an op the server rejected with a transient INTERNAL_ERROR', async () => {
+      // "Concurrent transaction conflict - please retry": the op stays pending
+      // locally, and without a retry in this cycle it sat unsynced until the
+      // next auto-sync tick while the header showed unsynced changes.
+      mockSyncService.downloadRemoteOps.and.resolveTo({ kind: 'no_new_ops' as const });
+      mockSyncService.uploadPendingOps.and.returnValues(
+        Promise.resolve({
+          kind: 'completed' as const,
+          uploadedCount: 0,
+          piggybackedOpsCount: 0,
+          localWinOpsCreated: 0,
+          permanentRejectionCount: 0,
+          hasMorePiggyback: false,
+          rejectedOps: [
+            {
+              opId: 'op-1',
+              error: 'Concurrent transaction conflict - please retry',
+              errorCode: 'INTERNAL_ERROR',
+            },
+          ],
+        }),
+        Promise.resolve({
+          kind: 'completed' as const,
+          uploadedCount: 1,
+          piggybackedOpsCount: 0,
+          localWinOpsCreated: 0,
+          permanentRejectionCount: 0,
+          hasMorePiggyback: false,
+          rejectedOps: [],
+        }),
+      );
+
+      const result = await service.sync();
+
+      expect(mockSyncService.uploadPendingOps).toHaveBeenCalledTimes(2);
+      expect(result).toBe(SyncStatus.InSync);
+      expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith('IN_SYNC');
+    });
+
+    it('should not report IN_SYNC when an op is still transiently rejected after the retry budget', async () => {
+      mockSyncService.downloadRemoteOps.and.resolveTo({ kind: 'no_new_ops' as const });
+      mockSyncService.uploadPendingOps.and.resolveTo({
+        kind: 'completed' as const,
+        uploadedCount: 0,
+        piggybackedOpsCount: 0,
+        localWinOpsCreated: 0,
+        permanentRejectionCount: 0,
+        hasMorePiggyback: false,
+        rejectedOps: [
+          { opId: 'op-1', error: 'server busy', errorCode: 'INTERNAL_ERROR' },
+        ],
+      });
+
+      const result = await service.sync();
+
+      expect(mockSyncService.uploadPendingOps).toHaveBeenCalledTimes(
+        1 + MAX_LWW_REUPLOAD_RETRIES,
+      );
       expect(result).toBe(SyncStatus.UpdateRemote);
       expect(mockProviderManager.setSyncStatus).toHaveBeenCalledWith(
         'UNKNOWN_OR_CHANGED',

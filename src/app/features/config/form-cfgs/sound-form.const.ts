@@ -4,7 +4,7 @@ import { playDoneSound } from '../../tasks/util/play-done-sound';
 import { playSound } from '../../../util/play-sound';
 
 export const SOUND_OPTS = [
-  { label: 'NONE', value: null },
+  { label: T.G.NONE, value: null },
   { label: 'Small Ding', value: 'ding-small-bell.mp3' },
   { label: 'Ding', value: 'copper-bell-ding.mp3' },
   { label: 'Sound 1', value: 'done1.mp3' },

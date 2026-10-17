@@ -27,6 +27,7 @@ import { Tick } from './tick.model';
 import { DateService } from 'src/app/core/date/date.service';
 import { Log } from '../log';
 import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
+// eslint-disable-next-line @typescript-eslint/no-restricted-imports -- grandfathered layer-boundary debt
 import { androidInterface } from '../../features/android/android-interface';
 
 const MINUTE_MS = 60 * 1000;
@@ -89,6 +90,16 @@ export class GlobalTrackingIntervalService {
    * (#5464). The emitted value carries no meaning; read the clock yourself.
    */
   minuteTick$: Observable<unknown> = this._createMinuteTickObservable();
+
+  // Reuse the shared second tick; refresh immediately after focus/resume as well.
+  clockTimestamp = toSignal(
+    merge(
+      this.globalInterval$,
+      this._createAppActiveObservable(),
+      this._wakeUpTick$,
+    ).pipe(map(() => Date.now())),
+    { initialValue: Date.now() },
+  );
 
   // Shared signal to avoid creating 200+ subscriptions in task components
   todayDateStr = toSignal(this.todayDateStr$, {

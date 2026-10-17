@@ -8,6 +8,8 @@ research note does not override the current code, tests, or an accepted decision
 
 Update these alongside the behavior or workflow they describe:
 
+- [Repository content map](repository-map.md) — task keywords → code entry points,
+  relevant constraints, and focused tests; start here to select what to read
 - [`src/app` layer map](../src/app/README.md) — where things live, which way
   dependencies point, and which of those directions are lint-enforced
 - [Documentation guide](documentation-guide.md)
@@ -51,6 +53,9 @@ not current behavior. Every active plan should start with:
 - owner and tracking issue or pull request;
 - date last verified against the code;
 - completion or removal condition.
+
+A plan for a user-facing interaction also includes a **Prior art** section →
+[feature review guide § Prior art](feature-review-guide.md#prior-art).
 
 When implementation lands, move enduring contracts or limitations into a
 maintained guide, package README, code comment, or decision record, then delete

@@ -203,8 +203,11 @@ export class PanDirective implements OnDestroy {
     }
 
     if (this._isPanning) {
-      // Prevent default to avoid scrolling
-      event.preventDefault();
+      // Prevent default to avoid scrolling. Once the browser scrolls, the event
+      // is not cancelable and Chrome logs an intervention for every attempt.
+      if (event.cancelable) {
+        event.preventDefault();
+      }
       // Stop propagation so parent PanDirectives (nested swipe-blocks) don't fire
       event.stopPropagation();
 
