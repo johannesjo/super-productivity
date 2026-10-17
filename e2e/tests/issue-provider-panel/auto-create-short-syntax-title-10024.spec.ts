@@ -142,8 +142,15 @@ test('auto-created issue excludes short syntax tokens (#10024)', async ({
   await page.locator('mat-tab-group .mat-mdc-tab:last-child').click();
   await page.getByRole('button', { name: 'GitHub Issues', exact: true }).click();
   const dialog = page.locator('dialog-edit-issue-provider');
-  await dialog.locator('input[id*="repo"]').fill('e2e/repro');
-  await dialog.locator('input[id*="token"]').fill('e2e-token');
+  const repoInput = dialog.locator('input[id*="repo"]');
+  const tokenInput = dialog.locator('input[id*="token"]');
+  // MatDialog focuses its first field only once the open animation ends. A
+  // fill racing that autofocus types the token into the repo field, and the
+  // auto-create then fails on the missing token.
+  await expect(repoInput).toBeFocused();
+  await repoInput.fill('e2e/repro');
+  await tokenInput.fill('e2e-token');
+  await expect(tokenInput).toHaveValue('e2e-token');
 
   await dialog.getByRole('button', { name: /Advanced Config/i }).click();
   await dialog.locator('mat-select[id*="defaultProjectId"]').click();
