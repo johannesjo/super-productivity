@@ -148,26 +148,23 @@
                whichever container holds the target, and it mirrors these
                conditions to know which ones are on screen. (#8780) -->
           @if (customizedUndoneTasks(); as customized) {
-            @if (customized.grouped) {
-              @for (
-                groupKey of customizerService.getOrderedGroupKeys(customized.grouped);
-                track groupKey
-              ) {
+            @if (customized.groups) {
+              @for (group of customized.groups; track group.key) {
                 <collapsible
                   class="task-section"
-                  [title]="groupKey | scheduledDateGroup: todayStr()"
+                  [title]="group.key | scheduledDateGroup: todayStr()"
                   [isIconBefore]="true"
-                  [isExpanded]="!customizerService.collapsedGroupIds().includes(groupKey)"
-                  (isExpandedChange)="customizerService.toggleGroupExpansion(groupKey)"
+                  [isExpanded]="
+                    !customizerService.collapsedGroupIds().includes(group.key)
+                  "
+                  (isExpandedChange)="customizerService.toggleGroupExpansion(group.key)"
                   [isGroup]="true"
                 >
                   <task-list
-                    [tasks]="customized.grouped[groupKey]"
+                    [tasks]="group.tasks"
                     listId="PARENT"
                     listModelId="UNDONE"
-                    [groupTagId]="
-                      $safeNavigationMigration(customized.groupTagIdByKey?.[groupKey])
-                    "
+                    [groupTagId]="group.tagId"
                   ></task-list>
                 </collapsible>
               }

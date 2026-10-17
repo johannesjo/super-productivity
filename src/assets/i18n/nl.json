@@ -2856,8 +2856,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Herinneringsgeluid pauze",
+      "DING": "Bel",
       "DONE_SOUND": "Taak gedaan geluid",
       "IS_INCREASE_DONE_PITCH": "Verhoog de toon voor elke uitgevoerde taak",
+      "SMALL_DING": "Kleine bel",
+      "SOUND_1": "Geluid 1",
+      "SOUND_2": "Geluid 2",
+      "SOUND_3": "Geluid 3",
+      "SOUND_4": "Geluid 4",
+      "SOUND_5": "Geluid 5",
+      "SOUND_6": "Geluid 6",
+      "SOUND_7": "Geluid 7",
       "TITLE": "Geluid",
       "TRACK_TIME_SOUND": "Herinneringsgeluid voor de tijd bijhouden",
       "VOLUME": "Volume"

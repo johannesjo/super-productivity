@@ -26,6 +26,10 @@ export type MiscConfig = Readonly<{
   isConfirmBeforeExit: boolean;
   isConfirmBeforeExitWithoutFinishDay: boolean;
   isMinimizeToTray: boolean;
+  // Legacy: the local REST API switch is device-local now (Electron main's
+  // simple store), because a synced switch started the listener on every
+  // desktop. Nothing reads or writes this anymore; kept optional so synced data
+  // from older clients keeps validating.
   isLocalRestApiEnabled?: boolean;
   // Desktop-only daily check for a newer GitHub release (#5463). Optional
   // because it was added later; a missing key means ON (see UpdateCheckService).
@@ -322,6 +326,12 @@ export type FocusModeConfig = Readonly<{
    */
   isShowPreparation?: boolean;
   focusModeSound?: 'off' | 'tick' | 'whiteNoise';
+  /**
+   * Volume of the focus-mode ambient sound (tick / white noise) in percent of
+   * the main sound volume. Absent → DEFAULT_FOCUS_MODE_SOUND_VOLUME (40), which
+   * is the fixed ratio used before this setting existed.
+   */
+  focusModeSoundVolume?: number;
   /** @deprecated Use focusModeSound instead. Kept for backward-compat validation of old data. */
   isPlayTick?: boolean;
   isPauseTrackingDuringBreak?: boolean;

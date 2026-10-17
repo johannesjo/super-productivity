@@ -185,7 +185,7 @@ jobs:
           test -f .tmp/angular-dist/browser/index.html || (echo "Build output missing" && exit 1)
           test -f .tmp/angular-dist/browser/assets/bundled-plugins/api-test-plugin/manifest.json || (echo "Plugin assets missing from build" && exit 1)
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ci-e2e-build-${{ github.run_id }}
           path: .tmp/angular-dist
@@ -208,7 +208,7 @@ jobs:
       - name: Setup E2E Environment
         uses: ./.github/actions/setup-e2e
       - name: Download Build Artifact
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v4
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v4
         with:
           name: ci-e2e-build-${{ github.run_id }}
           path: .tmp/angular-dist
@@ -218,7 +218,7 @@ jobs:
         run: npm run e2e -- --project=chromium --shard=${{ matrix.shard }}/3
       - name: 'Upload E2E results on failure'
         if: ${{ failure() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: e2eResults-${{ matrix.shard }}
           path: .tmp/e2e-test-results/**/*.*
@@ -240,7 +240,7 @@ jobs:
         with:
           browsers: webkit
       - name: Download Build Artifact
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v4
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v4
         with:
           name: ci-e2e-build-${{ github.run_id }}
           path: .tmp/angular-dist
@@ -250,7 +250,7 @@ jobs:
           E2E_WEBKIT_SMOKE: 'true'
       - name: 'Upload E2E results on failure'
         if: ${{ failure() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: e2eResults-webkit-smoke
           path: .tmp/e2e-test-results/**/*.*
@@ -286,7 +286,7 @@ jobs:
 
       - name: 'Upload PWA results on failure'
         if: ${{ failure() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: pwaResults
           path: .tmp/e2e-test-results/pwa-test-results

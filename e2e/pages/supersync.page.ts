@@ -9,6 +9,7 @@ import {
 import { BasePage } from './base.page';
 import { normalizeDialogMessage, translationRegex } from '../utils/i18n-strings';
 import { confirmSyncConflictOverwriteIfShown } from '../utils/sync-helpers';
+import { cssSelectors } from '../constants/selectors';
 
 export interface SuperSyncConfig {
   baseUrl: string;
@@ -161,7 +162,7 @@ export class SuperSyncPage extends BasePage {
   readonly syncSpinner: Locator;
   readonly syncCheckIcon: Locator;
   readonly syncErrorIcon: Locator;
-  private readonly _syncRemoteCheckIcon: Locator;
+  readonly syncConfirmedIcon: Locator;
   /** Fresh client confirmation dialog - appears when a new client first syncs */
   readonly freshClientDialog: Locator;
   readonly freshClientConfirmBtn: Locator;
@@ -207,17 +208,20 @@ export class SuperSyncPage extends BasePage {
     this.syncBtn = page.locator('button.sync-btn');
     this.providerSelect = page.locator('formly-field-mat-select mat-select');
     this.baseUrlInput = page.locator('.e2e-baseUrl input');
-    this.accessTokenInput = page.locator('.e2e-accessToken input');
+    // Current clients render an input (#10784); released clients a textarea.
+    this.accessTokenInput = page.locator(
+      '.e2e-accessToken input, .e2e-accessToken textarea',
+    );
     this.presenceDeviceNameInput = page.locator('.e2e-presenceDeviceName input');
     this.enableEncryptionBtn = page.locator('.e2e-enable-encryption-btn button');
     this.disableEncryptionBtn = page.locator('.e2e-disable-encryption-btn button');
     this.encryptionPasswordInput = page.locator('.e2e-encryptKey input[type="password"]');
     this.saveBtn = page.locator('mat-dialog-actions button[mat-flat-button]');
     this.syncSpinner = page.locator('.sync-btn mat-icon.spin');
-    this.syncCheckIcon = page.locator('.sync-btn mat-icon.sync-state-ico');
-    this._syncRemoteCheckIcon = page.locator(
-      '.sync-btn mat-icon.sync-state-ico:has-text("done_all")',
-    );
+    // Every local change uploaded / the server checked too. Both selectors
+    // also match the badge that released clients render.
+    this.syncCheckIcon = page.locator(cssSelectors.SYNC_UPLOADED);
+    this.syncConfirmedIcon = page.locator(cssSelectors.SYNC_REMOTE_CONFIRMED);
     // Error state shows sync_problem icon (no special class, just the icon name)
     this.syncErrorIcon = page.locator('.sync-btn mat-icon:has-text("sync_problem")');
     // Legacy Angular fresh-client dialog elements. Keep this locator scoped so a
@@ -2117,7 +2121,7 @@ export class SuperSyncPage extends BasePage {
   private async _getSyncCompletionSnapshot(): Promise<SyncCompletionSnapshot> {
     const [checkVisible, spinnerVisible, errorVisible, unsyncedCount] = await Promise.all(
       [
-        this._syncRemoteCheckIcon.isVisible().catch(() => false),
+        this.syncConfirmedIcon.isVisible().catch(() => false),
         this.syncSpinner.isVisible().catch(() => false),
         this.syncErrorIcon.isVisible().catch(() => false),
         this._getUnsyncedOperationCount(),
@@ -2582,7 +2586,7 @@ export class SuperSyncPage extends BasePage {
     const isSpinnerVisible = await this.syncSpinner.isVisible().catch(() => false);
     if (isSpinnerVisible) return 'syncing';
 
-    const isCheckVisible = await this._syncRemoteCheckIcon.isVisible().catch(() => false);
+    const isCheckVisible = await this.syncConfirmedIcon.isVisible().catch(() => false);
     if (isCheckVisible) return 'success';
 
     return 'unknown';

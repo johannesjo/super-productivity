@@ -44,6 +44,7 @@ import {
   getRepeatableTaskId,
 } from './get-repeatable-task-id.util';
 import { getDeadlineAutoPlanFields } from '../tasks/util/get-deadline-auto-plan-fields';
+import { getTaskPriority } from '../tasks/task-priority.const';
 
 @Injectable({
   providedIn: 'root',
@@ -398,6 +399,7 @@ export class TaskRepeatCfgService {
         additional: {
           repeatCfgId: taskRepeatCfg.id,
           timeEstimate: taskRepeatCfg.defaultEstimate || 0,
+          priority: getTaskPriority(taskRepeatCfg.priority),
           projectId: taskRepeatCfg.projectId || undefined,
           notes: taskRepeatCfg.notes || '',
           dueDay,

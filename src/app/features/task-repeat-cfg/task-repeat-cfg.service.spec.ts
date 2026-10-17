@@ -334,6 +334,29 @@ describe('TaskRepeatCfgService', () => {
   });
 
   describe('createRepeatableTask', () => {
+    for (const [priority, expected] of [
+      [3, 3],
+      ['high', 3],
+      [null, null],
+      [undefined, null],
+    ] as const) {
+      it(`creates occurrences with priority ${String(priority)}`, async () => {
+        taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+        taskService.createNewTaskWithDefaults.and.returnValue(mockTask);
+
+        await service.createRepeatableTask(
+          { ...mockTaskRepeatCfg, priority },
+          Date.now(),
+        );
+
+        expect(taskService.createNewTaskWithDefaults).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            additional: jasmine.objectContaining({ priority: expected }),
+          }),
+        );
+      });
+    }
+
     it('should create actions for a new repeatable task', async () => {
       const today = new Date();
       const targetDayDate = today.getTime();

@@ -518,12 +518,17 @@ describe('WorkViewComponent', () => {
       configureWorkViewTestBed({
         customizerService: {
           customizeUndoneTasks: () =>
-            opts.customized$ ?? of({ list: undone, grouped: opts.grouped }),
+            opts.customized$ ??
+            of({
+              list: undone,
+              grouped: opts.grouped,
+              groups:
+                opts.grouped &&
+                Object.entries(opts.grouped).map(([key, tasks]) => ({ key, tasks })),
+            }),
           isCustomized: signal(opts.isCustomized ?? !!(opts.grouped || opts.customized$)),
           collapsedGroupIds: signal(opts.collapsedGroupIds ?? []),
           toggleGroupExpansion,
-          getOrderedGroupKeys: (grouped: Record<string, TaskWithSubTasks[]>) =>
-            Object.keys(grouped),
         },
         sectionService: {
           getSectionsByContextId$: () =>

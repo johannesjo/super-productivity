@@ -2862,8 +2862,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Son pour rappel de prise de pause",
+      "DING": "Tintement de cloche",
       "DONE_SOUND": "Son pour tâche terminée",
       "IS_INCREASE_DONE_PITCH": "Augmentez la hauteur pour chaque tâche effectuée",
+      "SMALL_DING": "Tintement de clochette",
+      "SOUND_1": "Son 1",
+      "SOUND_2": "Son 2",
+      "SOUND_3": "Son 3",
+      "SOUND_4": "Son 4",
+      "SOUND_5": "Son 5",
+      "SOUND_6": "Son 6",
+      "SOUND_7": "Son 7",
       "TITLE": "Du son",
       "TRACK_TIME_SOUND": "Son de rappel de temps de piste",
       "VOLUME": "Le volume"

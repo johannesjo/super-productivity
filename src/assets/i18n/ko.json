@@ -2810,8 +2810,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "휴식 시간 알림음",
+      "DING": "종소리",
       "DONE_SOUND": "작업 완료 소리",
       "IS_INCREASE_DONE_PITCH": "모든 작업에 대한 피치 높이기",
+      "SMALL_DING": "작은 종소리",
+      "SOUND_1": "소리 1",
+      "SOUND_2": "소리 2",
+      "SOUND_3": "소리 3",
+      "SOUND_4": "소리 4",
+      "SOUND_5": "소리 5",
+      "SOUND_6": "소리 6",
+      "SOUND_7": "소리 7",
       "TITLE": "소리",
       "TRACK_TIME_SOUND": "시간 알림 소리 추적",
       "VOLUME": "음량"
