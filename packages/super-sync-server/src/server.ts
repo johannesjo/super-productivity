@@ -1,3 +1,5 @@
+import { getJwtSecret } from './auth';
+import { captureOAuthRoutes } from './capture/capture-oauth.routes';
 import * as fs from 'fs';
 import Fastify, { FastifyError, FastifyInstance } from 'fastify';
 import cors from '@fastify/cors';
@@ -10,6 +12,7 @@ import {
   ServerConfig,
   PrivacyConfig,
   isConsentRequired,
+  SERVER_TRUST_PROXY,
 } from './config';
 import { Logger } from './logger';
 import { prisma, disconnectDb } from './db';
@@ -29,6 +32,7 @@ import {
   resetWsConnectionService,
 } from './sync/services/websocket-connection.service';
 import { testRoutes } from './test-routes';
+import { captureMcpRoutes, captureRoutes } from './capture';
 
 // HTML escape to prevent XSS in generated HTML
 export const escapeHtml = (unsafe: string): string => {
@@ -39,26 +43,6 @@ export const escapeHtml = (unsafe: string): string => {
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
 };
-
-/**
- * Which peers may set X-Forwarded-* so req.ip resolves to the real client IP
- * instead of the proxy's. Two proxy-addr ranges, one per place the reverse
- * proxy can sit: 'loopback' (127.0.0.1/8, ::1/128) for host networking or a
- * same-pod sidecar, and 'uniquelocal' (10/8, 172.16/12, 192.168/16, fc00::/7)
- * for the docker bridge or an ingress controller's pod network. Headers from
- * any other peer are ignored, so a client that reaches the origin directly
- * cannot spoof its IP.
- *
- * Must stay a value that validates the connecting address: fastify 5.12.1
- * disabled the hop-count form (`trustProxy: 1`) because it ignores the peer
- * address entirely, leaving the headers spoofable (GHSA-3m5p-2c4r-xxw2).
- *
- * req.ip is the @fastify/rate-limit key, so too narrow a value silently
- * collapses every client into one bucket instead of failing loudly. Neither
- * range covers 100.64.0.0/10 (CGNAT/Tailscale) or 169.254.0.0/16 — a
- * deployment needing those wants this configurable, not widened for everyone.
- */
-export const SERVER_TRUST_PROXY = ['loopback', 'uniquelocal'];
 
 export const SERVER_HELMET_CONFIG = {
   contentSecurityPolicy: {
@@ -74,6 +58,30 @@ export const SERVER_HELMET_CONFIG = {
       baseUri: ["'self'"],
     },
   },
+};
+
+/**
+ * Helmet config for the deployment's public URL.
+ *
+ * Helmet's default CSP adds `upgrade-insecure-requests`, which makes the
+ * browser fetch every same-origin asset over https. On a plain-HTTP
+ * deployment (e.g. a LAN IP) that breaks every page, so the directive is
+ * dropped when PUBLIC_URL is http:// (#10023). This never weakens a
+ * production server: config.ts refuses to boot with a non-https PUBLIC_URL
+ * when NODE_ENV=production.
+ */
+export const getServerHelmetConfig = (publicUrl: string) => {
+  if (!/^http:\/\//i.test(publicUrl)) {
+    return SERVER_HELMET_CONFIG;
+  }
+  const { contentSecurityPolicy } = SERVER_HELMET_CONFIG;
+  return {
+    ...SERVER_HELMET_CONFIG,
+    contentSecurityPolicy: {
+      ...contentSecurityPolicy,
+      directives: { ...contentSecurityPolicy.directives, upgradeInsecureRequests: null },
+    },
+  };
 };
 
 /**
@@ -335,7 +343,7 @@ const installOperatorLegalPages = (dataDir: string): boolean => {
   return true;
 };
 
-export { ServerConfig, loadConfigFromEnv };
+export { ServerConfig, loadConfigFromEnv, SERVER_TRUST_PROXY };
 
 export const createServer = (
   config: Partial<ServerConfig> = {},
@@ -376,7 +384,7 @@ export const createServer = (
         // Add explicit timeouts for long-running operations
         connectionTimeout: 90000, // 90s - match client timeout
         requestTimeout: 80000, // 80s - must exceed DB timeout (60s) but be less than Caddy (85s)
-        trustProxy: SERVER_TRUST_PROXY,
+        trustProxy: fullConfig.trustProxy,
       });
 
       // Sanitize 5xx responses so internal details (e.g. raw Prisma errors
@@ -405,7 +413,7 @@ export const createServer = (
       });
 
       // Security Headers
-      await fastifyServer.register(helmet, SERVER_HELMET_CONFIG);
+      await fastifyServer.register(helmet, getServerHelmetConfig(fullConfig.publicUrl));
 
       // Rate Limiting (prevent brute force)
       if (!fullConfig.testMode?.enabled) {
@@ -495,6 +503,19 @@ export const createServer = (
       // WebSocket routes for real-time sync notifications
       await fastifyServer.register(wsRoutes, { prefix: '/api/sync' });
 
+      // Agent task capture: public /mcp for assistants, /api/capture for the app
+      if (fullConfig.captureConnectorEnabled) {
+        await fastifyServer.register(captureMcpRoutes, {
+          publicUrl: fullConfig.publicUrl,
+        });
+        await fastifyServer.register(captureOAuthRoutes, {
+          publicUrl: fullConfig.publicUrl,
+          signingKey: getJwtSecret(),
+          clients: fullConfig.captureOAuthClients,
+        });
+        await fastifyServer.register(captureRoutes, { prefix: '/api/capture' });
+      }
+
       // Test Routes (only in test mode)
       if (fullConfig.testMode?.enabled) {
         await fastifyServer.register(testRoutes, { prefix: '/api/test' });
@@ -515,7 +536,10 @@ export const createServer = (
 
       try {
         const address = await fastifyServer.listen(createListenOptions(fullConfig));
-        Logger.info(`Server started on ${address}`);
+        // Self-hosters on :latest otherwise cannot tell which build they run (#9181).
+        Logger.info(
+          `Server started on ${address} (revision ${process.env.SUPERSYNC_REVISION || 'unknown'})`,
+        );
         return address;
       } catch (err) {
         Logger.error('Failed to start server:', err);

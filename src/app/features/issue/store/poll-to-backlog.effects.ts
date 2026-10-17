@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { createEffect, ofType } from '@ngrx/effects';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
-import { EMPTY, from, merge, Observable, timer } from 'rxjs';
+import { combineLatest, EMPTY, from, merge, Observable, timer } from 'rxjs';
 import {
   catchError,
   concatMap,
@@ -23,6 +23,7 @@ import { getErrorTxt } from '../../../util/get-error-text';
 import { DELAY_BEFORE_ISSUE_POLLING } from '../issue.const';
 import { IssueLog } from '../../../core/log';
 import { PluginIssueProviderRegistryService } from '../../../plugins/issue-provider/plugin-issue-provider-registry.service';
+import { skipDuringSyncWindow } from '../../../util/skip-during-sync-window.operator';
 
 @Injectable()
 export class PollToBacklogEffects {
@@ -33,6 +34,12 @@ export class PollToBacklogEffects {
   private readonly _snackService = inject(SnackService);
   private readonly _store = inject(Store);
   private readonly _pluginRegistry = inject(PluginIssueProviderRegistryService);
+
+  /**
+   * Created here because the operator calls inject() -- the timers themselves are
+   * built lazily inside switchMap(), outside of any injection context.
+   */
+  private readonly _skipDuringSyncWindow = skipDuringSyncWindow<number>();
 
   pollToBacklogActions$: Observable<unknown> = this._actions$.pipe(
     ofType(setActiveWorkContext),
@@ -56,8 +63,13 @@ export class PollToBacklogEffects {
     () =>
       this.pollToBacklogTriggerToProjectId$.pipe(
         switchMap((pId) =>
-          this._store.select(selectEnabledIssueProviders).pipe(
-            switchMap((enabledProviders: IssueProvider[]) => {
+          // Plugin providers report a poll interval of 0 until they register,
+          // so re-evaluate on registration changes too (#10112).
+          combineLatest([
+            this._store.select(selectEnabledIssueProviders),
+            this._pluginRegistry.registrationChanges$,
+          ]).pipe(
+            switchMap(([enabledProviders]) => {
               const matchingProviders = enabledProviders.filter(
                 (provider) =>
                   provider.defaultProjectId === pId &&
@@ -75,6 +87,10 @@ export class PollToBacklogEffects {
                 ),
               );
             }),
+            // A switch to a tag emits no new project id, so the outer switchMap
+            // keeps this stream for the project just left; end it here, or a
+            // later provider or registration change would restart its polling.
+            takeUntil(this.pollToBacklogActions$),
           ),
         ),
       ),
@@ -83,15 +99,18 @@ export class PollToBacklogEffects {
 
   /**
    * Polls for backlog import for providers with pollingMode 'always'.
-   * Starts once after initial sync and runs continuously, reacting only
-   * to provider configuration changes -- not to context switches.
+   * Starts once after initial sync and runs continuously, reacting to provider
+   * configuration and registration changes -- not to context switches.
    */
   pollNewIssuesToBacklogAlways$: Observable<unknown> = createEffect(
     () =>
       this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
         switchMap(() =>
-          this._store.select(selectEnabledIssueProviders).pipe(
-            switchMap((enabledProviders: IssueProvider[]) => {
+          combineLatest([
+            this._store.select(selectEnabledIssueProviders),
+            this._pluginRegistry.registrationChanges$,
+          ]).pipe(
+            switchMap(([enabledProviders]) => {
               const alwaysProviders = enabledProviders.filter(
                 (provider) =>
                   provider.pollingMode === 'always' &&
@@ -127,6 +146,12 @@ export class PollToBacklogEffects {
     return (
       stopOnContextSwitch ? timer$.pipe(takeUntil(this.pollToBacklogActions$)) : timer$
     ).pipe(
+      // The chain is only gated once at start, but every tick imports issues and can
+      // dispatch restoreTask for archived recurring tasks. Inside the sync window the
+      // reducer commits such a change while capture only buffers the action, so a
+      // failed drain would leave local state ahead of the op log (and the archive read
+      // may be stale mid-replay). Dropping the tick is safe: the next one retries.
+      this._skipDuringSyncWindow,
       tap(() => IssueLog.log('POLL ' + provider.issueProviderKey)),
       switchMap(() =>
         from(

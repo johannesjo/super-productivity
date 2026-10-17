@@ -27,7 +27,6 @@ import { GlobalConfigService } from '../../features/config/global-config.service
 import { KeyboardConfig, keyboardConfigOrEmpty } from '@sp/keyboard-config';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
-import { MatBadge } from '@angular/material/badge';
 import { MatTooltip } from '@angular/material/tooltip';
 import { TranslatePipe } from '@ngx-translate/core';
 import { SimpleCounterButtonComponent } from '../../features/simple-counter/simple-counter-button/simple-counter-button.component';
@@ -49,7 +48,6 @@ import { DesktopPanelButtonsComponent } from './desktop-panel-buttons/desktop-pa
 import { toSignal } from '@angular/core/rxjs-interop';
 import { FocusButtonComponent } from './focus-button/focus-button.component';
 import { EmlDropDirective } from '../../core/drop-paste-input/eml-drop.directive';
-import { ConflictJournalService } from '../../op-log/sync/conflict-journal.service';
 
 /** One `DOM_DELTA_LINE` notch, in CSS pixels. Matches the row's icon metrics. */
 const WHEEL_LINE_HEIGHT_PX = 16;
@@ -70,7 +68,6 @@ const ACTION_ROW_REVEAL_PIN_MS = 400;
   imports: [
     MatIconButton,
     MatIcon,
-    MatBadge,
     MatTooltip,
     TranslatePipe,
     SimpleCounterButtonComponent,
@@ -104,15 +101,10 @@ export class MainHeaderComponent implements OnDestroy {
   private readonly _snackService = inject(SnackService);
   private readonly _configService = inject(GlobalConfigService);
   private readonly _dataInitStateService = inject(DataInitStateService);
-  private readonly _conflictJournal = inject(ConflictJournalService);
 
   readonly isDataLoaded = toSignal(this._dataInitStateService.isAllDataLoadedInitially$, {
     initialValue: false,
   });
-
-  // SPAP-15: persistent badge on the sync icon — count of unreviewed
-  // auto-resolved sync conflicts awaiting review.
-  readonly unreviewedConflictCount = this._conflictJournal.unreviewedCount;
 
   T: typeof T = T;
 
@@ -199,8 +191,8 @@ export class MainHeaderComponent implements OnDestroy {
   // the tooltip is the ambient counterpart to suppressing the transient
   // network snack on automatic syncs — a persistent problem stays discoverable
   // by glancing at / hovering the always-present header button.
-  // Precedence mirrors the icon @if cascade in the template (disabled →
-  // offline → error → syncing → in-sync); keep the two in sync.
+  // Precedence mirrors `syncIcon` (disabled → offline → error → syncing →
+  // in-sync); keep the two in sync.
   syncTooltip = computed(() => {
     if (!this.syncIsEnabledAndReady()) {
       return T.MH.TRIGGER_SYNC;
@@ -215,9 +207,42 @@ export class MainHeaderComponent implements OnDestroy {
       return T.MH.SYNC_STATE.SYNCING;
     }
     if (this.hasNoPendingOps()) {
-      return T.MH.SYNC_STATE.IN_SYNC;
+      return this.superSyncIsConfirmedInSync()
+        ? T.MH.SYNC_STATE.IN_SYNC_CONFIRMED
+        : T.MH.SYNC_STATE.IN_SYNC;
     }
     return T.MH.TRIGGER_SYNC;
+  });
+  // One glyph per state, nothing drawn over it. A badge inside the 24px ring
+  // collided with the arrows and could not get a backing disc, because the
+  // header background varies (#10427). Same precedence as `syncTooltip`.
+  syncIcon = computed(() => {
+    if (!this.syncIsEnabledAndReady()) {
+      return 'sync_disabled';
+    }
+    if (!this.isOnline()) {
+      return 'wifi_off';
+    }
+    if (this.syncState() === 'ERROR') {
+      return 'sync_problem';
+    }
+    if (this.isSyncInProgress()) {
+      return 'sync';
+    }
+    return this.hasNoPendingOps() ? 'cloud_done' : 'sync';
+  });
+  isSyncIconSpinning = computed(
+    () => this.syncIcon() === 'sync' && !!this.isSyncInProgress(),
+  );
+  // Test hook for the E2E sync helpers, which wait on these states. 'local':
+  // every local change is uploaded. 'remote': the remote was also checked
+  // within the last minute. Deliberately independent of the spinner and
+  // the error state, as the checkmark badges it replaces were.
+  syncConfirmation = computed(() => {
+    if (!this.syncIsEnabledAndReady() || !this.isOnline() || !this.hasNoPendingOps()) {
+      return null;
+    }
+    return this.superSyncIsConfirmedInSync() ? 'remote' : 'local';
   });
   readonly isTimeTrackingEnabled = computed(() => {
     return this.globalConfigService.appFeatures().isTimeTrackingEnabled;

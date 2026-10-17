@@ -26,6 +26,10 @@ export type MiscConfig = Readonly<{
   isConfirmBeforeExit: boolean;
   isConfirmBeforeExitWithoutFinishDay: boolean;
   isMinimizeToTray: boolean;
+  // Legacy: the local REST API switch is device-local now (Electron main's
+  // simple store), because a synced switch started the listener on every
+  // desktop. Nothing reads or writes this anymore; kept optional so synced data
+  // from older clients keeps validating.
   isLocalRestApiEnabled?: boolean;
   // Desktop-only daily check for a newer GitHub release (#5463). Optional
   // because it was added later; a missing key means ON (see UpdateCheckService).
@@ -67,6 +71,9 @@ export type MiscConfig = Readonly<{
   overlayIndicatorOpacity?: number; // Deprecated – moved to taskWidget.opacity
 }>;
 
+/** How a task's priority is drawn next to its title. */
+export type TaskPriorityIconPreset = 'chevrons' | 'numbers';
+
 export type TasksConfig = Readonly<{
   isAutoMarkParentAsDone: boolean;
   isAutoAddWorkedOnToToday: boolean;
@@ -75,6 +82,12 @@ export type TasksConfig = Readonly<{
   isMarkdownFormattingInNotesEnabled: boolean;
   defaultProjectId?: string | null | false; // allow 'false' because of #569
   notesTemplate: string;
+  /**
+   * A `TaskPriorityIconPreset`, typed as an opaque string so a preset added by a
+   * newer client does not fail validation (and get reset) on older ones. Optional:
+   * older data lacks it; readers fall back to `'chevrons'` for missing/unknown.
+   */
+  priorityIconPreset?: string;
 }>;
 
 export type ShortSyntaxConfig = Readonly<{
@@ -216,20 +229,35 @@ export type SoundConfig = Readonly<{
   volume: number;
 }>;
 
+/**
+ * Base64 DER encodings; see sync-core `capture-open.ts` for the format.
+ * `v` is open-ended so typia accepts a future version; clients skip it.
+ */
+export type CaptureKeyConfig = Readonly<{
+  v: number;
+  privateKeyPkcs8: string;
+  publicKeySpki: string;
+}>;
+
 export type SyncConfig = Readonly<{
   isEnabled: boolean;
   isEncryptionEnabled?: boolean;
   isCompressionEnabled?: boolean;
   /**
-   * SPAP-11: opt-in "Surgical sync" — store file-based sync as a small always-read
-   * ops file (`sync-ops.json`) plus a rarely-rewritten snapshot (`sync-state.json`)
-   * for O(delta) syncs. Default OFF. One-way per sync folder: once a client with
-   * this ON migrates the folder, other clients must also turn it on to continue.
+   * Absent: use the remote format, or EMPTY_FOLDER_SYNC_FORMAT (v2) for an empty folder.
+   * false: retain legacy v2 behavior. true: explicitly migrate v2 to v3.
+   * The migration is one-way per sync folder.
    */
   isUseSplitSyncFiles?: boolean;
   syncProvider: SyncProviderId | null;
   syncInterval: number;
   isManualSyncOnly?: boolean;
+  /**
+   * Agent task capture key pair (SuperSync). Synced on purpose: every device
+   * opens captures sealed to it. Absent or null means capture is off; null is
+   * what switching off writes, since an absent field does not travel.
+   */
+  captureKey?: CaptureKeyConfig | null;
 
   /* NOTE: view model for form only*/
   encryptKey?: string | null;
@@ -298,6 +326,12 @@ export type FocusModeConfig = Readonly<{
    */
   isShowPreparation?: boolean;
   focusModeSound?: 'off' | 'tick' | 'whiteNoise';
+  /**
+   * Volume of the focus-mode ambient sound (tick / white noise) in percent of
+   * the main sound volume. Absent → DEFAULT_FOCUS_MODE_SOUND_VOLUME (40), which
+   * is the fixed ratio used before this setting existed.
+   */
+  focusModeSoundVolume?: number;
   /** @deprecated Use focusModeSound instead. Kept for backward-compat validation of old data. */
   isPlayTick?: boolean;
   isPauseTrackingDuringBreak?: boolean;
@@ -410,6 +444,11 @@ export type CustomCfgSection =
 export interface ConfigSectionAction {
   label: string;
   icon?: string;
+  /**
+   * Renders as a full-width row styled like the section's fields (icon, label,
+   * chevron) instead of a button below them — for navigating somewhere else.
+   */
+  isRow?: boolean;
   onClick: () => void | Promise<void>;
 }
 

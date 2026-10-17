@@ -1,3 +1,9 @@
+import { TaskPriorityIndicatorComponent } from '../../task-priority-indicator/task-priority-indicator.component';
+import {
+  TASK_PRIORITY_LABEL_KEY,
+  TASK_PRIORITY_LEVELS,
+  getTaskPriority,
+} from '../../task-priority.const';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -9,6 +15,7 @@ import {
   Input,
   OnDestroy,
   output,
+  signal,
   viewChild,
   ViewEncapsulation,
 } from '@angular/core';
@@ -23,7 +30,7 @@ import {
 } from '@angular/material/menu';
 import { MatDivider } from '@angular/material/divider';
 import { ESTIMATE_OPTIONS } from '../../add-task-bar/add-task-bar.const';
-import { Task, TaskWithSubTasks } from '../../task.model';
+import { Task, TaskPriority, TaskWithSubTasks } from '../../task.model';
 import { from, Observable, of, ReplaySubject, Subject } from 'rxjs';
 import {
   delay,
@@ -49,6 +56,10 @@ import { DialogDeadlineComponent } from '../../dialog-deadline/dialog-deadline.c
 import { DialogTimeEstimateComponent } from '../../dialog-time-estimate/dialog-time-estimate.component';
 import { throttle } from '../../../../util/decorators';
 import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-confirm.component';
+import {
+  getTaskDeleteConfirmData,
+  isTaskDeleteConfirmRequired,
+} from '../../util/get-task-delete-confirm';
 import { isTouchActive } from 'src/app/util/input-intent';
 import { T } from 'src/app/t.const';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -81,6 +92,11 @@ import { AddSubtaskInputService } from '../../add-subtask-input/add-subtask-inpu
 import { TaskDuplicateService } from '../../task-duplicate.service';
 import { TaskMoveToProjectService } from '../../task-move-to-project.service';
 import { TaskMultiSelectService } from '../../task-multi-select.service';
+import {
+  PluginTaskContextMenuEntryView,
+  PluginTaskContextMenuRegistryService,
+} from '../../../../plugins/plugin-task-context-menu-registry.service';
+import { PluginTaskContextMenuTarget } from '@super-productivity/plugin-api';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -98,6 +114,7 @@ import { TaskMultiSelectService } from '../../task-multi-select.service';
     IssueIconPipe,
     MenuTouchFixDirective,
     SelectOptionRowComponent,
+    TaskPriorityIndicatorComponent,
   ],
   templateUrl: './task-context-menu-inner.component.html',
   styleUrl: './task-context-menu-inner.component.scss',
@@ -125,9 +142,16 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   private readonly _taskDuplicateService = inject(TaskDuplicateService);
   private readonly _taskMoveToProjectService = inject(TaskMoveToProjectService);
   private readonly _taskMultiSelectService = inject(TaskMultiSelectService);
+  private readonly _pluginTaskContextMenuRegistry = inject(
+    PluginTaskContextMenuRegistryService,
+  );
+  private readonly _pluginTaskContextMenuTarget =
+    signal<PluginTaskContextMenuTarget>('TASK');
 
   protected readonly isTouchActive = isTouchActive;
   protected readonly T = T;
+  protected readonly PRIORITY_LEVELS = TASK_PRIORITY_LEVELS;
+  protected readonly PRIORITY_LABEL_KEY = TASK_PRIORITY_LABEL_KEY;
   readonly ESTIMATE_OPTIONS = ESTIMATE_OPTIONS;
   readonly DEFAULT_PROJECT_ICON = DEFAULT_PROJECT_ICON;
 
@@ -139,6 +163,9 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   );
   readonly isFocusModeEnabled = computed(
     () => this._globalConfigService.appFeatures().isFocusModeEnabled,
+  );
+  readonly pluginTaskContextMenuEntries = computed(() =>
+    this._pluginTaskContextMenuRegistry.entriesFor(this._pluginTaskContextMenuTarget()),
   );
 
   // eslint-disable-next-line @angular-eslint/no-output-native
@@ -153,6 +180,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   readonly contextMenu = viewChild('contextMenu', { read: MatMenu });
 
   task!: TaskWithSubTasks | Task;
+  priority: TaskPriority | null = null;
 
   isCurrent: boolean = false;
   isBacklog: boolean = false;
@@ -200,6 +228,8 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   //  Accessor inputs cannot be migrated as they are too complex.
   @Input('task') set taskSet(v: TaskWithSubTasks | Task) {
     this.task = v;
+    this.priority = getTaskPriority(v.priority);
+    this._pluginTaskContextMenuTarget.set(v.parentId ? 'SUBTASK' : 'TASK');
     this.isCurrent = this._taskService.currentTaskId() === v.id;
     this._task$.next(v);
   }
@@ -212,9 +242,8 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
     this.isInSubTaskList = !!this._elementRef.nativeElement.closest('.sub-tasks');
     const host = this._elementRef.nativeElement as HTMLElement;
     this.isInTaskRow =
-      !!host.closest(
-        'task, [data-board-selection-scope] planner-task[data-task-selectable="true"]',
-      ) && !host.closest('task-detail-panel');
+      !!host.closest('task, planner-task[data-task-selectable="true"]') &&
+      !host.closest('task-detail-panel');
 
     setTimeout(() => {
       if (!this._isOpenedFromKeyboard) {
@@ -396,6 +425,22 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
     menu.focusFirstItem('program');
   }
 
+  /**
+   * For radio-style submenus: focus the checked item so opening the menu and
+   * pressing Enter keeps the current choice. Falls back to the first item.
+   * `MatMenuItem.focus()` also moves the menu's key manager to that item.
+   */
+  focusCheckedSubmenuItem(menu: MatMenu): void {
+    const checked = menu._allItems.find(
+      (item) => item._getHostElement().getAttribute('aria-checked') === 'true',
+    );
+    if (checked) {
+      checked.focus('program');
+    } else {
+      menu.focusFirstItem('program');
+    }
+  }
+
   /** Touch entry point into multi-selection (there is no modifier key). */
   enterSelectionMode(): void {
     // The detail panel is single-task UI (a bottom sheet on touch); close it.
@@ -403,6 +448,14 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
       this._taskService.setSelectedId(null);
     }
     this._taskMultiSelectService.enterTouchSelectionMode(this.task.id);
+  }
+
+  runPluginTaskContextMenuEntry(entry: PluginTaskContextMenuEntryView): Promise<void> {
+    return this._pluginTaskContextMenuRegistry.execute(
+      entry.pluginId,
+      entry.entryId,
+      this.task.id,
+    );
   }
 
   goToFocusMode(): void {
@@ -457,14 +510,10 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
     const isConfirmBeforeDelete =
       this._globalConfigService.cfg()?.tasks?.isConfirmBeforeDelete ?? true;
 
-    if (isConfirmBeforeDelete) {
+    if (isTaskDeleteConfirmRequired(this.task, isConfirmBeforeDelete)) {
       this._matDialog
         .open(DialogConfirmComponent, {
-          data: {
-            okTxt: T.F.TASK.D_CONFIRM_DELETE.OK,
-            message: T.F.TASK.D_CONFIRM_DELETE.MSG,
-            translateParams: { title: this.task.title },
-          },
+          data: getTaskDeleteConfirmData(this.task),
         })
         .afterClosed()
         .subscribe(async (isConfirm) => {
@@ -508,6 +557,13 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
       return;
     }
     this._taskService.update(this.task.id, { timeEstimate: ms });
+  }
+
+  setPriority(priority: TaskPriority | null): void {
+    if (priority === this.priority) {
+      return;
+    }
+    this._taskService.update(this.task.id, { priority });
   }
 
   addSubTask(): void {

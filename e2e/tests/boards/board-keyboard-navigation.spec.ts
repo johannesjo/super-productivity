@@ -8,7 +8,11 @@ const openKanban = async (page: Page): Promise<void> => {
     .getByRole('tab')
     .filter({ hasText: /kanban/i })
     .click();
-  await page.getByRole('button', { name: 'Create Tag', exact: true }).click();
+  const kanbanPanel = page.getByRole('tabpanel', { name: 'Kanban', exact: true });
+  await expect(kanbanPanel).toBeVisible();
+  // The button can pass Playwright's stability check while the tab is still sliding.
+  await expect(kanbanPanel).not.toHaveClass(/mat-tab-body-animating/);
+  await kanbanPanel.getByRole('button', { name: 'Create Tag', exact: true }).click();
   await expect(page.locator('[data-board-selection-scope="TODO"]')).toBeVisible();
 };
 
@@ -243,9 +247,13 @@ test.describe('Board keyboard navigation', () => {
     await form
       .getByRole('textbox', { name: 'Title', exact: true })
       .fill(`${testPrefix}-Duplicates`);
-    for (const name of ['First panel', 'Second panel']) {
+    const titles = form.getByRole('textbox', { name: 'Title', exact: true });
+    for (const [i, name] of ['First panel', 'Second panel'].entries()) {
       await form.getByRole('button', { name: 'Add new Panel' }).click();
-      await form.getByRole('textbox', { name: 'Title', exact: true }).last().fill(name);
+      // The new panel row renders asynchronously; without this wait `.last()`
+      // can still resolve to the previous row and overwrite its title.
+      await expect(titles).toHaveCount(i + 2);
+      await titles.last().fill(name);
     }
     await form.getByRole('button', { name: 'Save', exact: true }).click();
     const panels = page.locator('board-panel');
