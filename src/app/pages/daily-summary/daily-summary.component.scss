@@ -2,7 +2,12 @@
 
 $summary-point-inner-margin: var(--s);
 
+// The routed page is the scroll container. Reserve the scrollbar track so the
+// review tables rendering once the archive has loaded (around the end of the
+// route animation) can't narrow the page and re-wrap the centred headline.
 :host {
+  scrollbar-gutter: stable;
+
   evaluation-sheet {
     display: block;
   }
