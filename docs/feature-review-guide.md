@@ -9,6 +9,10 @@ whether a feature you are about to build should exist at all.
 
 For a new feature, the first review question is whether it should exist at all — not whether the diff is correct. Complexity added is permanent, so the burden is on the change to justify it. Is there real demand (reactions and distinct participants on the linked issue, not just the author)? Has the same idea been declined before — search **closed** issues, because a prior "no" needs new evidence, not a new PR. Does the PR's stated motivation survive checking: are the issues it cites actually open, or already fixed more cheaply (`git log -S`, `git tag --contains`)? Treat the motivation as a claim to verify, not context to accept. A correct, well-tested implementation of something that doesn't earn its place is still a decline, and the leanest fix that resolves the reported symptom usually wins.
 
+### Prior art
+
+A plan for a user-facing interaction (selection, keyboard flows, capture, planning views — not sync, bug fixes or infrastructure) includes a short **Prior art** section, written before the design: 3–5 apps chosen for the problem, not a fixed competitor list; one table of how each handles the few sub-questions the plan has to decide; the source and month checked (vendor docs vs. hands-on); and a **take / deliberately don't** list that checks each borrowed idea against the product principles. Link vendor docs instead of committing screenshots; add at most one or two cropped images when the visual itself is the decision. Model: [multi-select concept § 2](plans/2026-09-04-multi-select-tasks-concept.md#2-what-other-apps-do-summary). Reviewers of such a plan ask for the section if it is missing.
+
 ## Long-term cost of a change
 
 When reviewing new features, always double-check the potential long-term costs and risks a change introduces — maintenance burden, hard-to-reverse choices (data shapes, public/plugin APIs, sync formats), locked-in dependencies/abstractions, and footguns that only surface at scale or across synced clients — not just whether the immediate diff is correct.

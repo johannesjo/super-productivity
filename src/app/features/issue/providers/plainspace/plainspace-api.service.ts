@@ -225,6 +225,17 @@ export class PlainspaceApiService {
       .pipe(map((res) => mapSPTaskToIssue(res.task)));
   }
 
+  /**
+   * Deletes a task assigned to me for everyone in its space (server soft
+   * delete). Errors propagate (like `createTask$`): the delete effect treats a
+   * 404 as already gone and reports any other failure.
+   */
+  deleteTask$(id: string, cfg: PlainspaceCfg): Observable<void> {
+    return this._http.delete<void>(`${this._base(cfg)}/tasks/${encodeURIComponent(id)}`, {
+      headers: this._headers(cfg),
+    });
+  }
+
   /** Creates a remote space and returns its id (used by the share flow). */
   createSpace$(title: string, cfg: PlainspaceCfg): Observable<{ id: string }> {
     return this._http

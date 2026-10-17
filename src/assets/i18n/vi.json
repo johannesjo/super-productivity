@@ -2850,8 +2850,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Âm thanh nhắc nhở nghỉ",
+      "DING": "Tiếng chuông",
       "DONE_SOUND": "Âm thanh hoàn thành công việc",
       "IS_INCREASE_DONE_PITCH": "Tăng cao độ cho mỗi công việc hoàn thành",
+      "SMALL_DING": "Tiếng chuông nhỏ",
+      "SOUND_1": "Âm thanh 1",
+      "SOUND_2": "Âm thanh 2",
+      "SOUND_3": "Âm thanh 3",
+      "SOUND_4": "Âm thanh 4",
+      "SOUND_5": "Âm thanh 5",
+      "SOUND_6": "Âm thanh 6",
+      "SOUND_7": "Âm thanh 7",
       "TITLE": "Âm thanh",
       "TRACK_TIME_SOUND": "Âm thanh nhắc nhở theo dõi thời gian",
       "VOLUME": "Âm lượng"

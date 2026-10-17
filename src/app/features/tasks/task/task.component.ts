@@ -91,6 +91,10 @@ import { isDeadlineApproaching as isDeadlineApproachingFn } from '../util/is-dea
 import { TaskContextMenuComponent } from '../task-context-menu/task-context-menu.component';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ICAL_TYPE, PLAINSPACE_TYPE } from '../../issue/issue.const';
+import {
+  getTaskDeleteConfirmData,
+  isTaskDeleteConfirmRequired,
+} from '../util/get-task-delete-confirm';
 import { TaskTitleComponent } from '../../../ui/task-title/task-title.component';
 import { MatIcon } from '@angular/material/icon';
 import { MatIconButton, MatMiniFabButton } from '@angular/material/button';
@@ -772,15 +776,10 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     const isConfirmBeforeTaskDelete =
       this._configService.cfg()?.tasks?.isConfirmBeforeDelete ?? true;
 
-    if (isConfirmBeforeTaskDelete) {
+    if (isTaskDeleteConfirmRequired(this.task(), isConfirmBeforeTaskDelete)) {
       this._matDialog
         .open(DialogConfirmComponent, {
-          data: {
-            okTxt: T.F.TASK.D_CONFIRM_DELETE.OK,
-            message: T.F.TASK.D_CONFIRM_DELETE.MSG,
-            isFocusConfirm: true,
-            translateParams: { title: this.task().title },
-          },
+          data: getTaskDeleteConfirmData(this.task()),
         })
         .afterClosed()
         .pipe(takeUntilDestroyed(this._destroyRef))

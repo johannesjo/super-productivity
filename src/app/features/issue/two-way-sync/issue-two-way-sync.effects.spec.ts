@@ -148,6 +148,7 @@ describe('IssueTwoWaySyncEffects', () => {
       'fetchIssue',
       'pushChanges',
       'extractSyncValues',
+      'deleteIssue',
     ]);
 
     TestBed.configureTestingModule({
@@ -1295,6 +1296,29 @@ describe('IssueTwoWaySyncEffects', () => {
       expect(deleteIssueSpy).toHaveBeenCalledWith('issue-1', cfg);
 
       adapterRegistry.unregister('TEST_PROVIDER');
+    }));
+
+    it('should delete the Plainspace task through the registered Plainspace adapter', fakeAsync(() => {
+      const deleteIssueSpy = TestBed.inject(PlainspaceSyncAdapterService)
+        .deleteIssue as jasmine.Spy;
+      deleteIssueSpy.and.resolveTo(undefined);
+      const cfg = createMockIssueProvider();
+      issueProviderServiceSpy.getCfgOnce$.and.returnValue(of(cfg));
+
+      const task = createMockTask({
+        id: 'task-1',
+        issueType: 'PLAINSPACE',
+        issueId: 'ps-task-1',
+        issueProviderId: 'provider-1',
+        subTaskIds: [],
+      }) as TaskWithSubTasks;
+      (task as any).subTasks = [];
+
+      effects.deleteIssueOnTaskDelete$.subscribe();
+      actions$.next(TaskSharedActions.deleteTask({ task }));
+      tick(REMOTE_ISSUE_DELETE_DEFER_MS);
+
+      expect(deleteIssueSpy).toHaveBeenCalledWith('ps-task-1', cfg);
     }));
 
     it('should not call deleteIssue when adapter does not support it', fakeAsync(() => {

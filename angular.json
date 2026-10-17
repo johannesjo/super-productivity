@@ -34,7 +34,8 @@
               "src/favicon.ico",
               "src/assets",
               "src/manifest.json",
-              "src/static"
+              "src/static",
+              "src/sw.js"
             ],
             "styles": ["src/styles.scss"],
             "scripts": [],
@@ -57,6 +58,7 @@
           },
           "configurations": {
             "development": {
+              "externalDependencies": ["marked-katex-extension"],
               "budgets": [
                 {
                   "type": "anyComponentStyle",
@@ -68,7 +70,8 @@
               "sourceMap": true,
               "namedChunks": false,
               "aot": false,
-              "serviceWorker": "ngsw-config.json"
+              "serviceWorker": "ngsw-config.json",
+              "externalDependencies": ["marked-katex-extension"]
             },
             "production": {
               "baseHref": "",

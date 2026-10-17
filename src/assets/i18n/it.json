@@ -2856,8 +2856,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Suono per il promemoria della pausa",
+      "DING": "Campanello",
       "DONE_SOUND": "Suono per il completamento attività",
       "IS_INCREASE_DONE_PITCH": "Aumenta il tono per ogni attività svolta",
+      "SMALL_DING": "Campanellino",
+      "SOUND_1": "Suono 1",
+      "SOUND_2": "Suono 2",
+      "SOUND_3": "Suono 3",
+      "SOUND_4": "Suono 4",
+      "SOUND_5": "Suono 5",
+      "SOUND_6": "Suono 6",
+      "SOUND_7": "Suono 7",
       "TITLE": "Suono",
       "TRACK_TIME_SOUND": "Suono promemoria timer",
       "VOLUME": "Volume"
