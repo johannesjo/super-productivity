@@ -171,10 +171,12 @@ export const neutralizeAutoloadMedia = (notes: string): string =>
   // `!+`: dropping one `!` of `!![` would leave a working `![`.
   notes.replace(/!+\[/g, '[').replace(AUTOLOAD_TAG, '&lt;');
 
-// Years 0000-0099 pass the shape check but `new Date(y, …)` maps them to
-// 19xx; the server never seals them, so drop them like any other bad day.
+// Years before 1000 pass the shape check but break downstream: `new Date(y, …)`
+// maps 0000-0099 to 19xx, and getDbDateStr writes 0100-0999 unpadded
+// (`500-06-15`), which a repeat config turns into NaN dates. The server never
+// seals them, so drop them like any other bad day.
 const parseDueDay = (value: unknown): string | undefined =>
-  typeof value === 'string' && isValidDBDateStr(value) && !value.startsWith('00')
+  typeof value === 'string' && isValidDBDateStr(value) && !value.startsWith('0')
     ? value
     : undefined;
 

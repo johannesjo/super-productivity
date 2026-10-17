@@ -114,11 +114,17 @@ const REPEAT_KEYS = ['cycle', 'every', 'weekdays'];
 const DUE_DATE_RE = new RegExp(DUE_DATE_PATTERN);
 const DUE_TIME_RE = new RegExp(DUE_TIME_PATTERN);
 
-/** Rejects shapes like 2026-02-30 that the pattern lets through. */
+/**
+ * Rejects shapes like 2026-02-30 that the pattern lets through, and years
+ * before 1000: the app writes those days without zero padding (`500-06-15`),
+ * which a repeating capture turns into NaN dates (same floor as the Local REST
+ * API's repeat startDate).
+ */
 const isCalendarDay = (day: string): boolean => {
   const [year, month, date] = day.split('-').map(Number);
   const utc = new Date(Date.UTC(year, month - 1, date));
   return (
+    year >= 1000 &&
     utc.getUTCFullYear() === year &&
     utc.getUTCMonth() === month - 1 &&
     utc.getUTCDate() === date

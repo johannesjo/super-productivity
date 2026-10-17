@@ -408,6 +408,12 @@ export class TaskRepeatCfgEffects {
                     );
                     if (nextOccurrence) {
                       targetOccurrence = nextOccurrence;
+                    } else if (fullCfg.repeatUntilDay) {
+                      // Today's slot was the last one before the end date and
+                      // has passed: leave the instance as it is, like the
+                      // no-occurrence case above, instead of rescheduling it
+                      // into the past (#10091).
+                      return EMPTY;
                     }
                   }
                 }

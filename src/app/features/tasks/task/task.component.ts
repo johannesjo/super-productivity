@@ -16,7 +16,6 @@ import {
   viewChild,
 } from '@angular/core';
 import { TaskService } from '../task.service';
-import { SectionService } from '../../section/section.service';
 import { TaskDuplicateService } from '../task-duplicate.service';
 import { TaskMultiSelectService } from '../task-multi-select.service';
 import { TaskMoveToProjectService } from '../task-move-to-project.service';
@@ -188,7 +187,6 @@ const isInteractiveTarget = (target: EventTarget | null): boolean =>
 })
 export class TaskComponent implements OnDestroy, AfterViewInit {
   private readonly _taskService = inject(TaskService);
-  private readonly _sectionService = inject(SectionService);
   private readonly _taskDuplicateService = inject(TaskDuplicateService);
   private readonly _matDialog = inject(MatDialog);
   private readonly _location = inject(Location);
@@ -216,8 +214,6 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   task = input.required<TaskWithSubTasks>();
   isBacklog = input<boolean>(false);
-  // Section list this row is rendered in, null for non-section lists.
-  sectionId = input<string | null>(null);
   isInSubTaskList = input<boolean>(false);
   showDoneAnimation = signal(false);
   showUndoneAnimation = signal(false);
@@ -855,25 +851,15 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   moveTaskToTop(): void {
-    this._moveAndRefocus((id, parentId, isBacklog) => {
-      const sectionId = this.sectionId();
-      if (sectionId) {
-        this._sectionService.moveTaskToTop(sectionId, id);
-      } else {
-        this._taskService.moveToTop(id, parentId, isBacklog);
-      }
-    });
+    this._moveAndRefocus((id, parentId, isBacklog) =>
+      this._taskService.moveToTop(id, parentId, isBacklog),
+    );
   }
 
   moveTaskToBottom(): void {
-    this._moveAndRefocus((id, parentId, isBacklog) => {
-      const sectionId = this.sectionId();
-      if (sectionId) {
-        this._sectionService.moveTaskToBottom(sectionId, id);
-      } else {
-        this._taskService.moveToBottom(id, parentId, isBacklog);
-      }
-    });
+    this._moveAndRefocus((id, parentId, isBacklog) =>
+      this._taskService.moveToBottom(id, parentId, isBacklog),
+    );
   }
 
   handleArrowUp(): void {

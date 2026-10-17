@@ -333,6 +333,8 @@ describe('toCaptureTask', () => {
     for (const due of [
       { dueDate: '2026-02-30' },
       { dueDate: '0001-01-01' },
+      { dueDate: '0500-06-15' },
+      { dueDate: '0999-12-31' },
       { dueDate: '2026-10-16T09:30' },
       { dueDate: 1 },
       { dueTime: '09:30' },
