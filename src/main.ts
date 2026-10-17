@@ -209,7 +209,7 @@ bootstrapApplication(AppComponent, {
       EffectsModule.forRoot([]),
       // StoreDevtoolsModule lazy-loaded in dev mode after bootstrap
       ReactiveFormsModule,
-      ServiceWorkerModule.register('ngsw-worker.js', {
+      ServiceWorkerModule.register('sw.js', {
         enabled:
           !IS_ELECTRON &&
           !IS_NATIVE_PLATFORM &&
@@ -547,7 +547,7 @@ bootstrapApplication(AppComponent, {
     !IS_NATIVE_PLATFORM
   ) {
     Log.log('Registering Service worker');
-    return navigator.serviceWorker.register('ngsw-worker.js').catch((err: unknown) => {
+    return navigator.serviceWorker.register('sw.js').catch((err: unknown) => {
       Log.log('Service Worker Registration Error');
       Log.err(err);
     });

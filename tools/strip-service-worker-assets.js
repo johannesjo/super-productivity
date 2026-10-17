@@ -35,12 +35,16 @@
 const fs = require('fs');
 const path = require('path');
 
-/** Every file `"serviceWorker": "ngsw-config.json"` emits (Angular v22). */
+/**
+ * Every file `"serviceWorker": "ngsw-config.json"` emits (Angular v22), plus
+ * `sw.js`, the registered entry point that imports `ngsw-worker.js` (#10715).
+ */
 const SERVICE_WORKER_FILES = [
   'ngsw.json',
   'ngsw-worker.js',
   'safety-worker.js',
   'worker-basic.min.js',
+  'sw.js',
 ];
 
 /**
