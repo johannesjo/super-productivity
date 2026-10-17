@@ -8,7 +8,9 @@ import { TaskRepeatCfgCopy } from '../task-repeat-cfg.model';
 // Load-bearing `false` entries: lastTaskCreation* (the effect re-dispatches
 // them; `true` would re-enter it), quickSetting (derived UI value — the mapped
 // pattern fields carry the actual change), deletedInstanceDates (written by
-// the delete-instance flow, which removes the live task itself).
+// the delete-instance flow, which removes the live task itself),
+// repeatUntilDay (only stops later occurrences; the live instance, even an
+// overdue one, stays where it is — #10091).
 const SCHEDULE_AFFECTING_BY_FIELD: Record<keyof TaskRepeatCfgCopy, boolean> = {
   id: false,
   projectId: false,
@@ -25,7 +27,7 @@ const SCHEDULE_AFFECTING_BY_FIELD: Record<keyof TaskRepeatCfgCopy, boolean> = {
   quickSetting: false,
   repeatCycle: true,
   startDate: true,
-  repeatUntilDay: true,
+  repeatUntilDay: false,
   repeatEvery: true,
   monday: true,
   tuesday: true,

@@ -100,7 +100,7 @@ test.describe('@migration v12 SUP database on a blank start (#7345)', () => {
           async () =>
             (
               await readMigratedState<{ task?: { ids: string[] } }>(page).catch(
-                () => ({}),
+                (): { task?: { ids: string[] } } => ({}),
               )
             ).task?.ids ?? [],
           { timeout: 30000 },
