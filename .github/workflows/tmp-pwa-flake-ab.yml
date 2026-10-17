@@ -1,0 +1,186 @@
+name: TMP PWA flake A/B (#10715)
+
+# TEMPORARY. Compares the PWA update-activation flake (#10715) on master
+# (arm "base") with the fix (arm "fix"). Each arm is built once; the two PWA
+# specs then run in independent jobs, one fresh runner and browser per job.
+# --repeat-each cannot be used: each spec's beforeAll sets the server to v1
+# once per worker, so a repeat would start on v2.
+#
+# This file exists only on the ci-pwa-flake-ab branch, and every job is also
+# guarded to that branch. Delete the branch when done; never merge it.
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tmp-pwa-flake-ab-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  # origin/master that fix-pwa-sw-stream-abort is based on.
+  BASE_SHA: 944392e0d7d3959dfe5a8a3ea9d4b2f9232b8a24
+  FIX_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  build:
+    name: Build (${{ matrix.arm }})
+    if: github.head_ref == 'ci-pwa-flake-ab' || github.ref == 'refs/heads/ci-pwa-flake-ab'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      UNSPLASH_KEY: ${{ secrets.UNSPLASH_KEY }}
+      UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
+    strategy:
+      fail-fast: false
+      matrix:
+        arm: [base, fix]
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          ref: ${{ matrix.arm == 'base' && env.BASE_SHA || env.FIX_SHA }}
+          persist-credentials: false
+
+      - name: Setup E2E Environment
+        uses: ./.github/actions/setup-e2e
+
+      - name: Build production web app
+        run: npm run buildFrontend:prodWeb
+
+      - name: Upload build
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: dist-${{ matrix.arm }}
+          path: dist/browser
+          retention-days: 3
+          if-no-files-found: error
+
+  test:
+    name: PWA ${{ matrix.arm }} ${{ matrix.run }}
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        arm: [base, fix]
+        run:
+          [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+          ]
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          ref: ${{ matrix.arm == 'base' && env.BASE_SHA || env.FIX_SHA }}
+          persist-credentials: false
+
+      - name: Setup E2E Environment
+        uses: ./.github/actions/setup-e2e
+
+      - name: Download build
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v4
+        with:
+          name: dist-${{ matrix.arm }}
+          path: dist/browser
+
+      # Same command as the PWA & Lighthouse job in ci.yml, limited to the two
+      # specs that exist on both arms. The step may fail without failing the
+      # job; the summary job counts outcomes.
+      - name: Run PWA specs
+        id: pwa
+        continue-on-error: true
+        run: |
+          set -o pipefail
+          npx playwright test --config e2e/playwright.pwa.config.ts --reporter=line \
+            e2e/pwa/offline-reload.spec.ts e2e/pwa/update-activation.spec.ts 2>&1 | tee pwa.log
+
+      - name: Record result
+        if: always()
+        env:
+          ARM: ${{ matrix.arm }}
+          RUN: ${{ matrix.run }}
+          OUTCOME: ${{ steps.pwa.outcome }}
+        run: |
+          mkdir -p result
+          lines="$(grep -oE 'e2e/pwa/[a-z-]+\.spec\.ts:[0-9]+' pwa.log | sort -u | tr '\n' ' ' || true)"
+          echo "${ARM} ${RUN} ${OUTCOME} ${lines}" > "result/result-${ARM}-${RUN}.txt"
+          cat "result/result-${ARM}-${RUN}.txt"
+
+      - name: Upload result
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: result-${{ matrix.arm }}-${{ matrix.run }}
+          path: result
+          retention-days: 3
+
+      - name: Upload PWA results on failure
+        if: steps.pwa.outcome == 'failure'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: pwaResults-${{ matrix.arm }}-${{ matrix.run }}
+          path: .tmp/e2e-test-results/pwa-test-results
+          retention-days: 7
+
+  summary:
+    name: A/B summary
+    needs: test
+    if: always() && needs.test.result != 'skipped'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      # Without a name, every artifact lands in results/<artifact-name>/.
+      - name: Download results
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v4
+        with:
+          path: results
+
+      - name: Print failures per arm
+        run: |
+          {
+            echo "## PWA flake A/B (#10715)"
+            echo
+            for arm in base fix; do
+              total=$(cat results/result-"$arm"-*/*.txt 2>/dev/null | wc -l)
+              failed=$(cat results/result-"$arm"-*/*.txt 2>/dev/null | grep -c ' failure ' || true)
+              echo "- ${arm}: ${failed} failed of ${total} recorded runs (30 scheduled)"
+            done
+            echo
+            echo '```'
+            cat results/result-*/*.txt 2>/dev/null | grep -v ' success ' | sort -k1,1 -k2,2n || true
+            echo '```'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
