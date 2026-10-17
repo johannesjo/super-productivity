@@ -190,5 +190,13 @@
     "author": "owarimono",
     "authorUrl": "https://github.com/owarimono",
     "stars": 0
+  },
+  {
+    "name": "DDL Todo Board",
+    "shortDescription": "Month-calendar board showing only deadline todos (DDL-tagged tasks): in-cell create, click-to-edit, overdue highlighting, customizable colors.",
+    "url": "https://github.com/little-tiger001/ddl-todos-board",
+    "author": "little-tiger001",
+    "authorUrl": "https://github.com/little-tiger001",
+    "stars": 0
   }
 ]
