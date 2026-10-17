@@ -7,6 +7,9 @@
 // gets net::ERR_ABORTED, one failed static import fails main.js's whole module
 // graph, and the app never leaves the splash screen (#10715). A blob-backed
 // copy goes through Chromium's blob path, which a collection does not abort.
+//
+// Once released, this file must stay deployed: installed clients check it for
+// updates, and a missing sw.js leaves them on the old worker.
 importScripts('./ngsw-worker.js');
 
 const ngswRespondWith = FetchEvent.prototype.respondWith;

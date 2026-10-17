@@ -20,6 +20,7 @@
  * `ngsw.json` flat at the browser-output root (never hashed, never nested),
  * and `augmentAppWithServiceWorkerCore` copies `ngsw-worker.js` plus, when
  * present, `safety-worker.js` under both its own name and `worker-basic.min.js`.
+ * `sw.js` is ours (copied via `angular.json` assets), not Angular's.
  *
  * Usage: node ./tools/strip-service-worker-assets.js <target-dir>
  *

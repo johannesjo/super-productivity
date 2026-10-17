@@ -217,6 +217,10 @@ bootstrapApplication(AppComponent, {
         // Register the ServiceWorker as soon as the application is stable
         // or after 30 seconds (whichever comes first).
         registrationStrategy: 'registerWhenStable:30000',
+        // sw.js loads ngsw-worker.js via importScripts; without this, update
+        // checks may take that import from the HTTP cache. Keep in sync with
+        // the register() call below, or each call flips the registration.
+        updateViaCache: 'none',
       }),
       TranslateModule.forRoot({
         fallbackLang: DEFAULT_LANGUAGE,
@@ -547,10 +551,12 @@ bootstrapApplication(AppComponent, {
     !IS_NATIVE_PLATFORM
   ) {
     Log.log('Registering Service worker');
-    return navigator.serviceWorker.register('sw.js').catch((err: unknown) => {
-      Log.log('Service Worker Registration Error');
-      Log.err(err);
-    });
+    return navigator.serviceWorker
+      .register('sw.js', { updateViaCache: 'none' })
+      .catch((err: unknown) => {
+        Log.log('Service Worker Registration Error');
+        Log.err(err);
+      });
   } else if ('serviceWorker' in navigator && (IS_ELECTRON || IS_NATIVE_PLATFORM)) {
     navigator.serviceWorker
       .getRegistrations()
