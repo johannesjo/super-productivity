@@ -3098,7 +3098,7 @@
       "CREATE_TASK_TOUCH": "Tap + to add your first task",
       "TASK_SWIPE_LEFT_TOUCH": "Swipe task left for more actions",
       "TODAY_AND_INBOX": "This task is planned for today, so it shows in Today. It has no project, so it also lives in the Inbox.",
-      "TODAY_AND_INBOX_TOUCH": "This task is planned for today, so it shows in Today. It has no project, so it also lives in the Inbox, under ☰.",
+      "TODAY_AND_INBOX_PHONE": "This task is planned for today, so it shows in Today. It has no project, so it also lives in the Inbox, under ☰.",
       "OR_PRESS": "or press",
       "SKIP_ARIA": "Close tip"
     }

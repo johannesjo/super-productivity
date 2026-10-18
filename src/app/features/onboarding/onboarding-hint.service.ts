@@ -88,7 +88,7 @@ export class OnboardingHintService {
     if (phase === 'await-first-task') {
       return 'create-task';
     }
-    if (phase === 'task-swipe-left') {
+    if (phase === 'task-swipe-left' || phase === 'today-and-inbox') {
       const isTaskUiOpen =
         this._taskFocusService.isTaskContextMenuOpen() ||
         this._taskService.selectedTaskId() !== null;

@@ -144,6 +144,41 @@ test.describe('First-run onboarding', () => {
     await page.close();
   });
 
+  test('the last tip follows its task and ends once the task is out of view', async ({
+    isolatedContext,
+  }) => {
+    const page = await isolatedContext.newPage();
+    const runtimeErrors = attachPageErrorCollector(page, 'onboarding follow');
+    installDevErrorDialogHandler(page, 'onboarding follow');
+    await openFreshApp(page, { withExamples: false });
+    const title = `Followed tip task ${Date.now()}`;
+    await addTaskViaComposer(page, title);
+    const hint = page.locator('onboarding-hint');
+    await expect(hint).toContainText(MODEL_TIP);
+    const task = page.locator('task').filter({ hasText: title }).first();
+
+    // Menus open on the very row the tip points at: the tip steps aside.
+    await task.click({ button: 'right' });
+    await expect(page.locator('.mat-mdc-menu-content')).toBeVisible();
+    await expect(hint).toHaveCount(0);
+    await page.mouse.click(900, 650);
+    await expect(page.locator('.mat-mdc-menu-content')).toHaveCount(0);
+    await expect(hint).toContainText(MODEL_TIP);
+
+    // Done moves the row to the completed list; the tip moves with it.
+    await task.locator('done-toggle').click();
+    await expectHintOnInboxChip(page, title);
+
+    // Once its task is out of view the tip ends instead of pointing at nothing.
+    await page.getByText('Completed Tasks', { exact: false }).first().click();
+    await expect(hint).toHaveCount(0);
+    await expect
+      .poll(() => page.evaluate(() => localStorage.getItem('SUP_ONBOARDING_HINTS_DONE')))
+      .toBe('true');
+    assertNoRuntimeBrowserErrors(runtimeErrors, 'onboarding follow');
+    await page.close();
+  });
+
   test('points at the bottom-nav + in a narrow window used with a mouse', async ({
     isolatedContext,
   }) => {

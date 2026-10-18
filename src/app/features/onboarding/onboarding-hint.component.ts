@@ -17,6 +17,7 @@ import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { OnboardingHintService, OnboardingStep } from './onboarding-hint.service';
 import { isTouchActive } from '../../util/input-intent';
 import { GlobalConfigService } from '../config/global-config.service';
+import { LayoutService } from '../../core-ui/layout/layout.service';
 import { T } from '../../t.const';
 
 /** Max retries when target element is not yet in the DOM */
@@ -48,6 +49,8 @@ interface StepConfig {
   ) => string | string[];
   message: string;
   touchMessage?: string;
+  /** Replaces the message on the phone layout (bottom nav, Inbox behind ☰) */
+  phoneMessage?: string;
   /** Gesture icon shown before the message */
   icon?: string;
   showShortcut: boolean;
@@ -93,8 +96,8 @@ const STEP_CONFIGS = new Map<OnboardingStep, StepConfig>([
       selector: (_, firstTaskId) =>
         firstTaskId ? `task[data-task-id="${CSS.escape(firstTaskId)}"] tag-list tag` : [],
       message: T.ONBOARDING.HINTS.TODAY_AND_INBOX,
-      // On phones the Inbox is behind the menu button.
-      touchMessage: T.ONBOARDING.HINTS.TODAY_AND_INBOX_TOUCH,
+      // On the phone layout the Inbox is behind the menu button.
+      phoneMessage: T.ONBOARDING.HINTS.TODAY_AND_INBOX_PHONE,
       isEndedWhenMissing: true,
       showShortcut: false,
       isPulse: false,
@@ -135,6 +138,7 @@ export class OnboardingHintComponent {
   shortcutHint = signal<string | null>(null);
 
   private _globalConfigService = inject(GlobalConfigService);
+  private _layoutService = inject(LayoutService);
   private _liveAnnouncer = inject(LiveAnnouncer);
   private _translateService = inject(TranslateService);
   private _activeStep: OnboardingStep | null = null;
@@ -217,10 +221,16 @@ export class OnboardingHintComponent {
     if (!config) {
       return;
     }
-    const key = isTouchActive()
-      ? (config.touchMessage ?? config.message)
-      : config.message;
-    void this._liveAnnouncer.announce(this._translateService.instant(key));
+    void this._liveAnnouncer.announce(
+      this._translateService.instant(this._messageKey(config)),
+    );
+  }
+
+  private _messageKey(config: StepConfig): string {
+    if (config.phoneMessage && this._layoutService.isShowMobileBottomNav()) {
+      return config.phoneMessage;
+    }
+    return isTouchActive() ? (config.touchMessage ?? config.message) : config.message;
   }
 
   /** Re-anchor on scroll/resize, or attach once the target appears. */
@@ -245,6 +255,13 @@ export class OnboardingHintComponent {
         this._calculatePosition(targetEl, step);
       } else if (targetEl) {
         this._positionHintForStep(step);
+      } else if (this._targetEl && config?.isEndedWhenMissing) {
+        // The target is gone, e.g. the first task left the list: hide, and end
+        // the tip unless the target comes back.
+        this._targetEl = null;
+        this.hintPosition.set(null);
+        this._clearPositionTimeout();
+        this._schedulePosition(step, 0);
       }
     });
   }
@@ -328,19 +345,14 @@ export class OnboardingHintComponent {
     }, 0);
 
     this._resizeObserver?.disconnect();
-    this._resizeObserver = new ResizeObserver(() => {
-      if (targetEl.isConnected) {
-        this._calculatePosition(targetEl, step);
-      }
-    });
+    // Also reports the target leaving the DOM, e.g. the task row moving lists.
+    this._resizeObserver = new ResizeObserver(() => this._scheduleReposition());
     this._resizeObserver.observe(targetEl);
     return true;
   }
 
   private _updateMessage(config: StepConfig): void {
-    this.hintMessage.set(
-      isTouchActive() ? (config.touchMessage ?? config.message) : config.message,
-    );
+    this.hintMessage.set(this._messageKey(config));
     this.hintIcon.set(config.icon ?? null);
     if (!isTouchActive() && config.showShortcut) {
       const shortcut = this._globalConfigService.cfg()?.keyboard?.addNewTask;

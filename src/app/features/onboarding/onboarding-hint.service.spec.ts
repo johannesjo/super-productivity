@@ -24,7 +24,6 @@ const ONBOARDING_KEYS = [
   LS.ONBOARDING_HINTS_DONE,
   LS.IS_SKIP_TOUR,
   LS.EXAMPLE_TASKS_CREATED,
-  LS.EXAMPLE_TASK_IDS,
 ];
 
 const makeTask = (id: string, partial: Partial<Task> = {}): Task =>
@@ -112,7 +111,6 @@ describe('OnboardingHintService', () => {
     }
     // A fresh install seeds example tasks; tests that need an older install unset it.
     localStorage.setItem(LS.EXAMPLE_TASKS_CREATED, 'true');
-    localStorage.setItem(LS.EXAMPLE_TASK_IDS, JSON.stringify([EXAMPLE_TASK.id]));
 
     isShowAddTaskBar = signal(false);
     selectedTaskId = signal(null);
@@ -327,6 +325,19 @@ describe('OnboardingHintService', () => {
       addFirstTask();
       expect(service.currentStep()).toBeNull();
       expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBe('true');
+    });
+
+    it('hides while the task menu or task panel is open, as the swipe tip does', () => {
+      const service = createService();
+      addFirstTask();
+      expect(service.currentStep()).toBe('today-and-inbox');
+      isTaskContextMenuOpen.set(true);
+      expect(service.currentStep()).toBeNull();
+      isTaskContextMenuOpen.set(false);
+      selectedTaskId.set('task-1');
+      expect(service.currentStep()).toBeNull();
+      selectedTaskId.set(null);
+      expect(service.currentStep()).toBe('today-and-inbox');
     });
 
     it('ends for good once closed', () => {

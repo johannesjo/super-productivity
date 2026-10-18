@@ -204,7 +204,8 @@
   --z-right-panel-edge-handle: 66;
   --z-vertical-action-bar: 70;
   --z-tour: 1001;
-  --z-onboarding-hint: 1100;
+  // Below cdk-overlay (1000): menus and dialogs cover the hint, not vice versa.
+  --z-onboarding-hint: 998;
   --z-dragged-nav-item: 1002;
   --z-bg-overlay: 1;
 
