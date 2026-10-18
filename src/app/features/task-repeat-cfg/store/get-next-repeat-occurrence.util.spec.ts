@@ -262,6 +262,33 @@ describe('getNextRepeatOccurrence()', () => {
       });
       testCase(cfg, fromDate, startDate, expected);
     });
+
+    // #10902: stepping month by month from the 31st must not skip short months
+    it('should not skip February for every 4 months from Oct 31', () => {
+      const startDate = new Date(2026, 9, 31);
+      const lastCreation = new Date(2026, 9, 31);
+      const fromDate = new Date(2026, 10, 1);
+      const expected = new Date(2027, 1, 28);
+      const cfg = dummyRepeatable('ID1', {
+        repeatCycle: 'MONTHLY',
+        repeatEvery: 4,
+        lastTaskCreationDay: getDbDateStr(lastCreation),
+      });
+      testCase(cfg, fromDate, startDate, expected);
+    });
+
+    it('should not skip a 30-day month for every 4 months from Oct 31', () => {
+      const startDate = new Date(2026, 9, 31);
+      const lastCreation = new Date(2027, 1, 28);
+      const fromDate = new Date(2027, 2, 1);
+      const expected = new Date(2027, 5, 30);
+      const cfg = dummyRepeatable('ID1', {
+        repeatCycle: 'MONTHLY',
+        repeatEvery: 4,
+        lastTaskCreationDay: getDbDateStr(lastCreation),
+      });
+      testCase(cfg, fromDate, startDate, expected);
+    });
   });
 
   describe('MONTHLY monthlyLastDay (issue #7726)', () => {
@@ -1037,6 +1064,20 @@ describe('getNextRepeatOccurrence()', () => {
 
       expect(getNextRepeatOccurrence(cfg, fromDate, { inclusive: true })).toEqual(
         noon(new Date(2026, 6, 10)), // Jul 10 2026
+      );
+    });
+
+    it('does not skip February when the 30th already passed this month (#10902)', () => {
+      const fromDate = noon(new Date(2027, 0, 31)); // Sun Jan 31 2027
+      const cfg = dummyRepeatable('ID1', {
+        repeatCycle: 'MONTHLY',
+        repeatEvery: 1,
+        startDate: '2026-09-30',
+        lastTaskCreationDay: '2026-12-30',
+      });
+
+      expect(getNextRepeatOccurrence(cfg, fromDate, { inclusive: true })).toEqual(
+        noon(new Date(2027, 1, 28)), // Feb 28 2027
       );
     });
 

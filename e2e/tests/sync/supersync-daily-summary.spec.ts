@@ -6,6 +6,7 @@ import {
   createSimulatedClient,
   closeClient,
   archiveDoneTasks,
+  markTaskDone,
   type SimulatedE2EClient,
 } from '../../utils/supersync-helpers';
 
@@ -95,19 +96,21 @@ test.describe('@supersync Daily Summary Sync', () => {
       // Create Task B (no time)
       const taskBName = `TaskB-${uniqueId}`;
       await clientA.workView.addTask(taskBName);
-      const taskBLocator = clientA.page.locator(`task:has-text("${taskBName}")`);
 
-      // Mark both done
-      await taskALocator.hover();
-      await taskALocator.locator('done-toggle').click();
-
-      await taskBLocator.hover();
-      await taskBLocator.locator('done-toggle').click();
+      // Mark both done. markTaskDone waits for the done state: setDone is
+      // dispatched 200 ms after the click and cancelled if the work view is
+      // destroyed first, so Finish Day right after the click could archive
+      // nothing and the summary checks below would still pass.
+      await markTaskDone(clientA, taskAName);
+      await markTaskDone(clientA, taskBName);
 
       // Archive Tasks (Finish Day). The helper retries the click: Finish Day
       // shifts down while the last done task animates into "Completed Tasks",
       // so a single click can land on empty space.
       await archiveDoneTasks(clientA);
+      // Archived tasks leave the work view; this fails if a done was lost
+      await expect(clientA.page.locator('task', { hasText: taskAName })).toHaveCount(0);
+      await expect(clientA.page.locator('task', { hasText: taskBName })).toHaveCount(0);
       console.log('Client A archived tasks.');
 
       // Sync A (upload archive)
@@ -204,15 +207,16 @@ test.describe('@supersync Daily Summary Sync', () => {
         await client.workView.addTask(taskName);
       }
 
-      // Mark all tasks as done
+      // Mark all tasks as done, waiting for each done state (see above)
       for (const taskName of tasks) {
-        const taskLocator = client.page.locator(`task:has-text("${taskName}")`);
-        await taskLocator.hover();
-        await taskLocator.locator('done-toggle').click();
+        await markTaskDone(client, taskName);
       }
 
       // Finish day, then "Save and go home" to archive and trigger sync
       await archiveDoneTasks(client);
+      for (const taskName of tasks) {
+        await expect(client.page.locator('task', { hasText: taskName })).toHaveCount(0);
+      }
 
       // Wait a moment for any async effects to complete
       await client.page.waitForTimeout(1000);

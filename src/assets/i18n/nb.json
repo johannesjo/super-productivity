@@ -2856,8 +2856,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Ta en pause-påminnelseslyd",
+      "DING": "Bjelle",
       "DONE_SOUND": "Oppgavelyd",
       "IS_INCREASE_DONE_PITCH": "Øk tonehøyde for hver oppgave",
+      "SMALL_DING": "Liten bjelle",
+      "SOUND_1": "Lyd 1",
+      "SOUND_2": "Lyd 2",
+      "SOUND_3": "Lyd 3",
+      "SOUND_4": "Lyd 4",
+      "SOUND_5": "Lyd 5",
+      "SOUND_6": "Lyd 6",
+      "SOUND_7": "Lyd 7",
       "TITLE": "Lyd",
       "TRACK_TIME_SOUND": "Spor tidspåminnelseslyd",
       "VOLUME": "Volum"

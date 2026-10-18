@@ -10,6 +10,7 @@ import { MatMenu } from '@angular/material/menu';
 import { Store } from '@ngrx/store';
 
 import { PageTitleComponent } from './page-title.component';
+import { NAV_SECTION_ICON } from '../../magic-side-nav/nav-section-icons.const';
 import { WorkContextService } from '../../../features/work-context/work-context.service';
 import {
   WorkContext,
@@ -290,6 +291,36 @@ describe('PageTitleComponent', () => {
     });
   });
 
+  describe('sectionIcon()', () => {
+    // Every special section, so a swapped pair (e.g. /schedule vs /planner)
+    // or a section left without an icon fails here.
+    const cases: Array<[string, string]> = [
+      ['/schedule', NAV_SECTION_ICON.SCHEDULE],
+      ['/planner', NAV_SECTION_ICON.PLANNER],
+      ['/boards', NAV_SECTION_ICON.BOARDS],
+      ['/habits', NAV_SECTION_ICON.HABITS],
+      ['/search', NAV_SECTION_ICON.SEARCH],
+      ['/scheduled-list', NAV_SECTION_ICON.SCHEDULED_LIST],
+      ['/donate', NAV_SECTION_ICON.DONATE],
+      ['/config', NAV_SECTION_ICON.SETTINGS],
+      ['/archived-projects', NAV_SECTION_ICON.ARCHIVED_PROJECTS],
+    ];
+
+    cases.forEach(([url, expectedIcon]) => {
+      it(`returns "${expectedIcon}" for ${url}`, () => {
+        expect(setupComponent(url).sectionIcon()).toBe(expectedIcon);
+      });
+    });
+
+    it('is unset on a work context route, which shows the context icon', () => {
+      expect(setupComponent('/tag/TODAY/tasks').sectionIcon()).toBeUndefined();
+    });
+
+    it('is unset on a plugin route', () => {
+      expect(setupComponent('/plugins/some-plugin/index').sectionIcon()).toBeUndefined();
+    });
+  });
+
   describe('openInPlainspace()', () => {
     it('delegates to the share service with the active project id', () => {
       typeAndId$.next({ activeId: 'p1', activeType: WorkContextType.PROJECT });
@@ -419,13 +450,14 @@ describe('PageTitleComponent', () => {
       expect(minWidthOf('.page-title')).toBeGreaterThanOrEqual(60 + iconWidth);
     });
 
-    // ...and not where none is: a special section would otherwise carry an
-    // icon's worth of box it never fills.
-    it('leaves the floor bare on a section with no icon', async () => {
+    // Special sections carry their nav icon too, so they get the same floor.
+    it('adds the section icon to the floor on a special section', async () => {
       await withFloor('/config');
-      expect(host.querySelector('.page-title-icon')).toBeFalsy();
+      const icon = host.querySelector('.page-title-icon') as HTMLElement | null;
+      expect(icon?.textContent?.trim()).toBe(NAV_SECTION_ICON.SETTINGS);
 
-      expect(minWidthOf('.page-title')).toBe(60);
+      const iconWidth = parseFloat(getComputedStyle(icon!).width);
+      expect(minWidthOf('.page-title')).toBeGreaterThanOrEqual(60 + iconWidth);
     });
   });
 });

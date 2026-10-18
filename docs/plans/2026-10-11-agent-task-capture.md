@@ -81,8 +81,9 @@ the existing effects pick the first occurrence. An invalid `repeat` is
 dropped, leaving a one-off task. The tool stays write-only: its only answer
 is "Saved", so no task or setting data reaches the assistant.
 
-The local `create_task` of #10251 keeps `title` and `notes` only for now;
-the same optional fields there are a follow-up issue (#10833).
+The local `create_task` of #10251 takes the same optional fields with the
+same validation (#10833); invalid input is rejected, not dropped, and a timed
+one-off is likewise scheduled in its one `addTask`.
 
 ## Flow
 
@@ -310,6 +311,7 @@ user key`; AES-256-GCM, 12-byte random IV, 16-byte tag, AAD = version byte
 | Device creates a task, then goes offline more than 24 h without acking; another device takes over  | Possibly a duplicate, or a deleted task reappears, once the first device returns. Never same-id divergence                                                            | New `taskId` on takeover. **Accepted** (see decisions)                                                                                                          |
 | Same takeover, for a recurring capture                                                             | Possibly two repeat series that both keep creating tasks, until the user deletes one                                                                                  | New `taskId` and repeat config id on takeover. **Accepted** with the row above                                                                                  |
 | `addTask` persists, `addTaskRepeatCfgToTask` fails                                                 | The task stays a one-off; the retry skips it because the task exists                                                                                                  | Persist failure stops the run. **Accepted**: rare; a fix needs the shared importer to re-run follow-ups                                                         |
+| Local `create_task`: `addTask` persists, `addTaskRepeatCfgToTask` fails                            | `OUTCOME_UNKNOWN` with the task id; the task may be a one-off; a retry creates a duplicate                                                                            | Sticky persist-failure flag after the flush. **Accepted**: rare; the tool tells the assistant to check the Inbox first                                          |
 | Timed one-off capture with calendar auto time-blocking on                                          | No time-block event, no plugin `taskUpdate`; reminder and Today work                                                                                                  | Added in one `addTask`, no `scheduleTaskWithTime` (avoids a second op and a snack per import). **Accepted** (Oct 15 2026); timed recurring captures do get both |
 | Account switch or password change mid-import                                                       | Nothing created or acked; retried later                                                                                                                               | Epoch fence; `deviceId` survives the new client id                                                                                                              |
 | Concurrent `SYNC_IMPORT` elsewhere drops the `addTask`                                             | Task lost, like any local edit                                                                                                                                        | By design (sync rule 7)                                                                                                                                         |

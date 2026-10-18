@@ -400,7 +400,13 @@ button {
 // rather than to `:host`, because the page title's own buttons are deliberately
 // not on this grid.
 .action-nav-right {
-  ::ng-deep button:not(.sync-btn) .mat-icon {
+  // Material's icon-button token, so an SVG icon (the sync states) gets a
+  // 20px box too instead of 24px.
+  ::ng-deep button {
+    --mat-icon-button-icon-size: 20px;
+  }
+
+  ::ng-deep button .mat-icon {
     font-size: 20px;
     width: 20px;
     height: 20px;
@@ -408,10 +414,6 @@ button {
   }
 
   ::ng-deep button.sync-btn .mat-icon {
-    font-size: 24px;
-    width: 24px;
-    height: 24px;
-    line-height: 24px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -497,13 +499,14 @@ button {
   }
 }
 
+// Clockwise, the way the arrows of the `sync_ring` icon point.
 @keyframes spin {
   from {
     transform: rotate(0deg) translateZ(0);
   }
 
   to {
-    transform: rotate(-360deg) translateZ(0);
+    transform: rotate(360deg) translateZ(0);
   }
 }
 

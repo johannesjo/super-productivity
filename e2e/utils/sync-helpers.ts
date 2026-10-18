@@ -227,7 +227,7 @@ const readTerminalSyncState = async (
   // Error and conflict states can coexist with the old success icon, so they
   // must always win over the success check below.
   if (await syncPage.syncErrorIcon.isVisible().catch(() => false)) {
-    return { kind: 'error', message: 'sync_problem icon is visible' };
+    return { kind: 'error', message: 'sync error icon is visible' };
   }
 
   const snackBars = page.locator('.mat-mdc-snack-bar-container');

@@ -2844,8 +2844,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Zvuk podsjetnika za pauzu",
+      "DING": "Zvuk zvona",
       "DONE_SOUND": "Zvuk završetka zadatka",
       "IS_INCREASE_DONE_PITCH": "Povećaj ton za svaki završeni zadatak",
+      "SMALL_DING": "Zvuk malog zvona",
+      "SOUND_1": "Zvuk 1",
+      "SOUND_2": "Zvuk 2",
+      "SOUND_3": "Zvuk 3",
+      "SOUND_4": "Zvuk 4",
+      "SOUND_5": "Zvuk 5",
+      "SOUND_6": "Zvuk 6",
+      "SOUND_7": "Zvuk 7",
       "TITLE": "Zvuk",
       "TRACK_TIME_SOUND": "Zvuk podsjetnika praćenja vremena",
       "VOLUME": "Glasnoća"

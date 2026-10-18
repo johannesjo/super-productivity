@@ -2802,8 +2802,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "صوت تذكيري لأخذ استراحة",
+      "DING": "رنين جرس",
       "DONE_SOUND": "المهمة تمت الصوت",
       "IS_INCREASE_DONE_PITCH": "زيادة الملعب لكل مهمة يتم القيام بها",
+      "SMALL_DING": "رنين جرس صغير",
+      "SOUND_1": "صوت 1",
+      "SOUND_2": "صوت 2",
+      "SOUND_3": "صوت 3",
+      "SOUND_4": "صوت 4",
+      "SOUND_5": "صوت 5",
+      "SOUND_6": "صوت 6",
+      "SOUND_7": "صوت 7",
       "TITLE": "صوت",
       "TRACK_TIME_SOUND": "تتبع صوت تذكير الوقت",
       "VOLUME": "الصوت"
