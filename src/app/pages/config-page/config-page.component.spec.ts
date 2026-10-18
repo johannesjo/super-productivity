@@ -256,6 +256,28 @@ describe('ConfigPageComponent', () => {
 
       expect(getCollapsible().isExpanded).toBe(true);
     });
+
+    it('points the importer search results at the real Import/Export section', () => {
+      // The section's own hit comes from the live tab configs, so this fails
+      // if the tabs are reordered or the section key changes under the
+      // hand-written importer targets.
+      component.onSearchChange(T.GCF.IMEX.TITLE);
+      const sectionHit = component.searchResults.find(
+        (r) => r.labelKey === T.GCF.IMEX.TITLE,
+      );
+      expect(sectionHit).toBeDefined();
+
+      for (const key of [
+        T.FILE_IMEX.IMPORT_FROM_TODOIST,
+        T.FILE_IMEX.IMPORT_FROM_TICKTICK,
+      ]) {
+        component.onSearchChange(key);
+        const hit = component.searchResults.find((r) => r.labelKey === key);
+        expect(hit?.tabIndex).toBe(sectionHit!.tabIndex);
+        expect(hit?.sectionKey).toBe(sectionHit!.sectionKey);
+        expect(hit?.scrollSelector).toBe(sectionHit!.scrollSelector);
+      }
+    });
   });
 
   describe('App Features open by default', () => {
