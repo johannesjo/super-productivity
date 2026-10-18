@@ -1910,15 +1910,19 @@
         "SET_DEADLINE": "Set deadline"
       },
       "D_RECENTLY_DELETED": {
-        "CONFIRM_EMPTY": "Permanently remove the {{nr}} tasks in Recently deleted on this device?",
+        "CONFIRM_EMPTY": "Permanently remove everything in Recently deleted on this device?",
         "DELETED_ON": "Deleted {{date}}",
         "EMPTY": "Empty",
         "INTRO": "Deleted tasks stay here on this device for 30 days.",
         "LINK": "Recently deleted",
         "NONE": "Nothing deleted in the last 30 days.",
         "RESTORE": "Restore",
+        "RESTORE_ARIA": "Restore \"{{title}}\"",
         "RESTORED": "Restored \"{{title}}\"",
-        "SUB_TASKS": "+{{nr}} subtasks",
+        "SUB_TASKS": {
+          "ONE": "+{{nr}} subtask",
+          "OTHER": "+{{nr}} subtasks"
+        },
         "TITLE": "Recently deleted"
       },
       "D_REMINDER_VIEW": {

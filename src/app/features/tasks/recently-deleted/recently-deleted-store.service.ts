@@ -50,9 +50,15 @@ export class RecentlyDeletedStoreService {
             db.createObjectStore(STORE_NAME, { keyPath: 'id' });
           }
         },
-        // Reopen on next access if the browser closes the connection.
+        // Reopen on next access if the browser closes the connection, or
+        // close it so a newer tab's upgrade of this database is not blocked.
         terminated: () => {
           this._dbPromise = undefined;
+        },
+        blocking: () => {
+          const dbPromise = this._dbPromise;
+          this._dbPromise = undefined;
+          void dbPromise?.then((db) => db.close());
         },
       }).catch((e) => {
         this._dbPromise = undefined;

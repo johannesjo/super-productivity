@@ -116,9 +116,12 @@ export class OperationApplierService implements OperationApplyPort<Operation> {
     // the unset flag's own-op default is the safe direction. See meta-reducer.
     const localClientId = (await this.clientIdProvider.loadClientId()) ?? undefined;
 
-    const recentlyDeleted = isLocalHydration
-      ? undefined
-      : this.injector.get(RecentlyDeletedService);
+    // Only when the reducers run here: local hydration replays own ops, and a
+    // skipReducerDispatch retry would read state the ops already changed.
+    const recentlyDeleted =
+      isLocalHydration || options.skipReducerDispatch
+        ? undefined
+        : this.injector.get(RecentlyDeletedService);
     const preApplyTrashSnapshots = recentlyDeleted?.captureBeforeRemoteApply(ops);
 
     const reducerFailures: BulkReplayReducerFailure[] = [];
@@ -177,8 +180,12 @@ export class OperationApplierService implements OperationApplyPort<Operation> {
 
     if (recentlyDeleted && result.appliedOps.length > 0) {
       // Device-local trash, fed from the delete ops every client receives.
-      // Fire-and-forget: it never throws and must not delay or fail sync.
-      void recentlyDeleted.recordRemoteOps(result.appliedOps, preApplyTrashSnapshots);
+      // Fire-and-forget: it must not delay or fail sync.
+      try {
+        void recentlyDeleted.recordRemoteOps(result.appliedOps, preApplyTrashSnapshots);
+      } catch (e) {
+        OpLog.err('OperationApplierService: Recently deleted recording failed', e);
+      }
     }
 
     if (!result.failedOp) {

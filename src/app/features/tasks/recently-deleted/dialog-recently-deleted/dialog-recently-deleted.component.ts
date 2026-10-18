@@ -10,7 +10,7 @@ import {
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { Store } from '@ngrx/store';
-import { TranslatePipe } from '@ngx-translate/core';
+import { TranslatePipe, TranslateService, TranslateStore } from '@ngx-translate/core';
 import { BehaviorSubject, from } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { T } from '../../../../t.const';
@@ -22,6 +22,13 @@ import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-con
 import { DateTimeFormatService } from '../../../../core/date-time-format/date-time-format.service';
 import { LocaleDatePipe } from '../../../../ui/pipes/locale-date.pipe';
 import { truncate } from '../../../../util/truncate';
+import { getPluralKey } from '../../../../util/get-plural-key';
+
+interface RecentlyDeletedRow {
+  entry: RecentlyDeletedEntry;
+  /** Plural-aware key for the subtask count; undefined without subtasks. */
+  subTasksKey?: string;
+}
 
 @Component({
   selector: 'dialog-recently-deleted',
@@ -44,6 +51,8 @@ export class DialogRecentlyDeletedComponent {
   private readonly _matDialog = inject(MatDialog);
   private readonly _snackService = inject(SnackService);
   private readonly _taskEntities = inject(Store).selectSignal(selectTaskEntities);
+  private readonly _translateService = inject(TranslateService);
+  private readonly _translateStore = inject(TranslateStore);
   private readonly _reload$ = new BehaviorSubject<void>(undefined);
   private readonly _storedEntries = toSignal(
     this._reload$.pipe(switchMap(() => from(this._recentlyDeletedService.getEntries()))),
@@ -54,11 +63,23 @@ export class DialogRecentlyDeletedComponent {
 
   // Families that are live again (restored on another device, or recreated by
   // a concurrent edit that won over the delete) are not "deleted" any more.
-  readonly entries = computed<RecentlyDeletedEntry[] | undefined>(() => {
+  readonly rows = computed<RecentlyDeletedRow[] | undefined>(() => {
     const stored = this._storedEntries();
     if (!stored) return undefined;
     const taskEntities = this._taskEntities();
-    return stored.filter((entry) => !taskEntities[entry.id]);
+    return stored
+      .filter((entry) => !taskEntities[entry.id])
+      .map((entry) => ({
+        entry,
+        subTasksKey: entry.subTasks.length
+          ? getPluralKey(
+              this._translateService,
+              this._translateStore,
+              entry.subTasks.length,
+              'F.TASK.D_RECENTLY_DELETED.SUB_TASKS',
+            )
+          : undefined,
+      }));
   });
 
   async restore(entry: RecentlyDeletedEntry): Promise<void> {
@@ -78,7 +99,6 @@ export class DialogRecentlyDeletedComponent {
         data: {
           okTxt: T.F.TASK.D_RECENTLY_DELETED.EMPTY,
           message: T.F.TASK.D_RECENTLY_DELETED.CONFIRM_EMPTY,
-          translateParams: { nr: this.entries()?.length ?? 0 },
         },
       })
       .afterClosed()

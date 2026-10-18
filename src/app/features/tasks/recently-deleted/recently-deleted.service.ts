@@ -9,6 +9,7 @@ import {
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { Task } from '../task.model';
 import { selectTaskEntities } from '../store/task.selectors';
+import { selectProjectFeatureState } from '../../project/store/project.selectors';
 import { RecentlyDeletedStoreService } from './recently-deleted-store.service';
 import {
   getRecentlyDeletedEntriesFromAction,
@@ -138,7 +139,12 @@ export class RecentlyDeletedService {
   async restore(entry: RecentlyDeletedEntry): Promise<void> {
     // The local restoreTask is also seen by RecentlyDeletedEffects, which
     // removes the entry; awaiting the explicit delete keeps the dialog in step.
-    this._ngrxStore.dispatch(TaskSharedActions.restoreTask(getRestoreTaskPayload(entry)));
+    const projects = this._ngrxStore.selectSignal(selectProjectFeatureState)().entities;
+    this._ngrxStore.dispatch(
+      TaskSharedActions.restoreTask(
+        getRestoreTaskPayload(entry, (id) => !!projects[id] && !projects[id]?.isArchived),
+      ),
+    );
     await this._enqueue(() => this._store.deleteMany([entry.id]));
   }
 

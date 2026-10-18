@@ -8,6 +8,9 @@ import {
 } from './recently-deleted.util';
 import { createTask } from '../task.test-helper';
 import { Task } from '../task.model';
+import { Project } from '../../project/project.model';
+import { selectProjectFeatureState } from '../../project/store/project.selectors';
+import { INBOX_PROJECT } from '../../project/project.const';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { Operation, OpType } from '../../../op-log/core/operation.types';
 import { ActionType } from '../../../op-log/core/action-types.enum';
@@ -15,6 +18,8 @@ import { ActionType } from '../../../op-log/core/action-types.enum';
 class FakeRecentlyDeletedStore {
   entries = new Map<string, RecentlyDeletedEntry>();
   isFailing = false;
+  /** Makes puts slower than deletes, so unordered writes would interleave. */
+  putDelayMs = 0;
 
   async getAll(): Promise<RecentlyDeletedEntry[]> {
     this._maybeFail();
@@ -23,6 +28,9 @@ class FakeRecentlyDeletedStore {
 
   async putMany(entries: RecentlyDeletedEntry[]): Promise<void> {
     this._maybeFail();
+    if (this.putDelayMs && entries.length) {
+      await new Promise((r) => setTimeout(r, this.putDelayMs));
+    }
     entries.forEach((e) => this.entries.set(e.id, e));
   }
 
@@ -71,18 +79,24 @@ describe('RecentlyDeletedService', () => {
   let store: FakeRecentlyDeletedStore;
   let dispatch: jasmine.Spy;
   let taskEntities: Record<string, Task>;
+  let projectState: { entities: Record<string, Partial<Project>> };
 
   beforeEach(() => {
     store = new FakeRecentlyDeletedStore();
     dispatch = jasmine.createSpy('dispatch');
     taskEntities = {};
+    projectState = { entities: { p1: { id: 'p1' } } };
     TestBed.configureTestingModule({
       providers: [
         RecentlyDeletedService,
         { provide: RecentlyDeletedStoreService, useValue: store },
         {
           provide: Store,
-          useValue: { dispatch, selectSignal: () => () => taskEntities },
+          useValue: {
+            dispatch,
+            selectSignal: (selector: unknown) => () =>
+              selector === selectProjectFeatureState ? projectState : taskEntities,
+          },
         },
       ],
     });
@@ -132,6 +146,36 @@ describe('RecentlyDeletedService', () => {
     expect(action.type).toBe(TaskSharedActions.restoreTask.type);
     expect(action.task.id).toBe('a');
     expect(action.restoreToToday).toBeUndefined();
+    expect(store.entries.size).toBe(0);
+  });
+
+  it('restores a task whose project was archived into the Inbox', async () => {
+    projectState = { entities: { p1: { id: 'p1', isArchived: true } } };
+    await service.recordAction(
+      TaskSharedActions.deleteTask({
+        task: { ...createTask({ id: 'a', title: 'A', projectId: 'p1' }), subTasks: [] },
+      }),
+      NOW,
+      NOW,
+    );
+    const [entry] = await service.getEntries(NOW);
+
+    await service.restore(entry);
+
+    expect(dispatch.calls.mostRecent().args[0].task.projectId).toBe(INBOX_PROJECT.id);
+  });
+
+  it('keeps writes in call order even when a put is slower than a delete', async () => {
+    store.putDelayMs = 5;
+    const restoreA = TaskSharedActions.restoreTask({
+      task: createTask({ id: 'a' }),
+      subTasks: [],
+    });
+
+    const deleting = service.recordAction(deleteAction('a'), NOW, NOW);
+    await service.recordAction(restoreA, NOW, NOW);
+    await deleting;
+
     expect(store.entries.size).toBe(0);
   });
 

@@ -3,10 +3,11 @@
 <mat-dialog-content>
   <p class="intro">{{ T.F.TASK.D_RECENTLY_DELETED.INTRO | translate }}</p>
 
-  @if (entries(); as list) {
+  @if (rows(); as list) {
     @if (list.length) {
       <ul class="entries">
-        @for (entry of list; track entry.id) {
+        @for (row of list; track row.entry.id) {
+          @let entry = row.entry;
           <li class="entry">
             <div class="entry-text">
               <span class="entry-title">{{ entry.task.title }}</span>
@@ -19,12 +20,9 @@
                             entry.deletedAt | localeDate: 'short' : undefined : locale(),
                         }
                 }}
-                @if (entry.subTasks.length) {
-                  ·
-                  {{
-                    T.F.TASK.D_RECENTLY_DELETED.SUB_TASKS
-                      | translate: { nr: entry.subTasks.length }
-                  }}
+                @if (row.subTasksKey) {
+                  <span aria-hidden="true">·</span>
+                  {{ row.subTasksKey | translate: { nr: entry.subTasks.length } }}
                 }
               </span>
             </div>
@@ -32,6 +30,10 @@
               mat-button
               type="button"
               class="restore-btn"
+              [attr.aria-label]="
+                T.F.TASK.D_RECENTLY_DELETED.RESTORE_ARIA
+                  | translate: { title: entry.task.title }
+              "
               (click)="restore(entry)"
             >
               <mat-icon>restore_from_trash</mat-icon>
@@ -52,7 +54,7 @@
     type="button"
     color="warn"
     class="empty-btn"
-    [disabled]="!entries()?.length"
+    [disabled]="!rows()?.length"
     (click)="emptyTrash()"
   >
     <mat-icon>delete_forever</mat-icon>

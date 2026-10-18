@@ -83,13 +83,21 @@ export const getRecentlyDeletedEntriesFromAction = (
     if (!Array.isArray(taskIds) || !Array.isArray(tasks)) return [];
     const snapshots = tasks.filter(isTaskLike);
     const byId = new Map(snapshots.map((t) => [t.id, t]));
+    const childrenByParentId = new Map<string, Task[]>();
+    for (const t of snapshots) {
+      if (t.parentId) {
+        childrenByParentId.set(t.parentId, [
+          ...(childrenByParentId.get(t.parentId) ?? []),
+          t,
+        ]);
+      }
+    }
     const deletedIds = new Set(taskIds);
     return taskIds.flatMap((id) => {
       const task = byId.get(id);
       // A subtask deleted together with its parent belongs to the parent's entry.
       if (!task || (task.parentId && deletedIds.has(task.parentId))) return [];
-      const subTasks = snapshots.filter((t) => t.parentId === id);
-      return createEntry(task, subTasks, deletedAt);
+      return createEntry(task, childrenByParentId.get(id) ?? [], deletedAt);
     });
   }
 
@@ -116,15 +124,21 @@ export const isRecentlyDeletedEntryExpired = (
 /**
  * Payload for the existing, released `restoreTask` action. A deleted subtask
  * comes back as a top-level task in its project: its old parent's subtask
- * order cannot be restored without overwriting later changes.
+ * order cannot be restored without overwriting later changes. A task whose
+ * project is gone or archived comes back in the Inbox, where it is visible
+ * (the reducer keeps archived projects as valid owners).
  */
 export const getRestoreTaskPayload = (
   entry: RecentlyDeletedEntry,
+  isProjectActive: (projectId: string) => boolean = () => true,
 ): { task: Task; subTasks: Task[] } => ({
   task: {
     ...entry.task,
     parentId: undefined,
-    projectId: entry.task.projectId || INBOX_PROJECT.id,
+    projectId:
+      entry.task.projectId && isProjectActive(entry.task.projectId)
+        ? entry.task.projectId
+        : INBOX_PROJECT.id,
   },
   subTasks: entry.subTasks,
 });

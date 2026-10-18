@@ -1,5 +1,12 @@
 import { expect, test } from '../../fixtures/test.fixture';
 import { waitForStatePersistence } from '../../utils/waits';
+import {
+  closeRecentlyDeleted,
+  deleteTaskViaContextMenu,
+  expectRecentlyDeletedStoredCount,
+  openRecentlyDeleted,
+  RECENTLY_DELETED,
+} from '../../utils/recently-deleted-helpers';
 
 /**
  * Recently deleted (#2778): a deleted task can be recovered after the undo
@@ -25,10 +32,9 @@ test.describe('Recently deleted', () => {
     ).toBeVisible();
 
     // Delete the parent (and with it the subtask) through the context menu.
-    await parent.locator('task-title').first().click({ button: 'right' });
-    await page.locator('.mat-mdc-menu-content button.color-warn').click();
-    await page.locator('[e2e="confirmBtn"]').click();
-    await expect(taskPage.getTaskByText(parentTitle)).toHaveCount(0);
+    await deleteTaskViaContextMenu(page, parentTitle);
+    // The trash write is fire-and-forget: let it land before reloading.
+    await expectRecentlyDeletedStoredCount(page, 1);
 
     // The undo snack is long gone after a reload.
     await waitForStatePersistence(page);
@@ -36,18 +42,17 @@ test.describe('Recently deleted', () => {
     await workViewPage.waitForTaskList();
     await expect(taskPage.getTaskByText(parentTitle)).toHaveCount(0);
 
-    await page.goto('/#/tag/TODAY/history');
-    await page.locator('history .recently-deleted-btn').click();
-
-    const dialog = page.locator('dialog-recently-deleted');
-    const entry = dialog.locator('.entry').filter({ hasText: parentTitle });
+    await openRecentlyDeleted(page);
+    const entry = page.locator(RECENTLY_DELETED.ENTRY).filter({ hasText: parentTitle });
     await expect(entry).toBeVisible();
-    await expect(entry).toContainText('+1 subtasks');
+    await expect(entry).toContainText(/\+1 subtask(?!s)/);
 
-    await entry.locator('.restore-btn').click();
-    await expect(dialog.locator('.entry')).toHaveCount(0);
-    await expect(dialog.locator('.none')).toBeVisible();
-    await dialog.locator('button[mat-dialog-close]').click();
+    await entry.locator(RECENTLY_DELETED.RESTORE_BTN).click();
+    await expect(page.locator(RECENTLY_DELETED.ENTRY)).toHaveCount(0);
+    await expect(page.locator(RECENTLY_DELETED.NONE)).toBeVisible();
+    // The dialog also hides live tasks; the stored entry itself must be gone.
+    await expectRecentlyDeletedStoredCount(page, 0);
+    await closeRecentlyDeleted(page);
 
     await page.goto('/#/tag/TODAY/tasks');
     await workViewPage.waitForTaskList();
@@ -58,24 +63,36 @@ test.describe('Recently deleted', () => {
     ).toBeVisible();
   });
 
-  test('empties the trash', async ({ page, workViewPage, taskPage, testPrefix }) => {
+  test('empties the trash, and it stays empty after a reload', async ({
+    page,
+    workViewPage,
+    taskPage,
+    testPrefix,
+  }) => {
     await workViewPage.waitForTaskList();
     const title = `${testPrefix}-Trash empty`;
     await workViewPage.addTask(title);
-    const task = taskPage.getTaskByText(title).first();
-    await task.locator('task-title').first().click({ button: 'right' });
-    await page.locator('.mat-mdc-menu-content button.color-warn').click();
-    await page.locator('[e2e="confirmBtn"]').click();
-    await expect(taskPage.getTaskByText(title)).toHaveCount(0);
+    await expect(taskPage.getTaskByText(title)).toBeVisible();
+    await deleteTaskViaContextMenu(page, title);
 
-    await page.goto('/#/tag/TODAY/history');
-    await page.locator('history .recently-deleted-btn').click();
-    const dialog = page.locator('dialog-recently-deleted');
-    await expect(dialog.locator('.entry').filter({ hasText: title })).toBeVisible();
+    await openRecentlyDeleted(page);
+    await expect(
+      page.locator(RECENTLY_DELETED.ENTRY).filter({ hasText: title }),
+    ).toBeVisible();
 
-    await dialog.locator('.empty-btn').click();
+    await page.locator(RECENTLY_DELETED.EMPTY_BTN).click();
     await page.locator('dialog-confirm [e2e="confirmBtn"]').click();
-    await expect(dialog.locator('.entry')).toHaveCount(0);
-    await expect(dialog.locator('.empty-btn')).toBeDisabled();
+    await expect(page.locator(RECENTLY_DELETED.ENTRY)).toHaveCount(0);
+    await expect(page.locator(RECENTLY_DELETED.EMPTY_BTN)).toBeDisabled();
+    await expectRecentlyDeletedStoredCount(page, 0);
+    await closeRecentlyDeleted(page);
+
+    await waitForStatePersistence(page);
+    // Still on History: the reload lands there, not on a task list.
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.locator(RECENTLY_DELETED.LINK).waitFor({ state: 'visible' });
+    await openRecentlyDeleted(page);
+    await expect(page.locator(RECENTLY_DELETED.NONE)).toBeVisible();
+    await expectRecentlyDeletedStoredCount(page, 0);
   });
 });

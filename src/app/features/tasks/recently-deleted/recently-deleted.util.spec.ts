@@ -117,6 +117,17 @@ describe('recently-deleted.util', () => {
       expect(entries.map((e) => e.id)).toEqual(['a']);
     });
 
+    it('gives a lone deleted subtask its own entry when its parent survives', () => {
+      const a1 = createTask({ id: 'a1', title: 'A1', parentId: 'a' });
+
+      const entries = getRecentlyDeletedEntriesFromAction(
+        TaskSharedActions.deleteTasks({ taskIds: ['a1'], tasks: [a1] }),
+        DELETED_AT,
+      );
+
+      expect(entries.map((e) => e.id)).toEqual(['a1']);
+    });
+
     it('records nothing for a bulk delete without snapshots', () => {
       expect(
         getRecentlyDeletedEntriesFromAction(
@@ -204,6 +215,17 @@ describe('recently-deleted.util', () => {
 
       expect(next[TASK_FEATURE_NAME].entities['sub']?.parentId).toBeUndefined();
       expect(next[PROJECT_FEATURE_NAME].entities['project1']?.taskIds).toEqual(['sub']);
+    });
+
+    it('moves a task whose project is no longer active to the Inbox', () => {
+      const t = createTask({ id: 't', title: 'T', projectId: 'archived' });
+
+      expect(
+        getRestoreTaskPayload(
+          { id: 't', deletedAt: DELETED_AT, task: t, subTasks: [] },
+          (id) => id !== 'archived',
+        ).task.projectId,
+      ).toBe(INBOX_PROJECT.id);
     });
 
     it('falls back to the Inbox when the snapshot has no project', () => {

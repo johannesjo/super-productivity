@@ -13,8 +13,9 @@ Demand: #2778 (21 👍, 15 comments); #10350 also asks for projects/tags/filters
   point is a quiet "Recently deleted" text button at the bottom of the
   History view, which is already where archived tasks are restored. It opens a
   dialog.
-- **Fixed retention of 30 days, no setting**, plus "Empty". Expired entries are
-  dropped when the trash is written or opened.
+- **Fixed retention of 30 days, no setting**, plus "Empty". Deletes that are
+  already older than that are not recorded, and expired entries are purged
+  when the trash is opened.
 - **Tasks only, with their subtasks.** Plainspace tasks (deleting them deletes
   them for the whole Space) keep the current always-confirm behavior and
   never go to the trash. Blank tasks (the ones that also get no undo snack)
@@ -126,7 +127,9 @@ surface. **Rejected.**
   a sync.
 - **Restore** dispatches the existing, released `restoreTask` with the stored
   snapshot. A deleted subtask is restored as a top-level task in its project,
-  because its old parent's subtask order cannot be restored safely. `restoreTask`
+  because its old parent's subtask order cannot be restored safely. A task
+  whose project was archived or deleted meanwhile comes back in the Inbox, so
+  it is visible. `restoreTask`
   and `restoreDeletedTask` (local or remote) remove the entry.
 - **Retention / Empty** are local deletes from that database. They emit no op
   and need no replay determinism: no reducer reads the trash.
@@ -155,7 +158,7 @@ surface. **Rejected.**
 | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Delete on A while B edits the task    | Unchanged from today (existing delete-vs-update resolution). If the delete wins, both devices have the trash entry (A's own snapshot, so B's concurrent edit is not in it). If B's edit wins and recreates the task, the entry is hidden because the dialog filters ids that are active again. |
 | Restore on A while B empties / purges | Emptying on B is local and emits no op. A's `restoreTask` still applies on B (its payload carries the full task).                                                                                                                                                                              |
-| Restore on A and B concurrently       | Two `restoreTask` ops. The second is a no-op (the reducer is idempotent when the root is already active).                                                                                                                                                                                      |
+| Restore on A and B concurrently       | Two `restoreTask` ops. The second is a no-op (the reducer is idempotent when the root is already active, since v19.0.0; a v18 receiver behaves as for a concurrent double archive restore today).                                                                                              |
 | Purge timing across devices           | Each device expires entries 30 days after the delete's own timestamp. Devices may disagree briefly about what is in their trash, which is local, unsynced UI state. No synced state depends on it.                                                                                             |
 
 ### Known limitations (accepted for v1)
@@ -174,11 +177,14 @@ surface. **Rejected.**
   existing undo window (#10155 stays as is). A restored issue-linked task
   keeps its issue link. If the remote issue was deleted, the next issue
   refresh treats it like any other remotely deleted issue.
-- Paths that re-apply ops outside local hydration (retrying failed remote
-  ops, re-applying unsynced local ops after a snapshot load, a USE_REMOTE raw
-  rebuild) can re-add entries that were emptied within the last 30 days. The
-  puts are keyed by id, retention still applies, and no synced state reads the
-  trash.
+- The trash is fed only where the reducers actually run. A retry with
+  `skipReducerDispatch` (a failed remote op re-run at startup, unsynced local
+  ops re-applied after a snapshot load) is skipped, because state already
+  reflects those ops: a delete that only applies on such a retry is not
+  trashed. Paths that do re-run reducers on already-seen ops (restoring
+  preserved local ops after USE_REMOTE, a USE_REMOTE raw rebuild) can re-add
+  entries that were emptied within the last 30 days. The puts are keyed by id,
+  retention still applies, and no synced state reads the trash.
 - The trash survives a backup import or SYNC_IMPORT, so it can offer a task
   from the replaced dataset. Restoring one goes through `restoreTask`, which
   drops stale project, tag and repeat references, so state stays consistent.
