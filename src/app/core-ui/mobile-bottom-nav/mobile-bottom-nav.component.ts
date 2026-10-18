@@ -84,7 +84,7 @@ export class MobileBottomNavComponent {
     () => this._globalConfigService.appFeatures().isProjectNotesEnabled,
   );
   readonly isScheduleDayPanelEnabled = computed(
-    () => this._globalConfigService.appFeatures().isScheduleDayPanelEnabled,
+    () => this._globalConfigService.appFeatures().isSchedulerEnabled,
   );
   readonly isPlannerEnabled = computed(
     () => this._globalConfigService.appFeatures().isPlannerEnabled,
