@@ -39,7 +39,14 @@ class FakeRecentlyDeletedStore {
     deleteIds.forEach((id) => this.entries.delete(id));
   }
 
-  async clear(): Promise<void> {
+  emptiedAt = 0;
+
+  getEmptiedAt(): number {
+    return this.emptiedAt;
+  }
+
+  async clear(emptiedAt: number): Promise<void> {
+    this.emptiedAt = emptiedAt;
     this.entries.clear();
   }
 
@@ -193,6 +200,17 @@ describe('RecentlyDeletedService', () => {
     await service.empty();
     expect(store.entries.size).toBe(0);
     expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  // A USE_REMOTE replay re-applies deletes the user already emptied.
+  it('does not record again deletes made before the last empty()', async () => {
+    await service.recordAction(deleteAction('a'), NOW - 1000, NOW);
+    await service.empty(NOW);
+
+    await service.recordAction(deleteAction('a'), NOW - 1000, NOW + 5);
+    await service.recordAction(deleteAction('b'), NOW + 1, NOW + 5);
+
+    expect([...store.entries.keys()]).toEqual(['b']);
   });
 
   it('restore() offers an Undo that deletes the task again', async () => {

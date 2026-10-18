@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { DBSchema, IDBPDatabase, openDB } from 'idb';
+import { LS } from '../../../core/persistence/storage-keys.const';
 import { RecentlyDeletedEntry } from './recently-deleted.util';
 
 // A database of its own rather than a new SUP_OPS store: adding a store to
@@ -37,7 +38,15 @@ export class RecentlyDeletedStoreService {
     ]);
   }
 
-  async clear(): Promise<void> {
+  /** When the trash was last emptied on this device, 0 if never. */
+  getEmptiedAt(): number {
+    const emptiedAt = Number(localStorage.getItem(LS.RECENTLY_DELETED_EMPTIED_AT));
+    return Number.isFinite(emptiedAt) ? emptiedAt : 0;
+  }
+
+  async clear(emptiedAt: number): Promise<void> {
+    // Kept outside the database, so it holds even if the clear below fails.
+    localStorage.setItem(LS.RECENTLY_DELETED_EMPTIED_AT, String(emptiedAt));
     await (await this._db()).clear(STORE_NAME);
   }
 

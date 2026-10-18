@@ -151,7 +151,10 @@ surface. **Rejected.**
   (History, REST API, issue service, or remote) or `restoreDeletedTask` also
   removes it.
 - **Retention / Empty** are local deletes from that database. They emit no op
-  and need no replay determinism: no reducer reads the trash.
+  and need no replay determinism: no reducer reads the trash. "Empty" also
+  stores its time on this device (localStorage
+  `SUP_RECENTLY_DELETED_EMPTIED_AT`); deletes made before it are not recorded
+  again, so a replay cannot bring emptied tasks back.
 
 ### E. The op log itself as the trash
 
@@ -204,17 +207,21 @@ is noticed on the desktop. It is kept for now, pending a decision.
 - **Privacy:** a deleted task's pre-delete state stays in the op log and on
   the SuperSync server until compaction (7 days locally), as today. The trash
   adds a searchable copy on each device for 30 days, including deletes made
-  on other devices. "Empty" is per device, and a later full-state import
-  (USE_REMOTE) can bring a task back that was emptied here.
+  on other devices. "Empty" is per device.
 - The pre-apply snapshot is taken once per downloaded batch. A task created
   and bulk-deleted (`deleteTasks`) inside the same batch is not in it, so it
   is not trashed, and one edited and then bulk-deleted in one batch is trashed
   as it was before the batch. A single `deleteTask` carries its own snapshot.
 - A full-state rebuild (USE_REMOTE) that replays the whole history onto an
   empty state (SuperSync) re-adds every single-task delete of the last 30
-  days, including ones emptied here; bulk deletes from that replay are not
+  days made after the last "Empty" here; bulk deletes from that replay are not
   trashed. A file-based provider hydrates a snapshot first, so only deletes
   after it can come back.
+- The "Empty" cutoff compares against the sender's delete time. A delete made
+  before "Empty" that arrives later (an offline device) is not trashed, and
+  neither is a newer delete from a device whose clock runs behind by more than
+  the time since "Empty". If this device's clock was ahead when emptying, its
+  own deletes are not trashed until the clock passes that time again.
 - A delete that reaches this device more than 30 days after it was made is
   not trashed.
 - Restoring marks the task undone (`restoreTask` semantics, same as archive
@@ -228,9 +235,10 @@ is noticed on the desktop. It is kept for now, pending a decision.
   ops re-applied after a snapshot load) is skipped, because state already
   reflects those ops: a delete that only applies on such a retry is not
   trashed. Paths that do re-run reducers on already-seen ops (restoring
-  preserved local ops after USE_REMOTE, a USE_REMOTE raw rebuild) can re-add
-  entries that were emptied within the last 30 days. The puts are keyed by id,
-  retention still applies, and no synced state reads the trash.
+  preserved local ops after USE_REMOTE, a USE_REMOTE raw rebuild) record the
+  deletes of the last 30 days again, except those made before the last
+  "Empty". The puts are keyed by id, retention still applies, and no synced
+  state reads the trash.
 - The trash survives a backup import or SYNC_IMPORT, so it can offer a task
   from the replaced dataset. Restoring one goes through `restoreTask`, which
   drops stale project, tag and repeat references, so state stays consistent.

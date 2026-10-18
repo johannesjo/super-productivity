@@ -136,8 +136,8 @@ export class RecentlyDeletedService implements RemoteApplyListener {
     });
   }
 
-  async empty(): Promise<void> {
-    await this._enqueue(() => this._store.clear());
+  async empty(now: number = Date.now()): Promise<void> {
+    await this._enqueue(() => this._store.clear(now));
   }
 
   private _deleteAgain(id: string): void {
@@ -155,7 +155,11 @@ export class RecentlyDeletedService implements RemoteApplyListener {
     recorded: readonly { action: Action; deletedAt: number }[],
     now: number,
   ): Promise<void> {
-    const { puts, deleteIds } = getRecentlyDeletedChanges(recorded, now);
+    const changes = getRecentlyDeletedChanges(recorded, now);
+    const { deleteIds } = changes;
+    // A USE_REMOTE replay re-applies old deletes: keep emptied ones out.
+    const emptiedAt = this._store.getEmptiedAt();
+    const puts = changes.puts.filter((entry) => entry.deletedAt > emptiedAt);
     const isPurging =
       !this._isPurgedThisSession && (puts.length > 0 || deleteIds.length > 0);
     if (isPurging) {
