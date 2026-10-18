@@ -8,6 +8,38 @@ export const APP_FEATURES_FORM_CFG: ConfigFormSection<AppFeaturesConfig> = {
   help: T.GCF.APP_FEATURES.HELP,
   items: [
     {
+      key: 'isPlannerEnabled',
+      type: 'slide-toggle',
+      templateOptions: {
+        label: T.GCF.APP_FEATURES.PLANNER,
+        icon: 'edit_calendar',
+      },
+    },
+    {
+      key: 'isSchedulerEnabled',
+      type: 'slide-toggle',
+      templateOptions: {
+        label: T.GCF.APP_FEATURES.SCHEDULE,
+        icon: 'schedule',
+      },
+    },
+    {
+      key: 'isBoardsEnabled',
+      type: 'slide-toggle',
+      templateOptions: {
+        label: T.GCF.APP_FEATURES.BOARDS,
+        icon: 'grid_view',
+      },
+    },
+    {
+      key: 'isHabitsEnabled',
+      type: 'slide-toggle',
+      templateOptions: {
+        label: T.GCF.APP_FEATURES.HABITS,
+        icon: 'heart_check',
+      },
+    },
+    {
       key: 'isTimeTrackingEnabled',
       type: 'slide-toggle',
       props: {
@@ -24,27 +56,11 @@ export const APP_FEATURES_FORM_CFG: ConfigFormSection<AppFeaturesConfig> = {
       },
     },
     {
-      key: 'isSchedulerEnabled',
+      key: 'isFinishDayEnabled',
       type: 'slide-toggle',
       templateOptions: {
-        label: T.GCF.APP_FEATURES.SCHEDULE,
-        icon: 'schedule',
-      },
-    },
-    {
-      key: 'isPlannerEnabled',
-      type: 'slide-toggle',
-      templateOptions: {
-        label: T.GCF.APP_FEATURES.PLANNER,
-        icon: 'edit_calendar',
-      },
-    },
-    {
-      key: 'isBoardsEnabled',
-      type: 'slide-toggle',
-      templateOptions: {
-        label: T.GCF.APP_FEATURES.BOARDS,
-        icon: 'grid_view',
+        label: T.GCF.APP_FEATURES.FINISH_DAY,
+        icon: 'done_all',
       },
     },
     {
@@ -96,22 +112,6 @@ export const APP_FEATURES_FORM_CFG: ConfigFormSection<AppFeaturesConfig> = {
       templateOptions: {
         label: T.GCF.APP_FEATURES.DONATE_PAGE,
         icon: 'favorite',
-      },
-    },
-    {
-      key: 'isFinishDayEnabled',
-      type: 'slide-toggle',
-      templateOptions: {
-        label: T.GCF.APP_FEATURES.FINISH_DAY,
-        icon: 'done_all',
-      },
-    },
-    {
-      key: 'isHabitsEnabled',
-      type: 'slide-toggle',
-      templateOptions: {
-        label: T.GCF.APP_FEATURES.HABITS,
-        icon: 'heart_check',
       },
     },
   ],
