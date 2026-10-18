@@ -415,6 +415,13 @@ describe('SearchPageComponent', () => {
     it('selecting one restores it and then navigates to it', fakeAsync(() => {
       const entry = deletedEntry({ id: 'gone', title: 'Lost Report' });
       deletedEntries = [entry];
+      const calls: string[] = [];
+      recentlyDeletedSpy.restore.and.callFake(async () => {
+        calls.push('restore');
+      });
+      navigateToTaskServiceSpy.navigate.and.callFake(async () => {
+        calls.push('navigate');
+      });
       initAndFlush();
       typeAndFlush('lost');
 
@@ -425,6 +432,52 @@ describe('SearchPageComponent', () => {
       expect(navigateToTaskServiceSpy.navigate).toHaveBeenCalledWith('gone', false, {
         isFromSearch: true,
       });
+      expect(calls).toEqual(['restore', 'navigate']);
+    }));
+
+    it('the Restore button does not also trigger the row', fakeAsync(() => {
+      deletedEntries = [deletedEntry({ id: 'gone', title: 'Lost Report' })];
+      initAndFlush();
+      typeAndFlush('lost');
+      const event = jasmine.createSpyObj<MouseEvent>('MouseEvent', ['stopPropagation']);
+
+      void component.restoreDeletedItem(latestResults[0], event);
+      tick();
+
+      expect(event.stopPropagation).toHaveBeenCalled();
+      expect(recentlyDeletedSpy.restore).toHaveBeenCalledTimes(1);
+    }));
+
+    it('a stale row whose task is live again just navigates', fakeAsync(() => {
+      deletedEntries = [deletedEntry({ id: 'gone', title: 'Lost Report' })];
+      initAndFlush();
+      typeAndFlush('lost');
+      const staleItem = latestResults[0];
+      // Restored elsewhere (e.g. by sync) before the click lands.
+      allTasks$.next([createTask({ id: 'gone', title: 'Lost Report' })]);
+      tick(150);
+
+      void component.restoreDeletedItem(staleItem);
+      tick();
+
+      expect(recentlyDeletedSpy.restore).not.toHaveBeenCalled();
+      expect(navigateToTaskServiceSpy.navigate).toHaveBeenCalledWith('gone', false, {
+        isFromSearch: true,
+      });
+    }));
+
+    it('keep a few result slots even when live matches fill the limit', fakeAsync(() => {
+      allTasks$.next(
+        Array.from({ length: 60 }, (_, i) =>
+          createTask({ id: `live${i}`, title: `Meeting ${i}` }),
+        ),
+      );
+      deletedEntries = [deletedEntry({ id: 'gone', title: 'Meeting prep' })];
+      initAndFlush();
+      typeAndFlush('meeting');
+
+      expect(latestResults.length).toBe(50);
+      expect(latestResults.some((r) => r.id === 'gone' && r.isDeleted)).toBeTrue();
     }));
   });
 

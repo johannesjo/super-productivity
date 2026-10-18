@@ -2088,7 +2088,7 @@
         "DEADLINE_REMOVED": "Deadline removed",
         "DEADLINE_SET": "Deadline set for {{date}}",
         "DELETED": "Deleted task \"{{title}}\"",
-        "DELETED_FIND_IN_HISTORY": "Deleted task \"{{title}}\". Restore it from History → Recently deleted for 30 days.",
+        "DELETED_FIND_IN_HISTORY": "Deleted task \"{{title}}\". For 30 days, you can restore it from History → Recently deleted.",
         "DELETED_FIND_IN_SEARCH": "Deleted task \"{{title}}\". Search still finds it for 30 days.",
         "EMPTY_TITLE_VIA_APP_URI": "Task title was empty, no task was added",
         "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>\"{{title}}\"</strong> from backlog to the Today task list",

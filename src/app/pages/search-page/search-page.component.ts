@@ -10,7 +10,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { T } from '../../t.const';
 import { ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { BehaviorSubject, combineLatest, from, Observable } from 'rxjs';
-import { debounceTime, filter, map, startWith, switchMap } from 'rxjs/operators';
+import { debounceTime, filter, first, map, startWith, switchMap } from 'rxjs/operators';
 import { TaskService } from '../../features/tasks/task.service';
 import { DEFAULT_TAG, TODAY_TAG } from '../../features/tag/tag.const';
 import { NoteService } from '../../features/note/note.service';
@@ -46,6 +46,10 @@ import { SnackService } from '../../core/snack/snack.service';
 import { truncate } from '../../util/truncate';
 
 const MAX_RESULTS = 50;
+// Deleted matches are listed last but always get a few of the result slots,
+// so the delete message's promise ("Search still finds it") holds for
+// common words too.
+const MIN_DELETED_RESULTS = 5;
 
 @Component({
   selector: 'search-page',
@@ -110,6 +114,8 @@ export class SearchPageComponent implements OnInit {
     toObservable(this._menuTreeService.tagFolderMap),
     this._reloadDeleted$.pipe(
       switchMap(() => from(this._recentlyDeletedService.getEntries())),
+      // Live results never wait for the trash's IndexedDB read.
+      startWith([] as RecentlyDeletedEntry[]),
     ),
   ]).pipe(
     map(
@@ -419,13 +425,21 @@ export class SearchPageComponent implements OnInit {
     }
 
     const lowerSearchTerm = searchTerm.toLowerCase();
+    // Deleted items are mapped as not done and not archived, so they show
+    // without "include completed".
     const result = searchableItems.filter(
       (task) =>
-        (includeCompleted || task.isDeleted || (!task.isDone && !task.isArchiveTask)) &&
+        (includeCompleted || (!task.isDone && !task.isArchiveTask)) &&
         task.searchText.includes(lowerSearchTerm),
     );
 
-    return result.slice(0, MAX_RESULTS);
+    const deleted = result.filter((item) => item.isDeleted);
+    const rest = result.filter((item) => !item.isDeleted);
+    const head = rest.slice(
+      0,
+      MAX_RESULTS - Math.min(deleted.length, MIN_DELETED_RESULTS),
+    );
+    return [...head, ...deleted.slice(0, MAX_RESULTS - head.length)];
   }
 
   navigateToItem(item: SearchItem): void {
@@ -461,12 +475,27 @@ export class SearchPageComponent implements OnInit {
   async restoreDeletedItem(item: SearchItem, event?: MouseEvent): Promise<void> {
     event?.stopPropagation();
     const entry = this._deletedEntryById.get(item.id);
-    if (!entry) return;
+    if (!entry) {
+      // Live again meanwhile (e.g. restored by sync): just go there.
+      await this._navigateToTaskService.navigate(item.id, false, { isFromSearch: true });
+      return;
+    }
     await this._recentlyDeletedService.restore(entry);
+    // A row click restores, so a wrong pick must be as easy to take back as a
+    // delete is: Undo deletes it again (back into the trash).
     this._snackService.open({
       type: 'SUCCESS',
       msg: T.F.TASK.D_RECENTLY_DELETED.RESTORED,
       translateParams: { title: truncate(entry.task.title) },
+      actionStr: T.G.UNDO,
+      actionFn: () => {
+        this._taskService
+          .getByIdWithSubTaskData$(entry.id)
+          .pipe(first())
+          .subscribe((task) => {
+            if (task) this._taskService.remove(task);
+          });
+      },
     });
     this._reloadDeleted$.next();
     await this._navigateToTaskService.navigate(item.id, false, { isFromSearch: true });

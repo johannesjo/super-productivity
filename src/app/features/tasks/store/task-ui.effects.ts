@@ -32,7 +32,7 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { playDoneSound } from '../util/play-done-sound';
-import { Task } from '../task.model';
+import { Task, TaskWithSubTasks } from '../task.model';
 import { EMPTY } from 'rxjs';
 import { selectProjectById } from '../../project/store/project.selectors';
 import { Project } from '../../project/project.model';
@@ -348,8 +348,8 @@ export class TaskUiEffects {
 
   // Point at the shortest way back once the undo window is gone: Search lists
   // trashed tasks; without Search, the trash link at the bottom of History.
-  private _getDeletedSnackMsg(task: Task): string {
-    if (!isRecentlyDeletedTrashable(task)) {
+  private _getDeletedSnackMsg(task: TaskWithSubTasks): string {
+    if (!isRecentlyDeletedTrashable(task, task.subTasks ?? [])) {
       return T.F.TASK.S.DELETED;
     }
     return this._globalConfigService.appFeatures().isSearchEnabled

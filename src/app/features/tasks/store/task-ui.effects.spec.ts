@@ -416,6 +416,17 @@ describe('TaskUiEffects', () => {
       );
     });
 
+    it('hints for a blank-titled parent kept by its subtasks (it is trashed)', () => {
+      expect(
+        deletedSnackMsg(
+          createMockTaskWithSubTasks({
+            title: '',
+            subTasks: [createMockTask({ id: 'sub', title: 'Real subtask' })],
+          }),
+        ),
+      ).toBe(T.F.TASK.S.DELETED_FIND_IN_SEARCH);
+    });
+
     it('gives no trash hint for a Plainspace task, which is not trashed', () => {
       expect(
         deletedSnackMsg(
