@@ -152,7 +152,7 @@ test.describe('Sections', () => {
     await workViewPage.addTask('Root task');
 
     const controls = page.locator('.add-section-inline');
-    const wrapper = page.locator('.today > .task-list-wrapper');
+    const wrapper = page.locator('.today > div.task-list-wrapper');
     const donePanel = wrapper.locator(':scope > .collapsible-section').first();
     await expect(donePanel).toBeVisible();
 
