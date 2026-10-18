@@ -1,4 +1,5 @@
 import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { ofType } from '@ngrx/effects';
 import { NavigationEnd, Router } from '@angular/router';
 import { Action, Store } from '@ngrx/store';
@@ -12,15 +13,14 @@ import { LOCAL_ACTIONS } from '../../util/local-actions.token';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { GlobalConfigService } from '../config/global-config.service';
 import { ProjectService } from '../project/project.service';
+import { INBOX_PROJECT } from '../project/project.const';
+import { TODAY_TAG } from '../tag/tag.const';
 import { TaskService } from '../tasks/task.service';
 import { TaskFocusService } from '../tasks/task-focus.service';
 import { selectTaskEntities } from '../tasks/store/task.selectors';
+import { WorkContextService } from '../work-context/work-context.service';
 
-export type OnboardingStep =
-  | 'create-task'
-  | 'task-swipe-left'
-  | 'task-swipe-right'
-  | 'today-and-inbox';
+export type OnboardingStep = 'create-task' | 'task-swipe-left' | 'today-and-inbox';
 
 type OnboardingPhase = 'idle' | 'await-first-task' | OnboardingStep;
 
@@ -35,10 +35,12 @@ const RETURNING_USER_MIN_PROJECTS = 3;
  * 1. Point at "+" until the user creates their first real task (any local
  *    creation path; example tasks and repeat instances do not count).
  * 2. Phones only: on the task row, "swipe left for more actions" (advances once
- *    the task menu was opened and closed), then "swipe right to mark it as done"
- *    (ends once a task is marked done or the first task is deleted).
- * 3. Point at the Inbox and say what Today and the Inbox are (#8824). Ends
- *    when closed or once the user navigates anywhere.
+ *    the task menu was opened and closed, a task is marked done or the first
+ *    task is deleted).
+ * 3. Point at the first task's "Inbox" label and explain it (#8824): it shows
+ *    in Today because it is planned for today, and lives in the Inbox because
+ *    it has no project. Only shown while that is true. Ends when closed or
+ *    once the user navigates anywhere.
  *
  * Starting a Help tour ends guidance, so only one of them is ever on screen.
  * No step advances on a timer. Reloading after the first task ends guidance.
@@ -52,6 +54,7 @@ export class OnboardingHintService {
   private _projectService = inject(ProjectService);
   private _globalConfigService = inject(GlobalConfigService);
   private _router = inject(Router);
+  private _workContextService = inject(WorkContextService);
   private _store = inject(Store);
   private _localActions$: Observable<Action> = inject(LOCAL_ACTIONS);
 
@@ -63,6 +66,9 @@ export class OnboardingHintService {
   private _taskDoneSub: Subscription | null = null;
   private _navigationSub: Subscription | null = null;
   private _taskEntities = this._store.selectSignal(selectTaskEntities);
+  private _activeWorkContextId = toSignal(this._workContextService.activeWorkContextId$, {
+    initialValue: null,
+  });
 
   readonly firstTaskId = signal<string | null>(null);
 
@@ -82,7 +88,7 @@ export class OnboardingHintService {
     if (phase === 'await-first-task') {
       return 'create-task';
     }
-    if (phase === 'task-swipe-left' || phase === 'task-swipe-right') {
+    if (phase === 'task-swipe-left') {
       const isTaskUiOpen =
         this._taskFocusService.isTaskContextMenuOpen() ||
         this._taskService.selectedTaskId() !== null;
@@ -111,21 +117,22 @@ export class OnboardingHintService {
       if (isMenuOpen) {
         this._wasTaskMenuOpened = true;
       } else if (this._wasTaskMenuOpened) {
-        this._phase.set('task-swipe-right');
+        untracked(() => this._advanceToLastStep());
       }
     });
 
-    // A deleted first task (e.g. from the menu the swipe tip opens) leaves
-    // nothing to swipe; the hint would otherwise stay stuck on an empty list.
+    // A deleted first task leaves nothing to swipe or explain; the hint would
+    // otherwise stay stuck on an empty list. The task menu closes before the
+    // delete is confirmed, so this also covers the last step.
     effect(() => {
       const phase = this._phase();
       const id = this.firstTaskId();
       if (
-        (phase === 'task-swipe-left' || phase === 'task-swipe-right') &&
+        (phase === 'task-swipe-left' || phase === 'today-and-inbox') &&
         id &&
         !this._taskEntities()[id]
       ) {
-        untracked(() => this._advanceToLastStep());
+        untracked(() => this._markDone());
       }
     });
 
@@ -174,15 +181,14 @@ export class OnboardingHintService {
         }
       });
 
-    // Marking a task done (swipe right, checkbox, ...) completes the swipe hints.
+    // Marking a task done (swipe right, checkbox, ...) completes the swipe hint.
     this._taskDoneSub = this._localActions$
       .pipe(
         ofType(TaskSharedActions.updateTask),
         filter(({ task }) => task.changes.isDone === true),
       )
       .subscribe(() => {
-        const phase = this._phase();
-        if (phase === 'task-swipe-left' || phase === 'task-swipe-right') {
+        if (this._phase() === 'task-swipe-left') {
           this._advanceToLastStep();
         }
       });
@@ -236,8 +242,22 @@ export class OnboardingHintService {
     }
   }
 
+  /**
+   * The last tip explains the first task's own place, so it only shows where
+   * that holds: in the Inbox and on Today. A task created in a project or
+   * elsewhere, or already deleted, ends guidance instead.
+   */
   private _advanceToLastStep(): void {
-    this._phase.set('today-and-inbox');
+    const id = this.firstTaskId();
+    const task = id ? this._taskEntities()[id] : undefined;
+    if (
+      task?.projectId === INBOX_PROJECT.id &&
+      this._activeWorkContextId() === TODAY_TAG.id
+    ) {
+      this._phase.set('today-and-inbox');
+    } else {
+      this._markDone();
+    }
   }
 
   private _markDone(): void {

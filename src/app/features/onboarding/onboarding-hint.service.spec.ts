@@ -14,6 +14,7 @@ import { TaskService } from '../tasks/task.service';
 import { TaskFocusService } from '../tasks/task-focus.service';
 import { WorkContextType } from '../work-context/work-context.model';
 import { Event, NavigationEnd, Router } from '@angular/router';
+import { WorkContextService } from '../work-context/work-context.service';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { LOCAL_ACTIONS } from '../../util/local-actions.token';
 import { OnboardingHintService } from './onboarding-hint.service';
@@ -42,6 +43,7 @@ describe('OnboardingHintService', () => {
   let localActions$: Subject<Action>;
   let dataLoaded$: BehaviorSubject<boolean> | Subject<boolean>;
   let routerEvents$: Subject<Event>;
+  let activeWorkContextId$: BehaviorSubject<string | null>;
   let savedLs: Record<string, string | null>;
 
   const setTasks = (tasks: Task[]): void => {
@@ -79,9 +81,13 @@ describe('OnboardingHintService', () => {
     TestBed.tick();
   };
 
-  /** The first task, next to whatever other tasks exist (e.g. seeded examples). */
-  const addFirstTask = (otherTasks: Task[] = [], id = 'task-1'): void => {
-    const task = makeTask(id);
+  /** The first task (in the Inbox, added on Today), next to e.g. seeded examples. */
+  const addFirstTask = (
+    otherTasks: Task[] = [],
+    id = 'task-1',
+    partial: Partial<Task> = { projectId: 'INBOX_PROJECT' },
+  ): void => {
+    const task = makeTask(id, partial);
     setTasks([task, ...otherTasks]);
     dispatchAddTask(task);
   };
@@ -117,6 +123,7 @@ describe('OnboardingHintService', () => {
     localActions$ = new Subject<Action>();
     dataLoaded$ = new BehaviorSubject(true);
     routerEvents$ = new Subject<Event>();
+    activeWorkContextId$ = new BehaviorSubject<string | null>('TODAY');
 
     TestBed.configureTestingModule({
       providers: [
@@ -142,6 +149,7 @@ describe('OnboardingHintService', () => {
         { provide: TaskService, useValue: { selectedTaskId } },
         { provide: TaskFocusService, useValue: { isTaskContextMenuOpen } },
         { provide: Router, useValue: { events: routerEvents$ } },
+        { provide: WorkContextService, useValue: { activeWorkContextId$ } },
         { provide: LOCAL_ACTIONS, useValue: localActions$ },
       ],
     });
@@ -306,6 +314,21 @@ describe('OnboardingHintService', () => {
       expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBe('true');
     });
 
+    it('is skipped when the first task is in a project, as it would be untrue', () => {
+      const service = createService();
+      addFirstTask([], 'task-1', { projectId: 'work' });
+      expect(service.currentStep()).toBeNull();
+      expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBe('true');
+    });
+
+    it('is skipped when the first task was not added on Today', () => {
+      activeWorkContextId$.next('INBOX_PROJECT');
+      const service = createService();
+      addFirstTask();
+      expect(service.currentStep()).toBeNull();
+      expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBe('true');
+    });
+
     it('ends for good once closed', () => {
       const service = createService();
       addFirstTask();
@@ -316,7 +339,7 @@ describe('OnboardingHintService', () => {
   });
 
   describe('on phones', () => {
-    it('introduces swipe left, then swipe right, then Today and the Inbox', () => {
+    it('introduces swipe left, then Today and the Inbox', () => {
       const service = createPhoneService();
       addFirstTask([EXAMPLE_TASK]);
       expect(service.currentStep()).toBe('task-swipe-left');
@@ -328,9 +351,6 @@ describe('OnboardingHintService', () => {
       expect(service.currentStep()).toBeNull();
       isTaskContextMenuOpen.set(false);
       TestBed.tick();
-      expect(service.currentStep()).toBe('task-swipe-right');
-
-      markDone();
       expect(service.currentStep()).toBe('today-and-inbox');
     });
 
@@ -341,13 +361,29 @@ describe('OnboardingHintService', () => {
       expect(service.currentStep()).toBe('today-and-inbox');
     });
 
-    it('ends the swipe hints once the first task is deleted', () => {
+    it('ends guidance once the first task is deleted: nothing left to explain', () => {
       const service = createPhoneService();
       addFirstTask();
       expect(service.currentStep()).toBe('task-swipe-left');
       setTasks([]);
       TestBed.tick();
+      expect(service.currentStep()).toBeNull();
+      expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBe('true');
+    });
+
+    it('ends guidance when the first task is deleted after the menu closed', () => {
+      const service = createPhoneService();
+      addFirstTask();
+      // Choosing "Delete" closes the menu before the delete is confirmed.
+      isTaskContextMenuOpen.set(true);
+      TestBed.tick();
+      isTaskContextMenuOpen.set(false);
+      TestBed.tick();
       expect(service.currentStep()).toBe('today-and-inbox');
+      setTasks([]);
+      TestBed.tick();
+      expect(service.currentStep()).toBeNull();
+      expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBe('true');
     });
 
     it('hides swipe hints while a task detail panel is open', () => {

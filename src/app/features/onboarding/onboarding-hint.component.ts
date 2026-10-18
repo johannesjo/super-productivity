@@ -18,7 +18,6 @@ import { OnboardingHintService, OnboardingStep } from './onboarding-hint.service
 import { isTouchActive } from '../../util/input-intent';
 import { GlobalConfigService } from '../config/global-config.service';
 import { T } from '../../t.const';
-import { INBOX_PROJECT } from '../project/project.const';
 
 /** Max retries when target element is not yet in the DOM */
 const MAX_POSITION_RETRIES = 10;
@@ -43,7 +42,10 @@ const swipeTargetSelector = (swipeTargetTaskId: string | null): string =>
 
 interface StepConfig {
   /** Candidate targets in order of preference; the first visible one is used. */
-  selector: (swipeTargetTaskId: string | null) => string | string[];
+  selector: (
+    swipeTargetTaskId: string | null,
+    firstTaskId: string | null,
+  ) => string | string[];
   message: string;
   touchMessage?: string;
   /** Gesture icon shown before the message */
@@ -85,26 +87,14 @@ const STEP_CONFIGS = new Map<OnboardingStep, StepConfig>([
     },
   ],
   [
-    'task-swipe-right',
-    {
-      selector: (swipeTargetTaskId) => swipeTargetSelector(swipeTargetTaskId),
-      message: T.ONBOARDING.HINTS.TASK_SWIPE_RIGHT_TOUCH,
-      icon: 'swipe_right',
-      showShortcut: false,
-      isPulse: false,
-    },
-  ],
-  [
     'today-and-inbox',
     {
-      // On phones the bottom-nav Today button (the tip starts with Today);
-      // without a bottom nav, the Inbox entry in the side nav.
-      selector: () => [
-        'mobile-bottom-nav nav > button:first-of-type',
-        `magic-side-nav nav-item[data-project-id="${INBOX_PROJECT.id}"] .nav-link`,
-      ],
-      // The last tip: what Today and the Inbox are (#8824).
+      // The "Inbox" chip of the first task, which the tip explains (#8824).
+      selector: (_, firstTaskId) =>
+        firstTaskId ? `task[data-task-id="${CSS.escape(firstTaskId)}"] tag-list tag` : [],
       message: T.ONBOARDING.HINTS.TODAY_AND_INBOX,
+      // On phones the Inbox is behind the menu button.
+      touchMessage: T.ONBOARDING.HINTS.TODAY_AND_INBOX_TOUCH,
       isEndedWhenMissing: true,
       showShortcut: false,
       isPulse: false,
@@ -260,7 +250,10 @@ export class OnboardingHintComponent {
   }
 
   private _resolveTarget(config: StepConfig): HTMLElement | null {
-    const selectors = config.selector(this.onboardingHintService.swipeTargetTaskId());
+    const selectors = config.selector(
+      this.onboardingHintService.swipeTargetTaskId(),
+      this.onboardingHintService.firstTaskId(),
+    );
     for (const selector of Array.isArray(selectors) ? selectors : [selectors]) {
       const el = document.querySelector<HTMLElement>(selector);
       if (el && isVisible(el)) {

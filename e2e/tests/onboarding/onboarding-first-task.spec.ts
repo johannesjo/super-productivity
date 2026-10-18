@@ -11,8 +11,8 @@ const pixel5TestOptions = { ...devices['Pixel 5'] };
 // Browser type is worker-scoped and cannot be overridden inside a describe block.
 Reflect.deleteProperty(pixel5TestOptions, 'defaultBrowserType');
 
-const MODEL_TIP = "Today shows what's planned for today.";
-const INBOX_TIP = "The Inbox keeps every task that isn't in a project.";
+const MODEL_TIP = 'This task is planned for today, so it shows in Today.';
+const INBOX_TIP = 'It has no project, so it also lives in the Inbox';
 const INBOX_NAV_ITEM =
   'magic-side-nav nav-item[data-project-id="INBOX_PROJECT"] .nav-link';
 
@@ -27,6 +27,35 @@ const openFreshApp = async (
     });
   }
   await page.goto('/');
+};
+
+/** The last tip sits below the task's "Inbox" chip, its arrow pointing at it. */
+const expectHintOnInboxChip = async (page: Page, taskTitle: string): Promise<void> => {
+  const chipTarget = page
+    .locator('task')
+    .filter({ hasText: taskTitle })
+    .first()
+    .locator('tag-list tag')
+    .first();
+  const hint = page.locator('onboarding-hint');
+  await expect(chipTarget).toContainText('Inbox');
+  await expect
+    .poll(async () => {
+      const target = await chipTarget.boundingBox();
+      const chip = await hint.locator('.hint-chip').boundingBox();
+      const arrow = await hint.locator('.hint-arrow').boundingBox();
+      if (!target || !chip || !arrow) {
+        return false;
+      }
+      const halfArrow = arrow.width / 2;
+      const arrowCenter = arrow.x + halfArrow;
+      return (
+        chip.y >= target.y + target.height &&
+        arrowCenter >= target.x &&
+        arrowCenter <= target.x + target.width
+      );
+    })
+    .toBe(true);
 };
 
 const addTaskViaComposer = async (page: Page, title: string): Promise<void> => {
@@ -71,21 +100,16 @@ test.describe('First-run onboarding', () => {
       'Click + to add your first task',
     );
 
-    await addTaskViaComposer(page, `Inbox tip task ${Date.now()}`);
+    const title = `Inbox tip task ${Date.now()}`;
+    await addTaskViaComposer(page, title);
 
     const hint = page.locator('onboarding-hint');
     await expect(hint).toContainText(MODEL_TIP);
     await expect(hint).toContainText(INBOX_TIP);
-    const inboxNavItem = page.locator(INBOX_NAV_ITEM);
-    await expect
-      .poll(async () => {
-        const target = await inboxNavItem.boundingBox();
-        const chip = await hint.locator('.hint-chip').boundingBox();
-        return !!target && !!chip && chip.y > target.y + target.height;
-      })
-      .toBe(true);
+    await expect(hint).not.toContainText('☰');
+    await expectHintOnInboxChip(page, title);
 
-    await inboxNavItem.click();
+    await page.locator(INBOX_NAV_ITEM).click();
     await expect(hint).toHaveCount(0);
     await expect(
       page.locator('task').filter({ hasText: 'Optional: getting started tips' }),
@@ -261,7 +285,7 @@ test.describe('First-run onboarding', () => {
   test.describe('mobile', () => {
     test.use(pixel5TestOptions);
 
-    test('keeps + uncovered, then teaches the swipe gestures', async ({
+    test('keeps + uncovered, then teaches swiping and the Inbox', async ({
       isolatedContext,
     }) => {
       const page = await isolatedContext.newPage();
@@ -306,27 +330,11 @@ test.describe('First-run onboarding', () => {
         .toBe(true);
 
       // Marking the task done (swipe right or checkbox) leads to the last tip,
-      // anchored to the bottom-nav Today button.
+      // on the task's "Inbox" chip, saying where the Inbox is on phones.
       await task.locator('done-toggle').tap();
       await expect(hint).toContainText(MODEL_TIP);
-      const todayBtn = page.locator('mobile-bottom-nav nav > button:first-of-type');
-      await expect
-        .poll(async () => {
-          const btn = await todayBtn.boundingBox();
-          const chip = await hint.locator('.hint-chip').boundingBox();
-          const arrow = await hint.locator('.hint-arrow').boundingBox();
-          if (!btn || !chip || !arrow) {
-            return false;
-          }
-          const halfArrow = arrow.width / 2;
-          const arrowCenter = arrow.x + halfArrow;
-          return (
-            chip.y + chip.height <= btn.y &&
-            arrowCenter >= btn.x &&
-            arrowCenter <= btn.x + btn.width
-          );
-        })
-        .toBe(true);
+      await expect(hint).toContainText(`${INBOX_TIP}, under ☰`);
+      await expectHintOnInboxChip(page, 'My first mobile task');
       await hint.getByRole('button', { name: 'Close tip' }).tap();
       await expect(hint).toHaveCount(0);
       assertNoRuntimeBrowserErrors(runtimeErrors, 'mobile onboarding');
@@ -363,9 +371,7 @@ test.describe('First-run onboarding', () => {
       await page.getByRole('button', { name: 'Delete', exact: true }).click();
       await expect(page.locator('task')).toHaveCount(0);
 
-      // Nothing is left to swipe: move on instead of waiting unseen.
-      await expect(hint).toContainText(MODEL_TIP);
-      await hint.getByRole('button', { name: 'Close tip' }).tap();
+      // Nothing is left to swipe or explain: guidance ends instead of waiting unseen.
       await expect(hint).toHaveCount(0);
       await expect
         .poll(() =>
