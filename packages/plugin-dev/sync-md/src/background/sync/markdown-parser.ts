@@ -96,7 +96,7 @@ export const parseMarkdownWithHeader = (content: string): TaskParseResult => {
 export const parseMarkdownWithErrors = (content: string): TaskParseResult => {
   const footerStart = findFooterStart(content);
   const body = content.slice(0, footerStart);
-  const footer = content.slice(footerStart) || undefined;
+  let footer = content.slice(footerStart) || undefined;
   const lines = body.split('\n');
   const tasks: ParsedTask[] = [];
   const errors: string[] = [];
@@ -126,7 +126,7 @@ export const parseMarkdownWithErrors = (content: string): TaskParseResult => {
         firstTaskLineIndex = i;
         // Extract header content (everything before the first task)
         if (i > 0) {
-          header = lines.slice(0, i).join('\n');
+          header = lines.slice(0, i).join('\n') + '\n';
         }
       }
 
@@ -245,6 +245,13 @@ export const parseMarkdownWithErrors = (content: string): TaskParseResult => {
   // With no tasks, everything before the footer is header
   if (firstTaskLineIndex === -1 && lines.length > 0) {
     header = body;
+    // With no task boundary, reserve up to one blank line for the header.
+    // This keeps Joplin's title separator when tasks are added again.
+    if (header && footer) {
+      const separator = footer.match(/^(?:[ \t]*\r?\n){1,2}/)?.[0] || '';
+      header += separator;
+      footer = footer.slice(separator.length);
+    }
   }
 
   return { tasks, errors, header, footer };

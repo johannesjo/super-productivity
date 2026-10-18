@@ -156,30 +156,41 @@ describe('#4751 real-file Markdown preservation', () => {
     );
   });
 
-  it('keeps the footer after removing all tasks and adding a task again', async () => {
-    const suffix = '\n\n' + FOOTER + '\n';
-    writeFileSync(filePath, HEADER + TASK_LINE + suffix);
+  it('keeps an initially empty Joplin document stable before adding tasks', async () => {
+    writeFileSync(filePath, HEADER + FOOTER);
     jest.spyOn(PluginAPI, 'getTasks').mockResolvedValue([]);
-    await spToMd({ filePath, projectId: 'test-project' });
-    const emptyContent = readFileSync(filePath, 'utf8');
-    expect(emptyContent).toContain(FOOTER);
-    expect(emptyContent).not.toContain(TASK_LINE);
-    await spToMd({ filePath, projectId: 'test-project' });
-    expect(readFileSync(filePath, 'utf8')).toBe(emptyContent);
-    jest
-      .spyOn(PluginAPI, 'getTasks')
-      .mockResolvedValue([
-        new TaskBuilder()
-          .withId('task-1')
-          .withTitle('New task')
-          .withProjectId('test-project')
-          .build(),
-      ]);
-    await spToMd({ filePath, projectId: 'test-project' });
-    const restoredContent = readFileSync(filePath, 'utf8');
-    expect(restoredContent.indexOf('New task')).toBeLessThan(
-      restoredContent.indexOf(FOOTER),
-    );
-    expect(restoredContent.split(FOOTER)).toHaveLength(2);
+    for (let cycle = 0; cycle < 3; cycle++) {
+      await spToMd({ filePath, projectId: 'test-project' });
+      expect(readFileSync(filePath, 'utf8')).toBe(HEADER + FOOTER);
+    }
   });
+
+  it.each(['\n', '\r\n'])(
+    'preserves the Joplin header and footer after removing all tasks and adding again (%j)',
+    async (newline) => {
+      const header = HEADER.replace(/\n/g, newline);
+      const suffix = newline + newline + FOOTER.replace(/\n/g, newline) + newline;
+      writeFileSync(filePath, header + TASK_LINE + suffix);
+      jest.spyOn(PluginAPI, 'getTasks').mockResolvedValue([]);
+      await spToMd({ filePath, projectId: 'test-project' });
+      const emptyContent = readFileSync(filePath, 'utf8');
+      expect(emptyContent).toBe(header + suffix);
+      await spToMd({ filePath, projectId: 'test-project' });
+      expect(readFileSync(filePath, 'utf8')).toBe(emptyContent);
+      jest
+        .spyOn(PluginAPI, 'getTasks')
+        .mockResolvedValue([
+          new TaskBuilder()
+            .withId('task-1')
+            .withTitle('New task')
+            .withProjectId('test-project')
+            .build(),
+        ]);
+      await spToMd({ filePath, projectId: 'test-project' });
+      const restoredContent = readFileSync(filePath, 'utf8');
+      expect(restoredContent).toBe(header + '- [ ] <!--task-1--> New task' + suffix);
+      await spToMd({ filePath, projectId: 'test-project' });
+      expect(readFileSync(filePath, 'utf8')).toBe(restoredContent);
+    },
+  );
 });

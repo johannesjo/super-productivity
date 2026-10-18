@@ -67,11 +67,14 @@ export const spToMd = async (config: LocalUserCfg): Promise<void> => {
   let finalContent = markdown;
   if (header) {
     // Add newline between header and tasks if both exist
-    finalContent = header + (markdown ? '\n' + markdown : '');
+    finalContent = header + (markdown && !header.endsWith('\n') ? '\n' : '') + markdown;
   }
 
   if (footer) {
-    const separator = finalContent && !/^[ \t]*\r?\n/.test(footer) ? '\n' : '';
+    const separator =
+      finalContent && !finalContent.endsWith('\n') && !/^[ \t]*\r?\n/.test(footer)
+        ? '\n'
+        : '';
     finalContent += separator + footer;
   }
 
