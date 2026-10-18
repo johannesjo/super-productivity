@@ -37,7 +37,7 @@ const finishAsWontDo = async (
 ): Promise<void> => {
   await getTaskElement(client, taskName).first().click({ button: 'right' });
   const menuItem = client.page.locator('.mat-mdc-menu-content button', {
-    hasText: "Finish as won't do",
+    hasText: "Won't do",
   });
   await menuItem.waitFor({ state: 'visible' });
   await waitForMenuSettled(client.page);
