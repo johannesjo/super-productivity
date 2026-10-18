@@ -2,7 +2,7 @@ import { inject, NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReminderService } from './reminder.service';
 import { MatDialog } from '@angular/material/dialog';
-import { IS_ELECTRON } from '../../app.constants';
+import { IS_ELECTRON, IS_ELECTRON_TOKEN } from '../../app.constants';
 import {
   IS_NATIVE_PLATFORM,
   IS_IOS_NATIVE,
@@ -70,6 +70,7 @@ export class ReminderModule {
   private readonly _capacitorReminderService = inject(CapacitorReminderService);
   private readonly _syncWrapperService = inject(SyncWrapperService);
   private readonly _dateService = inject(DateService);
+  private readonly _isElectron = inject(IS_ELECTRON_TOKEN);
 
   constructor() {
     // Initialize reminder service (runs migration in background)
@@ -147,8 +148,11 @@ export class ReminderModule {
           willShowDialog: !IS_ANDROID_NATIVE || overdueReminders.length > 0,
         });
 
-        if (IS_ELECTRON && this._globalConfigService.cfg()?.reminder?.isFocusWindow) {
-          this._uiHelperService.focusApp();
+        if (
+          this._isElectron &&
+          this._globalConfigService.cfg()?.reminder?.isFocusWindow
+        ) {
+          this._uiHelperService.focusAppAfterNotification({ isReminder: true });
         }
 
         this._showNotification(reminders);
@@ -331,32 +335,7 @@ export class ReminderModule {
           event.actionId === NOTIFICATION_ACTION.SNOOZE_10M
             ? SNOOZE_10M_MS
             : SNOOZE_1H_MS;
-        const newRemindAt = Date.now() + snoozeMs;
-        if (reminderType === 'DEADLINE') {
-          // setDeadline enforces mutual exclusivity between deadlineDay and
-          // deadlineWithTime — passing both would null the day. Forward only the
-          // more specific field (deadlineWithTime) when present.
-          this._store.dispatch(
-            TaskSharedActions.setDeadline({
-              taskId,
-              ...(typeof task.deadlineWithTime === 'number'
-                ? { deadlineWithTime: task.deadlineWithTime }
-                : task.deadlineDay
-                  ? { deadlineDay: task.deadlineDay }
-                  : {}),
-              deadlineRemindAt: newRemindAt,
-            }),
-          );
-        } else {
-          this._store.dispatch(
-            TaskSharedActions.reScheduleTaskWithTime({
-              task,
-              remindAt: newRemindAt,
-              dueWithTime: task.dueWithTime ?? newRemindAt,
-              isMoveToBacklog: false,
-            }),
-          );
-        }
+        this._dispatchSnooze(task, Date.now() + snoozeMs, reminderType);
         Log.log('ReminderModule: Task snoozed via iOS notification', {
           taskId,
           snoozeMs,
@@ -382,20 +361,21 @@ export class ReminderModule {
     // Defer handling until the store is hydrated — see _handleAfterDataLoaded /
     // #8551. On cold start these queued actions are replayed from ReplaySubjects
     // the moment we subscribe, which is before persistence has loaded.
-    this._handleAfterDataLoaded(androidInterface.onReminderTap$, (taskId: string) => {
-      this._handleTapAction(taskId);
+    this._handleAfterDataLoaded(androidInterface.onReminderTap$, (tap) => {
+      if (typeof tap === 'string') {
+        this._handleTapAction(tap);
+      } else {
+        this._handleTapAction(tap.taskId, tap.reminderType);
+      }
     });
 
     this._handleAfterDataLoaded(androidInterface.onReminderDone$, (taskId: string) => {
       this._handleDoneAction(taskId);
     });
 
-    this._handleAfterDataLoaded(
-      androidInterface.onReminderSnooze$,
-      (event: { taskId: string; newRemindAt: number }) => {
-        this._handleSnoozeAction(event.taskId, event.newRemindAt);
-      },
-    );
+    this._handleAfterDataLoaded(androidInterface.onReminderSnooze$, (event) => {
+      this._handleSnoozeAction(event.taskId, event.newRemindAt, event.reminderType);
+    });
   }
 
   /**
@@ -503,7 +483,11 @@ export class ReminderModule {
   /**
    * Handle snooze from Android notification: update NgRx state to match native alarm.
    */
-  private async _handleSnoozeAction(taskId: string, newRemindAt: number): Promise<void> {
+  private async _handleSnoozeAction(
+    taskId: string,
+    newRemindAt: number,
+    reminderType?: string,
+  ): Promise<void> {
     Log.log('ReminderModule: Handling snooze action from Android', {
       taskId,
       newRemindAt,
@@ -518,13 +502,45 @@ export class ReminderModule {
     if (!task || task.isDone) {
       return;
     }
-    this._store.dispatch(
-      TaskSharedActions.reScheduleTaskWithTime({
-        task,
-        remindAt: newRemindAt,
-        dueWithTime: task.dueWithTime ?? newRemindAt,
-        isMoveToBacklog: false,
-      }),
-    );
+    this._dispatchSnooze(task, newRemindAt, reminderType);
+  }
+
+  /**
+   * A deadline snooze moves only the deadline reminder; anything else
+   * reschedules the task's own reminder.
+   */
+  private _dispatchSnooze(task: Task, newRemindAt: number, reminderType?: string): void {
+    if (reminderType === 'DEADLINE') {
+      // Deadline removed meanwhile (e.g. via sync): setDeadline would store an
+      // orphan deadlineRemindAt without a deadline.
+      if (typeof task.deadlineWithTime !== 'number' && !task.deadlineDay) {
+        return;
+      }
+      // setDeadline enforces mutual exclusivity between deadlineDay and
+      // deadlineWithTime — passing both would null the day. Forward only the
+      // more specific field (deadlineWithTime) when present.
+      this._store.dispatch(
+        TaskSharedActions.setDeadline({
+          taskId: task.id,
+          ...(typeof task.deadlineWithTime === 'number'
+            ? { deadlineWithTime: task.deadlineWithTime }
+            : task.deadlineDay
+              ? { deadlineDay: task.deadlineDay }
+              : {}),
+          deadlineRemindAt: newRemindAt,
+          // The deadline itself is unchanged, so "Deadline set" would mislead.
+          isSkipSnack: true,
+        }),
+      );
+    } else {
+      this._store.dispatch(
+        TaskSharedActions.reScheduleTaskWithTime({
+          task,
+          remindAt: newRemindAt,
+          dueWithTime: task.dueWithTime ?? newRemindAt,
+          isMoveToBacklog: false,
+        }),
+      );
+    }
   }
 }

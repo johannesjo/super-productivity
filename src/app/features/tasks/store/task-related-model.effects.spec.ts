@@ -106,6 +106,31 @@ describe('TaskRelatedModelEffects', () => {
       dispatchAddTimeSpent(task);
     });
 
+    it('should NOT dispatch planTasksForToday for time back-filled on a past day', fakeAsync(() => {
+      const task = createTask('task-1', {
+        dueDay: undefined,
+        dueWithTime: undefined,
+      });
+      let emitted = false;
+      const subscription = effects.autoAddTodayTagOnTracking.subscribe(() => {
+        emitted = true;
+      });
+
+      actions$.next(
+        TimeTrackingActions.addTimeSpent({
+          task,
+          date: '2020-01-01',
+          duration: 1000,
+          isFromTrackingReminder: false,
+          isBackfill: true,
+        }),
+      );
+      tick();
+
+      expect(emitted).toBe(false);
+      subscription.unsubscribe();
+    }));
+
     it('should NOT dispatch planTasksForToday when tracked task has an existing dueDay', fakeAsync(() => {
       const task = createTask('task-1', {
         dueDay: '2026-05-16',

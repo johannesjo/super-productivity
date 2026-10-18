@@ -68,7 +68,7 @@ describe('MobileNotificationEffects', () => {
               'ensurePermissions',
               'scheduleReminder',
               'cancelReminder',
-              'checkExactAlarmPermission',
+              'openExactAlarmSettings',
             ]),
           },
           { provide: CapacitorPlatformService, useValue: platformService },
@@ -115,12 +115,11 @@ describe('MobileNotificationEffects', () => {
     const setup = (platform: 'ios' | 'android' = 'ios'): void => {
       reminderServiceSpy = jasmine.createSpyObj('CapacitorReminderService', [
         'getPermissionState',
-        'ensureExactAlarmPermission',
+        'openExactAlarmSettings',
         'ensurePermissions',
         'scheduleReminder',
         'cancelReminder',
       ]);
-      reminderServiceSpy.ensureExactAlarmPermission.and.resolveTo(true);
       reminderServiceSpy.scheduleReminder.and.resolveTo();
       reminderServiceSpy.cancelReminder.and.resolveTo();
 
@@ -167,7 +166,7 @@ describe('MobileNotificationEffects', () => {
       expect(reminderServiceSpy.getPermissionState).toHaveBeenCalled();
       // The OS prompt must be deferred to the first real schedule.
       expect(reminderServiceSpy.ensurePermissions).not.toHaveBeenCalled();
-      expect(reminderServiceSpy.ensureExactAlarmPermission).not.toHaveBeenCalled();
+      expect(reminderServiceSpy.openExactAlarmSettings).not.toHaveBeenCalled();
       expect(snackServiceSpy.open).not.toHaveBeenCalled();
     }));
 
@@ -186,27 +185,17 @@ describe('MobileNotificationEffects', () => {
       runStartup();
 
       expect(snackServiceSpy.open).toHaveBeenCalledTimes(1);
-      expect(reminderServiceSpy.ensureExactAlarmPermission).not.toHaveBeenCalled();
+      expect(reminderServiceSpy.openExactAlarmSettings).not.toHaveBeenCalled();
     }));
 
     it('never checks exact alarms at startup, even when notifications are granted', fakeAsync(() => {
-      // ensureExactAlarmPermission() opens Android's "Alarms & reminders"
-      // settings page. At startup there is nothing scheduled, so sending the
-      // user there is pure noise — the scheduling effects own that check (#9648).
+      // openExactAlarmSettings() opens Android's "Alarms & reminders" settings
+      // page. Sending the user there unasked is pure noise (#9648, #10684).
       setup('android');
       reminderServiceSpy.getPermissionState.and.resolveTo('granted');
       runStartup();
 
-      expect(reminderServiceSpy.ensureExactAlarmPermission).not.toHaveBeenCalled();
-      expect(snackServiceSpy.open).not.toHaveBeenCalled();
-    }));
-
-    it('stays silent at startup when exact alarms would be denied', fakeAsync(() => {
-      setup('android');
-      reminderServiceSpy.getPermissionState.and.resolveTo('granted');
-      reminderServiceSpy.ensureExactAlarmPermission.and.resolveTo(false);
-      runStartup();
-
+      expect(reminderServiceSpy.openExactAlarmSettings).not.toHaveBeenCalled();
       expect(snackServiceSpy.open).not.toHaveBeenCalled();
     }));
   });
@@ -228,12 +217,11 @@ describe('MobileNotificationEffects', () => {
     beforeEach(() => {
       reminderServiceSpy = jasmine.createSpyObj('CapacitorReminderService', [
         'ensurePermissions',
-        'ensureExactAlarmPermission',
+        'openExactAlarmSettings',
         'scheduleReminder',
         'cancelReminder',
       ]);
       reminderServiceSpy.ensurePermissions.and.resolveTo(true);
-      reminderServiceSpy.ensureExactAlarmPermission.and.resolveTo(true);
       reminderServiceSpy.scheduleReminder.and.resolveTo();
       reminderServiceSpy.cancelReminder.and.resolveTo();
 
@@ -293,25 +281,16 @@ describe('MobileNotificationEffects', () => {
       expect(reminderServiceSpy.cancelReminder).not.toHaveBeenCalled();
     }));
 
-    it('checks exact alarm permission once after lazy notification permission is granted', fakeAsync(() => {
+    it('never opens the exact alarm settings page while scheduling (#10684)', fakeAsync(() => {
+      // A denied "Alarms & reminders" permission is surfaced inline where
+      // reminders are set (<exact-alarm-hint>), never by redirecting the user.
       store.overrideSelector(selectAllTasksWithReminder, [futureReminder('a')]);
       subscribeScheduleNotifications();
 
       tick(EFFECT_DELAY_MS + 1);
 
-      expect(reminderServiceSpy.ensureExactAlarmPermission).toHaveBeenCalledTimes(1);
-      expect(reminderServiceSpy.ensureExactAlarmPermission).toHaveBeenCalledBefore(
-        reminderServiceSpy.scheduleReminder,
-      );
-
-      store.overrideSelector(selectAllTasksWithReminder, [
-        futureReminder('a'),
-        futureReminder('b'),
-      ]);
-      store.refreshState();
-      tick(1);
-
-      expect(reminderServiceSpy.ensureExactAlarmPermission).toHaveBeenCalledTimes(1);
+      expect(reminderServiceSpy.scheduleReminder).toHaveBeenCalledTimes(1);
+      expect(reminderServiceSpy.openExactAlarmSettings).not.toHaveBeenCalled();
     }));
 
     it('skips scheduling and clears tracking when disableReminders is true from the start', fakeAsync(() => {
@@ -361,12 +340,11 @@ describe('MobileNotificationEffects', () => {
     beforeEach(() => {
       reminderServiceSpy = jasmine.createSpyObj('CapacitorReminderService', [
         'ensurePermissions',
-        'ensureExactAlarmPermission',
+        'openExactAlarmSettings',
         'scheduleReminder',
         'cancelReminder',
       ]);
       reminderServiceSpy.ensurePermissions.and.resolveTo(true);
-      reminderServiceSpy.ensureExactAlarmPermission.and.resolveTo(true);
       reminderServiceSpy.scheduleReminder.and.resolveTo();
       reminderServiceSpy.cancelReminder.and.resolveTo();
 
@@ -519,12 +497,11 @@ describe('MobileNotificationEffects', () => {
     beforeEach(() => {
       reminderServiceSpy = jasmine.createSpyObj('CapacitorReminderService', [
         'ensurePermissions',
-        'ensureExactAlarmPermission',
+        'openExactAlarmSettings',
         'scheduleReminder',
         'cancelReminder',
       ]);
       reminderServiceSpy.ensurePermissions.and.resolveTo(true);
-      reminderServiceSpy.ensureExactAlarmPermission.and.resolveTo(true);
       reminderServiceSpy.scheduleReminder.and.resolveTo();
       reminderServiceSpy.cancelReminder.and.resolveTo();
 
@@ -588,6 +565,38 @@ describe('MobileNotificationEffects', () => {
       );
     }));
 
+    it('schedules deadline reminders on Android too', fakeAsync(() => {
+      // Without a native alarm, Android deadline reminders only fired while the
+      // app was running — useless for the day/week lead-time options.
+      platformService.isIOS.and.returnValue(false);
+      platformService.isAndroid.and.returnValue(true);
+      const win = window as { SUPAndroid?: unknown };
+      const prevAndroid = win.SUPAndroid;
+      win.SUPAndroid = { supportsTypedReminderActions: () => true };
+      subscribeDeadlineNotifications();
+
+      tick(EFFECT_DELAY_MS + 1);
+      win.SUPAndroid = prevAndroid;
+
+      expect(reminderServiceSpy.scheduleReminder).toHaveBeenCalledOnceWith(
+        jasmine.objectContaining({
+          notificationId: generateNotificationId('d1_deadline'),
+          relatedId: 'd1',
+          reminderType: 'DEADLINE',
+        }),
+      );
+    }));
+
+    it('skips Android deadline alarms when the APK lacks typed reminder actions', fakeAsync(() => {
+      platformService.isIOS.and.returnValue(false);
+      platformService.isAndroid.and.returnValue(true);
+      subscribeDeadlineNotifications();
+
+      tick(EFFECT_DELAY_MS + 1);
+
+      expect(reminderServiceSpy.scheduleReminder).not.toHaveBeenCalled();
+    }));
+
     it('cancels previously scheduled deadline reminders when disabled', fakeAsync(() => {
       subscribeDeadlineNotifications();
 
@@ -615,6 +624,23 @@ describe('MobileNotificationEffects', () => {
       expect(reminderServiceSpy.cancelReminder).toHaveBeenCalledOnceWith(
         generateNotificationId('d1_deadline'),
       );
+    }));
+
+    it('does not cancel a deadline reminder that already fired', fakeAsync(() => {
+      // On Android cancel also removes the shown notification, so a later store
+      // emission must not dismiss it once its alarm time has simply passed.
+      const firedTask = futureDeadlineTask('d1');
+      store.overrideSelector(selectAllTasksWithDeadlineReminder, [firedTask]);
+      subscribeDeadlineNotifications();
+      tick(EFFECT_DELAY_MS + 1);
+      expect(reminderServiceSpy.scheduleReminder).toHaveBeenCalledTimes(1);
+
+      tick(600_001);
+      store.overrideSelector(selectAllTasksWithDeadlineReminder, [{ ...firedTask }]);
+      store.refreshState();
+      tick(1);
+
+      expect(reminderServiceSpy.cancelReminder).not.toHaveBeenCalled();
     }));
 
     it('cancels a tracked deadline reminder when its new timestamp is in the past', fakeAsync(() => {
@@ -675,12 +701,11 @@ describe('MobileNotificationEffects', () => {
     beforeEach(() => {
       reminderServiceSpy = jasmine.createSpyObj('CapacitorReminderService', [
         'ensurePermissions',
-        'ensureExactAlarmPermission',
+        'openExactAlarmSettings',
         'scheduleReminder',
         'cancelReminder',
       ]);
       reminderServiceSpy.ensurePermissions.and.resolveTo(true);
-      reminderServiceSpy.ensureExactAlarmPermission.and.resolveTo(true);
       reminderServiceSpy.scheduleReminder.and.resolveTo();
       reminderServiceSpy.cancelReminder.and.resolveTo();
 

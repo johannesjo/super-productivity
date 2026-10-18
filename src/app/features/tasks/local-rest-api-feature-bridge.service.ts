@@ -36,4 +36,8 @@ export class LocalRestApiFeatureBridgeService implements LocalRestApiFeatureBrid
     this._store.dispatch(addSubTask({ task, parentId, isIgnoreShortSyntax: true }));
     return task.id;
   }
+
+  addTimeSpentOnDay(task: Task, durationMs: number, date: string): void {
+    this._taskService.addTimeSpentAndSync(task, durationMs, date);
+  }
 }

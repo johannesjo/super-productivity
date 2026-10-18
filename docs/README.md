@@ -54,6 +54,9 @@ not current behavior. Every active plan should start with:
 - date last verified against the code;
 - completion or removal condition.
 
+A plan for a user-facing interaction also includes a **Prior art** section →
+[feature review guide § Prior art](feature-review-guide.md#prior-art).
+
 When implementation lands, move enduring contracts or limitations into a
 maintained guide, package README, code comment, or decision record, then delete
 the completed plan. Do not leave handover notes or “next steps” documents as

@@ -126,6 +126,16 @@ header {
   }
 }
 
+.schedule-btn[data-scheduled-date-color='overdue'] {
+  mat-icon {
+    color: var(--c-warn) !important;
+  }
+
+  .time-badge {
+    color: var(--c-warn);
+  }
+}
+
 .time-badge {
   @include center;
   margin-top: 10px;

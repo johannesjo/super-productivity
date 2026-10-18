@@ -148,20 +148,6 @@ export const createTestUser = async (
 };
 
 /**
- * Clean up all test data on the server.
- * Call this in test teardown if needed.
- */
-export const cleanupTestData = async (): Promise<void> => {
-  const response = await fetch(`${SUPERSYNC_BASE_URL}/api/test/cleanup`, {
-    method: 'POST',
-  });
-
-  if (!response.ok) {
-    console.warn(`Cleanup failed: ${response.status}`);
-  }
-};
-
-/**
  * Delete a specific test user account on the SuperSync server.
  * Used to test account deletion and re-registration scenarios.
  *
@@ -607,17 +593,6 @@ export const waitForTask = async (
 };
 
 /**
- * Count tasks matching a pattern on the page.
- */
-export const countTasks = async (page: Page, pattern?: string): Promise<number> => {
-  if (pattern) {
-    const escapedPattern = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    return page.locator(`task:has-text("${escapedPattern}")`).count();
-  }
-  return page.locator('task').count();
-};
-
-/**
  * Check if a task exists on the page.
  */
 export const hasTask = async (page: Page, taskName: string): Promise<boolean> => {
@@ -648,19 +623,6 @@ const escapeForSelector = (text: string): string => {
 export const getTaskElement = (client: SimulatedE2EClient, taskName: string): Locator => {
   const escapedName = escapeForSelector(taskName);
   return client.page.locator(`task:has-text("${escapedName}")`);
-};
-
-/**
- * Get a task element locator from a page by task name.
- * Use this when you have a page but not a client.
- *
- * @param page - The Playwright page
- * @param taskName - The task name to search for
- * @returns Locator for the task element
- */
-export const getTaskElementFromPage = (page: Page, taskName: string): Locator => {
-  const escapedName = escapeForSelector(taskName);
-  return page.locator(`task:has-text("${escapedName}")`);
 };
 
 /**
@@ -948,10 +910,18 @@ export const startTimeTracking = async (
   taskName: string,
 ): Promise<void> => {
   const task = getTaskElement(client, taskName);
-  await task.hover();
   const startBtn = task.locator('.start-task-btn');
-  await startBtn.waitFor({ state: 'visible', timeout: UI_VISIBLE_TIMEOUT });
-  await startBtn.click();
+  // The button exists only while the first line is hovered; a re-render or
+  // layout shift between hover and click detaches it, and click never re-hovers.
+  // Re-hover each attempt, and skip the click once tracking runs so a retry
+  // cannot toggle it back off.
+  await expect(async () => {
+    if (!(await task.evaluate((el) => el.classList.contains('isCurrent')))) {
+      await task.hover();
+      await startBtn.click({ timeout: 2000 });
+    }
+    await expect(task).toHaveClass(/\bisCurrent\b/, { timeout: 1000 });
+  }).toPass({ timeout: UI_VISIBLE_TIMEOUT });
 };
 
 /**
@@ -1010,58 +980,6 @@ export const getTaskCount = async (client: SimulatedE2EClient): Promise<number> 
 export const getTaskTitles = async (client: SimulatedE2EClient): Promise<string[]> => {
   const titles = await client.page.locator('task .task-title').allInnerTexts();
   return titles.map((title) => title.trim());
-};
-
-/**
- * Get the tracked time display text for a task.
- *
- * @param client - The simulated E2E client
- * @param taskName - The task name
- * @returns The time display text or null if not present
- */
-export const getTaskTimeDisplay = async (
-  client: SimulatedE2EClient,
-  taskName: string,
-): Promise<string | null> => {
-  const task = getTaskElement(client, taskName);
-  const timeVal = task.locator('.time-wrapper .time-val').first();
-  if ((await timeVal.count()) > 0) {
-    return timeVal.textContent();
-  }
-  return null;
-};
-
-/**
- * Wait for a task's tracked time text to be present.
- *
- * The task row intentionally hides `.time-wrapper` while hover controls are mounted,
- * so time-tracking assertions should read the rendered text instead of requiring
- * visual visibility.
- *
- * @param client - The simulated E2E client
- * @param taskName - The task name
- * @param timeout - Maximum time to wait for non-empty time text
- * @returns The trimmed time display text
- */
-export const waitForTaskTimeDisplay = async (
-  client: SimulatedE2EClient,
-  taskName: string,
-  timeout = UI_VISIBLE_TIMEOUT,
-): Promise<string> => {
-  await expect
-    .poll(
-      async () => {
-        const text = await getTaskTimeDisplay(client, taskName);
-        return text?.trim() ?? '';
-      },
-      {
-        timeout,
-        intervals: [250, 500, 1000],
-      },
-    )
-    .not.toBe('');
-
-  return (await getTaskTimeDisplay(client, taskName))!.trim();
 };
 
 /**
@@ -1142,7 +1060,7 @@ export const getTaskTitleFromState = async (
   }, titleSubstring);
 
 export const getTaskTimeSpentFromState = async (
-  client: SimulatedE2EClient,
+  client: Pick<SimulatedE2EClient, 'page'>,
   taskName: string,
 ): Promise<number | null> =>
   client.page.evaluate(async (name) => {
@@ -1265,7 +1183,7 @@ export const waitForTaskTimeSpent = async (
  * @param expectedTimeSpent - The expected timeSpent in milliseconds
  */
 export const expectExactTaskTime = async (
-  client: SimulatedE2EClient,
+  client: Pick<SimulatedE2EClient, 'page'>,
   taskName: string,
   expectedTimeSpent: number,
 ): Promise<void> => {
@@ -1287,7 +1205,7 @@ export const expectExactTaskTime = async (
  * @param duration - The time delta in milliseconds
  */
 export const recordTaskTimeDelta = async (
-  client: SimulatedE2EClient,
+  client: Pick<SimulatedE2EClient, 'page'>,
   taskName: string,
   date: string,
   duration: number,
@@ -1627,56 +1545,6 @@ export const expectTaskInWorklog = async (
   if (!found) {
     throw new Error(`Expected task "${taskName}" to be in worklog, but it was not found`);
   }
-};
-
-/**
- * Assert that a task does NOT appear in the worklog.
- *
- * @param client - The simulated E2E client
- * @param taskName - The task name that should NOT be in worklog
- */
-export const expectTaskNotInWorklog = async (
-  client: SimulatedE2EClient,
-  taskName: string,
-): Promise<void> => {
-  const found = await hasTaskInWorklog(client, taskName);
-  if (found) {
-    throw new Error(`Expected task "${taskName}" NOT to be in worklog, but it was found`);
-  }
-};
-
-/**
- * Get the count of worklog entries (archived tasks).
- *
- * @param client - The simulated E2E client
- * @returns The number of task entries in worklog
- */
-export const getWorklogTaskCount = async (
-  client: SimulatedE2EClient,
-): Promise<number> => {
-  // Navigate to worklog
-  await client.page.goto('/#/tag/TODAY/history');
-  await client.page.waitForLoadState('networkidle');
-  await client.page.waitForTimeout(UI_SETTLE_STANDARD);
-
-  // Expand week rows
-  const weekRows = client.page.locator('.week-row');
-  const weekCount = await weekRows.count();
-  for (let i = 0; i < Math.min(weekCount, 3); i++) {
-    const row = weekRows.nth(i);
-    if (await row.isVisible()) {
-      await row.click().catch(() => {});
-      await client.page.waitForTimeout(UI_SETTLE_SMALL);
-    }
-  }
-
-  // Count task entries
-  const taskEntries = await client.page
-    .locator('.task-summary-table .task-title, .worklog-task, worklog-task')
-    .count()
-    .catch(() => 0);
-
-  return taskEntries;
 };
 
 /**

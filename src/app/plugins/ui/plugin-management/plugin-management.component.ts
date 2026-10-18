@@ -5,6 +5,8 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs/operators';
 import { PluginService } from '../../plugin.service';
 import { PluginInstance } from '../../plugin-api.model';
 import { PluginMetaPersistenceService } from '../../plugin-meta-persistence.service';
@@ -35,14 +37,20 @@ import { PluginLog } from '../../../core/log';
 import { SnackService } from '../../../core/snack/snack.service';
 import { PluginBridgeService } from '../../plugin-bridge.service';
 import { CollapsibleComponent } from '../../../ui/collapsible/collapsible.component';
-import { LanguageCode } from '../../../core/locale.constants';
+import { DEFAULT_LANGUAGE, LanguageCode } from '../../../core/locale.constants';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
-import { confirmDialog } from '../../../util/native-dialogs';
+import { escapeHtml } from '../../../util/escape-html';
+import { getUploadedPluginIds } from '../../plugin-state.model';
+import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import { firstValueFrom } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { Router } from '@angular/router';
 import { selectAll as selectAllIssueProviders } from '../../../features/issue/store/issue-provider.selectors';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
 import COMMUNITY_PLUGINS_DATA from '../../../../assets/community-plugins.json';
+import { PluginApiAccess, PluginSecurityService } from '../../plugin-security';
+import { DEV_ONLY_BUNDLED_PLUGIN_IDS } from '../../bundled-plugins.const';
+import { environment } from '../../../../environments/environment';
 
 interface CommunityPlugin {
   name: string;
@@ -56,6 +64,38 @@ interface CommunityPlugin {
 interface PluginManifestAuthor {
   author?: unknown;
 }
+
+/**
+ * The app's Chinese codes stand for scripts, not regions: `zh` is Simplified
+ * and `zh-tw` is Traditional. Read literally, `zh-tw` would be "Chinese (Taiwan)".
+ */
+const LANGUAGE_CODE_TO_BCP47: Readonly<Record<string, string>> = {
+  [LanguageCode.zh]: 'zh-Hans',
+  [LanguageCode.zh_tw]: 'zh-Hant',
+};
+
+const createLanguageDisplayNames = (locale: string): Intl.DisplayNames | null => {
+  try {
+    return new Intl.DisplayNames([locale], {
+      type: 'language',
+      languageDisplay: 'standard',
+    });
+  } catch {
+    return null;
+  }
+};
+
+/** Never throws: an unknown or malformed code is shown as is. */
+const getLanguageName = (
+  displayNames: Intl.DisplayNames | null,
+  code: string,
+): string => {
+  try {
+    return displayNames?.of(LANGUAGE_CODE_TO_BCP47[code] ?? code) ?? code;
+  } catch {
+    return code;
+  }
+};
 
 @Component({
   selector: 'plugin-management',
@@ -94,41 +134,20 @@ export class PluginManagementComponent {
   private readonly _router = inject(Router);
   private readonly _layoutService = inject(LayoutService);
   private readonly _pluginBridge = inject(PluginBridgeService);
+  private readonly _pluginSecurity = inject(PluginSecurityService);
   private readonly _snackService = inject(SnackService);
   private readonly _allIssueProviders = this._store.selectSignal(selectAllIssueProviders);
 
-  // Language code to human-readable name mapping
-  /* eslint-disable @typescript-eslint/naming-convention */
-  private readonly _languageNames: Record<string, string> = {
-    ar: 'Arabic',
-    de: 'German',
-    cs: 'Czech',
-    en: 'English',
-    es: 'Spanish',
-    fa: 'Persian',
-    fi: 'Finnish',
-    fr: 'French',
-    hr: 'Croatian',
-    id: 'Indonesian',
-    it: 'Italian',
-    ja: 'Japanese',
-    ko: 'Korean',
-    nl: 'Dutch',
-    nb: 'Norwegian',
-    pl: 'Polish',
-    pt: 'Portuguese',
-    'pt-br': 'Portuguese (Brazil)',
-    ru: 'Russian',
-    sk: 'Slovak',
-    sv: 'Swedish',
-    tr: 'Turkish',
-    uk: 'Ukrainian',
-    zh: 'Chinese (Simplified)',
-    'zh-tw': 'Chinese (Traditional)',
-    ro: 'Romanian',
-    'ro-md': 'Romanian (Moldova)',
-  } as const;
-  /* eslint-enable @typescript-eslint/naming-convention */
+  /** Current UI language; follows `TranslateService.use()` so a switch re-renders. */
+  private readonly _uiLang = toSignal(
+    this._translateService.onLangChange.pipe(map((event) => event.lang)),
+    { initialValue: this._translateService.getCurrentLang() },
+  );
+
+  /** One formatter per UI language, shared by every plugin card. */
+  private readonly _languageDisplayNames = computed(() =>
+    createLanguageDisplayNames(this._uiLang() || DEFAULT_LANGUAGE),
+  );
 
   readonly communityPlugins = signal<CommunityPlugin[]>(
     [...(COMMUNITY_PLUGINS_DATA as CommunityPlugin[])].sort((a, b) =>
@@ -164,19 +183,51 @@ export class PluginManagementComponent {
     return plugins;
   });
 
+  // Development and E2E builds (plain `ng build`) are not `production`, so they list them.
+  private readonly _isShowDevPlugins = !environment.production;
+  // Dev-only plugins seen enabled stay listed, so disabling one does not make it vanish.
+  // Filled from inside pluginGroups (via isPluginListed); it only ever grows while this
+  // page is open, so re-running the computed gives the same result.
+  private readonly _shownDevPluginIds = new Set<string>();
+
+  // Uploaded plugins, then built-in integrations (issue and calendar providers), then
+  // other built-ins, each in load order. Grouped by origin and type rather than enabled
+  // state, so a card never moves while its toggle is used.
+  readonly pluginGroups = computed(() => {
+    const plugins = this.allPlugins().filter((p) => this._isListed(p));
+    const states = this._pluginService.pluginStates();
+    const isUploaded = (p: PluginInstance): boolean =>
+      states.get(p.manifest.id)?.type === 'uploaded';
+    const builtIn = plugins.filter((p) => !isUploaded(p));
+    return [
+      { titleKey: T.PLUGINS.GROUP_UPLOADED, plugins: plugins.filter(isUploaded) },
+      {
+        titleKey: T.PLUGINS.GROUP_INTEGRATIONS,
+        plugins: builtIn.filter((p) => this.isIssueProviderPlugin(p)),
+      },
+      {
+        titleKey: T.PLUGINS.GROUP_OTHER,
+        plugins: builtIn.filter((p) => !this.isIssueProviderPlugin(p)),
+      },
+    ].filter((group) => group.plugins.length > 0);
+  });
+
   // Upload state
   readonly isUploading = signal<boolean>(false);
   readonly uploadError = signal<string | null>(null);
 
   onPluginToggle(plugin: PluginInstance, event: MatSlideToggleChange): void {
     if (event.checked) {
-      this.enablePlugin(plugin);
+      this.enablePlugin(plugin, event);
     } else {
       this.disablePlugin(plugin, event);
     }
   }
 
-  private async enablePlugin(plugin: PluginInstance): Promise<void> {
+  private async enablePlugin(
+    plugin: PluginInstance,
+    event: MatSlideToggleChange,
+  ): Promise<void> {
     PluginLog.log('Enabling plugin:', plugin.manifest.id);
 
     try {
@@ -189,7 +240,8 @@ export class PluginManagementComponent {
           'User denied Node.js execution permission for plugin:',
           plugin.manifest.id,
         );
-        // Reset the toggle state
+        // The toggle switched itself on on click; turn it back off since nothing was enabled
+        event.source.checked = false;
         return;
       }
 
@@ -222,14 +274,12 @@ export class PluginManagementComponent {
     );
     if (attachedProviders.length > 0) {
       if (
-        !confirmDialog(
-          this._translateService.instant(T.PLUGINS.CONFIRM_DISABLE_WITH_ISSUE_PROVIDERS, {
-            count: attachedProviders.length,
-            name: plugin.manifest.name,
-          }),
-        )
+        !(await this._confirmInDialog(T.PLUGINS.CONFIRM_DISABLE_WITH_ISSUE_PROVIDERS, {
+          count: attachedProviders.length,
+          name: escapeHtml(plugin.manifest.name),
+        }))
       ) {
-        // Reset toggle back to enabled since user cancelled
+        // The toggle switched itself off on click; turn it back on since the user cancelled
         event.source.checked = true;
         return;
       }
@@ -246,6 +296,10 @@ export class PluginManagementComponent {
     } catch (error) {
       PluginLog.err('Failed to disable plugin:', error);
     }
+  }
+
+  private _isListed(plugin: PluginInstance): boolean {
+    return isPluginListed(plugin, this._isShowDevPlugins, this._shownDevPluginIds);
   }
 
   isPluginLoading(plugin: PluginInstance): boolean {
@@ -298,8 +352,13 @@ export class PluginManagementComponent {
       return;
     }
 
-    this.isUploading.set(true);
     this.uploadError.set(null);
+    if (!(await this._confirmInstall())) {
+      input.value = '';
+      return;
+    }
+
+    this.isUploading.set(true);
 
     try {
       const plugin = await this._pluginService.loadPluginFromZip(file);
@@ -328,6 +387,20 @@ export class PluginManagementComponent {
   }
 
   async clearPluginCache(): Promise<void> {
+    // Counts the same plugins clearUploadedPluginsFromMemory removes. With none
+    // installed, nothing visible is lost, so the cache is cleared without asking.
+    const uploadedCount = getUploadedPluginIds(this._pluginService.pluginStates()).length;
+    if (
+      uploadedCount > 0 &&
+      !(await this._confirmInDialog(
+        T.PLUGINS.CONFIRM_CLEAR_CACHE,
+        { count: uploadedCount },
+        T.PLUGINS.CLEAR_PLUGIN_CACHE,
+      ))
+    ) {
+      return;
+    }
+
     try {
       this.isUploading.set(true);
       this.uploadError.set(null);
@@ -360,12 +433,13 @@ export class PluginManagementComponent {
   }
 
   async removeUploadedPlugin(plugin: PluginInstance): Promise<void> {
+    // The name comes from the uploaded ZIP and the dialog renders the message as HTML.
     if (
-      !confirmDialog(
-        this._translateService.instant(T.PLUGINS.CONFIRM_REMOVE, {
-          name: plugin.manifest.name,
-        }),
-      )
+      !(await this._confirmInDialog(
+        T.PLUGINS.CONFIRM_REMOVE,
+        { name: escapeHtml(plugin.manifest.name) },
+        T.PLUGINS.REMOVE,
+      ))
     ) {
       return;
     }
@@ -387,6 +461,48 @@ export class PluginManagementComponent {
     } finally {
       this.isUploading.set(false);
     }
+  }
+
+  /** Resolves true only for the OK button; Cancel, Esc and backdrop resolve false. */
+  // Uploaded code is unreviewed, so the full risk list is shown here, right before it
+  // is installed, instead of above every plugin on the page.
+  private async _confirmInstall(): Promise<boolean> {
+    const t = (key: string): string => escapeHtml(this._translateService.instant(key));
+    const risks = [
+      T.PLUGINS.RISK_DATA_ACCESS,
+      T.PLUGINS.RISK_MALICIOUS_CODE,
+      T.PLUGINS.RISK_SYSTEM_ACCESS,
+      T.PLUGINS.RISK_PERFORMANCE,
+    ];
+    const message =
+      `<p>${t(T.PLUGINS.SECURITY_WARNING)}</p>` +
+      `<ul>${risks.map((risk) => `<li>${t(risk)}</li>`).join('')}</ul>` +
+      `<p>${t(T.PLUGINS.RECOMMENDATION)}</p>`;
+    const result = await firstValueFrom(
+      this._dialog
+        .open(DialogConfirmComponent, {
+          restoreFocus: true,
+          data: { message, okTxt: T.PLUGINS.INSTALL_PLUGIN },
+        })
+        .afterClosed(),
+    );
+    return result === true;
+  }
+
+  private async _confirmInDialog(
+    message: string,
+    translateParams: Record<string, string | number>,
+    okTxt?: string,
+  ): Promise<boolean> {
+    const result = await firstValueFrom(
+      this._dialog
+        .open(DialogConfirmComponent, {
+          restoreFocus: true,
+          data: { message, translateParams, okTxt },
+        })
+        .afterClosed(),
+    );
+    return result === true;
   }
 
   getPluginDescription(plugin: PluginInstance): string {
@@ -432,24 +548,29 @@ export class PluginManagementComponent {
    * effect when the plugin also declares the `http` capability — the bridge rejects `request`
    * without it — so the UI must not advertise "network access" for `allowedHosts` alone.
    */
-  getNetworkReachHosts(plugin: PluginInstance): string[] {
-    const hosts = plugin.manifest.allowedHosts;
-    return plugin.manifest.permissions?.includes('http') && hosts?.length ? hosts : [];
+  getApiAccess(plugin: PluginInstance): PluginApiAccess[] {
+    return this._pluginSecurity.getDeclaredApiAccess(plugin.manifest);
+  }
+
+  /** Declared permissions not described by getApiAccess (nothing checks them). */
+  getOtherPermissions(plugin: PluginInstance): string[] {
+    const described = new Set(this.getApiAccess(plugin).map((a) => a.permission));
+    return (plugin.manifest.permissions ?? []).filter((p) => !described.has(p));
+  }
+
+  getDetailsTitle(plugin: PluginInstance): string {
+    const details = this._translateService.instant(T.PLUGINS.DETAILS);
+    const summary = this.getPermissionsHooksTitle(plugin);
+    return summary ? `${details} · ${summary}` : details;
   }
 
   getPermissionsHooksTitle(plugin: PluginInstance): string {
     const parts: string[] = [];
     const pCount = plugin.manifest.permissions?.length || 0;
     const hCount = plugin.manifest.hooks?.length || 0;
-    const aCount = this.getNetworkReachHosts(plugin).length;
 
     if (pCount > 0) {
       parts.push(`${this._translateService.instant(T.PLUGINS.PERMISSIONS)} (${pCount})`);
-    }
-    if (aCount > 0) {
-      parts.push(
-        `${this._translateService.instant(T.PLUGINS.ALLOWED_HOSTS)} (${aCount})`,
-      );
     }
     if (hCount > 0) {
       parts.push(`${this._translateService.instant(T.PLUGINS.HOOKS)} (${hCount})`);
@@ -515,37 +636,23 @@ export class PluginManagementComponent {
       }
     } catch (error) {
       PluginLog.err('Failed to open config dialog:', error);
-      // Show error to user
-      this.uploadError.set(
-        error instanceof Error
-          ? error.message
-          : this._translateService.instant(T.PLUGINS.FAILED_TO_LOAD_CONFIG),
-      );
+      // A snack, not `uploadError`: that one renders in the "Install Plugin" card,
+      // far from the plugin whose settings button was clicked. The thrown messages
+      // are untranslated developer text, so they stay in the log above.
+      this._snackService.open({ type: 'ERROR', msg: T.PLUGINS.FAILED_TO_LOAD_CONFIG });
     }
   }
 
   /**
-   * Get formatted language string for display
-   * Returns "English only" if no i18n or only English
-   * Returns comma-separated language names otherwise
+   * Comma-separated names of the plugin's languages, in the UI language.
+   * Plugins without `i18n.languages` are English-only.
    */
   getPluginLanguages(plugin: PluginInstance): string {
     const languages = plugin.manifest.i18n?.languages;
+    const codes = languages?.length ? languages : [LanguageCode.en];
+    const displayNames = this._languageDisplayNames();
 
-    if (!languages || languages.length === 0) {
-      return 'English';
-    }
-
-    if (languages.length === 1 && languages[0] === 'en') {
-      return 'English';
-    }
-
-    // Map language codes to names and join with commas
-    const languageNames = languages
-      .map((code) => this._languageNames[code] || code)
-      .join(', ');
-
-    return languageNames;
+    return codes.map((code) => getLanguageName(displayNames, code)).join(', ');
   }
 
   /**
@@ -566,3 +673,22 @@ export class PluginManagementComponent {
     return languages.includes(currentLang);
   }
 }
+
+/**
+ * Whether the plugins page lists `plugin`. Dev-only bundled plugins are listed only when
+ * `isShowDevPlugins` is set or once seen enabled; `shownDevPluginIds` remembers the latter.
+ */
+export const isPluginListed = (
+  plugin: PluginInstance,
+  isShowDevPlugins: boolean,
+  shownDevPluginIds: Set<string>,
+): boolean => {
+  const id = plugin.manifest.id;
+  if (isShowDevPlugins || !DEV_ONLY_BUNDLED_PLUGIN_IDS.has(id)) {
+    return true;
+  }
+  if (plugin.isEnabled) {
+    shownDevPluginIds.add(id);
+  }
+  return shownDevPluginIds.has(id);
+};

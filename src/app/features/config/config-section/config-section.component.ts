@@ -62,6 +62,7 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
   //  and migrating would break narrowing currently.
   @Input() section?: ConfigFormSection<Record<string, unknown>>;
   @Input() isExpanded: boolean = false;
+  readonly isExpandedChange = output<boolean>();
   readonly save = output<{
     sectionKey: GlobalConfigFormSectionKey | ProjectCfgFormKey | TagCfgFormKey;
     config: Record<string, unknown>;
@@ -136,6 +137,14 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
     config: Record<string, unknown>;
   }): void {
     this.save.emit($event);
+  }
+
+  rowActions(): ConfigSectionAction[] {
+    return (this.section?.actions ?? []).filter((action) => action.isRow);
+  }
+
+  buttonActions(): ConfigSectionAction[] {
+    return (this.section?.actions ?? []).filter((action) => !action.isRow);
   }
 
   isActionPending(action: ConfigSectionAction): boolean {

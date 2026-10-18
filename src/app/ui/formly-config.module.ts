@@ -26,7 +26,8 @@ import { RepeatSectionTypeComponent } from '../features/config/repeat-section-ty
 import { FormlySliderComponent } from './formly-slider/formly-slider.component';
 import { FormlyTagSelectionComponent } from './formly-tag-selection/formly-tag-selection.component';
 import { FormlyBtnComponent } from './formly-button/formly-btn.component';
-import { FormlyLocalRestApiTokenComponent } from './formly-local-rest-api-token/formly-local-rest-api-token.component';
+import { FormlyLocalRestApiSettingsComponent } from './formly-local-rest-api-settings/formly-local-rest-api-settings.component';
+import { FormlyAssistantAccessSettingsComponent } from './formly-assistant-access-settings/formly-assistant-access-settings.component';
 import { FormlyImageInputComponent } from './formly-image-input/formly-image-input.component';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports -- grandfathered layer-boundary debt
 import { ColorInputComponent } from '../features/config/color-input/color-input.component';
@@ -55,6 +56,14 @@ import { FormlyDatePickerComponent } from './formly-date-picker/formly-date-pick
         { name: 'maxLength', message: 'Value is too long' },
       ],
       types: [
+        // Formly's material checkbox defaults `indeterminate` to true and renders
+        // that state whenever the value is null — so any checkbox nobody has
+        // touched yet shows "[-]" instead of unticked. A boolean setting has no
+        // third state; every consumer here reads a missing value as false. Set
+        // once centrally rather than per field, because the fields come from three
+        // different places (static form configs, the sync form, and plugin config
+        // fields mapped at runtime).
+        { name: 'checkbox', defaultOptions: { props: { indeterminate: false } } },
         { name: 'slider', component: FormlySliderComponent },
         { name: 'link', component: FormlyLinkWidgetComponent },
         { name: 'slide-toggle', component: FormlySlideToggleComponent },
@@ -77,8 +86,13 @@ import { FormlyDatePickerComponent } from './formly-date-picker/formly-date-pick
         { name: 'collapsible', component: FormlyCollapsibleComponent, wrappers: [] },
         { name: 'btn', component: FormlyBtnComponent, wrappers: [] },
         {
-          name: 'local-rest-api-token',
-          component: FormlyLocalRestApiTokenComponent,
+          name: 'local-rest-api-settings',
+          component: FormlyLocalRestApiSettingsComponent,
+          wrappers: [],
+        },
+        {
+          name: 'assistant-access-settings',
+          component: FormlyAssistantAccessSettingsComponent,
           wrappers: [],
         },
         {

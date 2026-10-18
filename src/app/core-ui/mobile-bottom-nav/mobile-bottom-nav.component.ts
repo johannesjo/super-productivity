@@ -126,6 +126,9 @@ export class MobileBottomNavComponent {
   readonly isScheduleDayPanelEnabled = computed(
     () => this._globalConfigService.appFeatures().isScheduleDayPanelEnabled,
   );
+  readonly isPlannerEnabled = computed(
+    () => this._globalConfigService.appFeatures().isPlannerEnabled,
+  );
 
   /**
    * Below 600px this menu is the *only* route to every right-panel toggle --
@@ -134,13 +137,16 @@ export class MobileBottomNavComponent {
    * schedule was in neither, and `toggleScheduleDayPanel()` has no other
    * caller and no keyboard shortcut, so the panel was simply unreachable on a
    * phone.
+   *
+   * With exactly one entry the menu is skipped and that entry is rendered as
+   * the nav button itself.
    */
-  readonly hasSidePanelMenuItems = computed(
+  readonly sidePanelItemCount = computed(
     () =>
-      this.sidePanelButtons().length > 0 ||
-      this.isScheduleDayPanelEnabled() ||
-      this.isIssuesPanelEnabled() ||
-      this.isProjectNotesEnabled(),
+      this.sidePanelButtons().length +
+      (this.isScheduleDayPanelEnabled() ? 1 : 0) +
+      (this.isIssuesPanelEnabled() ? 1 : 0) +
+      (this.isProjectNotesEnabled() ? 1 : 0),
   );
 
   // Navigation methods

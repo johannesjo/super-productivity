@@ -216,7 +216,7 @@
     white-space: nowrap;
   }
 
-  ::ng-deep schedule-event .ico-wrapper {
+  :host ::ng-deep schedule-event .ico-wrapper {
     display: none;
   }
 }

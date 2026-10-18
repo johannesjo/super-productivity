@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.Build
 import android.provider.Settings
 import android.util.Log
+import android.view.HapticFeedbackConstants
 import android.webkit.JavascriptInterface
 import android.webkit.WebView
 import android.widget.Toast
@@ -16,6 +17,7 @@ import com.superproductivity.superproductivity.BuildConfig
 import com.superproductivity.superproductivity.FullscreenActivity.Companion.WINDOW_INTERFACE_PROPERTY
 import com.superproductivity.superproductivity.app.LaunchDecider
 import com.superproductivity.superproductivity.review.InAppReview
+import com.superproductivity.superproductivity.service.BackgroundReminderSettingsStore
 import com.superproductivity.superproductivity.service.BackgroundSyncCredentialStore
 import com.superproductivity.superproductivity.service.FocusModeForegroundService
 import com.superproductivity.superproductivity.service.ForegroundServiceFailure
@@ -87,6 +89,13 @@ class JavaScriptInterface(
         return "${versionName}_L$launchMode"
     }
 
+    // Tells the web bundle that snooze/tap events carry the reminder type, so it
+    // may schedule native deadline alarms (online-only mode can pair a newer
+    // bundle with an older APK that lacks this).
+    @Suppress("unused")
+    @JavascriptInterface
+    fun supportsTypedReminderActions(): Boolean = true
+
     @Suppress("unused")
     @JavascriptInterface
     fun getTextZoom(): Int {
@@ -105,6 +114,30 @@ class JavaScriptInterface(
         activity.runOnUiThread {
             InAppReview.request(activity)
         }
+    }
+
+    // Tactile confirmation for touch gestures. performHapticFeedback follows the
+    // system "touch feedback" setting and needs no VIBRATE permission. Unknown
+    // types are ignored so a newer bundle can't crash an older shell's mapping.
+    @Suppress("unused")
+    @JavascriptInterface
+    fun performHapticFeedback(type: String) {
+        val constant = when (type) {
+            "confirm" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                HapticFeedbackConstants.CONFIRM
+            } else {
+                HapticFeedbackConstants.VIRTUAL_KEY
+            }
+            "threshold" -> if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                HapticFeedbackConstants.GESTURE_THRESHOLD_ACTIVATE
+            } else {
+                HapticFeedbackConstants.CLOCK_TICK
+            }
+            "longPress" -> HapticFeedbackConstants.LONG_PRESS
+            else -> return
+        }
+        // JavascriptInterface calls arrive on a background thread.
+        webView.post { webView.performHapticFeedback(constant) }
     }
 
     @Suppress("unused")
@@ -206,10 +239,16 @@ class JavaScriptInterface(
                     Log.d(TAG, "stopTrackingService: app backgrounded, falling back to stopService()", e)
                     if (!TrackingForegroundService.isStartPending) {
                         activity.stopService(Intent(activity, TrackingForegroundService::class.java))
+                        // onDestroy never runs if no instance is alive: clear
+                        // the persisted session directly so it is never recovered.
+                        TrackingForegroundService.clearState(activity)
                     }
                 }
             } else {
                 activity.stopService(intent)
+                // In a fresh process after a kill nothing is in memory, but the
+                // session may still be persisted with no service to clear it.
+                TrackingForegroundService.clearState(activity)
             }
         }
     }
@@ -222,6 +261,9 @@ class JavaScriptInterface(
                 action = TrackingForegroundService.ACTION_UPDATE
                 putExtra(TrackingForegroundService.EXTRA_TIME_SPENT, timeSpentMs)
             }
+            // Plain startService is safe: the service is either already started
+            // (exempt from the background-start ban) or, after a restore in a new
+            // process, this comes from the JS recovery at launch or onResume.
             activity.startService(intent)
         }
     }
@@ -229,14 +271,15 @@ class JavaScriptInterface(
     @Suppress("unused")
     @JavascriptInterface
     fun getTrackingElapsed(): String {
-        val taskId = TrackingForegroundService.currentTaskId
-        val elapsedMs = TrackingForegroundService.getElapsedMs()
-        val isTracking = TrackingForegroundService.isTracking
-        return if (isTracking && taskId != null) {
-            """{"taskId":"$taskId","elapsedMs":$elapsedMs}"""
-        } else {
-            "null"
-        }
+        // After a process kill the companion is empty but the session may be
+        // persisted; restoring it here is what lets the JS cold-start recovery
+        // credit the time tracked while the process was gone (#7390).
+        val snapshot = TrackingForegroundService.snapshotForBridge(activity) ?: return "null"
+        return JSONObject()
+            .put("taskId", snapshot.taskId)
+            .put("elapsedMs", snapshot.elapsedMs)
+            .put("resume", snapshot.resume)
+            .toString()
     }
 
     @Suppress("unused")
@@ -587,6 +630,18 @@ class JavaScriptInterface(
         safeCall("Failed to clear SuperSync credentials") {
             BackgroundSyncCredentialStore.clear(activity)
             SyncReminderScheduler.cancel(activity)
+        }
+    }
+
+    /**
+     * Mirrors the reminder settings [com.superproductivity.superproductivity.service.SyncReminderWorker]
+     * must honor when it schedules alarms from synced ops while the app is closed.
+     */
+    @Suppress("unused")
+    @JavascriptInterface
+    fun setBackgroundReminderSettings(isDisabled: Boolean, useAlarmStyle: Boolean) {
+        safeCall("Failed to set background reminder settings") {
+            BackgroundReminderSettingsStore.save(activity, isDisabled, useAlarmStyle)
         }
     }
 

@@ -15,6 +15,7 @@ import { FieldType, FormlyFieldConfig } from '@ngx-formly/core';
   template: `
     <mat-form-field>
       <mat-slide-toggle
+        #toggle
         color="primary"
         [checked]="formControl.value"
         (change)="onChange($event)"
@@ -27,6 +28,7 @@ import { FieldType, FormlyFieldConfig } from '@ngx-formly/core';
         tabindex="-1"
         readonly
         style="position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none;"
+        (focus)="toggle.focus()"
       />
       @if (props.icon) {
         <mat-icon>{{ props.icon }}</mat-icon>
