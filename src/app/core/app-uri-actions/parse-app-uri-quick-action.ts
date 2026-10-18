@@ -40,12 +40,11 @@ const isQuickActionHost = (host: string): host is QuickActionHost =>
  * `UIApplicationShortcutItem` carries one of these URLs in its user info and
  * the native side just opens it, so the whole mapping lives here.
  *
- * iOS-only in practice, despite this parser being platform-neutral: Android
- * routes custom-scheme URLs per declared host and `AndroidManifest.xml` lists
- * only `create-task`/`complete-task` (plus the OAuth callbacks), so none of
- * these hosts ever reach the app there. Adding them would mean adding intent
- * filters, deliberately out of scope here. Desktop recognizes `add-task` only,
- * via its own Electron protocol handler. Documented in wiki 3.01 §4.
+ * Reached on iOS and Android. Android routes custom-scheme URLs per declared
+ * host, so each host here also needs a `<data>` entry in `AndroidManifest.xml`
+ * (`tools/verify-android-url-hosts.test.js` checks that). Desktop recognizes
+ * `add-task` only, via its own Electron protocol handler. Documented in wiki
+ * 3.01 §4.
  *
  * Unlike `create-task`/`complete-task` (see `parse-app-uri-task-action.ts`)
  * these never write anything: they only open UI the user could have reached by
