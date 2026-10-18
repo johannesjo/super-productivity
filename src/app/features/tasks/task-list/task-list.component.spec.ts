@@ -19,6 +19,7 @@ import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.
 import { WorkContextType } from '../../work-context/work-context.model';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { Task } from '../task.model';
+import { Section } from '../../section/section.model';
 
 describe('TaskListComponent', () => {
   let component: TaskListComponent;
@@ -146,6 +147,35 @@ describe('TaskListComponent', () => {
   });
 
   describe('enterPredicate', () => {
+    describe('a dragged section', () => {
+      // Sections are dragged by their header from the sections wrapper, whose
+      // drop list carries no list data; letting one into a task list made
+      // drop() read `groupTagId` of undefined (#10866).
+      const section: Section = {
+        id: 'section1',
+        contextId: 'project1',
+        contextType: WorkContextType.PROJECT,
+        title: 'Section',
+        taskIds: [],
+      };
+      const sectionDrag = { data: section } as unknown as CdkDrag;
+
+      for (const [listModelId, listId] of [
+        ['DONE', 'PARENT'],
+        ['UNDONE', 'PARENT'],
+        ['BACKLOG', 'PARENT'],
+        ['ADD_TASK_PANEL', 'PARENT'],
+        ['other-section', 'PARENT'],
+        ['parent-task', 'SUB'],
+      ] as const) {
+        it(`is rejected by the ${listModelId} ${listId} list`, () => {
+          expect(
+            component.enterPredicate(sectionDrag, createMockDrop(listModelId, listId)),
+          ).toBe(false);
+        });
+      }
+    });
+
     describe('subtasks in parent-level DONE/UNDONE lists', () => {
       it('should allow subtask to reorder within UNDONE', () => {
         const subtask = { id: 'sub1', parentId: 'parent1' };
