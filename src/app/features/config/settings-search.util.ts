@@ -1,6 +1,7 @@
 import { FormlyFieldConfig } from '@ngx-formly/core';
 import { GenericConfigFormSection } from './global-config.model';
 import { T } from '../../t.const';
+import { IMEX_FORM } from './form-cfgs/imex-form.const';
 
 /** A single search hit — everything needed to render the row and jump to it. */
 export interface SettingsSearchTarget {
@@ -79,15 +80,15 @@ const CUSTOM_TARGETS: readonly SettingsSearchTarget[] = [
     labelKey: T.FILE_IMEX.IMPORT_FROM_TODOIST,
     tabLabelKey: T.PS.TABS.SYNC_BACKUP,
     tabIndex: 5,
-    scrollSelector: '.section-IMEX_YEAH',
-    sectionKey: 'IMEX_YEAH',
+    scrollSelector: `.section-${IMEX_FORM.key}`,
+    sectionKey: IMEX_FORM.key,
   },
   {
     labelKey: T.FILE_IMEX.IMPORT_FROM_TICKTICK,
     tabLabelKey: T.PS.TABS.SYNC_BACKUP,
     tabIndex: 5,
-    scrollSelector: '.section-IMEX_YEAH',
-    sectionKey: 'IMEX_YEAH',
+    scrollSelector: `.section-${IMEX_FORM.key}`,
+    sectionKey: IMEX_FORM.key,
   },
 ];
 
