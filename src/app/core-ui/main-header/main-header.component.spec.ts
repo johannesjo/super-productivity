@@ -978,22 +978,27 @@ describe('MainHeaderComponent action placement', () => {
       expect(component.syncTooltip()).toBe(T.MH.SYNC_STATE.IN_SYNC);
     });
 
-    it('shows the in-sync state as one glyph, with nothing drawn over it (#10427)', async () => {
+    it('shows the in-sync state as one icon, with nothing drawn over it (#10427)', async () => {
       readySync({ hasNoPendingOps: true });
 
       const host = await mountAtWidth(1200);
-      const icons = host.querySelectorAll('button.sync-btn mat-icon');
+      const icons = host.querySelectorAll<HTMLElement & { svgIcon?: string }>(
+        'button.sync-btn mat-icon',
+      );
 
       expect(icons.length).toBe(1);
-      expect(icons[0].textContent?.trim()).toBe('cloud_done');
+      // MatIcon is stubbed out here (NO_ERRORS_SCHEMA), so the binding lands
+      // as a plain property on the element.
+      expect(icons[0].svgIcon).toBe('sync_done');
+      expect(icons[0].textContent?.trim()).toBe('');
     });
 
-    it('shows the plain sync glyph while local changes wait for upload', () => {
+    it('shows the plain sync ring while local changes wait for upload', () => {
       readySync({ hasNoPendingOps: false });
 
       component = createComponent();
 
-      expect(component.syncIcon()).toBe('sync');
+      expect(component.syncIcon()).toBe('sync_ring');
       expect(component.isSyncIconSpinning()).toBe(false);
     });
 
@@ -1002,7 +1007,7 @@ describe('MainHeaderComponent action placement', () => {
 
       component = createComponent();
 
-      expect(component.syncIcon()).toBe('sync');
+      expect(component.syncIcon()).toBe('sync_ring');
       expect(component.isSyncIconSpinning()).toBe(true);
     });
 
@@ -1011,14 +1016,14 @@ describe('MainHeaderComponent action placement', () => {
 
       component = createComponent();
 
-      expect(component.syncIcon()).toBe('sync_problem');
+      expect(component.syncIcon()).toBe('sync_error');
       expect(component.isSyncIconSpinning()).toBe(false);
     });
 
-    it('shows sync_disabled while sync is not ready', () => {
+    it('shows the crossed-out sync ring while sync is not ready', () => {
       component = createComponent();
 
-      expect(component.syncIcon()).toBe('sync_disabled');
+      expect(component.syncIcon()).toBe('sync_off');
     });
   });
 

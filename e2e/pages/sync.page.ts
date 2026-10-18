@@ -43,9 +43,7 @@ export class SyncPage extends BasePage {
     // also match the badge that released clients render.
     this.syncCheckIcon = page.locator(cssSelectors.SYNC_UPLOADED);
     this.syncConfirmedIcon = page.locator(cssSelectors.SYNC_REMOTE_CONFIRMED);
-    this.syncErrorIcon = page
-      .locator('.sync-btn mat-icon')
-      .filter({ hasText: 'sync_problem' });
+    this.syncErrorIcon = page.locator(cssSelectors.SYNC_ERROR);
     // Encryption-related locators
     // Note: encryptionPasswordInput is no longer used directly - password is entered in a dialog
     this.encryptionPasswordInput = page.locator(
@@ -438,7 +436,7 @@ export class SyncPage extends BasePage {
     await this.waitForTriggeredSyncResponse(20000);
 
     if (await this.syncErrorIcon.isVisible().catch(() => false)) {
-      throw new Error('Sync failed: sync_problem icon is visible');
+      throw new Error('Sync failed: sync error icon is visible');
     }
 
     // Wait for sync spinner to disappear

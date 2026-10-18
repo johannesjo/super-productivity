@@ -89,12 +89,14 @@ const WEEKDAY_KEYS: (keyof TaskRepeatCfgCopy)[] = [
 ];
 
 // Unsaved edits to these would move the next occurrence. quickSetting is only
-// expanded into the pattern fields on save, and repeatFromCompletionDate moves
-// the anchor, so both count here although the reschedule effect ignores them.
+// expanded into the pattern fields on save, repeatFromCompletionDate moves the
+// anchor and repeatUntilDay can leave no next occurrence, so they count here
+// although the reschedule effect ignores them.
 const NEXT_OCCURRENCE_FIELDS: (keyof TaskRepeatCfgCopy)[] = [
   ...SCHEDULE_AFFECTING_FIELDS,
   'quickSetting',
   'repeatFromCompletionDate',
+  'repeatUntilDay',
 ];
 
 // TASK_REPEAT_CFG_FORM_CFG

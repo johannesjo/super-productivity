@@ -202,7 +202,7 @@ jobs:
             # check passes on exactly the APKs it should catch.
             listing="$(unzip -l "${apk}")"
             if printf '%s\n' "${listing}" \
-              | grep -E 'assets/public/(ngsw|safety-worker|worker-basic)'; then
+              | grep -E 'assets/public/(ngsw|safety-worker|worker-basic|sw\.js)'; then
               echo "::error::${apk} ships service-worker assets; the strip in sync:android did not run (#4155)"
               exit 1
             fi

@@ -8,7 +8,7 @@ import { isImageUrlSimple } from '../../util/is-image-url';
 import { formatTimeHHmm } from '../../util/format-time-hhmm';
 import { TaskAttachment } from './task-attachment/task-attachment.model';
 import { nanoid } from 'nanoid';
-import type { Chrono, ParsingContext, ParsingResult } from 'chrono-node';
+import type { Chrono, ParsedResult, ParsingContext, ParsingResult } from 'chrono-node';
 import {
   RepeatCycleOption,
   RepeatQuickSetting,
@@ -337,17 +337,6 @@ const getNextWeekdayDate = (now: Date, weekday: number): Date => {
   return new Date(now.getFullYear(), now.getMonth(), now.getDate() + diff, 12, 0);
 };
 
-// The nth occurrence of a weekday counting from today, org-mode style: nth = 1 is
-// the next occurrence (identical to getNextWeekdayDate), nth = 2 the one after,
-// and so on. Still anchored at 12:00 so the downstream dueWithTime/dueDay
-// conversion and `hasPlannedTime: false` behave exactly like "@monday".
-const getNthWeekdayDate = (now: Date, weekday: number, nth: number): Date => {
-  const date = getNextWeekdayDate(now, weekday);
-  const extraWeeks = (nth - 1) * 7;
-  date.setDate(date.getDate() + extraWeeks);
-  return date;
-};
-
 // Next date with the given day-of-month, today or later; months without that
 // day (e.g. "every 31st" in February) are skipped rather than clamped to the
 // month's last day. The repeat engine takes the recurring day-of-month from
@@ -371,11 +360,13 @@ const getNextDayOfMonthDate = (now: Date, dayOfMonth: number): Date | null => {
 // "@1monday" is exactly "@monday". "every" is deliberately absent from the
 // grammar, which is what keeps "@every 2 fridays" on the recurrence path: this
 // parser only runs once no recurrence matched. A trailing "m" ("@2m") is left
-// alone too, so the estimate grammar keeps the token. Out-of-range counts still
-// match (the token is consumed) but yield no date, which stops the numeric-hour
-// fallback turning "@9monday" into 09:00 with "monday" left in the title.
+// alone too, so the estimate grammar keeps the token. Glued out-of-range counts
+// still match (the token is consumed) but yield no date, which stops the
+// numeric-hour fallback turning "@9monday" into 09:00 with "monday" left in the
+// title. The spaced form only claims a single digit 1..5: "@10 fri" is an hour
+// plus a weekday, which chrono reads as Friday 10:00.
 const SHORT_SYNTAX_NTH_WEEKDAY_REG_EX = new RegExp(
-  `^(\\d{1,2})\\s*(${WEEKDAY_UNIT_SOURCE})(?![\\w])`,
+  `^(\\d{1,2})(\\s*)(${WEEKDAY_UNIT_SOURCE})(?![\\w])`,
   'i',
 );
 
@@ -389,17 +380,25 @@ interface NthWeekdaySyntaxResult {
   consumedLength: number;
 }
 
+// A chrono match that carries a clock time and no date of its own ("3pm", not
+// "tomorrow 3pm")
+const isTimeOnlyChronoMatch = (result: ParsedResult): boolean =>
+  result.start.isCertain('hour') &&
+  !(['day', 'month', 'year', 'weekday'] as const).some((component) =>
+    result.start.isCertain(component),
+  );
+
 const parseNthWeekdaySyntax = (
   dueMatchContent: string,
 ): NthWeekdaySyntaxResult | null => {
   const m = dueMatchContent.match(SHORT_SYNTAX_NTH_WEEKDAY_REG_EX);
-  if (!m) {
+  if (!m || (m[2] && !/^[1-5]$/.test(m[1]))) {
     return null;
   }
-  // All group 2 alternatives are unit words handled by weekdayOfUnit; the
+  // All group 3 alternatives are unit words handled by weekdayOfUnit; the
   // trailing "m" case ("@2m") is excluded by the lookahead, so no minute-check
   // is needed here.
-  const weekday = weekdayOfUnit(m[2].toLowerCase());
+  const weekday = weekdayOfUnit(m[3].toLowerCase());
   if (weekday === undefined) {
     return null;
   }
@@ -1199,19 +1198,18 @@ const applyNthWeekdaySyntax = async (
     const fallback = dateParser.parse(chronoText, timeReference, {
       forwardDate: false,
     })[0];
-    if (
-      fallback?.start.isCertain('hour') &&
-      !(['day', 'month', 'year', 'weekday'] as const).some((component) =>
-        fallback.start.isCertain(component),
-      )
-    ) {
+    if (fallback && isTimeOnlyChronoMatch(fallback)) {
       parsedDateArr = [fallback];
     }
   }
-  // Only absorb a chrono match that directly follows the phrase ("@2monday
-  // 3pm"); anything further into the remainder belongs to the title.
+  // Only absorb a time-only chrono match that directly follows the phrase
+  // ("@2monday 3pm"); anything further into the remainder belongs to the title.
+  // The date comes from the phrase, so a trailing date ("@2fri tomorrow") is
+  // left in the title instead of being consumed and ignored.
   const parsedDateResult =
-    parsedDateArr.length && /^\s*$/.test(chronoText.slice(0, parsedDateArr[0].index))
+    parsedDateArr.length &&
+    /^\s*$/.test(chronoText.slice(0, parsedDateArr[0].index)) &&
+    isTimeOnlyChronoMatch(parsedDateArr[0])
       ? parsedDateArr[0]
       : null;
   const consumedTotal =
@@ -1254,26 +1252,41 @@ const applyNthWeekdaySyntax = async (
     return { changes: {}, ranges };
   }
 
-  const hasTime = !!parsedDateResult && parsedDateResult.start.isCertain('hour');
-  const dueDate = getNthWeekdayDate(now, weekday, nth);
-  const parsedTime = hasTime && parsedDateResult ? parsedDateResult.start.date() : null;
+  const hasTime = !!parsedDateResult;
+  const parsedTime = parsedDateResult ? parsedDateResult.start.date() : null;
   let typedTimeStr: string | undefined;
+  // setDate retains the normalized hour from a DST gap, so the typed clock time
+  // is re-applied after every day shift: a later weekday must use it again once
+  // that time exists.
+  const applyTypedTime = (date: Date): void => {
+    if (parsedTime) {
+      date.setHours(parsedTime.getHours(), parsedTime.getMinutes(), 0, 0);
+    }
+  };
+  // The first occurrence (nth = 1), identical to "@monday": anchored at 12:00
+  // without a time so the downstream dueWithTime/dueDay conversion and
+  // `hasPlannedTime: false` behave the same.
+  const dueDate = getNextWeekdayDate(now, weekday);
   if (parsedTime) {
     // Captured before setHours: on a spring-forward day the wall-clock time does
     // not exist and the Date can only hold the shifted hour (see dueTimeStr).
     typedTimeStr = formatTimeHHmm(parsedTime);
-    dueDate.setHours(parsedTime.getHours(), parsedTime.getMinutes(), 0, 0);
+    applyTypedTime(dueDate);
   }
   // Match chrono's strict forwardDate comparison for both explicit times and
-  // the implied noon anchor of all-day dates. Future nth>1 dates stay put, and
-  // an occurrence exactly at now still counts as today.
+  // the implied noon anchor of all-day dates; an occurrence exactly at now
+  // still counts as today.
   if (dueDate.getTime() < now.getTime()) {
     dueDate.setDate(dueDate.getDate() + 7);
-    if (parsedTime) {
-      // setDate retains the normalized hour from a DST gap. The next weekday
-      // must use the original clock time when that time exists again.
-      dueDate.setHours(parsedTime.getHours(), parsedTime.getMinutes(), 0, 0);
-    }
+    applyTypedTime(dueDate);
+  }
+  // Higher counts continue from that first occurrence, org-mode style, so n is
+  // strictly increasing: on a Monday afternoon "@1monday" is next Monday and
+  // "@2monday" the one after it.
+  if (nth > 1) {
+    const extraDays = (nth - 1) * 7;
+    dueDate.setDate(dueDate.getDate() + extraDays);
+    applyTypedTime(dueDate);
   }
   if (isDeadline) {
     return {

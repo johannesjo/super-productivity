@@ -3249,18 +3249,26 @@ describe('shortSyntax nth weekday (@2monday)', () => {
       });
     }
 
-    it(`should keep ${trigger}2monday's future all-day date after noon on Monday`, async () => {
-      const r = await shortSyntax(
-        { ...TASK, title: `Task ${trigger}2monday` },
-        DEADLINE_CONFIG,
-        [],
-        [],
-        new Date(2024, 0, 22, 17),
-      );
-      expect(
-        trigger === '@' ? r?.taskChanges.dueWithTime : r?.taskChanges.deadlineWithTime,
-      ).toBe(new Date(2024, 0, 29, 12).getTime());
-    });
+    for (const [hour, expectedDay] of [
+      [10, 29],
+      [17, 5],
+    ]) {
+      it(`should count ${trigger}2monday on from ${trigger}1monday at ${hour}:00 on Monday`, async () => {
+        // Before noon the first Monday is today, after noon it is Jan 29; the
+        // second Monday is always the one after it, never the same day.
+        const r = await shortSyntax(
+          { ...TASK, title: `Task ${trigger}2monday` },
+          DEADLINE_CONFIG,
+          [],
+          [],
+          new Date(2024, 0, 22, hour),
+        );
+        const expected = new Date(2024, hour > 12 ? 1 : 0, expectedDay, 12);
+        expect(
+          trigger === '@' ? r?.taskChanges.dueWithTime : r?.taskChanges.deadlineWithTime,
+        ).toBe(expected.getTime());
+      });
+    }
 
     it(`should keep ${trigger}1monday's explicitly timed occurrence exactly at now`, async () => {
       const now = new Date(2024, 0, 22, 15, 0, 0, 0);
@@ -3554,6 +3562,35 @@ describe('shortSyntax nth weekday (@2monday)', () => {
     expectNthWeekday(r, 1, 2);
   });
 
+  it('should leave a trailing date in the title instead of swallowing it', async () => {
+    // The date comes from the phrase; only a trailing clock time is absorbed
+    const r = await parse('Task @2friday tomorrow');
+    expect(r?.taskChanges.title).toBe('Task tomorrow');
+    expectNthWeekday(r, 5, 2);
+    expect(r?.taskChanges.hasPlannedTime).toBe(false);
+  });
+
+  it('should read a spaced hour and weekday as a time, not an nth weekday', async () => {
+    // Only "@<1..5> <weekday>" is the spaced nth form; "@10 fri" is Friday 10:00
+    for (const [title, hour] of [
+      ['Call @10 fri', 10],
+      ['Call @15 friday', 15],
+    ] as const) {
+      const r = await parse(title);
+      expect(r?.taskChanges.title).withContext(title).toBe('Call');
+      const due = dueOf(r);
+      expect(due.getDay()).withContext(title).toBe(5);
+      expect(formatDateToISO(due)).withContext(title).toBe('2024-01-19');
+      expect(due.getHours()).withContext(title).toBe(hour);
+    }
+  });
+
+  it('should not claim a spaced count with a leading zero ("@05 fri")', async () => {
+    const r = await parse('Call @05 fri');
+    expect(dueOf(r).getDay()).toBe(5);
+    expect(formatDateToISO(dueOf(r))).toBe('2024-01-19');
+  });
+
   it('should not absorb a chrono match further into the remainder', async () => {
     // "tomorrow" belongs to the title; only the token itself is the due date
     const r = await parse('Standup @2monday and friday');
@@ -3632,10 +3669,18 @@ describe('shortSyntax nth weekday (@2monday)', () => {
     expect(nth?.taskChanges.dueWithTime).toBe(plain?.taskChanges.dueWithTime);
   });
 
-  it('should not shift a nth>1 count whose base occurrence is already in the future', async () => {
-    // Mon Jan 22 2024, 17:00: the 2nd Monday (Jan 29) with 15:00 is still ahead
+  it('should count a timed nth>1 on from the advanced first occurrence', async () => {
+    // Mon Jan 22 2024, 17:00: today's 15:00 has passed, so "@1monday 3pm" is
+    // Jan 29 and "@2monday 3pm" the Monday after it.
     const mondayEvening = new Date(2024, 0, 22, 17, 0, 0, 0);
     const r = await parse('Team call @2monday 3pm', mondayEvening);
+    expect(formatDateToISO(dueOf(r))).toBe('2024-02-05');
+    expect(dueOf(r).getHours()).toBe(15);
+  });
+
+  it('should keep a timed nth>1 one week after a first occurrence still ahead today', async () => {
+    const mondayAfternoon = new Date(2024, 0, 22, 14, 0, 0, 0);
+    const r = await parse('Team call @2monday 3pm', mondayAfternoon);
     expect(formatDateToISO(dueOf(r))).toBe('2024-01-29');
     expect(dueOf(r).getHours()).toBe(15);
   });

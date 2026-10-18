@@ -2841,8 +2841,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Erinnerungston für die Pause",
+      "DING": "Glocke",
       "DONE_SOUND": "Aufgabe erledigt Ton",
       "IS_INCREASE_DONE_PITCH": "Erhöht die Tonhöhe für jede erledigte Aufgabe",
+      "SMALL_DING": "Kleine Glocke",
+      "SOUND_1": "Ton 1",
+      "SOUND_2": "Ton 2",
+      "SOUND_3": "Ton 3",
+      "SOUND_4": "Ton 4",
+      "SOUND_5": "Ton 5",
+      "SOUND_6": "Ton 6",
+      "SOUND_7": "Ton 7",
       "TITLE": "Sound",
       "TRACK_TIME_SOUND": "Ton der Zeiterinnerung verfolgen",
       "VOLUME": "Volumen"

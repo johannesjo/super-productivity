@@ -138,6 +138,10 @@ export const cssSelectors = {
     'button.sync-btn[data-sync-confirmation], .sync-btn mat-icon.sync-state-ico',
   SYNC_REMOTE_CONFIRMED:
     'button.sync-btn[data-sync-confirmation="remote"], .sync-btn mat-icon.sync-state-ico:has-text("done_all")',
+  // Error state of the header sync button: the current build shows the
+  // `sync_error` SVG icon; released clients show the `sync_problem` ligature.
+  SYNC_ERROR:
+    '.sync-btn mat-icon[data-mat-icon-name="sync_error"], .sync-btn mat-icon:has-text("sync_problem")',
 } as const;
 
 export type SelectorKey = keyof typeof cssSelectors;

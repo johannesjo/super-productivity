@@ -2856,8 +2856,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "休息提醒音效",
+      "DING": "鈴鐺聲",
       "DONE_SOUND": "工作完成音效",
       "IS_INCREASE_DONE_PITCH": "每完成一個工作增加音高",
+      "SMALL_DING": "小鈴鐺聲",
+      "SOUND_1": "音效 1",
+      "SOUND_2": "音效 2",
+      "SOUND_3": "音效 3",
+      "SOUND_4": "音效 4",
+      "SOUND_5": "音效 5",
+      "SOUND_6": "音效 6",
+      "SOUND_7": "音效 7",
       "TITLE": "音效",
       "TRACK_TIME_SOUND": "追蹤時間提醒音效",
       "VOLUME": "音量"
