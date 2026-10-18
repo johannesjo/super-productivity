@@ -116,6 +116,7 @@
       [class.active]="activePluginId() === button.pluginId && isShowPluginPanel()"
     >
       <plugin-icon
+        matMenuItemIcon
         [pluginId]="button.pluginId"
         [fallbackIcon]="button.icon || 'extension'"
       ></plugin-icon>
