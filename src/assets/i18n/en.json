@@ -314,8 +314,8 @@
         "QUIT": "Quit",
         "TITLE": "Finish your day before quitting?",
         "UNARCHIVED_TASKS": {
-          "ONE": "1 completed task in your Today list hasn't been moved to the archive yet.",
-          "OTHER": "{{nr}} completed tasks in your Today list haven't been moved to the archive yet."
+          "ONE": "1 done task in your Today list hasn't been moved to the archive yet.",
+          "OTHER": "{{nr}} done tasks in your Today list haven't been moved to the archive yet."
         }
       }
     },
