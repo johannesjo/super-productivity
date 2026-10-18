@@ -48,7 +48,7 @@ timeout 480 ./gradlew :app:connectedPlayDebugAndroidTest \
   -Pandroid.testInstrumentationRunnerArguments.expectShim=true
 status=$?
 if [ "$status" -eq 124 ]; then
-  echo "::error::ImeInsetShimInstrumentedTest exceeded 8 minutes on API 34 — see the android-instrumentation-diagnostics artifact"
+  echo "::error::IME inset check exceeded 8 minutes on API 34 — see the android-instrumentation-diagnostics artifact"
 fi
 if [ "$status" -ne 0 ]; then
   adb logcat -d > "$DIAG/logcat.txt" 2>&1 || true
@@ -59,4 +59,4 @@ fi
 # On green, echo what the test measured so the job log documents which owner
 # insetted the WebView and by how much — geometry and versions only.
 echo "IME inset shim check passed on API 34:"
-adb logcat -d -s SUPKeyboardTest | tail -n 8 || true
+adb logcat -d -s SUPKeyboardTest | tail -n 12 || true

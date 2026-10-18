@@ -262,6 +262,7 @@
       "S": {
         "CAL_PROVIDER_ERROR": "Calendar Provider Error: {{errTxt}}",
         "CAL_PROVIDER_NOT_ICAL": "Calendar URL did not return iCal data. The share link may be expired, revoked, or require sign-in — try generating a new share URL.",
+        "CONNECT": "Connect",
         "EVENT_HIDDEN": "Calendar event hidden",
         "EVENT_MOVED": "Event moved",
         "EVENT_RESCHEDULED": "Event rescheduled",
@@ -1053,7 +1054,7 @@
       "ARCHIVED_NOTICE": "This project is archived.",
       "ARCHIVED_PROJECTS": {
         "EMPTY": "No archived projects.",
-        "LINK_LABEL": "Archived projects",
+        "NAV_LABEL": "Archived",
         "SEARCH": "Search archived projects",
         "UNARCHIVE": "Restore project"
       }
@@ -1354,6 +1355,10 @@
         "USE_LOCAL": "Use My Data",
         "USE_REMOTE": "Use Server Data",
         "USE_REMOTE_CONFIRM": "This replaces this device's data with the server's and discards {{count}} local change(s). Continue?"
+      },
+      "D_UNDECRYPTABLE_REMOTE": {
+        "MESSAGE": "Your sync server holds at least {{count}} change(s) that this device has not applied because it could not decrypt them. They may be your work from another device, saved under a different or older encryption password.\n\nOverwriting the server deletes them permanently, and this device cannot bring them back.\n\nBefore you overwrite, sync again and try your older encryption passwords with Retry Decrypt in the Decryption Failed dialog. Only continue if you are sure you no longer need these changes.",
+        "TITLE": "Some synced data could not be decrypted"
       },
       "FORM": {
         "BTN_CHANGE_PASSWORD": "Change Password",
@@ -1866,6 +1871,7 @@
         "SET_DEADLINE": "Set deadline",
         "SHOW_HIDDEN_DONE_SUB_TASKS": "+ {{nr}} completed subtasks",
         "SHOW_HIDDEN_SUB_TASKS": "+ {{nr}} subtasks",
+        "SUB_TASK_PROGRESS": "Subtasks: {{done}} of {{total}} done",
         "TIME_CONFLICT": "Overlaps with another scheduled task",
         "TOGGLE_ATTACHMENTS": "Show/hide attachments",
         "TOGGLE_DETAIL_PANEL": "Show/hide task panel",
@@ -2115,6 +2121,7 @@
         "MONTHLY_LAST_DAY_AND_TIME": "Monthly on the last day, {{timeStr}}",
         "MONTHLY_NTH_WEEKDAY": "Monthly on the {{ordinalStr}} {{weekdayStr}}",
         "MONTHLY_NTH_WEEKDAY_AND_TIME": "Monthly on the {{ordinalStr}} {{weekdayStr}}, {{timeStr}}",
+        "UNTIL": "{{repeatStr}}, until {{untilStr}}",
         "WEEKLY_CURRENT_WEEKDAY": "Weekly on {{weekdayStr}}",
         "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Weekly on {{weekdayStr}}, {{timeStr}}",
         "YEARLY_CURRENT_DATE": "Yearly on {{dayAndMonthStr}}",
@@ -2198,6 +2205,7 @@
         "SKIP_INSTANCE": "Skip for today",
         "REPEAT_CYCLE": "Recur cycle",
         "REPEAT_EVERY": "Recur every",
+        "REPEAT_UNTIL_DAY": "Recur until (optional)",
         "SATURDAY": "Saturday",
         "SCHEDULE_TYPE_LABEL": "Schedule type",
         "SKIP_OVERDUE": "Don't let overdue instances pile up",
@@ -2609,6 +2617,7 @@
       "HELP": "Focus mode opens a distraction-free screen to help you focus on your current task. Time tracking and the focus session timer are always kept in sync — pausing one pauses the other.",
       "L_AUTO_START_FOCUS_ON_PLAY": "Start a focus session when I start tracking a task",
       "L_FOCUS_MODE_SOUND": "Ambient sound during focus sessions",
+      "L_FOCUS_MODE_SOUND_VOLUME": "Ambient sound volume (% of main volume)",
       "L_MANUAL_BREAK_START": "Enable Pomodoro overtime (keep timer running until manually ended)",
       "L_PAUSE_TRACKING_DURING_BREAK": "Pause task tracking during breaks",
       "L_SHOW_PREPARATION_SCREEN": "Show preparation screen before each session (rocket countdown)",
@@ -2874,8 +2883,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Take a break reminder sound",
+      "DING": "Ding",
       "DONE_SOUND": "Task completed sound",
       "IS_INCREASE_DONE_PITCH": "Increase pitch for every task completed",
+      "SMALL_DING": "Small Ding",
+      "SOUND_1": "Sound 1",
+      "SOUND_2": "Sound 2",
+      "SOUND_3": "Sound 3",
+      "SOUND_4": "Sound 4",
+      "SOUND_5": "Sound 5",
+      "SOUND_6": "Sound 6",
+      "SOUND_7": "Sound 7",
       "TITLE": "Sound",
       "TRACK_TIME_SOUND": "Track time reminder sound",
       "VOLUME": "Volume"
@@ -3041,6 +3059,7 @@
     "SYNC_STATE": {
       "ERROR": "Sync problem — click to retry",
       "IN_SYNC": "In sync — click to sync now",
+      "IN_SYNC_CONFIRMED": "In sync, server checked just now — click to sync now",
       "OFFLINE": "You're offline — sync resumes when you reconnect",
       "SYNCING": "Syncing…"
     },
@@ -3057,6 +3076,7 @@
   },
   "MIGRATE": {
     "C_DOWNLOAD_BACKUP": "Do you want to download a backup of your legacy data (can be used with older versions of Super Productivity)?",
+    "C_IMPORT_PRE_V13_DATA": "Data from Super Productivity 12 or older was found on this device ({{tasks}} tasks, {{projects}} projects), but this version did not carry it over. Import it now? A copy is offered as a download first.\n\nIf you cancel, the old data stays untouched on this device, but you will not be asked again.",
     "DETECTED_LEGACY": "Detected legacy data. We will migrate it for you!",
     "DIALOG_MESSAGE": "We're updating how your data is stored for improved sync reliability. A backup will be downloaded automatically.",
     "DIALOG_TITLE": "Migrating Your Data",

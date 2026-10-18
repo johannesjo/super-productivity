@@ -259,8 +259,8 @@ export class OnboardingHintComponent {
       }
       // Re-resolve: a better target may have appeared (e.g. the opened side nav).
       const config = STEP_CONFIGS.get(step);
-      // Keep following the current target when nothing resolves, e.g. the mobile
-      // + button after a switch to mouse input (its desktop target is hidden).
+      // Keep following the current target when nothing resolves, e.g. while the
+      // layout swaps the header + for the bottom-nav one.
       const targetEl =
         (config ? this._resolveTarget(config) : null) ??
         (this._targetEl?.isConnected ? this._targetEl : null);

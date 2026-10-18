@@ -2799,8 +2799,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "休憩リマインダー音",
+      "DING": "ベルの音",
       "DONE_SOUND": "タスク完了音",
       "IS_INCREASE_DONE_PITCH": "実行するすべてのタスクのピッチを上げる",
+      "SMALL_DING": "小さなベルの音",
+      "SOUND_1": "音1",
+      "SOUND_2": "音2",
+      "SOUND_3": "音3",
+      "SOUND_4": "音4",
+      "SOUND_5": "音5",
+      "SOUND_6": "音6",
+      "SOUND_7": "音7",
       "TITLE": "音",
       "TRACK_TIME_SOUND": "時間リマインダー音を追跡",
       "VOLUME": "ボリューム"

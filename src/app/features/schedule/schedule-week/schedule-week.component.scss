@@ -203,7 +203,6 @@
     background: var(--schedule-panel-header-bg, transparent);
     border: none;
     --over-budget-badge-bg: var(--schedule-event-bg-in-side-panel);
-    --deadline-badge-bg: var(--schedule-event-bg-in-side-panel);
 
     .week-header-dates {
       grid-template-columns: 1fr;
@@ -214,8 +213,8 @@
     }
 
     // Panel is a single, full-width day cell with centered content. Anchoring
-    // the badges absolutely to the right edge leaves a large gap from the
-    // centered date; let them flow next to the date instead.
+    // the badge container absolutely to the right edge leaves a large gap from
+    // the centered date; let it flow next to the date instead.
     .day-badges {
       position: static;
       transform: none;

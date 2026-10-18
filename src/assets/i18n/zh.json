@@ -2812,8 +2812,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "休息提醒声音",
+      "DING": "铃铛声",
       "DONE_SOUND": "任务标记完成声音",
       "IS_INCREASE_DONE_PITCH": "每完成一个任务提高音调",
+      "SMALL_DING": "小铃铛声",
+      "SOUND_1": "声音 1",
+      "SOUND_2": "声音 2",
+      "SOUND_3": "声音 3",
+      "SOUND_4": "声音 4",
+      "SOUND_5": "声音 5",
+      "SOUND_6": "声音 6",
+      "SOUND_7": "声音 7",
       "TITLE": "声音",
       "TRACK_TIME_SOUND": "跟踪时间提醒声音",
       "VOLUME": "音量"

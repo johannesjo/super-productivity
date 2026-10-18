@@ -56,6 +56,14 @@ import { FormlyDatePickerComponent } from './formly-date-picker/formly-date-pick
         { name: 'maxLength', message: 'Value is too long' },
       ],
       types: [
+        // Formly's material checkbox defaults `indeterminate` to true and renders
+        // that state whenever the value is null — so any checkbox nobody has
+        // touched yet shows "[-]" instead of unticked. A boolean setting has no
+        // third state; every consumer here reads a missing value as false. Set
+        // once centrally rather than per field, because the fields come from three
+        // different places (static form configs, the sync form, and plugin config
+        // fields mapped at runtime).
+        { name: 'checkbox', defaultOptions: { props: { indeterminate: false } } },
         { name: 'slider', component: FormlySliderComponent },
         { name: 'link', component: FormlyLinkWidgetComponent },
         { name: 'slide-toggle', component: FormlySlideToggleComponent },

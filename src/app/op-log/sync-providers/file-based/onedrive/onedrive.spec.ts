@@ -18,6 +18,9 @@ describe('OneDrive', () => {
   >;
   const tokenExpiryMs = 5 * 60 * 1000;
 
+  // Built per test: an expiry computed once at load time runs out (minus the
+  // 60 s refresh skew) four minutes into a full suite run, and every later
+  // OneDrive spec then sees an expiring token and gets a refresh request.
   let baseCfg: OneDrivePrivateCfg;
 
   const noop = (): void => undefined;

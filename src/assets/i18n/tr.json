@@ -2802,8 +2802,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Mola hatırlatma sesi",
+      "DING": "Zil",
       "DONE_SOUND": "Görev tamamlandı sesi",
       "IS_INCREASE_DONE_PITCH": "Yapılan her görev için ses seviyesini artırın",
+      "SMALL_DING": "Küçük zil",
+      "SOUND_1": "Ses 1",
+      "SOUND_2": "Ses 2",
+      "SOUND_3": "Ses 3",
+      "SOUND_4": "Ses 4",
+      "SOUND_5": "Ses 5",
+      "SOUND_6": "Ses 6",
+      "SOUND_7": "Ses 7",
       "TITLE": "Ses",
       "TRACK_TIME_SOUND": "Zaman izleme hatırlatma sesi",
       "VOLUME": "Ses Seviyesi"

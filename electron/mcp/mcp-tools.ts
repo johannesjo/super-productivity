@@ -6,6 +6,14 @@ import {
 } from '../shared-with-frontend/assistant-access.model';
 import { McpToolDefinition, McpToolResult } from './mcp-protocol';
 import {
+  DUE_DATE_PATTERN,
+  DUE_TIME_PATTERN,
+  REPEAT_CYCLES,
+  REPEAT_EVERY_MAX,
+  REPEAT_WEEKDAYS,
+  validateCaptureSchedule,
+} from './capture-args';
+import {
   DEFAULT_LIST_LIMIT,
   MAX_LIST_LIMIT,
   MAX_NAMED_ENTITIES,
@@ -294,21 +302,69 @@ const createTask: ToolSpec = {
     name: 'create_task',
     description:
       "Adds a new task to the user's Inbox with the given title and optional notes, exactly as written. " +
-      'It gets the same defaults as a task the user adds to the Inbox by hand; no project, tag or date ' +
-      'comes from the request, and "#tag"/"+project" text is kept literally. ' +
+      'It gets the same defaults as a task the user adds to the Inbox by hand; no project or tag ' +
+      'comes from the request, and #tags, +projects and dates in the title or notes are not parsed. ' +
+      'Pass dueDate (and optionally dueTime) to schedule the task, and repeat to make it recurring. ' +
       'Retrying after an error can create a duplicate.',
     inputSchema: {
       type: 'object',
       properties: {
         title: { type: 'string', minLength: 1, maxLength: MAX_TITLE_CHARS },
         notes: { type: 'string', maxLength: MAX_NOTES_CHARS },
+        dueDate: {
+          type: 'string',
+          description:
+            "Optional day to schedule the task for, as YYYY-MM-DD in the user's " +
+            'local calendar.',
+          pattern: DUE_DATE_PATTERN,
+        },
+        dueTime: {
+          type: 'string',
+          description:
+            "Optional start time on dueDate, as 24-hour HH:MM in the user's local " +
+            'time zone. Requires dueDate. Without it the task is due on the day, ' +
+            'with no time.',
+          pattern: DUE_TIME_PATTERN,
+        },
+        repeat: {
+          type: 'object',
+          description:
+            'Optional: make the task recurring, starting on dueDate (or today). ' +
+            'dueTime, if given, is the time of every occurrence. A monthly or ' +
+            "yearly task repeats on the start day's date.",
+          properties: {
+            cycle: { type: 'string', enum: [...REPEAT_CYCLES] },
+            every: {
+              type: 'integer',
+              description: `Repeat every N cycles, 1 to ${REPEAT_EVERY_MAX}. Default 1.`,
+              minimum: 1,
+              maximum: REPEAT_EVERY_MAX,
+            },
+            weekdays: {
+              type: 'array',
+              description:
+                "Weekly only: the days it repeats on. Default: the start day's weekday.",
+              items: { type: 'string', enum: [...REPEAT_WEEKDAYS] },
+              minItems: 1,
+              uniqueItems: true,
+            },
+          },
+          required: ['cycle'],
+          additionalProperties: false,
+        },
       },
       required: ['title'],
       additionalProperties: false,
     },
   },
   run: async (args, _scopes, forward) => {
-    const unknownArg = findUnknownArg(args, ['title', 'notes']);
+    const unknownArg = findUnknownArg(args, [
+      'title',
+      'notes',
+      'dueDate',
+      'dueTime',
+      'repeat',
+    ]);
     if (unknownArg) {
       return invalid(unknownArg);
     }
@@ -322,13 +378,17 @@ const createTask: ToolSpec = {
     if (notes instanceof Error) {
       return invalid(notes.message);
     }
+    const schedule = validateCaptureSchedule(args);
+    if (typeof schedule === 'string') {
+      return invalid(schedule);
+    }
 
     let reply: RendererReply;
     try {
       reply = await forward({
         method: 'POST',
         path: ASSISTANT_CAPTURE_PATH,
-        body: { title, ...(notes ? { notes } : {}) },
+        body: { title, ...(notes ? { notes } : {}), ...schedule },
         source: 'mcp',
         timeoutMs: ASSISTANT_CAPTURE_TIMEOUT_MS,
       });

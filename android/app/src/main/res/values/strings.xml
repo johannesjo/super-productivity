@@ -38,12 +38,4 @@
   <string name="widget_description">Shows today\'s tasks with quick done action</string>
   <string name="widget_empty">No tasks for today</string>
   <string name="widget_task_done">Toggle task done</string>
-
-  <!-- Startup overlay -->
-  <string name="startup_overlay_add_task">Add task</string>
-  <string name="startup_overlay_hint">Add a task while loading\u2026</string>
-  <plurals name="startup_tasks_queued">
-    <item quantity="one">%d task queued</item>
-    <item quantity="other">%d tasks queued</item>
-  </plurals>
 </resources>

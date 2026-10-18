@@ -2812,8 +2812,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Sunet memento de luat o pauză",
+      "DING": "Clopoțel",
       "DONE_SOUND": "Sunet sarcină finalizată",
       "IS_INCREASE_DONE_PITCH": "Crește tonul pentru fiecare sarcină finalizată",
+      "SMALL_DING": "Clopoțel mic",
+      "SOUND_1": "Sunet 1",
+      "SOUND_2": "Sunet 2",
+      "SOUND_3": "Sunet 3",
+      "SOUND_4": "Sunet 4",
+      "SOUND_5": "Sunet 5",
+      "SOUND_6": "Sunet 6",
+      "SOUND_7": "Sunet 7",
       "TITLE": "Sunet",
       "TRACK_TIME_SOUND": "Sunet memento de urmărire a timpului",
       "VOLUME": "Volum"
