@@ -187,7 +187,7 @@ describe('OnboardingHintService', () => {
       const service = createService();
       addFirstTask([EXAMPLE_TASK], 'planner-task');
       expect(service.firstTaskId()).toBe('planner-task');
-      expect(service.currentStep()).toBe('explore-inbox');
+      expect(service.currentStep()).toBe('today-and-inbox');
     });
 
     it('ignores tasks added before data has loaded', () => {
@@ -266,7 +266,7 @@ describe('OnboardingHintService', () => {
     });
   });
 
-  describe('Inbox tip', () => {
+  describe('Today and Inbox tip', () => {
     it('follows the first task once the composer closes, until the Inbox is opened', () => {
       const service = createService();
       isShowAddTaskBar.set(true);
@@ -275,7 +275,8 @@ describe('OnboardingHintService', () => {
       expect(localStorage.getItem(LS.ONBOARDING_PRESET_DONE)).toBe('true');
 
       isShowAddTaskBar.set(false);
-      expect(service.currentStep()).toBe('explore-inbox');
+      expect(service.currentStep()).toBe('today-and-inbox');
+      expect(service.hasTipsInInbox()).toBeTrue();
       expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBeNull();
 
       activeWorkContextId$.next('INBOX_PROJECT');
@@ -284,37 +285,51 @@ describe('OnboardingHintService', () => {
       expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBe('true');
     });
 
-    it('is skipped when no example tasks are left', () => {
+    it('still explains Today and the Inbox when no example tasks are left', () => {
       const service = createService();
       addFirstTask([{ ...EXAMPLE_TASK, isDone: true }]);
-      expect(service.currentStep()).toBeNull();
-      expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBe('true');
+      expect(service.currentStep()).toBe('today-and-inbox');
+      expect(service.hasTipsInInbox()).toBeFalse();
+      expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBeNull();
     });
 
-    it('is skipped when the examples were never seeded here', () => {
+    it('does not mention tips when the examples were never seeded here', () => {
       localStorage.removeItem(LS.EXAMPLE_TASK_IDS);
       const service = createService();
       addFirstTask([EXAMPLE_TASK]);
-      expect(service.currentStep()).toBeNull();
+      expect(service.currentStep()).toBe('today-and-inbox');
+      expect(service.hasTipsInInbox()).toBeFalse();
     });
 
     it("does not mistake the user's own Inbox tasks for the example tips", () => {
       const service = createService();
       addFirstTask([makeTask('own-inbox-task', { projectId: 'INBOX_PROJECT' })]);
+      expect(service.hasTipsInInbox()).toBeFalse();
+    });
+
+    it('shows in the Inbox too, and ends once the user navigates elsewhere', () => {
+      activeWorkContextId$.next('INBOX_PROJECT');
+      const service = createService();
+      addFirstTask([EXAMPLE_TASK]);
+      expect(service.currentStep()).toBe('today-and-inbox');
+
+      activeWorkContextId$.next('some-project');
+      TestBed.tick();
       expect(service.currentStep()).toBeNull();
       expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBe('true');
     });
 
-    it('is skipped when the Inbox is already open', () => {
-      activeWorkContextId$.next('INBOX_PROJECT');
+    it('ends for good on "Got it"', () => {
       const service = createService();
-      addFirstTask([EXAMPLE_TASK]);
+      addFirstTask();
+      service.skip();
       expect(service.currentStep()).toBeNull();
+      expect(OnboardingHintService.isOnboardingInProgress()).toBeFalse();
     });
   });
 
   describe('on phones', () => {
-    it('introduces swipe left, then swipe right, then the Inbox', () => {
+    it('introduces swipe left, then swipe right, then Today and the Inbox', () => {
       const service = createPhoneService();
       addFirstTask([EXAMPLE_TASK]);
       expect(service.currentStep()).toBe('task-swipe-left');
@@ -329,15 +344,16 @@ describe('OnboardingHintService', () => {
       expect(service.currentStep()).toBe('task-swipe-right');
 
       markDone();
-      expect(service.currentStep()).toBe('explore-inbox');
+      expect(service.currentStep()).toBe('today-and-inbox');
+      expect(service.hasTipsInInbox()).toBeTrue();
     });
 
-    it('ends guidance once a task is marked done and nothing waits in the Inbox', () => {
+    it('moves on to Today and the Inbox once a task is marked done', () => {
       const service = createPhoneService();
       addFirstTask();
       markDone();
-      expect(service.currentStep()).toBeNull();
-      expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBe('true');
+      expect(service.currentStep()).toBe('today-and-inbox');
+      expect(service.hasTipsInInbox()).toBeFalse();
     });
 
     it('ends the swipe hints once the first task is deleted', () => {
@@ -346,16 +362,16 @@ describe('OnboardingHintService', () => {
       expect(service.currentStep()).toBe('task-swipe-left');
       setTasks([]);
       TestBed.tick();
-      expect(service.currentStep()).toBeNull();
-      expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBe('true');
+      expect(service.currentStep()).toBe('today-and-inbox');
     });
 
-    it('moves on to the Inbox when the first task is deleted and tips wait there', () => {
+    it('mentions the tips when the first task is deleted and tips wait there', () => {
       const service = createPhoneService();
       addFirstTask([EXAMPLE_TASK]);
       setTasks([EXAMPLE_TASK]);
       TestBed.tick();
-      expect(service.currentStep()).toBe('explore-inbox');
+      expect(service.currentStep()).toBe('today-and-inbox');
+      expect(service.hasTipsInInbox()).toBeTrue();
     });
 
     it('hides swipe hints while a task detail panel is open', () => {

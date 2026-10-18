@@ -14,10 +14,12 @@ import {
 } from '@angular/core';
 import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
+import { Router } from '@angular/router';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { OnboardingHintService, OnboardingStep } from './onboarding-hint.service';
 import { isTouchActive } from '../../util/input-intent';
 import { GlobalConfigService } from '../config/global-config.service';
+import { SETTINGS_SYNC_BACKUP_TAB_INDEX } from '../config/settings-search.util';
 import { T } from '../../t.const';
 import { INBOX_PROJECT } from '../project/project.const';
 
@@ -49,6 +51,10 @@ interface StepConfig {
   title?: string;
   message: string;
   touchMessage?: string;
+  /** Replaces `message` while the seeded tips are still in the Inbox */
+  tipsMessage?: string;
+  /** Offer switchers the Todoist/TickTick importers instead of a first task */
+  isImportOffered?: boolean;
   /** Text button that closes the tip, for steps the user just acknowledges */
   doneLabel?: string;
   /** Gesture icon shown before the message */
@@ -74,6 +80,7 @@ const STEP_CONFIGS = new Map<OnboardingStep, StepConfig>([
       selector: () => ['.tour-addBtn', '.add-task-button'],
       message: T.ONBOARDING.HINTS.CREATE_TASK,
       touchMessage: T.ONBOARDING.HINTS.CREATE_TASK_TOUCH,
+      isImportOffered: true,
       showShortcut: true,
       isPulse: true,
     },
@@ -100,7 +107,7 @@ const STEP_CONFIGS = new Map<OnboardingStep, StepConfig>([
     },
   ],
   [
-    'explore-inbox',
+    'today-and-inbox',
     {
       // The Inbox entry in the side nav; on phones the menu button that opens it,
       // until the menu is open and the entry itself is visible.
@@ -108,9 +115,11 @@ const STEP_CONFIGS = new Map<OnboardingStep, StepConfig>([
         `magic-side-nav nav-item[data-project-id="${INBOX_PROJECT.id}"] .nav-link`,
         'mobile-bottom-nav nav > button:last-of-type',
       ],
-      // The last tip: make clear that guidance ends here and the rest is optional.
+      // The last tip: how Today, projects and the Inbox relate, and that
+      // guidance ends here.
       title: T.ONBOARDING.HINTS.DONE_TITLE,
-      message: T.ONBOARDING.HINTS.EXPLORE_INBOX,
+      message: T.ONBOARDING.HINTS.TODAY_AND_INBOX,
+      tipsMessage: T.ONBOARDING.HINTS.EXPLORE_INBOX,
       doneLabel: T.ONBOARDING.HINTS.GOT_IT,
       isEndedWhenMissing: true,
       showShortcut: false,
@@ -151,9 +160,11 @@ export class OnboardingHintComponent {
   hintIcon = signal<string | null>(null);
   hintTitle = signal<string | null>(null);
   hintDoneLabel = signal<string | null>(null);
+  isImportOffered = signal(false);
   shortcutHint = signal<string | null>(null);
 
   private _globalConfigService = inject(GlobalConfigService);
+  private _router = inject(Router);
   private _liveAnnouncer = inject(LiveAnnouncer);
   private _translateService = inject(TranslateService);
   private _activeStep: OnboardingStep | null = null;
@@ -231,15 +242,27 @@ export class OnboardingHintComponent {
     this.onboardingHintService.skip();
   }
 
+  /** Imported tasks replace the first-task guidance, so it ends here. */
+  openImport(): void {
+    this.skip();
+    void this._router.navigate(['/config'], {
+      queryParams: { tab: SETTINGS_SYNC_BACKUP_TAB_INDEX, section: 'FILE_IMPORT_EXPORT' },
+    });
+  }
+
+  private _messageKey(config: StepConfig): string {
+    if (config.tipsMessage && this.onboardingHintService.hasTipsInInbox()) {
+      return config.tipsMessage;
+    }
+    return isTouchActive() ? (config.touchMessage ?? config.message) : config.message;
+  }
+
   private _announce(step: OnboardingStep): void {
     const config = STEP_CONFIGS.get(step);
     if (!config) {
       return;
     }
-    const key = isTouchActive()
-      ? (config.touchMessage ?? config.message)
-      : config.message;
-    const text = [config.title, key]
+    const text = [config.title, this._messageKey(config)]
       .filter((k): k is string => !!k)
       .map((k) => this._translateService.instant(k))
       .join(' ');
@@ -358,9 +381,8 @@ export class OnboardingHintComponent {
   }
 
   private _updateMessage(config: StepConfig): void {
-    this.hintMessage.set(
-      isTouchActive() ? (config.touchMessage ?? config.message) : config.message,
-    );
+    this.hintMessage.set(this._messageKey(config));
+    this.isImportOffered.set(!!config.isImportOffered);
     this.hintIcon.set(config.icon ?? null);
     this.hintTitle.set(config.title ?? null);
     this.hintDoneLabel.set(config.doneLabel ?? null);

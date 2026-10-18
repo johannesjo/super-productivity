@@ -42,6 +42,17 @@
             </button>
           </div>
         }
+        @if (isImportOffered()) {
+          <div class="hint-buttons">
+            <button
+              mat-button
+              type="button"
+              (click)="openImport()"
+            >
+              {{ T.ONBOARDING.HINTS.IMPORT | translate }}
+            </button>
+          </div>
+        }
       </div>
       <button
         type="button"

@@ -94,7 +94,7 @@
   "EXAMPLE_TASKS": {
     "GETTING_STARTED": {
       "TITLE": "Optional: getting started tips",
-      "NOTES": "Nothing here is required. Delete this task whenever you like.\n\n- **Projects**: group tasks by topic with the **+** next to **Projects** in the sidebar.\n- **Sync**: keep your data on several devices under **Settings → Sync & Backup**.\n- **Keyboard**: open **Help → How to: Keyboard Navigation** in the sidebar menu.\n- **Make it yours**: pick a theme or dark mode, and switch features like boards, schedule, habits, focus mode or integrations on or off under **Settings → General**. Plugins add even more."
+      "NOTES": "Nothing here is required. Delete this task whenever you like.\n\n- **Projects**: group tasks by topic with the **+** next to **Projects** in the sidebar.\n- **Sync**: keep your data on several devices under **Settings → Sync & Backup**.\n- **Tours**: **Help → How to** in the sidebar menu shows short syntax and keyboard navigation step by step. Close a tour whenever you like.\n- **Make it yours**: pick a theme or dark mode, and switch features like boards, schedule, habits, focus mode or integrations on or off under **Settings → General**. Plugins add even more."
     }
   },
   "F": {
@@ -3097,9 +3097,11 @@
       "CREATE_TASK": "Click + to add your first task",
       "CREATE_TASK_TOUCH": "Tap + to add your first task",
       "DONE_TITLE": "You're all set",
-      "EXPLORE_INBOX": "Some optional tips are waiting in your Inbox. Try them or delete them, whenever you like.",
+      "EXPLORE_INBOX": "Today shows what's planned for today. Every task also belongs to a project: the Inbox, unless you pick another. Some optional tips are waiting there, too.",
       "GOT_IT": "Got it",
+      "IMPORT": "Import from other apps",
       "TASK_SWIPE_LEFT_TOUCH": "Swipe task left for more actions",
+      "TODAY_AND_INBOX": "Today shows what's planned for today. Every task also belongs to a project: the Inbox, unless you pick another.",
       "TASK_SWIPE_RIGHT_TOUCH": "When you've finished a task, swipe it right to mark it done",
       "OR_PRESS": "or press",
       "SKIP_ARIA": "Close tip"
