@@ -19,8 +19,6 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 
 import com.superproductivity.superproductivity.R
 
@@ -35,17 +33,12 @@ class StartupOverlayManager(private val activity: android.app.Activity) {
     private var editText: EditText? = null
     private var feedbackText: TextView? = null
     private var barView: LinearLayout? = null
-    private var layoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
     private var insetLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
     private var taskCount = 0
     private var isBarVisible = false
-    // The bottom system-bar inset (nav/gesture bar height, px) that the web
-    // add-task bar pads itself above via the safe-area inset. The FAB/input bar
-    // are lifted by the same amount so they line up with the web bar we hand off
-    // to. Under Capacitor's built-in SystemBars the WebView draws edge-to-edge
-    // (no bottom margin), so this is read from the root window insets rather than
-    // measured from the WebView's geometry. -1 = not measured.
-    private var webViewBottomInset = -1
+    // Reused scratch for the per-layout geometry read (see updateOverlayInsets).
+    private val visibleFrame = Rect()
+    private val overlayLocation = IntArray(2)
 
     private val isDarkMode: Boolean
         get() {
@@ -65,13 +58,11 @@ class StartupOverlayManager(private val activity: android.app.Activity) {
 
         applyTheme()
 
-        // Edge-to-edge (Capacitor 8, targetSdk 36): this overlay lives on the
-        // full-window android.R.id.content, behind the system navigation bar,
-        // while the web UI draws edge-to-edge and pads its add-task bar above the
-        // nav bar by the bottom system-bar (safe-area) inset. Lift the FAB/input
-        // bar by that same inset so they line up with the web bar we hand off to.
-        // Re-measured on each layout so it catches the inset being applied late
-        // and on rotation. See updateOverlayInsets.
+        // The overlay lives on android.R.id.content. Lift the FAB / input bar
+        // above whatever covers the bottom of that container (navigation bar,
+        // keyboard) so they line up with the web bar we hand off to. Re-measured
+        // on every layout: it catches insets applied late, rotation and the
+        // keyboard opening and closing. See updateOverlayInsets.
         insetLayoutListener = ViewTreeObserver.OnGlobalLayoutListener { updateOverlayInsets() }
         rootView.viewTreeObserver.addOnGlobalLayoutListener(insetLayoutListener)
         updateOverlayInsets()
@@ -99,75 +90,46 @@ class StartupOverlayManager(private val activity: android.app.Activity) {
     }
 
     /**
-     * Lift the FAB / input bar above the navigation bar by the bottom system-bar
-     * inset, so they align with the web add-task button/bar (which pads itself by
-     * the same safe-area inset under SystemBars). Reads the root window insets
-     * directly — device-independent across gesture vs 3-button navigation. No-op
-     * until the insets are available and when the inset is unchanged.
+     * Lift the FAB / input bar so their bottom edge sits a fixed gap above the
+     * window's visible display frame — the top of the navigation bar, or of the
+     * keyboard while it is up. That is where the web add-task button/bar ends up
+     * too, whichever way its bottom inset is applied.
+     *
+     * Only the part of the visible-frame cut-off that still overlaps the
+     * overlay's own container is added: whatever padding already moved the
+     * container up must not be counted again. Capacitor's SystemBars decides
+     * that padding, and it changed in 8.5.2 — it now pads the DecorView (which
+     * holds android.R.id.content) for the system bars and the keyboard instead
+     * of only the WebView's parent, so the old "add the nav-bar inset, plus the
+     * keyboard height" margins lifted the overlay twice. Measuring the container
+     * against the visible frame is right under either contract.
+     * See docs/android-edge-to-edge-keyboard.md ("Capacitor 8.5.2+").
      */
     private fun updateOverlayInsets() {
         val overlay = overlayView ?: return
-        // Freeze the inset once the bar is expanded: from then on the keyboard
-        // listener in expandToInputBar owns the bar's margin (it adds the IME
-        // height on top of this resting inset). This also stops dead work once
-        // the FAB is gone.
-        if (isBarVisible) return
         if (overlay.height == 0) return
 
-        // Read the bottom system-bar inset (nav/gesture bar) directly. Under
-        // SystemBars the WebView draws edge-to-edge with no bottom margin, so the
-        // old (overlayBottom − webViewBottom) measurement reads ~0; the web bar
-        // pads itself by this same safe-area inset, so mirroring it here keeps the
-        // native overlay aligned with the web bar across gesture and 3-button nav.
-        val rootInsets = ViewCompat.getRootWindowInsets(overlay) ?: return
-        val inset = rootInsets
-            .getInsets(WindowInsetsCompat.Type.systemBars())
-            .bottom
-            .coerceAtLeast(0)
-        if (inset == webViewBottomInset) return
-        webViewBottomInset = inset
+        overlay.getWindowVisibleDisplayFrame(visibleFrame)
+        overlay.getLocationOnScreen(overlayLocation)
+        val overlayBottom = overlayLocation[1] + overlay.height
+        val covered = (overlayBottom - visibleFrame.bottom).coerceAtLeast(0)
 
-        // Bar is still hidden here (we return early once it is shown), so set its
-        // resting margin too; the keyboard listener takes over once expanded.
         val density = activity.resources.displayMetrics.density
-        (fab?.layoutParams as? ViewGroup.MarginLayoutParams)?.let { lp ->
-            lp.bottomMargin = (FAB_GAP_DP * density).toInt() + webViewBottomInset
-            fab?.layoutParams = lp
-        }
-        (barView?.layoutParams as? ViewGroup.MarginLayoutParams)?.let { lp ->
-            lp.bottomMargin = (BAR_GAP_DP * density).toInt() + webViewBottomInset
-            barView?.layoutParams = lp
-        }
+        setBottomMargin(fab, (FAB_GAP_DP * density).toInt() + covered)
+        setBottomMargin(barView, (BAR_GAP_DP * density).toInt() + covered)
+    }
+
+    /** No-op when unchanged, so the layout pass this triggers settles at once. */
+    private fun setBottomMargin(view: View?, bottomMargin: Int) {
+        val lp = view?.layoutParams as? ViewGroup.MarginLayoutParams ?: return
+        if (lp.bottomMargin == bottomMargin) return
+        lp.bottomMargin = bottomMargin
+        view.layoutParams = lp
     }
 
     private fun expandToInputBar() {
         if (isBarVisible) return
         isBarVisible = true
-
-        val rootView = activity.findViewById<ViewGroup>(android.R.id.content)
-
-        // Setup keyboard tracking before showing bar
-        val density = activity.resources.displayMetrics.density
-        val baseMargin = (BAR_GAP_DP * density).toInt()
-        var baseOffset = -1
-        layoutListener = ViewTreeObserver.OnGlobalLayoutListener {
-            val rect = Rect()
-            rootView.getWindowVisibleDisplayFrame(rect)
-            val screenHeight = rootView.rootView.height
-            val bottomGap = screenHeight - rect.bottom
-            if (baseOffset < 0) {
-                baseOffset = bottomGap
-            }
-            val keyboardHeight = bottomGap - baseOffset
-            val params = barView?.layoutParams as? ViewGroup.MarginLayoutParams ?: return@OnGlobalLayoutListener
-            // baseOffset already captured (and now subtracts) the nav bar, so
-            // add the WebView's bottom inset back to keep the bar above it.
-            params.bottomMargin =
-                (if (keyboardHeight > 0) keyboardHeight + baseMargin else baseMargin) +
-                webViewBottomInset.coerceAtLeast(0)
-            barView?.layoutParams = params
-        }
-        rootView.viewTreeObserver.addOnGlobalLayoutListener(layoutListener)
 
         // Hide FAB
         fab?.visibility = View.GONE
@@ -206,7 +168,7 @@ class StartupOverlayManager(private val activity: android.app.Activity) {
         fab?.background = fabBg
 
         // Match web AddTaskBar: left/right 4px, bottom gap + 36px action bar
-        // height. updateOverlayInsets() re-applies this with the WebView inset.
+        // height. updateOverlayInsets() re-applies the bottom with the insets.
         val sideMarginPx = (4 * density).toInt()
         val bottomMarginPx = (BAR_GAP_DP * density).toInt()
         val params = barView?.layoutParams as? ViewGroup.MarginLayoutParams
@@ -320,8 +282,6 @@ class StartupOverlayManager(private val activity: android.app.Activity) {
 
     private fun removeLayoutListener() {
         val observer = activity.findViewById<View>(android.R.id.content)?.viewTreeObserver
-        layoutListener?.let { observer?.removeOnGlobalLayoutListener(it) }
-        layoutListener = null
         insetLayoutListener?.let { observer?.removeOnGlobalLayoutListener(it) }
         insetLayoutListener = null
     }
@@ -338,12 +298,13 @@ class StartupOverlayManager(private val activity: android.app.Activity) {
     companion object {
         private const val TAG = "StartupOverlay"
 
-        // Base bottom gaps (dp) above the WebView's bottom inset. The FAB mirrors
+        // Bottom gaps (dp) above the visible display frame (nav bar / keyboard
+        // top). Internal for StartupOverlayInsetInstrumentedTest. The FAB mirrors
         // the web bottom-nav button, whose bottom edge sits ~6dp above the nav
         // line (measured). The input bar adds 36dp on top to clear the web
         // add-task-bar's action-button row. Fine-tune here if a device shows a
         // small constant offset (these are now device-independent of nav type).
-        private const val FAB_GAP_DP = 6
-        private const val BAR_GAP_DP = 6 + 36
+        internal const val FAB_GAP_DP = 6
+        internal const val BAR_GAP_DP = 6 + 36
     }
 }

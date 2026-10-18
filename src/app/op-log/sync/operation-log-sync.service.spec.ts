@@ -372,6 +372,8 @@ describe('OperationLogSyncService', () => {
           provide: OperationLogDownloadService,
           useValue: jasmine.createSpyObj('OperationLogDownloadService', [
             'downloadRemoteOps',
+            'getUndecryptableRemoteOps',
+            'clearUndecryptableRemoteOps',
           ]),
         },
         { provide: LockService, useValue: lockServiceSpy },
@@ -545,51 +547,58 @@ describe('OperationLogSyncService', () => {
         }
       });
 
-      it('should return localWinOpsCreated count from piggybacked ops processing', async () => {
-        opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
+      for (const providerMode of ['superSyncOps', 'fileSnapshotOps'] as const) {
+        it(`should return localWinOpsCreated count from piggybacked ops processing (${providerMode})`, async () => {
+          opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
 
-        const piggybackedOp: Operation = {
-          id: 'piggybacked-1',
-          clientId: 'client-B',
-          actionType: 'test' as ActionType,
-          opType: OpType.Update,
-          entityType: 'TASK',
-          entityId: 'task-1',
-          payload: { title: 'Remote Title' },
-          vectorClock: { clientB: 1 },
-          timestamp: Date.now(),
-          schemaVersion: 1,
-        };
+          const piggybackedOp: Operation = {
+            id: 'piggybacked-1',
+            clientId: 'client-B',
+            actionType: 'test' as ActionType,
+            opType: OpType.Update,
+            entityType: 'TASK',
+            entityId: 'task-1',
+            payload: { title: 'Remote Title' },
+            vectorClock: { clientB: 1 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          };
 
-        uploadServiceSpy.uploadPendingOps.and.returnValue(
-          Promise.resolve({
-            uploadedCount: 1,
-            piggybackedOps: [piggybackedOp],
-            rejectedCount: 0,
-            rejectedOps: [],
-          }),
-        );
+          uploadServiceSpy.uploadPendingOps.and.returnValue(
+            Promise.resolve({
+              uploadedCount: 1,
+              piggybackedOps: [piggybackedOp],
+              rejectedCount: 0,
+              rejectedOps: [],
+            }),
+          );
 
-        // Mock remoteOpsProcessingService to return 2 local-win ops
-        remoteOpsProcessingServiceSpy.processRemoteOps.and.resolveTo({
-          localWinOpsCreated: 2,
-          allOpsFilteredBySyncImport: false,
-          filteredOpCount: 0,
-          isLocalUnsyncedImport: false,
-          blockedByIncompatibleOp: false,
+          // Mock remoteOpsProcessingService to return 2 local-win ops
+          remoteOpsProcessingServiceSpy.processRemoteOps.and.resolveTo({
+            localWinOpsCreated: 2,
+            allOpsFilteredBySyncImport: false,
+            filteredOpCount: 0,
+            isLocalUnsyncedImport: false,
+            blockedByIncompatibleOp: false,
+          });
+
+          const mockProvider = {
+            providerMode,
+            isReady: () => Promise.resolve(true),
+          } as unknown as OperationSyncCapable;
+
+          const result = await service.uploadPendingOps(mockProvider);
+
+          expect(result.kind).toBe('completed');
+          if (result.kind === 'completed') {
+            expect(result.localWinOpsCreated).toBe(2);
+          }
+          expect(
+            remoteOpsProcessingServiceSpy.processRemoteOps.calls.mostRecent().args[1]
+              ?.rebaseKeptTimeDeltas,
+          ).toBe(providerMode === 'superSyncOps' ? true : undefined);
         });
-
-        const mockProvider = {
-          isReady: () => Promise.resolve(true),
-        } as any;
-
-        const result = await service.uploadPendingOps(mockProvider);
-
-        expect(result.kind).toBe('completed');
-        if (result.kind === 'completed') {
-          expect(result.localWinOpsCreated).toBe(2);
-        }
-      });
+      }
 
       it('should flag the piggybacked SYNC_IMPORT conflict as never-synced using PRE-upload history', async () => {
         // Regression: the never-synced guard must be captured before the upload marks
@@ -1173,7 +1182,7 @@ describe('OperationLogSyncService', () => {
 
           expect(result.kind).toBe('completed');
           expect(setLastServerSeq).not.toHaveBeenCalled();
-          expect(opLogStoreSpy.markSynced).toHaveBeenCalledWith([1]);
+          expect(opLogStoreSpy.markSynced).toHaveBeenCalledWith([1], undefined);
         });
 
         it('should recover across cycles: defer REPAIR while pending ops exist, then apply it once acks drain (no livelock)', async () => {
@@ -1250,7 +1259,7 @@ describe('OperationLogSyncService', () => {
           );
           // … the cursor stays behind it, but the ack still drains.
           expect(setLastServerSeq).not.toHaveBeenCalled();
-          expect(opLogStoreSpy.markSynced).toHaveBeenCalledWith([1]);
+          expect(opLogStoreSpy.markSynced).toHaveBeenCalledWith([1], undefined);
 
           // ── Cycle 2: cursor was frozen, so the REPAIR is re-downloaded ──
           remoteOpsProcessingServiceSpy.processRemoteOps.calls.reset();
@@ -1685,55 +1694,62 @@ describe('OperationLogSyncService', () => {
         expect(result.kind).toBe('no_new_ops');
       });
 
-      it('should return localWinOpsCreated count and newOpsCount from processing remote ops', async () => {
-        opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
+      for (const providerMode of ['superSyncOps', 'fileSnapshotOps'] as const) {
+        it(`should return localWinOpsCreated count and newOpsCount from processing remote ops (${providerMode})`, async () => {
+          opLogStoreSpy.getUnsynced.and.returnValue(Promise.resolve([]));
 
-        const remoteOp: Operation = {
-          id: 'remote-1',
-          clientId: 'client-B',
-          actionType: 'test' as ActionType,
-          opType: OpType.Update,
-          entityType: 'TASK',
-          entityId: 'task-1',
-          payload: { title: 'Remote Title' },
-          vectorClock: { clientB: 1 },
-          timestamp: Date.now(),
-          schemaVersion: 1,
-        };
+          const remoteOp: Operation = {
+            id: 'remote-1',
+            clientId: 'client-B',
+            actionType: 'test' as ActionType,
+            opType: OpType.Update,
+            entityType: 'TASK',
+            entityId: 'task-1',
+            payload: { title: 'Remote Title' },
+            vectorClock: { clientB: 1 },
+            timestamp: Date.now(),
+            schemaVersion: 1,
+          };
 
-        downloadServiceSpy.downloadRemoteOps.and.returnValue(
-          Promise.resolve({
-            newOps: [remoteOp],
-            hasMore: false,
-            latestSeq: 1,
-            needsFullStateUpload: false,
-            success: true,
-            providerMode: 'superSyncOps',
-            failedFileCount: 0,
-          }),
-        );
+          downloadServiceSpy.downloadRemoteOps.and.returnValue(
+            Promise.resolve({
+              newOps: [remoteOp],
+              hasMore: false,
+              latestSeq: 1,
+              needsFullStateUpload: false,
+              success: true,
+              providerMode: 'superSyncOps',
+              failedFileCount: 0,
+            }),
+          );
 
-        // Mock remoteOpsProcessingService to return 1 local-win op
-        remoteOpsProcessingServiceSpy.processRemoteOps.and.resolveTo({
-          localWinOpsCreated: 1,
-          allOpsFilteredBySyncImport: false,
-          filteredOpCount: 0,
-          isLocalUnsyncedImport: false,
-          blockedByIncompatibleOp: false,
+          // Mock remoteOpsProcessingService to return 1 local-win op
+          remoteOpsProcessingServiceSpy.processRemoteOps.and.resolveTo({
+            localWinOpsCreated: 1,
+            allOpsFilteredBySyncImport: false,
+            filteredOpCount: 0,
+            isLocalUnsyncedImport: false,
+            blockedByIncompatibleOp: false,
+          });
+
+          const mockProvider = {
+            providerMode,
+            isReady: () => Promise.resolve(true),
+          } as unknown as OperationSyncCapable;
+
+          const result = await service.downloadRemoteOps(mockProvider);
+
+          expect(result.kind).toBe('ops_processed');
+          if (result.kind === 'ops_processed') {
+            expect(result.localWinOpsCreated).toBe(1);
+            expect(result.newOpsCount).toBe(1);
+          }
+          expect(
+            remoteOpsProcessingServiceSpy.processRemoteOps.calls.mostRecent().args[1]
+              ?.rebaseKeptTimeDeltas,
+          ).toBe(providerMode === 'superSyncOps' ? true : undefined);
         });
-
-        const mockProvider = {
-          isReady: () => Promise.resolve(true),
-        } as any;
-
-        const result = await service.downloadRemoteOps(mockProvider);
-
-        expect(result.kind).toBe('ops_processed');
-        if (result.kind === 'ops_processed') {
-          expect(result.localWinOpsCreated).toBe(1);
-          expect(result.newOpsCount).toBe(1);
-        }
-      });
+      }
 
       it('should preserve repair context and the final conflict guard together', async () => {
         const remoteOp = {
@@ -1936,6 +1952,62 @@ describe('OperationLogSyncService', () => {
 
           expect(forceUploadSpy).toHaveBeenCalled();
           expect(outcome.kind).toBe('no_new_ops');
+        });
+
+        it('cancels USE_LOCAL when the user declines deleting undecryptable remote ops', async () => {
+          const incomingImport: Operation = {
+            ...remoteOp(),
+            id: 'import-in-prefix',
+            actionType: ActionType.LOAD_ALL_DATA,
+            opType: OpType.SyncImport,
+            entityType: 'ALL',
+            entityId: undefined,
+          };
+          downloadServiceSpy.downloadRemoteOps.and.resolveTo({
+            newOps: [incomingImport],
+            latestServerSeq: 17,
+            needsFullStateUpload: false,
+            success: true,
+            providerMode: 'superSyncOps',
+            failedFileCount: 0,
+            decryptErrorAfterKeptPrefix: decryptError,
+          });
+          opLogStoreSpy.getUnsynced.and.resolveTo([
+            {
+              seq: 1,
+              op: {
+                ...remoteOp(),
+                id: 'local-op-1',
+                clientId: 'client-A',
+                payload: { title: 'Local Title' },
+                vectorClock: { clientA: 1 },
+              },
+              appliedAt: Date.now(),
+              source: 'local',
+            },
+          ]);
+          stateSnapshotServiceSpy.getStateSnapshot.and.returnValue({
+            task: { ids: ['task-1'] },
+            project: { ids: [INBOX_PROJECT.id] },
+            tag: { ids: [TODAY_TAG.id] },
+            note: { ids: [] },
+          } as any);
+          syncImportConflictDialogServiceSpy.showConflictDialog.and.resolveTo(
+            'USE_LOCAL',
+          );
+          const localState = TestBed.inject(SyncLocalStateService);
+          spyOn(localState, 'confirmOverwriteOfUndecryptableRemoteOps').and.returnValue(
+            false,
+          );
+          const forceUploadSpy = spyOn(service, 'forceUploadLocalState');
+
+          const outcome = await service.downloadRemoteOps(provider, {
+            keepDecryptedPrefix: true,
+          });
+
+          expect(localState.confirmOverwriteOfUndecryptableRemoteOps).toHaveBeenCalled();
+          expect(forceUploadSpy).not.toHaveBeenCalled();
+          expect(outcome.kind).toBe('cancelled');
         });
 
         it('still reports the decrypt error when the cursor stayed behind the prefix', async () => {
@@ -4882,6 +4954,10 @@ describe('OperationLogSyncService', () => {
       );
       expect(opLogStoreSpy.getOpById).toHaveBeenCalledOnceWith('force-import');
       expect(result).toEqual({ hasUnresolvedOps: false });
+      // #9256: the clean slate deleted the ops this device could not decrypt.
+      expect(
+        TestBed.inject(OperationLogDownloadService).clearUndecryptableRemoteOps,
+      ).toHaveBeenCalled();
     });
 
     it('should upload pending ops after creating SYNC_IMPORT', async () => {
@@ -4952,6 +5028,10 @@ describe('OperationLogSyncService', () => {
       await expectAsync(service.forceUploadLocalState(mockProvider)).toBeRejectedWith(
         error,
       );
+      // The server was not replaced, so the undecryptable ops are still there.
+      expect(
+        TestBed.inject(OperationLogDownloadService).clearUndecryptableRemoteOps,
+      ).not.toHaveBeenCalled();
     });
 
     it('should reject when mandatory encryption blocks the force upload', async () => {
@@ -7921,6 +8001,15 @@ describe('OperationLogSyncService', () => {
         timestamp: Date.now(),
         schemaVersion: 1,
       };
+      const originalDelta: Operation = {
+        ...piggybackedOp,
+        id: 'local-delta',
+        clientId: 'client-A',
+        actionType: ActionType.TIME_TRACKING_SYNC_TIME_SPENT,
+        payload: { taskId: 'task-1', date: '2026-10-03', duration: 3000 },
+        vectorClock: { clientA: 1 },
+      };
+      const originals = new Map([[originalDelta.id, originalDelta]]);
 
       uploadServiceSpy.uploadPendingOps.and.resolveTo({
         uploadedCount: 1,
@@ -7928,6 +8017,7 @@ describe('OperationLogSyncService', () => {
         rejectedCount: 0,
         rejectedOps: [],
         pendingAcknowledgementSeqs: [1],
+        pendingAcknowledgementOriginals: originals,
       });
 
       opLogStoreSpy.getUnsynced.and.resolveTo([]);
@@ -7962,7 +8052,7 @@ describe('OperationLogSyncService', () => {
           beforeFullStateApply: jasmine.any(Function),
         }),
       );
-      expect(opLogStoreSpy.markSynced).toHaveBeenCalledOnceWith([1]);
+      expect(opLogStoreSpy.markSynced).toHaveBeenCalledOnceWith([1], originals);
       expect(events).toEqual(['processRemoteOps', 'markSynced']);
       expect(result.kind).not.toBe('cancelled');
     });
@@ -8352,7 +8442,7 @@ describe('OperationLogSyncService', () => {
       const result = await service.uploadPendingOps({} as OperationSyncCapable);
 
       expect(result.kind).toBe('completed');
-      expect(opLogStoreSpy.markSynced).toHaveBeenCalledWith([7]);
+      expect(opLogStoreSpy.markSynced).toHaveBeenCalledWith([7], undefined);
     });
   });
 

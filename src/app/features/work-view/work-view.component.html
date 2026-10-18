@@ -90,11 +90,13 @@
       }
 
       @if (pluginEmbedId(); as embedId) {
-        <plugin-index
-          [directPluginId]="embedId"
-          [showFullUI]="false"
-          [skipCleanupOnDestroy]="true"
-        ></plugin-index>
+        @defer (on immediate) {
+          <plugin-index
+            [directPluginId]="embedId"
+            [showFullUI]="false"
+            [skipCleanupOnDestroy]="true"
+          ></plugin-index>
+        }
       } @else {
         <div class="task-list-wrapper">
           @if (!(workContextService.isHasTasksToWorkOn$ | async)) {
@@ -146,24 +148,23 @@
                whichever container holds the target, and it mirrors these
                conditions to know which ones are on screen. (#8780) -->
           @if (customizedUndoneTasks(); as customized) {
-            @if (customized.grouped) {
-              @for (
-                groupKey of customizerService.getOrderedGroupKeys(customized.grouped);
-                track groupKey
-              ) {
+            @if (customized.groups) {
+              @for (group of customized.groups; track group.key) {
                 <collapsible
                   class="task-section"
-                  [title]="groupKey | scheduledDateGroup: todayStr()"
+                  [title]="group.key | scheduledDateGroup: todayStr()"
                   [isIconBefore]="true"
-                  [isExpanded]="!customizerService.collapsedGroupIds().includes(groupKey)"
-                  (isExpandedChange)="customizerService.toggleGroupExpansion(groupKey)"
+                  [isExpanded]="
+                    !customizerService.collapsedGroupIds().includes(group.key)
+                  "
+                  (isExpandedChange)="customizerService.toggleGroupExpansion(group.key)"
                   [isGroup]="true"
                 >
                   <task-list
-                    [tasks]="customized.grouped[groupKey]"
+                    [tasks]="group.tasks"
                     listId="PARENT"
                     listModelId="UNDONE"
-                    [groupTagId]="customized.groupTagIdByKey?.[groupKey]"
+                    [groupTagId]="group.tagId"
                   ></task-list>
                 </collapsible>
               }
@@ -172,6 +173,7 @@
               <div
                 class="sections-wrapper"
                 [class.has-inline-insertion]="isProjectContext()"
+                data-section-selection-scope
                 cdkDropList
                 [cdkDropListEnterPredicate]="acceptSectionDragOnly"
                 (cdkDropListDropped)="dropSection($event)"
@@ -190,13 +192,15 @@
                 </div>
                 @for (section of sections(); track section.id) {
                   @if (isProjectContext()) {
-                    <button
-                      type="button"
-                      class="add-section-inline focus-ring"
-                      (click)="addSection(section.id)"
-                    >
-                      <span>{{ T.MH.ADD_SECTION | translate }}</span>
-                    </button>
+                    <div class="section-insertion-point">
+                      <button
+                        type="button"
+                        class="add-section-inline focus-ring"
+                        (click)="addSection(section.id)"
+                      >
+                        <span>{{ T.MH.ADD_SECTION | translate }}</span>
+                      </button>
+                    </div>
                   }
                   <div
                     class="section-container"
@@ -253,6 +257,26 @@
                   </div>
                 }
                 @if (isProjectContext()) {
+                  <div class="section-insertion-point">
+                    <button
+                      type="button"
+                      class="add-section-inline focus-ring"
+                      (click)="addSection()"
+                    >
+                      <span>{{ T.MH.ADD_SECTION | translate }}</span>
+                    </button>
+                  </div>
+                }
+              </div>
+            } @else {
+              <div class="default-task-list">
+                <task-list
+                  class="tour-undoneList"
+                  [tasks]="customized.list"
+                  listId="PARENT"
+                  listModelId="UNDONE"
+                ></task-list>
+                @if (isProjectContext() && !customizerService.isCustomized()) {
                   <button
                     type="button"
                     class="add-section-inline focus-ring"
@@ -262,22 +286,6 @@
                   </button>
                 }
               </div>
-            } @else {
-              <task-list
-                class="tour-undoneList"
-                [tasks]="customized.list"
-                listId="PARENT"
-                listModelId="UNDONE"
-              ></task-list>
-              @if (isProjectContext() && !customizerService.isCustomized()) {
-                <button
-                  type="button"
-                  class="add-section-inline focus-ring"
-                  (click)="addSection()"
-                >
-                  <span>{{ T.MH.ADD_SECTION | translate }}</span>
-                </button>
-              }
             }
           }
 
@@ -437,8 +445,10 @@
                 [isGroup]="true"
               >
                 <div class="repeat-cfg-list">
-                  @for (repeatCfg of repeatCfgsForContext(); track repeatCfg.id) {
-                    <repeat-cfg-preview [repeatCfg]="repeatCfg"></repeat-cfg-preview>
+                  @defer (on immediate) {
+                    @for (repeatCfg of repeatCfgsForContext(); track repeatCfg.id) {
+                      <repeat-cfg-preview [repeatCfg]="repeatCfg"></repeat-cfg-preview>
+                    }
                   }
                 </div>
               </collapsible>
@@ -487,7 +497,7 @@
         <split
           (posChanged)="splitInputPos = $event"
           [containerEl]="containerEl"
-          [counter]="backlogTasks()?.length"
+          [counter]="$safeNavigationMigration(backlogTasks()?.length)"
           [isAnimateBtn]="isTriggerBacklogIconAni$ | async"
           [splitBottomEl]="splitBottomEl"
           [splitPos]="splitInputPos"

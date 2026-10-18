@@ -338,6 +338,12 @@ test.describe('@webdav automatic file format rollout', () => {
             { ...config, isUseSplitSyncFiles: true },
             { isReconfigure: true },
           );
+          // Migration publishes an equivalent v3 baseline, then defers appending
+          // until the next download applies its new revision (#10395).
+          await waitForSyncComplete(b.page, syncB, 30000, {
+            allowResponseOnlyCompletion: true,
+          });
+          await syncB.triggerSync();
           await waitForSyncComplete(b.page, syncB);
         }
         const added = `Joined writer ${folder}`;
@@ -346,12 +352,13 @@ test.describe('@webdav automatic file format rollout', () => {
         await syncB.triggerSync();
         await waitForSyncComplete(b.page, syncB);
         if (choice === 'migrate') {
-          const ops = await readPrefixedFile<{ version: number }>(
+          const ops = await readPrefixedFile<{ version: number; recentOps: unknown[] }>(
             request,
             `${remote}sync-ops.json`,
             authorization,
           );
           expect(ops.version).toBe(3);
+          expect(JSON.stringify(ops.recentOps)).toContain(added);
           const tombstone = await readPrefixedFile<{ format: string }>(
             request,
             `${remote}sync-data.json`,
@@ -549,7 +556,7 @@ test.describe('@webdav automatic file format rollout', () => {
         { useProductFormatDefault: true },
       );
       await expect.poll(() => failedProbe).toBe(true);
-      await expect(sync.syncBtn.locator('mat-icon')).toHaveText('sync_problem');
+      await expect(sync.syncErrorIcon).toBeVisible();
       expect(writes).toEqual([]);
       await expect(a.page.locator('task').filter({ hasText: title })).toBeVisible();
       for (const file of ['sync-data.json', 'sync-ops.json', 'sync-state.json']) {

@@ -322,14 +322,21 @@ finish-day-btn,
   }
 }
 
-// Reserve the hit area so revealing an insertion point never moves tasks.
+// Overlay the existing section margin instead of changing the list geometry.
+.section-insertion-point {
+  position: relative;
+  height: 0;
+}
+
 .add-section-inline {
+  position: absolute;
+  bottom: 0;
   display: flex;
   align-items: center;
   gap: var(--s2);
   width: 100%;
-  min-height: var(--s4);
-  padding: var(--s-half) 0;
+  height: var(--s3);
+  padding: 0;
   border: 0;
   background: transparent;
   color: var(--brand);
@@ -352,23 +359,25 @@ finish-day-btn,
   }
 }
 
-.sections-wrapper.has-inline-insertion {
-  .no-section,
-  .section-container {
-    margin-bottom: 0;
-  }
+// With no named sections, use the existing gap before the next panel without
+// reserving any space. The compact hit area stays clear of its heading.
+.default-task-list {
+  position: relative;
 }
 
-// Existing menus and section spacing remain intact on touch-only devices.
+.default-task-list > .add-section-inline {
+  top: 100%;
+  bottom: auto;
+  height: var(--s2);
+}
+
+.sections-wrapper.has-inline-insertion.cdk-drop-list-dragging .add-section-inline {
+  visibility: hidden;
+}
+
+// Existing menus remain available on touch-only devices.
 @media (hover: none) and (pointer: coarse) {
   .add-section-inline {
     display: none;
-  }
-
-  .sections-wrapper.has-inline-insertion {
-    .no-section,
-    .section-container {
-      margin-bottom: var(--s3);
-    }
   }
 }

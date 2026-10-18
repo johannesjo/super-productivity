@@ -138,6 +138,8 @@ export class RemoteOpsProcessingService {
        * apply old-epoch ops onto the fresh state.
        */
       fenceEpoch?: number;
+      /** SuperSync can recover receipts if a kept delta was already uploaded. */
+      rebaseKeptTimeDeltas?: boolean;
     },
   ): Promise<{
     localWinOpsCreated: number;
@@ -506,6 +508,16 @@ export class RemoteOpsProcessingService {
           nonConflicting,
           {
             callerHoldsOperationLogLock: true,
+            ...(options?.rebaseKeptTimeDeltas
+              ? {
+                  rebaseKeptTimeDeltas: true,
+                  assertFence: (context: string) =>
+                    this.providerManager.assertSyncEpochUnchanged(
+                      options.fenceEpoch,
+                      context,
+                    ),
+                }
+              : {}),
           },
         );
         localWinOpsCreated = lwwResult.localWinOpsCreated;

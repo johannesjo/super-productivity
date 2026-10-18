@@ -127,6 +127,7 @@ describe('OperationLogUploadService', () => {
         mockApiProvider = jasmine.createSpyObj('ApiSyncProvider', [
           'getLastServerSeq',
           'uploadOps',
+          'downloadOps',
           'setLastServerSeq',
           'supportsCausalRepairSnapshots',
         ]);
@@ -151,6 +152,81 @@ describe('OperationLogUploadService', () => {
         (mockApiProvider.supportsCausalRepairSnapshots as jasmine.Spy).and.returnValue(
           true,
         );
+      });
+
+      describe('time delta upload receipts', () => {
+        for (const receiptKind of [
+          'matching',
+          'different-content',
+          'absent',
+          'failed',
+        ] as const) {
+          it(`handles a ${receiptKind} receipt without weakening id collision rejection`, async () => {
+            const entry = createMockEntry(1, 'delta', 'client1');
+            entry.op = {
+              ...entry.op,
+              actionType: ActionType.TIME_TRACKING_SYNC_TIME_SPENT,
+              opType: OpType.Update,
+              payload: { taskId: entry.op.entityId, duration: 3000, date: '2026-10-03' },
+              vectorClock: { client1: 3, remote: 2 },
+            };
+            const original = { ...entry.op, vectorClock: { client1: 1 } };
+            mockOpLogStore.getUnsynced.and.resolveTo([entry]);
+            mockApiProvider.uploadOps.and.resolveTo({
+              results: [
+                { opId: entry.op.id, accepted: false, errorCode: 'INVALID_OP_ID' },
+              ],
+              latestSeq: 1,
+            });
+            if (receiptKind === 'failed') {
+              mockApiProvider.downloadOps.and.rejectWith(new Error('offline'));
+              await expectAsync(
+                service.uploadPendingOps(mockApiProvider),
+              ).toBeRejectedWithError('offline');
+              expect(mockOpLogStore.markSynced).not.toHaveBeenCalled();
+              return;
+            }
+            mockApiProvider.downloadOps.and.resolveTo({
+              ops:
+                receiptKind === 'absent'
+                  ? []
+                  : [
+                      {
+                        serverSeq: 1,
+                        receivedAt: 1,
+                        op:
+                          receiptKind === 'matching'
+                            ? original
+                            : { ...original, payload: { duration: 9000 } },
+                      },
+                    ],
+              hasMore: false,
+              latestSeq: 1,
+            });
+            const result = await service.uploadPendingOps(mockApiProvider);
+            if (receiptKind === 'matching') {
+              expect(result.uploadedCount).toBe(1);
+              expect(result.rejectedOps).toEqual([]);
+              expect(mockOpLogStore.markSynced.calls.first().args[0]).toEqual([1]);
+              expect(
+                mockOpLogStore.markSynced.calls.first().args[1]?.get(original.id),
+              ).toEqual(jasmine.objectContaining(original));
+              mockOpLogStore.markSynced.calls.reset();
+              const deferred = await service.uploadPendingOps(mockApiProvider, {
+                deferAcknowledgement: true,
+              });
+              expect(mockOpLogStore.markSynced).not.toHaveBeenCalled();
+              expect(deferred.pendingAcknowledgementSeqs).toEqual([1]);
+              expect(deferred.pendingAcknowledgementOriginals?.get(original.id)).toEqual(
+                jasmine.objectContaining(original),
+              );
+            } else {
+              expect(result.uploadedCount).toBe(0);
+              expect(result.rejectedOps[0].errorCode).toBe('INVALID_OP_ID');
+              expect(mockOpLogStore.markSynced).not.toHaveBeenCalled();
+            }
+          });
+        }
       });
 
       describe('crossed pending orders (#10377)', () => {

@@ -1,7 +1,7 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
 import { PollToBacklogEffects } from './poll-to-backlog.effects';
 import { IssueService } from '../issue.service';
 import { WorkContextService } from '../../work-context/work-context.service';
@@ -12,6 +12,7 @@ import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
 import { SnackService } from '../../../core/snack/snack.service';
 import { JIRA_TYPE } from '../issue.const';
 import { IssueProvider } from '../issue.model';
+import { PluginIssueProviderRegistryService } from '../../../plugins/issue-provider/plugin-issue-provider-registry.service';
 import { HydrationStateService } from '../../../op-log/apply/hydration-state.service';
 
 describe('PollToBacklogEffects', () => {
@@ -23,6 +24,7 @@ describe('PollToBacklogEffects', () => {
   let snackServiceSpy: jasmine.SpyObj<SnackService>;
   let isInSyncWindow: boolean;
   let isInitialSyncDone: boolean;
+  let isActiveProject$: BehaviorSubject<boolean>;
 
   const createMockIssueProvider = (
     overrides: Partial<IssueProvider> = {},
@@ -50,8 +52,9 @@ describe('PollToBacklogEffects', () => {
       Promise.resolve(),
     );
 
+    isActiveProject$ = new BehaviorSubject(true);
     workContextServiceSpy = jasmine.createSpyObj('WorkContextService', [], {
-      isActiveWorkContextProject$: of(true),
+      isActiveWorkContextProject$: isActiveProject$,
       activeWorkContextId$: of('project-1'),
     });
 
@@ -96,6 +99,68 @@ describe('PollToBacklogEffects', () => {
   });
 
   describe('pollNewIssuesToBacklog$', () => {
+    it('should start polling when Linear registers after the project is activated', fakeAsync(() => {
+      const pluginRegistry = TestBed.inject(PluginIssueProviderRegistryService);
+      const provider = createMockIssueProvider({
+        id: 'linear-1',
+        issueProviderKey: 'LINEAR',
+        defaultProjectId: 'project-1',
+      });
+
+      issueServiceSpy.getPollInterval.and.callFake((key) =>
+        pluginRegistry.getPollIntervalMs(key),
+      );
+      store.overrideSelector(selectEnabledIssueProviders, [provider]);
+      store.refreshState();
+
+      const actionsSubject = new Subject<any>();
+      actions$ = actionsSubject.asObservable();
+
+      const subscription = effects.pollNewIssuesToBacklog$.subscribe();
+
+      actionsSubject.next(
+        setActiveWorkContext({
+          activeType: WorkContextType.PROJECT,
+          activeId: 'project-1',
+        }),
+      );
+
+      tick(300000);
+      expect(
+        issueServiceSpy.checkAndImportNewIssuesToBacklogForProject,
+      ).not.toHaveBeenCalled();
+
+      pluginRegistry.register({
+        pluginId: 'linear-issue-provider',
+        issueProviderKey: 'LINEAR',
+        name: 'Linear',
+        humanReadableName: 'Linear',
+        icon: 'linear',
+        pollIntervalMs: 300000,
+        issueStrings: { singular: 'Issue', plural: 'Issues' },
+        definition: {
+          configFields: [],
+          getHeaders: () => ({}),
+          searchIssues: () => Promise.resolve([]),
+          getById: () => Promise.resolve({ id: '1', title: '', body: '', url: '' }),
+          getIssueLink: () => '',
+          issueDisplay: [],
+        },
+      });
+
+      tick(10001);
+      expect(
+        issueServiceSpy.checkAndImportNewIssuesToBacklogForProject,
+      ).toHaveBeenCalledWith('LINEAR', 'linear-1', false);
+
+      tick(300000);
+      expect(
+        issueServiceSpy.checkAndImportNewIssuesToBacklogForProject,
+      ).toHaveBeenCalledTimes(2);
+
+      subscription.unsubscribe();
+    }));
+
     it('should poll when active project matches provider defaultProjectId', fakeAsync(() => {
       const provider = createMockIssueProvider({
         id: 'jira-1',
@@ -123,6 +188,62 @@ describe('PollToBacklogEffects', () => {
       expect(
         issueServiceSpy.checkAndImportNewIssuesToBacklogForProject,
       ).toHaveBeenCalledWith(JIRA_TYPE, 'jira-1', false);
+    }));
+
+    it('should not restart polling for a project left for a tag on a registration change', fakeAsync(() => {
+      const pluginRegistry = TestBed.inject(PluginIssueProviderRegistryService);
+      store.overrideSelector(selectEnabledIssueProviders, [
+        createMockIssueProvider({ id: 'jira-1', defaultProjectId: 'project-1' }),
+      ]);
+      store.refreshState();
+
+      const actionsSubject = new Subject<any>();
+      actions$ = actionsSubject.asObservable();
+
+      const subscription = effects.pollNewIssuesToBacklog$.subscribe();
+
+      actionsSubject.next(
+        setActiveWorkContext({
+          activeType: WorkContextType.PROJECT,
+          activeId: 'project-1',
+        }),
+      );
+      tick(10001);
+      expect(
+        issueServiceSpy.checkAndImportNewIssuesToBacklogForProject,
+      ).toHaveBeenCalledTimes(1);
+
+      isActiveProject$.next(false);
+      actionsSubject.next(
+        setActiveWorkContext({
+          activeType: WorkContextType.TAG,
+          activeId: 'TODAY',
+        }),
+      );
+      pluginRegistry.register({
+        pluginId: 'linear-issue-provider',
+        issueProviderKey: 'LINEAR',
+        name: 'Linear',
+        humanReadableName: 'Linear',
+        icon: 'linear',
+        pollIntervalMs: 300000,
+        issueStrings: { singular: 'Issue', plural: 'Issues' },
+        definition: {
+          configFields: [],
+          getHeaders: () => ({}),
+          searchIssues: () => Promise.resolve([]),
+          getById: () => Promise.resolve({ id: '1', title: '', body: '', url: '' }),
+          getIssueLink: () => '',
+          issueDisplay: [],
+        },
+      });
+
+      tick(310001);
+      expect(
+        issueServiceSpy.checkAndImportNewIssuesToBacklogForProject,
+      ).toHaveBeenCalledTimes(1);
+
+      subscription.unsubscribe();
     }));
 
     it('should NOT poll providers with pollingMode always (handled by separate effect)', fakeAsync(() => {
@@ -186,6 +307,58 @@ describe('PollToBacklogEffects', () => {
   });
 
   describe('pollNewIssuesToBacklogAlways$', () => {
+    it('should start polling when Linear registers after initial sync', fakeAsync(() => {
+      const pluginRegistry = TestBed.inject(PluginIssueProviderRegistryService);
+      const provider = createMockIssueProvider({
+        id: 'linear-1',
+        issueProviderKey: 'LINEAR',
+        pollingMode: 'always',
+      });
+
+      issueServiceSpy.getPollInterval.and.callFake((key) =>
+        pluginRegistry.getPollIntervalMs(key),
+      );
+      store.overrideSelector(selectEnabledIssueProviders, [provider]);
+      store.refreshState();
+
+      const subscription = effects.pollNewIssuesToBacklogAlways$.subscribe();
+
+      tick(300000);
+      expect(
+        issueServiceSpy.checkAndImportNewIssuesToBacklogForProject,
+      ).not.toHaveBeenCalled();
+
+      pluginRegistry.register({
+        pluginId: 'linear-issue-provider',
+        issueProviderKey: 'LINEAR',
+        name: 'Linear',
+        humanReadableName: 'Linear',
+        icon: 'linear',
+        pollIntervalMs: 300000,
+        issueStrings: { singular: 'Issue', plural: 'Issues' },
+        definition: {
+          configFields: [],
+          getHeaders: () => ({}),
+          searchIssues: () => Promise.resolve([]),
+          getById: () => Promise.resolve({ id: '1', title: '', body: '', url: '' }),
+          getIssueLink: () => '',
+          issueDisplay: [],
+        },
+      });
+
+      tick(10001);
+      expect(
+        issueServiceSpy.checkAndImportNewIssuesToBacklogForProject,
+      ).toHaveBeenCalledWith('LINEAR', 'linear-1', true);
+
+      tick(300000);
+      expect(
+        issueServiceSpy.checkAndImportNewIssuesToBacklogForProject,
+      ).toHaveBeenCalledTimes(2);
+
+      subscription.unsubscribe();
+    }));
+
     it('should poll providers with pollingMode always after sync without context switch', fakeAsync(() => {
       const provider = createMockIssueProvider({
         id: 'jira-1',
