@@ -260,6 +260,9 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
 
   enterPredicate = (drag: CdkDrag, drop: CdkDropList): boolean => {
     // TODO this gets called very often for nested lists. Maybe there are possibilities to optimize
+    // A section dragged by its header (see the work view's acceptSectionDragOnly)
+    // is not a task: no task list takes it, so it snaps back (#10866).
+    if (drag.data && 'contextType' in drag.data) return false;
     if (this.multiDrag.isListGroupDrag())
       return this.multiDrag.canDrop(
         drop.data.listId,

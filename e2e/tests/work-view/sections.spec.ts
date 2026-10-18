@@ -348,6 +348,35 @@ test.describe('Sections', () => {
     ).toHaveCount(0);
   });
 
+  test('snaps a section dragged onto the Done list back without an error (#10866)', async ({
+    page,
+    workViewPage,
+    projectPage,
+    taskPage,
+  }) => {
+    // The fixture fails the test on any page error, which is how the
+    // TypeError drop() threw on `groupTagId` showed.
+    await setupTestProject(workViewPage, projectPage);
+    await workViewPage.addTask('Finished');
+    await taskPage.markTaskAsDone(page.locator('task').filter({ hasText: 'Finished' }));
+    const doneList = page.locator('task-list.tour-doneList');
+    await expect(doneList.locator('task').filter({ hasText: 'Finished' })).toBeVisible();
+
+    await openProjectContextMenu(page);
+    await clickAddSection(page);
+    await submitPromptDialog(page, 'Dragged');
+    const section = sectionByTitle(page, 'Dragged');
+    await expect(section).toBeVisible();
+
+    await cdkDragTo(page, section.locator('.collapsible-title'), doneList);
+    // The drag has ended once CDK has animated its preview away.
+    await expect(page.locator('.cdk-drag-preview, .cdk-drag-placeholder')).toHaveCount(0);
+
+    await expect(section).toBeVisible();
+    await expect(page.locator('.section-container')).toHaveCount(1);
+    await expect(doneList.locator('task')).toHaveCount(1);
+  });
+
   test('reorders tasks within a section via drag and drop', async ({
     page,
     workViewPage,
