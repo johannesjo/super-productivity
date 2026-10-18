@@ -319,6 +319,21 @@ describe('OnboardingHintService', () => {
       expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBe('true');
     });
 
+    it('ends when the first task moves out of Inbox while staying on Today', () => {
+      const service = createService();
+      addFirstTask();
+      expect(service.currentStep()).toBe('today-and-inbox');
+
+      isTaskContextMenuOpen.set(true);
+      setTasks([makeTask('task-1', { projectId: 'work' })]);
+      TestBed.tick();
+      isTaskContextMenuOpen.set(false);
+      TestBed.tick();
+
+      expect(service.currentStep()).toBeNull();
+      expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBe('true');
+    });
+
     it('is skipped when the first task was not added on Today', () => {
       activeWorkContextId$.next('INBOX_PROJECT');
       const service = createService();

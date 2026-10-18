@@ -124,13 +124,16 @@ export class OnboardingHintService {
     // A deleted first task leaves nothing to swipe or explain; the hint would
     // otherwise stay stuck on an empty list. The task menu closes before the
     // delete is confirmed, so this also covers the last step.
+    // Moving to a project can leave the row on Today, but invalidates the Inbox tip.
     effect(() => {
       const phase = this._phase();
       const id = this.firstTaskId();
       if (
         (phase === 'task-swipe-left' || phase === 'today-and-inbox') &&
         id &&
-        !this._taskEntities()[id]
+        (!this._taskEntities()[id] ||
+          (phase === 'today-and-inbox' &&
+            this._taskEntities()[id]?.projectId !== INBOX_PROJECT.id))
       ) {
         untracked(() => this._markDone());
       }

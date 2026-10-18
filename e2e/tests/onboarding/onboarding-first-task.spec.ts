@@ -12,7 +12,7 @@ const pixel5TestOptions = { ...devices['Pixel 5'] };
 Reflect.deleteProperty(pixel5TestOptions, 'defaultBrowserType');
 
 const MODEL_TIP = 'This task is planned for today, so it shows in Today.';
-const INBOX_TIP = 'It has no project, so it also lives in the Inbox';
+const INBOX_TIP = 'Tasks without a project of your own stay in Inbox';
 const INBOX_NAV_ITEM =
   'magic-side-nav nav-item[data-project-id="INBOX_PROJECT"] .nav-link';
 
