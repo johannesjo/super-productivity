@@ -407,6 +407,19 @@
                 [isIconBefore]="true"
                 [isGroup]="true"
               >
+                <ng-container actions>
+                  <button
+                    class="all-repeat-cfgs-btn"
+                    mat-icon-button
+                    type="button"
+                    routerLink="/scheduled-list"
+                    [matTooltip]="T.WW.SHOW_ALL_RECURRING_TASKS | translate"
+                    [attr.aria-label]="T.WW.SHOW_ALL_RECURRING_TASKS | translate"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <mat-icon>arrow_forward</mat-icon>
+                  </button>
+                </ng-container>
                 <div class="repeat-cfg-list">
                   @defer (on immediate) {
                     @for (repeatCfg of repeatCfgsForContext(); track repeatCfg.id) {

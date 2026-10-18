@@ -3024,7 +3024,6 @@
   "MH": {
     "ADD_NEW_TASK": "Add new Task",
     "ADD_SECTION": "Add Section",
-    "ALL_PLANNED_LIST": "Upcoming",
     "BOARDS": "Boards",
     "COPY_TASK_LIST_MARKDOWN": "Copy to clipboard",
     "CREATE_PROJECT": "Create project",
@@ -3383,14 +3382,8 @@
     "NO_DEADLINES": "There are currently no tasks with deadlines. You can set a deadline via the task's context menu or detail panel.",
     "NO_REPEATABLE_TASKS": "No recurring tasks yet. To create one, open a task's side panel and choose \"Recur\".",
     "NO_SCHEDULED": "There are currently no scheduled tasks of this type. You can schedule a task by choosing \"Schedule Task\" in the task's context menu. To open it, right-click (long press on mobile) on a task.",
-    "NO_SCHEDULED_FOR_DAY": "No tasks planned for specific days yet. Right-click a task and choose \"Schedule\" to plan it for a day.",
-    "NO_SCHEDULED_WITH_TIME": "No tasks scheduled with a start time yet. Right-click a task and choose \"Schedule\" to set a specific time.",
-    "NO_SCHEDULED_TITLE": "Tasks Planned for Specific Days",
-    "REPEATED_TASKS": "Recurring Tasks",
     "SCHEDULED_TASKS": "Scheduled Tasks",
-    "SCHEDULED_TASKS_WITH_TIME": "Scheduled Tasks with Start Time",
-    "START_TASK": "Start task and remove reminder",
-    "TASKS_WITH_DEADLINES": "Tasks with Deadlines"
+    "START_TASK": "Start task and remove reminder"
   },
   "THEMES": {
     "amber": "amber",
@@ -3438,6 +3431,7 @@
     "NO_TASKS_IN_MAIN_LIST": "All tasks are organized into sections",
     "RECURRING_TASKS": "Recurring Tasks",
     "RESET_BREAK_TIMER": "Reset without break timer",
+    "SHOW_ALL_RECURRING_TASKS": "All recurring tasks",
     "TIME_ESTIMATED": "Time estimated:",
     "TODAY_REMAINING": "Today remaining:",
     "WITHOUT_BREAK": "Without break:",

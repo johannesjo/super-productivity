@@ -128,7 +128,7 @@ describe('PageTitleComponent', () => {
       ['/boards', T.MH.BOARDS],
       ['/habits', T.MH.HABITS],
       ['/search', T.MH.SEARCH],
-      ['/scheduled-list', T.MH.ALL_PLANNED_LIST],
+      ['/scheduled-list', T.WW.RECURRING_TASKS],
       ['/donate', T.MH.DONATE],
       ['/config', T.PS.GLOBAL_SETTINGS],
     ];
@@ -181,7 +181,7 @@ describe('PageTitleComponent', () => {
     it('does not collide /scheduled-list with /schedule', () => {
       const c = setupComponent('/scheduled-list');
       expect(c.isSpecialSection()).toBe(true);
-      expect(c.displayTitle()).toBe(T.MH.ALL_PLANNED_LIST);
+      expect(c.displayTitle()).toBe(T.WW.RECURRING_TASKS);
     });
   });
 
@@ -300,7 +300,7 @@ describe('PageTitleComponent', () => {
       ['/boards', NAV_SECTION_ICON.BOARDS],
       ['/habits', NAV_SECTION_ICON.HABITS],
       ['/search', NAV_SECTION_ICON.SEARCH],
-      ['/scheduled-list', NAV_SECTION_ICON.SCHEDULED_LIST],
+      ['/scheduled-list', NAV_SECTION_ICON.RECURRING_TASKS],
       ['/donate', NAV_SECTION_ICON.DONATE],
       ['/config', NAV_SECTION_ICON.SETTINGS],
       ['/archived-projects', NAV_SECTION_ICON.ARCHIVED_PROJECTS],
