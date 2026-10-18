@@ -79,10 +79,17 @@ export class OnboardingHintService {
     return task && !task.isDone ? task.id : null;
   });
 
-  /** Hints hide while the composer, a task panel or task menu is open. */
+  /**
+   * Hints hide while the composer, the phone menu, a task panel or task menu is
+   * open. They sit above the phone menu otherwise.
+   */
   readonly currentStep = computed<OnboardingStep | null>(() => {
     const phase = this._phase();
-    if (phase === 'idle' || this._layoutService.isShowAddTaskBar()) {
+    if (
+      phase === 'idle' ||
+      this._layoutService.isShowAddTaskBar() ||
+      this._layoutService.isMobileSideNavOpen()
+    ) {
       return null;
     }
     if (phase === 'await-first-task') {
