@@ -3127,11 +3127,103 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
         repeatUntilDay: yesterdayStr,
       };
 
+      // A pattern edit with an end date already in place; the end date alone
+      // does not trigger the effect (see the next spec).
       actions$ = of(
         updateTaskRepeatCfg({
           taskRepeatCfg: {
             id: 'repeat-cfg-id',
-            changes: { repeatUntilDay: yesterdayStr },
+            changes: { repeatEvery: 1 },
+          },
+        }),
+      );
+      taskRepeatCfgService.getTaskRepeatCfgById$.and.returnValue(of(updatedCfg));
+      taskService.getTasksByRepeatCfgId$.and.returnValue(of([liveTask]));
+
+      const emitted: Action[] = [];
+      effects.rescheduleTaskOnRepeatCfgUpdate$.subscribe((result) =>
+        emitted.push(result),
+      );
+
+      expect(emitted).toEqual([]);
+      expect(taskRepeatCfgService.updateTaskRepeatCfg).not.toHaveBeenCalled();
+    });
+
+    // #10091: an end date only stops later occurrences. Setting or clearing it
+    // must not relocate the live instance, not even an overdue one, or move the
+    // creation anchor.
+    for (const repeatUntilDay of ['2099-12-31', undefined]) {
+      it(`leaves an overdue instance alone when only the end date is ${repeatUntilDay ? 'set' : 'cleared'} (#10091)`, () => {
+        const DAY_MS = 24 * 60 * 60 * 1000;
+        const TWO_DAYS_MS = 2 * DAY_MS;
+        const TEN_DAYS_MS = 10 * DAY_MS;
+        const today = new Date();
+        const twoDaysAgoStr = getDbDateStr(new Date(today.getTime() - TWO_DAYS_MS));
+        const tenDaysAgoStr = getDbDateStr(new Date(today.getTime() - TEN_DAYS_MS));
+
+        const overdueTask: Task = {
+          ...mockTask,
+          isDone: false,
+          dueDay: twoDaysAgoStr,
+          created: today.getTime() - TWO_DAYS_MS,
+        };
+        const updatedCfg: TaskRepeatCfgCopy = {
+          ...mockRepeatCfg,
+          repeatCycle: 'DAILY',
+          repeatEvery: 1,
+          startDate: tenDaysAgoStr,
+          lastTaskCreationDay: twoDaysAgoStr,
+          repeatUntilDay,
+        };
+
+        actions$ = of(
+          updateTaskRepeatCfg({
+            taskRepeatCfg: {
+              id: 'repeat-cfg-id',
+              changes: { repeatUntilDay },
+            },
+          }),
+        );
+        taskRepeatCfgService.getTaskRepeatCfgById$.and.returnValue(of(updatedCfg));
+        taskService.getTasksByRepeatCfgId$.and.returnValue(of([overdueTask]));
+
+        const emitted: Action[] = [];
+        effects.rescheduleTaskOnRepeatCfgUpdate$.subscribe((result) =>
+          emitted.push(result),
+        );
+
+        expect(emitted).toEqual([]);
+        expect(taskRepeatCfgService.updateTaskRepeatCfg).not.toHaveBeenCalled();
+      });
+    }
+
+    it('does not schedule a past slot when the end date leaves no later one (#10091)', () => {
+      const today = new Date();
+      const todayStr = getDbDateStr(today);
+
+      const liveTask: Task = {
+        ...mockTask,
+        isDone: false,
+        dueDay: todayStr,
+        created: today.getTime(),
+      };
+      const updatedCfg: TaskRepeatCfgCopy = {
+        ...mockRepeatCfg,
+        repeatCycle: 'DAILY',
+        repeatEvery: 1,
+        startDate: todayStr,
+        lastTaskCreationDay: todayStr,
+        repeatUntilDay: todayStr,
+        // start of today — always in the past relative to "now"
+        startTime: '00:00',
+        remindAt: TaskReminderOptionId.AtStart,
+      };
+
+      actions$ = of(
+        updateTaskRepeatCfg({
+          taskRepeatCfg: {
+            id: 'repeat-cfg-id',
+            changes: { repeatEvery: 1 },
           },
         }),
       );
@@ -3170,7 +3262,7 @@ describe('TaskRepeatCfgEffects - Repeatable Subtasks', () => {
         updateTaskRepeatCfg({
           taskRepeatCfg: {
             id: 'repeat-cfg-id',
-            changes: { repeatUntilDay: todayStr },
+            changes: { repeatEvery: 1 },
           },
         }),
       );

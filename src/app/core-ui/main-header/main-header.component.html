@@ -135,7 +135,14 @@
             [attr.data-sync-confirmation]="syncConfirmation()"
             mat-icon-button
           >
-            <mat-icon [class.spin]="isSyncIconSpinning()">{{ syncIcon() }}</mat-icon>
+            @if (syncIcon() === 'wifi_off') {
+              <mat-icon>wifi_off</mat-icon>
+            } @else {
+              <mat-icon
+                [svgIcon]="syncIcon()"
+                [class.spin]="isSyncIconSpinning()"
+              ></mat-icon>
+            }
           </button>
         }
 

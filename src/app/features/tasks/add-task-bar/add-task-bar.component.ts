@@ -47,7 +47,7 @@ import {
 } from 'rxjs/operators';
 import { IS_ANDROID_WEB_VIEW_TOKEN } from '../../../util/is-android-web-view';
 import { IosKeyboardService } from '../../../core/theme/ios-keyboard.service';
-import { BehaviorSubject, combineLatest, from, Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, firstValueFrom, from, Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import {
@@ -744,9 +744,15 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         await this._planTaskForCurrentDay(suggestion.taskId);
         didPlanForDay = true;
       } else {
-        this._taskService.getByIdOnce$(suggestion.taskId).subscribe((task) => {
+        // project contexts need the sub task data to move the task
+        const task = await firstValueFrom(
+          this._taskService.getByIdWithSubTaskData$(suggestion.taskId),
+        );
+        if (task) {
           this._taskService.moveToCurrentWorkContext(task);
-        });
+        } else {
+          Log.error('Unable to load task to move', suggestion.taskId);
+        }
       }
 
       if (suggestion.isArchivedTask) {

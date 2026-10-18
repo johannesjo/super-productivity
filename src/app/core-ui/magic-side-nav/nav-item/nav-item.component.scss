@@ -247,6 +247,11 @@ button[mat-menu-item].nav-link.active {
     }
   }
 
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: calc(-1 * var(--focus-ring-width));
+  }
+
   // Route items (a.nav-link) should change icon color on hover
   &:not(.active):is(a) {
     @include interactiveHighlight {

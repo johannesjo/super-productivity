@@ -37,19 +37,6 @@ describe('PluginHttpService', () => {
   // to yield the microtask queue before the HttpClient request is dispatched.
   const flushMicrotasks = (): Promise<void> => new Promise((r) => setTimeout(r, 0));
 
-  it('keeps PATCH on HttpClient off-device (#8579)', async () => {
-    const http = service.createHttpHelper(noopHeaders);
-    const promise = http.patch('https://api.github.com/repos/o/r/issues/1', {
-      state: 'closed',
-    });
-    await flushMicrotasks();
-    const req = httpMock.expectOne('https://api.github.com/repos/o/r/issues/1');
-    expect(req.request.method).toBe('PATCH');
-    expect(req.request.body).toEqual({ state: 'closed' });
-    req.flush({ ok: true });
-    await expectAsync(promise).toBeResolved();
-  });
-
   describe('URL validation', () => {
     it('should allow valid HTTPS URLs', async () => {
       const http = service.createHttpHelper(noopHeaders);
@@ -270,82 +257,6 @@ describe('PluginHttpService - native WebDAV/CalDAV method routing (#8558)', () =
     );
   });
 
-  describe('PATCH (#8579)', () => {
-    const GITHUB_API_VERSION_HEADER = 'X-GitHub-Api-Version';
-    const LOWERCASE_CONTENT_TYPE = 'content-type';
-    const nativeCfg = (): { headers: Record<string, string> } & Record<string, unknown> =>
-      nativeHttp.calls.mostRecent().args[0] as {
-        headers: Record<string, string>;
-      } & Record<string, unknown>;
-
-    it('routes JSON PATCH through the native executor', async () => {
-      nativeHttp.and.resolveTo(
-        okResponse({ status: 200, data: '{"id":"issue-1","title":"Updated"}' }),
-      );
-      const http = service.createHttpHelper(authHeaders);
-      const result = await http.patch<{ id: string; title: string }>(
-        'https://api.github.com/repos/owner/repo/issues/1',
-        { title: 'Updated' },
-        {
-          headers: { [GITHUB_API_VERSION_HEADER]: '2022-11-28' },
-          params: { state: 'open' },
-        },
-      );
-
-      expect(nativeHttp).toHaveBeenCalledTimes(1);
-      const cfg = nativeCfg();
-      expect(cfg['url']).toBe(
-        'https://api.github.com/repos/owner/repo/issues/1?state=open',
-      );
-      expect(cfg['method']).toBe('PATCH');
-      expect(cfg['data']).toBe('{"title":"Updated"}');
-      expect(cfg['responseType']).toBe('json');
-      expect(cfg.headers['Authorization']).toBe('Basic abc');
-      expect(cfg.headers[GITHUB_API_VERSION_HEADER]).toBe('2022-11-28');
-      expect(result).toEqual({ id: 'issue-1', title: 'Updated' });
-      httpMock.expectNone(() => true);
-    });
-
-    // Without it the Android executor labels the JSON body application/xml and
-    // iOS sends no content type; Google Calendar rejects that.
-    it('sends Content-Type: application/json for an object body', async () => {
-      nativeHttp.and.resolveTo(okResponse({ status: 200, data: '{}' }));
-      const http = service.createHttpHelper(authHeaders);
-      await http.patch('https://www.googleapis.com/calendar/v3/calendars/c/events/e', {
-        summary: 'Moved',
-      });
-      expect(nativeCfg().headers['Content-Type']).toBe('application/json');
-    });
-
-    it('keeps a caller-supplied content type in any casing', async () => {
-      nativeHttp.and.resolveTo(okResponse({ status: 200, data: '{}' }));
-      const http = service.createHttpHelper(authHeaders);
-      await http.patch(
-        'https://api.example.com/items/1',
-        { a: 1 },
-        { headers: { [LOWERCASE_CONTENT_TYPE]: 'application/merge-patch+json' } },
-      );
-      const headers = nativeCfg().headers;
-      expect(headers[LOWERCASE_CONTENT_TYPE]).toBe('application/merge-patch+json');
-      expect(headers['Content-Type']).toBeUndefined();
-    });
-  });
-
-  it('leaves string bodies of WebDAV verbs without an added content type', async () => {
-    const http = service.createHttpHelper(authHeaders);
-    await http.request('PROPFIND', 'https://caldav.icloud.com/', '<propfind/>', {
-      responseType: 'text',
-    });
-    const headers = (
-      nativeHttp.calls.mostRecent().args[0] as {
-        headers: Record<string, string>;
-      }
-    ).headers;
-    expect(Object.keys(headers).map((h) => h.toLowerCase())).not.toContain(
-      'content-type',
-    );
-  });
-
   it('rejects with an error carrying .status on a non-2xx native response', async () => {
     nativeHttp.and.resolveTo(okResponse({ status: 404, data: '' }));
     const http = service.createHttpHelper(authHeaders);
@@ -372,6 +283,21 @@ describe('PluginHttpService - native WebDAV/CalDAV method routing (#8558)', () =
     const promise = http.get('https://caldav.icloud.com/');
     await new Promise((r) => setTimeout(r, 0));
     const req = httpMock.expectOne('https://caldav.icloud.com/');
+    req.flush({ ok: true });
+    await expectAsync(promise).toBeResolved();
+    expect(nativeHttp).not.toHaveBeenCalled();
+  });
+
+  // Android's HttpURLConnection (behind CapacitorHttp) accepts PATCH, and
+  // HttpClient keeps the JSON body and error body the providers rely on (#8579).
+  it('does NOT reroute PATCH — it stays on HttpClient with its JSON body', async () => {
+    const http = service.createHttpHelper(authHeaders);
+    const url = 'https://api.github.com/repos/o/r/issues/1';
+    const promise = http.patch(url, { state: 'closed' });
+    await new Promise((r) => setTimeout(r, 0));
+    const req = httpMock.expectOne(url);
+    expect(req.request.method).toBe('PATCH');
+    expect(req.request.body).toEqual({ state: 'closed' });
     req.flush({ ok: true });
     await expectAsync(promise).toBeResolved();
     expect(nativeHttp).not.toHaveBeenCalled();

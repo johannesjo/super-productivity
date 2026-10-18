@@ -542,11 +542,14 @@ export const test = base.extend<ScreenshotFixtures>({
   screenshotMaster: async ({ page, electronApp, locale, theme }, use, testInfo) => {
     const viewport = testInfo.project.name as ViewportName;
     const showSyncReadyState = async (): Promise<void> => {
-      await page.evaluate(() => {
-        // Screenshots run without a sync provider. Show the in-sync glyph
-        // instead of `sync_disabled`, as a configured install would.
+      await page.evaluate(async () => {
+        // Screenshots run without a sync provider. Show the in-sync icon
+        // instead of `sync_off`, as a configured install would. Fetched the
+        // same way the app loads its built-in SVG icons.
         const icon = document.querySelector('.sync-btn mat-icon');
-        if (icon) icon.textContent = 'cloud_done';
+        if (!icon) return;
+        const res = await fetch('assets/icons/sync-done.svg');
+        if (res.ok) icon.innerHTML = await res.text();
       });
     };
     const fn = async (scenario: string, name: string): Promise<void> => {
