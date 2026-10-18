@@ -59,4 +59,4 @@ fi
 # On green, echo what the test measured so the job log documents which owner
 # insetted the WebView and by how much — geometry and versions only.
 echo "IME inset shim check passed on API 34:"
-adb logcat -d -s SUPKeyboardTest SUPOverlayTest | tail -n 12 || true
+adb logcat -d -s SUPKeyboardTest | tail -n 12 || true

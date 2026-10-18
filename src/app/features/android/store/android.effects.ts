@@ -81,8 +81,10 @@ export class AndroidEffects {
       { dispatch: false },
     );
 
-  // Import tasks captured natively (startup quick-add overlay) on cold start and
-  // every resume. concatMap keeps imports serial; startWith covers cold start.
+  // Import tasks left in the native capture inbox by the removed startup
+  // quick-add overlay of an older app version, on cold start and every resume
+  // (a retry if the first import failed). concatMap keeps imports serial;
+  // startWith covers cold start.
   importNativeCaptures$ =
     IS_ANDROID_WEB_VIEW &&
     createEffect(
