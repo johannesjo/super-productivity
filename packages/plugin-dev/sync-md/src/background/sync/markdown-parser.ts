@@ -17,7 +17,26 @@ export interface TaskParseResult {
   tasks: ParsedTask[];
   errors: string[];
   header?: string;
+  footer?: string;
 }
+
+/** Keep trailing column-zero HTML comments outside task notes, including their spacing. */
+const findFooterStart = (content: string): number => {
+  let footerStart = content.length;
+  let footerEnd = 0;
+  for (const match of content.matchAll(/<!--[\s\S]*?-->/g)) {
+    const start = match.index!;
+    if (start > 0 && content[start - 1] !== '\n') continue;
+    let boundary = start;
+    while (boundary > 0 && /\s/.test(content[boundary - 1])) boundary--;
+    if (boundary !== footerEnd || footerStart === content.length) {
+      footerStart = boundary;
+    }
+    footerEnd = start + match[0].length;
+  }
+  if (content.slice(footerEnd).trim()) return content.length;
+  return footerStart;
+};
 
 /**
  * Detect the base indentation size used in the markdown
@@ -75,7 +94,10 @@ export const parseMarkdownWithHeader = (content: string): TaskParseResult => {
  * Handles tasks and subtasks (first two levels) and converts deeper levels to notes
  */
 export const parseMarkdownWithErrors = (content: string): TaskParseResult => {
-  const lines = content.split('\n');
+  const footerStart = findFooterStart(content);
+  const body = content.slice(0, footerStart);
+  const footer = content.slice(footerStart) || undefined;
+  const lines = body.split('\n');
   const tasks: ParsedTask[] = [];
   const errors: string[] = [];
   const parentStack: Array<{
@@ -93,7 +115,7 @@ export const parseMarkdownWithErrors = (content: string): TaskParseResult => {
   let header: string | undefined;
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i];
+    const line = lines[i].replace(/\r$/, '');
 
     // Match task line: - [ ] or - [x] with optional ID comment at the beginning
     const taskMatch = line.match(/^(\s*)- \[([ x])\]\s*(?:<!--([^>]+)-->\s*)?(.*)$/);
@@ -193,8 +215,9 @@ export const parseMarkdownWithErrors = (content: string): TaskParseResult => {
           const baseIndent = currentTask.isSubtask
             ? currentTask.indent + detectedIndentSize
             : detectedIndentSize * 2;
-          const noteLine =
-            line.length > baseIndent ? line.substring(baseIndent) : line.trim();
+          const noteLine = line.slice(
+            Math.min(baseIndent, line.match(/^[ \t]*/)![0].length),
+          );
           if (!tasks[currentTaskIndex].notes) {
             tasks[currentTaskIndex].notes = '';
           }
@@ -209,8 +232,7 @@ export const parseMarkdownWithErrors = (content: string): TaskParseResult => {
       const baseIndent = currentTask.isSubtask
         ? currentTask.indent + detectedIndentSize
         : detectedIndentSize;
-      const noteLine =
-        line.length > baseIndent ? line.substring(baseIndent) : line.trim();
+      const noteLine = line.slice(Math.min(baseIndent, line.match(/^[ \t]*/)![0].length));
 
       if (!tasks[currentTaskIndex].notes) {
         tasks[currentTaskIndex].notes = '';
@@ -220,12 +242,12 @@ export const parseMarkdownWithErrors = (content: string): TaskParseResult => {
     }
   }
 
-  // If no tasks were found, the entire content is considered header
+  // With no tasks, everything before the footer is header
   if (firstTaskLineIndex === -1 && lines.length > 0) {
-    header = content;
+    header = body;
   }
 
-  return { tasks, errors, header };
+  return { tasks, errors, header, footer };
 };
 
 /**

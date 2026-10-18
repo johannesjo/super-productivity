@@ -49,16 +49,18 @@ export const spToMd = async (config: LocalUserCfg): Promise<void> => {
   // Convert project tasks to markdown
   const markdown = convertTasksToMarkdown(orderedTasks);
 
-  // Get existing header from file
+  // Preserve document content outside the task list
   let header = '';
+  let footer = '';
   try {
     const existingContent = await readTasksFile(config.filePath);
     if (existingContent) {
       const parsed = parseMarkdownWithHeader(existingContent);
       header = parsed.header || '';
+      footer = parsed.footer || '';
     }
   } catch (error) {
-    // File doesn't exist yet, no header to preserve
+    // File does not exist yet, no document content to preserve
   }
 
   // Combine header and tasks
@@ -66,6 +68,11 @@ export const spToMd = async (config: LocalUserCfg): Promise<void> => {
   if (header) {
     // Add newline between header and tasks if both exist
     finalContent = header + (markdown ? '\n' + markdown : '');
+  }
+
+  if (footer) {
+    const separator = finalContent && !/^[ \t]*\r?\n/.test(footer) ? '\n' : '';
+    finalContent += separator + footer;
   }
 
   // Write to file

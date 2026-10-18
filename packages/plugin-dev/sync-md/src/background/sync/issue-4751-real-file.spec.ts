@@ -114,7 +114,10 @@ describe('#4751 real-file Markdown preservation', () => {
         const content = (await readTasksFile(filePath))!;
         expect(parseMarkdownWithHeader(content).tasks[0].notes).toBe(notes);
         await mdToSp(content, 'test-project');
-        expect(batch).not.toHaveBeenCalled();
+        expect(batch).toHaveBeenLastCalledWith({
+          projectId: 'test-project',
+          operations: [{ type: 'reorder', taskIds: ['task-1'] }],
+        });
         await spToMd({ filePath, projectId: 'test-project' });
         expect(readFileSync(filePath, 'utf8')).toBe(
           HEADER + TASK_LINE + '\n  Ordinary note\n  <!-- task note -->' + suffix,
