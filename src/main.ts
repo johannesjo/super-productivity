@@ -23,7 +23,6 @@ import { IS_ANDROID_WEB_VIEW } from './app/util/is-android-web-view';
 import { androidInterface } from './app/features/android/android-interface';
 import { AndroidBackButtonService } from './app/features/android/android-back-button.service';
 import { IS_IOS_NATIVE, IS_NATIVE_PLATFORM } from './app/util/is-native-platform';
-import { DataInitStateService } from './app/core/data-init/data-init-state.service';
 // Type definitions for window.ea are in ./app/core/window-ea.d.ts
 import { App as CapacitorApp } from '@capacitor/app';
 import { GlobalErrorHandler } from './app/core/error-handler/global-error-handler.class';
@@ -437,15 +436,6 @@ bootstrapApplication(AppComponent, {
           return appRef.injector.get(OperationLogCompactionService).compact();
         },
       };
-    });
-  }
-
-  // Dismiss native startup overlay after all data is loaded (Android only)
-  if (IS_ANDROID_WEB_VIEW) {
-    appRef.injector.get(DataInitStateService).isAllDataLoadedInitially$.subscribe(() => {
-      import('./app/core/startup-overlay/startup-overlay.service').then((m) => {
-        appRef.injector.get(m.StartupOverlayService).processAndDismiss();
-      });
     });
   }
 
