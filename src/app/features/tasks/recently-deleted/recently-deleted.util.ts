@@ -78,6 +78,8 @@ export const getRecentlyDeletedEntriesFromAction = (
 
   if (action.type === TaskSharedActions.deleteTasks.type) {
     const { taskIds, tasks } = action as ReturnType<typeof TaskSharedActions.deleteTasks>;
+    // Only local actions carry `tasks`: the upload strips them from the op
+    // (operation-log-upload.service.ts), so a synced bulk delete yields nothing.
     if (!Array.isArray(taskIds) || !Array.isArray(tasks)) return [];
     const snapshots = tasks.filter(isTaskLike);
     const byId = new Map(snapshots.map((t) => [t.id, t]));

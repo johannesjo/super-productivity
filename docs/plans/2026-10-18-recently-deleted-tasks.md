@@ -114,7 +114,13 @@ surface. **Rejected.**
   subtasks).
 - **Remote deletes:** `OperationApplierService` hands the ops it just applied
   (not local hydration) to the trash, using `op.timestamp` as the delete time.
-  A delete made on the phone is therefore restorable on the desktop. The hook
+  A single-task delete (`deleteTask`) made on the phone is therefore
+  restorable on the desktop. A bulk `deleteTasks` (multi-select delete,
+  plugin/issue removals, repeat-duplicate cleanup) is not: the upload strips
+  its `tasks` snapshots (`_sanitizeRegularOpPayloadForUpload` in
+  `operation-log-upload.service.ts`), so other devices receive only ids and
+  record nothing. Such a delete is restorable only on the device that made
+  it. The hook
   is fire-and-forget and swallows errors, so the trash can never fail or slow
   a sync.
 - **Restore** dispatches the existing, released `restoreTask` with the stored
@@ -170,5 +176,11 @@ surface. **Rejected.**
 - A USE_REMOTE raw rebuild replays server history and can re-add entries that
   were emptied within the last 30 days (idempotent puts; the retention filter
   still applies).
+- Bulk deletes (`deleteTasks`) reach other devices without task snapshots
+  (stripped on upload), so they are trashed only on the deleting device.
+  Changing that would put full task snapshots back on the wire; not done.
+- Automatic `deleteTasks` (stale duplicate repeat instances, plugin/issue
+  removals) are trashed like user deletes, because the effect cannot tell
+  them apart from the payload.
 - Tasks deleted together with their project (`deleteProject`) are not
   trashed. That is out of scope with #10350.
