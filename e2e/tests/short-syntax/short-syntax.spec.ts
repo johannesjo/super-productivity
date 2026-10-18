@@ -74,12 +74,14 @@ const nthWeekdayDueDay = (page: Page, weekday: number, nth: number): Promise<str
     (args) => {
       const now = new Date();
       const diff = (args.weekday - now.getDay() + 7) % 7;
+      // The first occurrence is anchored at 12:00 like the app's
+      // getNextWeekdayDate, so after noon on that weekday it is next week's.
+      const due = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diff, 12);
+      if (due.getTime() < now.getTime()) {
+        due.setDate(due.getDate() + 7);
+      }
       const extraDays = (args.nth - 1) * 7;
-      const due = new Date(
-        now.getFullYear(),
-        now.getMonth(),
-        now.getDate() + diff + extraDays,
-      );
+      due.setDate(due.getDate() + extraDays);
       const month = `${due.getMonth() + 1}`.padStart(2, '0');
       const day = `${due.getDate()}`.padStart(2, '0');
       return `${due.getFullYear()}-${month}-${day}`;
