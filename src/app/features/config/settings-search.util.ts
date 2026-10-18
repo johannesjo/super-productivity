@@ -73,6 +73,22 @@ const CUSTOM_TARGETS: readonly SettingsSearchTarget[] = [
     tabIndex: 5,
     scrollSelector: '.sync-summary',
   },
+  // The importer buttons live inside the Import/Export custom section, whose
+  // title and help never name the source apps — switching users search for them.
+  {
+    labelKey: T.FILE_IMEX.IMPORT_FROM_TODOIST,
+    tabLabelKey: T.PS.TABS.SYNC_BACKUP,
+    tabIndex: 5,
+    scrollSelector: '.section-IMEX_YEAH',
+    sectionKey: 'IMEX_YEAH',
+  },
+  {
+    labelKey: T.FILE_IMEX.IMPORT_FROM_TICKTICK,
+    tabLabelKey: T.PS.TABS.SYNC_BACKUP,
+    tabIndex: 5,
+    scrollSelector: '.section-IMEX_YEAH',
+    sectionKey: 'IMEX_YEAH',
+  },
 ];
 
 /** Every field of a section, with `fieldGroup` wrappers (sync providers) flattened out. */
