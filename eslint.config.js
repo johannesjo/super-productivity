@@ -452,6 +452,7 @@ module.exports = tseslint.config(
     extends: [...angular.configs.templateRecommended, prettierRecommended],
     rules: {
       '@angular-eslint/template/no-negated-async': 'off',
+      '@angular-eslint/template/no-positive-tabindex': 'error',
       'prettier/prettier': 'error',
     },
   },

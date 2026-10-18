@@ -134,7 +134,6 @@
                     (click)="layoutService.showAddTaskBar()"
                     color=""
                     mat-stroked-button
-                    tabindex="1"
                   >
                     <mat-icon>playlist_add</mat-icon>
                     {{ T.WW.ADD_MORE | translate }}
@@ -273,7 +272,6 @@
                   <button
                     mat-stroked-button
                     color="primary"
-                    tabindex="1"
                     (click)="addAllOverdueToMyDay()"
                   >
                     <mat-icon>wb_sunny</mat-icon>
@@ -381,7 +379,6 @@
                       class="e2e-move-done-to-archive"
                       mat-stroked-button
                       (click)="moveDoneToArchive()"
-                      tabindex="1"
                     >
                       <mat-icon>done_all</mat-icon>
                       {{ T.WW.MOVE_DONE_TO_ARCHIVE | translate }}
