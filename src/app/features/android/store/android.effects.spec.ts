@@ -1,4 +1,9 @@
-import { buildTaskTitle } from './android.effects';
+import { TestBed } from '@angular/core/testing';
+import { AndroidEffects, buildTaskTitle } from './android.effects';
+import { SnackService } from '../../../core/snack/snack.service';
+import { TaskService } from '../../tasks/task.service';
+import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachment.service';
+import { AndroidCaptureImportService } from '../android-capture-import.service';
 
 describe('android share helpers', () => {
   describe('buildTaskTitle', () => {
@@ -66,6 +71,61 @@ describe('android share helpers', () => {
       });
       expect(result.length).toBe(150);
       expect(result.endsWith('...')).toBeTrue();
+    });
+  });
+
+  describe('createTaskFromShare', () => {
+    let effects: AndroidEffects;
+    let taskService: jasmine.SpyObj<TaskService>;
+    let attachmentService: jasmine.SpyObj<TaskAttachmentService>;
+
+    beforeEach(() => {
+      taskService = jasmine.createSpyObj('TaskService', ['add']);
+      taskService.add.and.returnValue('task-1');
+      attachmentService = jasmine.createSpyObj('TaskAttachmentService', [
+        'addAttachment',
+      ]);
+      TestBed.configureTestingModule({
+        providers: [
+          AndroidEffects,
+          { provide: TaskService, useValue: taskService },
+          { provide: TaskAttachmentService, useValue: attachmentService },
+          {
+            provide: SnackService,
+            useValue: jasmine.createSpyObj('SnackService', ['open']),
+          },
+          { provide: AndroidCaptureImportService, useValue: {} },
+        ],
+      });
+      effects = TestBed.inject(AndroidEffects);
+    });
+
+    it('stores a shared title literally instead of parsing short syntax', () => {
+      effects.createTaskFromShare({
+        subject: 'C# #tips @ 5pm +Work',
+        title: '',
+        type: 'LINK',
+        path: 'https://example.com/post',
+      });
+
+      expect(taskService.add).toHaveBeenCalledOnceWith(
+        'C# #tips @ 5pm +Work',
+        false,
+        {},
+        false,
+        true,
+      );
+      expect(attachmentService.addAttachment).toHaveBeenCalledWith(
+        'task-1',
+        jasmine.objectContaining({ type: 'LINK', path: 'https://example.com/post' }),
+      );
+    });
+
+    it('creates nothing for an empty share', () => {
+      effects.createTaskFromShare({ subject: '', title: '', type: 'NOTE', path: '  ' });
+
+      expect(taskService.add).not.toHaveBeenCalled();
+      expect(attachmentService.addAttachment).not.toHaveBeenCalled();
     });
   });
 });

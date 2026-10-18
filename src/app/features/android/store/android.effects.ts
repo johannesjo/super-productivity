@@ -31,32 +31,37 @@ export class AndroidEffects {
     createEffect(
       () =>
         androidInterface.onShareWithAttachment$.pipe(
-          tap((shareData) => {
-            // Guard against empty payloads (e.g. stale share data persisted by an
-            // older app version) so we never create a blank, attachment-less task.
-            if (!shareData?.path?.trim()) {
-              DroidLog.warn('Ignoring share intent with empty content');
-              return;
-            }
-            const taskTitle = buildTaskTitle(shareData);
-            const taskId = this._taskService.add(taskTitle);
-            const icon = shareData.type === 'LINK' ? 'link' : 'file_present';
-            this._taskAttachmentService.addAttachment(taskId, {
-              title:
-                shareData.subject?.trim() || shareData.title?.trim() || shareData.path,
-              type: shareData.type,
-              path: shareData.path,
-              icon,
-              id: null,
-            });
-            this._snackService.open({
-              type: 'SUCCESS',
-              msg: 'Task created from share',
-            });
-          }),
+          tap((shareData) => this.createTaskFromShare(shareData)),
         ),
       { dispatch: false },
     );
+
+  /** Public for tests: `handleShare$` only exists inside the Android WebView. */
+  createTaskFromShare(shareData: AndroidShareData): void {
+    // Guard against empty payloads (e.g. stale share data persisted by an
+    // older app version) so we never create a blank, attachment-less task.
+    if (!shareData?.path?.trim()) {
+      DroidLog.warn('Ignoring share intent with empty content');
+      return;
+    }
+    const taskTitle = buildTaskTitle(shareData);
+    // isIgnoreShortSyntax: a share is untrusted external content (often a web
+    // page title), so `#tag`/`@date`/`+project` tokens are stored literally, as
+    // for the iOS share extension and the URL scheme actions.
+    const taskId = this._taskService.add(taskTitle, false, {}, false, true);
+    const icon = shareData.type === 'LINK' ? 'link' : 'file_present';
+    this._taskAttachmentService.addAttachment(taskId, {
+      title: shareData.subject?.trim() || shareData.title?.trim() || shareData.path,
+      type: shareData.type,
+      path: shareData.path,
+      icon,
+      id: null,
+    });
+    this._snackService.open({
+      type: 'SUCCESS',
+      msg: 'Task created from share',
+    });
+  }
 
   showForegroundServiceFailure$ =
     IS_ANDROID_WEB_VIEW &&
