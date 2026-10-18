@@ -1,7 +1,9 @@
 <h2 mat-dialog-title>{{ T.F.TASK.D_RECENTLY_DELETED.TITLE | translate }}</h2>
 
 <mat-dialog-content>
-  <p class="intro">{{ T.F.TASK.D_RECENTLY_DELETED.INTRO | translate: retentionParams }}</p>
+  <p class="intro">
+    {{ T.F.TASK.D_RECENTLY_DELETED.INTRO | translate: retentionParams }}
+  </p>
 
   @if (rows(); as list) {
     @if (list.length) {
@@ -43,7 +45,9 @@
         }
       </ul>
     } @else {
-      <p class="none">{{ T.F.TASK.D_RECENTLY_DELETED.NONE | translate: retentionParams }}</p>
+      <p class="none">
+        {{ T.F.TASK.D_RECENTLY_DELETED.NONE | translate: retentionParams }}
+      </p>
     }
   }
 </mat-dialog-content>
