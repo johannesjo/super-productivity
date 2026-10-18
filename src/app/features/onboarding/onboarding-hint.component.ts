@@ -119,7 +119,7 @@ const STEP_CONFIGS = new Map<OnboardingStep, StepConfig>([
       // guidance ends here.
       title: T.ONBOARDING.HINTS.DONE_TITLE,
       message: T.ONBOARDING.HINTS.TODAY_AND_INBOX,
-      tipsMessage: T.ONBOARDING.HINTS.EXPLORE_INBOX,
+      tipsMessage: T.ONBOARDING.HINTS.TODAY_AND_INBOX_TIPS,
       doneLabel: T.ONBOARDING.HINTS.GOT_IT,
       isEndedWhenMissing: true,
       showShortcut: false,

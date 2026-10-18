@@ -1,6 +1,6 @@
 import { computed, effect, inject, Injectable, signal, untracked } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
 import { ofType } from '@ngrx/effects';
+import { NavigationEnd, Router } from '@angular/router';
 import { Action, Store } from '@ngrx/store';
 import { Observable, Subscription } from 'rxjs';
 import { concatMap, filter, first } from 'rxjs/operators';
@@ -16,7 +16,6 @@ import { INBOX_PROJECT } from '../project/project.const';
 import { TaskService } from '../tasks/task.service';
 import { TaskFocusService } from '../tasks/task-focus.service';
 import { selectTaskEntities } from '../tasks/store/task.selectors';
-import { WorkContextService } from '../work-context/work-context.service';
 
 export type OnboardingStep =
   | 'create-task'
@@ -67,7 +66,7 @@ export class OnboardingHintService {
   private _taskFocusService = inject(TaskFocusService);
   private _projectService = inject(ProjectService);
   private _globalConfigService = inject(GlobalConfigService);
-  private _workContextService = inject(WorkContextService);
+  private _router = inject(Router);
   private _store = inject(Store);
   private _localActions$: Observable<Action> = inject(LOCAL_ACTIONS);
 
@@ -77,16 +76,12 @@ export class OnboardingHintService {
   private _startSub: Subscription | null = null;
   private _taskAddSub: Subscription | null = null;
   private _taskDoneSub: Subscription | null = null;
+  private _navigationSub: Subscription | null = null;
   private _taskEntities = this._store.selectSignal(selectTaskEntities);
-  private _activeWorkContextId = toSignal(this._workContextService.activeWorkContextId$, {
-    initialValue: null,
-  });
 
   readonly firstTaskId = signal<string | null>(null);
   /** Whether the seeded tips were still in the Inbox when the last step began. */
   readonly hasTipsInInbox = signal(false);
-  /** Where the user was when the last step began; navigating away ends it. */
-  private _contextAtLastStep: string | null = null;
 
   /** Row the swipe hints point at: the first task while undone, else any undone task. */
   readonly swipeTargetTaskId = computed(() => {
@@ -151,16 +146,6 @@ export class OnboardingHintService {
       }
     });
 
-    // The last tip is done once the user moves on, e.g. by opening the Inbox.
-    effect(() => {
-      if (
-        this._phase() === 'today-and-inbox' &&
-        this._activeWorkContextId() !== this._contextAtLastStep
-      ) {
-        untracked(() => this._markDone());
-      }
-    });
-
     // A returning user who sets up sync needs no new-user guidance.
     effect(() => {
       if (this._globalConfigService.sync()?.isEnabled) {
@@ -196,6 +181,15 @@ export class OnboardingHintService {
         filter(({ isExampleTask, task }) => !isExampleTask && !task.repeatCfgId),
       )
       .subscribe(({ task }) => this._onFirstTaskCandidate(task.id));
+
+    // The last tip is done once the user moves on to any page, e.g. the Inbox.
+    this._navigationSub = this._router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe(() => {
+        if (this._phase() === 'today-and-inbox') {
+          this._markDone();
+        }
+      });
 
     // Marking a task done (swipe right, checkbox, ...) completes the swipe hints.
     this._taskDoneSub = this._localActions$
@@ -267,7 +261,6 @@ export class OnboardingHintService {
         return !!task && task.projectId === INBOX_PROJECT.id && !task.isDone;
       }),
     );
-    this._contextAtLastStep = this._activeWorkContextId();
     this._phase.set('today-and-inbox');
   }
 
@@ -280,6 +273,8 @@ export class OnboardingHintService {
     this._taskAddSub = null;
     this._taskDoneSub?.unsubscribe();
     this._taskDoneSub = null;
+    this._navigationSub?.unsubscribe();
+    this._navigationSub = null;
     this.firstTaskId.set(null);
     this._phase.set('idle');
   }

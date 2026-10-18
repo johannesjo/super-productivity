@@ -188,6 +188,7 @@ test.describe('@supersync Fresh-client example tasks vs incoming import (#7976)'
         )
         .toBe('true');
 
+      // A real reload first: the hash-route goto alone would not restart the app.
       await freshClient.page.reload();
       await freshClient.page.goto('/#/project/INBOX_PROJECT/tasks', {
         waitUntil: 'domcontentloaded',

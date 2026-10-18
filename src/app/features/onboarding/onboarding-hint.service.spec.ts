@@ -13,7 +13,7 @@ import { Task } from '../tasks/task.model';
 import { TaskService } from '../tasks/task.service';
 import { TaskFocusService } from '../tasks/task-focus.service';
 import { WorkContextType } from '../work-context/work-context.model';
-import { WorkContextService } from '../work-context/work-context.service';
+import { Event, NavigationEnd, Router } from '@angular/router';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { LOCAL_ACTIONS } from '../../util/local-actions.token';
 import { OnboardingHintService } from './onboarding-hint.service';
@@ -41,7 +41,7 @@ describe('OnboardingHintService', () => {
   let updateSection: jasmine.Spy;
   let localActions$: Subject<Action>;
   let dataLoaded$: BehaviorSubject<boolean> | Subject<boolean>;
-  let activeWorkContextId$: BehaviorSubject<string | null>;
+  let routerEvents$: Subject<Event>;
   let savedLs: Record<string, string | null>;
 
   const setTasks = (tasks: Task[]): void => {
@@ -86,6 +86,11 @@ describe('OnboardingHintService', () => {
     dispatchAddTask(task);
   };
 
+  const navigateTo = (url: string): void => {
+    routerEvents$.next(new NavigationEnd(1, url, url));
+    TestBed.tick();
+  };
+
   const markDone = (id = 'task-1'): void => {
     localActions$.next(
       TaskSharedActions.updateTask({ task: { id, changes: { isDone: true } } }),
@@ -111,7 +116,7 @@ describe('OnboardingHintService', () => {
     updateSection = jasmine.createSpy('updateSection');
     localActions$ = new Subject<Action>();
     dataLoaded$ = new BehaviorSubject(true);
-    activeWorkContextId$ = new BehaviorSubject<string | null>('TODAY');
+    routerEvents$ = new Subject<Event>();
 
     TestBed.configureTestingModule({
       providers: [
@@ -136,7 +141,7 @@ describe('OnboardingHintService', () => {
         },
         { provide: TaskService, useValue: { selectedTaskId } },
         { provide: TaskFocusService, useValue: { isTaskContextMenuOpen } },
-        { provide: WorkContextService, useValue: { activeWorkContextId$ } },
+        { provide: Router, useValue: { events: routerEvents$ } },
         { provide: LOCAL_ACTIONS, useValue: localActions$ },
       ],
     });
@@ -205,8 +210,7 @@ describe('OnboardingHintService', () => {
     it('never changes feature settings', () => {
       const service = createService();
       addFirstTask([EXAMPLE_TASK]);
-      activeWorkContextId$.next('INBOX_PROJECT');
-      TestBed.tick();
+      navigateTo('/project/INBOX_PROJECT/tasks');
       service.skip();
       expect(updateSection).not.toHaveBeenCalled();
     });
@@ -279,8 +283,7 @@ describe('OnboardingHintService', () => {
       expect(service.hasTipsInInbox()).toBeTrue();
       expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBeNull();
 
-      activeWorkContextId$.next('INBOX_PROJECT');
-      TestBed.tick();
+      navigateTo('/project/INBOX_PROJECT/tasks');
       expect(service.currentStep()).toBeNull();
       expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBe('true');
     });
@@ -307,14 +310,14 @@ describe('OnboardingHintService', () => {
       expect(service.hasTipsInInbox()).toBeFalse();
     });
 
-    it('shows in the Inbox too, and ends once the user navigates elsewhere', () => {
-      activeWorkContextId$.next('INBOX_PROJECT');
+    it('ends on any navigation, also to pages without tasks', () => {
       const service = createService();
+      // Earlier navigation (e.g. the start page) does not count.
+      navigateTo('/tag/TODAY/tasks');
       addFirstTask([EXAMPLE_TASK]);
       expect(service.currentStep()).toBe('today-and-inbox');
 
-      activeWorkContextId$.next('some-project');
-      TestBed.tick();
+      navigateTo('/config');
       expect(service.currentStep()).toBeNull();
       expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBe('true');
     });

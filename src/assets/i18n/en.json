@@ -3097,11 +3097,11 @@
       "CREATE_TASK": "Click + to add your first task",
       "CREATE_TASK_TOUCH": "Tap + to add your first task",
       "DONE_TITLE": "You're all set",
-      "EXPLORE_INBOX": "Today shows what's planned for today. Every task also belongs to a project: the Inbox, unless you pick another. Some optional tips are waiting there, too.",
       "GOT_IT": "Got it",
       "IMPORT": "Import from other apps",
       "TASK_SWIPE_LEFT_TOUCH": "Swipe task left for more actions",
       "TODAY_AND_INBOX": "Today shows what's planned for today. Every task also belongs to a project: the Inbox, unless you pick another.",
+      "TODAY_AND_INBOX_TIPS": "Today shows what's planned for today. Every task also belongs to a project: the Inbox, unless you pick another. Some optional tips are waiting there, too.",
       "TASK_SWIPE_RIGHT_TOUCH": "When you've finished a task, swipe it right to mark it done",
       "OR_PRESS": "or press",
       "SKIP_ARIA": "Close tip"
