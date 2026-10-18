@@ -252,6 +252,7 @@ const SYNC_WINDOW =
 const APPLY_WINDOW =
   'the remote-apply window, which _settle checks is closed at every step boundary';
 const CONSTANT = 'a constant';
+const TRASH = 'the write-only device-local Recently deleted trash';
 
 /**
  * In-memory service state that devices share on purpose, by class name and
@@ -262,6 +263,10 @@ const CONSTANT = 'a constant';
 const SHARED_FIELDS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
   OperationLogStoreService: { _adapter: ROUTED, _db: ROUTED, _initPromise: ROUTED },
   ArchiveStoreService: { _adapter: ROUTED, _db: ROUTED, _initPromise: ROUTED },
+  // The Recently deleted trash is device-local and write-only here: no reducer,
+  // sync path or oracle reads it, so devices sharing it changes nothing compared.
+  RecentlyDeletedService: { _queue: TRASH },
+  RecentlyDeletedStoreService: { _dbPromise: TRASH },
   OperationLogEffects: {
     isHandlingQuotaExceeded:
       'set only on a storage-quota error, which the fuzz never hits',
