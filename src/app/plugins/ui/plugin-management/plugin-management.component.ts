@@ -51,15 +51,22 @@ import COMMUNITY_PLUGINS_DATA from '../../../../assets/community-plugins.json';
 import { PluginApiAccess, PluginSecurityService } from '../../plugin-security';
 import { DEV_ONLY_BUNDLED_PLUGIN_IDS } from '../../bundled-plugins.const';
 import { environment } from '../../../../environments/environment';
+import {
+  CommunityPlugin,
+  CommunityPluginDownloadError,
+  CommunityPluginStatus,
+  downloadVerifiedCommunityPlugin,
+  getCommunityPluginStatus,
+} from '../../util/community-plugin.util';
 
-interface CommunityPlugin {
-  name: string;
-  shortDescription: string;
-  url: string;
-  author: string;
-  authorUrl?: string;
-  stars?: number;
-}
+const COMMUNITY_DOWNLOAD_ERROR_KEYS: Record<
+  CommunityPluginDownloadError['reason'],
+  string
+> = {
+  download: T.PLUGINS.COMMUNITY_DOWNLOAD_FAILED,
+  tooLarge: T.PLUGINS.COMMUNITY_DOWNLOAD_TOO_LARGE,
+  hashMismatch: T.PLUGINS.COMMUNITY_HASH_MISMATCH,
+};
 
 interface PluginManifestAuthor {
   author?: unknown;
@@ -154,6 +161,38 @@ export class PluginManagementComponent {
       a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }),
     ),
   );
+
+  /** Versions of uploaded plugins, by id; listed entries are matched against these. */
+  private readonly _uploadedPluginVersions = computed(() => {
+    const versions = new Map<string, string>();
+    for (const [id, state] of this._pluginService.pluginStates()) {
+      if (state.type === 'uploaded') {
+        versions.set(id, state.manifest.version);
+      }
+    }
+    return versions;
+  });
+
+  readonly communityPluginRows = computed(() => {
+    const versions = this._uploadedPluginVersions();
+    return this.communityPlugins().map((plugin) => {
+      const status: CommunityPluginStatus = plugin.id
+        ? getCommunityPluginStatus(plugin, versions.get(plugin.id))
+        : 'notInstalled';
+      return { plugin, status };
+    });
+  });
+
+  /** Listed entries with a newer release than the installed plugin, by plugin id. */
+  readonly communityUpdates = computed(() => {
+    const updates = new Map<string, CommunityPlugin>();
+    for (const { plugin, status } of this.communityPluginRows()) {
+      if (status === 'updateAvailable' && plugin.id) {
+        updates.set(plugin.id, plugin);
+      }
+    }
+    return updates;
+  });
 
   T: typeof T = T;
   readonly IS_ELECTRON = IS_ELECTRON;
@@ -381,6 +420,49 @@ export class PluginManagementComponent {
           ? error.message
           : this._translateService.instant(T.PLUGINS.FAILED_TO_INSTALL),
       );
+    } finally {
+      this.isUploading.set(false);
+    }
+  }
+
+  /**
+   * Installs or updates a listed plugin from its pinned release. Shows the same risk
+   * warning as a ZIP upload: the checksum proves the file is the listed one, not
+   * that its code was reviewed.
+   */
+  async installCommunityPlugin(plugin: CommunityPlugin): Promise<void> {
+    const release = plugin.release;
+    if (!release || this.isUploading() || !(await this._confirmInstall())) {
+      return;
+    }
+
+    this.isUploading.set(true);
+    try {
+      const file = await downloadVerifiedCommunityPlugin(release);
+      const installed = await this._pluginService.loadPluginFromZip(file);
+      if (installed.manifest.id !== plugin.id) {
+        PluginLog.warn('Listed plugin id does not match its manifest id', {
+          listedId: plugin.id,
+          manifestId: installed.manifest.id,
+        });
+      }
+      if (!installed.error) {
+        this._snackService.open({
+          type: 'SUCCESS',
+          msg: T.PLUGINS.PLUGIN_INSTALLED,
+          translateParams: { name: installed.manifest.name },
+        });
+      }
+    } catch (error) {
+      PluginLog.err('Failed to install community plugin:', plugin.id, error);
+      this._snackService.open({
+        type: 'ERROR',
+        msg:
+          error instanceof CommunityPluginDownloadError
+            ? COMMUNITY_DOWNLOAD_ERROR_KEYS[error.reason]
+            : T.PLUGINS.FAILED_TO_INSTALL,
+        translateParams: { name: plugin.name, maxSize: this.maxPluginSizeMB },
+      });
     } finally {
       this.isUploading.set(false);
     }

@@ -903,19 +903,55 @@ async function testAPI() {
 - **Plugin API Types**: [@super-productivity/plugin-api](https://www.npmjs.com/package/@super-productivity/plugin-api)
 - **Plugin Boilerplate**: [boilerplate-solid-js](../packages/plugin-dev/boilerplate-solid-js)
 - **Example Plugins**: [plugin-dev](../packages/plugin-dev)
-- **Community Plugins**:
-  - [counter-tester-plugin](https://github.com/Mustache-Games/counter-tester-plugin) by [Mustache Dev](https://github.com/Mustache-Games)
-  - [sp-reporter](https://github.com/dougcooper/sp-reporter) by [dougcooper](https://github.com/dougcooper)
+- **Community Plugins**: [community-plugins.json](../src/assets/community-plugins.json), also listed in Settings → Plugins
 
 ## Contributing
 
 If you create a useful plugin, consider:
 
 1. Posting on reddit or GitHub discussions about it
-2. Submitting a PR adding it to [community-plugins.json](../src/assets/community-plugins.json)
+2. [Getting it listed in the app](#get-listed-in-the-app)
 
-   Document installation as: download the release ZIP, then Settings → Plugins → Choose Plugin File.
-   Uploading a ZIP is the only install path — there is no "load from folder" option.
+### Get Listed in the App
+
+Settings → Plugins shows a **Community Plugins** list read from
+[community-plugins.json](../src/assets/community-plugins.json), which ships with
+the app. To be listed, open a PR that adds an entry:
+
+```json
+{
+  "name": "My Plugin",
+  "shortDescription": "One or two sentences on what it does.",
+  "url": "https://github.com/you/my-plugin",
+  "author": "you",
+  "authorUrl": "https://github.com/you",
+  "id": "my-plugin",
+  "release": {
+    "version": "1.0.0",
+    "downloadUrl": "https://github.com/you/my-plugin/releases/download/v1.0.0/plugin.zip",
+    "sha256": "<output of: sha256sum plugin.zip>"
+  }
+}
+```
+
+- `id` and `release` are optional. Without them the entry links to your page and
+  users install the ZIP by hand (Settings → Plugins → Choose Plugin File).
+- `id` must equal the `id` in your `manifest.json`. With it, the list shows
+  **Installed** for users who have the plugin.
+- With `release`, the list shows an **Install** button. The app downloads
+  `downloadUrl`, refuses the file unless its SHA-256 matches `sha256`, then
+  installs it with the usual risk warning. `version` must equal the manifest
+  `version` and be numeric (`1.2.0`).
+- To ship an update, open a PR that bumps `version`, `downloadUrl` and
+  `sha256`. Users who have an older version see **Update** once the app release
+  that contains the new listing reaches them.
+- The `Community Plugins` CI check downloads each release and verifies its size
+  (10 MB max), hash, and manifest `id` and `version`; `npm run lint` checks the
+  file's shape. The download host must allow cross-origin requests for the
+  button to work in the web app; the desktop app is not affected. When the
+  download fails, the app tells the user to install the ZIP by hand.
+- A listing is not a review: the list says that community plugins are not
+  reviewed, and the hash only proves the file is the one listed.
 
 Happy plugin development! 🚀
 
