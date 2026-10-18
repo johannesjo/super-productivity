@@ -1,0 +1,68 @@
+<h2 mat-dialog-title>{{ T.F.TASK.D_RECENTLY_DELETED.TITLE | translate }}</h2>
+
+<mat-dialog-content>
+  <p class="intro">{{ T.F.TASK.D_RECENTLY_DELETED.INTRO | translate }}</p>
+
+  @if (entries(); as list) {
+    @if (list.length) {
+      <ul class="entries">
+        @for (entry of list; track entry.id) {
+          <li class="entry">
+            <div class="entry-text">
+              <span class="entry-title">{{ entry.task.title }}</span>
+              <span class="entry-meta">
+                {{
+                  T.F.TASK.D_RECENTLY_DELETED.DELETED_ON
+                    | translate
+                      : {
+                          date:
+                            entry.deletedAt | localeDate: 'short' : undefined : locale(),
+                        }
+                }}
+                @if (entry.subTasks.length) {
+                  ·
+                  {{
+                    T.F.TASK.D_RECENTLY_DELETED.SUB_TASKS
+                      | translate: { nr: entry.subTasks.length }
+                  }}
+                }
+              </span>
+            </div>
+            <button
+              mat-button
+              type="button"
+              class="restore-btn"
+              (click)="restore(entry)"
+            >
+              <mat-icon>restore_from_trash</mat-icon>
+              {{ T.F.TASK.D_RECENTLY_DELETED.RESTORE | translate }}
+            </button>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="none">{{ T.F.TASK.D_RECENTLY_DELETED.NONE | translate }}</p>
+    }
+  }
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button
+    mat-button
+    type="button"
+    color="warn"
+    class="empty-btn"
+    [disabled]="!entries()?.length"
+    (click)="emptyTrash()"
+  >
+    <mat-icon>delete_forever</mat-icon>
+    {{ T.F.TASK.D_RECENTLY_DELETED.EMPTY | translate }}
+  </button>
+  <button
+    mat-button
+    type="button"
+    mat-dialog-close
+  >
+    {{ T.G.CLOSE | translate }}
+  </button>
+</mat-dialog-actions>

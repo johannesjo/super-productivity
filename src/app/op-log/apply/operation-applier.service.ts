@@ -24,6 +24,7 @@ import {
   BulkReplayReducerFailure,
   runWithBulkReplayFailureCollector,
 } from './bulk-replay-failure-collector';
+import { RecentlyDeletedService } from '../../features/tasks/recently-deleted/recently-deleted.service';
 
 // Re-export for consumers that import from this service
 export type {
@@ -168,6 +169,12 @@ export class OperationApplierService implements OperationApplyPort<Operation> {
         OpLog.err('OperationApplierService: startPostSyncCooldown failed', e);
       },
     });
+
+    if (!isLocalHydration && result.appliedOps.length > 0) {
+      // Device-local trash, fed from the delete ops every client receives.
+      // Fire-and-forget: it never throws and must not delay or fail sync.
+      void this.injector.get(RecentlyDeletedService).recordRemoteOps(result.appliedOps);
+    }
 
     if (!result.failedOp) {
       OpLog.normal('OperationApplierService: Finished applying operations.');

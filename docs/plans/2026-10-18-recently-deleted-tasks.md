@@ -1,0 +1,174 @@
+# Recently deleted tasks (trash bin) — design note
+
+Status: draft, implemented on `feat/recently-deleted-tasks`.
+Demand: #2778 (21 👍, 15 comments); #10350 also asks for projects/tags/filters
+(out of scope); related general-undo requests #7244 and #8821.
+
+## Product decision (can be flipped)
+
+- **No settings toggle.** A trash helps only if it was already on when the
+  accident happened, so an opt-in trash protects nobody. The project rule is
+  "prefer not building a feature over adding a toggle to dodge a decision".
+- **Always on, nearly invisible.** No nav item, badge or count. The only entry
+  point is a quiet "Recently deleted" text button at the bottom of the
+  History view, which is already where archived tasks are restored. It opens a
+  dialog.
+- **Fixed retention of 30 days, no setting**, plus "Empty". Expired entries are
+  dropped when the trash is written or opened.
+- **Tasks only, with their subtasks.** Plainspace tasks (deleting them deletes
+  them for the whole Space) keep the current always-confirm behavior and
+  never go to the trash. Blank tasks (the ones that also get no undo snack)
+  are skipped too.
+- The delete-undo snackbar (`undo-task-delete.meta-reducer.ts`,
+  `TASK_DELETE_UNDO_WINDOW_MS`) is unchanged.
+
+**Alternative: a hidden toggle**, i.e. trash off by default behind a setting.
+That has the same code, plus a setting, and protects only the users who found
+the setting before they lost something. Flipping to it later means gating
+`RecentlyDeletedEffects` and the History link on a config flag. Nothing on
+the wire changes either way.
+
+## Prior art
+
+Checked 2026-10 from vendor docs where noted. The rest is unverified
+secondhand information.
+
+| App             | Trash?                                        | Retention            | Entry point        | Source                                                                                                      |
+| --------------- | --------------------------------------------- | -------------------- | ------------------ | ----------------------------------------------------------------------------------------------------------- |
+| Apple Reminders | "Recently Deleted" list (iOS 18 / macOS 15)   | 30 days, then purged | Sidebar smart list | [Apple support](https://support.apple.com/en-gb/guide/reminders/remna83c9566/mac) (vendor docs)             |
+| Todoist         | No; a deleted task is gone, paid backups only | n/a                  | n/a                | third-party integration docs, not Todoist's own                                                             |
+| Things 3        | Trash list, manually emptied                  | until emptied        | Sidebar            | from memory, not checked                                                                                    |
+| Amazing Marvin  | Trash area                                    | not checked          | not checked        | [Marvin help](https://help.amazingmarvin.com/en/articles/3869041-how-does-the-trash-area-work) (title only) |
+
+**Take:** Apple's name ("Recently deleted") and its fixed 30-day retention.
+Restoring is one action. **Deliberately don't:** add a sidebar entry (Apple,
+Things), because it is noise for the 99% of days nothing was lost. Don't keep
+entries until manually emptied (Things), because storage would grow without
+limit.
+
+## How delete works today
+
+- `TaskService.remove` → `TaskSharedActions.deleteTask({ task })`. One TASK
+  entity is declared, with `OpType.Delete`. The reducer cascades to
+  `subTaskIds`. The payload carries the full `TaskWithSubTasks`. The keyboard
+  path passes a raw subtask `Task` whose `subTasks` is undefined (#9280).
+- `TaskService.removeMultipleTasks` → `deleteTasks({ taskIds, tasks })`. It is
+  a bulk Delete and its `tasks` snapshots include the cascaded subtasks.
+- `undoTaskDeleteMetaReducer` captures the pre-delete context, and the snack's
+  Undo dispatches `restoreDeletedTask`. That action **overwrites**
+  project/tag/parent id lists with the snapshot taken at delete time. This is
+  fine within 5 s but would clobber 30 days of later reordering, so it is not
+  usable for a late restore.
+- Issue side effects: `deleteIssueOnTaskDelete$` deletes the remote issue
+  (when the provider supports it) after `REMOTE_ISSUE_DELETE_DEFER_MS`, and is
+  cancelled only by `restoreDeletedTask`. Calendar auto-import dismissals ride
+  on the `deleteTasks` payload. None of this can be undone (#10155).
+- The archive (`archive_young` / `archive_old`, outside NgRx) is restored with
+  `TaskSharedActions.restoreTask({ task, subTasks })`. Its reducer re-adds the
+  family to its project and tags, drops stale project/tag/repeat refs and
+  sections, and is idempotent on replay.
+
+## Options considered
+
+### A. Trash inside the archive (`moveToArchive` + optional `deletedAt?`)
+
+Delete would become `moveToArchive` with `deletedAt` on the task snapshots.
+
+- The wire changes for every delete: a `Delete` op becomes a multi-entity bulk
+  `Update` that gets "archive wins" precedence. Delete-vs-edit conflicts move
+  to a different resolution path.
+- Every side effect keyed on `deleteTask`/`deleteTasks` (remote issue delete,
+  calendar dismissal, time-block delete, reminders, plugin `taskDelete` hook,
+  the undo snack) would have to be re-keyed or would silently stop.
+- Released clients would write the trashed tasks into their archive as plain
+  archived tasks. Their search, History, worklog totals, daily summary,
+  metrics, calendar and plugin/REST `getArchivedTasks` would show deleted tasks
+  and count their time. New clients would need a `deletedAt` filter in every
+  one of the dozen-plus archive readers, and every future reader would have to
+  remember it.
+- Purging needs a new action (nothing existing removes archive entries by id).
+  Released clients ignore it, so their archives keep the "deleted" tasks
+  forever.
+- **Rejected.** The degradation is not just "archived": it is visible data
+  and time totals on released clients, plus a changed conflict path.
+
+### B. Soft delete in live state (`task.deletedAt?`, task stays in NgRx)
+
+Released clients would render deleted tasks as normal, live tasks.
+**Rejected.**
+
+### C. New synced trash model (`MODEL_CONFIGS` slice or entity)
+
+This adds a new persisted model, new actions, full-state snapshot surface and
+conflict rules. Released clients drop or ignore it. It has the largest
+surface. **Rejected.**
+
+### D. Device-local trash fed by the delete ops every client already sees — **chosen**
+
+- Each client keeps the trash in its own small IndexedDB database
+  (`SUP_RECENTLY_DELETED`, one object store keyed by task id). It is never
+  uploaded, never in snapshots or backups, and not part of `SUP_OPS`, so
+  `SUP_OPS` `DB_VERSION` is untouched (no downgrade barrier, #9187).
+- **Local deletes:** a `LOCAL_ACTIONS` effect records `deleteTask` and
+  `deleteTasks` from their existing payloads (snapshots of the task and its
+  subtasks).
+- **Remote deletes:** `OperationApplierService` hands the ops it just applied
+  (not local hydration) to the trash, using `op.timestamp` as the delete time.
+  A delete made on the phone is therefore restorable on the desktop. The hook
+  is fire-and-forget and swallows errors, so the trash can never fail or slow
+  a sync.
+- **Restore** dispatches the existing, released `restoreTask` with the stored
+  snapshot. A deleted subtask is restored as a top-level task in its project,
+  because its old parent's subtask order cannot be restored safely. `restoreTask`
+  and `restoreDeletedTask` (local or remote) remove the entry.
+- **Retention / Empty** are local deletes from that database. They emit no op
+  and need no replay determinism: no reducer reads the trash.
+
+## Sync / compatibility analysis
+
+- **No new action, op type, payload field, persisted model field or schema
+  bump, and no change to what any existing op carries.** Every `remove()`
+  caller already passes the full family. The keyboard path's raw `Task`
+  (#9280) is a subtask, which has no subtasks of its own.
+- **Released clients** see nothing new. A restore made on a new client
+  reaches them as `restoreTask`, which they already apply from the History
+  view today. Their archive handler asks the archive to delete ids it does not
+  hold, which is a no-op.
+- **One intent = one op:** delete is still one op, and restore is one
+  `restoreTask` op. No multi-entity crossing is added: `restoreTask` declares
+  one TASK entity, as it does for archive restores. No denormalized list is
+  added.
+- **Replay / effects:** the effect uses `LOCAL_ACTIONS`. Remote recording
+  happens only on the non-hydration apply path, and recording is idempotent
+  (a put keyed by id).
+
+### Concurrent cases
+
+| Case                                  | Outcome                                                                                                                                                                                                                                                                                        |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Delete on A while B edits the task    | Unchanged from today (existing delete-vs-update resolution). If the delete wins, both devices have the trash entry (A's own snapshot, so B's concurrent edit is not in it). If B's edit wins and recreates the task, the entry is hidden because the dialog filters ids that are active again. |
+| Restore on A while B empties / purges | Emptying on B is local and emits no op. A's `restoreTask` still applies on B (its payload carries the full task).                                                                                                                                                                              |
+| Restore on A and B concurrently       | Two `restoreTask` ops. The second is a no-op (the reducer is idempotent when the root is already active).                                                                                                                                                                                      |
+| Purge timing across devices           | Each device expires entries 30 days after the delete's own timestamp. Devices may disagree briefly about what is in their trash, which is local, unsynced UI state. No synced state depends on it.                                                                                             |
+
+### Known limitations (accepted for v1)
+
+- The trash is per device. A device set up after the delete (from a
+  snapshot), or a new browser profile, starts with an empty trash. "Empty" on
+  one device does not empty the others. A synced "empty" would need a new
+  action. Released clients would ignore it harmlessly, but it is not needed
+  for the reported problem.
+- A deleted task's pre-delete state still lives in the op log and on the
+  SuperSync server until compaction, exactly as today. The trash does not
+  change that privacy property in either direction.
+- Restoring marks the task undone (`restoreTask` semantics, same as archive
+  restore) and drops its section.
+- Issue-linked tasks: the remote side effect is **not** deferred beyond the
+  existing undo window (#10155 stays as is). A restored issue-linked task
+  keeps its issue link. If the remote issue was deleted, the next issue
+  refresh treats it like any other remotely deleted issue.
+- A USE_REMOTE raw rebuild replays server history and can re-add entries that
+  were emptied within the last 30 days (idempotent puts; the retention filter
+  still applies).
+- Tasks deleted together with their project (`deleteProject`) are not
+  trashed. That is out of scope with #10350.
