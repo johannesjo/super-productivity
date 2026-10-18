@@ -41,15 +41,15 @@ jobs:
       HUSKY: '0'
 
     steps:
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
-        with:
-          node-version: 22
-
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 1
           # The action writes its own token into the origin URL for pushes.
           persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version-file: .nvmrc
 
       # work around for npm installs from git+https://github.com/johannesjo/J2M.git
       - name: Reconfigure git to use HTTP authentication
