@@ -168,6 +168,8 @@ const getNextRepeatOccurrenceIgnoringEnd = (
         ) {
           return checkDate;
         }
+        // Step from day 1 so a 29th-31st cannot overflow past a short month (#10902)
+        checkDate.setDate(1);
         checkDate.setMonth(checkDate.getMonth() + 1);
         setDateSafely(checkDate, dayOfMonthRepeat);
       }
