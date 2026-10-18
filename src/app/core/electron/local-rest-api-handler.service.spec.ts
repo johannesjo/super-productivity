@@ -2770,9 +2770,26 @@ describe('LocalRestApiHandlerService', () => {
         expect(taskServiceMock.update).not.toHaveBeenCalled();
       });
 
-      it('returns 404 for missing, archived and prototype-like task ids', async () => {
+      it('returns 404 for unknown task ids', async () => {
         provideTask(undefined);
-        for (const id of ['missing', 'archived', '__proto__', 'constructor']) {
+        const response = await putTime({ date: DATE, duration: HOUR_MS }, 'missing');
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual(
+          jasmine.objectContaining({
+            error: jasmine.objectContaining({ code: 'TASK_NOT_FOUND' }),
+          }),
+        );
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('returns 404 when a prototype-like id resolves to an inherited value', async () => {
+        // The store selector reads `entities[id]`, so these ids return
+        // Object.prototype and Object instead of undefined.
+        const entities: Record<string, Task> = {};
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (id: string) => of(entities[id]),
+        });
+        for (const id of ['__proto__', 'constructor']) {
           const response = await putTime({ date: DATE, duration: HOUR_MS }, id);
           expect(response.status).toBe(404);
           expect(response.body).toEqual(
