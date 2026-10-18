@@ -133,6 +133,19 @@ describe('downloadVerifiedCommunityPlugin', () => {
     );
   });
 
+  it('classifies a download interrupted after headers as a download error', async () => {
+    const body = new ReadableStream<Uint8Array>({
+      start: (controller) => {
+        controller.error(new TypeError('Connection reset during download'));
+      },
+    });
+
+    await expectFailure(
+      downloadVerifiedCommunityPlugin('x', release, respondWith(body)),
+      'download',
+    );
+  });
+
   it('rejects an HTTP error', async () => {
     await expectFailure(
       downloadVerifiedCommunityPlugin('x', release, respondWith(null, { status: 404 })),

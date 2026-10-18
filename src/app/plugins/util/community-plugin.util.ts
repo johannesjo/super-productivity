@@ -138,7 +138,12 @@ export const downloadVerifiedCommunityPlugin = async (
     throw new CommunityPluginDownloadError('tooLarge', 'Download exceeds the size limit');
   }
 
-  const bytes = await response.arrayBuffer();
+  let bytes: ArrayBuffer;
+  try {
+    bytes = await response.arrayBuffer();
+  } catch (e) {
+    throw new CommunityPluginDownloadError('download', `Download failed: ${e}`);
+  }
   if (bytes.byteLength > MAX_PLUGIN_ZIP_SIZE) {
     throw new CommunityPluginDownloadError('tooLarge', 'Download exceeds the size limit');
   }
