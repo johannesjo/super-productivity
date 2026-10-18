@@ -8,9 +8,7 @@
 # the API 30-34 / WebView < 140 band #9316 was reported in, which no device on
 # hand covers. ImeInsetShimInstrumentedTest asserts the mechanism there (explicit
 # WebView height == keyboard top) as well as the symptom (web content ends above
-# the keyboard); StartupOverlayInsetInstrumentedTest checks the native startup
-# overlay sits above the bars and the keyboard exactly once in this band's
-# SystemBars branch. Only those two run here; the full suite already ran on API 35.
+# the keyboard). Only that test runs here; the full suite already ran on API 35.
 # See docs/android-edge-to-edge-keyboard.md.
 #
 # A file, not an inline `script:` block — see run-android-checks.sh for why.
@@ -46,11 +44,11 @@ adb logcat -c || true
 # >= 140 the gate flips to the SystemBars branch and the test would stay green
 # while the #9316 band silently lost its only coverage. With the pin it fails.
 timeout 480 ./gradlew :app:connectedPlayDebugAndroidTest \
-  -Pandroid.testInstrumentationRunnerArguments.class=com.superproductivity.superproductivity.ImeInsetShimInstrumentedTest,com.superproductivity.superproductivity.StartupOverlayInsetInstrumentedTest \
+  -Pandroid.testInstrumentationRunnerArguments.class=com.superproductivity.superproductivity.ImeInsetShimInstrumentedTest \
   -Pandroid.testInstrumentationRunnerArguments.expectShim=true
 status=$?
 if [ "$status" -eq 124 ]; then
-  echo "::error::IME/overlay inset checks exceeded 8 minutes on API 34 — see the android-instrumentation-diagnostics artifact"
+  echo "::error::IME inset check exceeded 8 minutes on API 34 — see the android-instrumentation-diagnostics artifact"
 fi
 if [ "$status" -ne 0 ]; then
   adb logcat -d > "$DIAG/logcat.txt" 2>&1 || true

@@ -158,11 +158,6 @@ export interface AndroidInterface {
   // Re-render the home screen widget from the current widget_data snapshot
   updateWidget?(): void;
 
-  // Startup overlay
-  getStartupOverlayPartialText?(): string | null;
-  hideStartupOverlay?(): void;
-  dismissStartupOverlay?(): void;
-
   // added here only
   // ReplaySubject so cold-start onResume emissions arriving before the JS
   // subscriber attaches are still delivered (relevant for tracking recovery

@@ -65,11 +65,10 @@ Consequences we handled:
 
 - **Startup overlay was lifted twice.** `StartupOverlayManager` added the nav-bar
   inset and the keyboard height as its own margins inside `android.R.id.content`,
-  which the DecorView padding now already lifts. It now measures its container
-  against the window's visible display frame and adds only what still overlaps,
-  which is right under either contract. `StartupOverlayInsetInstrumentedTest`
-  pins it (FAB and input bar, keyboard closed / open / closed) on both CI
-  emulators.
+  which the DecorView padding now already lifts. It was fixed to measure its
+  container against the window's visible display frame. The native startup
+  overlay (and `StartupOverlayInsetInstrumentedTest`) has since been removed:
+  its placeholder FAB never matched the themed web FAB it handed off to (#7098).
 - **Startup layout jump.** Without the hint, WebView ≥ 140 started in the
   non-passthrough branch (DecorView padded) until the page committed, then
   jumped. `initialViewportFitValueHint: 'cover'` starts it in passthrough; it

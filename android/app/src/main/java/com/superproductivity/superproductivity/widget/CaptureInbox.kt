@@ -9,7 +9,9 @@ import java.io.IOException
 import java.util.UUID
 
 /**
- * Durable on-device inbox for tasks captured natively (startup quick-add overlay).
+ * Durable on-device inbox for tasks captured natively. Its only writer, the
+ * startup quick-add overlay, was removed; the inbox stays so captures queued by
+ * an older app version are still imported.
  *
  * One immutable JSON file per capture: [add] returns only after the file is
  * fsynced and renamed into place, reads never delete, and the app acknowledges
