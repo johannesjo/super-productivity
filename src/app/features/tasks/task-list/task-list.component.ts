@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 import { DropListModelSource, Task, TaskCopy, TaskWithSubTasks } from '../task.model';
 import { TaskService } from '../task.service';
+import { isWontDoTask } from '../util/is-wont-do-task';
 import { expandFadeFastAnimation } from '../../../ui/animations/expand.ani';
 import { filterDoneTasks } from '../filter-done-tasks.pipe';
 import { T } from '../../../t.const';
@@ -658,6 +659,8 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       const afterTaskId = getAnchorFromDragDrop(taskId, newOrderedIds);
       const now = Date.now();
       const isDone = target === 'DONE';
+      // A won't-do subtask keeps the stamp that marks it, so it stays won't do.
+      const doneOn = draggedTask && isWontDoTask(draggedTask) ? draggedTask.doneOn : now;
       this._store.dispatch(
         TaskSharedActions.convertToMainTask({
           task: draggedTask ?? ({ id: taskId, parentId: src } as TaskWithSubTasks),
@@ -666,7 +669,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
           isDone,
           today: this._dateService.todayStr(),
           modified: now,
-          ...(isDone ? { doneOn: now } : {}),
+          ...(isDone ? { doneOn } : {}),
         }),
       );
       return;

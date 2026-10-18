@@ -154,11 +154,14 @@ export interface TaskCopy
   doneOn?: number;
 
   /**
-   * Marks a done task as finished as "won't do" rather than completed. Only
-   * meaningful together with `isDone`, so read it through `isWontDoTask()`.
-   * Clients predating the field show a plain done task.
+   * When a task was finished as "won't do" rather than completed: the
+   * `doneOn` of that finish. It only counts while it equals `doneOn` and the
+   * task is done, so read it through `isWontDoTask()`. Reopening clears
+   * `doneOn` and every completion stamps a new one, on clients predating the
+   * field too, so a value left behind never counts again; those clients show
+   * a plain done task.
    */
-  isWontDo?: boolean;
+  wontDoOn?: number;
   parentId?: string;
   remindAt?: number;
   repeatCfgId?: string;

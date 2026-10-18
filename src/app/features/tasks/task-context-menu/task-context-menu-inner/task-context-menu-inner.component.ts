@@ -97,6 +97,7 @@ import {
   PluginTaskContextMenuRegistryService,
 } from '../../../../plugins/plugin-task-context-menu-registry.service';
 import { PluginTaskContextMenuTarget } from '@super-productivity/plugin-api';
+import { getWontDoChanges } from '../../util/is-wont-do-task';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -603,7 +604,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
 
   // Finishing as won't do still marks the task done; only the reason differs.
   setWontDo(): void {
-    this._taskService.setDone(this.task.id, true);
+    this._taskService.update(this.task.id, getWontDoChanges(Date.now()));
   }
 
   addToMyDay(): void {

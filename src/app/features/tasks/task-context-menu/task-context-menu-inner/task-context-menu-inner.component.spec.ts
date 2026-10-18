@@ -396,6 +396,26 @@ describe('TaskContextMenuInnerComponent', () => {
     }));
   });
 
+  // A `wontDoOn` equal to `doneOn` marks won't do; both travel in the op, so
+  // every client, released ones included, stores the same pair.
+  describe('setWontDo()', () => {
+    it('finishes the task with a matching doneOn and wontDoOn', () => {
+      jasmine.clock().install();
+      jasmine.clock().mockDate(new Date(1_700_000_000_000));
+      try {
+        component.setWontDo();
+      } finally {
+        jasmine.clock().uninstall();
+      }
+
+      expect(taskService.update).toHaveBeenCalledOnceWith(component.task.id, {
+        isDone: true,
+        doneOn: 1_700_000_000_000,
+        wontDoOn: 1_700_000_000_000,
+      });
+    });
+  });
+
   describe('duplicate()', () => {
     it('delegates a task without subtasks directly to TaskDuplicateService', async () => {
       const mockTask: Task = {
