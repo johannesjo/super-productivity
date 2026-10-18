@@ -39,10 +39,11 @@ const QUICK_PARSER = readRoot(
   'parse-app-uri-quick-action.ts',
 );
 
-// Comments are stripped so a host named in prose cannot satisfy the check.
+// Only full `<data>` elements count, so a host named in comment prose cannot
+// satisfy the check.
 const DECLARED_HOSTS = new Set(
   [
-    ...MANIFEST.replace(/<!--[\s\S]*?-->/g, '').matchAll(
+    ...MANIFEST.matchAll(
       /<data\s+android:scheme="([^"]+)"\s+android:host="([^"]+)"\s*\/>/g,
     ),
   ]
