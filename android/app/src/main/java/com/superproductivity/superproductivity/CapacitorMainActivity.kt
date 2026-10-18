@@ -34,7 +34,6 @@ import com.superproductivity.superproductivity.webview.WebViewBlockActivity
 import com.superproductivity.superproductivity.webview.WebViewCompatibilityChecker
 import com.superproductivity.superproductivity.webview.WebViewRecovery
 import com.superproductivity.superproductivity.widget.ShareIntentQueue
-import com.superproductivity.superproductivity.widget.StartupOverlayManager
 import com.superproductivity.superproductivity.widget.TaskListWidgetProvider
 import com.superproductivity.plugins.webdavhttp.WebDavHttpPlugin
 import org.json.JSONObject
@@ -49,7 +48,6 @@ class CapacitorMainActivity : BridgeActivity() {
     private var webViewRecoveryScheduled = false
     private var pendingShareIntent: JSONObject? = null
     private var isFrontendReady = false
-    private var startupOverlayManager: StartupOverlayManager? = null
 
     // Soft-keyboard workaround: the WebView's resting layout height
     // (e.g. MATCH_PARENT), captured so it can be restored when the keyboard hides.
@@ -263,13 +261,6 @@ class CapacitorMainActivity : BridgeActivity() {
         )
         isWidgetDoneDrainReceiverRegistered = true
 
-        // Show startup overlay for quick task entry while Angular loads.
-        // Only on fresh cold start — not on config-change recreation.
-        if (savedInstanceState == null) {
-            startupOverlayManager = StartupOverlayManager(this)
-            startupOverlayManager?.show()
-        }
-
         // Schedule background sync worker if credentials are configured
         if (BackgroundSyncCredentialStore.get(this) != null) {
             SyncReminderScheduler.ensureScheduled(this)
@@ -345,22 +336,6 @@ class CapacitorMainActivity : BridgeActivity() {
         }
         super.onNewIntent(intent)
         handleIntent(intent)
-    }
-
-    fun getStartupOverlayPartialText(): String? {
-        return startupOverlayManager?.getPartialTextAndPrepare()
-    }
-
-    fun hideStartupOverlay() {
-        if (startupOverlayManager != null) {
-            startupOverlayManager?.hide()
-            startupOverlayManager = null
-        }
-    }
-
-    fun dismissStartupOverlay() {
-        startupOverlayManager?.dismiss()
-        startupOverlayManager = null
     }
 
     fun flushPendingShareIntent() {
@@ -713,8 +688,6 @@ class CapacitorMainActivity : BridgeActivity() {
 
 
     override fun onDestroy() {
-        startupOverlayManager?.dismiss()
-        startupOverlayManager = null
         if (isTimerCompleteReceiverRegistered) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(timerCompleteReceiver)
             isTimerCompleteReceiverRegistered = false

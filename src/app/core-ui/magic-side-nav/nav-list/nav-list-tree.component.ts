@@ -36,6 +36,7 @@ import { Project } from '../../../features/project/project.model';
 import { isSingleEmoji } from '../../../util/extract-first-emoji';
 import { expandCollapseAni } from '../../../ui/tree-dnd/tree.animations';
 import { Log } from '../../../core/log';
+import { NAV_SECTION_ICON } from '../nav-section-icons.const';
 
 const TREE_INDENT = 16;
 
@@ -48,7 +49,7 @@ const ARCHIVED_PROJECTS_NAV_ITEM: NavRouteItem = {
   type: 'route',
   id: 'archived-projects',
   label: T.F.PROJECT.ARCHIVED_PROJECTS.NAV_LABEL,
-  icon: 'archive',
+  icon: NAV_SECTION_ICON.ARCHIVED_PROJECTS,
   route: '/archived-projects',
 };
 

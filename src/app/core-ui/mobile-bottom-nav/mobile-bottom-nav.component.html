@@ -1,7 +1,6 @@
 <nav
   class="mobile-bottom-nav"
   [class.entrance]="isEntrance()"
-  (animationend)="onEntranceAnimationEnd($event)"
 >
   <button
     mat-button
@@ -28,7 +27,6 @@
     mat-fab
     class="add-task-button"
     [class.smaller]="hasProjectBacklog()"
-    [class.hide-for-native]="isEntranceAnimating()"
     color="primary"
     (click)="showAddTaskBar()"
     [attr.aria-label]="T.GCF.KEYBOARD.GLOBAL_ADD_TASK | translate"

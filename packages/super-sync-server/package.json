@@ -39,7 +39,7 @@
     "@fastify/cors": "^11.1.0",
     "@fastify/helmet": "^13.0.2",
     "@fastify/rate-limit": "^10.3.0",
-    "@fastify/static": "^10.1.2",
+    "@fastify/static": "^10.1.6",
     "@fastify/websocket": "^11.2.0",
     "@prisma/client": "5.22.0",
     "@simplewebauthn/server": "^13.3.2",
@@ -50,7 +50,7 @@
     "dotenv": "^17.2.3",
     "fastify": "^5.12.5",
     "jsonwebtoken": "^9.0.2",
-    "nodemailer": "^10.0.9",
+    "nodemailer": "^10.1.0",
     "uuidv7": "^1.1.0",
     "zod": "^4.4.3"
   },
