@@ -11,7 +11,7 @@ import {
   type SimulatedE2EClient,
 } from '../../utils/supersync-helpers';
 import { serveReleasedClientAssets } from '../../utils/released-client-assets';
-import { waitForMenuSettled } from '../../utils/waits';
+import { waitForAppReady, waitForMenuSettled } from '../../utils/waits';
 
 /**
  * A released (v19.1.0) device stores a won't-do marker it does not know as a
@@ -26,14 +26,43 @@ import { waitForMenuSettled } from '../../utils/waits';
 
 const CROSS = 'done-toggle .done-check--cross';
 
-/** Only explicit syncs run, so the crossing happens in the stated order. */
+const setBlockFlags = (): void => {
+  const flags = globalThis as typeof globalThis & Record<string, boolean>;
+  flags['__SP_E2E_BLOCK_AUTO_SYNC'] = true;
+  flags['__SP_E2E_BLOCK_WS_DOWNLOAD'] = true;
+  flags['__SP_E2E_BLOCK_IMMEDIATE_UPLOAD'] = true;
+};
+
+/** Only explicit syncs run, also after a reload, so the crossing happens in order. */
 const blockBackgroundSync = async (client: SimulatedE2EClient): Promise<void> => {
-  await client.page.evaluate(() => {
-    const flags = globalThis as typeof globalThis & Record<string, boolean>;
-    flags['__SP_E2E_BLOCK_AUTO_SYNC'] = true;
-    flags['__SP_E2E_BLOCK_WS_DOWNLOAD'] = true;
-    flags['__SP_E2E_BLOCK_IMMEDIATE_UPLOAD'] = true;
-  });
+  await client.page.addInitScript(setBlockFlags);
+  await client.page.evaluate(setBlockFlags);
+};
+
+/**
+ * Renames like the title editor does (see `renameTask`), on a released bundle,
+ * which exposes no store to read back. A typed but uncommitted title is lost
+ * on reload, so the title after one proves the rename became an op.
+ */
+const renameOnReleased = async (
+  client: SimulatedE2EClient,
+  from: string,
+  to: string,
+): Promise<void> => {
+  await getTaskElement(client, from).first().locator('task-title').dispatchEvent('click');
+  const textarea = client.page.locator('task-title textarea').first();
+  await textarea.waitFor({ state: 'visible' });
+  await textarea.evaluate((el: HTMLTextAreaElement, name: string) => {
+    el.focus();
+    el.dispatchEvent(new Event('focus', { bubbles: true }));
+    el.value = name;
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    el.dispatchEvent(new Event('blur', { bubbles: true }));
+  }, to);
+  await expect(textarea).toBeHidden();
+  await client.page.reload();
+  await waitForAppReady(client.page, { ensureRoute: false });
+  await expect(getTaskElement(client, to)).toHaveCount(1);
 };
 
 /**
@@ -160,7 +189,7 @@ test.describe("@supersync released device beside a reopened won't-do task", () =
       const releasedTitle = `${taskName}-released`;
       await renameTask(current, taskName, currentTitle);
       await sync(current);
-      await renameTask(released, taskName, releasedTitle);
+      await renameOnReleased(released, taskName, releasedTitle);
       await sync(released);
       await sync(current);
       await sync(released);
