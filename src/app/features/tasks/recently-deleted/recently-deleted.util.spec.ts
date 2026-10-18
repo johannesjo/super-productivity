@@ -4,6 +4,7 @@ import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions'
 import { PLAINSPACE_TYPE } from '../../issue/issue.const';
 import { INBOX_PROJECT } from '../../project/project.const';
 import {
+  getRecentlyDeletedChanges,
   getRecentlyDeletedEntriesFromAction,
   getRestoredTaskIdsFromAction,
   getRestoreTaskPayload,
@@ -235,6 +236,38 @@ describe('recently-deleted.util', () => {
         getRestoreTaskPayload({ id: 't', deletedAt: DELETED_AT, task: t, subTasks: [] })
           .task.projectId,
       ).toBe(INBOX_PROJECT.id);
+    });
+  });
+
+  describe('getRecentlyDeletedChanges', () => {
+    const del = (id: string): ReturnType<typeof TaskSharedActions.deleteTask> =>
+      TaskSharedActions.deleteTask({
+        task: { ...createTask({ id, title: id }), subTasks: [] },
+      });
+    const restore = (id: string): ReturnType<typeof TaskSharedActions.restoreTask> =>
+      TaskSharedActions.restoreTask({ task: createTask({ id }), subTasks: [] });
+
+    it('folds a batch in order: the last action per task wins', () => {
+      const { puts, deleteIds } = getRecentlyDeletedChanges(
+        [
+          { action: del('a'), deletedAt: DELETED_AT },
+          { action: restore('a'), deletedAt: DELETED_AT },
+          { action: restore('b'), deletedAt: DELETED_AT },
+          { action: del('b'), deletedAt: DELETED_AT },
+        ],
+        DELETED_AT,
+      );
+
+      expect(puts.map((e) => e.id)).toEqual(['b']);
+      expect(deleteIds).toEqual(['a']);
+    });
+
+    it('skips deletes already past the retention', () => {
+      const { puts } = getRecentlyDeletedChanges(
+        [{ action: del('a'), deletedAt: DELETED_AT }],
+        DELETED_AT + RECENTLY_DELETED_RETENTION_MS + 1,
+      );
+      expect(puts).toEqual([]);
     });
   });
 });

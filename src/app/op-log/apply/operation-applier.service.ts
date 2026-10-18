@@ -24,7 +24,7 @@ import {
   BulkReplayReducerFailure,
   runWithBulkReplayFailureCollector,
 } from './bulk-replay-failure-collector';
-import { RecentlyDeletedService } from '../../features/tasks/recently-deleted/recently-deleted.service';
+import { REMOTE_APPLY_LISTENER } from './remote-apply-listener.token';
 
 // Re-export for consumers that import from this service
 export type {
@@ -118,11 +118,10 @@ export class OperationApplierService implements OperationApplyPort<Operation> {
 
     // Only when the reducers run here: local hydration replays own ops, and a
     // skipReducerDispatch retry would read state the ops already changed.
-    const recentlyDeleted =
+    const onRemoteReducersCommitted =
       isLocalHydration || options.skipReducerDispatch
         ? undefined
-        : this.injector.get(RecentlyDeletedService);
-    const preApplyTrashSnapshots = recentlyDeleted?.captureBeforeRemoteApply(ops);
+        : this._beforeRemoteApply(ops);
 
     const reducerFailures: BulkReplayReducerFailure[] = [];
     const result = await replayOperationBatch({
@@ -165,7 +164,10 @@ export class OperationApplierService implements OperationApplyPort<Operation> {
         // this action is now disabled to prevent UI freezes during bulk archive sync.
         this.store.dispatch(remoteArchiveDataApplied());
       },
-      onReducersCommitted: options.onReducersCommitted,
+      onReducersCommitted: async (committedOps, failures) => {
+        onRemoteReducersCommitted?.(committedOps);
+        await options.onReducersCommitted?.(committedOps, failures);
+      },
       onArchiveSideEffectError: ({ op, processedCount, error }) => {
         OpLog.err(
           `OperationApplierService: Failed archive handling for operation ${op.id}. ` +
@@ -178,16 +180,6 @@ export class OperationApplierService implements OperationApplyPort<Operation> {
       },
     });
 
-    if (recentlyDeleted && result.appliedOps.length > 0) {
-      // Device-local trash, fed from the delete ops every client receives.
-      // Fire-and-forget: it must not delay or fail sync.
-      try {
-        void recentlyDeleted.recordRemoteOps(result.appliedOps, preApplyTrashSnapshots);
-      } catch (e) {
-        OpLog.err('OperationApplierService: Recently deleted recording failed', e);
-      }
-    }
-
     if (!result.failedOp) {
       OpLog.normal('OperationApplierService: Finished applying operations.');
     }
@@ -199,5 +191,28 @@ export class OperationApplierService implements OperationApplyPort<Operation> {
     }
 
     return result;
+  }
+
+  // A listener (the Recently deleted trash) must never fail or delay sync.
+  private _beforeRemoteApply(
+    ops: Operation[],
+  ): ((committedOps: readonly Operation[]) => void) | undefined {
+    try {
+      const onCommitted = this.injector
+        .get(REMOTE_APPLY_LISTENER, null)
+        ?.beforeRemoteApply(ops);
+      return onCommitted
+        ? (committedOps) => {
+            try {
+              onCommitted(committedOps);
+            } catch (e) {
+              OpLog.err('OperationApplierService: remote apply listener failed', e);
+            }
+          }
+        : undefined;
+    } catch (e) {
+      OpLog.err('OperationApplierService: remote apply listener failed', e);
+      return undefined;
+    }
   }
 }

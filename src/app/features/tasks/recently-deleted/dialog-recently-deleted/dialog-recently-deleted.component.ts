@@ -16,12 +16,13 @@ import { switchMap } from 'rxjs/operators';
 import { T } from '../../../../t.const';
 import { selectTaskEntities } from '../../store/task.selectors';
 import { RecentlyDeletedService } from '../recently-deleted.service';
-import { RecentlyDeletedEntry } from '../recently-deleted.util';
-import { SnackService } from '../../../../core/snack/snack.service';
+import {
+  RECENTLY_DELETED_RETENTION_DAYS,
+  RecentlyDeletedEntry,
+} from '../recently-deleted.util';
 import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-confirm.component';
 import { DateTimeFormatService } from '../../../../core/date-time-format/date-time-format.service';
 import { LocaleDatePipe } from '../../../../ui/pipes/locale-date.pipe';
-import { truncate } from '../../../../util/truncate';
 import { getPluralKey } from '../../../../util/get-plural-key';
 
 interface RecentlyDeletedRow {
@@ -49,7 +50,6 @@ interface RecentlyDeletedRow {
 export class DialogRecentlyDeletedComponent {
   private readonly _recentlyDeletedService = inject(RecentlyDeletedService);
   private readonly _matDialog = inject(MatDialog);
-  private readonly _snackService = inject(SnackService);
   private readonly _taskEntities = inject(Store).selectSignal(selectTaskEntities);
   private readonly _translateService = inject(TranslateService);
   private readonly _translateStore = inject(TranslateStore);
@@ -60,6 +60,7 @@ export class DialogRecentlyDeletedComponent {
 
   readonly locale = inject(DateTimeFormatService).currentLocale;
   readonly T: typeof T = T;
+  readonly retentionParams = { days: RECENTLY_DELETED_RETENTION_DAYS };
 
   // Families that are live again (restored on another device, or recreated by
   // a concurrent edit that won over the delete) are not "deleted" any more.
@@ -84,11 +85,6 @@ export class DialogRecentlyDeletedComponent {
 
   async restore(entry: RecentlyDeletedEntry): Promise<void> {
     await this._recentlyDeletedService.restore(entry);
-    this._snackService.open({
-      type: 'SUCCESS',
-      msg: T.F.TASK.D_RECENTLY_DELETED.RESTORED,
-      translateParams: { title: truncate(entry.task.title) },
-    });
     this._reload$.next();
   }
 

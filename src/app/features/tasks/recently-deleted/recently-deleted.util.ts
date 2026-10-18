@@ -6,7 +6,9 @@ import { INBOX_PROJECT } from '../../project/project.const';
 import { isBlankTask } from '../util/is-blank-task';
 
 /** Fixed on purpose: no setting (see docs/plans/2026-10-18-recently-deleted-tasks.md). */
-export const RECENTLY_DELETED_RETENTION_MS = 30 * 24 * 60 * 60 * 1000;
+export const RECENTLY_DELETED_RETENTION_DAYS = 30;
+export const RECENTLY_DELETED_RETENTION_MS =
+  RECENTLY_DELETED_RETENTION_DAYS * 24 * 60 * 60 * 1000;
 
 /**
  * One deleted task family, kept device-locally. Never synced: it is fed by the
@@ -86,10 +88,12 @@ export const getRecentlyDeletedEntriesFromAction = (
     const childrenByParentId = new Map<string, Task[]>();
     for (const t of snapshots) {
       if (t.parentId) {
-        childrenByParentId.set(t.parentId, [
-          ...(childrenByParentId.get(t.parentId) ?? []),
-          t,
-        ]);
+        const siblings = childrenByParentId.get(t.parentId);
+        if (siblings) {
+          siblings.push(t);
+        } else {
+          childrenByParentId.set(t.parentId, [t]);
+        }
       }
     }
     const deletedIds = new Set(taskIds);
@@ -120,6 +124,29 @@ export const isRecentlyDeletedEntryExpired = (
   entry: Pick<RecentlyDeletedEntry, 'deletedAt'>,
   now: number,
 ): boolean => now - entry.deletedAt > RECENTLY_DELETED_RETENTION_MS;
+
+/**
+ * Folds recorded actions, in order, into one set of store writes: a restore
+ * cancels an earlier delete of the same family in the batch.
+ */
+export const getRecentlyDeletedChanges = (
+  recorded: readonly { action: Action; deletedAt: number }[],
+  now: number,
+): { puts: RecentlyDeletedEntry[]; deleteIds: string[] } => {
+  const changes = new Map<string, RecentlyDeletedEntry | null>();
+  for (const { action, deletedAt } of recorded) {
+    for (const entry of getRecentlyDeletedEntriesFromAction(action, deletedAt)) {
+      if (!isRecentlyDeletedEntryExpired(entry, now)) changes.set(entry.id, entry);
+    }
+    for (const id of getRestoredTaskIdsFromAction(action)) {
+      changes.set(id, null);
+    }
+  }
+  const puts: RecentlyDeletedEntry[] = [];
+  const deleteIds: string[] = [];
+  changes.forEach((entry, id) => (entry ? puts.push(entry) : deleteIds.push(id)));
+  return { puts, deleteIds };
+};
 
 /**
  * Payload for the existing, released `restoreTask` action. A deleted subtask

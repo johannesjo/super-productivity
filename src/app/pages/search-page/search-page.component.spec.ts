@@ -20,7 +20,6 @@ import { TranslateModule } from '@ngx-translate/core';
 import { SearchItem } from './search-page.model';
 import { RecentlyDeletedService } from '../../features/tasks/recently-deleted/recently-deleted.service';
 import { RecentlyDeletedEntry } from '../../features/tasks/recently-deleted/recently-deleted.util';
-import { SnackService } from '../../core/snack/snack.service';
 
 // Minimal stub task matching the Task interface shape
 const createTask = (overrides: Partial<Task> = {}): Task =>
@@ -127,10 +126,6 @@ describe('SearchPageComponent', () => {
         { provide: Router, useValue: routerSpy },
         { provide: LayoutService, useValue: layoutServiceSpy },
         { provide: RecentlyDeletedService, useValue: recentlyDeletedSpy },
-        {
-          provide: SnackService,
-          useValue: jasmine.createSpyObj('SnackService', ['open']),
-        },
         {
           provide: MenuTreeService,
           useValue: {
@@ -389,7 +384,7 @@ describe('SearchPageComponent', () => {
       initAndFlush();
       typeAndFlush('lost');
       expect(latestResults.map((r) => r.id)).toEqual(['gone']);
-      expect(latestResults[0].isDeleted).toBeTrue();
+      expect(latestResults[0].deletedEntry).toBeTruthy();
     }));
 
     it('are found by a subtask title', fakeAsync(() => {
@@ -409,7 +404,7 @@ describe('SearchPageComponent', () => {
       initAndFlush();
       typeAndFlush('back');
       expect(latestResults.length).toBe(1);
-      expect(latestResults[0].isDeleted).toBeFalsy();
+      expect(latestResults[0].deletedEntry).toBeFalsy();
     }));
 
     it('selecting one restores it and then navigates to it', fakeAsync(() => {
@@ -477,7 +472,7 @@ describe('SearchPageComponent', () => {
       typeAndFlush('meeting');
 
       expect(latestResults.length).toBe(50);
-      expect(latestResults.some((r) => r.id === 'gone' && r.isDeleted)).toBeTrue();
+      expect(latestResults.some((r) => r.id === 'gone' && !!r.deletedEntry)).toBeTrue();
     }));
   });
 

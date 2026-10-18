@@ -14,6 +14,10 @@ import { INBOX_PROJECT } from '../../project/project.const';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { Operation, OpType } from '../../../op-log/core/operation.types';
 import { ActionType } from '../../../op-log/core/action-types.enum';
+import { SnackService } from '../../../core/snack/snack.service';
+import { SnackParams } from '../../../core/snack/snack.model';
+import { TaskService } from '../task.service';
+import { of } from 'rxjs';
 
 class FakeRecentlyDeletedStore {
   entries = new Map<string, RecentlyDeletedEntry>();
@@ -26,17 +30,13 @@ class FakeRecentlyDeletedStore {
     return [...this.entries.values()];
   }
 
-  async putMany(entries: RecentlyDeletedEntry[]): Promise<void> {
+  async applyChanges(puts: RecentlyDeletedEntry[], deleteIds: string[]): Promise<void> {
     this._maybeFail();
-    if (this.putDelayMs && entries.length) {
+    if (this.putDelayMs && puts.length) {
       await new Promise((r) => setTimeout(r, this.putDelayMs));
     }
-    entries.forEach((e) => this.entries.set(e.id, e));
-  }
-
-  async deleteMany(ids: string[]): Promise<void> {
-    this._maybeFail();
-    ids.forEach((id) => this.entries.delete(id));
+    puts.forEach((e) => this.entries.set(e.id, e));
+    deleteIds.forEach((id) => this.entries.delete(id));
   }
 
   async clear(): Promise<void> {
@@ -80,16 +80,25 @@ describe('RecentlyDeletedService', () => {
   let dispatch: jasmine.Spy;
   let taskEntities: Record<string, Task>;
   let projectState: { entities: Record<string, Partial<Project>> };
+  let snack: jasmine.SpyObj<SnackService>;
+  let taskService: jasmine.SpyObj<TaskService>;
 
   beforeEach(() => {
     store = new FakeRecentlyDeletedStore();
     dispatch = jasmine.createSpy('dispatch');
     taskEntities = {};
     projectState = { entities: { p1: { id: 'p1' } } };
+    snack = jasmine.createSpyObj('SnackService', ['open']);
+    taskService = jasmine.createSpyObj('TaskService', [
+      'getByIdWithSubTaskData$',
+      'remove',
+    ]);
     TestBed.configureTestingModule({
       providers: [
         RecentlyDeletedService,
         { provide: RecentlyDeletedStoreService, useValue: store },
+        { provide: SnackService, useValue: snack },
+        { provide: TaskService, useValue: taskService },
         {
           provide: Store,
           useValue: {
@@ -186,72 +195,181 @@ describe('RecentlyDeletedService', () => {
     expect(dispatch).not.toHaveBeenCalled();
   });
 
-  it('records remote deletes with the op timestamp and ignores unrelated ops', async () => {
-    const ts = Date.now() - 1000;
-    await service.recordRemoteOps([
-      remoteOp(
-        ActionType.TASK_SHARED_DELETE,
-        { task: { ...createTask({ id: 'r', title: 'Remote' }), subTasks: [] } },
-        ts,
-      ),
-      remoteOp(
-        ActionType.TASK_SHARED_UPDATE,
-        { task: { id: 'r', changes: { title: 'x' } } },
-        ts,
-      ),
-    ]);
+  it('restore() offers an Undo that deletes the task again', async () => {
+    await service.recordAction(deleteAction('a', 'Task A'), NOW, NOW);
+    const [entry] = await service.getEntries(NOW);
+    const restored = { ...createTask({ id: 'a' }), subTasks: [] };
+    taskService.getByIdWithSubTaskData$.and.returnValue(of(restored));
 
-    expect([...store.entries.keys()]).toEqual(['r']);
-    expect(store.entries.get('r')?.deletedAt).toBe(ts);
+    await service.restore(entry);
+    (snack.open.calls.mostRecent().args[0] as SnackParams).actionFn!();
+
+    expect(taskService.remove).toHaveBeenCalledOnceWith(restored);
   });
 
-  it('snapshots a synced bulk delete from pre-apply state (the upload strips its tasks)', async () => {
-    const parent = createTask({ id: 'p', title: 'Parent', subTaskIds: ['c'] });
-    const child = createTask({ id: 'c', title: 'Child', parentId: 'p' });
-    const other = createTask({ id: 'o', title: 'Untouched' });
-    taskEntities = { p: parent, c: child, o: other };
-    const ts = Date.now() - 1000;
-    // What arrives after upload sanitization: ids only, no `tasks`.
-    const ops = [
-      remoteOp(
-        ActionType.TASK_SHARED_DELETE_MULTIPLE,
-        { actionPayload: { taskIds: ['p'] }, entityChanges: [] },
-        ts,
-      ),
-    ];
+  it('drops expired entries on the first write, even if the trash is never opened', async () => {
+    store.entries.set('old', {
+      id: 'old',
+      task: createTask({ id: 'old' }),
+      subTasks: [],
+      deletedAt: NOW - RECENTLY_DELETED_RETENTION_MS - 1,
+    } as RecentlyDeletedEntry);
 
-    const snapshots = service.captureBeforeRemoteApply(ops);
-    // The ops apply: the tasks are gone from state afterwards.
-    taskEntities = { o: other };
-    await service.recordRemoteOps(ops, snapshots);
+    await service.recordAction(deleteAction('a'), NOW, NOW);
 
-    expect([...store.entries.keys()]).toEqual(['p']);
-    expect(store.entries.get('p')?.subTasks.map((t) => t.id)).toEqual(['c']);
-    expect(store.entries.get('p')?.deletedAt).toBe(ts);
+    expect([...store.entries.keys()]).toEqual(['a']);
   });
 
-  it('captureBeforeRemoteApply never throws on the sync path', () => {
-    TestBed.inject(Store).selectSignal = (() => {
-      throw new Error('no store');
-    }) as never;
-    expect(
-      service.captureBeforeRemoteApply([
-        remoteOp(ActionType.TASK_SHARED_DELETE_MULTIPLE, { taskIds: ['p'] }, 1),
-      ]).size,
-    ).toBe(0);
-  });
+  describe('remote ops', () => {
+    // The callback is fire-and-forget; a later queued read waits for it.
+    const applyRemote = async (ops: Operation[], after?: () => void): Promise<void> => {
+      const onCommitted = service.beforeRemoteApply(ops);
+      after?.();
+      onCommitted(ops);
+      await service.getEntries();
+    };
 
-  it('never rejects when storage fails, so the sync path stays unaffected', async () => {
-    store.isFailing = true;
-    await expectAsync(service.recordAction(deleteAction('a'), NOW, NOW)).toBeResolved();
-    await expectAsync(
-      service.recordRemoteOps([
+    it('records deletes with the op timestamp and ignores unrelated ops', async () => {
+      const ts = Date.now() - 1000;
+      await applyRemote([
+        remoteOp(
+          ActionType.TASK_SHARED_DELETE,
+          { task: { ...createTask({ id: 'r', title: 'Remote' }), subTasks: [] } },
+          ts,
+        ),
+        remoteOp(
+          ActionType.TASK_SHARED_UPDATE,
+          { task: { id: 'r', changes: { title: 'x' } } },
+          ts,
+        ),
+      ]);
+
+      expect([...store.entries.keys()]).toEqual(['r']);
+      expect(store.entries.get('r')?.deletedAt).toBe(ts);
+    });
+
+    it('clamps a sender timestamp from the future, so the entry still expires', async () => {
+      const before = Date.now();
+      await applyRemote([
         remoteOp(
           ActionType.TASK_SHARED_DELETE,
           { task: { ...createTask({ id: 'r', title: 'R' }), subTasks: [] } },
-          Date.now(),
+          before + RECENTLY_DELETED_RETENTION_MS,
         ),
-      ]),
-    ).toBeResolved();
+      ]);
+
+      expect(store.entries.get('r')!.deletedAt).toBeLessThanOrEqual(Date.now());
+    });
+
+    it('writes a whole batch in one storage call', async () => {
+      const spy = spyOn(store, 'applyChanges').and.callThrough();
+      const ops = ['r1', 'r2', 'r3'].map((id) =>
+        remoteOp(
+          ActionType.TASK_SHARED_DELETE,
+          { task: { ...createTask({ id, title: id }), subTasks: [] } },
+          Date.now() - 1000,
+        ),
+      );
+
+      service.beforeRemoteApply(ops)(ops);
+      await service.empty();
+
+      expect(spy).toHaveBeenCalledTimes(1);
+      expect(spy.calls.first().args[0].map((e) => e.id)).toEqual(['r1', 'r2', 'r3']);
+    });
+
+    it('snapshots a synced bulk delete from pre-apply state (the upload strips its tasks)', async () => {
+      const parent = createTask({ id: 'p', title: 'Parent', subTaskIds: ['c'] });
+      const child = createTask({ id: 'c', title: 'Child', parentId: 'p' });
+      const other = createTask({ id: 'o', title: 'Untouched' });
+      taskEntities = { p: parent, c: child, o: other };
+      const ts = Date.now() - 1000;
+
+      // What arrives after upload sanitization: ids only, no `tasks`.
+      await applyRemote(
+        [
+          remoteOp(
+            ActionType.TASK_SHARED_DELETE_MULTIPLE,
+            { actionPayload: { taskIds: ['p'] }, entityChanges: [] },
+            ts,
+          ),
+        ],
+        // The ops apply: the tasks are gone from state afterwards.
+        () => (taskEntities = { o: other }),
+      );
+
+      expect([...store.entries.keys()]).toEqual(['p']);
+      expect(store.entries.get('p')?.subTasks.map((t) => t.id)).toEqual(['c']);
+      expect(store.entries.get('p')?.deletedAt).toBe(ts);
+    });
+
+    it('also trashes subtasks only this device has (the reducer deletes them too)', async () => {
+      const sentChild = createTask({ id: 'c1', title: 'Sent', parentId: 'p' });
+      const localChild = createTask({ id: 'c2', title: 'Local only', parentId: 'p' });
+      taskEntities = {
+        p: createTask({ id: 'p', subTaskIds: ['c1', 'c2'] }),
+        c1: sentChild,
+        c2: localChild,
+      };
+
+      await applyRemote([
+        remoteOp(
+          ActionType.TASK_SHARED_DELETE,
+          {
+            task: {
+              ...createTask({ id: 'p', title: 'Parent', subTaskIds: ['c1'] }),
+              subTasks: [sentChild],
+            },
+          },
+          Date.now() - 1000,
+        ),
+      ]);
+
+      expect(store.entries.get('p')?.subTasks.map((t) => t.id)).toEqual(['c1', 'c2']);
+    });
+
+    it('one unreadable op does not lose the rest of the batch', async () => {
+      taskEntities = new Proxy({} as Record<string, Task>, {
+        get: (_t, key) => {
+          if (key === 'bad') throw new Error('broken state');
+          return undefined;
+        },
+      });
+      const ts = Date.now() - 1000;
+
+      await applyRemote([
+        remoteOp(ActionType.TASK_SHARED_DELETE_MULTIPLE, { taskIds: ['bad'] }, ts),
+        remoteOp(
+          ActionType.TASK_SHARED_DELETE,
+          { task: { ...createTask({ id: 'ok', title: 'OK' }), subTasks: [] } },
+          ts,
+        ),
+      ]);
+
+      expect([...store.entries.keys()]).toEqual(['ok']);
+    });
+
+    it('records nothing for ops whose reducers did not commit', async () => {
+      const op = remoteOp(
+        ActionType.TASK_SHARED_DELETE,
+        { task: { ...createTask({ id: 'r', title: 'R' }), subTasks: [] } },
+        Date.now() - 1000,
+      );
+      service.beforeRemoteApply([op])([]);
+      await service.getEntries();
+      expect(store.entries.size).toBe(0);
+    });
+  });
+
+  it('never rejects or throws when storage fails, so the sync path stays unaffected', async () => {
+    store.isFailing = true;
+    await expectAsync(service.recordAction(deleteAction('a'), NOW, NOW)).toBeResolved();
+    const op = remoteOp(
+      ActionType.TASK_SHARED_DELETE,
+      { task: { ...createTask({ id: 'r', title: 'R' }), subTasks: [] } },
+      Date.now(),
+    );
+    expect(() => service.beforeRemoteApply([op])([op])).not.toThrow();
+    await expectAsync(service.getEntries()).toBeResolved();
   });
 });

@@ -46,7 +46,10 @@ import { DateService } from '../../../core/date/date.service';
 import { isBlankTask } from '../util/is-blank-task';
 import { TaskMultiSelectService } from '../task-multi-select.service';
 import { TASK_DELETE_UNDO_WINDOW_MS } from '../../../app.constants';
-import { isRecentlyDeletedTrashable } from '../recently-deleted/recently-deleted.util';
+import {
+  isRecentlyDeletedTrashable,
+  RECENTLY_DELETED_RETENTION_DAYS,
+} from '../recently-deleted/recently-deleted.util';
 
 @Injectable()
 export class TaskUiEffects {
@@ -132,6 +135,7 @@ export class TaskUiEffects {
           this._snackService.open({
             translateParams: {
               title: truncate(task.title),
+              days: RECENTLY_DELETED_RETENTION_DAYS,
             },
             msg: this._getDeletedSnackMsg(task),
             config: { duration: TASK_DELETE_UNDO_WINDOW_MS },

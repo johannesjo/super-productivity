@@ -14,7 +14,10 @@ import { bulkApplyOperations } from './bulk-hydration.action';
 import { CLIENT_ID_PROVIDER, ClientIdProvider } from '../util/client-id.provider';
 import { OperationLogEffects } from '../capture/operation-log.effects';
 import { reportBulkReplayReducerFailure } from './bulk-replay-failure-collector';
-import { RecentlyDeletedService } from '../../features/tasks/recently-deleted/recently-deleted.service';
+import {
+  REMOTE_APPLY_LISTENER,
+  RemoteApplyListener,
+} from './remote-apply-listener.token';
 
 describe('OperationApplierService', () => {
   let service: OperationApplierService;
@@ -23,7 +26,8 @@ describe('OperationApplierService', () => {
   let mockHydrationState: jasmine.SpyObj<HydrationStateService>;
   let mockOperationLogEffects: jasmine.SpyObj<OperationLogEffects>;
   let mockClientIdProvider: jasmine.SpyObj<ClientIdProvider>;
-  let mockRecentlyDeleted: jasmine.SpyObj<RecentlyDeletedService>;
+  let mockListener: jasmine.SpyObj<RemoteApplyListener>;
+  let onCommitted: jasmine.Spy;
 
   const createMockOperation = (
     id: string,
@@ -67,12 +71,9 @@ describe('OperationApplierService', () => {
     mockArchiveOperationHandler.handleOperation.and.returnValue(Promise.resolve());
     mockOperationLogEffects.processDeferredActions.and.returnValue(Promise.resolve());
     mockClientIdProvider.loadClientId.and.resolveTo('testClient');
-    mockRecentlyDeleted = jasmine.createSpyObj('RecentlyDeletedService', [
-      'captureBeforeRemoteApply',
-      'recordRemoteOps',
-    ]);
-    mockRecentlyDeleted.captureBeforeRemoteApply.and.returnValue(new Map());
-    mockRecentlyDeleted.recordRemoteOps.and.resolveTo();
+    onCommitted = jasmine.createSpy('onCommitted');
+    mockListener = jasmine.createSpyObj('RemoteApplyListener', ['beforeRemoteApply']);
+    mockListener.beforeRemoteApply.and.returnValue(onCommitted);
 
     TestBed.configureTestingModule({
       providers: [
@@ -82,60 +83,71 @@ describe('OperationApplierService', () => {
         { provide: HydrationStateService, useValue: mockHydrationState },
         { provide: OperationLogEffects, useValue: mockOperationLogEffects },
         { provide: CLIENT_ID_PROVIDER, useValue: mockClientIdProvider },
-        { provide: RecentlyDeletedService, useValue: mockRecentlyDeleted },
+        { provide: REMOTE_APPLY_LISTENER, useValue: mockListener },
       ],
     });
 
     service = TestBed.inject(OperationApplierService);
   });
 
-  describe('Recently deleted trash hook', () => {
-    it('snapshots before the reducers run and records the applied ops after', async () => {
-      const snapshots = new Map();
+  describe('remote apply listener', () => {
+    it('is called before the reducers run and gets the committed ops after', async () => {
       let dispatchCountAtCapture = -1;
-      mockRecentlyDeleted.captureBeforeRemoteApply.and.callFake(() => {
+      mockListener.beforeRemoteApply.and.callFake(() => {
         dispatchCountAtCapture = mockStore.dispatch.calls.count();
-        return snapshots;
+        return onCommitted;
       });
+      const op = createMockOperation('op-1');
+
+      await service.applyOperations([op]);
+
+      expect(dispatchCountAtCapture).toBe(0);
+      expect(mockListener.beforeRemoteApply).toHaveBeenCalledOnceWith([op]);
+      expect(onCommitted).toHaveBeenCalledOnceWith([op]);
+    });
+
+    for (const options of [{ isLocalHydration: true }, { skipReducerDispatch: true }]) {
+      it(`is not called with ${JSON.stringify(options)}`, async () => {
+        await service.applyOperations([createMockOperation('op-1')], options);
+
+        expect(mockListener.beforeRemoteApply).not.toHaveBeenCalled();
+      });
+    }
+
+    it('gets only reducer-committed ops', async () => {
+      const op1 = createMockOperation('op-1');
+      const op2 = createMockOperation('op-2');
+      mockStore.dispatch.and.callFake((() => {
+        reportBulkReplayReducerFailure(op2, new Error('reducer'));
+      }) as never);
+
+      await service.applyOperations([op1, op2]);
+
+      expect(onCommitted).toHaveBeenCalledOnceWith([op1]);
+    });
+
+    it('still gets ops whose archive side effect failed (their reducers committed)', async () => {
+      mockArchiveOperationHandler.handleOperation.and.rejectWith(new Error('archive'));
       const op = createMockOperation('op-1');
 
       const result = await service.applyOperations([op]);
 
-      expect(dispatchCountAtCapture).toBe(0);
-      expect(mockStore.dispatch).toHaveBeenCalled();
-      expect(mockRecentlyDeleted.captureBeforeRemoteApply).toHaveBeenCalledWith([op]);
-      expect(mockRecentlyDeleted.recordRemoteOps).toHaveBeenCalledOnceWith(
-        result.appliedOps,
-        snapshots,
-      );
-    });
-
-    for (const options of [{ isLocalHydration: true }, { skipReducerDispatch: true }]) {
-      it(`does not touch the trash with ${JSON.stringify(options)}`, async () => {
-        await service.applyOperations([createMockOperation('op-1')], options);
-
-        expect(mockRecentlyDeleted.captureBeforeRemoteApply).not.toHaveBeenCalled();
-        expect(mockRecentlyDeleted.recordRemoteOps).not.toHaveBeenCalled();
-      });
-    }
-
-    it('does not record ops that failed to apply', async () => {
-      mockArchiveOperationHandler.handleOperation.and.rejectWith(new Error('archive'));
-
-      const result = await service.applyOperations([createMockOperation('op-1')]);
-
       expect(result.failedOp).toBeDefined();
-      expect(mockRecentlyDeleted.recordRemoteOps).not.toHaveBeenCalled();
+      expect(onCommitted).toHaveBeenCalledOnceWith([op]);
     });
 
-    it('never fails the apply when the trash throws', async () => {
-      mockRecentlyDeleted.recordRemoteOps.and.throwError('trash down');
+    it('never fails the apply when the listener throws', async () => {
+      onCommitted.and.throwError('trash down');
       const op = createMockOperation('op-1');
 
       const result = await service.applyOperations([op]);
 
       expect(result.appliedOps).toEqual([op]);
       expect(result.failedOp).toBeUndefined();
+
+      mockListener.beforeRemoteApply.and.throwError('trash down');
+      const second = await service.applyOperations([createMockOperation('op-2')]);
+      expect(second.failedOp).toBeUndefined();
     });
   });
 

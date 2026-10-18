@@ -48,7 +48,7 @@
                 <div
                   class="task-title"
                   [class.task-archived]="item.isArchiveTask"
-                  [class.task-deleted]="item.isDeleted"
+                  [class.task-deleted]="item.deletedEntry"
                   [class.task-done]="item.isDone"
                   [class.task-subtask]="!!item.parentTitle"
                 >
@@ -78,7 +78,7 @@
                   @if (item.isNote) {
                     <mat-icon class="issue-icon">comment</mat-icon>
                   }
-                  @if (item.isDeleted) {
+                  @if (item.deletedEntry) {
                     <span class="deleted-label">
                       <mat-icon class="archive-icon">delete_outline</mat-icon>
                       {{ T.F.SEARCH_BAR.DELETED | translate }}

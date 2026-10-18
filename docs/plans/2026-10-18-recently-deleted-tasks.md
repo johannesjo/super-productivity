@@ -25,8 +25,9 @@ Demand: #2778 (21 👍, 15 comments); #10350 also asks for projects/tags/filters
     left out: daily noise for a rare need, plus a persisted config field. It
     stays the fallback if Search does not make the trash findable enough.
 - **Fixed retention of 30 days, no setting**, plus "Empty". Deletes that are
-  already older than that are not recorded, and expired entries are purged
-  when the trash is opened.
+  already older than that are not recorded. Expired entries are purged when
+  the trash is opened and on the first write of a session, so they go even
+  if the trash is never opened.
 - **Tasks only, with their subtasks.** Plainspace tasks (deleting them deletes
   them for the whole Space) keep the current always-confirm behavior and
   never go to the trash. Blank tasks (the ones that also get no undo snack)
@@ -124,26 +125,46 @@ surface. **Rejected.**
 - **Local deletes:** a `LOCAL_ACTIONS` effect records `deleteTask` and
   `deleteTasks` from their existing payloads (snapshots of the task and its
   subtasks).
-- **Remote deletes:** `OperationApplierService` hands the ops it just applied
-  (not local hydration) to the trash, using `op.timestamp` as the delete time.
+- **Remote deletes:** `OperationApplierService` hands the ops whose reducers
+  committed (not local hydration) to the trash, through the
+  `REMOTE_APPLY_LISTENER` token provided in `main.ts`, so the op-log layer
+  does not import the feature. An op whose archive side effect fails is still
+  recorded, because its reducer already deleted the task. The delete time is
+  `op.timestamp`, clamped to this device's clock so a sender clock that runs
+  ahead cannot keep an entry past retention.
   A delete made on the phone is therefore restorable on the desktop. A bulk
   `deleteTasks` reaches other devices with ids only, because the upload strips
   its `tasks` snapshots (`_sanitizeRegularOpPayloadForUpload` in
   `operation-log-upload.service.ts`). So the applier first reads those tasks
   and their subtasks from this device's own state, before the ops apply
-  (`captureBeforeRemoteApply`, read-only). Nothing extra goes on the wire. A
-  task created and bulk-deleted inside the same downloaded batch is not in
-  that state, so it is not trashed. The hook
+  (`beforeRemoteApply`, read-only). A remote `deleteTask` also gets the
+  subtasks only this device has, because the reducer deletes them by
+  `parentId` too. Nothing extra goes on the wire. The hook
   is fire-and-forget and swallows errors, so the trash can never fail or slow
   a sync.
 - **Restore** dispatches the existing, released `restoreTask` with the stored
   snapshot. A deleted subtask is restored as a top-level task in its project,
   because its old parent's subtask order cannot be restored safely. A task
   whose project was archived or deleted meanwhile comes back in the Inbox, so
-  it is visible. `restoreTask`
-  and `restoreDeletedTask` (local or remote) remove the entry.
+  it is visible. Restoring removes the entry and offers Undo, which deletes the
+  task again (back into the trash). A remote `restoreTask` or a
+  `restoreDeletedTask` (local or remote) also removes it.
 - **Retention / Empty** are local deletes from that database. They emit no op
   and need no replay determinism: no reducer reads the trash.
+
+### E. The op log itself as the trash
+
+Restore by reading the delete op back from `SUP_OPS`. Compaction drops ops
+after 7 days (`COMPACTION_RETENTION_MS`), and a synced bulk delete arrives
+without its task snapshots, so most deletes would no longer be restorable.
+**Rejected.**
+
+### Open product decision: local deletes only
+
+Recording only this device's own deletes would drop the remote path
+(`REMOTE_APPLY_LISTENER`, the pre-apply snapshot) and the cross-device
+privacy copy. It would also lose the case of a delete made on the phone that
+is noticed on the desktop. It is kept for now, pending a decision.
 
 ## Sync / compatibility analysis
 
@@ -179,9 +200,17 @@ surface. **Rejected.**
   one device does not empty the others. A synced "empty" would need a new
   action. Released clients would ignore it harmlessly, but it is not needed
   for the reported problem.
-- A deleted task's pre-delete state still lives in the op log and on the
-  SuperSync server until compaction, exactly as today. The trash does not
-  change that privacy property in either direction.
+- **Privacy:** a deleted task's pre-delete state stays in the op log and on
+  the SuperSync server until compaction (7 days locally), as today. The trash
+  adds a searchable copy on each device for 30 days, including deletes made
+  on other devices. "Empty" is per device, and a later full-state import
+  (USE_REMOTE) can bring a task back that was emptied here.
+- The pre-apply snapshot is taken once per downloaded batch. A task created
+  and deleted inside the same batch is not in it, so it is not trashed, and a
+  task edited and then deleted in one batch is trashed as it was before the
+  batch.
+- A delete that reaches this device more than 30 days after it was made is
+  not trashed.
 - Restoring marks the task undone (`restoreTask` semantics, same as archive
   restore) and drops its section.
 - Issue-linked tasks: the remote side effect is **not** deferred beyond the

@@ -10,7 +10,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { T } from '../../t.const';
 import { ReactiveFormsModule, UntypedFormControl } from '@angular/forms';
 import { BehaviorSubject, combineLatest, from, Observable } from 'rxjs';
-import { debounceTime, filter, first, map, startWith, switchMap } from 'rxjs/operators';
+import { debounceTime, filter, map, startWith, switchMap } from 'rxjs/operators';
 import { TaskService } from '../../features/tasks/task.service';
 import { DEFAULT_TAG, TODAY_TAG } from '../../features/tag/tag.const';
 import { NoteService } from '../../features/note/note.service';
@@ -40,10 +40,10 @@ import { Log } from '../../core/log';
 import { MenuTreeService } from '../../features/menu-tree/menu-tree.service';
 import { MatCheckbox } from '@angular/material/checkbox';
 import { RecentlyDeletedService } from '../../features/tasks/recently-deleted/recently-deleted.service';
-import { RecentlyDeletedEntry } from '../../features/tasks/recently-deleted/recently-deleted.util';
-import { INBOX_PROJECT } from '../../features/project/project.const';
-import { SnackService } from '../../core/snack/snack.service';
-import { truncate } from '../../util/truncate';
+import {
+  getRestoreTaskPayload,
+  RecentlyDeletedEntry,
+} from '../../features/tasks/recently-deleted/recently-deleted.util';
 
 const MAX_RESULTS = 50;
 // Deleted matches are listed last but always get a few of the result slots,
@@ -83,7 +83,6 @@ export class SearchPageComponent implements OnInit {
   private _layoutService = inject(LayoutService);
   private _menuTreeService = inject(MenuTreeService);
   private _recentlyDeletedService = inject(RecentlyDeletedService);
-  private _snackService = inject(SnackService);
 
   readonly inputEl = viewChild.required<ElementRef>('inputEl');
 
@@ -93,7 +92,6 @@ export class SearchPageComponent implements OnInit {
   filteredResults$: Observable<SearchItem[]> = new Observable();
 
   private _reloadDeleted$ = new BehaviorSubject<void>(undefined);
-  private _deletedEntryById = new Map<string, RecentlyDeletedEntry>();
 
   private _cachedArchiveItems: SearchItem[] | null = null;
   private _archiveCacheInputs?: {
@@ -104,19 +102,21 @@ export class SearchPageComponent implements OnInit {
     tagFolderMap: Map<string, string>;
   };
 
-  private _searchableItems$: Observable<SearchItem[]> = combineLatest([
+  // Ids of the deleted rows currently on offer; a row clicked after its task
+  // came back (e.g. via sync) is stale.
+  private _shownDeletedIds = new Set<string>();
+
+  private _projectFolderMap$ = toObservable(this._menuTreeService.projectFolderMap);
+  private _tagFolderMap$ = toObservable(this._menuTreeService.tagFolderMap);
+
+  private _liveItems$: Observable<SearchItem[]> = combineLatest([
     this._taskService.allTasks$,
     this._taskService.getArchivedTasks(),
     this._noteService.notes$,
     this._projectService.list$,
     this._tagService.tags$,
-    toObservable(this._menuTreeService.projectFolderMap),
-    toObservable(this._menuTreeService.tagFolderMap),
-    this._reloadDeleted$.pipe(
-      switchMap(() => from(this._recentlyDeletedService.getEntries())),
-      // Live results never wait for the trash's IndexedDB read.
-      startWith([] as RecentlyDeletedEntry[]),
-    ),
+    this._projectFolderMap$,
+    this._tagFolderMap$,
   ]).pipe(
     map(
       ([
@@ -127,7 +127,6 @@ export class SearchPageComponent implements OnInit {
         tags,
         projectFolderMap,
         tagFolderMap,
-        deletedEntries,
       ]) => {
         if (
           !this._cachedArchiveItems ||
@@ -169,18 +168,31 @@ export class SearchPageComponent implements OnInit {
           ),
           ...this._mapNotesToSearchItems(notes, projects, projectFolderMap),
           ...this._cachedArchiveItems,
-          ...this._mapDeletedEntriesToSearchItems(
-            deletedEntries,
-            allTasks,
-            projects,
-            tags,
-            projectFolderMap,
-            tagFolderMap,
-          ),
         ];
       },
     ),
   );
+
+  // Own stream, so the trash's IndexedDB read neither delays the live results
+  // nor makes them map twice.
+  private _deletedItems$: Observable<SearchItem[]> = combineLatest([
+    this._reloadDeleted$.pipe(
+      switchMap(() => from(this._recentlyDeletedService.getEntries())),
+    ),
+    this._taskService.allTasks$,
+    this._projectService.list$,
+    this._tagService.tags$,
+    this._projectFolderMap$,
+    this._tagFolderMap$,
+  ]).pipe(
+    map((args) => this._mapDeletedEntriesToSearchItems(...args)),
+    startWith([] as SearchItem[]),
+  );
+
+  private _searchableItems$: Observable<SearchItem[]> = combineLatest([
+    this._liveItems$,
+    this._deletedItems$,
+  ]).pipe(map(([live, deleted]) => [...live, ...deleted]));
 
   /**
    * Recently deleted tasks are searchable, because searching for its title is
@@ -197,32 +209,28 @@ export class SearchPageComponent implements OnInit {
   ): SearchItem[] {
     const liveIds = new Set(allTasks.map((t) => t.id));
     const liveEntries = entries.filter((entry) => !liveIds.has(entry.id));
-    this._deletedEntryById = new Map(liveEntries.map((e) => [e.id, e]));
+    this._shownDeletedIds = new Set(liveEntries.map((entry) => entry.id));
     const projectIds = new Set(projects.map((p) => p.id));
-    return liveEntries.map((entry) => {
-      const task: Task = {
-        ...entry.task,
-        parentId: undefined,
-        projectId:
-          entry.task.projectId && projectIds.has(entry.task.projectId)
-            ? entry.task.projectId
-            : INBOX_PROJECT.id,
-      };
-      const [item] = this._mapTasksToSearchItems(
-        false,
-        [task],
-        projects,
-        tags,
-        projectFolderMap,
-        tagFolderMap,
-      );
+    // Shown where restoring puts it (list$ holds only unarchived projects).
+    const items = this._mapTasksToSearchItems(
+      false,
+      liveEntries.map(
+        (entry) => getRestoreTaskPayload(entry, (id) => projectIds.has(id)).task,
+      ),
+      projects,
+      tags,
+      projectFolderMap,
+      tagFolderMap,
+    );
+    return items.map((item, i) => {
+      const deletedEntry = liveEntries[i];
       // A match on a subtask title finds its deleted parent.
-      const subTaskText = entry.subTasks.map((t) => t.title).join('\0');
+      const subTaskText = deletedEntry.subTasks.map((t) => t.title).join('\0');
       return {
         ...item,
         searchText: `${item.searchText}\0${subTaskText.toLowerCase()}`,
         isDone: false,
-        isDeleted: true,
+        deletedEntry,
       };
     });
   }
@@ -433,8 +441,8 @@ export class SearchPageComponent implements OnInit {
         task.searchText.includes(lowerSearchTerm),
     );
 
-    const deleted = result.filter((item) => item.isDeleted);
-    const rest = result.filter((item) => !item.isDeleted);
+    const deleted = result.filter((item) => item.deletedEntry);
+    const rest = result.filter((item) => !item.deletedEntry);
     const head = rest.slice(
       0,
       MAX_RESULTS - Math.min(deleted.length, MIN_DELETED_RESULTS),
@@ -452,7 +460,7 @@ export class SearchPageComponent implements OnInit {
       this._router.navigate([`/tag/${item.id}/tasks`]);
       return;
     }
-    if (item.isDeleted) {
+    if (item.deletedEntry) {
       void this.restoreDeletedItem(item);
       return;
     }
@@ -474,29 +482,12 @@ export class SearchPageComponent implements OnInit {
 
   async restoreDeletedItem(item: SearchItem, event?: MouseEvent): Promise<void> {
     event?.stopPropagation();
-    const entry = this._deletedEntryById.get(item.id);
-    if (!entry) {
+    if (!item.deletedEntry || !this._shownDeletedIds.has(item.id)) {
       // Live again meanwhile (e.g. restored by sync): just go there.
       await this._navigateToTaskService.navigate(item.id, false, { isFromSearch: true });
       return;
     }
-    await this._recentlyDeletedService.restore(entry);
-    // A row click restores, so a wrong pick must be as easy to take back as a
-    // delete is: Undo deletes it again (back into the trash).
-    this._snackService.open({
-      type: 'SUCCESS',
-      msg: T.F.TASK.D_RECENTLY_DELETED.RESTORED,
-      translateParams: { title: truncate(entry.task.title) },
-      actionStr: T.G.UNDO,
-      actionFn: () => {
-        this._taskService
-          .getByIdWithSubTaskData$(entry.id)
-          .pipe(first())
-          .subscribe((task) => {
-            if (task) this._taskService.remove(task);
-          });
-      },
-    });
+    await this._recentlyDeletedService.restore(item.deletedEntry);
     this._reloadDeleted$.next();
     await this._navigateToTaskService.navigate(item.id, false, { isFromSearch: true });
   }

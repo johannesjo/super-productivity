@@ -6,8 +6,8 @@ import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions'
 import { RecentlyDeletedService } from './recently-deleted.service';
 
 /**
- * Records local deletes and restores in the device-local trash. Remote ones
- * are recorded by OperationApplierService, which has the op timestamps.
+ * Records local deletes and undos in the device-local trash. Remote ones are
+ * recorded via OperationApplierService, which has the op timestamps.
  */
 @Injectable()
 export class RecentlyDeletedEffects {
@@ -20,7 +20,8 @@ export class RecentlyDeletedEffects {
         ofType(
           TaskSharedActions.deleteTask,
           TaskSharedActions.deleteTasks,
-          TaskSharedActions.restoreTask,
+          // The undo snack's restore. A local restoreTask from the trash is
+          // removed by RecentlyDeletedService.restore() itself.
           TaskSharedActions.restoreDeletedTask,
         ),
         tap((action) => {

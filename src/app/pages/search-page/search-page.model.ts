@@ -2,6 +2,7 @@ import { Project } from '../../features/project/project.model';
 import { Tag } from '../../features/tag/tag.model';
 import { IssueProviderKey } from '../../features/issue/issue.model';
 import { TimeSpentOnDay } from '../../features/tasks/task.model';
+import { RecentlyDeletedEntry } from '../../features/tasks/recently-deleted/recently-deleted.util';
 
 export interface SearchItem {
   id: string;
@@ -33,7 +34,7 @@ export interface SearchItem {
   /** A tag itself as a result; selecting it opens that tag (#10223). */
   isTag?: boolean;
   /** A task in Recently deleted; selecting it restores it (#2778). */
-  isDeleted?: boolean;
+  deletedEntry?: RecentlyDeletedEntry;
 }
 
 export interface SearchQueryParams {

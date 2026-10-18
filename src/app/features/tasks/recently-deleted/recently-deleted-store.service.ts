@@ -26,16 +26,15 @@ export class RecentlyDeletedStoreService {
     return (await this._db()).getAll(STORE_NAME);
   }
 
-  async putMany(entries: RecentlyDeletedEntry[]): Promise<void> {
-    if (!entries.length) return;
+  /** Applies puts and deletes in one transaction, deletes last. */
+  async applyChanges(puts: RecentlyDeletedEntry[], deleteIds: string[]): Promise<void> {
+    if (!puts.length && !deleteIds.length) return;
     const tx = (await this._db()).transaction(STORE_NAME, 'readwrite');
-    await Promise.all([...entries.map((entry) => tx.store.put(entry)), tx.done]);
-  }
-
-  async deleteMany(ids: string[]): Promise<void> {
-    if (!ids.length) return;
-    const tx = (await this._db()).transaction(STORE_NAME, 'readwrite');
-    await Promise.all([...ids.map((id) => tx.store.delete(id)), tx.done]);
+    await Promise.all([
+      ...puts.map((entry) => tx.store.put(entry)),
+      ...deleteIds.map((id) => tx.store.delete(id)),
+      tx.done,
+    ]);
   }
 
   async clear(): Promise<void> {
