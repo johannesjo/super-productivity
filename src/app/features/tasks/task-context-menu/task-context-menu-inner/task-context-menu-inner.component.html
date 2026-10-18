@@ -93,17 +93,6 @@
     }
   </div>
 
-  @if (isTouchActive() && isInTaskRow) {
-    <button
-      (click)="enterSelectionMode()"
-      mat-menu-item
-    >
-      <span class="menuItemLeft">
-        <mat-icon>checklist_rtl</mat-icon>
-        {{ T.F.TASK.MULTI_SELECT.SELECT_ENTRY | translate }}
-      </span>
-    </button>
-  }
   @if (
     isTimeTrackingEnabled() &&
     ((isAdvancedControls() && isTouchActive()) || !isAdvancedControls()) &&
@@ -369,6 +358,30 @@
       <span class="menuItemLeft">
         <mat-icon>extension</mat-icon>
         {{ T.PLUGINS.TASK_CONTEXT_MENU_ACTIONS | translate }}
+      </span>
+    </button>
+  }
+
+  @if (isTouchActive() && isInTaskRow) {
+    <button
+      (click)="enterSelectionMode()"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon>checklist_rtl</mat-icon>
+        {{ T.F.TASK.MULTI_SELECT.SELECT_ENTRY | translate }}
+      </span>
+    </button>
+  }
+
+  @if (!task.isDone) {
+    <button
+      (click)="setWontDo()"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon>block</mat-icon>
+        {{ T.F.TASK.CMP.MARK_WONT_DO | translate }}
       </span>
     </button>
   }
