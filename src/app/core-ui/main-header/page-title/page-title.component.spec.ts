@@ -10,6 +10,7 @@ import { MatMenu } from '@angular/material/menu';
 import { Store } from '@ngrx/store';
 
 import { PageTitleComponent } from './page-title.component';
+import { NAV_SECTION_ICON } from '../../magic-side-nav/nav-section-icons.const';
 import { WorkContextService } from '../../../features/work-context/work-context.service';
 import {
   WorkContext,
@@ -290,6 +291,20 @@ describe('PageTitleComponent', () => {
     });
   });
 
+  describe('section icon', () => {
+    it('uses the side nav icon of a special section', () => {
+      expect(setupComponent('/planner').sectionIcon()).toBe(NAV_SECTION_ICON.PLANNER);
+      expect(setupComponent('/habits').sectionIcon()).toBe(NAV_SECTION_ICON.HABITS);
+      expect(setupComponent('/archived-projects').sectionIcon()).toBe(
+        NAV_SECTION_ICON.ARCHIVED_PROJECTS,
+      );
+    });
+
+    it('is unset on a work context route, which shows the context icon', () => {
+      expect(setupComponent('/tag/TODAY/tasks').sectionIcon()).toBeUndefined();
+    });
+  });
+
   describe('openInPlainspace()', () => {
     it('delegates to the share service with the active project id', () => {
       typeAndId$.next({ activeId: 'p1', activeType: WorkContextType.PROJECT });
@@ -419,13 +434,14 @@ describe('PageTitleComponent', () => {
       expect(minWidthOf('.page-title')).toBeGreaterThanOrEqual(60 + iconWidth);
     });
 
-    // ...and not where none is: a special section would otherwise carry an
-    // icon's worth of box it never fills.
-    it('leaves the floor bare on a section with no icon', async () => {
+    // Special sections carry their nav icon too, so they get the same floor.
+    it('adds the section icon to the floor on a special section', async () => {
       await withFloor('/config');
-      expect(host.querySelector('.page-title-icon')).toBeFalsy();
+      const icon = host.querySelector('.page-title-icon') as HTMLElement | null;
+      expect(icon?.textContent?.trim()).toBe(NAV_SECTION_ICON.SETTINGS);
 
-      expect(minWidthOf('.page-title')).toBe(60);
+      const iconWidth = parseFloat(getComputedStyle(icon!).width);
+      expect(minWidthOf('.page-title')).toBeGreaterThanOrEqual(60 + iconWidth);
     });
   });
 });

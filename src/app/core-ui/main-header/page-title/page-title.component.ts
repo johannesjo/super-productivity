@@ -16,6 +16,7 @@ import { Store } from '@ngrx/store';
 import { WorkContextService } from '../../../features/work-context/work-context.service';
 import { WorkContextType } from '../../../features/work-context/work-context.model';
 import { DEFAULT_PROJECT_ICON } from '../../../features/project/project.const';
+import { NAV_SECTION_ICON } from '../../magic-side-nav/nav-section-icons.const';
 import { isSingleEmoji } from '../../../util/extract-first-emoji';
 import { selectIsProjectSharedOnPlainspace } from '../../../features/issue/store/issue-provider.selectors';
 import { PlainspaceShareService } from '../../../features/issue/providers/plainspace/plainspace-share.service';
@@ -48,7 +49,11 @@ import { KeyboardConfig } from '@sp/keyboard-config';
         mat-ripple
         routerLink="/active/tasks"
       >
-        @if (!isSpecialSection() && activeWorkContext()) {
+        @if (sectionIcon(); as icon) {
+          <!-- Same icon the side nav shows for this section; it inherits the
+               title color, as the nav's route icons inherit theirs. -->
+          <mat-icon class="page-title-icon">{{ icon }}</mat-icon>
+        } @else if (!isSpecialSection() && activeWorkContext()) {
           <mat-icon
             class="page-title-icon"
             [class.page-title-icon--emoji]="isContextEmojiIcon()"
@@ -364,25 +369,29 @@ export class PageTitleComponent {
     initialValue: this._router.url.split(/[?#]/, 1)[0],
   });
 
-  // Routes that get their own title and have no work-context menu.
+  // Routes that get their own title and icon and have no work-context menu.
   // Order is irrelevant — patterns are mutually exclusive end-anchors.
-  private static readonly _ROUTE_TITLE_KEYS: ReadonlyArray<readonly [RegExp, string]> = [
-    [/schedule$/, T.MH.SCHEDULE],
-    [/planner$/, T.MH.PLANNER],
-    [/boards$/, T.MH.BOARDS],
-    [/habits$/, T.MH.HABITS],
-    [/search$/, T.MH.SEARCH],
-    [/scheduled-list$/, T.MH.ALL_PLANNED_LIST],
-    [/donate$/, T.MH.DONATE],
-    [/config$/, T.PS.GLOBAL_SETTINGS],
-    [/archived-projects$/, T.MH.ARCHIVED_PROJECTS],
+  private static readonly _ROUTE_SECTIONS: ReadonlyArray<
+    readonly [RegExp, string, string]
+  > = [
+    [/schedule$/, T.MH.SCHEDULE, NAV_SECTION_ICON.SCHEDULE],
+    [/planner$/, T.MH.PLANNER, NAV_SECTION_ICON.PLANNER],
+    [/boards$/, T.MH.BOARDS, NAV_SECTION_ICON.BOARDS],
+    [/habits$/, T.MH.HABITS, NAV_SECTION_ICON.HABITS],
+    [/search$/, T.MH.SEARCH, NAV_SECTION_ICON.SEARCH],
+    [/scheduled-list$/, T.MH.ALL_PLANNED_LIST, NAV_SECTION_ICON.SCHEDULED_LIST],
+    [/donate$/, T.MH.DONATE, NAV_SECTION_ICON.DONATE],
+    [/config$/, T.PS.GLOBAL_SETTINGS, NAV_SECTION_ICON.SETTINGS],
+    [/archived-projects$/, T.MH.ARCHIVED_PROJECTS, NAV_SECTION_ICON.ARCHIVED_PROJECTS],
   ];
 
-  private _routeTitleKey = computed(
-    () => PageTitleComponent._ROUTE_TITLE_KEYS.find(([re]) => re.test(this._url()))?.[1],
+  private _routeSection = computed(() =>
+    PageTitleComponent._ROUTE_SECTIONS.find(([re]) => re.test(this._url())),
   );
+  private _routeTitleKey = computed(() => this._routeSection()?.[1]);
+  sectionIcon = computed(() => this._routeSection()?.[2]);
 
-  isSpecialSection = computed(() => !!this._routeTitleKey());
+  isSpecialSection = computed(() => !!this._routeSection());
   isWorkViewPage = computed(() => /tasks$/.test(this._url()));
 
   displayTitle = computed(() => {
