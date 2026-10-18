@@ -290,6 +290,11 @@
     background: var(--sidenav-hover-bg);
     color: var(--sidenav-text);
   }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: calc(-1 * var(--focus-ring-width));
+  }
 }
 
 // Navigation list

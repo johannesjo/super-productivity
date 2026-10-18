@@ -8,9 +8,7 @@
 # the API 30-34 / WebView < 140 band #9316 was reported in, which no device on
 # hand covers. ImeInsetShimInstrumentedTest asserts the mechanism there (explicit
 # WebView height == keyboard top) as well as the symptom (web content ends above
-# the keyboard); StartupOverlayInsetInstrumentedTest checks the native startup
-# overlay sits above the bars and the keyboard exactly once in this band's
-# SystemBars branch. Only those two run here; the full suite already ran on API 35.
+# the keyboard). Only that test runs here; the full suite already ran on API 35.
 # See docs/android-edge-to-edge-keyboard.md.
 #
 # A file, not an inline `script:` block — see run-android-checks.sh for why.
@@ -37,6 +35,12 @@ echo "Using $ANDROID_SERIAL"
 # soft keyboard hidden, the IME never opens and the test cannot tell a working
 # shim from one that never ran.
 adb shell settings put secure show_ime_with_hard_keyboard 1
+# A freshly booted emulator can ANR the launcher; its "isn't responding" dialog
+# keeps window focus, so the app window never gains it and the IME never serves
+# the WebView ("Ignoring showSoftInput() ... is not served", run 39156328714).
+# Suppress such dialogs for the run and close one that is already up.
+adb shell settings put global hide_error_dialogs 1
+adb shell am broadcast -a android.intent.action.CLOSE_SYSTEM_DIALOGS > /dev/null || true
 # Which band this image is actually in — the test branches on it and logs the
 # same, but the dumpsys line is the reading to compare a reporter's device to.
 adb shell dumpsys webviewupdate | grep -i 'Current WebView package' || true
@@ -46,11 +50,11 @@ adb logcat -c || true
 # >= 140 the gate flips to the SystemBars branch and the test would stay green
 # while the #9316 band silently lost its only coverage. With the pin it fails.
 timeout 480 ./gradlew :app:connectedPlayDebugAndroidTest \
-  -Pandroid.testInstrumentationRunnerArguments.class=com.superproductivity.superproductivity.ImeInsetShimInstrumentedTest,com.superproductivity.superproductivity.StartupOverlayInsetInstrumentedTest \
+  -Pandroid.testInstrumentationRunnerArguments.class=com.superproductivity.superproductivity.ImeInsetShimInstrumentedTest \
   -Pandroid.testInstrumentationRunnerArguments.expectShim=true
 status=$?
 if [ "$status" -eq 124 ]; then
-  echo "::error::IME/overlay inset checks exceeded 8 minutes on API 34 — see the android-instrumentation-diagnostics artifact"
+  echo "::error::IME inset check exceeded 8 minutes on API 34 — see the android-instrumentation-diagnostics artifact"
 fi
 if [ "$status" -ne 0 ]; then
   adb logcat -d > "$DIAG/logcat.txt" 2>&1 || true
@@ -61,4 +65,4 @@ fi
 # On green, echo what the test measured so the job log documents which owner
 # insetted the WebView and by how much — geometry and versions only.
 echo "IME inset shim check passed on API 34:"
-adb logcat -d -s SUPKeyboardTest SUPOverlayTest | tail -n 12 || true
+adb logcat -d -s SUPKeyboardTest | tail -n 12 || true

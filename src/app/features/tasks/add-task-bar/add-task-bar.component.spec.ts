@@ -20,7 +20,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { signal, Signal } from '@angular/core';
 import { AddTaskSuggestion } from './add-task-suggestions.model';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { TaskCopy, TaskReminderOptionId } from '../task.model';
+import { TaskCopy, TaskReminderOptionId, TaskWithSubTasks } from '../task.model';
 import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-format.service';
 import { DEFAULT_LOCALE } from 'src/app/core/locale.constants';
 import { DateService } from '../../../core/date/date.service';
@@ -189,6 +189,7 @@ describe('AddTaskBarComponent', () => {
     mockTaskService = jasmine.createSpyObj('TaskService', [
       'add',
       'getByIdOnce$',
+      'getByIdWithSubTaskData$',
       'scheduleTask',
       'moveToCurrentWorkContext',
     ]);
@@ -490,6 +491,30 @@ describe('AddTaskBarComponent', () => {
         }),
       );
       expect(mockTaskService.moveToCurrentWorkContext).not.toHaveBeenCalled();
+    });
+
+    it('moves an existing task to the current context with its sub task data (#10838)', async () => {
+      const task = {
+        id: 'task-1',
+        title: 'Existing task',
+        subTaskIds: [],
+      } as Partial<TaskCopy> as TaskCopy;
+      const taskWithSubTasks = { ...task, subTasks: [] } as TaskWithSubTasks;
+      // Unused by the fix: if the code goes back to getByIdOnce$, the test
+      // fails on the assertion below instead of a TypeError.
+      mockTaskService.getByIdOnce$.and.returnValue(of(task));
+      mockTaskService.getByIdWithSubTaskData$.and.returnValue(of(taskWithSubTasks));
+      const suggestion = {
+        title: task.title,
+        taskId: task.id,
+        projectId: 'project-2',
+      } as AddTaskSuggestion;
+
+      await component.onTaskSuggestionSelected(suggestion);
+
+      expect(mockTaskService.moveToCurrentWorkContext).toHaveBeenCalledOnceWith(
+        taskWithSubTasks,
+      );
     });
   });
 

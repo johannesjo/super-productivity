@@ -105,6 +105,9 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
 
+      - name: Carry entitlements into the archive
+        run: tools/sign-ios-archive-adhoc.sh "$RUNNER_TEMP/App.xcarchive"
+
       - name: Create ExportOptions.plist
         run: |
           cat > "$RUNNER_TEMP/ExportOptions.plist" << EOF
@@ -162,6 +165,11 @@ jobs:
       - name: List exported files
         run: ls -la "$RUNNER_TEMP/ipa-output"
 
+      - name: Verify App Group entitlement
+        run: |
+          unzip -q "$RUNNER_TEMP"/ipa-output/*.ipa -d "$RUNNER_TEMP/ipa-check"
+          tools/assert-ios-app-group-entitlements.sh "$RUNNER_TEMP/ipa-check/Payload/App.app"
+
       - name: Upload IPA artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -173,7 +181,7 @@ jobs:
         # .ruby-version file in the repo the action errors out rather than
         # using system Ruby. bundler-cache runs `bundle install` and caches the
         # ~210-gem fastlane tree so it isn't reinstalled each run.
-        uses: ruby/setup-ruby@e81a8fa391b11a595c1b7ed84177cc0fe02faf83 # v1.328.0
+        uses: ruby/setup-ruby@651ff0d62c5c79bed6d53ec518387aae20e72c1a # v1.329.0
         with:
           ruby-version: '3.3'
           bundler-cache: true

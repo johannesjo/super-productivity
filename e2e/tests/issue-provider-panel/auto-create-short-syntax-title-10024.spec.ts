@@ -150,6 +150,7 @@ test('auto-created issue excludes short syntax tokens (#10024)', async ({
   await expect(repoInput).toBeFocused();
   await repoInput.fill('e2e/repro');
   await tokenInput.fill('e2e-token');
+  await expect(repoInput).toHaveValue('e2e/repro');
   await expect(tokenInput).toHaveValue('e2e-token');
 
   await dialog.getByRole('button', { name: /Advanced Config/i }).click();

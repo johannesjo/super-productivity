@@ -24,6 +24,7 @@ import {
 } from '../../features/project/store/project.selectors';
 import { toggleHideFromMenu } from '../../features/project/store/project.actions';
 import { NavConfig, NavItem } from './magic-side-nav.model';
+import { NAV_SECTION_ICON } from './nav-section-icons.const';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
 import { PluginService } from '../../plugins/plugin.service';
 import { lsGetBoolean, lsSetItem } from '../../util/ls-util';
@@ -237,7 +238,7 @@ export class MagicNavConfigService {
               type: 'route',
               id: 'search',
               label: T.MH.SEARCH,
-              icon: 'search',
+              icon: NAV_SECTION_ICON.SEARCH,
               route: '/search',
               featureConfigKey: 'isSearchEnabled',
             } as NavItem,
@@ -247,7 +248,7 @@ export class MagicNavConfigService {
         type: 'route',
         id: 'scheduled-list',
         label: T.MH.ALL_PLANNED_LIST,
-        icon: 'list',
+        icon: NAV_SECTION_ICON.SCHEDULED_LIST,
         route: '/scheduled-list',
       },
 
@@ -260,7 +261,7 @@ export class MagicNavConfigService {
               type: 'route',
               id: 'donate',
               label: T.MH.DONATE,
-              icon: 'favorite',
+              icon: NAV_SECTION_ICON.DONATE,
               route: '/donate',
               featureConfigKey: 'isDonatePageEnabled',
             } as NavItem,
@@ -334,7 +335,7 @@ export class MagicNavConfigService {
         type: 'route',
         id: 'settings',
         label: T.MH.SETTINGS,
-        icon: 'settings',
+        icon: NAV_SECTION_ICON.SETTINGS,
         route: '/config',
         tourClass: 'tour-settingsMenuBtn',
       },
@@ -408,7 +409,7 @@ export class MagicNavConfigService {
         type: 'route',
         id: 'planner',
         label: T.MH.PLANNER,
-        icon: 'edit_calendar',
+        icon: NAV_SECTION_ICON.PLANNER,
         route: '/planner',
         featureConfigKey: 'isPlannerEnabled',
       });
@@ -419,7 +420,7 @@ export class MagicNavConfigService {
         type: 'route',
         id: 'schedule',
         label: T.MH.SCHEDULE,
-        icon: 'schedule',
+        icon: NAV_SECTION_ICON.SCHEDULE,
         route: '/schedule',
         featureConfigKey: 'isSchedulerEnabled',
       });
@@ -430,7 +431,7 @@ export class MagicNavConfigService {
         type: 'route',
         id: 'boards',
         label: T.MH.BOARDS,
-        icon: 'grid_view',
+        icon: NAV_SECTION_ICON.BOARDS,
         route: '/boards',
         featureConfigKey: 'isBoardsEnabled',
       });
@@ -441,7 +442,7 @@ export class MagicNavConfigService {
         type: 'route',
         id: 'habits',
         label: T.MH.HABITS,
-        icon: 'heart_check',
+        icon: NAV_SECTION_ICON.HABITS,
         route: '/habits',
         featureConfigKey: 'isHabitsEnabled',
       });

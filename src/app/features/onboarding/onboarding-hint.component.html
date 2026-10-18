@@ -15,9 +15,6 @@
       class="hint-chip"
     >
       <div class="hint-text">
-        @if (hintTitle(); as title) {
-          <div class="hint-title">{{ title | translate }}</div>
-        }
         @if (hintMessage()) {
           <div class="hint-message">
             @if (hintIcon(); as icon) {
@@ -30,17 +27,6 @@
           <span class="shortcut-hint">
             {{ T.ONBOARDING.HINTS.OR_PRESS | translate }} <kbd>{{ shortcut }}</kbd>
           </span>
-        }
-        @if (hintDoneLabel(); as doneLabel) {
-          <div class="hint-buttons">
-            <button
-              mat-button
-              type="button"
-              (click)="skip()"
-            >
-              {{ doneLabel | translate }}
-            </button>
-          </div>
         }
       </div>
       <button
