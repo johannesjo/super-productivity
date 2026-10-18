@@ -109,7 +109,7 @@ test.describe('First-run onboarding', () => {
     // Focus returns to + after the composer closes; move it so the + tooltip
     // does not sit on top of the hint's close button.
     await page.mouse.click(640, 600);
-    await hint.getByRole('button', { name: 'Got it' }).click();
+    await hint.getByRole('button', { name: 'Close tip' }).click();
     await expect(hint).toHaveCount(0);
 
     await waitForStatePersistence(page);
@@ -317,7 +317,7 @@ test.describe('First-run onboarding', () => {
           return !!btn && !!chip && chip.y + chip.height <= btn.y;
         })
         .toBe(true);
-      await hint.getByRole('button', { name: 'Got it' }).tap();
+      await hint.getByRole('button', { name: 'Close tip' }).tap();
       await expect(hint).toHaveCount(0);
       assertNoRuntimeBrowserErrors(runtimeErrors, 'mobile onboarding');
       await page.close();
@@ -355,7 +355,7 @@ test.describe('First-run onboarding', () => {
 
       // Nothing is left to swipe: move on instead of waiting unseen.
       await expect(hint).toContainText(MODEL_TIP);
-      await hint.getByRole('button', { name: 'Got it' }).tap();
+      await hint.getByRole('button', { name: 'Close tip' }).tap();
       await expect(hint).toHaveCount(0);
       await expect
         .poll(() =>

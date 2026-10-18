@@ -12,7 +12,6 @@ import {
   untracked,
   viewChild,
 } from '@angular/core';
-import { MatButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { OnboardingHintService, OnboardingStep } from './onboarding-hint.service';
@@ -45,12 +44,8 @@ const swipeTargetSelector = (swipeTargetTaskId: string | null): string =>
 interface StepConfig {
   /** Candidate targets in order of preference; the first visible one is used. */
   selector: (swipeTargetTaskId: string | null) => string | string[];
-  /** Optional heading above the message, e.g. to mark the end of guidance */
-  title?: string;
   message: string;
   touchMessage?: string;
-  /** Text button that closes the tip, for steps the user just acknowledges */
-  doneLabel?: string;
   /** Gesture icon shown before the message */
   icon?: string;
   showShortcut: boolean;
@@ -110,7 +105,6 @@ const STEP_CONFIGS = new Map<OnboardingStep, StepConfig>([
       ],
       // The last tip: what Today and the Inbox are (#8824).
       message: T.ONBOARDING.HINTS.TODAY_AND_INBOX,
-      doneLabel: T.ONBOARDING.HINTS.GOT_IT,
       isEndedWhenMissing: true,
       showShortcut: false,
       isPulse: false,
@@ -138,7 +132,7 @@ interface HintPosition {
 @Component({
   selector: 'onboarding-hint',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [TranslatePipe, MatIcon, MatButton],
+  imports: [TranslatePipe, MatIcon],
   templateUrl: './onboarding-hint.component.html',
   styleUrl: './onboarding-hint.component.scss',
 })
@@ -148,8 +142,6 @@ export class OnboardingHintComponent {
   hintPosition = signal<HintPosition | null>(null);
   hintMessage = signal<string>('');
   hintIcon = signal<string | null>(null);
-  hintTitle = signal<string | null>(null);
-  hintDoneLabel = signal<string | null>(null);
   shortcutHint = signal<string | null>(null);
 
   private _globalConfigService = inject(GlobalConfigService);
@@ -238,11 +230,7 @@ export class OnboardingHintComponent {
     const key = isTouchActive()
       ? (config.touchMessage ?? config.message)
       : config.message;
-    const text = [config.title, key]
-      .filter((k): k is string => !!k)
-      .map((k) => this._translateService.instant(k))
-      .join(' ');
-    void this._liveAnnouncer.announce(text);
+    void this._liveAnnouncer.announce(this._translateService.instant(key));
   }
 
   /** Re-anchor on scroll/resize, or attach once the target appears. */
@@ -361,8 +349,6 @@ export class OnboardingHintComponent {
       isTouchActive() ? (config.touchMessage ?? config.message) : config.message,
     );
     this.hintIcon.set(config.icon ?? null);
-    this.hintTitle.set(config.title ?? null);
-    this.hintDoneLabel.set(config.doneLabel ?? null);
     if (!isTouchActive() && config.showShortcut) {
       const shortcut = this._globalConfigService.cfg()?.keyboard?.addNewTask;
       this.shortcutHint.set(shortcut || null);

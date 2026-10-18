@@ -37,8 +37,8 @@ const RETURNING_USER_MIN_PROJECTS = 3;
  * 2. Phones only: on the task row, "swipe left for more actions" (advances once
  *    the task menu was opened and closed), then "swipe right to mark it as done"
  *    (ends once a task is marked done or the first task is deleted).
- * 3. Point at the Inbox and say what Today and the Inbox are (#8824). Ends on
- *    "Got it" or once the user navigates anywhere.
+ * 3. Point at the Inbox and say what Today and the Inbox are (#8824). Ends
+ *    when closed or once the user navigates anywhere.
  *
  * Starting a Help tour ends guidance, so only one of them is ever on screen.
  * No step advances on a timer. Reloading after the first task ends guidance.

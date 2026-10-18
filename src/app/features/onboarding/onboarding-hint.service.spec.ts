@@ -306,7 +306,7 @@ describe('OnboardingHintService', () => {
       expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBe('true');
     });
 
-    it('ends for good on "Got it"', () => {
+    it('ends for good once closed', () => {
       const service = createService();
       addFirstTask();
       service.skip();
