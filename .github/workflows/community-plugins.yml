@@ -3,13 +3,15 @@ name: Community Plugins
 
 # Downloads every pinned release in the in-app plugin listing and checks its
 # size, SHA-256 and manifest id/version, so a listing PR can be reviewed
-# without hashing files by hand. The shape check also runs in `npm run lint`.
+# without hashing files by hand. The shape check and the tool's tests run in
+# `npm run lint`; this job only adds the network step.
 'on':
   pull_request:
     branches: [master, main]
     paths:
       - src/assets/community-plugins.json
       - tools/verify-community-plugins.js
+      - .github/workflows/community-plugins.yml
 
 concurrency:
   group: community-plugins-${{ github.ref }}
@@ -33,6 +35,4 @@ jobs:
           node-version: 22
 
       - name: Verify community plugins
-        run: |
-          node --test tools/verify-community-plugins.test.js
-          node tools/verify-community-plugins.js --download
+        run: node tools/verify-community-plugins.js --download

@@ -19,7 +19,7 @@ const crypto = require('node:crypto');
 const { execFileSync } = require('node:child_process');
 
 const LISTING_PATH = path.join(__dirname, '../src/assets/community-plugins.json');
-// Keep in sync with MAX_PLUGIN_ZIP_SIZE in src/app/plugins/plugin.const.ts.
+// Same as MAX_PLUGIN_ZIP_SIZE in src/app/plugins/plugin.const.ts (a test compares them).
 const MAX_PLUGIN_ZIP_SIZE = 10 * 1024 * 1024;
 
 const ENTRY_KEYS = new Set([
@@ -37,6 +37,10 @@ const ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._-]*$/;
 // Numeric only, so the app can tell whether a listed release is newer.
 const VERSION_PATTERN = /^\d+(\.\d+)*$/;
 const SHA256_PATTERN = /^[0-9a-f]{64}$/;
+
+// Manifest values come from the downloaded ZIP: quote and cap them so they cannot
+// forge GitHub Actions workflow commands (`::notice::`) in the log.
+const show = (v) => JSON.stringify(v ?? null).slice(0, 100);
 
 const isNonEmptyString = (v) => typeof v === 'string' && v.trim().length > 0;
 const isHttpsUrl = (v) => {
@@ -169,15 +173,15 @@ const verifyRelease = async (
   try {
     manifest = readManifest(bytes);
   } catch (e) {
-    return [`could not read manifest.json from the ZIP: ${e.message}`];
+    return [`could not read manifest.json from the ZIP: ${show(e.message)}`];
   }
   const errors = [];
   if (manifest?.id !== entry.id) {
-    errors.push(`manifest id is "${manifest?.id}", listed id is "${entry.id}"`);
+    errors.push(`manifest id is ${show(manifest?.id)}, listed id is "${entry.id}"`);
   }
   if (manifest?.version !== release.version) {
     errors.push(
-      `manifest version is "${manifest?.version}", listed version is "${release.version}"`,
+      `manifest version is ${show(manifest?.version)}, listed version is "${release.version}"`,
     );
   }
   return errors;
@@ -212,4 +216,9 @@ if (require.main === module) {
   });
 }
 
-module.exports = { validateCommunityPlugins, verifyRelease, LISTING_PATH };
+module.exports = {
+  validateCommunityPlugins,
+  verifyRelease,
+  LISTING_PATH,
+  MAX_PLUGIN_ZIP_SIZE,
+};

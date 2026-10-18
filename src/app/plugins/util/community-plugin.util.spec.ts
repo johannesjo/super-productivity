@@ -7,6 +7,7 @@ import {
   getCommunityPluginStatus,
 } from './community-plugin.util';
 import { MAX_PLUGIN_ZIP_SIZE } from '../plugin.const';
+import { strToU8, zipSync } from 'fflate';
 
 const sha256Hex = async (bytes: Uint8Array<ArrayBuffer>): Promise<string> =>
   Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256', bytes)), (b) =>
@@ -59,7 +60,10 @@ describe('getCommunityPluginStatus', () => {
 });
 
 describe('downloadVerifiedCommunityPlugin', () => {
-  const bytes = new TextEncoder().encode('zip bytes');
+  const zip = (manifest: object): Uint8Array<ArrayBuffer> =>
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    new Uint8Array(zipSync({ 'manifest.json': strToU8(JSON.stringify(manifest)) }));
+  const bytes = zip({ id: 'x', version: '1.0.0' });
   let release: CommunityPluginRelease;
 
   const respondWith =
@@ -90,6 +94,7 @@ describe('downloadVerifiedCommunityPlugin', () => {
 
   it('returns the ZIP when the hash matches, comparing case-insensitively', async () => {
     const file = await downloadVerifiedCommunityPlugin(
+      'x',
       { ...release, sha256: release.sha256.toUpperCase() },
       respondWith(bytes),
     );
@@ -103,7 +108,7 @@ describe('downloadVerifiedCommunityPlugin', () => {
       .createSpy('fetch')
       .and.callFake(() => Promise.resolve(new Response(bytes)));
 
-    await downloadVerifiedCommunityPlugin(release, fetchSpy);
+    await downloadVerifiedCommunityPlugin('x', release, fetchSpy);
 
     expect(fetchSpy).toHaveBeenCalledWith(release.downloadUrl, { credentials: 'omit' });
   });
@@ -111,6 +116,7 @@ describe('downloadVerifiedCommunityPlugin', () => {
   it('rejects a file whose hash does not match', async () => {
     await expectFailure(
       downloadVerifiedCommunityPlugin(
+        'x',
         release,
         respondWith(new TextEncoder().encode('swapped')),
       ),
@@ -120,7 +126,7 @@ describe('downloadVerifiedCommunityPlugin', () => {
 
   it('rejects a network error, e.g. a CORS block', async () => {
     await expectFailure(
-      downloadVerifiedCommunityPlugin(release, () =>
+      downloadVerifiedCommunityPlugin('x', release, () =>
         Promise.reject(new TypeError('Failed to fetch')),
       ),
       'download',
@@ -129,14 +135,44 @@ describe('downloadVerifiedCommunityPlugin', () => {
 
   it('rejects an HTTP error', async () => {
     await expectFailure(
-      downloadVerifiedCommunityPlugin(release, respondWith(null, { status: 404 })),
+      downloadVerifiedCommunityPlugin('x', release, respondWith(null, { status: 404 })),
       'download',
     );
   });
 
-  it('rejects an oversized download before reading it', async () => {
+  it('rejects a ZIP whose manifest is not the listed plugin or version', async () => {
+    for (const manifest of [
+      { id: 'other', version: '1.0.0' },
+      { id: 'x', version: '0.9.0' },
+    ]) {
+      const other = zip(manifest);
+      await expectFailure(
+        downloadVerifiedCommunityPlugin(
+          'x',
+          { ...release, sha256: await sha256Hex(other) },
+          respondWith(other),
+        ),
+        'manifestMismatch',
+      );
+    }
+  });
+
+  it('rejects a matching-hash file that is not a ZIP with a manifest', async () => {
+    const notZip = new TextEncoder().encode('not a zip');
     await expectFailure(
       downloadVerifiedCommunityPlugin(
+        'x',
+        { ...release, sha256: await sha256Hex(notZip) },
+        respondWith(notZip),
+      ),
+      'manifestMismatch',
+    );
+  });
+
+  it('rejects a too-large content-length', async () => {
+    await expectFailure(
+      downloadVerifiedCommunityPlugin(
+        'x',
         release,
         respondWith(bytes, {
           headers: new Headers([['content-length', String(MAX_PLUGIN_ZIP_SIZE + 1)]]),
@@ -149,6 +185,7 @@ describe('downloadVerifiedCommunityPlugin', () => {
   it('rejects an oversized body without a content-length', async () => {
     await expectFailure(
       downloadVerifiedCommunityPlugin(
+        'x',
         release,
         respondWith(new Uint8Array(MAX_PLUGIN_ZIP_SIZE + 1)),
       ),

@@ -947,9 +947,10 @@ the app. To be listed, open a PR that adds an entry:
   that contains the new listing reaches them.
 - The `Community Plugins` CI check downloads each release and verifies its size
   (10 MB max), hash, and manifest `id` and `version`; `npm run lint` checks the
-  file's shape. The download host must allow cross-origin requests for the
-  button to work in the web app; the desktop app is not affected. When the
-  download fails, the app tells the user to install the ZIP by hand.
+  file's shape.
+- The desktop and mobile apps install in-app. The web app shows a **Download**
+  link to `downloadUrl` instead, because release hosts such as GitHub and
+  Codeberg send no CORS headers; the user then installs the ZIP by hand.
 - A listing is not a review: the list says that community plugins are not
   reviewed, and the hash only proves the file is the one listed.
 

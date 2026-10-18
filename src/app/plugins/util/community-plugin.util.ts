@@ -2,8 +2,9 @@ import { MAX_PLUGIN_ZIP_SIZE } from '../plugin.const';
 
 /**
  * A pinned, installable release of a listed community plugin. The hash pins the
- * exact ZIP that was reviewed when the entry was added or bumped, so a swapped or
- * re-uploaded release asset fails verification instead of installing.
+ * exact ZIP that was listed when the entry was added or bumped, so a swapped or
+ * re-uploaded release asset fails verification instead of installing. Pinning is
+ * not a review: listed plugins are unreviewed third-party code.
  */
 export interface CommunityPluginRelease {
   version: string;
@@ -27,6 +28,8 @@ export interface CommunityPlugin {
 
 export type CommunityPluginStatus = 'notInstalled' | 'installed' | 'updateAvailable';
 
+// Listed versions are strictly numeric (tools/verify-community-plugins.js); the
+// leniency here is for the installed side, whose manifest version is the author's.
 const parseVersion = (version: string): number[] | null => {
   const core = version.trim().replace(/^v/i, '').split(/[-+]/)[0];
   return /^\d+(\.\d+)*$/.test(core) ? core.split('.').map(Number) : null;
@@ -65,7 +68,11 @@ export const getCommunityPluginStatus = (
     : 'installed';
 };
 
-export type CommunityPluginDownloadFailure = 'download' | 'tooLarge' | 'hashMismatch';
+export type CommunityPluginDownloadFailure =
+  | 'download'
+  | 'tooLarge'
+  | 'hashMismatch'
+  | 'manifestMismatch';
 
 export class CommunityPluginDownloadError extends Error {
   override name = 'CommunityPluginDownloadError';
@@ -82,12 +89,35 @@ const toHex = (bytes: ArrayBuffer): string =>
   Array.from(new Uint8Array(bytes), (b) => b.toString(16).padStart(2, '0')).join('');
 
 /**
+ * Whether the ZIP's manifest.json has the listed id and version. Checked before
+ * install: `loadPluginFromZip` installs under the manifest's id, so a mismatch would
+ * replace a different installed plugin. CI checks the same with `unzip`.
+ */
+const isListedManifest = async (
+  bytes: ArrayBuffer,
+  id: string,
+  version: string,
+): Promise<boolean> => {
+  const { unzipSync } = await import('fflate');
+  try {
+    const files = unzipSync(new Uint8Array(bytes), {
+      filter: (file) => file.name === 'manifest.json',
+    });
+    const manifest = JSON.parse(new TextDecoder().decode(files['manifest.json']));
+    return manifest?.id === id && manifest?.version === version;
+  } catch {
+    return false;
+  }
+};
+
+/**
  * Downloads a listed release and returns it as a ZIP `File` for
- * `PluginService.loadPluginFromZip`, but only if its SHA-256 matches the pinned hash.
- * Redirects are followed (release hosts redirect to their CDNs): the hash, not the
- * URL, is what makes the bytes trustworthy.
+ * `PluginService.loadPluginFromZip`, but only if its SHA-256 matches the pinned hash
+ * and its manifest has the listed id and version. Redirects are followed (release
+ * hosts redirect to their CDNs): the hash, not the URL, makes the bytes trustworthy.
  */
 export const downloadVerifiedCommunityPlugin = async (
+  id: string,
   release: CommunityPluginRelease,
   fetchFn: typeof fetch = fetch,
 ): Promise<File> => {
@@ -117,6 +147,12 @@ export const downloadVerifiedCommunityPlugin = async (
     throw new CommunityPluginDownloadError(
       'hashMismatch',
       'Downloaded file does not match the listed checksum',
+    );
+  }
+  if (!(await isListedManifest(bytes, id, release.version))) {
+    throw new CommunityPluginDownloadError(
+      'manifestMismatch',
+      'Downloaded manifest does not have the listed id and version',
     );
   }
   return new File([bytes], 'plugin.zip', { type: 'application/zip' });

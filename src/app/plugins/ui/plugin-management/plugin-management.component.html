@@ -35,12 +35,6 @@
           @if (isUploadedPlugin(plugin)) {
             <mat-chip>{{ T.PLUGINS.THIRD_PARTY | translate }}</mat-chip>
           }
-          @if (communityUpdates().get(plugin.manifest.id)?.release; as release) {
-            <mat-chip>{{
-              T.PLUGINS.COMMUNITY_UPDATE_AVAILABLE
-                | translate: { version: release.version }
-            }}</mat-chip>
-          }
           @if (isPluginLoading(plugin)) {
             <mat-chip color="accent">
               <mat-icon class="loading-icon">autorenew</mat-icon>
@@ -160,19 +154,34 @@
               {{ T.PLUGINS.SETUP_ISSUE_PROVIDER | translate }}
             </button>
           }
-          @if (communityUpdates().get(plugin.manifest.id); as listed) {
-            <button
-              mat-button
-              color="primary"
-              (click)="installCommunityPlugin(listed)"
-              [disabled]="isUploading()"
-            >
-              <mat-icon>update</mat-icon>
-              {{
-                T.PLUGINS.COMMUNITY_UPDATE
-                  | translate: { version: listed.release?.version }
-              }}
-            </button>
+          @if (communityUpdates().get(plugin.manifest.id); as update) {
+            @if (isInAppInstall) {
+              <button
+                mat-button
+                color="primary"
+                (click)="installCommunityPlugin(update.plugin)"
+                [disabled]="isUploading()"
+              >
+                <mat-icon>update</mat-icon>
+                {{
+                  T.PLUGINS.COMMUNITY_UPDATE
+                    | translate: { version: update.release.version }
+                }}
+              </button>
+            } @else {
+              <a
+                mat-button
+                color="primary"
+                [href]="update.release.downloadUrl"
+                target="_blank"
+              >
+                <mat-icon>download</mat-icon>
+                {{
+                  T.PLUGINS.COMMUNITY_DOWNLOAD
+                    | translate: { version: update.release.version }
+                }}
+              </a>
+            }
           }
           @if (isUploadedPlugin(plugin)) {
             <button
@@ -233,6 +242,21 @@
               <mat-icon>check</mat-icon>
               {{ T.PLUGINS.COMMUNITY_INSTALLED | translate }}
             </p>
+          } @else if (plugin.release && !isInAppInstall) {
+            <div class="community-plugin-action">
+              <a
+                mat-stroked-button
+                color="primary"
+                [href]="plugin.release.downloadUrl"
+                target="_blank"
+              >
+                <mat-icon>download</mat-icon>
+                {{
+                  T.PLUGINS.COMMUNITY_DOWNLOAD
+                    | translate: { version: plugin.release.version }
+                }}
+              </a>
+            </div>
           } @else if (plugin.release) {
             <div class="community-plugin-action">
               <button

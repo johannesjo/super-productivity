@@ -20,6 +20,7 @@ import { isPluginListed, PluginManagementComponent } from './plugin-management.c
 import { T } from '../../../t.const';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { CommunityPlugin } from '../../util/community-plugin.util';
+import { strToU8, zipSync } from 'fflate';
 
 type PluginManifestWithAuthor = PluginManifest & { author?: string };
 
@@ -323,6 +324,7 @@ describe('PluginManagementComponent', () => {
         PLUGINS: {
           AUTHORED_BY: '{{author}} tarafından',
           COMMUNITY_GET_LISTED: 'Eklentinizi burada listeleyin',
+          COMMUNITY_DOWNLOAD: 'v{{version}} indir',
           COMMUNITY_INSTALL: 'v{{version}} yükle',
           COMMUNITY_PLUGINS: 'Topluluk eklentileri',
           COMMUNITY_WARNING: 'Topluluk eklentileri incelenmez.',
@@ -331,6 +333,7 @@ describe('PluginManagementComponent', () => {
       translateService.use('tr');
       // A fixture instead of the real community-plugins.json, whose first entry
       // may lack the optional authorUrl or release.
+      (component as { isInAppInstall: boolean }).isInAppInstall = true;
       component.communityPlugins.set([plugin]);
       fixture.detectChanges();
     });
@@ -364,6 +367,19 @@ describe('PluginManagementComponent', () => {
       const button = card().querySelector('.community-plugin-item button');
 
       expect(normalize(button?.textContent)).toBe('download v2.0.0 yükle');
+    });
+
+    it('links to the ZIP instead on web, where release hosts block the download', () => {
+      (component as { isInAppInstall: boolean }).isInAppInstall = false;
+      // A new list, so the OnPush view re-renders with the flag.
+      component.communityPlugins.set([{ ...plugin }]);
+      fixture.detectChanges();
+      const item = card().querySelector('.community-plugin-item');
+      const link = item?.querySelector<HTMLAnchorElement>('.community-plugin-action a');
+
+      expect(item?.querySelector('button')).toBeNull();
+      expect(link?.getAttribute('href')).toBe(plugin.release.downloadUrl);
+      expect(normalize(link?.textContent)).toBe('download v2.0.0 indir');
     });
 
     it('offers no install button for a link-only entry', () => {
@@ -497,7 +513,12 @@ describe('PluginManagementComponent', () => {
   });
 
   describe('listed community plugins', () => {
-    const zipBytes = new TextEncoder().encode('zip bytes');
+    const zipBytes = new Uint8Array(
+      zipSync({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'manifest.json': strToU8(JSON.stringify({ id: 'listed', version: '1.2.0' })),
+      }),
+    );
     let listed: CommunityPlugin;
     let pluginStates: WritableSignal<Map<string, PluginState>>;
     let fetchSpy: jasmine.Spy;
@@ -549,7 +570,10 @@ describe('PluginManagementComponent', () => {
 
       pluginStates.set(new Map([['listed', uploaded('listed', '1.1.0')]]));
       expect(component.communityPluginRows()[0].status).toBe('updateAvailable');
-      expect(component.communityUpdates().get('listed')).toBe(listed);
+      expect(component.communityUpdates().get('listed')).toEqual({
+        plugin: listed,
+        release: listed.release!,
+      });
     });
 
     it('ignores a built-in plugin with the same id', () => {
@@ -613,6 +637,20 @@ describe('PluginManagementComponent', () => {
           translateParams: jasmine.objectContaining({ name: 'Listed' }),
         }),
       );
+      expect(component.isUploading()).toBe(false);
+    });
+
+    it('shows the install error, as for a ZIP upload, when the plugin is rejected', async () => {
+      stubConfirmDialog(true);
+      loadPluginFromZipSpy.and.returnValue(Promise.reject(new Error('Manifest invalid')));
+
+      await component.installCommunityPlugin(listed);
+
+      expect(snackOpenSpy).toHaveBeenCalledWith({
+        type: 'ERROR',
+        msg: 'Manifest invalid',
+        isSkipTranslate: true,
+      });
       expect(component.isUploading()).toBe(false);
     });
 

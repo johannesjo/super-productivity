@@ -184,7 +184,7 @@ mat-error {
     display: inline-flex;
     align-items: center;
     gap: var(--s-half);
-    font-size: 14px;
+    font-size: var(--font-size-md);
     color: var(--text-color-muted);
 
     mat-icon {
