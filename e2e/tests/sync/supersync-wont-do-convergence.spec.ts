@@ -178,4 +178,59 @@ test.describe("@supersync Won't do vs un-done convergence", () => {
       }
     });
   }
+
+  // Concurrently, A finishes an open task as won't do and B completes it
+  // later. B's completion is the newer edit, so it wins on both clients: an
+  // older won't do must not survive beside it.
+  for (const firstToSync of ['wontDo', 'completed'] as const) {
+    test(`converges on a newer completion when the ${firstToSync} client syncs first`, async ({
+      browser,
+      baseURL,
+      testRunId,
+    }) => {
+      const appUrl = baseURL || 'http://localhost:4242';
+      let clientA: SimulatedE2EClient | null = null;
+      let clientB: SimulatedE2EClient | null = null;
+
+      try {
+        const syncConfig = getSuperSyncConfig(await createTestUser(testRunId));
+        clientA = await createSimulatedClient(browser, appUrl, 'A', testRunId);
+        await clientA.sync.setupSuperSync(syncConfig);
+        clientB = await createSimulatedClient(browser, appUrl, 'B', testRunId);
+        await clientB.sync.setupSuperSync(syncConfig);
+
+        const taskName = `WontDo-completed-${firstToSync}-${testRunId}`;
+        await clientA.workView.addTask(taskName);
+        await clientA.sync.syncAndWait();
+        await clientB.sync.syncAndWait();
+        await waitForTask(clientB.page, taskName);
+
+        await finishAsWontDo(clientA, taskName);
+        await markTaskDone(clientB, taskName);
+
+        const [first, second] =
+          firstToSync === 'wontDo' ? [clientA, clientB] : [clientB, clientA];
+        await first.sync.syncAndWait();
+        await second.sync.syncAndWait();
+        await first.sync.syncAndWait();
+        await second.sync.syncAndWait();
+
+        for (const client of [clientA, clientB]) {
+          await expect(getDoneTaskElement(client, taskName)).toHaveCount(1);
+          await expect(
+            getDoneTaskElement(client, taskName).locator(
+              'done-toggle .done-check--cross',
+            ),
+          ).toHaveCount(0);
+          expect(await getStoredState(client, taskName)).toEqual({
+            isDone: true,
+            isWontDo: false,
+          });
+        }
+      } finally {
+        if (clientA) await closeClient(clientA);
+        if (clientB) await closeClient(clientB);
+      }
+    });
+  }
 });
