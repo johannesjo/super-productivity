@@ -12,7 +12,6 @@ import { LOCAL_ACTIONS } from '../../util/local-actions.token';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { GlobalConfigService } from '../config/global-config.service';
 import { ProjectService } from '../project/project.service';
-import { INBOX_PROJECT } from '../project/project.const';
 import { TaskService } from '../tasks/task.service';
 import { TaskFocusService } from '../tasks/task-focus.service';
 import { selectTaskEntities } from '../tasks/store/task.selectors';
@@ -24,17 +23,6 @@ export type OnboardingStep =
   | 'today-and-inbox';
 
 type OnboardingPhase = 'idle' | 'await-first-task' | OnboardingStep;
-
-const readExampleTaskIds = (): string[] => {
-  try {
-    const ids: unknown = JSON.parse(localStorage.getItem(LS.EXAMPLE_TASK_IDS) ?? '[]');
-    return Array.isArray(ids)
-      ? ids.filter((id): id is string => typeof id === 'string')
-      : [];
-  } catch {
-    return [];
-  }
-};
 
 /** More projects than the default ones means this is not a new user. */
 const RETURNING_USER_MIN_PROJECTS = 3;
@@ -49,13 +37,10 @@ const RETURNING_USER_MIN_PROJECTS = 3;
  * 2. Phones only: on the task row, "swipe left for more actions" (advances once
  *    the task menu was opened and closed), then "swipe right to mark it as done"
  *    (ends once a task is marked done or the first task is deleted).
- * 3. Point at the Inbox and explain where tasks live: Today lists what is
- *    planned for today, every task belongs to a project, the Inbox by default
- *    (#8824). Mentions the seeded tips while they are still in the Inbox. Ends
- *    on "Got it" or once the user navigates anywhere.
+ * 3. Point at the Inbox and say what Today and the Inbox are (#8824). Ends on
+ *    "Got it" or once the user navigates anywhere.
  *
- * Switchers can leave from step 1 to the Todoist/TickTick importers, and
- * starting a Help tour ends guidance, so only one of them is ever on screen.
+ * Starting a Help tour ends guidance, so only one of them is ever on screen.
  * No step advances on a timer. Reloading after the first task ends guidance.
  */
 @Injectable({ providedIn: 'root' })
@@ -80,8 +65,6 @@ export class OnboardingHintService {
   private _taskEntities = this._store.selectSignal(selectTaskEntities);
 
   readonly firstTaskId = signal<string | null>(null);
-  /** Whether the seeded tips were still in the Inbox when the last step began. */
-  readonly hasTipsInInbox = signal(false);
 
   /** Row the swipe hints point at: the first task while undone, else any undone task. */
   readonly swipeTargetTaskId = computed(() => {
@@ -254,13 +237,6 @@ export class OnboardingHintService {
   }
 
   private _advanceToLastStep(): void {
-    const entities = this._taskEntities();
-    this.hasTipsInInbox.set(
-      readExampleTaskIds().some((id) => {
-        const task = entities[id];
-        return !!task && task.projectId === INBOX_PROJECT.id && !task.isDone;
-      }),
-    );
     this._phase.set('today-and-inbox');
   }
 

@@ -12,7 +12,7 @@ const pixel5TestOptions = { ...devices['Pixel 5'] };
 Reflect.deleteProperty(pixel5TestOptions, 'defaultBrowserType');
 
 const MODEL_TIP = "Today shows what's planned for today.";
-const INBOX_TIP = 'Some optional tips are waiting there, too.';
+const INBOX_TIP = "The Inbox keeps every task that isn't in a project.";
 const INBOX_NAV_ITEM =
   'magic-side-nav nav-item[data-project-id="INBOX_PROJECT"] .nav-link';
 
@@ -109,7 +109,6 @@ test.describe('First-run onboarding', () => {
     // Focus returns to + after the composer closes; move it so the + tooltip
     // does not sit on top of the hint's close button.
     await page.mouse.click(640, 600);
-    await expect(hint).toContainText("You're all set");
     await hint.getByRole('button', { name: 'Got it' }).click();
     await expect(hint).toHaveCount(0);
 
@@ -222,8 +221,7 @@ test.describe('First-run onboarding', () => {
 
     const hint = page.locator('onboarding-hint');
     await expect(hint).toContainText(MODEL_TIP);
-    await expect(hint).toContainText('the Inbox, unless you pick another');
-    await expect(hint).not.toContainText(INBOX_TIP);
+    await expect(hint).toContainText(INBOX_TIP);
 
     // Moving on anywhere ends the last tip.
     await page.locator(INBOX_NAV_ITEM).click();
@@ -232,34 +230,6 @@ test.describe('First-run onboarding', () => {
       .poll(() => page.evaluate(() => localStorage.getItem('SUP_ONBOARDING_HINTS_DONE')))
       .toBe('true');
     assertNoRuntimeBrowserErrors(runtimeErrors, 'onboarding model');
-    await page.close();
-  });
-
-  test('switchers can go to the Todoist and TickTick importers from the first tip', async ({
-    isolatedContext,
-  }) => {
-    const page = await isolatedContext.newPage();
-    const runtimeErrors = attachPageErrorCollector(page, 'onboarding import');
-    installDevErrorDialogHandler(page, 'onboarding import');
-    await openFreshApp(page, { withExamples: true });
-
-    const hint = page.locator('onboarding-hint');
-    await expect(hint).toContainText('Click + to add your first task');
-    await hint.getByRole('button', { name: 'Import from other apps' }).click();
-
-    await expect(page).toHaveURL(/#\/config\?.*tab=5/);
-    await expect(hint).toHaveCount(0);
-    const todoistBtn = page.getByRole('button', { name: 'Import from Todoist' });
-    await expect(todoistBtn).toBeVisible();
-    await expect(
-      page.getByRole('button', { name: 'Import from TickTick' }),
-    ).toBeVisible();
-
-    // Leaving for the importer ends guidance for good.
-    await page.reload();
-    await expect(todoistBtn).toBeVisible();
-    await expect(page.locator('onboarding-hint')).toHaveCount(0);
-    assertNoRuntimeBrowserErrors(runtimeErrors, 'onboarding import');
     await page.close();
   });
 

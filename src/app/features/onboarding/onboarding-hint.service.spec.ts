@@ -280,7 +280,6 @@ describe('OnboardingHintService', () => {
 
       isShowAddTaskBar.set(false);
       expect(service.currentStep()).toBe('today-and-inbox');
-      expect(service.hasTipsInInbox()).toBeTrue();
       expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBeNull();
 
       navigateTo('/project/INBOX_PROJECT/tasks');
@@ -288,26 +287,11 @@ describe('OnboardingHintService', () => {
       expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBe('true');
     });
 
-    it('still explains Today and the Inbox when no example tasks are left', () => {
+    it('explains Today and the Inbox also when no example tasks are left', () => {
       const service = createService();
       addFirstTask([{ ...EXAMPLE_TASK, isDone: true }]);
       expect(service.currentStep()).toBe('today-and-inbox');
-      expect(service.hasTipsInInbox()).toBeFalse();
       expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBeNull();
-    });
-
-    it('does not mention tips when the examples were never seeded here', () => {
-      localStorage.removeItem(LS.EXAMPLE_TASK_IDS);
-      const service = createService();
-      addFirstTask([EXAMPLE_TASK]);
-      expect(service.currentStep()).toBe('today-and-inbox');
-      expect(service.hasTipsInInbox()).toBeFalse();
-    });
-
-    it("does not mistake the user's own Inbox tasks for the example tips", () => {
-      const service = createService();
-      addFirstTask([makeTask('own-inbox-task', { projectId: 'INBOX_PROJECT' })]);
-      expect(service.hasTipsInInbox()).toBeFalse();
     });
 
     it('ends on any navigation, also to pages without tasks', () => {
@@ -348,7 +332,6 @@ describe('OnboardingHintService', () => {
 
       markDone();
       expect(service.currentStep()).toBe('today-and-inbox');
-      expect(service.hasTipsInInbox()).toBeTrue();
     });
 
     it('moves on to Today and the Inbox once a task is marked done', () => {
@@ -356,7 +339,6 @@ describe('OnboardingHintService', () => {
       addFirstTask();
       markDone();
       expect(service.currentStep()).toBe('today-and-inbox');
-      expect(service.hasTipsInInbox()).toBeFalse();
     });
 
     it('ends the swipe hints once the first task is deleted', () => {
@@ -366,15 +348,6 @@ describe('OnboardingHintService', () => {
       setTasks([]);
       TestBed.tick();
       expect(service.currentStep()).toBe('today-and-inbox');
-    });
-
-    it('mentions the tips when the first task is deleted and tips wait there', () => {
-      const service = createPhoneService();
-      addFirstTask([EXAMPLE_TASK]);
-      setTasks([EXAMPLE_TASK]);
-      TestBed.tick();
-      expect(service.currentStep()).toBe('today-and-inbox');
-      expect(service.hasTipsInInbox()).toBeTrue();
     });
 
     it('hides swipe hints while a task detail panel is open', () => {

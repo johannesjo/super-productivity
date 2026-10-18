@@ -79,7 +79,6 @@ import { MatOption } from '@angular/material/core';
 import {
   searchSettings,
   SETTINGS_PLUGINS_TAB_INDEX,
-  SETTINGS_SYNC_BACKUP_TAB_INDEX,
   SettingsSearchTarget,
 } from '../../features/config/settings-search.util';
 
@@ -316,11 +315,7 @@ export class ConfigPageComponent implements OnInit {
       .subscribe((params) => {
         if (params['tab'] !== undefined) {
           const tabIndex = parseInt(params['tab'], 10);
-          if (
-            !isNaN(tabIndex) &&
-            tabIndex >= 0 &&
-            tabIndex <= SETTINGS_SYNC_BACKUP_TAB_INDEX
-          ) {
+          if (!isNaN(tabIndex) && tabIndex >= 0 && tabIndex < 5) {
             this.selectedTabIndex = tabIndex;
             this._cd.detectChanges();
           }
