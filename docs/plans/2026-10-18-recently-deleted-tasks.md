@@ -114,13 +114,14 @@ surface. **Rejected.**
   subtasks).
 - **Remote deletes:** `OperationApplierService` hands the ops it just applied
   (not local hydration) to the trash, using `op.timestamp` as the delete time.
-  A single-task delete (`deleteTask`) made on the phone is therefore
-  restorable on the desktop. A bulk `deleteTasks` (multi-select delete,
-  plugin/issue removals, repeat-duplicate cleanup) is not: the upload strips
+  A delete made on the phone is therefore restorable on the desktop. A bulk
+  `deleteTasks` reaches other devices with ids only, because the upload strips
   its `tasks` snapshots (`_sanitizeRegularOpPayloadForUpload` in
-  `operation-log-upload.service.ts`), so other devices receive only ids and
-  record nothing. Such a delete is restorable only on the device that made
-  it. The hook
+  `operation-log-upload.service.ts`). So the applier first reads those tasks
+  and their subtasks from this device's own state, before the ops apply
+  (`captureBeforeRemoteApply`, read-only). Nothing extra goes on the wire. A
+  task created and bulk-deleted inside the same downloaded batch is not in
+  that state, so it is not trashed. The hook
   is fire-and-forget and swallows errors, so the trash can never fail or slow
   a sync.
 - **Restore** dispatches the existing, released `restoreTask` with the stored
@@ -173,12 +174,14 @@ surface. **Rejected.**
   existing undo window (#10155 stays as is). A restored issue-linked task
   keeps its issue link. If the remote issue was deleted, the next issue
   refresh treats it like any other remotely deleted issue.
-- A USE_REMOTE raw rebuild replays server history and can re-add entries that
-  were emptied within the last 30 days (idempotent puts; the retention filter
-  still applies).
-- Bulk deletes (`deleteTasks`) reach other devices without task snapshots
-  (stripped on upload), so they are trashed only on the deleting device.
-  Changing that would put full task snapshots back on the wire; not done.
+- Paths that re-apply ops outside local hydration (retrying failed remote
+  ops, re-applying unsynced local ops after a snapshot load, a USE_REMOTE raw
+  rebuild) can re-add entries that were emptied within the last 30 days. The
+  puts are keyed by id, retention still applies, and no synced state reads the
+  trash.
+- The trash survives a backup import or SYNC_IMPORT, so it can offer a task
+  from the replaced dataset. Restoring one goes through `restoreTask`, which
+  drops stale project, tag and repeat references, so state stays consistent.
 - Automatic `deleteTasks` (stale duplicate repeat instances, plugin/issue
   removals) are trashed like user deletes, because the effect cannot tell
   them apart from the payload.

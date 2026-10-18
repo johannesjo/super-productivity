@@ -116,6 +116,11 @@ export class OperationApplierService implements OperationApplyPort<Operation> {
     // the unset flag's own-op default is the safe direction. See meta-reducer.
     const localClientId = (await this.clientIdProvider.loadClientId()) ?? undefined;
 
+    const recentlyDeleted = isLocalHydration
+      ? undefined
+      : this.injector.get(RecentlyDeletedService);
+    const preApplyTrashSnapshots = recentlyDeleted?.captureBeforeRemoteApply(ops);
+
     const reducerFailures: BulkReplayReducerFailure[] = [];
     const result = await replayOperationBatch({
       ops,
@@ -170,10 +175,10 @@ export class OperationApplierService implements OperationApplyPort<Operation> {
       },
     });
 
-    if (!isLocalHydration && result.appliedOps.length > 0) {
+    if (recentlyDeleted && result.appliedOps.length > 0) {
       // Device-local trash, fed from the delete ops every client receives.
       // Fire-and-forget: it never throws and must not delay or fail sync.
-      void this.injector.get(RecentlyDeletedService).recordRemoteOps(result.appliedOps);
+      void recentlyDeleted.recordRemoteOps(result.appliedOps, preApplyTrashSnapshots);
     }
 
     if (!result.failedOp) {

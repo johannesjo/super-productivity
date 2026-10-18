@@ -7,6 +7,7 @@ import {
   RecentlyDeletedEntry,
 } from './recently-deleted.util';
 import { createTask } from '../task.test-helper';
+import { Task } from '../task.model';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { Operation, OpType } from '../../../op-log/core/operation.types';
 import { ActionType } from '../../../op-log/core/action-types.enum';
@@ -69,15 +70,20 @@ describe('RecentlyDeletedService', () => {
   let service: RecentlyDeletedService;
   let store: FakeRecentlyDeletedStore;
   let dispatch: jasmine.Spy;
+  let taskEntities: Record<string, Task>;
 
   beforeEach(() => {
     store = new FakeRecentlyDeletedStore();
     dispatch = jasmine.createSpy('dispatch');
+    taskEntities = {};
     TestBed.configureTestingModule({
       providers: [
         RecentlyDeletedService,
         { provide: RecentlyDeletedStoreService, useValue: store },
-        { provide: Store, useValue: { dispatch } },
+        {
+          provide: Store,
+          useValue: { dispatch, selectSignal: () => () => taskEntities },
+        },
       ],
     });
     service = TestBed.inject(RecentlyDeletedService);
@@ -153,6 +159,42 @@ describe('RecentlyDeletedService', () => {
 
     expect([...store.entries.keys()]).toEqual(['r']);
     expect(store.entries.get('r')?.deletedAt).toBe(ts);
+  });
+
+  it('snapshots a synced bulk delete from pre-apply state (the upload strips its tasks)', async () => {
+    const parent = createTask({ id: 'p', title: 'Parent', subTaskIds: ['c'] });
+    const child = createTask({ id: 'c', title: 'Child', parentId: 'p' });
+    const other = createTask({ id: 'o', title: 'Untouched' });
+    taskEntities = { p: parent, c: child, o: other };
+    const ts = Date.now() - 1000;
+    // What arrives after upload sanitization: ids only, no `tasks`.
+    const ops = [
+      remoteOp(
+        ActionType.TASK_SHARED_DELETE_MULTIPLE,
+        { actionPayload: { taskIds: ['p'] }, entityChanges: [] },
+        ts,
+      ),
+    ];
+
+    const snapshots = service.captureBeforeRemoteApply(ops);
+    // The ops apply: the tasks are gone from state afterwards.
+    taskEntities = { o: other };
+    await service.recordRemoteOps(ops, snapshots);
+
+    expect([...store.entries.keys()]).toEqual(['p']);
+    expect(store.entries.get('p')?.subTasks.map((t) => t.id)).toEqual(['c']);
+    expect(store.entries.get('p')?.deletedAt).toBe(ts);
+  });
+
+  it('captureBeforeRemoteApply never throws on the sync path', () => {
+    TestBed.inject(Store).selectSignal = (() => {
+      throw new Error('no store');
+    }) as never;
+    expect(
+      service.captureBeforeRemoteApply([
+        remoteOp(ActionType.TASK_SHARED_DELETE_MULTIPLE, { taskIds: ['p'] }, 1),
+      ]).size,
+    ).toBe(0);
   });
 
   it('never rejects when storage fails, so the sync path stays unaffected', async () => {

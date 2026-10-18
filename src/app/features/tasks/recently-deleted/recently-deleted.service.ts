@@ -7,6 +7,8 @@ import {
   convertOpToAction,
 } from '../../../op-log/apply/operation-converter.util';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
+import { Task } from '../task.model';
+import { selectTaskEntities } from '../store/task.selectors';
 import { RecentlyDeletedStoreService } from './recently-deleted-store.service';
 import {
   getRecentlyDeletedEntriesFromAction,
@@ -50,8 +52,49 @@ export class RecentlyDeletedService {
     });
   }
 
-  /** Records the trash-relevant ops among freshly applied remote ops. */
-  recordRemoteOps(ops: readonly Operation[]): Promise<void> {
+  /**
+   * The upload strips the `tasks` snapshots from `deleteTasks` ops, so a
+   * synced bulk delete names only ids. Read those tasks (and their subtasks)
+   * from this device's state while they still exist, i.e. before the ops apply.
+   * Read-only and never throws: it runs on the sync path.
+   */
+  captureBeforeRemoteApply(ops: readonly Operation[]): ReadonlyMap<string, Task> {
+    const snapshots = new Map<string, Task>();
+    try {
+      const bulkDeletes = ops.filter(
+        (op) =>
+          (ACTION_TYPE_ALIASES[op.actionType] ?? op.actionType) ===
+          TaskSharedActions.deleteTasks.type,
+      );
+      if (!bulkDeletes.length) return snapshots;
+      const entities = this._ngrxStore.selectSignal(selectTaskEntities)();
+      for (const op of bulkDeletes) {
+        const { taskIds } = convertOpToAction(op) as { taskIds?: unknown };
+        if (!Array.isArray(taskIds)) continue;
+        for (const id of taskIds) {
+          const task = typeof id === 'string' ? entities[id] : undefined;
+          if (!task) continue;
+          snapshots.set(task.id, task);
+          for (const subTaskId of task.subTaskIds) {
+            const subTask = entities[subTaskId];
+            if (subTask) snapshots.set(subTask.id, subTask);
+          }
+        }
+      }
+    } catch (e) {
+      TaskLog.err('[RecentlyDeleted] Could not snapshot remote bulk delete', e);
+    }
+    return snapshots;
+  }
+
+  /**
+   * Records the trash-relevant ops among freshly applied remote ops.
+   * `preApplySnapshots` comes from captureBeforeRemoteApply().
+   */
+  recordRemoteOps(
+    ops: readonly Operation[],
+    preApplySnapshots: ReadonlyMap<string, Task> = new Map(),
+  ): Promise<void> {
     const now = Date.now();
     const relevantOps = ops.filter((op) =>
       RECENTLY_DELETED_RECORDED_ACTION_TYPES.has(
@@ -67,7 +110,11 @@ export class RecentlyDeletedService {
           TaskLog.err('[RecentlyDeleted] Could not read remote op', { opId: op.id }, e);
           return Promise.resolve();
         }
-        return this.recordAction(action, op.timestamp, now);
+        return this.recordAction(
+          withPreApplySnapshots(action, preApplySnapshots),
+          op.timestamp,
+          now,
+        );
       }),
     ).then(() => undefined);
   }
@@ -107,3 +154,19 @@ export class RecentlyDeletedService {
     return next;
   }
 }
+
+const withPreApplySnapshots = (
+  action: Action,
+  snapshots: ReadonlyMap<string, Task>,
+): Action => {
+  if (action.type !== TaskSharedActions.deleteTasks.type) return action;
+  const { taskIds, tasks } = action as { taskIds?: unknown; tasks?: unknown };
+  if (Array.isArray(tasks) || !Array.isArray(taskIds)) return action;
+  const rootIds = new Set(taskIds);
+  return {
+    ...action,
+    tasks: [...snapshots.values()].filter(
+      (task) => rootIds.has(task.id) || (!!task.parentId && rootIds.has(task.parentId)),
+    ),
+  } as Action;
+};

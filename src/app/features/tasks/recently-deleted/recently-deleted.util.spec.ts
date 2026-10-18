@@ -117,7 +117,7 @@ describe('recently-deleted.util', () => {
       expect(entries.map((e) => e.id)).toEqual(['a']);
     });
 
-    it('records nothing for a synced bulk delete (upload strips the snapshots)', () => {
+    it('records nothing for a bulk delete without snapshots', () => {
       expect(
         getRecentlyDeletedEntriesFromAction(
           TaskSharedActions.deleteTasks({ taskIds: ['a'] }),
