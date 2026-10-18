@@ -4,9 +4,6 @@
   [formlyAttributes]="field"
   [id]="id"
 >
-  @if (selectedProjectTitle; as title) {
-    <mat-select-trigger>{{ title }}</mat-select-trigger>
-  }
   <mat-option [value]="DefaultStartPage.Today">{{
     T.G.TODAY_TAG_TITLE | translate
   }}</mat-option>
