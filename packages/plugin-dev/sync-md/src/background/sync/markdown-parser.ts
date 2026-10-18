@@ -24,7 +24,37 @@ export interface TaskParseResult {
 const findFooterStart = (content: string): number => {
   let footerStart = content.length;
   let footerEnd = 0;
-  for (const match of content.matchAll(/<!--[\s\S]*?-->/g)) {
+  const tokens = /(^[ \t]*(`{3,}|~{3,})([^\r\n]*)\r?$)|(`+)|<!--[\s\S]*?-->/gm;
+  let match: RegExpExecArray | null;
+  while ((match = tokens.exec(content))) {
+    const fence = match[2];
+    if (fence) {
+      // Backtick fence info cannot contain backticks. Task-note indentation is allowed.
+      if (fence[0] === '`' && match[3].includes('`')) continue;
+      const closingFence = new RegExp(
+        `^[ \\t]*${fence[0]}{${fence.length},}[ \\t]*\\r?$`,
+        'gm',
+      );
+      closingFence.lastIndex = tokens.lastIndex;
+      tokens.lastIndex = closingFence.exec(content)
+        ? closingFence.lastIndex
+        : content.length;
+      continue;
+    }
+    const codeSpan = match[4];
+    if (codeSpan) {
+      const backticks = /`+|\r?\n[ \t]*\r?\n|\r?\n<!--/g;
+      backticks.lastIndex = tokens.lastIndex;
+      let closing: RegExpExecArray | null;
+      while ((closing = backticks.exec(content))) {
+        // A code span cannot continue into another paragraph or a footer block.
+        if (closing[0][0] !== '`') break;
+        if (closing[0].length !== codeSpan.length) continue;
+        tokens.lastIndex = backticks.lastIndex;
+        break;
+      }
+      continue;
+    }
     const start = match.index!;
     if (start > 0 && content[start - 1] !== '\n') continue;
     let boundary = start;

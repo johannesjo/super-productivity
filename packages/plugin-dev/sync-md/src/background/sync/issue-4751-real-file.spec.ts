@@ -156,6 +156,94 @@ describe('#4751 real-file Markdown preservation', () => {
     );
   });
 
+  it.each([
+    ['```html', '<!-- literal opener', '```'],
+    ['~~~html', '<!-- literal opener', '~~~'],
+    ['````html', '```\n<!-- literal opener', '````'],
+    ['```html', '<!-- literal opener', '````'],
+    ['Example `<!--` marker', '', ''],
+    ['Example ``literal ` and <!--`` marker', '', ''],
+  ])('keeps %s code delimiters from consuming the footer', async (open, body, close) => {
+    const notes = [open, body, close].filter(Boolean).join('\n');
+    const suffix = '\n\n' + FOOTER + '\n';
+    const content =
+      HEADER +
+      TASK_LINE +
+      '\n' +
+      notes
+        .split('\n')
+        .map((line) => '  ' + line)
+        .join('\n') +
+      suffix;
+    writeFileSync(filePath, content);
+    const task = new TaskBuilder()
+      .withId('task-1')
+      .withTitle('Original task')
+      .withProjectId('test-project')
+      .build();
+    jest.spyOn(PluginAPI, 'getTasks').mockResolvedValue([{ ...task, notes }]);
+    const batch = jest.spyOn(PluginAPI, 'batchUpdateForProject');
+    for (let cycle = 0; cycle < 3; cycle++) {
+      const current = (await readTasksFile(filePath))!;
+      expect(parseMarkdownWithHeader(current).tasks[0].notes).toBe(notes);
+      await mdToSp(current, 'test-project');
+      expect(batch).toHaveBeenLastCalledWith({
+        projectId: 'test-project',
+        operations: [{ type: 'reorder', taskIds: ['task-1'] }],
+      });
+      await spToMd({ filePath, projectId: 'test-project' });
+      expect(readFileSync(filePath, 'utf8')).toBe(content);
+    }
+  });
+
+  it.each(['\n', '\n\n'])(
+    'does not pair unmatched backticks with a footer after %j',
+    async (separator) => {
+      const notes = 'An unmatched ` delimiter';
+      const suffix = separator + '<!-- Footer ` example -->';
+      writeFileSync(filePath, TASK_LINE + '\n  ' + notes + suffix);
+      const parsed = parseMarkdownWithHeader((await readTasksFile(filePath))!);
+      expect(parsed.tasks[0].notes).toBe(notes);
+      expect(parsed.footer).toBe(suffix);
+      const task = new TaskBuilder()
+        .withId('task-1')
+        .withTitle('Renamed task')
+        .withProjectId('test-project')
+        .build();
+      jest.spyOn(PluginAPI, 'getTasks').mockResolvedValue([{ ...task, notes }]);
+      await spToMd({ filePath, projectId: 'test-project' });
+      expect(readFileSync(filePath, 'utf8')).toBe(
+        '- [ ] <!--task-1--> Renamed task\n  ' + notes + suffix,
+      );
+    },
+  );
+
+  it('does not treat unmatched backticks as a code span', () => {
+    const notes = 'An unmatched ` delimiter';
+    const parsed = parseMarkdownWithHeader(TASK_LINE + '\n  ' + notes + '\n\n' + FOOTER);
+    expect(parsed.tasks[0].notes).toBe(notes);
+    expect(parsed.footer).toBe('\n\n' + FOOTER);
+  });
+
+  it('keeps trailing comments inside an unclosed code fence in task notes', () => {
+    const content = TASK_LINE + '\n  ```html\n<!-- literal -->';
+    const parsed = parseMarkdownWithHeader(content);
+    expect(parsed.footer).toBeUndefined();
+    expect(parsed.tasks[0].notes).toBe('```html\n<!-- literal -->');
+  });
+
+  it('keeps apparent code fences inside a multiline footer comment', async () => {
+    const suffix = '\n\n<!-- Footer\n```html\n- [ ] Not a task\n```\n-->\n';
+    writeFileSync(filePath, TASK_LINE + suffix);
+    const parsed = parseMarkdownWithHeader((await readTasksFile(filePath))!);
+    expect(parsed.tasks).toHaveLength(1);
+    expect(parsed.tasks[0].notes).toBeUndefined();
+    await spToMd({ filePath, projectId: 'test-project' });
+    expect(readFileSync(filePath, 'utf8')).toBe(
+      '- [ ] <!--task-1--> Renamed task' + suffix,
+    );
+  });
+
   it('keeps an initially empty Joplin document stable before adding tasks', async () => {
     writeFileSync(filePath, HEADER + FOOTER);
     jest.spyOn(PluginAPI, 'getTasks').mockResolvedValue([]);
