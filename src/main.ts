@@ -99,6 +99,7 @@ import { LOCAL_REST_API_FEATURE_BRIDGE } from './app/core/electron/local-rest-ap
 import { LOCAL_REST_API_FEATURE_ROUTES } from './app/core/electron/local-rest-api-feature-routes';
 import { LocalRestApiTaskRepeatCfgRoutesService } from './app/features/task-repeat-cfg/local-rest-api-task-repeat-cfg-routes.service';
 import { LocalRestApiAssistantCaptureRoutesService } from './app/features/tasks/assistant-capture/local-rest-api-assistant-capture-routes.service';
+import { LocalRestApiNoteRoutesService } from './app/features/note/local-rest-api-note-routes.service';
 import { PluginOAuthRedirectHandler } from './app/plugins/oauth/plugin-oauth-redirect.handler';
 import { OAuthCallbackHandlerService } from './app/imex/sync/oauth-callback-handler.service';
 import { GlobalConfigService } from './app/features/config/global-config.service';
@@ -208,7 +209,7 @@ bootstrapApplication(AppComponent, {
       EffectsModule.forRoot([]),
       // StoreDevtoolsModule lazy-loaded in dev mode after bootstrap
       ReactiveFormsModule,
-      ServiceWorkerModule.register('ngsw-worker.js', {
+      ServiceWorkerModule.register('sw.js', {
         enabled:
           !IS_ELECTRON &&
           !IS_NATIVE_PLATFORM &&
@@ -216,6 +217,10 @@ bootstrapApplication(AppComponent, {
         // Register the ServiceWorker as soon as the application is stable
         // or after 30 seconds (whichever comes first).
         registrationStrategy: 'registerWhenStable:30000',
+        // sw.js loads ngsw-worker.js via importScripts; without this, update
+        // checks may take that import from the HTTP cache. Keep in sync with
+        // the register() call below, or each call flips the registration.
+        updateViaCache: 'none',
       }),
       TranslateModule.forRoot({
         fallbackLang: DEFAULT_LANGUAGE,
@@ -250,6 +255,11 @@ bootstrapApplication(AppComponent, {
     {
       provide: LOCAL_REST_API_FEATURE_ROUTES,
       useClass: LocalRestApiAssistantCaptureRoutesService,
+      multi: true,
+    },
+    {
+      provide: LOCAL_REST_API_FEATURE_ROUTES,
+      useClass: LocalRestApiNoteRoutesService,
       multi: true,
     },
     {
@@ -541,10 +551,12 @@ bootstrapApplication(AppComponent, {
     !IS_NATIVE_PLATFORM
   ) {
     Log.log('Registering Service worker');
-    return navigator.serviceWorker.register('ngsw-worker.js').catch((err: unknown) => {
-      Log.log('Service Worker Registration Error');
-      Log.err(err);
-    });
+    return navigator.serviceWorker
+      .register('sw.js', { updateViaCache: 'none' })
+      .catch((err: unknown) => {
+        Log.log('Service Worker Registration Error');
+        Log.err(err);
+      });
   } else if ('serviceWorker' in navigator && (IS_ELECTRON || IS_NATIVE_PLATFORM)) {
     navigator.serviceWorker
       .getRegistrations()

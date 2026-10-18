@@ -34,7 +34,8 @@
               "src/favicon.ico",
               "src/assets",
               "src/manifest.json",
-              "src/static"
+              "src/static",
+              "src/sw.js"
             ],
             "styles": ["src/styles.scss"],
             "scripts": [],

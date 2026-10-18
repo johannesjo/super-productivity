@@ -2856,8 +2856,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Mengambil suara pengingat istirahat",
+      "DING": "Denting lonceng",
       "DONE_SOUND": "Suara tugas selesai",
       "IS_INCREASE_DONE_PITCH": "Tingkatkan nada untuk setiap tugas yang diselesaikan",
+      "SMALL_DING": "Denting lonceng kecil",
+      "SOUND_1": "Suara 1",
+      "SOUND_2": "Suara 2",
+      "SOUND_3": "Suara 3",
+      "SOUND_4": "Suara 4",
+      "SOUND_5": "Suara 5",
+      "SOUND_6": "Suara 6",
+      "SOUND_7": "Suara 7",
       "TITLE": "Suara",
       "TRACK_TIME_SOUND": "Lacak suara pengingat waktu",
       "VOLUME": "Volume"
