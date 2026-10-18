@@ -97,11 +97,11 @@ const STEP_CONFIGS = new Map<OnboardingStep, StepConfig>([
   [
     'today-and-inbox',
     {
-      // The Inbox entry in the side nav; on phones the menu button that opens it,
-      // until the menu is open and the entry itself is visible.
+      // On phones the bottom-nav Today button (the tip starts with Today);
+      // without a bottom nav, the Inbox entry in the side nav.
       selector: () => [
+        'mobile-bottom-nav nav > button:first-of-type',
         `magic-side-nav nav-item[data-project-id="${INBOX_PROJECT.id}"] .nav-link`,
-        'mobile-bottom-nav nav > button:last-of-type',
       ],
       // The last tip: what Today and the Inbox are (#8824).
       message: T.ONBOARDING.HINTS.TODAY_AND_INBOX,

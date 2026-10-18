@@ -306,15 +306,25 @@ test.describe('First-run onboarding', () => {
         .toBe(true);
 
       // Marking the task done (swipe right or checkbox) leads to the last tip,
-      // anchored to the bottom-nav menu that holds the Inbox.
+      // anchored to the bottom-nav Today button.
       await task.locator('done-toggle').tap();
       await expect(hint).toContainText(MODEL_TIP);
-      const menuBtn = page.locator('mobile-bottom-nav nav > button:last-of-type');
+      const todayBtn = page.locator('mobile-bottom-nav nav > button:first-of-type');
       await expect
         .poll(async () => {
-          const btn = await menuBtn.boundingBox();
+          const btn = await todayBtn.boundingBox();
           const chip = await hint.locator('.hint-chip').boundingBox();
-          return !!btn && !!chip && chip.y + chip.height <= btn.y;
+          const arrow = await hint.locator('.hint-arrow').boundingBox();
+          if (!btn || !chip || !arrow) {
+            return false;
+          }
+          const halfArrow = arrow.width / 2;
+          const arrowCenter = arrow.x + halfArrow;
+          return (
+            chip.y + chip.height <= btn.y &&
+            arrowCenter >= btn.x &&
+            arrowCenter <= btn.x + btn.width
+          );
         })
         .toBe(true);
       await hint.getByRole('button', { name: 'Close tip' }).tap();
