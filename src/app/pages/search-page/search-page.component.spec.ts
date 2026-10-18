@@ -18,6 +18,9 @@ import { Tag } from '../../features/tag/tag.model';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { TranslateModule } from '@ngx-translate/core';
 import { SearchItem } from './search-page.model';
+import { RecentlyDeletedService } from '../../features/tasks/recently-deleted/recently-deleted.service';
+import { RecentlyDeletedEntry } from '../../features/tasks/recently-deleted/recently-deleted.util';
+import { SnackService } from '../../core/snack/snack.service';
 
 // Minimal stub task matching the Task interface shape
 const createTask = (overrides: Partial<Task> = {}): Task =>
@@ -70,6 +73,8 @@ describe('SearchPageComponent', () => {
   let navigateToTaskServiceSpy: jasmine.SpyObj<NavigateToTaskService>;
   let routerSpy: jasmine.SpyObj<Router>;
   let layoutServiceSpy: jasmine.SpyObj<LayoutService>;
+  let deletedEntries: RecentlyDeletedEntry[];
+  let recentlyDeletedSpy: jasmine.SpyObj<RecentlyDeletedService>;
 
   beforeEach(async () => {
     allTasks$ = new BehaviorSubject<Task[]>([]);
@@ -93,6 +98,14 @@ describe('SearchPageComponent', () => {
     routerSpy = jasmine.createSpyObj('Router', ['navigate']);
     routerSpy.navigate.and.returnValue(Promise.resolve(true));
 
+    deletedEntries = [];
+    recentlyDeletedSpy = jasmine.createSpyObj('RecentlyDeletedService', [
+      'getEntries',
+      'restore',
+    ]);
+    recentlyDeletedSpy.getEntries.and.callFake(() => Promise.resolve(deletedEntries));
+    recentlyDeletedSpy.restore.and.resolveTo();
+
     layoutServiceSpy = jasmine.createSpyObj('LayoutService', ['toggleNotes'], {
       isShowNotes: signal(false),
     });
@@ -113,6 +126,11 @@ describe('SearchPageComponent', () => {
         { provide: NoteService, useValue: { notes$ } },
         { provide: Router, useValue: routerSpy },
         { provide: LayoutService, useValue: layoutServiceSpy },
+        { provide: RecentlyDeletedService, useValue: recentlyDeletedSpy },
+        {
+          provide: SnackService,
+          useValue: jasmine.createSpyObj('SnackService', ['open']),
+        },
         {
           provide: MenuTreeService,
           useValue: {
@@ -356,6 +374,59 @@ describe('SearchPageComponent', () => {
     expect(latestResults.length).toBe(1);
     expect(latestResults[0].isArchiveTask).toBe(true);
   }));
+
+  describe('Recently deleted tasks (#2778)', () => {
+    const deletedEntry = (
+      task: Partial<Task>,
+      subTasks: Task[] = [],
+    ): RecentlyDeletedEntry => {
+      const t = createTask(task);
+      return { id: t.id, deletedAt: 1, task: t, subTasks };
+    };
+
+    it('are found without "include completed", marked as deleted', fakeAsync(() => {
+      deletedEntries = [deletedEntry({ id: 'gone', title: 'Lost Report' })];
+      initAndFlush();
+      typeAndFlush('lost');
+      expect(latestResults.map((r) => r.id)).toEqual(['gone']);
+      expect(latestResults[0].isDeleted).toBeTrue();
+    }));
+
+    it('are found by a subtask title', fakeAsync(() => {
+      deletedEntries = [
+        deletedEntry({ id: 'gone', title: 'Parent' }, [
+          createTask({ id: 'sub', title: 'Hidden Child', parentId: 'gone' }),
+        ]),
+      ];
+      initAndFlush();
+      typeAndFlush('hidden child');
+      expect(latestResults.map((r) => r.id)).toEqual(['gone']);
+    }));
+
+    it('are not listed once the task is live again', fakeAsync(() => {
+      allTasks$.next([createTask({ id: 'back', title: 'Back Again' })]);
+      deletedEntries = [deletedEntry({ id: 'back', title: 'Back Again' })];
+      initAndFlush();
+      typeAndFlush('back');
+      expect(latestResults.length).toBe(1);
+      expect(latestResults[0].isDeleted).toBeFalsy();
+    }));
+
+    it('selecting one restores it and then navigates to it', fakeAsync(() => {
+      const entry = deletedEntry({ id: 'gone', title: 'Lost Report' });
+      deletedEntries = [entry];
+      initAndFlush();
+      typeAndFlush('lost');
+
+      component.navigateToItem(latestResults[0]);
+      tick();
+
+      expect(recentlyDeletedSpy.restore).toHaveBeenCalledOnceWith(entry);
+      expect(navigateToTaskServiceSpy.navigate).toHaveBeenCalledWith('gone', false, {
+        isFromSearch: true,
+      });
+    }));
+  });
 
   it('should call NavigateToTaskService.navigate on navigateToItem', () => {
     const item = {

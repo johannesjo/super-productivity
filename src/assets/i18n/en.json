@@ -1137,6 +1137,7 @@
       "TOGGLE_TIME_SCHEDULING_HINT": "Ctrl+1 to toggle time scheduling"
     },
     "SEARCH_BAR": {
+      "DELETED": "Deleted",
       "INCLUDE_COMPLETED": "Include completed and archived tasks",
       "INFO": "Start typing to search for tasks, notes, projects or tags",
       "NO_RESULTS": "No tasks, notes, projects or tags found matching your search",
@@ -2087,6 +2088,8 @@
         "DEADLINE_REMOVED": "Deadline removed",
         "DEADLINE_SET": "Deadline set for {{date}}",
         "DELETED": "Deleted task \"{{title}}\"",
+        "DELETED_FIND_IN_HISTORY": "Deleted task \"{{title}}\". Restore it from History → Recently deleted for 30 days.",
+        "DELETED_FIND_IN_SEARCH": "Deleted task \"{{title}}\". Search still finds it for 30 days.",
         "EMPTY_TITLE_VIA_APP_URI": "Task title was empty, no task was added",
         "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>\"{{title}}\"</strong> from backlog to the Today task list",
         "FOUND_MOVE_FROM_OTHER_LIST": "Added task <strong>\"{{title}}\"</strong> from <strong>{{contextTitle}}</strong> to current list",

@@ -9,10 +9,21 @@ Demand: #2778 (21 👍, 15 comments); #10350 also asks for projects/tags/filters
 - **No settings toggle.** A trash helps only if it was already on when the
   accident happened, so an opt-in trash protects nobody. The project rule is
   "prefer not building a feature over adding a toggle to dodge a decision".
-- **Always on, nearly invisible.** No nav item, badge or count. The only entry
-  point is a quiet "Recently deleted" text button at the bottom of the
-  History view, which is already where archived tasks are restored. It opens a
-  dialog.
+- **Always on, found where people look.** No nav item, badge or count.
+  - **Search** lists deleted tasks, marked "Deleted", without "include
+    completed", because searching for its title is how people look for a task
+    that went missing. Selecting one (or its Restore button) restores it and
+    jumps to it. A match on a subtask title finds the deleted parent.
+  - **The delete message** says where to look once Undo is gone: "Search still
+    finds it for 30 days", or "History → Recently deleted" when the Search app
+    feature is off. Plainspace tasks, which are not trashed, keep the old
+    message.
+  - **History** has a quiet "Recently deleted" link at the bottom, where
+    archived tasks are already restored. It opens a dialog to browse, restore
+    and empty the trash.
+  - A permanent menu item (with an App-features toggle) was considered and
+    left out: daily noise for a rare need, plus a persisted config field. It
+    stays the fallback if Search does not make the trash findable enough.
 - **Fixed retention of 30 days, no setting**, plus "Empty". Deletes that are
   already older than that are not recorded, and expired entries are purged
   when the trash is opened.

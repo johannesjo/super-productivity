@@ -32,6 +32,8 @@ export interface SearchItem {
   isProject?: boolean;
   /** A tag itself as a result; selecting it opens that tag (#10223). */
   isTag?: boolean;
+  /** A task in Recently deleted; selecting it restores it (#2778). */
+  isDeleted?: boolean;
 }
 
 export interface SearchQueryParams {

@@ -46,6 +46,7 @@ import { DateService } from '../../../core/date/date.service';
 import { isBlankTask } from '../util/is-blank-task';
 import { TaskMultiSelectService } from '../task-multi-select.service';
 import { TASK_DELETE_UNDO_WINDOW_MS } from '../../../app.constants';
+import { isRecentlyDeletedTrashable } from '../recently-deleted/recently-deleted.util';
 
 @Injectable()
 export class TaskUiEffects {
@@ -132,7 +133,7 @@ export class TaskUiEffects {
             translateParams: {
               title: truncate(task.title),
             },
-            msg: T.F.TASK.S.DELETED,
+            msg: this._getDeletedSnackMsg(task),
             config: { duration: TASK_DELETE_UNDO_WINDOW_MS },
             actionStr: T.G.UNDO,
             actionFn: () => {
@@ -344,4 +345,15 @@ export class TaskUiEffects {
       ),
     { dispatch: false },
   );
+
+  // Point at the shortest way back once the undo window is gone: Search lists
+  // trashed tasks; without Search, the trash link at the bottom of History.
+  private _getDeletedSnackMsg(task: Task): string {
+    if (!isRecentlyDeletedTrashable(task)) {
+      return T.F.TASK.S.DELETED;
+    }
+    return this._globalConfigService.appFeatures().isSearchEnabled
+      ? T.F.TASK.S.DELETED_FIND_IN_SEARCH
+      : T.F.TASK.S.DELETED_FIND_IN_HISTORY;
+  }
 }

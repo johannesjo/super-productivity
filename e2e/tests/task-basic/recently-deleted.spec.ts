@@ -63,6 +63,33 @@ test.describe('Recently deleted', () => {
     ).toBeVisible();
   });
 
+  test('finds a deleted task via Search and restores it from the result', async ({
+    page,
+    workViewPage,
+    taskPage,
+    testPrefix,
+  }) => {
+    await workViewPage.waitForTaskList();
+    const title = `${testPrefix}-Trash search`;
+    await workViewPage.addTask(title);
+    await expect(taskPage.getTaskByText(title)).toBeVisible();
+    await deleteTaskViaContextMenu(page, title);
+    // The delete message says where to look once Undo is gone.
+    await expect(page.getByText('Search still finds it for 30 days')).toBeVisible();
+    await expectRecentlyDeletedStoredCount(page, 1);
+
+    await page.goto('/#/search');
+    await page.locator('search-page .search-field input').fill(title);
+    const result = page.locator('search-page mat-list-item').filter({ hasText: title });
+    await expect(result).toHaveCount(1);
+    await expect(result).toContainText('Deleted');
+
+    await result.click();
+    await expect(page).toHaveURL(/\/#\/tag\/TODAY\/tasks/);
+    await expect(taskPage.getTaskByText(title)).toBeVisible();
+    await expectRecentlyDeletedStoredCount(page, 0);
+  });
+
   test('empties the trash, and it stays empty after a reload', async ({
     page,
     workViewPage,

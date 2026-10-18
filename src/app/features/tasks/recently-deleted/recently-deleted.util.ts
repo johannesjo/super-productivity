@@ -45,7 +45,7 @@ const stripSubTasks = (task: Task | TaskWithSubTasks): Task => {
 
 // Plainspace deletes remove the task for the whole Space and always confirm;
 // blank tasks get no undo snack either — neither goes to the trash.
-const isTrashable = (task: Task, subTasks: Task[]): boolean =>
+export const isRecentlyDeletedTrashable = (task: Task, subTasks: Task[] = []): boolean =>
   task.issueType !== PLAINSPACE_TYPE && !isBlankTask({ ...task, subTasks });
 
 const createEntry = (
@@ -55,7 +55,7 @@ const createEntry = (
 ): RecentlyDeletedEntry[] => {
   const root = stripSubTasks(task);
   const cleanSubTasks = subTasks.filter(isTaskLike).map(stripSubTasks);
-  return isTrashable(root, cleanSubTasks)
+  return isRecentlyDeletedTrashable(root, cleanSubTasks)
     ? [{ id: root.id, deletedAt, task: root, subTasks: cleanSubTasks }]
     : [];
 };
