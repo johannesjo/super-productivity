@@ -51,23 +51,22 @@ const DECLARED_HOSTS = new Set(
     .map((m) => m[2]),
 );
 
-const QUICK_ACTION_HOSTS = (() => {
-  const match = QUICK_PARSER.match(/QUICK_ACTION_HOSTS = \[([^\]]*)\]/);
-  assert.ok(match, 'QUICK_ACTION_HOSTS not found as an array literal in the parser');
+/** The string literals of an exported `const NAME = [...]` array in `source`. */
+const exportedHosts = (source, name) => {
+  const match = source.match(new RegExp(`${name} = \\[([^\\]]*)\\]`));
+  assert.ok(match, `${name} not found as an array literal in its parser`);
   return [...match[1].matchAll(/'([^']+)'/g)].map((m) => m[1]);
-})();
+};
 
-const TASK_ACTION_HOSTS = (() => {
-  const match = TASK_PARSER.match(/if \(action !== '([^']+)' && action !== '([^']+)'\)/);
-  assert.ok(match, 'task action guard not found in parse-app-uri-task-action.ts');
-  return [match[1], match[2]];
-})();
+const QUICK_ACTION_HOSTS = exportedHosts(QUICK_PARSER, 'QUICK_ACTION_HOSTS');
+const TASK_ACTION_HOSTS = exportedHosts(TASK_PARSER, 'TASK_ACTION_HOSTS');
 
 test('the manifest declares hosts on the app scheme', () => {
   assert.ok(DECLARED_HOSTS.size > 0, `no <data> hosts for ${SCHEME} in the manifest`);
 });
 
 test('every task action host is declared in the manifest', () => {
+  assert.ok(TASK_ACTION_HOSTS.length > 0, 'TASK_ACTION_HOSTS is empty');
   TASK_ACTION_HOSTS.forEach((host) =>
     assert.ok(DECLARED_HOSTS.has(host), `${SCHEME}://${host} is not declared`),
   );

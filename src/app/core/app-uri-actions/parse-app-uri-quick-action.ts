@@ -1,9 +1,9 @@
 /**
- * Every action host this parser recognizes, as one exported list so the iOS
- * side can be checked against it: `tools/verify-ios-quick-actions.test.js`
- * reads this array out of the source and asserts every
- * `UIApplicationShortcutItems` entry in `ios/App/App/Info.plist` points at one
- * of these. A Karma spec cannot read files, so that contract has no other place
+ * Every action host this parser recognizes, as one exported list so the native
+ * sides can be checked against it: `tools/verify-ios-quick-actions.test.js`
+ * asserts every `UIApplicationShortcutItems` entry in `ios/App/App/Info.plist`
+ * points at one of these, and `tools/verify-android-url-hosts.test.js` asserts
+ * `AndroidManifest.xml` declares each of them. A Karma spec cannot read files, so that contract has no other place
  * to live — which only holds if this array is what the parser actually branches
  * on, hence the types below being derived from it rather than repeated.
  */
