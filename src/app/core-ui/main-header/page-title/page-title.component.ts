@@ -53,7 +53,7 @@ import { KeyboardConfig } from '@sp/keyboard-config';
           <!-- Same icon the side nav shows for this section; it inherits the
                title color, as the nav's route icons inherit theirs. -->
           <mat-icon class="page-title-icon">{{ icon }}</mat-icon>
-        } @else if (!isSpecialSection() && activeWorkContext()) {
+        } @else if (activeWorkContext()) {
           <mat-icon
             class="page-title-icon"
             [class.page-title-icon--emoji]="isContextEmojiIcon()"
@@ -222,7 +222,7 @@ import { KeyboardConfig } from '@sp/keyboard-config';
         min-width: 0;
       }
 
-      /* Mirrors the side-nav work-context icon so the same project/tag reads
+      /* Mirrors the side-nav icon so the same project/tag or section reads
          identically in the nav and the header (icon value, emoji handling and
          theme/tag color). See nav-item.component. */
       /* One source for the size: the title's floor has to add this box on top

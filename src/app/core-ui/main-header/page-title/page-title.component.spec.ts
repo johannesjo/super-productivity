@@ -291,17 +291,33 @@ describe('PageTitleComponent', () => {
     });
   });
 
-  describe('section icon', () => {
-    it('uses the side nav icon of a special section', () => {
-      expect(setupComponent('/planner').sectionIcon()).toBe(NAV_SECTION_ICON.PLANNER);
-      expect(setupComponent('/habits').sectionIcon()).toBe(NAV_SECTION_ICON.HABITS);
-      expect(setupComponent('/archived-projects').sectionIcon()).toBe(
-        NAV_SECTION_ICON.ARCHIVED_PROJECTS,
-      );
+  describe('sectionIcon()', () => {
+    // Every special section, so a swapped pair (e.g. /schedule vs /planner)
+    // or a section left without an icon fails here.
+    const cases: Array<[string, string]> = [
+      ['/schedule', NAV_SECTION_ICON.SCHEDULE],
+      ['/planner', NAV_SECTION_ICON.PLANNER],
+      ['/boards', NAV_SECTION_ICON.BOARDS],
+      ['/habits', NAV_SECTION_ICON.HABITS],
+      ['/search', NAV_SECTION_ICON.SEARCH],
+      ['/scheduled-list', NAV_SECTION_ICON.SCHEDULED_LIST],
+      ['/donate', NAV_SECTION_ICON.DONATE],
+      ['/config', NAV_SECTION_ICON.SETTINGS],
+      ['/archived-projects', NAV_SECTION_ICON.ARCHIVED_PROJECTS],
+    ];
+
+    cases.forEach(([url, expectedIcon]) => {
+      it(`returns "${expectedIcon}" for ${url}`, () => {
+        expect(setupComponent(url).sectionIcon()).toBe(expectedIcon);
+      });
     });
 
     it('is unset on a work context route, which shows the context icon', () => {
       expect(setupComponent('/tag/TODAY/tasks').sectionIcon()).toBeUndefined();
+    });
+
+    it('is unset on a plugin route', () => {
+      expect(setupComponent('/plugins/some-plugin/index').sectionIcon()).toBeUndefined();
     });
   });
 
