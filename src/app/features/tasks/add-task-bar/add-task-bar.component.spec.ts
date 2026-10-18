@@ -500,6 +500,8 @@ describe('AddTaskBarComponent', () => {
         subTaskIds: [],
       } as Partial<TaskCopy> as TaskCopy;
       const taskWithSubTasks = { ...task, subTasks: [] } as TaskWithSubTasks;
+      // Unused by the fix: if the code goes back to getByIdOnce$, the test
+      // fails on the assertion below instead of a TypeError.
       mockTaskService.getByIdOnce$.and.returnValue(of(task));
       mockTaskService.getByIdWithSubTaskData$.and.returnValue(of(taskWithSubTasks));
       const suggestion = {
