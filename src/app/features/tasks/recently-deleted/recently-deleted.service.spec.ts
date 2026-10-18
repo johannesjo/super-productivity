@@ -220,6 +220,38 @@ describe('RecentlyDeletedService', () => {
     expect([...store.entries.keys()]).toEqual(['a']);
   });
 
+  it('keeps a re-delete whose id still has an expired entry from an earlier session', async () => {
+    store.entries.set('a', {
+      id: 'a',
+      task: createTask({ id: 'a' }),
+      subTasks: [],
+      deletedAt: NOW - RECENTLY_DELETED_RETENTION_MS - 1,
+    } as RecentlyDeletedEntry);
+
+    await service.recordAction(deleteAction('a'), NOW, NOW);
+
+    expect(store.entries.get('a')?.deletedAt).toBe(NOW);
+  });
+
+  it('retries the first-write purge after a failed write', async () => {
+    store.entries.set('old', {
+      id: 'old',
+      task: createTask({ id: 'old' }),
+      subTasks: [],
+      deletedAt: NOW - RECENTLY_DELETED_RETENTION_MS - 1,
+    } as RecentlyDeletedEntry);
+    const applyChanges = store.applyChanges.bind(store);
+    let calls = 0;
+    spyOn(store, 'applyChanges').and.callFake((puts, ids) =>
+      calls++ === 0 ? Promise.reject(new Error('idb down')) : applyChanges(puts, ids),
+    );
+
+    await service.recordAction(deleteAction('a'), NOW, NOW);
+    await service.recordAction(deleteAction('b'), NOW, NOW);
+
+    expect(store.entries.has('old')).toBeFalse();
+  });
+
   describe('remote ops', () => {
     // The callback is fire-and-forget; a later queued read waits for it.
     const applyRemote = async (ops: Operation[], after?: () => void): Promise<void> => {

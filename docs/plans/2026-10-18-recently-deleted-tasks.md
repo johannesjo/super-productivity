@@ -147,8 +147,9 @@ surface. **Rejected.**
   because its old parent's subtask order cannot be restored safely. A task
   whose project was archived or deleted meanwhile comes back in the Inbox, so
   it is visible. Restoring removes the entry and offers Undo, which deletes the
-  task again (back into the trash). A remote `restoreTask` or a
-  `restoreDeletedTask` (local or remote) also removes it.
+  task again (back into the trash). Any other `restoreTask`
+  (History, REST API, issue service, or remote) or `restoreDeletedTask` also
+  removes it.
 - **Retention / Empty** are local deletes from that database. They emit no op
   and need no replay determinism: no reducer reads the trash.
 
@@ -206,9 +207,14 @@ is noticed on the desktop. It is kept for now, pending a decision.
   on other devices. "Empty" is per device, and a later full-state import
   (USE_REMOTE) can bring a task back that was emptied here.
 - The pre-apply snapshot is taken once per downloaded batch. A task created
-  and deleted inside the same batch is not in it, so it is not trashed, and a
-  task edited and then deleted in one batch is trashed as it was before the
-  batch.
+  and bulk-deleted (`deleteTasks`) inside the same batch is not in it, so it
+  is not trashed, and one edited and then bulk-deleted in one batch is trashed
+  as it was before the batch. A single `deleteTask` carries its own snapshot.
+- A full-state rebuild (USE_REMOTE) that replays the whole history onto an
+  empty state (SuperSync) re-adds every single-task delete of the last 30
+  days, including ones emptied here; bulk deletes from that replay are not
+  trashed. A file-based provider hydrates a snapshot first, so only deletes
+  after it can come back.
 - A delete that reaches this device more than 30 days after it was made is
   not trashed.
 - Restoring marks the task undone (`restoreTask` semantics, same as archive

@@ -156,14 +156,21 @@ export class RecentlyDeletedService implements RemoteApplyListener {
     now: number,
   ): Promise<void> {
     const { puts, deleteIds } = getRecentlyDeletedChanges(recorded, now);
-    if (!this._isPurgedThisSession && (puts.length || deleteIds.length)) {
+    const isPurging =
+      !this._isPurgedThisSession && (puts.length > 0 || deleteIds.length > 0);
+    if (isPurging) {
       const all = await this._store.getAll();
+      // Deletes run after puts, so a re-deleted task must not be purged here.
+      const putIds = new Set(puts.map((entry) => entry.id));
       all.forEach((entry) => {
-        if (isRecentlyDeletedEntryExpired(entry, now)) deleteIds.push(entry.id);
+        if (isRecentlyDeletedEntryExpired(entry, now) && !putIds.has(entry.id)) {
+          deleteIds.push(entry.id);
+        }
       });
-      this._isPurgedThisSession = true;
     }
     await this._store.applyChanges(puts, deleteIds);
+    // Only once it is written: a failed write purges again next time.
+    if (isPurging) this._isPurgedThisSession = true;
   }
 
   private _enqueue(fn: () => Promise<void>): Promise<void> {
