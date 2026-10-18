@@ -841,6 +841,9 @@ IDs deduplicate ops still in the local log, while vector clocks carry causality.
    committed revision (#10239). The next cycle downloads/applies that baseline
    before retrying; rejection does not acknowledge local ops, write the file, or
    advance the cursor. Warm-cache uploads retain the conditional PUT check.
+   An empty revision (OneDrive reports `''` without an ETag) never counts as a
+   match. Whether OneDrive's content-response ETag equals its metadata `eTag`
+   for one file version is unverified; a mismatch would repeatedly defer upload.
    V2 and v3 ops uploads only extend a file this client applied, with or without
    retained ops: an unapplied migration probe or a cold read without a matching
    committed revision defers before dedup acknowledgements or compaction
@@ -1424,6 +1427,34 @@ migration source: the first read on a not-yet-migrated device copies the id
 forward (`ClientIdService`). The clientId is non-regenerable (it keys the vector
 clock), so a transient IndexedDB read failure propagates rather than minting a
 fresh id.
+
+### Full-State Replacement Transactions
+
+Five store methods replace durable state, each with its own policy:
+`commitFileSnapshotBaseline` (exact `lastAppliedOpSeq` tail check),
+`runRemoteStateReplacement` (raw-rebuild marker that resumes after a crash),
+`runDestructiveStateReplacement` (backup restore and clean slate; rotates
+`client_id`), `replaceRejectedRepair` (stale-repair rebase) and the
+genesis/recovery anchors for legacy data. They share only the adapter
+transaction wrapper and are deliberately not merged: a common helper would need
+a policy switch per invariant. Re-audit before proposing one.
+
+- **Acknowledgement must not lead durable work.** A provider cursor may lag
+  durable state (redelivery is deduplicated by retained op ids, and after
+  pruning by cursor plus author-clock coverage) but never run ahead of it.
+- **Multi-commit flows are not one transaction.** Raw rebuild keeps
+  `rawRebuildIncomplete` until the replay finishes, so a crash forces another
+  raw download; the original safety backup is reused, not overwritten.
+- **Locks do not extend the IDB transaction.** The operation-log lock
+  serializes writers; NgRx state, localStorage cursors and other databases are
+  outside it.
+- **Archive retry is at least once**; assert final state and additive totals,
+  not call or row counts.
+- **Originating repair persists both archive partitions with the `REPAIR` row**
+  (inside the mixed-source append). Empty incoming partitions never clear a
+  nonempty archive, matching released receivers. The `state_cache` write is
+  optional: if it fails, the live repair still completes and restart recovers
+  from the retained `REPAIR` tail.
 
 ### Compaction During Active Sync
 
