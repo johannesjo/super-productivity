@@ -262,6 +262,7 @@
       "S": {
         "CAL_PROVIDER_ERROR": "Calendar Provider Error: {{errTxt}}",
         "CAL_PROVIDER_NOT_ICAL": "Calendar URL did not return iCal data. The share link may be expired, revoked, or require sign-in — try generating a new share URL.",
+        "CONNECT": "Connect",
         "EVENT_HIDDEN": "Calendar event hidden",
         "EVENT_MOVED": "Event moved",
         "EVENT_RESCHEDULED": "Event rescheduled",
