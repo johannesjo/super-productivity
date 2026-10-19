@@ -1,6 +1,6 @@
 # Agent task capture
 
-Oct 11, 2026 · status: decided, nothing built · rev. 3; rev. 2 after an adversarial
+Oct 11, 2026 · status: M1+M2 shipped in #10759 (scheduling: #10829, #10899); M3–M4 open · rev. 3; rev. 2 after an adversarial
 review and a Codex review
 
 Let any AI agent add a task to Super Productivity: Claude (web, desktop,

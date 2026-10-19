@@ -48,7 +48,7 @@ describe('MobileBottomNavComponent', () => {
     [keyof AppFeaturesConfig, string, LayoutToggle, LayoutShowSignal]
   > = [
     [
-      'isScheduleDayPanelEnabled',
+      'isSchedulerEnabled',
       '.e2e-toggle-schedule-day-panel',
       'toggleScheduleDayPanel',
       'isShowScheduleDayPanel',
@@ -63,7 +63,7 @@ describe('MobileBottomNavComponent', () => {
   ];
 
   const ALL_OFF: Partial<AppFeaturesConfig> = {
-    isScheduleDayPanelEnabled: false,
+    isSchedulerEnabled: false,
     isIssuesPanelEnabled: false,
     isProjectNotesEnabled: false,
   };
@@ -182,7 +182,7 @@ describe('MobileBottomNavComponent', () => {
   const cases: Array<[string, Partial<AppFeaturesConfig>]> = [
     ['all three enabled', {}],
     ['schedule and notes', { isIssuesPanelEnabled: false }],
-    ['issues and notes', { isScheduleDayPanelEnabled: false }],
+    ['issues and notes', { isSchedulerEnabled: false }],
   ];
 
   cases.forEach(([name, over]) => {

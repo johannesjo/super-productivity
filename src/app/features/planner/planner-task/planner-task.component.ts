@@ -89,7 +89,7 @@ import { getNextPlannerAddButton } from '../get-next-planner-add-button';
   ],
   /* eslint-disable @typescript-eslint/naming-convention */
   host: {
-    // Planner and Boards opt in; scheduled-list cards keep their existing behavior.
+    // Planner and Boards opt in; other hosts keep their existing behavior.
     '[attr.data-task-id]': 'focusable() ? task().id : null',
     '[attr.data-task-selectable]': 'focusable() ? "true" : null',
     '[attr.tabindex]': 'focusable() ? "0" : null',
