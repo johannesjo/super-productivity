@@ -42,6 +42,8 @@ import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
 import { IS_TOUCH_PRIMARY } from './app/util/is-mouse-primary';
 import { FeatureStoresModule } from './app/root-store/feature-stores.module';
+import { REMOTE_APPLY_LISTENER } from './app/op-log/apply/remote-apply-listener.token';
+import { RecentlyDeletedService } from './app/features/tasks/recently-deleted/recently-deleted.service';
 import {
   MATERIAL_ANIMATIONS,
   MatNativeDateModule,
@@ -247,6 +249,7 @@ bootstrapApplication(AppComponent, {
       provide: LOCAL_REST_API_FEATURE_BRIDGE,
       useClass: LocalRestApiFeatureBridgeService,
     },
+    { provide: REMOTE_APPLY_LISTENER, useExisting: RecentlyDeletedService },
     {
       provide: LOCAL_REST_API_FEATURE_ROUTES,
       useClass: LocalRestApiTaskRepeatCfgRoutesService,

@@ -102,6 +102,8 @@ export enum LS {
   PLAINSPACE_CLAIM_POOL_HIDDEN = 'PLAINSPACE_CLAIM_POOL_HIDDEN',
   // Plainspace account/identity — local-only, never synced (device identity).
   PLAINSPACE_ACCOUNT = 'SUP_PLAINSPACE_ACCOUNT',
+  // Recently deleted trash — device-local, never synced.
+  RECENTLY_DELETED_EMPTIED_AT = 'SUP_RECENTLY_DELETED_EMPTIED_AT',
 
   // Magic side nav
   NAV_SIDEBAR_EXPANDED = 'SUP_NAV_SIDEBAR_EXPANDED',

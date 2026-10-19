@@ -58,6 +58,7 @@ import { TaskInternalEffects } from '../features/tasks/store/task-internal.effec
 import { TaskRelatedModelEffects } from '../features/tasks/store/task-related-model.effects';
 import { TaskReminderEffects } from '../features/tasks/store/task-reminder.effects';
 import { TaskUiEffects } from '../features/tasks/store/task-ui.effects';
+import { RecentlyDeletedEffects } from '../features/tasks/recently-deleted/recently-deleted.effects';
 import { ShortSyntaxEffects } from '../features/tasks/store/short-syntax.effects';
 import { IS_ELECTRON } from '../app.constants';
 import { TaskElectronEffects } from '../features/tasks/store/task-electron.effects';
@@ -158,6 +159,7 @@ import { ReducerFailureSnackEffects } from './meta/reducer-failure-snack.effects
       TaskRelatedModelEffects,
       TaskReminderEffects,
       TaskUiEffects,
+      RecentlyDeletedEffects,
       ShortSyntaxEffects,
       TaskDueEffects,
       ...(IS_ELECTRON ? [TaskElectronEffects] : []),

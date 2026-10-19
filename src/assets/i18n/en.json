@@ -1138,6 +1138,7 @@
       "TOGGLE_TIME_SCHEDULING_HINT": "Ctrl+1 to toggle time scheduling"
     },
     "SEARCH_BAR": {
+      "DELETED": "Deleted",
       "INCLUDE_COMPLETED": "Include completed and archived tasks",
       "INFO": "Start typing to search for tasks, notes, projects or tags",
       "NO_RESULTS": "No tasks, notes, projects or tags found matching your search",
@@ -1912,6 +1913,22 @@
         "RO_NEVER": "Never",
         "SET_DEADLINE": "Set deadline"
       },
+      "D_RECENTLY_DELETED": {
+        "CONFIRM_EMPTY": "Permanently remove everything in Recently deleted on this device?",
+        "DELETED_ON": "Deleted {{date}}",
+        "EMPTY": "Empty",
+        "INTRO": "Deleted tasks stay here on this device for {{days}} days.",
+        "LINK": "Recently deleted",
+        "NONE": "Nothing deleted in the last {{days}} days.",
+        "RESTORE": "Restore",
+        "RESTORE_ARIA": "Restore \"{{title}}\"",
+        "RESTORED": "Restored \"{{title}}\"",
+        "SUB_TASKS": {
+          "ONE": "+{{nr}} subtask",
+          "OTHER": "+{{nr}} subtasks"
+        },
+        "TITLE": "Recently deleted"
+      },
       "D_REMINDER_VIEW": {
         "ADD_TO_TODAY": "Add to Today",
         "CLEAR_ALL_REMINDERS": "Clear all reminders",
@@ -2074,6 +2091,8 @@
         "DEADLINE_REMOVED": "Deadline removed",
         "DEADLINE_SET": "Deadline set for {{date}}",
         "DELETED": "Deleted task \"{{title}}\"",
+        "DELETED_FIND_IN_HISTORY": "Deleted task \"{{title}}\". For {{days}} days, you can restore it from History → Recently deleted.",
+        "DELETED_FIND_IN_SEARCH": "Deleted task \"{{title}}\". Search still finds it for {{days}} days.",
         "EMPTY_TITLE_VIA_APP_URI": "Task title was empty, no task was added",
         "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>\"{{title}}\"</strong> from backlog to the Today task list",
         "FOUND_MOVE_FROM_OTHER_LIST": "Added task <strong>\"{{title}}\"</strong> from <strong>{{contextTitle}}</strong> to current list",

@@ -33,7 +33,7 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { playDoneSound } from '../util/play-done-sound';
-import { Task } from '../task.model';
+import { Task, TaskWithSubTasks } from '../task.model';
 import { isWontDoTask } from '../util/is-wont-do-task';
 import { EMPTY } from 'rxjs';
 import { selectProjectById } from '../../project/store/project.selectors';
@@ -48,6 +48,10 @@ import { DateService } from '../../../core/date/date.service';
 import { isBlankTask } from '../util/is-blank-task';
 import { TaskMultiSelectService } from '../task-multi-select.service';
 import { TASK_DELETE_UNDO_WINDOW_MS } from '../../../app.constants';
+import {
+  isRecentlyDeletedTrashable,
+  RECENTLY_DELETED_RETENTION_DAYS,
+} from '../recently-deleted/recently-deleted.util';
 
 @Injectable()
 export class TaskUiEffects {
@@ -133,8 +137,9 @@ export class TaskUiEffects {
           this._snackService.open({
             translateParams: {
               title: truncate(task.title),
+              days: RECENTLY_DELETED_RETENTION_DAYS,
             },
-            msg: T.F.TASK.S.DELETED,
+            msg: this._getDeletedSnackMsg(task),
             config: { duration: TASK_DELETE_UNDO_WINDOW_MS },
             actionStr: T.G.UNDO,
             actionFn: () => {
@@ -350,4 +355,15 @@ export class TaskUiEffects {
       ),
     { dispatch: false },
   );
+
+  // Point at the shortest way back once the undo window is gone: Search lists
+  // trashed tasks; without Search, the trash link at the bottom of History.
+  private _getDeletedSnackMsg(task: TaskWithSubTasks): string {
+    if (!isRecentlyDeletedTrashable(task, task.subTasks ?? [])) {
+      return T.F.TASK.S.DELETED;
+    }
+    return this._globalConfigService.appFeatures().isSearchEnabled
+      ? T.F.TASK.S.DELETED_FIND_IN_SEARCH
+      : T.F.TASK.S.DELETED_FIND_IN_HISTORY;
+  }
 }
