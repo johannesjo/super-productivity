@@ -94,7 +94,7 @@
   "EXAMPLE_TASKS": {
     "GETTING_STARTED": {
       "TITLE": "Optional: getting started tips",
-      "NOTES": "Nothing here is required. Delete this task whenever you like.\n\n- **Today and Inbox**: Today shows what is planned for today. Tasks without a project of your own stay in Inbox. A task can appear in both lists.\n- **Projects**: group tasks by topic with the **+** next to **Projects** in the sidebar.\n- **Sync**: keep your data on several devices under **Settings → Sync & Backup**.\n- **Coming from Todoist or TickTick?** Import your tasks under **Settings → Sync & Backup → Import/Export**.\n- **Tours**: **Help → How to** in the sidebar menu shows short syntax and keyboard navigation step by step. Close a tour whenever you like.\n- **Make it yours**: pick a theme or dark mode, and switch features like boards, schedule, habits, focus mode or integrations on or off under **Settings → General**. Plugins add even more."
+      "NOTES": "Nothing here is required. Delete this task whenever you like.\n\n- **Today and Inbox**: Today shows what is planned for today. Tasks without a project of your own stay in Inbox. A task can appear in both lists.\n- **Projects**: group tasks by topic with the **+** next to **Projects** in the sidebar.\n- **Sync**: keep your data on several devices under **Settings → Sync & Backup**.\n- **Coming from Todoist or TickTick?** Import your tasks under **Settings → Sync & Backup → Import/Export**.\n- **Tours**: **Help → Quick tour** in the sidebar menu walks you through the basics on your own task, and **Help → How to** shows short syntax and keyboard navigation step by step. Close a tour whenever you like.\n- **Make it yours**: pick a theme or dark mode, and switch features like boards, schedule, habits, focus mode or integrations on or off under **Settings → General**. Plugins add even more."
     }
   },
   "F": {
@@ -3050,6 +3050,7 @@
       "CREATE_TASK": "How to: Create a task",
       "GET_HELP_ONLINE": "Get help online",
       "KEYBOARD": "How to: Keyboard Navigation",
+      "QUICK_TOUR": "Quick tour",
       "REDDIT_COMMUNITY": "Reddit community",
       "REPORT_A_PROBLEM": "Report a problem",
       "SEND_FEEDBACK": "Send feedback",
@@ -3118,11 +3119,46 @@
     "HINTS": {
       "CREATE_TASK": "Click + to add your first task",
       "CREATE_TASK_TOUCH": "Tap + to add your first task",
+      "DECLINED": "No problem. It's under Help → Quick tour whenever you like.",
+      "MORE_FALLBACK": "There's more already switched on: projects, time tracking, Planner…",
+      "NO_THANKS": "No thanks",
+      "SHOW_ME_MORE": "Show me more ›",
       "TASK_SWIPE_LEFT_TOUCH": "Swipe task left for more actions",
-      "TODAY_AND_INBOX": "This task is planned for today, so it shows in Today. Tasks without a project of your own stay in Inbox.",
-      "TODAY_AND_INBOX_PHONE": "This task is planned for today, so it shows in Today. Tasks without a project of your own stay in Inbox, under ☰.",
+      "TODAY_AND_INBOX": "This task is planned for today, so it shows in {{todayIcon}} <b>Today</b>. Tasks without a project of your own stay in {{inboxIcon}} <b>Inbox</b>.",
+      "TODAY_AND_INBOX_PHONE": "This task is planned for today, so it shows in {{todayIcon}} <b>Today</b>. Tasks without a project of your own stay in {{inboxIcon}} <b>Inbox</b>, under ☰.",
       "OR_PRESS": "or press",
       "SKIP_ARIA": "Close tip"
+    },
+    "TOUR": {
+      "ADD_SUBTASK": "Break it down: right-click the task and pick {{subtaskIcon}} <b>Add subtask</b>",
+      "COUNTER": "{{nr}} of {{total}}",
+      "NEXT": "Next ›",
+      "ORGANIZE": "Make a <b>project</b> of your own to group tasks, or a <b>tag</b> to label them. Create one with +",
+      "ORGANIZE_COLLAPSED": "Make a <b>project</b> of your own to group tasks, or a <b>tag</b> to label them. Expand the side nav with {{expandIcon}} to create one",
+      "ORGANIZE_PHONE": "Projects and tags live under ☰. Make a <b>project</b> of your own to group tasks, or a <b>tag</b> to label them",
+      "PLANNER": "Plan the next days in {{plannerIcon}} <b>Planner</b>",
+      "TASK_MENU_TOUCH": "Swipe a task left for its menu: {{playIcon}} <b>Start tracking time</b>, {{subtaskIcon}} <b>Add subtask</b>",
+      "TASK_MENU_TOUCH_NO_TRACKING": "Swipe a task left for its menu, e.g. {{subtaskIcon}} <b>Add subtask</b>",
+      "TIMER_RUNNING": "Timer's running. Press {{playIcon}} again or <kbd>{{key}}</kbd> to pause.",
+      "TIMER_RUNNING_TOUCH": "Timer's running. Tap {{playIcon}} at the top to pause.",
+      "TRACK_TIME": "Hover over the task and press {{playIcon}} to track time"
+    },
+    "WANT_MORE": {
+      "BOARDS": "<b>Boards</b> · Kanban-style columns for your tasks",
+      "DONE": "Done",
+      "FINISH_DAY": "<b>Finish day</b> · Review and wrap up your day",
+      "FOCUS_MODE": "<b>Focus mode</b> · Pomodoro and distraction-free work",
+      "FOOTER": "Find this again under Help → Quick tour.",
+      "HABITS": "<b>Habits</b> · Track routines day by day",
+      "INTRO": "Super Productivity starts calm. More is there when you need it:",
+      "OPEN_SETTINGS": "Open settings ›",
+      "PLUGINS": "<b>Plugins & integrations</b> · Jira, GitHub, CalDAV and more",
+      "SCHEDULE": "<b>Schedule</b> · Your day on a timeline",
+      "SEARCH": "Search everything with <kbd>{{key}}</kbd>.",
+      "SEARCH_PHONE": "Search everything from ☰.",
+      "SHORT_SYNTAX": "Type <code>#tag</code>, <code>+project</code> or <code>@tomorrow</code> while adding a task. Help → How to shows more.",
+      "SYNC": "Your data stays on this device. Sync and backups are in Settings.",
+      "TITLE": "Want more?"
     }
   },
   "PDS": {

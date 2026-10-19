@@ -17,7 +17,8 @@ import { Event, NavigationEnd, Router } from '@angular/router';
 import { WorkContextService } from '../work-context/work-context.service';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { LOCAL_ACTIONS } from '../../util/local-actions.token';
-import { OnboardingHintService } from './onboarding-hint.service';
+import { OnboardingHintService, QUICK_TOUR_DECLINED_MS } from './onboarding-hint.service';
+import { QuickTourService } from './quick-tour.service';
 
 const ONBOARDING_KEYS = [
   LS.ONBOARDING_PRESET_DONE,
@@ -44,6 +45,8 @@ describe('OnboardingHintService', () => {
   let routerEvents$: Subject<Event>;
   let activeWorkContextId$: BehaviorSubject<string | null>;
   let savedLs: Record<string, string | null>;
+  let startQuickTour: jasmine.Spy;
+  let isQuickTourActive: WritableSignal<boolean>;
 
   const setTasks = (tasks: Task[]): void => {
     store.overrideSelector(
@@ -122,6 +125,8 @@ describe('OnboardingHintService', () => {
     dataLoaded$ = new BehaviorSubject(true);
     routerEvents$ = new Subject<Event>();
     activeWorkContextId$ = new BehaviorSubject<string | null>('TODAY');
+    startQuickTour = jasmine.createSpy('start');
+    isQuickTourActive = signal(false);
 
     TestBed.configureTestingModule({
       providers: [
@@ -149,6 +154,10 @@ describe('OnboardingHintService', () => {
         { provide: Router, useValue: { events: routerEvents$ } },
         { provide: WorkContextService, useValue: { activeWorkContextId$ } },
         { provide: LOCAL_ACTIONS, useValue: localActions$ },
+        {
+          provide: QuickTourService,
+          useValue: { start: startQuickTour, isActive: isQuickTourActive },
+        },
       ],
     });
     store = TestBed.inject(MockStore);
@@ -277,7 +286,7 @@ describe('OnboardingHintService', () => {
   });
 
   describe('Today and Inbox tip', () => {
-    it('follows the first task once the composer closes, until the Inbox is opened', () => {
+    it('follows the first task once the composer closes, until the user moves on', () => {
       const service = createService();
       isShowAddTaskBar.set(true);
       addFirstTask([EXAMPLE_TASK]);
@@ -289,6 +298,8 @@ describe('OnboardingHintService', () => {
       expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBeNull();
 
       navigateTo('/project/INBOX_PROJECT/tasks');
+      expect(service.currentStep()).toBe('quick-tour-offer');
+      navigateTo('/tag/TODAY/tasks');
       expect(service.currentStep()).toBeNull();
       expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBe('true');
     });
@@ -300,7 +311,7 @@ describe('OnboardingHintService', () => {
       expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBeNull();
     });
 
-    it('ends on any navigation, also to pages without tasks', () => {
+    it('gives way to the tour offer on any navigation, also to pages without tasks', () => {
       const service = createService();
       // Earlier navigation (e.g. the start page) does not count.
       navigateTo('/tag/TODAY/tasks');
@@ -308,6 +319,9 @@ describe('OnboardingHintService', () => {
       expect(service.currentStep()).toBe('today-and-inbox');
 
       navigateTo('/config');
+      expect(service.currentStep()).toBe('quick-tour-offer');
+      expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBeNull();
+      navigateTo('/planner');
       expect(service.currentStep()).toBeNull();
       expect(localStorage.getItem(LS.ONBOARDING_HINTS_DONE)).toBe('true');
     });
@@ -359,6 +373,66 @@ describe('OnboardingHintService', () => {
       const service = createService();
       addFirstTask();
       service.skip();
+      expect(service.currentStep()).toBeNull();
+      expect(OnboardingHintService.isOnboardingInProgress()).toBeFalse();
+    });
+  });
+
+  describe('quick tour offer', () => {
+    it('Show me more ends guidance and starts the tour on the first task', () => {
+      const service = createService();
+      addFirstTask();
+      service.showMeMore();
+      expect(startQuickTour).toHaveBeenCalledOnceWith('task-1');
+      expect(service.currentStep()).toBeNull();
+      expect(OnboardingHintService.isOnboardingInProgress()).toBeFalse();
+    });
+
+    it('can be accepted from the fallback after leaving Today', () => {
+      const service = createService();
+      addFirstTask();
+      navigateTo('/config');
+      service.showMeMore();
+      expect(startQuickTour).toHaveBeenCalledOnceWith('task-1');
+    });
+
+    it('No thanks names the way back, then ends without a tour', () => {
+      jasmine.clock().install();
+      try {
+        const service = createService();
+        addFirstTask();
+        service.decline();
+        expect(service.currentStep()).toBe('quick-tour-declined');
+        jasmine.clock().tick(QUICK_TOUR_DECLINED_MS);
+        expect(service.currentStep()).toBeNull();
+        expect(OnboardingHintService.isOnboardingInProgress()).toBeFalse();
+        expect(startQuickTour).not.toHaveBeenCalled();
+      } finally {
+        jasmine.clock().uninstall();
+      }
+    });
+
+    it('is not offered again once the last tip is closed', () => {
+      const service = createService();
+      addFirstTask();
+      service.skip();
+      navigateTo('/config');
+      expect(service.currentStep()).toBeNull();
+      expect(startQuickTour).not.toHaveBeenCalled();
+    });
+
+    it('has no place when the first task needs no last tip', () => {
+      const service = createService();
+      addFirstTask([], 'task-1', { projectId: 'work' });
+      expect(service.currentStep()).toBeNull();
+      expect(OnboardingHintService.isOnboardingInProgress()).toBeFalse();
+    });
+
+    it('ends guidance when the tour is started from Help meanwhile', () => {
+      const service = createService();
+      expect(service.currentStep()).toBe('create-task');
+      isQuickTourActive.set(true);
+      TestBed.tick();
       expect(service.currentStep()).toBeNull();
       expect(OnboardingHintService.isOnboardingInProgress()).toBeFalse();
     });
