@@ -52,6 +52,7 @@ import {
   findLastTaskInSubtree,
   findNextTaskAfterSubtree,
 } from '../../../util/find-adjacent-focusable';
+import { TaskCompletionPromptService } from '../task-completion-prompt.service';
 import { TaskAttachmentService } from '../task-attachment/task-attachment.service';
 import { DialogEditTaskAttachmentComponent } from '../task-attachment/dialog-edit-attachment/dialog-edit-task-attachment.component';
 import { ProjectService } from '../../project/project.service';
@@ -189,6 +190,7 @@ const isInteractiveTarget = (target: EventTarget | null): boolean =>
 })
 export class TaskComponent implements OnDestroy, AfterViewInit {
   private readonly _taskService = inject(TaskService);
+  private readonly _taskCompletionPromptService = inject(TaskCompletionPromptService);
   private readonly _taskDuplicateService = inject(TaskDuplicateService);
   private readonly _matDialog = inject(MatDialog);
   private readonly _location = inject(Location);
@@ -1150,7 +1152,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   @throttle(200, { leading: true, trailing: false })
   toggleDoneKeyboard(): void {
-    this.toggleTaskDone();
+    this.toggleTaskDoneSilent();
   }
 
   onSwipeRightTriggered(isTriggered: boolean): void {
@@ -1162,6 +1164,21 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   toggleTaskDone(): void {
+    if (!this._multiSelect.isTouchSelectionMode()) this._multiSelect.clear();
+    window.clearTimeout(this._doneAnimationTimeout);
+
+    if (this.task().isDone) {
+      this.toggleTaskDoneSilent();
+      return;
+    }
+
+    this.showDoneAnimation.set(true);
+    this._taskCompletionPromptService.completeTask(this.task(), () => {
+      this.showDoneAnimation.set(false);
+    });
+  }
+
+  toggleTaskDoneSilent(): void {
     if (!this._multiSelect.isTouchSelectionMode()) this._multiSelect.clear();
     window.clearTimeout(this._doneAnimationTimeout);
     this.focusNext(true, true);
