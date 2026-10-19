@@ -1,4 +1,10 @@
-import { Component, NO_ERRORS_SCHEMA, Provider } from '@angular/core';
+import {
+  Component,
+  NO_ERRORS_SCHEMA,
+  Provider,
+  WritableSignal,
+  signal,
+} from '@angular/core';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { TestBed } from '@angular/core/testing';
@@ -20,6 +26,10 @@ import { TaskViewCustomizerService } from '../../../features/task-view-customize
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { PlainspaceShareService } from '../../../features/issue/providers/plainspace/plainspace-share.service';
 import { T } from '../../../t.const';
+import { PluginBridgeService } from '../../../plugins/plugin-bridge.service';
+import { PluginService } from '../../../plugins/plugin.service';
+import { PluginMenuEntryCfg } from '../../../plugins/plugin-api.model';
+import { PluginState } from '../../../plugins/plugin-state.model';
 
 // The title's spacing tokens are declared by main-header and inherited, so this
 // host pulls in that stylesheet and mounts the real `page-title` under it —
@@ -41,6 +51,8 @@ describe('PageTitleComponent', () => {
   let isShared$: BehaviorSubject<boolean>;
   let isXxxs$: BehaviorSubject<{ matches: boolean }>;
   let openSpy: jasmine.Spy;
+  let pluginMenuEntries: WritableSignal<PluginMenuEntryCfg[]>;
+  let pluginStates: Map<string, PluginState>;
 
   // `color` is a Tag-only field not surfaced on WorkContext's type.
   const wc = (o: Partial<WorkContext> & { color?: string | null }): WorkContext =>
@@ -77,6 +89,14 @@ describe('PageTitleComponent', () => {
       useValue: { isCustomized: () => false },
     },
     {
+      provide: PluginBridgeService,
+      useValue: { menuEntries: () => pluginMenuEntries() },
+    },
+    {
+      provide: PluginService,
+      useValue: { getAllPluginStates: () => pluginStates },
+    },
+    {
       provide: GlobalConfigService,
       useValue: { cfg: () => ({ keyboard: {} }) },
     },
@@ -109,6 +129,8 @@ describe('PageTitleComponent', () => {
       }),
     );
     isShared$ = new BehaviorSubject(false);
+    pluginMenuEntries = signal<PluginMenuEntryCfg[]>([]);
+    pluginStates = new Map();
     isXxxs$ = new BehaviorSubject<{ matches: boolean }>({ matches: false });
     openSpy = jasmine
       .createSpy('openProjectOnPlainspace')
@@ -164,6 +186,44 @@ describe('PageTitleComponent', () => {
 
       routerEvents$.next(new NavigationEnd(2, '/config', '/config#plugins'));
       expect(c.displayTitle()).toBe(T.PS.GLOBAL_SETTINGS);
+    });
+  });
+
+  describe('plugin page', () => {
+    const url = '/plugins/my-plugin/index';
+    const entry = (o: Partial<PluginMenuEntryCfg>): PluginMenuEntryCfg => ({
+      pluginId: 'my-plugin',
+      label: 'My Plugin',
+      onClick: () => undefined,
+      ...o,
+    });
+
+    it('uses the label of the plugin menu entry', () => {
+      pluginMenuEntries.set([entry({ pluginId: 'other', label: 'Other' }), entry({})]);
+      expect(setupComponent(url).displayTitle()).toBe('My Plugin');
+    });
+
+    it('falls back to the manifest name without a menu entry', () => {
+      pluginStates.set('my-plugin', {
+        manifest: { name: 'Manifest Name' },
+      } as PluginState);
+      expect(setupComponent(url).displayTitle()).toBe('Manifest Name');
+    });
+
+    it('is a special section, so the work-context actions are hidden', () => {
+      expect(setupComponent(url).isSpecialSection()).toBe(true);
+    });
+
+    it('exposes the plugin id for the icon', () => {
+      expect(setupComponent(url).pluginId()).toBe('my-plugin');
+      expect(setupComponent('/active/tasks').pluginId()).toBeUndefined();
+    });
+
+    it('passes a Material fallback icon but never an SVG path', () => {
+      pluginMenuEntries.set([entry({ icon: 'alarm' })]);
+      expect(setupComponent(url).pluginFallbackIcon()).toBe('alarm');
+      pluginMenuEntries.set([entry({ icon: 'icon.svg' })]);
+      expect(setupComponent(url).pluginFallbackIcon()).toBe('extension');
     });
   });
 

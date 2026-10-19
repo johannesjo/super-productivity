@@ -24,6 +24,9 @@ import { TaskViewCustomizerService } from '../../../features/task-view-customize
 import { TaskViewCustomizerPanelComponent } from '../../../features/task-view-customizer/task-view-customizer-panel/task-view-customizer-panel.component';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { KeyboardConfig } from '@sp/keyboard-config';
+import { PluginBridgeService } from '../../../plugins/plugin-bridge.service';
+import { PluginService } from '../../../plugins/plugin.service';
+import { PluginIconComponent } from '../../../plugins/ui/plugin-icon/plugin-icon.component';
 
 @Component({
   selector: 'page-title',
@@ -40,6 +43,7 @@ import { KeyboardConfig } from '@sp/keyboard-config';
     WorkContextMenuComponent,
     TaskViewCustomizerPanelComponent,
     TranslatePipe,
+    PluginIconComponent,
   ],
   template: `
     @if (activeWorkContextTypeAndId()) {
@@ -53,6 +57,13 @@ import { KeyboardConfig } from '@sp/keyboard-config';
           <!-- Same icon the side nav shows for this section; it inherits the
                title color, as the nav's route icons inherit theirs. -->
           <mat-icon class="page-title-icon">{{ icon }}</mat-icon>
+        } @else if (pluginId(); as id) {
+          <plugin-icon
+            class="page-title-icon"
+            [pluginId]="id"
+            [size]="20"
+            [fallbackIcon]="pluginFallbackIcon()"
+          ></plugin-icon>
         } @else if (activeWorkContext()) {
           <mat-icon
             class="page-title-icon"
@@ -332,6 +343,8 @@ export class PageTitleComponent {
   private _translateService = inject(TranslateService);
   private _store = inject(Store);
   private _plainspaceShareService = inject(PlainspaceShareService);
+  private _pluginBridge = inject(PluginBridgeService);
+  private _pluginService = inject(PluginService);
 
   readonly T = T;
 
@@ -391,12 +404,39 @@ export class PageTitleComponent {
   private _routeTitleKey = computed(() => this._routeSection()?.[1]);
   sectionIcon = computed(() => this._routeSection()?.[2]);
 
-  isSpecialSection = computed(() => !!this._routeSection());
+  // Plugin pages are titled like the built-in sections, with the label and
+  // icon of the plugin's nav entry.
+  pluginId = computed(() => this._url().match(/^\/plugins\/([^/]+)\/index$/)?.[1]);
+  private _pluginMenuEntry = computed(() => {
+    const id = this.pluginId();
+    return id
+      ? this._pluginBridge.menuEntries().find((e) => e.pluginId === id)
+      : undefined;
+  });
+  pluginFallbackIcon = computed(() => {
+    const icon = this._pluginMenuEntry()?.icon;
+    // An SVG path is not a Material icon name.
+    return icon && !/\.svg$/i.test(icon) ? icon : 'extension';
+  });
+
+  isSpecialSection = computed(() => !!this._routeSection() || !!this.pluginId());
   isWorkViewPage = computed(() => /tasks$/.test(this._url()));
 
   displayTitle = computed(() => {
     const key = this._routeTitleKey();
-    return key ? this._translateService.instant(key) : this.activeWorkContextTitle();
+    if (key) {
+      return this._translateService.instant(key);
+    }
+    const pluginId = this.pluginId();
+    if (pluginId) {
+      // No menu entry when the manifest sets isSkipMenuEntry.
+      return (
+        this._pluginMenuEntry()?.label ??
+        this._pluginService.getAllPluginStates().get(pluginId)?.manifest.name ??
+        pluginId
+      );
+    }
+    return this.activeWorkContextTitle();
   });
 
   // Icon shown next to the title, defaulting the same way the nav does
