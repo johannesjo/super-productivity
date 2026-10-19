@@ -67,6 +67,9 @@
     ::ng-deep .mat-mdc-tab {
       min-width: 120px;
       border-radius: var(--card-border-radius) var(--card-border-radius) 0 0;
+      // Clip the square hover/focus state layer and the press ripple to the
+      // rounded corners, so only the color changes on hover, press and select.
+      overflow: hidden;
       transition: background-color var(--transition-fast);
 
       &.mdc-tab--active {
