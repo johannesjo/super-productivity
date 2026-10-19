@@ -437,8 +437,13 @@ export const startApp = (): void => {
     // The window blurs as the lock screen takes over, so only record the state
     // on the unlocked -> locked transition. Otherwise a later 'suspend' after
     // 'lock-screen' (or the reverse) would overwrite true with false.
+    // 'resume' clears getIsLocked() on wake even while the lock screen is still
+    // up, so a lock -> resume -> suspend sequence would record again; the local
+    // flag stays set from 'lock-screen' until 'unlock-screen' and prevents that.
+    // Linux never fires 'lock-screen' and relies on getIsLocked() alone.
+    let isScreenLocked = false;
     const rememberFocusBeforeSuspend = (): void => {
-      if (!getIsLocked()) {
+      if (!isScreenLocked && !getIsLocked()) {
         wasFocusedBeforeSuspend = mainWin.isFocused();
       }
     };
@@ -454,6 +459,7 @@ export const startApp = (): void => {
     powerMonitor.on('lock-screen', () => {
       log('powerMonitor: Screen lock detected');
       rememberFocusBeforeSuspend();
+      isScreenLocked = true;
       setIsLocked(true);
       suspendStart = Date.now();
       mainWin.webContents.send(IPC.SUSPEND);
@@ -474,6 +480,7 @@ export const startApp = (): void => {
     powerMonitor.on('unlock-screen', () => {
       const idleTime = Date.now() - suspendStart;
       log(`powerMonitor: Screen unlock detected. Idle time: ${idleTime}ms`);
+      isScreenLocked = false;
       setIsLocked(false);
       sendIdleMsgIfOverMin(idleTime);
       mainWin.webContents.send(IPC.RESUME);
