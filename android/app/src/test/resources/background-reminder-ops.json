@@ -351,7 +351,7 @@
           "notes",
           "updated",
           "doneOn",
-          "isWontDo",
+          "wontDoOn",
           "parentId",
           "repeatCfgId",
           "_hideSubTasksMode",

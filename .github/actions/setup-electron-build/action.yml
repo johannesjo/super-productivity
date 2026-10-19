@@ -1,6 +1,6 @@
 name: 'Setup Electron Build'
 description: >
-  Shared setup for Electron build/package jobs: Node 22, the git-over-HTTPS
+  Shared setup for Electron build/package jobs: Node from .nvmrc, the git-over-HTTPS
   workaround, and the npm + electron-binary caches. Does NOT run `npm i` —
   callers run it themselves (with a retry) because some jobs install platform
   workarounds immediately before it.

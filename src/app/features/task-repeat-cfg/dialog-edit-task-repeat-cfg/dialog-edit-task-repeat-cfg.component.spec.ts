@@ -1280,6 +1280,16 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       expect(component.hasUnsavedScheduleChanges()).toBe(true);
     });
 
+    // repeatUntilDay is not schedule-affecting for the reschedule effect, but an
+    // unsaved end date can still leave no next occurrence.
+    it('treats a changed end date as an unsaved schedule change', async () => {
+      const component = await setup({ repeatCfg: dailyCfg });
+
+      component.repeatCfg.update((cfg) => ({ ...cfg, repeatUntilDay: '2099-12-31' }));
+
+      expect(component.hasUnsavedScheduleChanges()).toBe(true);
+    });
+
     it('keeps the date when only non-schedule fields change', async () => {
       const component = await setup({ repeatCfg: dailyCfg });
 

@@ -96,8 +96,8 @@ import { PluginTaskContextMenuRegistryService } from './plugin-task-context-menu
 import { formatDateForPlugin } from './plugin-i18n-date.util';
 
 // Relational fields corrupt parent<->child links when applied as plain values (mirrors
-// `REJECTED_TASK_FIELDS` in the local REST API); `isWontDo` isn't in the plugin API yet.
-const REJECTED_UPDATE_FIELDS = ['parentId', 'subTaskIds', 'isWontDo'] as const;
+// `REJECTED_TASK_FIELDS` in the local REST API); `wontDoOn` isn't in the plugin API yet.
+const REJECTED_UPDATE_FIELDS = ['parentId', 'subTaskIds', 'wontDoOn'] as const;
 
 const toPluginTaskCopy = (
   task: (TaskCopy & { subTasks?: unknown }) | null | undefined,
@@ -891,7 +891,7 @@ export class PluginBridgeService implements OnDestroy {
     if (rejectedField) {
       throw new Error(
         this._translateService.instant(
-          rejectedField === 'isWontDo'
+          rejectedField === 'wontDoOn'
             ? T.PLUGINS.FIELD_NOT_IN_PLUGIN_API
             : T.PLUGINS.FIELD_NOT_UPDATABLE,
           { field: rejectedField },

@@ -153,7 +153,13 @@ describe('TaskDuplicateService', () => {
   });
 
   it('keeps a subtask finished as wont do', () => {
-    const wontDoSubTask: Task = { ...subTask, id: 'sub-wont-do', isWontDo: true };
+    const wontDoSubTask: Task = {
+      ...subTask,
+      id: 'sub-wont-do',
+      isDone: true,
+      doneOn: 5,
+      wontDoOn: 5,
+    };
     taskService.add.and.returnValue('new-parent-task');
     taskService.createNewTaskWithDefaults.and.returnValue({
       ...DEFAULT_TASK,
@@ -171,9 +177,9 @@ describe('TaskDuplicateService', () => {
       .allArgs()
       .map(([arg]) => arg.additional);
     expect(additionals[0]).toEqual(
-      jasmine.objectContaining({ isDone: true, isWontDo: true }),
+      jasmine.objectContaining({ isDone: true, doneOn: 5, wontDoOn: 5 }),
     );
-    expect(additionals[1]?.isWontDo).toBeUndefined();
+    expect(additionals[1]?.wontDoOn).toBeUndefined();
   });
 
   it('preserves legacy string priorities on parents and subtasks', () => {
