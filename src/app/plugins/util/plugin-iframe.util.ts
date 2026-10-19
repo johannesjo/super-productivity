@@ -79,6 +79,7 @@ const ALLOWED_IFRAME_API_METHODS = new Set([
   'decrementCounter',
   'deleteCounter',
   'getAllCounters',
+  'getAllSimpleCounters',
 ]);
 
 const isTransparentCssValue = (value: string): boolean => {
@@ -434,7 +435,12 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
           reorderTasks: (taskIds, contextId, contextType) => callApi('reorderTasks', [taskIds, contextId, contextType]),
 
           // UI methods
-          showSnack: (cfg) => callApi('showSnack', [cfg]),
+          // A snack action's onClick cannot cross postMessage (DataCloneError would drop
+          // the whole snack); show the message without the button instead.
+          showSnack: (cfg) => {
+            const { action, ...rest } = cfg || {};
+            return callApi('showSnack', [rest]);
+          },
           notify: (cfg) => callApi('notify', [cfg]),
           request: (url, options) => callApi('request', [url, options]),
           openDialog: (cfg) => callApi('openDialog', [cfg]),
@@ -484,6 +490,7 @@ export const createPluginApiScript = (config: PluginIframeConfig): string => {
           decrementCounter: (id, decrementBy) => callApi('decrementCounter', [id, decrementBy]),
           deleteCounter: (id) => callApi('deleteCounter', [id]),
           getAllCounters: () => callApi('getAllCounters'),
+          getAllSimpleCounters: () => callApi('getAllSimpleCounters'),
 
           // i18n
           translate: (key, params) => callApi('translate', [key, params]),

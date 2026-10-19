@@ -2,6 +2,11 @@ import { getSyncService } from './sync.service';
 import { Logger } from '../logger';
 import { DEFAULT_SYNC_CONFIG, MS_PER_DAY } from './sync.types';
 import { MIN_CHECKPOINT_SAFE_APP_VERSION } from './checkpoint-gate';
+import {
+  deleteDeadCaptureGrants,
+  deleteExpiredCaptures,
+  pruneRetryWindow,
+} from '../capture';
 
 let cleanupTimer: NodeJS.Timeout | null = null;
 let initialCleanupTimer: NodeJS.Timeout | null = null;
@@ -115,27 +120,71 @@ const runDailyCleanup = async (): Promise<void> => {
   } catch (error) {
     Logger.error(`Cleanup [unverified-users] failed: ${error}`);
   }
+
+  // 7. Agent task capture: items no device claimed within retention, grants
+  // that can never authenticate again, and stale retry-window entries. The
+  // tables are empty unless CAPTURE_CONNECTOR_ENABLED, so this is a no-op then.
+  try {
+    const items = await deleteExpiredCaptures(cutoffTime);
+    const grants = await deleteDeadCaptureGrants(Date.now());
+    pruneRetryWindow();
+    if (items > 0 || grants > 0) {
+      Logger.info(`Cleanup [capture]: removed ${items} items, ${grants} grants`);
+    }
+  } catch (error) {
+    Logger.error(`Cleanup [capture] failed: ${error}`);
+  }
+};
+
+// Own parser: parsePositiveIntegerEnv rejects 0, a valid hour.
+const getCleanupHourUtc = (): number | null => {
+  const rawValue = process.env.OLD_OPS_CLEANUP_HOUR_UTC;
+  if (rawValue === undefined || rawValue === '') return null;
+
+  const hour = Number(rawValue);
+  if (!/^\d{1,2}$/.test(rawValue) || hour > 23) {
+    Logger.warn(
+      `Invalid OLD_OPS_CLEANUP_HOUR_UTC="${rawValue}" (expected 0-23). ` +
+        `Falling back to running ${INITIAL_CLEANUP_DELAY_MS / 1000}s after start.`,
+    );
+    return null;
+  }
+  return hour;
+};
+
+const msUntilNextUtcHour = (hourUtc: number, now: number): number => {
+  const next = new Date(now);
+  next.setUTCHours(hourUtc, 0, 0, 0);
+  if (next.getTime() <= now) next.setUTCDate(next.getUTCDate() + 1);
+  return next.getTime() - now;
 };
 
 export const startCleanupJobs = (): void => {
   Logger.info('Starting daily cleanup job...');
 
+  const hourUtc = getCleanupHourUtc();
   // Brief warmup before the first pass; the per-batch/per-run throttles in
   // deleteOldSyncedOpsForAllUsers keep the work bounded so this delay only
   // needs to cover startup tasks, not the cleanup itself.
+  const firstRunDelayMs =
+    hourUtc === null ? INITIAL_CLEANUP_DELAY_MS : msUntilNextUtcHour(hourUtc, Date.now());
   initialCleanupTimer = setTimeout(() => {
     initialCleanupTimer = null;
     void runDailyCleanup();
-  }, INITIAL_CLEANUP_DELAY_MS);
+
+    // Schedule recurring daily cleanup from the first run, so it keeps that time of day
+    cleanupTimer = setInterval(() => {
+      void runDailyCleanup();
+    }, MS_PER_DAY);
+    cleanupTimer.unref();
+  }, firstRunDelayMs);
   initialCleanupTimer.unref();
 
-  // Schedule recurring daily cleanup
-  cleanupTimer = setInterval(() => {
-    void runDailyCleanup();
-  }, MS_PER_DAY);
-  cleanupTimer.unref();
-
-  Logger.info('Daily cleanup job scheduled');
+  Logger.info(
+    hourUtc === null
+      ? 'Daily cleanup job scheduled'
+      : `Daily cleanup job scheduled for ${hourUtc}:00 UTC`,
+  );
 };
 
 export const stopCleanupJobs = (): void => {

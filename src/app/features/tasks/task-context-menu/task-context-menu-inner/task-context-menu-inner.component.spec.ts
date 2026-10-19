@@ -28,6 +28,8 @@ import { By } from '@angular/platform-browser';
 import { MatMenu } from '@angular/material/menu';
 import { TaskDuplicateService } from '../../task-duplicate.service';
 import { TaskMultiSelectService } from '../../task-multi-select.service';
+import { FocusModeService } from '../../../focus-mode/focus-mode.service';
+import { showFocusOverlay } from '../../../focus-mode/store/focus-mode.actions';
 import { T } from '../../../../t.const';
 import { PluginTaskContextMenuRegistryService } from '../../../../plugins/plugin-task-context-menu-registry.service';
 
@@ -55,6 +57,7 @@ describe('TaskContextMenuInnerComponent', () => {
   let taskDuplicateService: jasmine.SpyObj<TaskDuplicateService>;
   let addSubtaskInputService: jasmine.SpyObj<AddSubtaskInputService>;
   let store: MockStore;
+  let focusModeService: jasmine.SpyObj<FocusModeService>;
   let isTaskContextMenuOpen: ReturnType<typeof signal<boolean>>;
   let closeActiveTaskContextMenu: ReturnType<typeof signal<(() => void) | null>>;
 
@@ -68,8 +71,12 @@ describe('TaskContextMenuInnerComponent', () => {
       'getTasksWithSubTasksByRepeatCfgId$',
       'getArchiveTasksForRepeatCfgId',
       'update',
+      'setCurrentId',
     ]);
     taskService.currentTaskId.and.returnValue('some-id');
+    focusModeService = jasmine.createSpyObj<FocusModeService>('FocusModeService', [
+      'tryStartSessionForTask',
+    ]);
     taskDuplicateService = jasmine.createSpyObj<TaskDuplicateService>(
       'TaskDuplicateService',
       ['duplicate'],
@@ -92,6 +99,7 @@ describe('TaskContextMenuInnerComponent', () => {
         { provide: TaskService, useValue: taskService },
         { provide: TaskDuplicateService, useValue: taskDuplicateService },
         { provide: AddSubtaskInputService, useValue: addSubtaskInputService },
+        { provide: FocusModeService, useValue: focusModeService },
         {
           provide: TaskRepeatCfgService,
           useValue: {
@@ -162,6 +170,46 @@ describe('TaskContextMenuInnerComponent', () => {
   afterEach(() => {
     selectTaskByIdWithSubTaskData.release();
     store.resetSelectors();
+  });
+
+  describe('touch selection entry point', () => {
+    for (const [name, selectable, inDetails, expected] of [
+      ['planner card', true, false, true],
+      ['opted-out card', false, false, false],
+      ['detail panel card', true, true, false],
+    ] as const) {
+      it(`recognizes ${name}`, fakeAsync(() => {
+        const container = document.createElement(inDetails ? 'task-detail-panel' : 'div');
+        const card = document.createElement('planner-task');
+        if (selectable) card.setAttribute('data-task-selectable', 'true');
+        container.appendChild(card);
+        card.appendChild(fixture.nativeElement);
+        component.ngAfterViewInit();
+        expect(component.isInTaskRow).toBe(expected);
+        flush();
+      }));
+    }
+  });
+
+  describe('goToFocusMode()', () => {
+    it('leaves starting to the focus mode service when it can start right away', () => {
+      focusModeService.tryStartSessionForTask.and.returnValue(true);
+      const dispatchSpy = spyOn(store, 'dispatch');
+      component.goToFocusMode();
+      expect(focusModeService.tryStartSessionForTask).toHaveBeenCalledWith(
+        component.task,
+      );
+      expect(taskService.setCurrentId).not.toHaveBeenCalled();
+      expect(dispatchSpy).not.toHaveBeenCalled();
+    });
+
+    it('tracks the task and opens the overlay when it cannot start right away', () => {
+      focusModeService.tryStartSessionForTask.and.returnValue(false);
+      const dispatchSpy = spyOn(store, 'dispatch');
+      component.goToFocusMode();
+      expect(taskService.setCurrentId).toHaveBeenCalledWith('task-default');
+      expect(dispatchSpy).toHaveBeenCalledWith(showFocusOverlay());
+    });
   });
 
   describe('enterSelectionMode()', () => {
@@ -335,7 +383,7 @@ describe('TaskContextMenuInnerComponent', () => {
     };
 
     it('lists None, Low, Medium, High and checks only the current level', fakeAsync(() => {
-      component.taskSet = { ...DEFAULT_TASK, id: 'task-1', priority: 2 } as Task;
+      component.taskSet = { ...DEFAULT_TASK, id: 'task-1', priority: 'medium' } as Task;
       fixture.detectChanges();
 
       const items = openPriorityMenu();
@@ -356,11 +404,14 @@ describe('TaskContextMenuInnerComponent', () => {
       // Opening focuses the current level, so Enter keeps it.
       expect(document.activeElement).toBe(items[2]);
       expect(items[1].querySelector('task-priority-indicator')).not.toBeNull();
+      items[2].click();
+      flush();
+      expect(taskService.update).not.toHaveBeenCalled();
       closeMenus();
     }));
 
     it('sets the numeric level, and clears with null', fakeAsync(() => {
-      component.taskSet = { ...DEFAULT_TASK, id: 'task-1', priority: 2 } as Task;
+      component.taskSet = { ...DEFAULT_TASK, id: 'task-1', priority: 'medium' } as Task;
       fixture.detectChanges();
 
       openPriorityMenu()[3].click();
@@ -372,6 +423,26 @@ describe('TaskContextMenuInnerComponent', () => {
       expect(taskService.update).toHaveBeenCalledWith('task-1', { priority: null });
       closeMenus();
     }));
+  });
+
+  // A `wontDoOn` equal to `doneOn` marks won't do; both travel in the op, so
+  // every client, released ones included, stores the same pair.
+  describe('setWontDo()', () => {
+    it('finishes the task with a matching doneOn and wontDoOn', () => {
+      jasmine.clock().install();
+      jasmine.clock().mockDate(new Date(1_700_000_000_000));
+      try {
+        component.setWontDo();
+      } finally {
+        jasmine.clock().uninstall();
+      }
+
+      expect(taskService.update).toHaveBeenCalledOnceWith(component.task.id, {
+        isDone: true,
+        doneOn: 1_700_000_000_000,
+        wontDoOn: 1_700_000_000_000,
+      });
+    });
   });
 
   describe('duplicate()', () => {
@@ -432,6 +503,21 @@ describe('TaskContextMenuInnerComponent', () => {
   });
 
   describe('deleteTask()', () => {
+    // #8583: Enter in the delete confirm deletes the task.
+    it('focuses the confirm button of the delete dialog', () => {
+      const openSpy = spyOn(TestBed.inject(MatDialog), 'open').and.callThrough();
+      component.task = { ...DEFAULT_TASK, id: 'T1', projectId: 'P1' };
+
+      void component.deleteTask();
+
+      expect(openSpy).toHaveBeenCalledWith(
+        jasmine.anything(),
+        jasmine.objectContaining({
+          data: jasmine.objectContaining({ isFocusConfirm: true }),
+        }),
+      );
+    });
+
     // #9946: the selector returns undefined for a task that is gone from the
     // store; removing an id-less stub used to wipe every top-level task.
     it('removes nothing when the task is gone from the store', fakeAsync(() => {

@@ -11,7 +11,12 @@ import { CollapsibleComponent } from './collapsible.component';
     <collapsible
       [title]="'Group One'"
       [isGroup]="true"
-    ></collapsible>
+    >
+      <button
+        actions
+        class="header-action"
+      ></button>
+    </collapsible>
     <collapsible
       [title]="'Group Two'"
       [isGroup]="true"
@@ -113,6 +118,22 @@ describe('CollapsibleComponent', () => {
     fixture.detectChanges();
 
     expect(collapsible.isExpanded).toBe(false);
+  });
+
+  it('should leave keys from a header action to that action', () => {
+    const actionBtn: HTMLElement = fixture.nativeElement.querySelector('.header-action');
+    const collapsible = collapsibleInstances[0];
+    const ev = new KeyboardEvent('keydown', {
+      key: 'Enter',
+      bubbles: true,
+      cancelable: true,
+    });
+
+    actionBtn.dispatchEvent(ev);
+    fixture.detectChanges();
+
+    expect(collapsible.isExpanded).toBe(false);
+    expect(ev.defaultPrevented).toBe(false);
   });
 
   it('should not toggle a non-group collapsible with Arrow keys', () => {

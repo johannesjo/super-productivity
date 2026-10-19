@@ -8,7 +8,11 @@ import {
   selectIsOsProgressBarOwnedBySession,
   selectIsOverlayShown,
 } from '../../focus-mode/store/focus-mode.selectors';
-import { selectCurrentTask, selectTaskEntities } from './task.selectors';
+import {
+  selectCurrentTask,
+  selectCurrentTaskId,
+  selectTaskEntities,
+} from './task.selectors';
 import { selectTodayTaskIds } from '../../work-context/store/work-context.selectors';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { FocusModeService } from '../../focus-mode/focus-mode.service';
@@ -64,6 +68,7 @@ describe('TaskElectronEffects', () => {
         provideMockStore({
           selectors: [
             { selector: selectCurrentTask, value: task },
+            { selector: selectCurrentTaskId, value: task.id },
             { selector: selectTaskEntities, value: { T1: task } },
             { selector: selectTodayTaskIds, value: [] },
             { selector: selectIsOverlayShown, value: false },
@@ -102,6 +107,17 @@ describe('TaskElectronEffects', () => {
         progress: 0.5,
         progressBarMode: 'normal',
       });
+    });
+
+    it('should ignore time added to a task that is not being tracked', () => {
+      store.overrideSelector(selectCurrentTaskId, 'OTHER');
+      store.refreshState();
+
+      const sub = effects.setTaskBarProgress$.subscribe();
+      actions$.next(addTimeSpent());
+      sub.unsubscribe();
+
+      expect(setProgressBarSpy).not.toHaveBeenCalled();
     });
 
     it('should stand down while a timed focus session owns the bar', () => {

@@ -25,7 +25,6 @@ import { JiraCommonInterfacesService } from './providers/jira/jira-common-interf
 import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-interfaces.service';
 import { CaldavCommonInterfacesService } from './providers/caldav/caldav-common-interfaces.service';
 import { OpenProjectCommonInterfacesService } from './providers/open-project/open-project-common-interfaces.service';
-import { RedmineCommonInterfacesService } from './providers/redmine/redmine-common-interfaces.service';
 import { CalendarCommonInterfacesService } from './providers/calendar/calendar-common-interfaces.service';
 import { PluginIssueProviderAdapterService } from '../../plugins/issue-provider/plugin-issue-provider-adapter.service';
 import { PluginIssueProviderRegistryService } from '../../plugins/issue-provider/plugin-issue-provider-registry.service';
@@ -139,7 +138,7 @@ describe('IssueService', () => {
     ]);
     pluginRegistrySpy = jasmine.createSpyObj('PluginIssueProviderRegistryService', [
       'hasProvider',
-      'getIcon',
+      'getSvgIcon',
       'getName',
       'getIssueStrings',
       'getPollIntervalMs',
@@ -195,7 +194,6 @@ describe('IssueService', () => {
           provide: OpenProjectCommonInterfacesService,
           useValue: mockCommonInterfaceService,
         },
-        { provide: RedmineCommonInterfacesService, useValue: mockCommonInterfaceService },
         {
           provide: CalendarCommonInterfacesService,
           useValue: mockCommonInterfaceService,
@@ -959,6 +957,38 @@ describe('IssueService', () => {
       await service.refreshIssueTask(task, false, false);
 
       expect(changesOfLastUpdate().remindAt).toBe(newDue);
+    });
+
+    // Re-stamping `doneOn` would turn a won't-do task into a completed one.
+    it('single refresh: does not write isDone again to a task that is already done', async () => {
+      const task = createCaldavTask({ isDone: true, doneOn: 5, wontDoOn: 5 });
+      commonInterfaceServiceSpy.getFreshDataForIssueTask.and.returnValue(
+        Promise.resolve({
+          taskChanges: { isDone: true, title: 'renamed', issueWasUpdated: true },
+          issue: {},
+          issueTitle: 'x',
+        }),
+      );
+
+      await service.refreshIssueTask(task, false, false);
+
+      expect('isDone' in changesOfLastUpdate()).toBeFalse();
+      expect(changesOfLastUpdate().title).toBe('renamed');
+    });
+
+    it('single refresh: still writes isDone to an open task', async () => {
+      const task = createCaldavTask({ isDone: false });
+      commonInterfaceServiceSpy.getFreshDataForIssueTask.and.returnValue(
+        Promise.resolve({
+          taskChanges: { isDone: true, issueWasUpdated: true },
+          issue: {},
+          issueTitle: 'x',
+        }),
+      );
+
+      await service.refreshIssueTask(task, false, false);
+
+      expect(changesOfLastUpdate().isDone).toBeTrue();
     });
 
     describe('remote unschedule clears the reminder on every device (#9776 shape)', () => {

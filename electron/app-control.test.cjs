@@ -13,6 +13,7 @@ let nextIsLocked;
 let sharedState;
 let refreshIndicatorCalls;
 let localRestApiConfig;
+let focusCalls;
 
 const resetModule = () => {
   delete require.cache[appControlModulePath];
@@ -69,7 +70,12 @@ const installMocks = () => {
     if (request === '../various-shared') {
       return {
         quitApp: () => {},
-        showOrFocus: () => {},
+        showOrFocus: () => {
+          focusCalls.push('showOrFocus');
+        },
+        raiseForReminder: () => {
+          focusCalls.push('raiseForReminder');
+        },
       };
     }
 
@@ -153,6 +159,7 @@ test.beforeEach(() => {
   };
   refreshIndicatorCalls = 0;
   localRestApiConfig = undefined;
+  focusCalls = [];
 
   installMocks();
 });
@@ -177,6 +184,9 @@ test('settings update reads current task tray setting from tasks config', async 
       isMinimizeToTray: true,
       isTrayShowCurrentTask: true,
       isTrayShowCurrentCountdown: false,
+      // Synced from another device: must not reach the REST API listener, whose
+      // switch is device-local now.
+      isLocalRestApiEnabled: true,
     },
   };
 
@@ -186,7 +196,7 @@ test('settings update reads current task tray setting from tasks config', async 
   assert.equal(sharedState.isTrayShowCurrentTask, false);
   assert.equal(sharedState.isTrayShowCurrentCountdown, false);
   assert.equal(refreshIndicatorCalls, 1);
-  assert.equal(localRestApiConfig, cfg);
+  assert.equal(localRestApiConfig, undefined);
 });
 
 test('settings update falls back to legacy misc tray task setting', async () => {
@@ -210,4 +220,15 @@ test('settings update falls back to legacy misc tray task setting', async () => 
   assert.equal(sharedState.isTrayShowCurrentTask, true);
   assert.equal(sharedState.isTrayShowCurrentCountdown, true);
   assert.equal(refreshIndicatorCalls, 1);
+});
+
+test('SHOW_OR_FOCUS routes reminder requests to the raise-only path (#10410)', () => {
+  const { initAppControlIpc } = loadAppControlModule();
+  initAppControlIpc();
+  const showOrFocusHandler = ipcHandlers.get('SHOW_OR_FOCUS');
+
+  showOrFocusHandler({});
+  showOrFocusHandler({}, { isReminder: true });
+
+  assert.deepEqual(focusCalls, ['showOrFocus', 'raiseForReminder']);
 });

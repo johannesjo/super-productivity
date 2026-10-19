@@ -1,4 +1,10 @@
-import { Component, NO_ERRORS_SCHEMA, Provider } from '@angular/core';
+import {
+  Component,
+  NO_ERRORS_SCHEMA,
+  Provider,
+  WritableSignal,
+  signal,
+} from '@angular/core';
 import { MatIconButton } from '@angular/material/button';
 import { MatIcon } from '@angular/material/icon';
 import { TestBed } from '@angular/core/testing';
@@ -10,6 +16,7 @@ import { MatMenu } from '@angular/material/menu';
 import { Store } from '@ngrx/store';
 
 import { PageTitleComponent } from './page-title.component';
+import { NAV_SECTION_ICON } from '../../magic-side-nav/nav-section-icons.const';
 import { WorkContextService } from '../../../features/work-context/work-context.service';
 import {
   WorkContext,
@@ -19,6 +26,10 @@ import { TaskViewCustomizerService } from '../../../features/task-view-customize
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { PlainspaceShareService } from '../../../features/issue/providers/plainspace/plainspace-share.service';
 import { T } from '../../../t.const';
+import { PluginBridgeService } from '../../../plugins/plugin-bridge.service';
+import { PluginService } from '../../../plugins/plugin.service';
+import { PluginMenuEntryCfg } from '../../../plugins/plugin-api.model';
+import { PluginState } from '../../../plugins/plugin-state.model';
 
 // The title's spacing tokens are declared by main-header and inherited, so this
 // host pulls in that stylesheet and mounts the real `page-title` under it —
@@ -40,6 +51,8 @@ describe('PageTitleComponent', () => {
   let isShared$: BehaviorSubject<boolean>;
   let isXxxs$: BehaviorSubject<{ matches: boolean }>;
   let openSpy: jasmine.Spy;
+  let pluginMenuEntries: WritableSignal<PluginMenuEntryCfg[]>;
+  let pluginStates: Map<string, PluginState>;
 
   // `color` is a Tag-only field not surfaced on WorkContext's type.
   const wc = (o: Partial<WorkContext> & { color?: string | null }): WorkContext =>
@@ -76,6 +89,14 @@ describe('PageTitleComponent', () => {
       useValue: { isCustomized: () => false },
     },
     {
+      provide: PluginBridgeService,
+      useValue: { menuEntries: () => pluginMenuEntries() },
+    },
+    {
+      provide: PluginService,
+      useValue: { getAllPluginStates: () => pluginStates },
+    },
+    {
       provide: GlobalConfigService,
       useValue: { cfg: () => ({ keyboard: {} }) },
     },
@@ -108,6 +129,8 @@ describe('PageTitleComponent', () => {
       }),
     );
     isShared$ = new BehaviorSubject(false);
+    pluginMenuEntries = signal<PluginMenuEntryCfg[]>([]);
+    pluginStates = new Map();
     isXxxs$ = new BehaviorSubject<{ matches: boolean }>({ matches: false });
     openSpy = jasmine
       .createSpy('openProjectOnPlainspace')
@@ -127,7 +150,7 @@ describe('PageTitleComponent', () => {
       ['/boards', T.MH.BOARDS],
       ['/habits', T.MH.HABITS],
       ['/search', T.MH.SEARCH],
-      ['/scheduled-list', T.MH.ALL_PLANNED_LIST],
+      ['/scheduled-list', T.WW.RECURRING_TASKS],
       ['/donate', T.MH.DONATE],
       ['/config', T.PS.GLOBAL_SETTINGS],
     ];
@@ -166,6 +189,44 @@ describe('PageTitleComponent', () => {
     });
   });
 
+  describe('plugin page', () => {
+    const url = '/plugins/my-plugin/index';
+    const entry = (o: Partial<PluginMenuEntryCfg>): PluginMenuEntryCfg => ({
+      pluginId: 'my-plugin',
+      label: 'My Plugin',
+      onClick: () => undefined,
+      ...o,
+    });
+
+    it('uses the label of the plugin menu entry', () => {
+      pluginMenuEntries.set([entry({ pluginId: 'other', label: 'Other' }), entry({})]);
+      expect(setupComponent(url).displayTitle()).toBe('My Plugin');
+    });
+
+    it('falls back to the manifest name without a menu entry', () => {
+      pluginStates.set('my-plugin', {
+        manifest: { name: 'Manifest Name' },
+      } as PluginState);
+      expect(setupComponent(url).displayTitle()).toBe('Manifest Name');
+    });
+
+    it('is a special section, so the work-context actions are hidden', () => {
+      expect(setupComponent(url).isSpecialSection()).toBe(true);
+    });
+
+    it('exposes the plugin id for the icon', () => {
+      expect(setupComponent(url).pluginId()).toBe('my-plugin');
+      expect(setupComponent('/active/tasks').pluginId()).toBeUndefined();
+    });
+
+    it('passes a Material fallback icon but never an SVG path', () => {
+      pluginMenuEntries.set([entry({ icon: 'alarm' })]);
+      expect(setupComponent(url).pluginFallbackIcon()).toBe('alarm');
+      pluginMenuEntries.set([entry({ icon: 'icon.svg' })]);
+      expect(setupComponent(url).pluginFallbackIcon()).toBe('extension');
+    });
+  });
+
   describe('isSpecialSection()', () => {
     it('is true for /config', () => {
       const c = setupComponent('/config');
@@ -180,7 +241,7 @@ describe('PageTitleComponent', () => {
     it('does not collide /scheduled-list with /schedule', () => {
       const c = setupComponent('/scheduled-list');
       expect(c.isSpecialSection()).toBe(true);
-      expect(c.displayTitle()).toBe(T.MH.ALL_PLANNED_LIST);
+      expect(c.displayTitle()).toBe(T.WW.RECURRING_TASKS);
     });
   });
 
@@ -287,6 +348,36 @@ describe('PageTitleComponent', () => {
       const c = setupComponent('/project/p2/tasks');
       expect(c.contextIcon()).toBe('🚀');
       expect(c.isContextEmojiIcon()).toBe(true);
+    });
+  });
+
+  describe('sectionIcon()', () => {
+    // Every special section, so a swapped pair (e.g. /schedule vs /planner)
+    // or a section left without an icon fails here.
+    const cases: Array<[string, string]> = [
+      ['/schedule', NAV_SECTION_ICON.SCHEDULE],
+      ['/planner', NAV_SECTION_ICON.PLANNER],
+      ['/boards', NAV_SECTION_ICON.BOARDS],
+      ['/habits', NAV_SECTION_ICON.HABITS],
+      ['/search', NAV_SECTION_ICON.SEARCH],
+      ['/scheduled-list', NAV_SECTION_ICON.RECURRING_TASKS],
+      ['/donate', NAV_SECTION_ICON.DONATE],
+      ['/config', NAV_SECTION_ICON.SETTINGS],
+      ['/archived-projects', NAV_SECTION_ICON.ARCHIVED_PROJECTS],
+    ];
+
+    cases.forEach(([url, expectedIcon]) => {
+      it(`returns "${expectedIcon}" for ${url}`, () => {
+        expect(setupComponent(url).sectionIcon()).toBe(expectedIcon);
+      });
+    });
+
+    it('is unset on a work context route, which shows the context icon', () => {
+      expect(setupComponent('/tag/TODAY/tasks').sectionIcon()).toBeUndefined();
+    });
+
+    it('is unset on a plugin route', () => {
+      expect(setupComponent('/plugins/some-plugin/index').sectionIcon()).toBeUndefined();
     });
   });
 
@@ -419,13 +510,14 @@ describe('PageTitleComponent', () => {
       expect(minWidthOf('.page-title')).toBeGreaterThanOrEqual(60 + iconWidth);
     });
 
-    // ...and not where none is: a special section would otherwise carry an
-    // icon's worth of box it never fills.
-    it('leaves the floor bare on a section with no icon', async () => {
+    // Special sections carry their nav icon too, so they get the same floor.
+    it('adds the section icon to the floor on a special section', async () => {
       await withFloor('/config');
-      expect(host.querySelector('.page-title-icon')).toBeFalsy();
+      const icon = host.querySelector('.page-title-icon') as HTMLElement | null;
+      expect(icon?.textContent?.trim()).toBe(NAV_SECTION_ICON.SETTINGS);
 
-      expect(minWidthOf('.page-title')).toBe(60);
+      const iconWidth = parseFloat(getComputedStyle(icon!).width);
+      expect(minWidthOf('.page-title')).toBeGreaterThanOrEqual(60 + iconWidth);
     });
   });
 });

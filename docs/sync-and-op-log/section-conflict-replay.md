@@ -146,6 +146,41 @@ lists are `project.noteIds`, `note.todayOrder` and `simpleCounter.ids`:
   before; on a file-based provider receivers that already hold the remote op
   skip it as superseded, so the holding device keeps its own order.
 
+A pending note or habit order that commutes with a concurrent remote op stays
+out of a conflict over the entity's other pending ops (`nonCommutingPendingOps`,
+#10420). The edit conflict resolves as it would without the order, and neither
+winner rejects the order. Like a kept time delta, the order then moves in place
+past the remote clocks of the conflicts it crosses, together with every later
+pending op of the device on an entity it lists (`keptCommutingReorders`,
+`rebaseKeptReorders`), so the server accepts it after either winner. Its
+payload does not change. A crash before the move leaves the old clock: SuperSync
+rejects the order into the paths above, and without causal proof (the remote
+row lost) that keeps the stop. A file-based provider uploads it with the old
+clock; no E2E covers that crash window. Board, section and issue-provider
+orders stay in the conflict and keep the stop.
+An order that crosses an order or note delete (`isReissuedReorderCrossing`)
+does not move when that op applies, whether the op is the conflict's remote
+op or applies beside it in the same batch: the reissue above runs only while
+the order is concurrent with it, and a moved order would upload its stale
+list. A conflict's remote clock can dominate such an op (the other device
+deleted a listed note, then edited the conflicting one). A released receiver
+writes a deleted note's id as given and its notes panel crashes (the v19.1.0
+E2E below).
+
+A remote LWW resolution row of a habit commutes with a habit order that lists
+an existing habit: the LWW meta-reducer writes that habit only, and no habit field is
+list-routed, so neither the row's mode nor its keys are read (decision 5). A
+note row keeps the stop, since a note snapshot carries `projectId` and
+`isPinnedToToday`; so do board, section and issue-provider orders.
+
+A pending local delete of the entity keeps the order in the conflict, and
+sync stops as before #10420. When the remote side wins that conflict, this
+device recreates the entity at the end of its list (the LWW meta-reducer's
+recreate appends the id), while a kept order would place it elsewhere on
+every other device: a SuperSync probe showed that permanent order difference
+for a habit renamed on the other device (measured 2026-10). The note
+recreate is #10380's.
+
 A habit delete keeps the stop: a habit order fills the slots of the habits it
 lists, so a delete shifts them around an unlisted (disabled) habit and the two
 application orders differ. Boards, sections and issue providers keep the stop
@@ -165,10 +200,10 @@ snapshot for habits).
 A pin or unpin without proof keeps that fallback too. Proof can be missing
 after compaction removed the conflict row, and on clock-gap rejections that no
 downloaded op explains, which need not involve a reorder at all. Stopping there
-would leave the whole-dataset replacement as the only way out. Known gap: the
-note snapshot carries `isPinnedToToday` but not receivers' `note.todayOrder`
-write, so their Today list can miss the change. A pin that wins a download-time
-LWW conflict against another edit of the same note already has the same gap.
+would leave the whole-dataset replacement as the only way out. Receivers keep
+`note.todayOrder` in step with the snapshot's `isPinnedToToday` since #10659;
+receivers released before it apply the pin without the Today list change, as
+they do for a pin that wins a download-time LWW conflict.
 
 ## State-based projection
 
@@ -230,15 +265,19 @@ the replacement payload must be checked against the released-fleet rules in
 Content reorder recovery reuses existing action payloads without a schema or
 persisted-model change. Its E2E covers both note and dated-habit resolution
 histories consumed by unmodified v19.1.0. Older clients that resolve first retain
-their original safety gate; see the [S2 validation report](../plans/2026-09-26-sync-S2-result.md)
-and [dated-habit result](../plans/2026-09-26-sync-habit-date-reorder-result.md)
+their original safety gate; see [#10275](https://github.com/super-productivity/super-productivity/pull/10275)
+and [#10295](https://github.com/super-productivity/super-productivity/pull/10295)
 for released-asset provenance and the tested limits.
 
 The provider suite checks both GitLab and Jira replacement histories against
 unmodified v19.1.0 assets, including restart and the rendered tab order. If that
 released client encounters the conflict first, it still stops with pending work intact;
-the new resolver cannot change old-client behavior. See the
-[provider fix validation](../plans/2026-09-26-sync-issue-provider-reorder-reproduction.md#provider-independent-recovery).
+the new resolver cannot change old-client behavior. Admission is
+provider-independent: any `ISSUE_PROVIDER_UPDATE` with a nonempty `changes`
+object whose `id` is absent or equals the declared provider qualifies, because
+`updateOne` leaves the ordered IDs unchanged unless the identity changes.
+Deletions, competing reorders, malformed changes and identity changes stay
+unsupported ([#10294](https://github.com/super-productivity/super-productivity/pull/10294)).
 
 The structural rule's E2E checks, against unmodified v19.1.0 assets, that a
 released receiver renders a reissued pin once, that it consumes a project order
@@ -252,6 +291,13 @@ The #10377 reissues are ordinary `updateNoteOrder` and
 as the reissues above, with a clock that dominates the remote op, so released
 receivers apply them after it in any arrival order. A released client that
 holds the pending side still stops, as before.
+
+The #10420 E2E (`supersync-reorder-beside-conflict.spec.ts`) checks against
+v19.1.0 assets that a released device consumes a habit order moved past its own
+rename, and an order the current device reissues after the released device's
+whole-habit resolution row. Its note case has the released device delete a
+note that the current device edited beside its pending order, or delete
+another listed note and then edit that one.
 
 ## Verification
 

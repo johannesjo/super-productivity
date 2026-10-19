@@ -14,6 +14,7 @@ import {
   projectAdapter,
 } from '../../../features/project/store/project.reducer';
 import { Project } from '../../../features/project/project.model';
+import { NOTE_FEATURE_NAME } from '../../../features/note/store/note.reducer';
 import { TAG_FEATURE_NAME, tagAdapter } from '../../../features/tag/store/tag.reducer';
 import { Tag } from '../../../features/tag/tag.model';
 import { TODAY_TAG } from '../../../features/tag/tag.const';
@@ -428,6 +429,81 @@ const filterOrphanedTaskIdsFromEntityData = (
     },
   );
   return cleaned ?? entityData;
+};
+
+/**
+ * A NOTE recreated by an LWW Update (a local delete lost to a remote edit,
+ * #10380) rejoins the lists `deleteNote` removed it from: its project's
+ * `noteIds` and, when pinned, `todayOrder`. It is appended, so its position
+ * there may differ from the other devices (order only, accepted on #10393).
+ * Like `deleteNote` and the TASK recreate, this writes PROJECT without
+ * declaring it (a rule 13 exception decided on #10393).
+ */
+const restoreRecreatedNoteMembership = (
+  state: RootState,
+  note: Record<string, unknown>,
+): RootState => {
+  const noteId = note['id'] as string;
+  let nextState = state;
+  const projectId = note['projectId'];
+  const project =
+    typeof projectId === 'string'
+      ? (state[PROJECT_FEATURE_NAME].entities[projectId] as Project | undefined)
+      : undefined;
+  if (project && !project.noteIds.includes(noteId)) {
+    nextState = {
+      ...nextState,
+      [PROJECT_FEATURE_NAME]: projectAdapter.updateOne(
+        { id: project.id, changes: { noteIds: [...project.noteIds, noteId] } },
+        nextState[PROJECT_FEATURE_NAME],
+      ),
+    };
+  }
+  const noteState = nextState[NOTE_FEATURE_NAME];
+  if (note['isPinnedToToday'] === true && !noteState.todayOrder.includes(noteId)) {
+    nextState = {
+      ...nextState,
+      [NOTE_FEATURE_NAME]: {
+        ...noteState,
+        todayOrder: [...noteState.todayOrder, noteId],
+      },
+    };
+  }
+  return nextState;
+};
+
+/**
+ * An LWW Update that replaces an existing NOTE keeps `todayOrder` in step with
+ * the winner's `isPinnedToToday`, the list `updateNote` maintains locally
+ * (#10379): a pinned note absent from it is prepended, as `updateNote` does,
+ * and an unpinned one is removed. A note that stays pinned keeps its position.
+ */
+const syncExistingNoteTodayOrder = (
+  state: RootState,
+  note: Record<string, unknown>,
+): RootState => {
+  const noteId = note['id'] as string;
+  const noteState = state[NOTE_FEATURE_NAME];
+  const isListed = noteState.todayOrder.includes(noteId);
+  if (note['isPinnedToToday'] === true && !isListed) {
+    return {
+      ...state,
+      [NOTE_FEATURE_NAME]: {
+        ...noteState,
+        todayOrder: [noteId, ...noteState.todayOrder],
+      },
+    };
+  }
+  if (note['isPinnedToToday'] === false && isListed) {
+    return {
+      ...state,
+      [NOTE_FEATURE_NAME]: {
+        ...noteState,
+        todayOrder: noteState.todayOrder.filter((id) => id !== noteId),
+      },
+    };
+  }
+  return state;
 };
 
 /**
@@ -948,6 +1024,12 @@ export const lwwUpdateMetaReducer: MetaReducer = (
         entities?: Record<string, Record<string, unknown>>;
       }
     ).entities?.[entityId];
+
+    if (entityType === 'NOTE' && updatedEntity) {
+      updatedState = existingEntity
+        ? syncExistingNoteTodayOrder(updatedState, updatedEntity)
+        : restoreRecreatedNoteMembership(updatedState, updatedEntity);
+    }
 
     // For TASK entities, sync related entities when relationships change
     if (entityType === 'TASK' && updatedEntity) {

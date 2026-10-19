@@ -86,6 +86,7 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       | Observable<TaskRepeatCfg | undefined>
       | Subject<TaskRepeatCfg>,
     renderTemplate = false,
+    { startOfNextDayDiffMs = 0 }: { startOfNextDayDiffMs?: number } = {},
   ): Promise<ComponentFixture<DialogEditTaskRepeatCfgComponent>> => {
     mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
     mockMatDialog = jasmine.createSpyObj('MatDialog', ['open']);
@@ -103,8 +104,10 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
     mockDateService = jasmine.createSpyObj('DateService', [
       'todayStr',
       'getLogicalTodayDate',
+      'getStartOfNextDayDiffMs',
     ]);
     mockDateService.todayStr.and.returnValue(MOCK_TODAY_STR);
+    mockDateService.getStartOfNextDayDiffMs.and.returnValue(startOfNextDayDiffMs);
     mockDateService.getLogicalTodayDate.and.returnValue(new Date(MOCK_TODAY));
 
     // Set up the return value for the repeat-config lookup before creating the component
@@ -247,6 +250,58 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
   });
 
   describe('isLoading signal', () => {
+    it('copies an existing task priority into a new repeat config', async () => {
+      const fixture = await setupTestBed({ task: { ...mockTask, priority: 'high' } });
+      expect(fixture.componentInstance.repeatCfg().priority).toBe(3);
+    });
+
+    it('does not turn a missing legacy priority into an update on save', async () => {
+      const fixture = await setupTestBed({ repeatCfg: mockRepeatCfg });
+      fixture.componentInstance.save();
+      const changes =
+        mockTaskRepeatCfgService.updateTaskRepeatCfg.calls.mostRecent().args[1];
+      expect('priority' in changes).toBe(false);
+    });
+
+    it('shows None for a legacy config loaded through an existing task without changing its priority', async () => {
+      const fixture = await setupTestBed(
+        { task: { ...mockTask, repeatCfgId: mockRepeatCfg.id } },
+        of(mockRepeatCfg),
+        true,
+      );
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const headers = fixture.nativeElement.querySelectorAll('.collapsible-header');
+      headers[headers.length - 1].click();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const loader = TestbedHarnessEnvironment.loader(fixture);
+      const prioritySelect = await loader.getHarness(
+        MatSelectHarness.with({ selector: '[id*="priority"]' }),
+      );
+      expect(await prioritySelect.getValueText()).toBe(T.F.TASK.CMP.PRIORITY_NONE);
+      await prioritySelect.clickOptions({ text: T.F.TASK.CMP.PRIORITY_NONE });
+      fixture.componentInstance.save();
+
+      const changes =
+        mockTaskRepeatCfgService.updateTaskRepeatCfg.calls.mostRecent().args[1];
+      expect('priority' in changes).toBe(false);
+    });
+
+    it('offers to update instances when the series priority is cleared', async () => {
+      const fixture = await setupTestBed({
+        repeatCfg: { ...mockRepeatCfg, priority: 3 },
+      });
+      fixture.componentInstance.repeatCfg.update((cfg) => ({ ...cfg, priority: null }));
+      fixture.componentInstance.save();
+      expect(mockTaskRepeatCfgService.updateTaskRepeatCfg).toHaveBeenCalledWith(
+        mockRepeatCfg.id,
+        jasmine.objectContaining({ priority: null }),
+        true,
+      );
+    });
+
     it('should be false when repeatCfg is provided directly (sync path)', async () => {
       const fixture = await setupTestBed({ repeatCfg: mockRepeatCfg });
       const component = fixture.componentInstance;
@@ -397,6 +452,26 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       });
 
       expect(fixture.componentInstance.repeatCfg().startDate).toBe('2026-06-12');
+    });
+
+    it('starts an undated task on the logical today (#3378)', async () => {
+      const fixture = await setupTestBed({ task: mockTask });
+
+      expect(fixture.componentInstance.repeatCfg().startDate).toBe(MOCK_TODAY_STR);
+    });
+
+    it('starts a late-night timed task on its logical day (#3378)', async () => {
+      const hourMs = 60 * 60 * 1000;
+      // 02:00 on 06-10 is the late night of logical 06-09 with a 05:00 day start
+      const lateNightTask = {
+        ...mockTask,
+        dueWithTime: new Date(2026, 5, 10, 2, 0).getTime(),
+      } as TaskCopy;
+      const fixture = await setupTestBed({ task: lateNightTask }, undefined, false, {
+        startOfNextDayDiffMs: 5 * hourMs,
+      });
+
+      expect(fixture.componentInstance.repeatCfg().startDate).toBe('2026-06-09');
     });
 
     it('returns the created config ID when saving', async () => {
@@ -690,6 +765,16 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
         monthlyWeekOfMonth: null,
       });
       expect(normalized.monthlyWeekOfMonth).toBeUndefined();
+    });
+
+    it('converts a cleared repeatUntilDay (null) to undefined (#10091)', async () => {
+      const fixture = await setupTestBed({ task: mockTask });
+      const normalized = (fixture.componentInstance as any)._normalizeMonthlyAnchor({
+        quickSetting: 'DAILY',
+        repeatUntilDay: null,
+      });
+      expect('repeatUntilDay' in normalized).toBe(true);
+      expect(normalized.repeatUntilDay).toBeUndefined();
     });
   });
 
@@ -999,6 +1084,261 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       fixture.componentInstance.save();
 
       expect('startDate' in changes()).toBe(false);
+    });
+  });
+
+  describe('next occurrence and inherited subtasks (issue #10233)', () => {
+    const dailyCfg: TaskRepeatCfg = {
+      ...mockRepeatCfg,
+      quickSetting: 'CUSTOM',
+      repeatCycle: 'DAILY',
+      repeatEvery: 1,
+      startDate: '2026-06-01',
+      lastTaskCreationDay: '2026-06-09',
+    };
+    const formatDay = (day: number, month = 5, year = 2026): string =>
+      new Date(year, month, day).toLocaleDateString('en-US', {
+        weekday: 'short',
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+      });
+    const expectedDate = formatDay(10);
+
+    let instantCalls: { key: string | string[]; params?: object }[];
+
+    const setup = async (
+      dialogData: Parameters<typeof setupTestBed>[0],
+    ): Promise<DialogEditTaskRepeatCfgComponent> => {
+      const fixture = await setupTestBed(dialogData);
+      instantCalls = [];
+      spyOn(TestBed.inject(TranslateService), 'instant').and.callFake(
+        (key: string | string[], params?: object) => {
+          instantCalls.push({ key, params });
+          return key;
+        },
+      );
+      return fixture.componentInstance;
+    };
+
+    beforeEach(() => {
+      jasmine.clock().install();
+      jasmine.clock().mockDate(new Date(2026, 5, 9, 10, 0, 0));
+    });
+
+    afterEach(() => {
+      jasmine.clock().uninstall();
+    });
+
+    it('shows the next occurrence of the saved config', async () => {
+      const component = await setup({ repeatCfg: dailyCfg });
+
+      expect(component.nextOccurrenceText()).toBe(T.F.TASK_REPEAT.D_EDIT.NEXT_OCCURRENCE);
+      expect(instantCalls.at(-1)!.params).toEqual({ date: expectedDate });
+    });
+
+    it('qualifies the date for wait-for-completion configs', async () => {
+      const component = await setup({
+        repeatCfg: { ...dailyCfg, waitForCompletion: true },
+      });
+
+      expect(component.nextOccurrenceText()).toBe(
+        T.F.TASK_REPEAT.D_EDIT.NEXT_OCCURRENCE_WAIT_FOR_COMPLETION,
+      );
+    });
+
+    it('passes over a skipped instance', async () => {
+      const component = await setup({
+        repeatCfg: { ...dailyCfg, deletedInstanceDates: ['2026-06-10'] },
+      });
+
+      expect(component.nextOccurrenceText()).toBe(T.F.TASK_REPEAT.D_EDIT.NEXT_OCCURRENCE);
+      expect(instantCalls.at(-1)!.params).toEqual({ date: formatDay(11) });
+    });
+
+    it('passes over consecutive skipped instances', async () => {
+      const component = await setup({
+        repeatCfg: { ...dailyCfg, deletedInstanceDates: ['2026-06-10', '2026-06-11'] },
+      });
+
+      expect(component.nextOccurrenceText()).toBe(T.F.TASK_REPEAT.D_EDIT.NEXT_OCCURRENCE);
+      expect(instantCalls.at(-1)!.params).toEqual({ date: formatDay(12) });
+    });
+
+    it('passes over a skipped monthly instance', async () => {
+      const component = await setup({
+        repeatCfg: {
+          ...dailyCfg,
+          repeatCycle: 'MONTHLY',
+          startDate: '2026-05-10',
+          lastTaskCreationDay: '2026-05-10',
+          deletedInstanceDates: ['2026-06-10'],
+        },
+      });
+
+      expect(component.nextOccurrenceText()).toBe(T.F.TASK_REPEAT.D_EDIT.NEXT_OCCURRENCE);
+      expect(instantCalls.at(-1)!.params).toEqual({
+        date: formatDay(10, 6),
+      });
+    });
+
+    it('passes over consecutive skipped monthly instances', async () => {
+      const component = await setup({
+        repeatCfg: {
+          ...dailyCfg,
+          repeatCycle: 'MONTHLY',
+          startDate: '2026-05-10',
+          lastTaskCreationDay: '2026-05-10',
+          deletedInstanceDates: ['2026-06-10', '2026-07-10'],
+        },
+      });
+
+      expect(component.nextOccurrenceText()).toBe(T.F.TASK_REPEAT.D_EDIT.NEXT_OCCURRENCE);
+      expect(instantCalls.at(-1)!.params).toEqual({
+        date: formatDay(10, 7),
+      });
+    });
+
+    it('keeps the completion-date anchor when passing over a skipped month', async () => {
+      // Skipping does not move lastTaskCreationDay, so the May 31 anchor holds
+      // and the month after a skipped June 30 is July 31, not July 30.
+      const component = await setup({
+        repeatCfg: {
+          ...dailyCfg,
+          repeatCycle: 'MONTHLY',
+          repeatFromCompletionDate: true,
+          startDate: '2026-01-15',
+          lastTaskCreationDay: '2026-05-31',
+          deletedInstanceDates: ['2026-06-30'],
+        },
+      });
+
+      component.nextOccurrenceText();
+      expect(instantCalls.at(-1)!.params).toEqual({
+        date: formatDay(31, 6),
+      });
+    });
+
+    it('passes over a skipped yearly instance', async () => {
+      const component = await setup({
+        repeatCfg: {
+          ...dailyCfg,
+          repeatCycle: 'YEARLY',
+          startDate: '2025-06-10',
+          lastTaskCreationDay: '2025-06-10',
+          deletedInstanceDates: ['2026-06-10'],
+        },
+      });
+
+      expect(component.nextOccurrenceText()).toBe(T.F.TASK_REPEAT.D_EDIT.NEXT_OCCURRENCE);
+      expect(instantCalls.at(-1)!.params).toEqual({
+        date: formatDay(10, 5, 2027),
+      });
+    });
+
+    it('shows no date while a due instance waits for the current one to be done', async () => {
+      // The June 8 instance is unfinished, so June 9 is held back and is created
+      // as soon as June 8 is completed.
+      const component = await setup({
+        repeatCfg: {
+          ...dailyCfg,
+          waitForCompletion: true,
+          lastTaskCreationDay: '2026-06-08',
+        },
+      });
+
+      expect(component.nextOccurrenceText()).toBe(
+        T.F.TASK_REPEAT.D_EDIT.NEXT_OCCURRENCE_AFTER_COMPLETION,
+      );
+    });
+
+    it('qualifies the date for configs repeating from the completion date', async () => {
+      const component = await setup({
+        repeatCfg: { ...dailyCfg, repeatFromCompletionDate: true },
+      });
+
+      expect(component.nextOccurrenceText()).toBe(
+        T.F.TASK_REPEAT.D_EDIT.NEXT_OCCURRENCE_FROM_COMPLETION,
+      );
+    });
+
+    it('withholds the date while schedule changes are unsaved', async () => {
+      const component = await setup({ repeatCfg: dailyCfg });
+
+      component.repeatCfg.update((cfg) => ({ ...cfg, repeatEvery: 3 }));
+
+      expect(component.nextOccurrenceText()).toBe(
+        T.F.TASK_REPEAT.D_EDIT.NEXT_OCCURRENCE_UNSAVED,
+      );
+    });
+
+    it('treats a changed quick setting as an unsaved schedule change', async () => {
+      const component = await setup({ repeatCfg: dailyCfg });
+
+      component.repeatCfg.update((cfg) => ({ ...cfg, quickSetting: 'MONDAY_TO_FRIDAY' }));
+
+      expect(component.hasUnsavedScheduleChanges()).toBe(true);
+    });
+
+    // repeatUntilDay is not schedule-affecting for the reschedule effect, but an
+    // unsaved end date can still leave no next occurrence.
+    it('treats a changed end date as an unsaved schedule change', async () => {
+      const component = await setup({ repeatCfg: dailyCfg });
+
+      component.repeatCfg.update((cfg) => ({ ...cfg, repeatUntilDay: '2099-12-31' }));
+
+      expect(component.hasUnsavedScheduleChanges()).toBe(true);
+    });
+
+    it('keeps the date when only non-schedule fields change', async () => {
+      const component = await setup({ repeatCfg: dailyCfg });
+
+      component.repeatCfg.update((cfg) => ({ ...cfg, title: 'Renamed' }));
+
+      expect(component.nextOccurrenceText()).toBe(T.F.TASK_REPEAT.D_EDIT.NEXT_OCCURRENCE);
+    });
+
+    it('shows nothing for a paused config', async () => {
+      const component = await setup({ repeatCfg: { ...dailyCfg, isPaused: true } });
+
+      expect(component.nextOccurrenceText()).toBeNull();
+    });
+
+    it('shows nothing when creating a new config', async () => {
+      const component = await setup({ task: mockTask });
+
+      expect(component.nextOccurrenceText()).toBeNull();
+    });
+
+    it('lists the subtasks new instances inherit', async () => {
+      const component = await setup({
+        repeatCfg: {
+          ...dailyCfg,
+          shouldInheritSubtasks: true,
+          subTaskTemplates: [{ title: 'Pack bag' }, { title: 'Water plants' }],
+        },
+      });
+
+      expect(component.inheritedSubtaskTitles()).toEqual(['Pack bag', 'Water plants']);
+
+      component.repeatCfg.update((cfg) => ({ ...cfg, shouldInheritSubtasks: false }));
+
+      expect(component.inheritedSubtaskTitles()).toEqual([]);
+    });
+
+    it('lists no subtasks while inheritance is newly enabled', async () => {
+      // Saving replaces the templates with the newest instance's subtasks.
+      const component = await setup({
+        repeatCfg: {
+          ...dailyCfg,
+          shouldInheritSubtasks: false,
+          subTaskTemplates: [{ title: 'Stale template' }],
+        },
+      });
+
+      component.repeatCfg.update((cfg) => ({ ...cfg, shouldInheritSubtasks: true }));
+
+      expect(component.inheritedSubtaskTitles()).toEqual([]);
     });
   });
 });

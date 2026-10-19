@@ -11,14 +11,20 @@ import { SnackService } from '../../core/snack/snack.service';
 import { ValidateStateService } from '../validation/validate-state.service';
 import { OperationLogEffects } from '../capture/operation-log.effects';
 import { CLIENT_ID_PROVIDER } from '../util/client-id.provider';
-import { buildEntityRegistry, ENTITY_REGISTRY } from '../core/entity-registry';
+import {
+  buildEntityRegistry,
+  ENTITY_REGISTRY,
+  getPayloadKey,
+} from '../core/entity-registry';
 import {
   ActionType,
   EntityConflict,
+  EntityType,
   extractActionPayload,
   OpType,
   Operation,
 } from '../core/operation.types';
+import { ENTITY_TYPES } from '@sp/shared-schema';
 import {
   compareVectorClocks,
   incrementVectorClock,
@@ -35,6 +41,11 @@ import { TODAY_TAG } from '../../features/tag/tag.const';
 import { appStateFeatureKey } from '../../root-store/app-state/app-state.reducer';
 import { getDbDateStr } from '../../util/get-db-date-str';
 import { UnsupportedMultiEntityConflictError } from '../core/errors/sync-errors';
+import { validateOperationPayload } from '../validation/validate-operation-payload';
+import {
+  isTimelessTaskPatch,
+  isTimePreservingTaskSnapshot,
+} from './time-preserving-task-snapshot.util';
 
 /**
  * Minimal RootState for exercising the PRODUCTION `lwwUpdateMetaReducer` on a
@@ -379,8 +390,8 @@ describe('ConflictResolutionService — disjoint-field merge', () => {
   // A syncTimeSpent op is an additive delta. Its wire entityChanges carry the
   // delta's arguments ({ taskId, date, duration }, direct write) or nothing
   // (deferred write); a synthesized merge would write those keys onto the task
-  // and reject the delta. The pair must fall to whole-entity LWW, and whichever
-  // side wins must leave the task's time history intact.
+  // and reject the delta. A local non-time winner must leave the other client's
+  // time history and additive contribution intact without copying delta arguments.
   describe('(a-time) pending edit vs remote syncTimeSpent (#10147)', () => {
     const DAY = '2024-01-15';
     const HISTORY = {
@@ -439,7 +450,9 @@ describe('ConflictResolutionService — disjoint-field merge', () => {
         payload: { task: { id: 'task-1', changes: { isDone: true } } },
       });
 
-    const expectNoSynthesizedMerge = async (): Promise<void> => {
+    const expectNoSynthesizedMerge = async (
+      expectedMode: 'patch' | 'replace' = 'replace',
+    ): Promise<void> => {
       const localOps = mockOpLogStore.appendMixedSourceBatchSkipDuplicates.calls
         .allArgs()
         .flatMap(([batches]) => batches)
@@ -450,24 +463,27 @@ describe('ConflictResolutionService — disjoint-field merge', () => {
         expect(Object.keys(payload)).not.toContain('taskId');
         expect(Object.keys(payload)).not.toContain('date');
         expect(Object.keys(payload)).not.toContain('duration');
-        expect((emitted.payload as { lwwUpdateMode?: string }).lwwUpdateMode).not.toBe(
-          'patch',
+        expect((emitted.payload as { lwwUpdateMode?: string }).lwwUpdateMode).toBe(
+          expectedMode,
         );
+        if (expectedMode === 'patch') {
+          expect(Object.keys(payload)).not.toContain('timeSpent');
+          expect(Object.keys(payload)).not.toContain('timeSpentOnDay');
+        }
       }
     };
 
     for (const form of ['direct', 'deferred'] as const) {
-      it(`never synthesizes a merged patch from a ${form}-form delta and keeps the time history on the local-win path`, async () => {
+      it(`keeps a ${form}-form delta and the time history beside a local non-time winner`, async () => {
         mockStore.select.and.returnValue(of(currentTask));
 
         await service.autoResolveConflictsLWW([
           conflictOf([pendingDoneEdit()], [capturedSyncTimeSpent(form)]),
         ]);
-        await expectNoSynthesizedMerge();
+        await expectNoSynthesizedMerge('patch');
 
-        // Local (ts 2000) wins: the local-win op is a full snapshot. Applied
-        // through the production reducer on the other client, it carries the
-        // whole timeSpentOnDay map — not a single-day delta.
+        // Local (ts 2000) wins the non-time fields. Applying its patch through
+        // the production reducer preserves the other client's time and delta.
         const localWin = mergedOpArgs();
         expect(localWin).toBeDefined();
         const mockBase = jasmine.createSpy('base').and.callFake((st: unknown) => st);
@@ -491,8 +507,11 @@ describe('ConflictResolutionService — disjoint-field merge', () => {
           >
         )[TASK_FEATURE_NAME].entities['task-1'];
         expect(task['isDone']).toBe(true);
-        expect(task['timeSpentOnDay']).toEqual(HISTORY);
-        expect(task['timeSpent']).toBe(HISTORY_TOTAL);
+        expect(task['timeSpentOnDay']).toEqual({
+          ...HISTORY,
+          [DAY]: HISTORY[DAY] + 60000,
+        });
+        expect(task['timeSpent']).toBe(HISTORY_TOTAL + 60000);
       });
     }
 
@@ -1614,7 +1633,7 @@ describe('ConflictResolutionService — disjoint-field merge', () => {
       );
     });
 
-    it('keeps a local time delta pending and rebases it, even when no field is re-sent', async () => {
+    it('keeps a local time delta pending unchanged, even when no field is re-sent', async () => {
       mockStore.select.and.returnValue(of({ id: 'task-1', title: 'A title' }));
       const rename = title({ id: 'l-rename', clientId: 'A', vectorClock: { A: 1 } }, 'A');
       const delta = op({
@@ -1639,16 +1658,137 @@ describe('ConflictResolutionService — disjoint-field merge', () => {
       await service.autoResolveConflictsLWW([conflictOf([rename, delta], [remote])]);
 
       // The rename lost and the delta's arguments are no fields: nothing is
-      // re-sent, and the delta stays pending, rebased past the remote side.
+      // re-sent, and the delta stays pending with its original identity.
       expect(mergedOpArgs()).toBeUndefined();
       expect(appliedOpIds()).toEqual(['r']);
       const rejected = mockOpLogStore.markRejected.calls.allArgs().flat(2);
       expect(rejected).toContain('l-rename');
       expect(rejected).not.toContain('l-delta');
-      expect(mockOpLogStore.rebasePendingLocalOps).toHaveBeenCalledWith(['l-delta'], {
-        B: 1,
-      });
+      expect(mockOpLogStore.rebasePendingLocalOps).not.toHaveBeenCalled();
     });
+
+    it('re-clocks a kept delta in the remote-winner commit', async () => {
+      mockStore.select.and.returnValue(of({ id: 'task-1', title: 'A title' }));
+      const rename = title({ id: 'l-rename', clientId: 'A', vectorClock: { A: 1 } }, 'A');
+      const delta = op({
+        id: 'l-delta',
+        clientId: 'A',
+        actionType: ActionType.TIME_TRACKING_SYNC_TIME_SPENT,
+        vectorClock: { A: 2 },
+        timestamp: 1100,
+        payload: {
+          actionPayload: { taskId: 'task-1', date: '2026-01-01', duration: 3000 },
+          entityChanges: [],
+        },
+      });
+      const remote = title(
+        { id: 'r', clientId: 'B', vectorClock: { B: 1 }, timestamp: 2000 },
+        'B title',
+      );
+      mockOpLogStore.getOpById.and.callFake(async (id: string) =>
+        id === 'l-delta' ? ({ source: 'local', op: delta, seq: 2 } as never) : undefined,
+      );
+      const assertFence = jasmine.createSpy('assertFence');
+
+      await service.autoResolveConflictsLWW([conflictOf([rename, delta], [remote])], [], {
+        rebaseKeptTimeDeltas: true,
+        assertFence,
+      });
+
+      expect(
+        mockOpLogStore.appendMixedSourceBatchSkipDuplicates,
+      ).toHaveBeenCalledOnceWith(
+        [{ ops: [remote], source: 'remote', options: { pendingApply: true } }],
+        {
+          rebaseKept: jasmine.objectContaining({
+            opIds: new Set(['l-delta']),
+            clockToDominate: { B: 1 },
+          }),
+        },
+      );
+      expect(mockOpLogStore.rebasePendingLocalOps).not.toHaveBeenCalled();
+      expect(assertFence).toHaveBeenCalledOnceWith('kept time delta rebase');
+    });
+
+    for (const { rebaseKeptTimeDeltas, disableDisjointMerge } of [
+      { rebaseKeptTimeDeltas: false, disableDisjointMerge: false },
+      { rebaseKeptTimeDeltas: true, disableDisjointMerge: false },
+      { rebaseKeptTimeDeltas: true, disableDisjointMerge: true },
+    ]) {
+      it(`rebases fresh resolution clocks in the batch commit with recovery=${rebaseKeptTimeDeltas}, snapshot=${disableDisjointMerge}`, async () => {
+        mockStore.select.and.returnValue(of({ id: 'task-1', title: 'A title' }));
+        const rename = title(
+          { id: 'l-rename', clientId: 'A', vectorClock: { A: 1 }, timestamp: 3000 },
+          'A title',
+        );
+        const delta = op({
+          id: 'l-delta',
+          clientId: 'A',
+          vectorClock: { A: 2 },
+          actionType: ActionType.TIME_TRACKING_SYNC_TIME_SPENT,
+          payload: {
+            actionPayload: { taskId: 'task-1', date: '2026-01-01', duration: 3000 },
+          },
+        });
+        const remote = title(
+          { id: 'r', clientId: 'B', vectorClock: { B: 1 }, timestamp: 2000 },
+          'B title',
+        );
+        mockOpLogStore.getOpById.and.callFake(async (id) =>
+          id === delta.id ? ({ source: 'local', op: delta, seq: 2 } as never) : undefined,
+        );
+        let rebasedSuccessor: Operation | undefined;
+        mockOpLogStore.appendMixedSourceBatchSkipDuplicates.and.callFake(
+          async (batches, options) => {
+            const written = batches.flatMap((batch) =>
+              batch.ops.map((batchOp) => ({
+                seq: ++lastSeq,
+                op: batchOp,
+                source: batch.source,
+              })),
+            );
+            const kept = options?.rebaseKept;
+            if (kept) {
+              // The store re-clocks the delta and successor in this same commit.
+              const successor = mergedOpArgs()!;
+              expect([...kept.opIds]).toEqual([delta.id]);
+              expect(kept.successorOpIds?.has(successor.id)).toBeTrue();
+              expect(kept.clockToDominate).toEqual({ B: 1 });
+              rebasedSuccessor = { ...successor, vectorClock: { A: 4, B: 1 } };
+              written.find((w) => w.op.id === successor.id)!.op = rebasedSuccessor;
+            }
+            return { written, skippedCount: 0 };
+          },
+        );
+        const assertFence = jasmine.createSpy('assertFence');
+        await service.autoResolveConflictsLWW(
+          [conflictOf([rename, delta], [remote])],
+          [],
+          {
+            rebaseKeptTimeDeltas,
+            disableDisjointMerge,
+            assertFence,
+          },
+        );
+        expect(mockOpLogStore.rebasePendingLocalOps).not.toHaveBeenCalled();
+        if (rebaseKeptTimeDeltas && !disableDisjointMerge) {
+          expect(rebasedSuccessor).toBeDefined();
+          expect(assertFence).toHaveBeenCalledOnceWith('kept time delta rebase');
+          const applied = mockOperationApplier.applyOperations.calls.mostRecent().args[0];
+          expect(applied.find((row) => row.id === rebasedSuccessor!.id)).toBe(
+            rebasedSuccessor,
+          );
+          expect(compareVectorClocks(rebasedSuccessor!.vectorClock, { A: 3, B: 1 })).toBe(
+            VectorClockComparison.GREATER_THAN,
+          );
+        } else {
+          expect(rebasedSuccessor).toBeUndefined();
+          expect(assertFence).not.toHaveBeenCalled();
+          const rejected = mockOpLogStore.markRejected.calls.allArgs().flat(2);
+          expect(rejected).not.toContain(delta.id);
+        }
+      });
+    }
 
     it('re-sends a pending edit beside a newer remote patch row that does not write its field (#10260, #10422)', async () => {
       mockStore.select.and.returnValue(
@@ -1691,7 +1831,91 @@ describe('ConflictResolutionService — disjoint-field merge', () => {
       expect(reemitted.timestamp).toBe(900);
     });
 
-    it('refuses the patch beside a remote time delta', async () => {
+    // Decision 5a extended (#10393, #10448) reads a remote row's keys only for
+    // TASK, PROJECT, TAG and SIMPLE_COUNTER; NOTE stays out (decision 4).
+    it('reads a remote patch row per field only for TASK, PROJECT, TAG and SIMPLE_COUNTER (decision 5a)', async () => {
+      const admitted = ['TASK', 'PROJECT', 'TAG', 'SIMPLE_COUNTER'];
+      const notEntities = ['MIGRATION', 'RECOVERY', 'ALL'];
+      const payloadKeyFor = (type: EntityType): string =>
+        getPayloadKey(type) ?? type.toLowerCase();
+      mockStore.select.and.returnValue(of({ id: 'e-1', title: 'B title', isDone: true }));
+
+      for (const type of ENTITY_TYPES.filter((t) => !notEntities.includes(t))) {
+        mockOpLogStore.appendMixedSourceBatchSkipDuplicates.calls.reset();
+        const local = op({
+          id: `l-${type}`,
+          clientId: 'A',
+          entityType: type,
+          entityId: 'e-1',
+          vectorClock: { A: 2 },
+          timestamp: 900,
+          payload: { [payloadKeyFor(type)]: { id: 'e-1', changes: { isDone: true } } },
+        });
+        const row = op({
+          id: `r-${type}`,
+          clientId: 'B',
+          actionType: `[${type}] LWW Update` as ActionType,
+          entityType: type,
+          entityId: 'e-1',
+          vectorClock: { A: 1, B: 3 },
+          timestamp: 2000,
+          payload: {
+            actionPayload: { id: 'e-1', title: 'B title' },
+            entityChanges: [],
+            lwwUpdateMode: 'patch',
+          },
+        });
+
+        await service.autoResolveConflictsLWW([
+          { ...conflictOf([local], [row], 'e-1'), entityType: type },
+        ]);
+
+        const reemitted = mergedOpArgs('e-1');
+        const isPatch =
+          (reemitted?.payload as { lwwUpdateMode?: string } | undefined)
+            ?.lwwUpdateMode === 'patch';
+        expect(isPatch).withContext(type).toBe(admitted.includes(type));
+      }
+    });
+
+    it('handles non-array clearedFields accepted by existing payload validation and replay', async () => {
+      mockStore.select.and.returnValue(of({ id: 'task-1', title: 'Local title' }));
+      const remote = op({
+        id: 'remote-row',
+        clientId: 'B',
+        vectorClock: { B: 1 },
+        timestamp: 1000,
+        actionType: '[TASK] LWW Update' as ActionType,
+        payload: {
+          actionPayload: { id: 'task-1', title: 'Remote title' },
+          entityChanges: [],
+          lwwUpdateMode: 'patch',
+          clearedFields: {},
+        },
+      });
+      expect(validateOperationPayload(remote).success).toBeTrue();
+      expect(convertOpToAction(remote).type).toBe('[TASK] LWW Update');
+      expect(isTimelessTaskPatch(remote, 'task-1')).toBeTrue();
+      expect(isTimePreservingTaskSnapshot(remote)).toBeFalse();
+
+      await service.autoResolveConflictsLWW([
+        conflictOf(
+          [
+            op({
+              actionType: ActionType.TASK_SHARED_PLAN_FOR_TODAY,
+              timestamp: 2000,
+              payload: { taskIds: ['task-1'], today: '2026-10-04' },
+            }),
+          ],
+          [remote],
+        ),
+      ]);
+      expect((mergedOpArgs()!.payload as { lwwUpdateMode?: string }).lwwUpdateMode).toBe(
+        'patch',
+      );
+    });
+
+    it('emits the local non-time snapshot beside a remote time delta', async () => {
       mockStore.select.and.returnValue(of({ id: 'task-1', title: 'A title' }));
       const local = title({ id: 'l', clientId: 'A', vectorClock: { A: 1 } }, 'A');
       const remoteRename = title(
@@ -1715,8 +1939,13 @@ describe('ConflictResolutionService — disjoint-field merge', () => {
       ]);
 
       expect((mergedOpArgs()!.payload as { lwwUpdateMode?: string }).lwwUpdateMode).toBe(
-        'replace',
+        'patch',
       );
+      const payload = extractActionPayload(mergedOpArgs()!.payload);
+      expect(payload['title']).toBe('A title');
+      expect(Object.keys(payload)).not.toContain('timeSpent');
+      expect(Object.keys(payload)).not.toContain('timeSpentOnDay');
+      expect(Object.keys(payload)).not.toContain('duration');
       expect(mockOpLogStore.rebasePendingLocalOps).not.toHaveBeenCalled();
     });
   });

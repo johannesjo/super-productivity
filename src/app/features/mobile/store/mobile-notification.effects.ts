@@ -4,8 +4,9 @@ import { debounceTime, distinctUntilChanged, map, switchMap, tap } from 'rxjs/op
 import { combineLatest, Observable, timer } from 'rxjs';
 import { SnackService } from '../../../core/snack/snack.service';
 import { Log } from '../../../core/log';
-import { T } from '../../../t.const';
+import { DateService } from '../../../core/date/date.service';
 import { generateNotificationId } from '../../android/android-notification-id.util';
+import { hasTypedReminderActions } from '../../android/android-interface';
 import { Store } from '@ngrx/store';
 import {
   selectAllTasksWithReminder,
@@ -23,7 +24,7 @@ import {
 import { TaskRepeatCfg } from '../../task-repeat-cfg/task-repeat-cfg.model';
 import { getRepeatableTaskId } from '../../task-repeat-cfg/get-repeatable-task-id.util';
 import { isValidSplitTime } from '../../../util/is-valid-split-time';
-import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
+import { getRepeatDueWithTime } from '../../task-repeat-cfg/store/get-repeat-due-with-time.util';
 import { remindOptionToMilliseconds } from '../../tasks/util/remind-option-to-milliseconds';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { getDueDateNotificationOffsetMs } from '../due-date-notification-offset';
@@ -64,19 +65,18 @@ export class MobileNotificationEffects {
   private _reminderService = inject(CapacitorReminderService);
   private _platformService = inject(CapacitorPlatformService);
   private _globalConfigService = inject(GlobalConfigService);
+  private _dateService = inject(DateService);
   // Single-shot guard so we don't spam the user with duplicate warnings.
   private _hasShownNotificationWarning = false;
   // Track scheduled reminder IDs to cancel removed ones
   private _scheduledReminderIds = new Set<string>();
   // Track scheduled due-date notification IDs separately
   private _scheduledDueDateIds = new Set<string>();
-  // Track scheduled deadline reminder IDs separately
-  private _scheduledDeadlineIds = new Set<string>();
+  // Track scheduled deadline reminders separately: taskId → triggerAtMs, so a
+  // pending alarm can be told apart from one that already fired
+  private _scheduledDeadlineIds = new Map<string, number>();
   // Track pre-scheduled recurring reminder IDs (the predicted task instance IDs)
   private _scheduledRepeatReminderIds = new Set<string>();
-  // One-shot guard: the Android exact-alarm check runs at most once per session.
-  // See _warnIfExactAlarmPermissionDeniedOnce().
-  private _exactAlarmPermissionCheckPromise?: Promise<void>;
 
   // Narrowed cfg slice so the scheduling effects only re-run on reminder-config
   // changes, not on every unrelated global-config edit (theme, sync, etc.).
@@ -120,12 +120,9 @@ export class MobileNotificationEffects {
                 this._notifyPermissionIssue();
                 return;
               }
-              // Deliberately no exact-alarm check here. `ensureExactAlarmPermission()`
-              // opens Android's "Alarms & reminders" settings PAGE, and running it at
-              // startup sent users there with nothing scheduled — reachable for anyone
-              // once notifications are granted, which now happens on the first timer
-              // start (#9648). The scheduling effects below run it when a reminder
-              // actually needs an alarm, which is the only moment it can matter.
+              // Deliberately no exact-alarm prompt anywhere in these effects: a
+              // denied "Alarms & reminders" permission is surfaced calmly by
+              // <exact-alarm-hint> where reminders are set (#9648, #10684).
             } catch (error) {
               Log.err(error);
               this._notifyPermissionIssue(error?.toString());
@@ -205,7 +202,6 @@ export class MobileNotificationEffects {
                 this._notifyPermissionIssue();
                 return;
               }
-              await this._warnIfExactAlarmPermissionDeniedOnce();
 
               // Schedule each reminder using the platform-appropriate method
               for (const task of tasksWithReminders) {
@@ -323,7 +319,6 @@ export class MobileNotificationEffects {
                 this._notifyPermissionIssue();
                 return;
               }
-              await this._warnIfExactAlarmPermissionDeniedOnce();
 
               for (const occ of upcoming) {
                 await this._reminderService.scheduleReminder({
@@ -405,7 +400,6 @@ export class MobileNotificationEffects {
               if (!hasPermission) {
                 return;
               }
-              await this._warnIfExactAlarmPermissionDeniedOnce();
 
               const now = Date.now();
               // Android + SuperSync only: those alarms hit the server on firing,
@@ -453,7 +447,7 @@ export class MobileNotificationEffects {
     );
 
   /**
-   * Schedule explicit deadline reminders on iOS.
+   * Schedule explicit deadline reminders natively (iOS and Android).
    *
    * SYNC-SAFE: Same rationale as scheduleNotifications$ above — dispatch:false
    * (no store mutations), idempotent native scheduling, and we deliberately want
@@ -462,7 +456,6 @@ export class MobileNotificationEffects {
    */
   scheduleDeadlineNotifications$ =
     this._platformService.isNative &&
-    this._platformService.isIOS() &&
     createEffect(
       () =>
         timer(DELAY_SCHEDULE).pipe(
@@ -473,9 +466,14 @@ export class MobileNotificationEffects {
             ]),
           ),
           tap(async ([tasks, reminderCfg]) => {
+            // An older APK would report a deadline snooze/tap as a task one and
+            // move the wrong reminder; it keeps the in-app deadline reminder.
+            if (this._platformService.isAndroid() && !hasTypedReminderActions()) {
+              return;
+            }
             try {
               if (reminderCfg?.disableReminders) {
-                for (const previousId of this._scheduledDeadlineIds) {
+                for (const previousId of this._scheduledDeadlineIds.keys()) {
                   const notificationId = generateNotificationId(previousId + '_deadline');
                   await this._reminderService.cancelReminder(notificationId);
                 }
@@ -485,7 +483,7 @@ export class MobileNotificationEffects {
 
               const currentDeadlineIds = new Set((tasks || []).map((t) => t.id));
 
-              for (const previousId of this._scheduledDeadlineIds) {
+              for (const previousId of this._scheduledDeadlineIds.keys()) {
                 if (!currentDeadlineIds.has(previousId)) {
                   const notificationId = generateNotificationId(previousId + '_deadline');
                   await this._reminderService.cancelReminder(notificationId);
@@ -501,12 +499,15 @@ export class MobileNotificationEffects {
               if (!hasPermission) {
                 return;
               }
-              await this._warnIfExactAlarmPermissionDeniedOnce();
 
               const now = Date.now();
+              const scheduled = new Map<string, number>();
               for (const task of tasks) {
                 if (!task.deadlineRemindAt || task.deadlineRemindAt <= now) {
-                  if (this._scheduledDeadlineIds.has(task.id)) {
+                  // Only cancel an alarm that is still pending: on Android cancel
+                  // also removes an already shown notification.
+                  const scheduledAt = this._scheduledDeadlineIds.get(task.id);
+                  if (scheduledAt !== undefined && scheduledAt > now) {
                     await this._reminderService.cancelReminder(
                       generateNotificationId(task.id + '_deadline'),
                     );
@@ -523,9 +524,10 @@ export class MobileNotificationEffects {
                   reminderType: 'DEADLINE',
                   triggerAtMs: task.deadlineRemindAt,
                 });
+                scheduled.set(task.id, task.deadlineRemindAt);
               }
 
-              this._scheduledDeadlineIds = currentDeadlineIds;
+              this._scheduledDeadlineIds = scheduled;
 
               Log.log('MobileEffects: scheduled deadline reminders', {
                 count: tasks.length,
@@ -559,7 +561,7 @@ export class MobileNotificationEffects {
     const foundCfgIds = new Set<string>();
 
     // Anchor each day at noon to keep the per-day timestamp clear of DST /
-    // midnight edges; getDbDateStr/getDateTimeFromClockString only use the date.
+    // midnight edges; getDbDateStr/getRepeatDueWithTime only use the date.
     const baseDay = new Date(now);
     baseDay.setHours(12, 0, 0, 0);
 
@@ -586,7 +588,11 @@ export class MobileNotificationEffects {
           continue;
         }
 
-        const dueMs = getDateTimeFromClockString(cfg.startTime, dayMs);
+        const dueMs = getRepeatDueWithTime(
+          cfg.startTime,
+          dayMs,
+          this._dateService.getStartOfNextDayDiffMs(),
+        );
         const triggerAtMs = remindOptionToMilliseconds(dueMs, cfg.remindAt);
         if (typeof triggerAtMs !== 'number' || triggerAtMs <= now) {
           continue;
@@ -614,46 +620,6 @@ export class MobileNotificationEffects {
     }
 
     return result;
-  }
-
-  /**
-   * Run the Android exact-alarm check at most once per app session, warning the
-   * user when it is denied. Memoized via `_exactAlarmPermissionCheckPromise` so
-   * the underlying `ensureExactAlarmPermission()` — which can open the Android
-   * system settings page — never re-fires across the many scheduling effects
-   * that call this. A later in-session grant is intentionally not re-detected
-   * (it resets next launch); the trade-off avoids repeatedly opening that page.
-   *
-   * Gated on `isAndroid()`, the superset of native + legacy WebView: on legacy
-   * WebView `ensureExactAlarmPermission()` self-guards and returns true, so no
-   * spurious warning fires there.
-   */
-  private _warnIfExactAlarmPermissionDeniedOnce(): Promise<void> {
-    if (!this._platformService.isAndroid()) {
-      return Promise.resolve();
-    }
-
-    this._exactAlarmPermissionCheckPromise =
-      this._exactAlarmPermissionCheckPromise ||
-      this._reminderService
-        .ensureExactAlarmPermission()
-        .then((hasExactAlarm) => {
-          if (!hasExactAlarm) {
-            this._snackService.open({
-              type: 'ERROR',
-              msg: T.NOTIFICATION.EXACT_ALARM_DENIED,
-            });
-          }
-        })
-        // `ensureExactAlarmPermission()` swallows its own errors today, but keep
-        // a resolving catch so a future throw can't cache a rejected promise
-        // here (which every scheduling effect would then re-await). Log-only: a
-        // thrown check is not an explicit denial, so don't show the snack.
-        .catch((error: unknown) => {
-          Log.warn('MobileEffects: exact alarm permission check failed', error);
-        });
-
-    return this._exactAlarmPermissionCheckPromise;
   }
 
   private _notifyPermissionIssue(message?: string): void {

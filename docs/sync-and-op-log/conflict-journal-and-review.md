@@ -62,7 +62,9 @@ same field, each at that write's own timestamp (see
 * both sides changed at least one real (non-noise) field, or the remote
   side holds such a row;
 * time stays out of the patch: a local `syncTimeSpent` delta is kept pending
-  and rebased past the remote side instead; a remote delta, `removeTimeSpent`,
+  with its original ID, clock and payload; only a confirmed SuperSync
+  conflict rejection permits a commuting rebase. Lost responses retry unchanged;
+  a remote delta, `removeTimeSpent`,
   or a delta beside an absolute time write (or beside a remote row that may
   write time) refuses the patch;
 * an overlapping patch that would clear a reminder field (`reminderId`,
@@ -110,6 +112,14 @@ such a row reads only **which** fields it writes (its keys, or every field for
 a `'replace'` row), never its values: the row applies as itself, and the local
 fields newer than it, or that it does not write, are re-sent after it. Rows
 never merge with each other (a pending local row keeps whole-entity LWW).
+Rejection recovery has a separate, narrow no-op proof: after the server explicitly
+rejects every moved operation, it may compare this client's own unchanged
+replacement against intervening original content edits. This preserves the
+replacement body and its order beside the original time deltas; it does not read
+incoming resolution values or use row values to synthesize a field patch. The
+retained history must be complete through the snapshot frontier. Earlier stored
+rows still need the proof unless the pending operation's clock covers them;
+append order alone does not establish observation.
 The re-sends are written last in the same transaction as the remote winners,
 after every incoming op of the download, so a crash cannot leave the remote
 values persisted without them.

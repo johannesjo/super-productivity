@@ -9,6 +9,8 @@ import { Task } from '../../../features/tasks/task.model';
 import { Project } from '../../../features/project/project.model';
 import { Tag } from '../../../features/tag/tag.model';
 import { Section } from '../../../features/section/section.model';
+import { NOTE_FEATURE_NAME } from '../../../features/note/store/note.reducer';
+import { Note } from '../../../features/note/note.model';
 import { WorkContextType } from '../../../features/work-context/work-context.model';
 import { TODAY_TAG } from '../../../features/tag/tag.const';
 import { INBOX_PROJECT } from '../../../features/project/project.const';
@@ -1625,6 +1627,226 @@ describe('lwwUpdateMetaReducer', () => {
       expect(recreated.id).toBe('recreated-section');
       expect(recreated.title).toBe('Recreated Section');
       expect(recreated.contextId).toBe(PROJECT_ID);
+    });
+  });
+
+  describe('[NOTE] LWW Update recreate (#10380)', () => {
+    const NOTE_ID = 'note1';
+    const OTHER_NOTE_ID = 'note0';
+    const createNote = (overrides: Partial<Note> = {}): Note => ({
+      id: NOTE_ID,
+      content: 'Note content',
+      projectId: PROJECT_ID,
+      isPinnedToToday: false,
+      created: 100,
+      modified: 100,
+      ...overrides,
+    });
+    const createStateWithNotes = (
+      notes: Note[],
+      noteIds: string[],
+      todayOrder: string[],
+    ): Partial<RootState> => {
+      const base = createMockState();
+      return {
+        ...base,
+        [PROJECT_FEATURE_NAME]: {
+          ...base[PROJECT_FEATURE_NAME]!,
+          entities: {
+            ...base[PROJECT_FEATURE_NAME]!.entities,
+            [PROJECT_ID]: createMockProject({ noteIds }),
+          },
+        },
+        [NOTE_FEATURE_NAME]: {
+          ids: notes.map((n) => n.id),
+          entities: Object.fromEntries(notes.map((n) => [n.id, n])),
+          todayOrder,
+        },
+      } as Partial<RootState>;
+    };
+    const lwwNote = (note: Note): Action =>
+      ({
+        type: '[NOTE] LWW Update',
+        ...note,
+        meta: {
+          isPersistent: true,
+          entityType: 'NOTE',
+          entityId: note.id,
+          isRemote: true,
+          lwwUpdateMode: 'replace',
+          recreatesEntityAfterDelete: true,
+        },
+      }) as unknown as Action;
+    const run = (state: Partial<RootState>, action: Action): Partial<RootState> => {
+      reducer(state, action);
+      return mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+    };
+
+    it('restores a deleted pinned note intact, in its project and in Today', () => {
+      const other = createNote({ id: OTHER_NOTE_ID, isPinnedToToday: true });
+      const note = createNote({ isPinnedToToday: true, isLock: true });
+      const result = run(
+        createStateWithNotes([other], [OTHER_NOTE_ID], [OTHER_NOTE_ID]),
+        lwwNote(note),
+      );
+
+      expect(result[NOTE_FEATURE_NAME]!.entities[NOTE_ID]).toEqual({
+        ...note,
+        modified: jasmine.any(Number),
+      });
+      expect(result[PROJECT_FEATURE_NAME]!.entities[PROJECT_ID]!.noteIds).toEqual([
+        OTHER_NOTE_ID,
+        NOTE_ID,
+      ]);
+      expect(result[NOTE_FEATURE_NAME]!.todayOrder).toEqual([OTHER_NOTE_ID, NOTE_ID]);
+      expect(appDataValidators.note(result[NOTE_FEATURE_NAME]!).success).toBe(true);
+    });
+
+    it('restores an unpinned note to its project only', () => {
+      const result = run(createStateWithNotes([], [], []), lwwNote(createNote()));
+
+      expect(result[PROJECT_FEATURE_NAME]!.entities[PROJECT_ID]!.noteIds).toEqual([
+        NOTE_ID,
+      ]);
+      expect(result[NOTE_FEATURE_NAME]!.todayOrder).toEqual([]);
+    });
+
+    it('restores a pinned note without a project to Today only', () => {
+      const result = run(
+        createStateWithNotes([], [], []),
+        lwwNote(createNote({ projectId: null, isPinnedToToday: true })),
+      );
+
+      expect(result[PROJECT_FEATURE_NAME]!.entities[PROJECT_ID]!.noteIds).toEqual([]);
+      expect(result[NOTE_FEATURE_NAME]!.todayOrder).toEqual([NOTE_ID]);
+    });
+
+    it('does not add a note to a project this client does not have', () => {
+      const result = run(
+        createStateWithNotes([], [], []),
+        lwwNote(createNote({ projectId: 'missing-project' })),
+      );
+
+      expect(result[PROJECT_FEATURE_NAME]!.entities['missing-project']).toBeUndefined();
+      expect(result[NOTE_FEATURE_NAME]!.entities[NOTE_ID]).toBeDefined();
+    });
+
+    it('does not duplicate list entries that are already present', () => {
+      const result = run(
+        createStateWithNotes([], [NOTE_ID], [NOTE_ID]),
+        lwwNote(createNote({ isPinnedToToday: true })),
+      );
+
+      expect(result[PROJECT_FEATURE_NAME]!.entities[PROJECT_ID]!.noteIds).toEqual([
+        NOTE_ID,
+      ]);
+      expect(result[NOTE_FEATURE_NAME]!.todayOrder).toEqual([NOTE_ID]);
+    });
+
+    it('leaves project noteIds alone when the note still exists', () => {
+      const result = run(
+        createStateWithNotes([createNote()], [], []),
+        lwwNote(createNote({ content: 'Edited' })),
+      );
+
+      expect(result[NOTE_FEATURE_NAME]!.entities[NOTE_ID]!.content).toBe('Edited');
+      expect(result[PROJECT_FEATURE_NAME]!.entities[PROJECT_ID]!.noteIds).toEqual([]);
+      expect(result[NOTE_FEATURE_NAME]!.todayOrder).toEqual([]);
+    });
+  });
+
+  describe('[NOTE] LWW Update of an existing note keeps todayOrder in step (#10379)', () => {
+    const NOTE_ID = 'note1';
+    const OTHER_NOTE_ID = 'note0';
+    const createNote = (overrides: Partial<Note> = {}): Note => ({
+      id: NOTE_ID,
+      content: 'Note content',
+      projectId: PROJECT_ID,
+      isPinnedToToday: false,
+      created: 100,
+      modified: 100,
+      ...overrides,
+    });
+    const stateWith = (notes: Note[], todayOrder: string[]): Partial<RootState> =>
+      ({
+        ...createMockState(),
+        [NOTE_FEATURE_NAME]: {
+          ids: notes.map((n) => n.id),
+          entities: Object.fromEntries(notes.map((n) => [n.id, n])),
+          todayOrder,
+        },
+      }) as Partial<RootState>;
+    const lwwNote = (note: Note): Action =>
+      ({
+        type: '[NOTE] LWW Update',
+        ...note,
+        meta: {
+          isPersistent: true,
+          entityType: 'NOTE',
+          entityId: note.id,
+          isRemote: true,
+          lwwUpdateMode: 'replace',
+        },
+      }) as unknown as Action;
+    const todayOrderAfter = (state: Partial<RootState>, action: Action): string[] => {
+      reducer(state, action);
+      const next = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      return next[NOTE_FEATURE_NAME]!.todayOrder;
+    };
+    const other = createNote({ id: OTHER_NOTE_ID, isPinnedToToday: true });
+
+    it('drops a note the winner unpinned from Today', () => {
+      const pinned = createNote({ isPinnedToToday: true });
+      expect(
+        todayOrderAfter(
+          stateWith([other, pinned], [NOTE_ID, OTHER_NOTE_ID]),
+          lwwNote(createNote({ content: 'Edited' })),
+        ),
+      ).toEqual([OTHER_NOTE_ID]);
+    });
+
+    it('lists a note the winner pinned at the top of Today, as updateNote does', () => {
+      expect(
+        todayOrderAfter(
+          stateWith([other, createNote()], [OTHER_NOTE_ID]),
+          lwwNote(createNote({ isPinnedToToday: true })),
+        ),
+      ).toEqual([NOTE_ID, OTHER_NOTE_ID]);
+    });
+
+    it('keeps the position of a note that stays pinned', () => {
+      const pinned = createNote({ isPinnedToToday: true });
+      expect(
+        todayOrderAfter(
+          stateWith([other, pinned], [OTHER_NOTE_ID, NOTE_ID]),
+          lwwNote(createNote({ isPinnedToToday: true, content: 'Edited' })),
+        ),
+      ).toEqual([OTHER_NOTE_ID, NOTE_ID]);
+    });
+
+    it('follows the merged note when an update-mode payload omits the pin', () => {
+      const pinned = createNote({ isPinnedToToday: true });
+      const partial = {
+        type: '[NOTE] LWW Update',
+        id: NOTE_ID,
+        content: 'Edited',
+        meta: {
+          isPersistent: true,
+          entityType: 'NOTE',
+          entityId: NOTE_ID,
+          isRemote: true,
+        },
+      } as unknown as Action;
+      expect(
+        todayOrderAfter(stateWith([other, pinned], [OTHER_NOTE_ID]), partial),
+      ).toEqual([NOTE_ID, OTHER_NOTE_ID]);
+    });
+
+    it('is idempotent when the same replacement is applied twice', () => {
+      const action = lwwNote(createNote({ isPinnedToToday: true }));
+      reducer(stateWith([other, createNote()], [OTHER_NOTE_ID]), action);
+      const once = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      expect(todayOrderAfter(once, action)).toEqual([NOTE_ID, OTHER_NOTE_ID]);
     });
   });
 

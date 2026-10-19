@@ -231,7 +231,7 @@ describe('SyncFuzzHarness: negative control', () => {
       .toContain({ step: 3, device: 'B', kind: 'import-dialog', detail: 'USE_REMOTE' });
     expect(kept.failures.map((f) => f.signature))
       .withContext(JSON.stringify(kept.failures))
-      .not.toContain('field-reverted:task.title');
+      .not.toContain('older-write-won:task.title');
 
     // ...until the server loses the rename while acknowledging it.
     loseUploadsOf('"after"');
@@ -240,7 +240,7 @@ describe('SyncFuzzHarness: negative control', () => {
 
     expect(failures.map((f) => f.signature))
       .withContext(JSON.stringify(failures))
-      .toContain('field-reverted:task.title');
+      .toContain('older-write-won:task.title');
   }, 60_000);
 
   it('the oracles report an older notes edit that beats a newer concurrent one', async () => {
@@ -263,6 +263,38 @@ describe('SyncFuzzHarness: negative control', () => {
     expect(failures.map((f) => f.signature))
       .withContext(JSON.stringify(failures))
       .toContain('older-write-won:task.notes');
+  }, 60_000);
+
+  it('the oracles hold a field to its own latest write, not its side’s (#10422)', async () => {
+    // A's notes stay pending while C writes newer notes and uploads; A then
+    // renames and uploads. A's side has the latest intent, but C's notes win
+    // per field, as the field patch resolves them.
+    const steps: FuzzStep[] = [
+      { d: 'A', a: ['editTaskNotes', 't1', 'A notes'] },
+      { d: 'C', a: ['editTaskNotes', 't1', 'C notes'], s: 1 },
+      { d: 'A', a: ['renameTask', 't1', 'A title'], s: 1 },
+    ];
+    const { failures } = await runFuzz({ steps });
+
+    expect(failures).withContext(JSON.stringify(failures)).toEqual([]);
+  }, 60_000);
+
+  it('the oracles hold a re-sent field to its own write’s time (#10422)', async () => {
+    // A resolves against B's newer rename and re-sends its notes, written
+    // before C's. A row stamping them at A's rename would beat C's notes,
+    // and the oracle would report it (`older-write-won:task.notes`;
+    // field-patch-timestamp.integration.spec.ts pins the values).
+    const steps: FuzzStep[] = [
+      { d: 'A', a: ['editTaskNotes', 't1', 'A notes'] },
+      { d: 'C', a: ['editTaskNotes', 't1', 'C notes'] },
+      { d: 'A', a: ['renameTask', 't1', 'A title'] },
+      { d: 'B', a: ['renameTask', 't1', 'B title'], s: 1 },
+      { d: 'A', s: 1 },
+      { d: 'C', s: 1 },
+    ];
+    const { failures } = await runFuzz({ steps });
+
+    expect(failures).withContext(JSON.stringify(failures)).toEqual([]);
   }, 60_000);
 
   /**
@@ -308,7 +340,7 @@ describe('SyncFuzzHarness: negative control', () => {
       expect(signatures).withContext(JSON.stringify(kept.failures)).toContain(STOP);
       expect(signatures)
         .withContext(JSON.stringify(kept.failures))
-        .not.toContain('field-reverted:task.title');
+        .not.toContain('older-write-won:task.title');
 
       // ...until the server loses the rename while acknowledging it.
       loseUploadsOf('"after"');
@@ -317,7 +349,7 @@ describe('SyncFuzzHarness: negative control', () => {
 
       expect(failures.map((f) => f.signature))
         .withContext(JSON.stringify(failures))
-        .toContain('field-reverted:task.title');
+        .toContain('older-write-won:task.title');
     }, 60_000);
   }
 
@@ -342,7 +374,7 @@ describe('SyncFuzzHarness: negative control', () => {
       .toContain({ step: 7, device: 'C', kind: 'stop-dialog', detail: 'USE_REMOTE' });
     expect(kept.failures.map((f) => f.signature))
       .withContext(JSON.stringify(kept.failures))
-      .not.toContain('field-reverted:task.title');
+      .not.toContain('older-write-won:task.title');
 
     // ...until the server loses the rename while acknowledging it.
     loseUploadsOf('"after"');
@@ -351,7 +383,7 @@ describe('SyncFuzzHarness: negative control', () => {
 
     expect(failures.map((f) => f.signature))
       .withContext(JSON.stringify(failures))
-      .toContain('field-reverted:task.title');
+      .toContain('older-write-won:task.title');
   }, 60_000);
 
   it('excuses a write dropped by a second stop answered with USE_REMOTE', async () => {
@@ -386,7 +418,7 @@ describe('SyncFuzzHarness: negative control', () => {
     expect(signatures).withContext(JSON.stringify(failures)).toContain(STOP);
     expect(signatures)
       .withContext(JSON.stringify(failures))
-      .not.toContain('field-reverted:task.title');
+      .not.toContain('older-write-won:task.title');
   }, 60_000);
 
   it('leaves a stop unanswered in a trace without a dialog answer or a replacement', async () => {

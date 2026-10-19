@@ -29,7 +29,12 @@ export const timeTrackingReducer = createReducer(
   ),
   on(TimeTrackingActions.updateWholeState, (state, { newState }) => newState),
 
-  on(TimeTrackingActions.addTimeSpent, (state, { task, date }) => {
+  on(TimeTrackingActions.addTimeSpent, (state, { task, date, isBackfill }) => {
+    // Back-filled time for a past day was not worked now: stamping Date.now()
+    // as that day's work end (or start) would be wrong.
+    if (isBackfill) {
+      return state;
+    }
     const isUpdateProject = !!task.projectId;
 
     return {

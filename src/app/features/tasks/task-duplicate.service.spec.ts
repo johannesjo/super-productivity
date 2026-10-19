@@ -16,8 +16,16 @@ describe('TaskDuplicateService', () => {
     title: 'Sub task',
     projectId: 'project-1',
     isDone: true,
+    dueDay: '2026-09-02',
     timeEstimate: 3_600_000,
     notes: 'Sub task notes',
+  };
+  const timedSubTask: Task = {
+    ...DEFAULT_TASK,
+    id: 'timed-sub-task',
+    title: 'Timed sub task',
+    projectId: 'project-1',
+    dueWithTime: 1_757_000_000_000,
   };
   const parentTask: TaskWithSubTasks = {
     ...DEFAULT_TASK,
@@ -28,8 +36,8 @@ describe('TaskDuplicateService', () => {
     notes: 'Parent task notes',
     dueDay: '2026-09-01',
     timeEstimate: 7_200_000,
-    subTaskIds: [subTask.id],
-    subTasks: [subTask],
+    subTaskIds: [subTask.id, timedSubTask.id],
+    subTasks: [subTask, timedSubTask],
   };
 
   beforeEach(() => {
@@ -57,8 +65,14 @@ describe('TaskDuplicateService', () => {
       title: subTask.title,
       projectId: subTask.projectId,
     };
+    const newTimedSubTask: Task = {
+      ...DEFAULT_TASK,
+      id: 'new-timed-sub-task',
+      title: timedSubTask.title,
+      projectId: timedSubTask.projectId,
+    };
     taskService.add.and.returnValue('new-parent-task');
-    taskService.createNewTaskWithDefaults.and.returnValue(newSubTask);
+    taskService.createNewTaskWithDefaults.and.returnValues(newSubTask, newTimedSubTask);
 
     const result = service.duplicate(parentTask);
 
@@ -81,13 +95,30 @@ describe('TaskDuplicateService', () => {
       additional: {
         isDone: true,
         projectId: 'project-1',
+        dueDay: '2026-09-02',
         timeEstimate: 3_600_000,
         notes: 'Sub task notes',
+      },
+    });
+    expect(taskService.createNewTaskWithDefaults).toHaveBeenCalledWith({
+      title: 'Timed sub task',
+      additional: {
+        isDone: false,
+        projectId: 'project-1',
+        dueWithTime: 1_757_000_000_000,
+        timeEstimate: 0,
+        notes: undefined,
       },
     });
     expect(store.dispatch).toHaveBeenCalledWith(
       addSubTask({
         task: newSubTask,
+        parentId: 'new-parent-task',
+      }),
+    );
+    expect(store.dispatch).toHaveBeenCalledWith(
+      addSubTask({
+        task: newTimedSubTask,
         parentId: 'new-parent-task',
       }),
     );
@@ -118,11 +149,41 @@ describe('TaskDuplicateService', () => {
       .map(([arg]) => arg.additional);
     expect(additionals[0]).toEqual(jasmine.objectContaining({ priority: 3 }));
     expect(additionals[1]).not.toEqual(jasmine.objectContaining({ priority: 3 }));
-    expect(additionals[1]?.priority).toBeUndefined();
+    expect(additionals[1]?.priority).toBeNull();
   });
 
-  it('does not copy a stale string priority from an old test build', () => {
-    const staleSubTask = { ...subTask, priority: 'high' } as unknown as Task;
+  it('keeps a subtask finished as wont do', () => {
+    const wontDoSubTask: Task = {
+      ...subTask,
+      id: 'sub-wont-do',
+      isDone: true,
+      doneOn: 5,
+      wontDoOn: 5,
+    };
+    taskService.add.and.returnValue('new-parent-task');
+    taskService.createNewTaskWithDefaults.and.returnValue({
+      ...DEFAULT_TASK,
+      id: 'new-sub-task',
+      projectId: 'project-1',
+    });
+
+    service.duplicate({
+      ...parentTask,
+      subTaskIds: [wontDoSubTask.id, subTask.id],
+      subTasks: [wontDoSubTask, subTask],
+    });
+
+    const additionals = taskService.createNewTaskWithDefaults.calls
+      .allArgs()
+      .map(([arg]) => arg.additional);
+    expect(additionals[0]).toEqual(
+      jasmine.objectContaining({ isDone: true, doneOn: 5, wontDoOn: 5 }),
+    );
+    expect(additionals[1]?.wontDoOn).toBeUndefined();
+  });
+
+  it('preserves legacy string priorities on parents and subtasks', () => {
+    const legacySubTask: Task = { ...subTask, priority: 'high' };
     taskService.add.and.returnValue('new-parent-task');
     taskService.createNewTaskWithDefaults.and.returnValue({
       ...DEFAULT_TASK,
@@ -133,14 +194,14 @@ describe('TaskDuplicateService', () => {
     service.duplicate({
       ...parentTask,
       priority: 'high',
-      subTasks: [staleSubTask],
-    } as unknown as TaskWithSubTasks);
+      subTasks: [legacySubTask],
+    } as TaskWithSubTasks);
 
-    expect('priority' in taskService.add.calls.mostRecent().args[2]!).toBe(false);
+    expect(taskService.add.calls.mostRecent().args[2]!.priority).toBe('high');
     expect(
-      'priority' in
-        taskService.createNewTaskWithDefaults.calls.mostRecent().args[0].additional!,
-    ).toBe(false);
+      taskService.createNewTaskWithDefaults.calls.mostRecent().args[0].additional!
+        .priority,
+    ).toBe('high');
   });
 
   it('does not duplicate a subtask', () => {

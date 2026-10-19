@@ -84,7 +84,63 @@ const signatures = (
 };
 
 describe('sync fuzz preservation oracles', () => {
+  describe('provable existence', () => {
+    it('reports a missing newer isolated edit, including a note with a delete', () => {
+      const del = entry('A', { A: 1 }, ['deleteNote', 'n1']);
+      const edit = entry('B', { B: 1 }, ['editNote', 'n1', 'content', 'newer']);
+      expect(signatures({}, [del, edit])).toEqual(['lost-entity:note']);
+      expect(signatures({ notes: { n1: { content: 'newer' } } }, [del, edit])).toEqual(
+        [],
+      );
+      // A later delete, or one that saw the edit, legitimately removes it.
+      expect(signatures({}, [{ ...del, time: edit.time + 1 }, edit])).toEqual([]);
+      const after = entry('A', { A: 2, B: 1 }, ['deleteNote', 'n1']);
+      expect(signatures({}, [del, edit, after])).toEqual([]);
+    });
+
+    it('does not infer a winner across several conflict rounds or three devices', () => {
+      const del = entry('A', { A: 1 }, ['deleteNote', 'n1']);
+      const edit = entry('B', { B: 1 }, ['editNote', 'n1', 'content', 'newer']);
+      const third = entry('C', { C: 1 }, ['editNote', 'n1', 'isLock', true]);
+      expect(signatures({}, [del, edit, third])).toEqual([]);
+      const earlier = entry('B', { B: 1 }, ['editNote', 'n1', 'isLock', true]);
+      const later = entry('B', { B: 2 }, ['editNote', 'n1', 'content', 'later']);
+      expect(signatures({}, [earlier, del, later])).toEqual([]);
+    });
+
+    for (const intent of [
+      ['addTask', 't1', 'P'],
+      ['restoreTask', 't1'],
+    ] as Intent[]) {
+      it(`requires a causally later ${intent[0]} without calling it resurrection`, () => {
+        const del = entry('A', { A: 1 }, ['deleteTask', 't1']);
+        const recreate = entry('B', { A: 1, B: 1 }, intent);
+        expect(signatures({}, [del, recreate])).toEqual(['lost-entity:task']);
+        expect(signatures({ tasks: { t1: { id: 't1' } } }, [del, recreate])).toEqual([]);
+        const deleteAgain = entry('B', { A: 1, B: 2 }, ['deleteTask', 't1']);
+        expect(signatures({}, [del, recreate, deleteAgain])).toEqual([]);
+      });
+    }
+
+    it('requires a kept edit even when its creation is outside the retained ledger', () => {
+      const edit = entry('B', { A: 5, B: 1 }, ['editNote', 'n1', 'content', 'after']);
+      expect(signatures({}, [edit])).toEqual(['lost-entity:note']);
+    });
+  });
+
   describe('latest write per field', () => {
+    it('uses an implicit write’s original time, not its intent’s last op', () => {
+      const track = entry('A', { A: 4 }, ['track', 't1', 0]);
+      track.writes = [{ entity: 'task:t1', field: 'isDone', value: false, time: 10 }];
+      track.time = 30;
+      const done = entry('B', { B: 1 }, ['doneTask', 't1', true]);
+      done.time = 20;
+      expect(signatures({ tasks: { t1: { isDone: true } } }, [track, done])).toEqual([]);
+      expect(signatures({ tasks: { t1: { isDone: false } } }, [track, done])).toEqual([
+        'older-write-won:task.isDone',
+      ]);
+    });
+
     // A writes notes, C writes newer notes; both concurrent (#10422's shape).
     const a = entry('A', { A: 1 }, ['editTaskNotes', 't1', 'A notes']);
     const c = entry('C', { C: 1 }, ['editTaskNotes', 't1', 'C notes']);
@@ -108,9 +164,11 @@ describe('sync fuzz preservation oracles', () => {
       ).toEqual(['older-write-won:task.notes']);
     });
 
-    it('accepts an older write whose side wins by a later edit of another field', () => {
+    it('reports an older write whose side has a later edit of another field', () => {
       // A's notes and rename are pending together and upload after C's
-      // notes: A resolves, its side wins by the rename and patches its notes.
+      // notes: A resolves per field (#10422). C's notes are the newer write
+      // of notes, so they win; A re-sends only its title. A's later rename
+      // does not make its older notes win.
       const notesA = entry('A', { A: 1 }, ['editTaskNotes', 't1', 'A notes'], {
         uploadedAt: 100,
       });
@@ -118,17 +176,23 @@ describe('sync fuzz preservation oracles', () => {
       const rename = entry('A', { A: 2 }, ['renameTask', 't1', 'A title'], {
         uploadedAt: 100,
       });
-      const converged = {
+      const entries = [notesA, notesC, rename];
+      expect(
+        signatures(
+          { tasks: { t1: { id: 't1', notes: 'C notes', title: 'A title' } } },
+          entries,
+        ),
+      ).toEqual([]);
+      const olderNotes = {
         tasks: { t1: { id: 't1', notes: 'A notes', title: 'A title' } },
       };
-      expect(signatures(converged, [notesA, notesC, rename])).toEqual([]);
-      // ...but not when A's notes uploaded before C's: that crossing was
-      // resolved earlier, and C won it. The later rename does not write notes
-      // (review of #10428, finding 2: the #10421 class).
+      expect(signatures(olderNotes, entries)).toEqual(['older-write-won:task.notes']);
+      // ...nor when A's notes uploaded before C's: that crossing was resolved
+      // earlier, and C won it (review of #10428, finding 2: the #10421 class).
       const earlyNotesA = entry('A', { A: 1 }, ['editTaskNotes', 't1', 'A notes']);
       const laterNotesC = entry('C', { C: 1 }, ['editTaskNotes', 't1', 'C notes']);
       const laterRename = entry('A', { A: 2 }, ['renameTask', 't1', 'A title']);
-      expect(signatures(converged, [earlyNotesA, laterNotesC, laterRename])).toEqual([
+      expect(signatures(olderNotes, [earlyNotesA, laterNotesC, laterRename])).toEqual([
         'older-write-won:task.notes',
       ]);
     });
@@ -167,9 +231,13 @@ describe('sync fuzz preservation oracles', () => {
         },
       };
 
-      it('accounts for any value when its delta is remote to the resolver', () => {
-        // A uploads first: C resolves against A's remote delta, whole-entity.
-        expect(signatures(converged, [notesB, notesC, track(100)])).toEqual([]);
+      it('does not when its plain delta is remote to the resolver', () => {
+        // A uploads first: C's notes and A's delta commute, so detection
+        // drops the delta (isCommutingTimeDeltaCrossing) and no whole-entity
+        // snapshot carries B's notes (adversarial review of #10458).
+        expect(signatures(converged, [notesB, notesC, track(100)])).toEqual([
+          'older-write-won:task.notes',
+        ]);
       });
 
       it('accounts for any value when its intent plans the task (opaque)', () => {
@@ -188,7 +256,7 @@ describe('sync fuzz preservation oracles', () => {
             t1: { id: 't1', notes: 'D notes', timeSpentOnDay: { [fuzzDay()]: 1000 } },
           },
         };
-        expect(signatures(unseen, [notesD, notesB, notesC, track(100)])).toEqual([
+        expect(signatures(unseen, [notesD, notesB, notesC, track(100, true)])).toEqual([
           'older-write-won:task.notes',
         ]);
       });
@@ -214,6 +282,35 @@ describe('sync fuzz preservation oracles', () => {
       expect(
         signatures({ habits: { h1: { id: 'h1', title: 'A' } } }, [titleA, titleC]),
       ).toEqual(['older-write-won:habit.title']);
+    });
+
+    it('allows a note snapshot baseline only when that side has not overwritten it', () => {
+      const creation = entry('A', { A: 1 }, ['addNote', 'n1', 'P']);
+      creation.writes = [{ entity: 'note:n1', field: 'content', value: 'n1' }];
+      const content = entry('B', { A: 1, B: 1 }, ['editNote', 'n1', 'content', 'B']);
+      const lock = entry('C', { A: 1, C: 1 }, ['editNote', 'n1', 'isLock', true]);
+      const baseline = { notes: { n1: { content: 'n1', isLock: true } } };
+      expect(signatures(baseline, [creation, content, lock])).toEqual([]);
+      const overwritten = entry('C', { A: 1, C: 1 }, ['editNote', 'n1', 'content', 'C']);
+      expect(
+        signatures({ notes: { n1: { content: 'n1' } } }, [
+          creation,
+          content,
+          overwritten,
+        ]),
+      ).toEqual(['older-write-won:note.content']);
+    });
+
+    it('checks a causally later note edit after a reorder, but leaves concurrent reorders unclassified', () => {
+      const reorder = entry('A', { A: 1 }, ['reorderNotes', 'P', 0, 1]);
+      const old = entry('A', { A: 2 }, ['editNote', 'n1', 'content', 'old']);
+      const later = entry('B', { A: 2, B: 1 }, ['editNote', 'n1', 'content', 'new']);
+      const converged = { notes: { n1: { content: 'old' } } };
+      expect(signatures(converged, [reorder, old, later])).toEqual([
+        'older-write-won:note.content',
+      ]);
+      const concurrent = entry('C', { C: 1 }, ['reorderNotes', 'P', 0, 1]);
+      expect(signatures(converged, [old, later, concurrent])).toEqual([]);
     });
   });
 
@@ -323,7 +420,7 @@ describe('sync fuzz preservation oracles', () => {
       );
       expect(
         signatures(converged('imported'), [rename], replacement('imported')),
-      ).toEqual(['field-reverted:task.title']);
+      ).toEqual(['older-write-won:task.title']);
     });
   });
 });

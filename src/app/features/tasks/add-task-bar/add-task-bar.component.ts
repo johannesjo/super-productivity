@@ -284,7 +284,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
     startWith([]),
   );
 
-  mentionCfg$ = inject(MentionConfigService).mentionConfig$;
+  mentionCfg$ = inject(MentionConfigService).addTaskBarMentionConfig$;
 
   // View children
   inputEl = viewChild<ElementRef<HTMLTextAreaElement>>('inputEl');
@@ -743,10 +743,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
       if (planForDay) {
         await this._planTaskForCurrentDay(suggestion.taskId);
         didPlanForDay = true;
-      } else {
-        this._taskService.getByIdOnce$(suggestion.taskId).subscribe((task) => {
-          this._taskService.moveToCurrentWorkContext(task);
-        });
+      } else if (suggestion.projectId) {
+        // Project contexts only suggest the project's own backlog tasks, so
+        // this is a move from the backlog, like the issue search's one.
+        this._projectService.moveTaskToTodayList(suggestion.taskId, suggestion.projectId);
       }
 
       if (suggestion.isArchivedTask) {

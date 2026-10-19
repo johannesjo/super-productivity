@@ -1,4 +1,6 @@
+import { isTimePreservingTaskSnapshot } from './time-preserving-task-snapshot.util';
 import { extractActionPayload } from '@sp/sync-core';
+import { clearedFieldsProps } from '../../util/cleared-update-fields';
 import {
   compareVectorClocks,
   mergeVectorClocks,
@@ -192,6 +194,9 @@ export const remoteWinsInServerOrder = (
  * device, so its fields are overlaid onto the snapshot's content. Unlike a
  * delta it is absolute, so it needs neither the clock merge nor the hoist: it
  * stays after the snapshot and re-applies the same value there on replay.
+ * A remote winner of the same task's other conflict (e.g. a rename newer than
+ * the local one, beside an older opaque op the local side beat) is overlaid
+ * the same way: it also applies after the snapshot (#10438).
  *
  * Field-patch re-sends (#10422) go last, after every incoming op, in the same
  * transaction: a crash between the remote winners and the re-sends would
@@ -216,22 +221,26 @@ export const buildTimeAwareResolutionBatches = async ({
   resendOps?: Operation[];
   getTask: (taskId: string) => Promise<unknown>;
 }): Promise<{ batches: MixedSourceOperationBatch[]; precedingOps: Operation[] }> => {
+  // Provenance is local to this batch: only newly built source winners qualify.
+  const sourceSnapshotIds = new Set(
+    newLocalWinOps.filter(isTimePreservingTaskSnapshot).map((op) => op.id),
+  );
   const foldedIds = new Set<string>();
-  // A remote winner applied after the snapshot can overwrite a folded field,
-  // so the overlay would no longer be this device's post-batch value. A
-  // winning delta is folded before the snapshot and writes no plain field.
-  const remoteWinnerTaskIds = new Set(
-    remoteWinsOps
-      .filter((op) => op.entityType === 'TASK' && !isSyncTimeSpentOp(op))
-      .flatMap(getOpEntityIds),
+  // A remote winner of the snapshot's task applies after it (`localWinKeys`
+  // below), so its plain fields are this device's post-batch values as well
+  // (#10438). A winning delta is folded before the snapshot instead. Only a
+  // TASK winner that declares the task follows the snapshot; one that merely
+  // names it (a tag's task list, a subtask's parent) writes none of its plain
+  // fields and is ignored, as on master.
+  const remoteWinnerFieldOps = remoteWinsOps.filter(
+    (op) => op.entityType === 'TASK' && !isSyncTimeSpentOp(op),
   );
   const foldFieldOps = (op: Operation, fieldOps: Operation[]): Operation => {
     if (
       op.entityType !== 'TASK' ||
       !op.entityId ||
       !isLwwUpdatePayload(op.payload) ||
-      op.payload.lwwUpdateMode !== 'replace' ||
-      remoteWinnerTaskIds.has(op.entityId)
+      (op.payload.lwwUpdateMode !== 'replace' && !sourceSnapshotIds.has(op.id))
     ) {
       return op;
     }
@@ -246,10 +255,18 @@ export const buildTimeAwareResolutionBatches = async ({
     // plain edit leaves the snapshot as on master, since the overlay would no
     // longer be the post-batch value; the time projection's folds are carried.
     const taskId = op.entityId;
+    const edits = fieldOps.filter(
+      (incoming) => touchesTask(incoming, taskId) && !foldedIds.has(incoming.id),
+    );
+    const winners = remoteWinnerFieldOps.filter((winner) =>
+      getOpEntityIds(winner).includes(taskId),
+    );
+    // Their relative order on this device is not fixed (a re-send moves the
+    // edits after the winners), so the overlay could not tell which is last.
+    if (edits.length > 0 && winners.length > 0) return op;
     const overlay: Record<string, unknown> = {};
     let hasOverlay = false;
-    for (const incoming of fieldOps) {
-      if (!touchesTask(incoming, taskId) || foldedIds.has(incoming.id)) continue;
+    for (const incoming of [...edits, ...winners]) {
       const changes = plainTaskFields(incoming, taskId);
       if (!changes) return op;
       Object.assign(overlay, changes);
@@ -257,7 +274,24 @@ export const buildTimeAwareResolutionBatches = async ({
     }
     if (!hasOverlay) return op;
     const actionPayload = { ...op.payload.actionPayload, ...overlay };
-    return { ...op, payload: { ...op.payload, actionPayload } };
+    const clearedFields = sourceSnapshotIds.has(op.id)
+      ? (op.payload.clearedFields ?? []).filter((field) => !(field in overlay))
+      : undefined;
+    return {
+      ...op,
+      payload: {
+        ...op.payload,
+        actionPayload,
+        ...(clearedFields
+          ? {
+              clearedFields: [
+                ...clearedFields,
+                ...(clearedFieldsProps(overlay).clearedFields ?? []),
+              ],
+            }
+          : {}),
+      },
+    };
   };
   const foldSnapshots = (ops: Operation[], timeOps: Operation[]): Promise<Operation[]> =>
     Promise.all(

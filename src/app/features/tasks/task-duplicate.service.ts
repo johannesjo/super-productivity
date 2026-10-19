@@ -3,6 +3,8 @@ import { Store } from '@ngrx/store';
 import { TaskService } from './task.service';
 import { TaskWithSubTasks } from './task.model';
 import { addSubTask } from './store/task.actions';
+import { PlannerActions } from '../planner/store/planner.actions';
+import { isWontDoTask } from './util/is-wont-do-task';
 
 @Injectable({
   providedIn: 'root',
@@ -21,7 +23,7 @@ export class TaskDuplicateService {
       projectId: task.projectId || undefined,
       tagIds: task.tagIds || [],
       ...(task.notes && { notes: task.notes }),
-      ...(typeof task.priority === 'number' && { priority: task.priority }),
+      ...(task.priority !== undefined && { priority: task.priority }),
     };
     const timeData = {
       ...(task.dueDay && { dueDay: task.dueDay }),
@@ -40,10 +42,16 @@ export class TaskDuplicateService {
         title: subTask.title,
         additional: {
           isDone: subTask.isDone,
+          ...(isWontDoTask(subTask) && {
+            doneOn: subTask.doneOn,
+            wontDoOn: subTask.wontDoOn,
+          }),
           projectId: subTask.projectId,
+          ...(subTask.dueDay && { dueDay: subTask.dueDay }),
+          ...(subTask.dueWithTime && { dueWithTime: subTask.dueWithTime }),
           timeEstimate: subTask.timeEstimate,
           notes: subTask.notes,
-          ...(typeof subTask.priority === 'number' && { priority: subTask.priority }),
+          ...(subTask.priority !== undefined && { priority: subTask.priority }),
         },
       });
       this._store.dispatch(
@@ -52,6 +60,14 @@ export class TaskDuplicateService {
           parentId: taskId,
         }),
       );
+      if (subTask.dueDay) {
+        this._store.dispatch(
+          PlannerActions.planTaskForDay({
+            task: subTaskObj,
+            day: subTask.dueDay,
+          }),
+        );
+      }
     }
 
     return taskId;

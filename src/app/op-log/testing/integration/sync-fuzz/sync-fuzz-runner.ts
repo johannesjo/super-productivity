@@ -145,16 +145,33 @@ export interface LedgerEntry {
 interface LedgerWrite {
   value: unknown;
   entry: LedgerEntry;
+  time: number;
+  isBaseline?: boolean;
 }
 
 /**
  * Intents whose ops always take a whole-entity conflict path, so a crossing
- * with one can carry any value its winning side held: habit counts are
- * opaque (decision 6 of docs/sync-and-op-log/lww-field-level-resolution.md),
- * and no field patch reads a delete, archive or restore (an archive also wins
- * over a concurrent edit, by sync-core's planner). A `track` is whole-entity
- * when it plans the task for today (`opaque`, decision 6); its plain delta
- * refuses the patch only from the remote side (see `crossing`).
+ * with one can carry any value its winning side held. Each mirrors a refusal
+ * in production:
+ * - `countHabit`: an opaque op (decision 6 of
+ *   docs/sync-and-op-log/lww-field-level-resolution.md): `sideNonNoiseKeys`
+ *   returns undefined for it, so `isFieldPatchEligible` refuses;
+ * - `deleteTask`: a DELETE refuses in `isFieldPatchEligible`, and its plan is
+ *   a whole-entity win (`ConflictLocalWinOpsService._isWholeEntityWinPlan`);
+ * - `archiveTask`: no `{ id, changes }` to read (`isOpaqueChangeOp`), and a
+ *   multi-entity op with subtasks; an archive also wins over a concurrent
+ *   edit by sync-core's planner (`_isWholeEntityWinPlan`);
+ * - `restoreTask`: carries the flat archived task, not `{ id, changes }`, so a
+ *   local one refuses (`isChangesShapedOp` in `isFieldPatchEligible`). A
+ *   remote one is read per field but writes every field at its own time, as
+ *   a snapshot does; the side rule here differs only where the other side
+ *   has a later intent than the restore (kept as before, not seen in fuzz).
+ * A `track` is whole-entity when it plans the task for today (`opaque`,
+ * decision 6). A plain delta is not: detection drops a remote one that is
+ * disjoint from the local side before it reaches a conflict
+ * (`isCommutingTimeDeltaCrossing` in
+ * `ConflictDetectionService._checkEntityForConflict`'s CONCURRENT branch),
+ * and a local one stays pending beside the patch (`keptLocalTimeDeltas`).
  */
 const WHOLE_ENTITY_INTENTS: ReadonlySet<Intent[0]> = new Set([
   'countHabit',
@@ -185,7 +202,10 @@ const isConcurrent = (a: LedgerEntry, b: LedgerEntry): boolean =>
   compareVectorClocks(a.clock, b.clock) === 'CONCURRENT';
 
 /** Whether `b`'s device had seen `a` (or `a` is `b`) when it wrote `b`. */
-const isCausalPastOf = (a: LedgerEntry, b: LedgerEntry): boolean => {
+const isCausalPastOf = (
+  a: Pick<LedgerEntry, 'clock'>,
+  b: Pick<LedgerEntry, 'clock'>,
+): boolean => {
   const comparison = compareVectorClocks(a.clock, b.clock);
   return comparison === 'LESS_THAN' || comparison === 'EQUAL';
 };
@@ -201,14 +221,24 @@ const isLaterWrite = (
 
 /** What the executed intents imply, for the preservation oracles. */
 export class Ledger {
-  readonly created = new Set<string>();
   readonly deleted = new Set<string>();
+  readonly noteReorders: readonly LedgerEntry[];
   /** Per entity, the intents that targeted it, in execution order. */
   readonly byEntity = new Map<string, LedgerEntry[]>();
   readonly writes = new Map<string, LedgerWrite[]>();
 
   constructor(entries: readonly LedgerEntry[]) {
+    this.noteReorders = entries.filter((e) => e.intent[0] === 'reorderNotes');
     for (const entry of entries) this._note(entry);
+    // Explicit creation after a delete starts a new lifetime with new defaults.
+    // A restore carries an archived snapshot, so it does not excuse old content.
+    for (const [key, writes] of this.writes) {
+      const creation = this.causalCreation(key.split('|')[0]);
+      if (!creation) continue;
+      const kept = writes.filter((w) => !this._isBefore(w.entry, creation));
+      if (kept.length) this.writes.set(key, kept);
+      else this.writes.delete(key);
+    }
   }
 
   private _note(entry: LedgerEntry): void {
@@ -216,14 +246,18 @@ export class Ledger {
     const [kind] = intent;
     if (REPLACEMENT_INTENTS.has(kind) || kind.startsWith('reorder')) return;
     const entity = entityOfIntent(intent);
-    if (kind.startsWith('add')) this.created.add(entity);
     if (kind.startsWith('delete')) this.deleted.add(entity);
     this.byEntity.set(entity, [...(this.byEntity.get(entity) ?? []), entry]);
     for (const write of writes) {
       const key = `${write.entity}|${write.field}`;
       this.writes.set(key, [
         ...(this.writes.get(key) ?? []),
-        { value: write.value, entry },
+        {
+          value: write.value,
+          entry,
+          time: write.time ?? entry.time,
+          isBaseline: write.isBaseline,
+        },
       ]);
     }
   }
@@ -234,6 +268,8 @@ export class Ledger {
    * or tracked is not expected to survive.
    */
   crossesArchive(entity: string, entry: LedgerEntry): boolean {
+    // Concurrent archives both clear scheduling; neither is a losing edit.
+    if (entry.intent[0] === 'archiveTask') return false;
     return (this.byEntity.get(entity) ?? []).some(
       (other) => other.intent[0] === 'archiveTask' && isConcurrent(other, entry),
     );
@@ -248,10 +284,68 @@ export class Ledger {
     );
   }
 
+  /** A new lifetime causally after every retained delete, regardless of wall time. */
+  hasCausalRecreation(entity: string): boolean {
+    return !!this._afterEveryDelete(
+      entity,
+      (e) => e.intent[0].startsWith('add') || e.intent[0] === 'restoreTask',
+    );
+  }
+
+  causalCreation(entity: string): LedgerEntry | undefined {
+    return this._afterEveryDelete(entity, (e) => e.intent[0].startsWith('add'));
+  }
+
+  private _isBefore(a: LedgerEntry, b: LedgerEntry): boolean {
+    return compareVectorClocks(a.clock, b.clock) === 'LESS_THAN';
+  }
+
+  private _afterEveryDelete(
+    entity: string,
+    matches: (entry: LedgerEntry) => boolean,
+  ): LedgerEntry | undefined {
+    const entries = this.byEntity.get(entity) ?? [];
+    const deletes = entries.filter((e) => e.intent[0].startsWith('delete'));
+    if (!deletes.length) return undefined;
+    return [...entries]
+      .reverse()
+      .find((e) => matches(e) && deletes.every((del) => this._isBefore(del, e)));
+  }
+
+  /**
+   * An isolated two-device edit/delete crossing above a shared causal baseline.
+   * Do not extrapolate a winner through other pending intents, later conflict
+   * rounds, archives or a third device: those require production's resolver.
+   */
+  hasIsolatedWinningEdit(entity: string): boolean {
+    const entries = this.byEntity.get(entity) ?? [];
+    return entries.some(
+      (del) =>
+        del.intent[0].startsWith('delete') &&
+        entries.some(
+          (edit) =>
+            ['renameTask', 'editTaskNotes', 'doneTask', 'editNote', 'editHabit'].includes(
+              edit.intent[0],
+            ) &&
+            edit.device !== del.device &&
+            isConcurrent(edit, del) &&
+            isLaterWrite(edit, del) &&
+            entries.every(
+              (e) =>
+                e === edit ||
+                e === del ||
+                (isCausalPastOf(e, edit) && isCausalPastOf(e, del)),
+            ),
+        ),
+    );
+  }
+
   /** The time tracked on the entity, without what crossed an archive. */
   trackedTime(entity: string): number | undefined {
+    const creation = this.causalCreation(entity);
     const tracks = (this.byEntity.get(entity) ?? []).filter(
-      (entry) => entry.intent[0] === 'track',
+      (entry) =>
+        entry.intent[0] === 'track' && (!creation || !this._isBefore(entry, creation)),
     );
     if (tracks.length === 0) return undefined;
     return tracks
@@ -265,13 +359,19 @@ export class Ledger {
    * that uploads later resolves, with the intents it had pending together
    * (one upload) against the other device's intents it has not seen and that
    * were uploaded before. `whole` says the conflict takes a whole-entity
-   * path: an opaque or whole-entity intent on either side, or a plain time
-   * delta on the remote side, which refuses the field patch (the design
-   * note's "Time" rule). The model takes one other device at a time; the
-   * app's remote side is everything it downloads for the entity, so a third
-   * device's remote delta in the same download is not seen here. And only
-   * the later uploader resolves, as on SuperSync; on a file-based provider
-   * both devices can.
+   * path: an opaque or whole-entity intent on either side
+   * (`WHOLE_ENTITY_INTENTS`). Otherwise both sides are readable and the
+   * conflict resolves per field.
+   *
+   * Where this model and production can differ:
+   * - it takes one other device at a time; the app's remote side is everything
+   *   it downloads for the entity, so a third device's opaque op in the same
+   *   download makes production resolve whole-entity where this says per
+   *   field (a false `older-write-won`, never a missed one);
+   * - LWW rows are not intents, so a remote `'replace'` row (a stale local-win
+   *   snapshot, #10421) and a pending local row (whole-entity) are not seen;
+   * - only the later uploader resolves, as on SuperSync; on a file-based
+   *   provider both devices can.
    */
   crossing(
     entity: string,
@@ -291,9 +391,7 @@ export class Ledger {
     );
     const isWholeEntity = (e: LedgerEntry): boolean =>
       WHOLE_ENTITY_INTENTS.has(e.intent[0]) || e.opaque;
-    const whole =
-      [...local, ...remote].some(isWholeEntity) ||
-      remote.some((e) => e.intent[0] === 'track');
+    const whole = [...local, ...remote].some(isWholeEntity);
     return resolver === a
       ? { aSide: local, bSide: remote, whole }
       : { aSide: remote, bSide: local, whole };
@@ -323,7 +421,7 @@ export interface Replacement {
 
 /** The fields the intents write (FuzzWrite), per entity type. */
 const WRITTEN_FIELDS: Readonly<Record<string, readonly string[]>> = {
-  task: ['title', 'notes', 'isDone'],
+  task: ['title', 'notes', 'isDone', 'dueDay', 'dueWithTime'],
   note: ['content', 'isPinnedToToday', 'isLock'],
   habit: ['title', 'isEnabled'],
 };
@@ -940,8 +1038,11 @@ const checkTodayNotes = (
 /**
  * Preservation of what the kept intents and the last replacement wrote.
  *
- * A deleted entity that is gone is not lost (`lost-entity`). One that
- * exists afterwards must have been recreated: its delete crossed a
+ * A missing entity is lost when it has no retained delete, a causally later
+ * recreate/restore, or an isolated newer edit that beats its delete. Other
+ * delete crossings remain unclassified; a global timestamp is not proof.
+ * Apart from an explicit causal recreation, a deleted entity that exists
+ * afterwards must have been recreated: its delete crossed a
  * concurrent intent on it and lost, and the entity came back from the
  * winning side's ops, with defaults outside them (decision 2 of
  * docs/sync-and-op-log/lww-field-level-resolution.md, accepted, "the fuzz
@@ -980,13 +1081,27 @@ export const checkPreservation = (
     return found as Record<string, unknown> | undefined;
   };
 
-  for (const entity of new Set([...ledger.created, ...(replacement?.entities ?? [])])) {
-    if (!ledger.deleted.has(entity) && !entityOf(entity)) {
-      fail(`lost-entity:${entity.split(':')[0]}`, `${entity} was never deleted`);
+  for (const entity of new Set([
+    ...ledger.byEntity.keys(),
+    ...(replacement?.entities ?? []),
+  ])) {
+    const reason = !ledger.deleted.has(entity)
+      ? 'was never deleted'
+      : ledger.hasCausalRecreation(entity)
+        ? 'was recreated after every delete'
+        : ledger.hasIsolatedWinningEdit(entity)
+          ? 'has a newer isolated edit that wins over its delete'
+          : undefined;
+    if (reason && !entityOf(entity)) {
+      fail(`lost-entity:${entity.split(':')[0]}`, `${entity} ${reason}`);
     }
   }
   for (const entity of ledger.deleted) {
-    if (entityOf(entity) && !ledger.deleteWasCrossed(entity)) {
+    if (
+      entityOf(entity) &&
+      !ledger.deleteWasCrossed(entity) &&
+      !ledger.hasCausalRecreation(entity)
+    ) {
       fail(
         `resurrected:${entity.split(':')[0]}`,
         `${entity} was deleted after every intent on it, and exists`,
@@ -997,6 +1112,7 @@ export const checkPreservation = (
   /** The losses a recreate explains are counted apart (see above). */
   const signatureOf = (entity: string, signature: string): string =>
     ledger.deleted.has(entity) &&
+    !ledger.causalCreation(entity) &&
     ledger.deleteWasCrossed(entity) &&
     RECREATE_LOSS.test(signature)
       ? `recreated:${signature}`
@@ -1015,7 +1131,9 @@ export const checkPreservation = (
     const task = entityOf(entity) as Task | undefined;
     if (ledger.deleted.has(entity) && !task) continue;
     const tracked = ledger.trackedTime(entity);
-    const expected = (replacement?.time.get(entity) ?? 0) + (tracked ?? 0);
+    const expected =
+      (ledger.causalCreation(entity) ? 0 : (replacement?.time.get(entity) ?? 0)) +
+      (tracked ?? 0);
     if (tracked === undefined && expected === 0) continue;
     const actual = task?.timeSpentOnDay?.[day] ?? 0;
     if (actual !== expected) {
@@ -1031,6 +1149,7 @@ export const checkPreservation = (
   for (const [key, value] of replacement?.fields ?? []) {
     if (ledger.writes.has(key)) continue;
     const [entity, field] = key.split('|');
+    if (ledger.causalCreation(entity)) continue;
     const current = entityOf(entity);
     if (!current) continue;
     const actual = valueAt(current, field.split('.'));
@@ -1048,8 +1167,12 @@ export const checkPreservation = (
     if (!current) continue;
     const report = failOn(entity);
     const writes = allWrites.filter(({ entry }) => !ledger.crossesArchive(entity, entry));
-    if (writes.length === 0) continue;
-    const values = writes.map((w) => w.value);
+    if (writes.length === 0 || writes.every((w) => w.isBaseline)) continue;
+    const baseline =
+      replacement?.fields.has(key) && !ledger.causalCreation(entity)
+        ? { value: replacement.fields.get(key), clock: replacement.clock }
+        : undefined;
+    const values = [...writes.map((w) => w.value), ...(baseline ? [baseline.value] : [])];
     const actual = valueAt(current, field.split('.'));
     const type = entity.split(':')[0];
     const fieldName = field.split('.')[0];
@@ -1064,7 +1187,7 @@ export const checkPreservation = (
         `${entity}.${field}: writes ${shortJson(values)}, converged ${shortJson(actual)}`,
       );
     } else {
-      checkLatestWrite(ledger, entity, field, writes, actual, report);
+      checkLatestWrite(ledger, entity, field, writes, actual, report, baseline);
     }
   }
 
@@ -1084,26 +1207,39 @@ export const checkPreservation = (
 /**
  * Per-field last-writer-wins across devices: a field that several intents
  * wrote converges on the value of the one with the latest own edit time
- * (timestamp, then clientId, as sync-core's planner breaks ties). A field
- * patch or LWW resolution is meant to give exactly that; #10422 shows a
- * remote win's patch that re-sends the loser's older value at the winner's
- * time and beats a third device's newer edit.
+ * (timestamp, then clientId, as sync-core's planner breaks ties).
  *
  * The latest write may lose only a conflict that LWW lets it lose. For every
  * intent of another device on the entity that is concurrent with it, the two
- * meet in one conflict (`Ledger.crossing`), and each side wins by its latest
- * intent (design A, "Overlap"). Where the other side wins:
- * - through a field patch, a field both sides wrote takes the winning side's
- *   value, so a write of that side with the converged value accounts for it;
- * - on a whole-entity path, the winning side's snapshot can carry any value
- *   its device held: the conflict accounts for any value.
- * Where the latest write's side wins every such conflict, its value must
- * survive.
+ * meet in one conflict (`Ledger.crossing`):
+ * - through the field patch (both sides readable), each field goes to the
+ *   side whose latest write of THAT field is newer (`localWinningFieldGroups`
+ *   in conflict-field-patch.util.ts, #10422). The latest write is the newest
+ *   write of its field on either side, so it wins every such conflict: none
+ *   accounts for another value, whatever else the other side wrote later;
+ * - on a whole-entity path (`crossing`'s `whole`, the shapes
+ *   `isFieldPatchEligible` refuses), the side with the latest intent wins
+ *   (sync-core's planner), and its snapshot can carry any value its device
+ *   held: a write of that side or in its causal past accounts for it.
  *
- * Out of scope, by design: NOTE fields, which stay on whole-entity LWW
- * (decision 4 of docs/sync-and-op-log/lww-field-level-resolution.md), and
+ * This is a stricter model of the shapes the fuzz covers, not an exact model
+ * of production: crossings are judged pairwise from intents, and a remote
+ * restore or LWW `'replace'` row is approximated (see `WHOLE_ENTITY_INTENTS`
+ * and `Ledger.crossing`).
+ *
+ * Two documented residuals still stamp fields later than they were written
+ * (superseded re-emits and `_reemitSurvivingLocalFields`, see "What it
+ * leaves" in lww-field-level-resolution.md). An older value one of them
+ * carried reports as `older-write-won` too; no seed shows one yet.
+ *
+ * Concurrent NOTE fields stay on whole-entity LWW (decision 4 of
+ * docs/sync-and-op-log/lww-field-level-resolution.md): either side's snapshot
+ * may explain a value, but not a baseline both sides overwrote. Concurrent
+ * note reorders remain unclassified because the ledger does not index their
+ * affected entities. Out of scope, by design:
  * habit counts (`countOnDay`), which are opaque (decision 6). A value no
- * intent wrote is `field-unwritten`'s, not this check's.
+ * intent wrote is `field-unwritten`'s, not this check's. Pending local LWW
+ * rows (re-sends, whole-entity) are not in the ledger, which models intents.
  */
 const checkLatestWrite = (
   ledger: Ledger,
@@ -1112,24 +1248,57 @@ const checkLatestWrite = (
   writes: readonly LedgerWrite[],
   actual: unknown,
   fail: (signature: string, detail: string) => void,
+  baseline?: { value: unknown; clock: VectorClock },
 ): void => {
   const type = entity.split(':')[0];
-  if (type === 'note' || field.startsWith('countOnDay')) return;
-  const latest = writes.reduce((a, b) => (isLaterWrite(b.entry, a.entry) ? b : a));
+  if (field.startsWith('countOnDay')) return;
+  const key = (write: LedgerWrite): Pick<LedgerEntry, 'time' | 'clientId'> => ({
+    time: write.time,
+    clientId: write.entry.clientId,
+  });
+  const latest = writes.reduce((a, b) => (isLaterWrite(key(b), key(a)) ? b : a));
   if (Object.is(actual, latest.value)) return;
+  const valueWasHeld = (side: readonly LedgerEntry[]): boolean => {
+    const winner = latestOf(side);
+    if (winner.intent[0].startsWith('delete')) return false;
+    const visible = writes.filter(
+      (w) => side.includes(w.entry) || isCausalPastOf(w.entry, winner),
+    );
+    // A snapshot carries its last visible field write, not every value from
+    // its causal past. In particular, an overwritten baseline cannot return.
+    if (visible.length) {
+      const held = visible.reduce((a, b) => (isLaterWrite(key(b), key(a)) ? b : a));
+      return Object.is(held.value, actual);
+    }
+    return !!(
+      baseline &&
+      Object.is(baseline.value, actual) &&
+      isCausalPastOf(baseline, winner)
+    );
+  };
+  if (type === 'note' && ledger.noteReorders.some((e) => isConcurrent(e, latest.entry)))
+    return;
   const accounted = (ledger.byEntity.get(entity) ?? []).some((other) => {
     if (other.device === latest.entry.device || !isConcurrent(other, latest.entry)) {
       return false;
     }
     const { aSide, bSide, whole } = ledger.crossing(entity, latest.entry, other);
-    if (!isLaterWrite(latestOf(bSide), latestOf(aSide))) return false;
-    // A patch carries the winning side's own writes; a whole-entity snapshot
-    // what its device held: its side's writes and their causal past.
+    // NOTE promises a whole-entity snapshot, not per-field merge. Keep that
+    // boundary while checking that some concurrent side could carry the value.
+    if (type === 'note') return valueWasHeld(aSide) || valueWasHeld(bSide);
+    if (!whole || !isLaterWrite(latestOf(bSide), latestOf(aSide))) return false;
+    // A whole-entity snapshot carries what its device held: its side's writes
+    // and their causal past.
     const winner = latestOf(bSide);
-    return writes.some(
-      (w) =>
-        Object.is(w.value, actual) &&
-        (bSide.includes(w.entry) || (whole && isCausalPastOf(w.entry, winner))),
+    return (
+      (baseline &&
+        Object.is(baseline.value, actual) &&
+        isCausalPastOf(baseline, winner)) ||
+      writes.some(
+        (w) =>
+          Object.is(w.value, actual) &&
+          (bSide.includes(w.entry) || isCausalPastOf(w.entry, winner)),
+      )
     );
   });
   if (accounted) return;

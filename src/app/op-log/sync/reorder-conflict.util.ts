@@ -5,6 +5,7 @@ import { BoardsState } from '../../features/boards/store/boards.reducer';
 import { IssueProviderState } from '../../features/issue/issue.model';
 import {
   ActionType,
+  EntityConflict,
   EntityType,
   extractActionPayload,
   isMultiEntityPayload,
@@ -13,7 +14,13 @@ import {
   VectorClock,
 } from '../core/operation.types';
 import { getOpEntityIds } from '../util/get-op-entity-ids.util';
-import { compareVectorClocks, VectorClockComparison } from '../../core/util/vector-clock';
+import {
+  compareVectorClocks,
+  mergeVectorClocks,
+  VectorClockComparison,
+} from '../../core/util/vector-clock';
+import { getLwwEntityType, isLwwUpdateActionType } from '../core/lww-update-action-types';
+import { areCommutingSectionOperations } from './section-conflict-commutativity.util';
 import {
   SectionReplayProjection,
   SectionReplaySnapshot,
@@ -106,8 +113,8 @@ const dayCount = (day: 'today' | 'date'): PatchShape => ({
 /**
  * Absolute single-entity patches: a replacement with current values is a local
  * no-op. Deltas, moves, deletes and every unlisted action never commute here.
- * Without causal proof a rejected patch keeps the entity LWW fallback; for a pin
- * that snapshot omits receivers' `todayOrder` write (section-conflict-replay.md).
+ * Without causal proof a rejected patch keeps the entity LWW fallback; receivers
+ * derive the pin's `todayOrder` change from it (#10379).
  */
 const PATCHES: Partial<Record<ActionType, PatchShape>> = {
   [ActionType.NOTE_UPDATE]: entityUpdate('NOTE', 'note'),
@@ -181,19 +188,34 @@ const writesTodayOrder = (op: Operation): boolean =>
   );
 
 /**
+ * An LWW resolution row writes its own entity only (lww-update.meta-reducer).
+ * Of a type that routes no field into a list, it commutes with a note or habit
+ * order listing that entity whatever it carries, so neither its mode nor its
+ * keys are read (#10420; decision 5).
+ */
+const isUnroutedLwwRow = (order: Operation, edit: Operation): boolean =>
+  isLwwUpdateActionType(edit.actionType) &&
+  getLwwEntityType(edit.actionType) === edit.entityType &&
+  edit.opType === OpType.Update &&
+  !LIST_ROUTED_FIELDS[edit.entityType] &&
+  !!reissuedListOf(order) &&
+  getOpEntityIds(edit).length === 1;
+
+/**
  * The one rule: a reorder commutes with a single-entity patch of one of the
  * entities it lists when the patch keeps the entity's identity and writes
  * neither the reordered list nor its membership.
  */
 const isReorderAndEdit = (order: Operation, edit: Operation): boolean => {
-  const patch = readPatch(edit);
   if (
-    !patch ||
     order.entityType !== edit.entityType ||
     !isContentReorderOperation(order) ||
-    !getOpEntityIds(order).includes(patch.id)
+    !getOpEntityIds(order).includes(edit.entityId!)
   )
     return false;
+  if (isUnroutedLwwRow(order, edit)) return true;
+  const patch = readPatch(edit);
+  if (!patch) return false;
   const isTagOrder = payloadOf(order)['activeContextType'] === WorkContextType.TAG;
   return Object.keys(patch.changes).every((field) => {
     if (field === 'id') return patch.changes['id'] === patch.id;
@@ -403,4 +425,139 @@ export const projectReorderConflictAgainstState = (
       position: 0,
     },
   };
+};
+
+/**
+ * The pending ops of one entity that conflict with a concurrent remote op of
+ * it: none when each commutes with it. A pending note or habit order that
+ * commutes stays out of a conflict over the entity's other ops (#10420): it is
+ * not superseded by either winner, and entity LWW could not carry its list.
+ */
+export const nonCommutingPendingOps = (
+  remoteOp: Operation,
+  pending: Operation[],
+): Operation[] => {
+  const commutes = (op: Operation): boolean =>
+    areCommutingSectionOperations(remoteOp, op) ||
+    areCommutingReorderAndContentOperations(remoteOp, op, pending) ||
+    isReissuedReorderCrossing(remoteOp, op);
+  // Only note and habit orders: no board, section or issue-provider crossing
+  // beside a conflict has an E2E, so those keep the stop.
+  const rest = pending.filter((op) => !isReissuableReorder(op) || !commutes(op));
+  if (rest.every(commutes)) return [];
+  // A pending delete of the entity keeps its orders in the conflict (the
+  // stop): a remote win recreates the entity at the end of the list here,
+  // while the kept order places it elsewhere on every other device.
+  return rest.some((op) => op.opType === OpType.Delete) ? pending : rest;
+};
+
+/**
+ * #10420: the pending reorders that conflict detection kept out of the
+ * conflicts of entities they list, because each commutes with the remote op.
+ * The remote winner rejects none of them. Like kept time deltas, they stay
+ * pending and move past those conflicts' remote clocks in place
+ * (`rebaseKeptReorders`), so the server accepts them after either winner.
+ * `reissuedCrossings` holds each kept order's remote ops that it crosses as a
+ * competing order or a listed note delete (`isReissuedReorderCrossing`): those
+ * of its conflicts, and the concurrent ones applied in the same batch
+ * (`appliedAlongside`), whose clock a conflict's remote clock may dominate.
+ */
+export interface KeptReorders {
+  opIds: Set<string>;
+  clockToDominate: VectorClock;
+  reissuedCrossings: Map<string, Operation[]>;
+}
+
+export const keptCommutingReorders = (
+  conflicts: EntityConflict[],
+  pendingByEntity: Map<string, Operation[]>,
+  appliedAlongside: Operation[] = [],
+): KeptReorders => {
+  const inConflict = new Set(conflicts.flatMap((c) => c.localOps.map((op) => op.id)));
+  const opIds = new Set<string>();
+  const reissuedCrossings = new Map<string, Operation[]>();
+  let clockToDominate: VectorClock = {};
+  for (const op of new Set([...pendingByEntity.values()].flat())) {
+    if (!isReissuableReorder(op) || inConflict.has(op.id)) continue;
+    const ids = getOpEntityIds(op);
+    for (const c of conflicts) {
+      if (c.entityType !== op.entityType || !ids.includes(c.entityId)) continue;
+      opIds.add(op.id);
+      for (const remote of c.remoteOps) {
+        clockToDominate = mergeVectorClocks(clockToDominate, remote.vectorClock);
+        if (isReissuedReorderCrossing(op, remote)) {
+          reissuedCrossings.set(op.id, [...(reissuedCrossings.get(op.id) ?? []), remote]);
+        }
+      }
+    }
+  }
+  for (const op of new Set([...pendingByEntity.values()].flat())) {
+    if (!opIds.has(op.id)) continue;
+    const crossings = appliedAlongside.filter(
+      (remote) =>
+        isReissuedReorderCrossing(op, remote) &&
+        compareVectorClocks(op.vectorClock, remote.vectorClock) ===
+          VectorClockComparison.CONCURRENT,
+    );
+    if (crossings.length > 0) {
+      reissuedCrossings.set(op.id, [
+        ...(reissuedCrossings.get(op.id) ?? []),
+        ...crossings,
+      ]);
+    }
+  }
+  return { opIds, clockToDominate, reissuedCrossings };
+};
+
+/**
+ * Moves the kept reorders past their crossings' clocks in place, with every
+ * later pending op of this client on an entity they list (the resolution's own
+ * ops among them), so seq order stays causal order per entity: a later op the
+ * server checks after a rebased reorder must not look older than it. Ids,
+ * seqs and payloads stay. Runs after the resolution is durable;
+ * a crash before it leaves the reorder with its old clock, which the server
+ * rejects into the existing paths (at worst the stop, never a loss).
+ *
+ * An order that crosses an applied remote order or note delete stays where it
+ * is: `reissueCrossedPendingReorders` reissues it from current state only while
+ * it is still concurrent with that op. Moved, it would upload its stale list,
+ * such as the id of a note the remote delete removed, which released reducers
+ * write as given. A crossing the local side won is rejected (`rejectedRemoteOpIds`)
+ * and never applied, so that order moves.
+ */
+export const rebaseKeptReorders = async (
+  store: {
+    getUnsynced: () => Promise<{ seq: number; source: string; op: Operation }[]>;
+    rebasePendingLocalOps: (
+      opIds: readonly string[],
+      clockToDominate: VectorClock,
+    ) => Promise<unknown>;
+  },
+  kept: KeptReorders,
+  rejectedRemoteOpIds: ReadonlySet<string>,
+): Promise<void> => {
+  if (kept.opIds.size === 0) return;
+  const isLeftToReissue = (opId: string): boolean =>
+    (kept.reissuedCrossings.get(opId) ?? []).some(
+      (remote) => !rejectedRemoteOpIds.has(remote.id),
+    );
+  const pending = (await store.getUnsynced()).filter((e) => e.source === 'local');
+  const orders = pending.filter(
+    (e) => kept.opIds.has(e.op.id) && !isLeftToReissue(e.op.id),
+  );
+  if (orders.length === 0) return;
+  const first = Math.min(...orders.map((e) => e.seq));
+  const listed = new Set(
+    orders.flatMap(({ op }) => getOpEntityIds(op).map((id) => `${op.entityType}:${id}`)),
+  );
+  const later = pending.filter(
+    (e) =>
+      e.seq >= first &&
+      !isLeftToReissue(e.op.id) &&
+      getOpEntityIds(e.op).some((id) => listed.has(`${e.op.entityType}:${id}`)),
+  );
+  await store.rebasePendingLocalOps(
+    later.map((e) => e.op.id),
+    kept.clockToDominate,
+  );
 };

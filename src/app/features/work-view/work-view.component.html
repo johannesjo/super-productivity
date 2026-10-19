@@ -90,11 +90,13 @@
       }
 
       @if (pluginEmbedId(); as embedId) {
-        <plugin-index
-          [directPluginId]="embedId"
-          [showFullUI]="false"
-          [skipCleanupOnDestroy]="true"
-        ></plugin-index>
+        @defer (on immediate) {
+          <plugin-index
+            [directPluginId]="embedId"
+            [showFullUI]="false"
+            [skipCleanupOnDestroy]="true"
+          ></plugin-index>
+        }
       } @else {
         <div class="task-list-wrapper">
           @if (!(workContextService.isHasTasksToWorkOn$ | async)) {
@@ -132,7 +134,6 @@
                     (click)="layoutService.showAddTaskBar()"
                     color=""
                     mat-stroked-button
-                    tabindex="1"
                   >
                     <mat-icon>playlist_add</mat-icon>
                     {{ T.WW.ADD_MORE | translate }}
@@ -146,24 +147,23 @@
                whichever container holds the target, and it mirrors these
                conditions to know which ones are on screen. (#8780) -->
           @if (customizedUndoneTasks(); as customized) {
-            @if (customized.grouped) {
-              @for (
-                groupKey of customizerService.getOrderedGroupKeys(customized.grouped);
-                track groupKey
-              ) {
+            @if (customized.groups) {
+              @for (group of customized.groups; track group.key) {
                 <collapsible
                   class="task-section"
-                  [title]="groupKey | scheduledDateGroup: todayStr()"
+                  [title]="group.key | scheduledDateGroup: todayStr()"
                   [isIconBefore]="true"
-                  [isExpanded]="!customizerService.collapsedGroupIds().includes(groupKey)"
-                  (isExpandedChange)="customizerService.toggleGroupExpansion(groupKey)"
+                  [isExpanded]="
+                    !customizerService.collapsedGroupIds().includes(group.key)
+                  "
+                  (isExpandedChange)="customizerService.toggleGroupExpansion(group.key)"
                   [isGroup]="true"
                 >
                   <task-list
-                    [tasks]="customized.grouped[groupKey]"
+                    [tasks]="group.tasks"
                     listId="PARENT"
                     listModelId="UNDONE"
-                    [groupTagId]="customized.groupTagIdByKey?.[groupKey]"
+                    [groupTagId]="group.tagId"
                   ></task-list>
                 </collapsible>
               }
@@ -171,6 +171,7 @@
               @let bySection = undoneTasksBySection();
               <div
                 class="sections-wrapper"
+                data-section-selection-scope
                 cdkDropList
                 [cdkDropListEnterPredicate]="acceptSectionDragOnly"
                 (cdkDropListDropped)="dropSection($event)"
@@ -271,7 +272,6 @@
                   <button
                     mat-stroked-button
                     color="primary"
-                    tabindex="1"
                     (click)="addAllOverdueToMyDay()"
                   >
                     <mat-icon>wb_sunny</mat-icon>
@@ -379,7 +379,6 @@
                       class="e2e-move-done-to-archive"
                       mat-stroked-button
                       (click)="moveDoneToArchive()"
-                      tabindex="1"
                     >
                       <mat-icon>done_all</mat-icon>
                       {{ T.WW.MOVE_DONE_TO_ARCHIVE | translate }}
@@ -408,9 +407,24 @@
                 [isIconBefore]="true"
                 [isGroup]="true"
               >
+                <ng-container actions>
+                  <button
+                    class="all-repeat-cfgs-btn"
+                    mat-icon-button
+                    type="button"
+                    routerLink="/scheduled-list"
+                    [matTooltip]="T.WW.SHOW_ALL_RECURRING_TASKS | translate"
+                    [attr.aria-label]="T.WW.SHOW_ALL_RECURRING_TASKS | translate"
+                    (click)="$event.stopPropagation()"
+                  >
+                    <mat-icon>arrow_forward</mat-icon>
+                  </button>
+                </ng-container>
                 <div class="repeat-cfg-list">
-                  @for (repeatCfg of repeatCfgsForContext(); track repeatCfg.id) {
-                    <repeat-cfg-preview [repeatCfg]="repeatCfg"></repeat-cfg-preview>
+                  @defer (on immediate) {
+                    @for (repeatCfg of repeatCfgsForContext(); track repeatCfg.id) {
+                      <repeat-cfg-preview [repeatCfg]="repeatCfg"></repeat-cfg-preview>
+                    }
                   }
                 </div>
               </collapsible>
@@ -459,7 +473,7 @@
         <split
           (posChanged)="splitInputPos = $event"
           [containerEl]="containerEl"
-          [counter]="backlogTasks()?.length"
+          [counter]="$safeNavigationMigration(backlogTasks()?.length)"
           [isAnimateBtn]="isTriggerBacklogIconAni$ | async"
           [splitBottomEl]="splitBottomEl"
           [splitPos]="splitInputPos"
