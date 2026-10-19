@@ -88,7 +88,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   },
   idle: {
     isOnlyOpenIdleWhenCurrentTask: false,
-    isSuppressIdleDuringFocusMode: false,
+    isSuppressIdleDuringFocusMode: true,
     isEnableIdleTimeTracking: true,
     minIdleTime: 5 * minute,
   },

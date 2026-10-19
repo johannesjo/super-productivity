@@ -28,6 +28,8 @@ import { By } from '@angular/platform-browser';
 import { MatMenu } from '@angular/material/menu';
 import { TaskDuplicateService } from '../../task-duplicate.service';
 import { TaskMultiSelectService } from '../../task-multi-select.service';
+import { FocusModeService } from '../../../focus-mode/focus-mode.service';
+import { showFocusOverlay } from '../../../focus-mode/store/focus-mode.actions';
 import { T } from '../../../../t.const';
 import { PluginTaskContextMenuRegistryService } from '../../../../plugins/plugin-task-context-menu-registry.service';
 
@@ -55,6 +57,7 @@ describe('TaskContextMenuInnerComponent', () => {
   let taskDuplicateService: jasmine.SpyObj<TaskDuplicateService>;
   let addSubtaskInputService: jasmine.SpyObj<AddSubtaskInputService>;
   let store: MockStore;
+  let focusModeService: jasmine.SpyObj<FocusModeService>;
   let isTaskContextMenuOpen: ReturnType<typeof signal<boolean>>;
   let closeActiveTaskContextMenu: ReturnType<typeof signal<(() => void) | null>>;
 
@@ -68,8 +71,12 @@ describe('TaskContextMenuInnerComponent', () => {
       'getTasksWithSubTasksByRepeatCfgId$',
       'getArchiveTasksForRepeatCfgId',
       'update',
+      'setCurrentId',
     ]);
     taskService.currentTaskId.and.returnValue('some-id');
+    focusModeService = jasmine.createSpyObj<FocusModeService>('FocusModeService', [
+      'tryStartSessionForTask',
+    ]);
     taskDuplicateService = jasmine.createSpyObj<TaskDuplicateService>(
       'TaskDuplicateService',
       ['duplicate'],
@@ -92,6 +99,7 @@ describe('TaskContextMenuInnerComponent', () => {
         { provide: TaskService, useValue: taskService },
         { provide: TaskDuplicateService, useValue: taskDuplicateService },
         { provide: AddSubtaskInputService, useValue: addSubtaskInputService },
+        { provide: FocusModeService, useValue: focusModeService },
         {
           provide: TaskRepeatCfgService,
           useValue: {
@@ -181,6 +189,27 @@ describe('TaskContextMenuInnerComponent', () => {
         flush();
       }));
     }
+  });
+
+  describe('goToFocusMode()', () => {
+    it('leaves starting to the focus mode service when it can start right away', () => {
+      focusModeService.tryStartSessionForTask.and.returnValue(true);
+      const dispatchSpy = spyOn(store, 'dispatch');
+      component.goToFocusMode();
+      expect(focusModeService.tryStartSessionForTask).toHaveBeenCalledWith(
+        component.task,
+      );
+      expect(taskService.setCurrentId).not.toHaveBeenCalled();
+      expect(dispatchSpy).not.toHaveBeenCalled();
+    });
+
+    it('tracks the task and opens the overlay when it cannot start right away', () => {
+      focusModeService.tryStartSessionForTask.and.returnValue(false);
+      const dispatchSpy = spyOn(store, 'dispatch');
+      component.goToFocusMode();
+      expect(taskService.setCurrentId).toHaveBeenCalledWith('task-default');
+      expect(dispatchSpy).toHaveBeenCalledWith(showFocusOverlay());
+    });
   });
 
   describe('enterSelectionMode()', () => {
