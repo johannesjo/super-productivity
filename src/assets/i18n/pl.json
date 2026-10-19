@@ -91,28 +91,6 @@
     "INTRO_1": "Super Productivity jest finansowane w całości przez społeczność. Nie ma śledzenia, reklam ani zbierania danych — Twoje zadania pozostają na Twoim urządzeniu.",
     "INTRO_2": "Jeśli cenisz takie podejście i chcesz, aby projekt był utrzymywany w dobrej kondycji i się rozwijał, dobrowolna darowizna jest bardzo mile widziana."
   },
-  "EXAMPLE_TASKS": {
-    "GETTING_STARTED": {
-      "TITLE": "Opcjonalnie: wskazówki na start",
-      "NOTES": "Nic tutaj nie jest obowiązkowe. Usuń to zadanie, kiedy chcesz.\n\n- **Dzisiaj i Skrzynka odbiorcza**: widok „Dzisiaj” pokazuje to, co zaplanowano na dziś. Zadania bez własnego projektu zostają w widoku „Skrzynka odbiorcza”. Zadanie może pojawić się na obu listach.\n- **Projekty**: grupuj zadania tematycznie za pomocą **+** obok **Projekty** na pasku bocznym.\n- **Synchronizacja**: trzymaj dane na kilku urządzeniach w **Ustawienia → Synchronizacja i kopia zapasowa**.\n- **Przychodzisz z Todoista lub TickTicka?** Zaimportuj swoje zadania w **Ustawienia → Synchronizacja i kopia zapasowa → Import/eksport**.\n- **Przewodniki**: **Pomoc → Krótki przewodnik** w menu paska bocznego przeprowadzi Cię przez podstawy na Twoim własnym zadaniu, a **Pomoc → Poradnik** pokazuje krok po kroku krótką składnię i nawigację klawiaturą. Zamknij przewodnik, kiedy chcesz.\n- **Dopasuj do siebie**: wybierz motyw lub tryb ciemny i włączaj lub wyłączaj funkcje, takie jak tablice, harmonogram, nawyki, tryb skupienia czy integracje, w **Ustawienia → Ogólne**. Wtyczki dodają jeszcze więcej."
-    },
-    "LEARN_KEYBOARD_SHORTCUTS": {
-      "TITLE": "Poznaj skróty klawiaturowe",
-      "NOTES": "Super Productivity jest zaprojektowane do obsługi za pomocą klawiatury. Poznaj skróty, aby pracować szybciej.\n\n**Jak zacząć:**\n1. Otwórz **menu boczne**\n2. Przejdź do **Pomoc**\n3. Kliknij **Przewodnik po nawigacji klawiaturowej**"
-    },
-    "CREATE_PROJECT": {
-      "TITLE": "Utwórz swój pierwszy projekt",
-      "NOTES": "Projekty pomagają organizować zadania według obszarów pracy. Każdy projekt ma własną listę zadań i backlog.\n\n**Jak utworzyć projekt:**\n1. Kliknij przycisk **+** obok **Projekty** w pasku bocznym\n2. Nadaj mu nazwę i wybierz kolor\n3. Zacznij dodawać do niego zadania"
-    },
-    "SET_UP_SYNC": {
-      "TITLE": "Skonfiguruj synchronizację",
-      "NOTES": "Zabezpiecz swoje dane i miej do nich dostęp na różnych urządzeniach.\n\n**Jak skonfigurować:**\n1. Otwórz **Ustawienia** (ikona koła zębatego w pasku bocznym)\n2. Przejdź do **Synchronizacja**\n3. Wybierz dostawcę: Super Sync, Dropbox, WebDAV lub synchronizacja przez plik lokalny\n4. Postępuj zgodnie z instrukcjami konfiguracji"
-    },
-    "GO_FURTHER": {
-      "TITLE": "Odkryj więcej",
-      "NOTES": "Jest jeszcze wiele do odkrycia!\n\n**Funkcje aplikacji** (w Ustawieniach) — Włącz integracje, nawyki i inne funkcje. Przejdź do **Ustawienia → Funkcje aplikacji**, aby zobaczyć, co jest dostępne.\n\n**Tablice** — Wizualizuj swoje zadania na konfigurowalnych tablicach Kanban. Włącz je w **Funkcjach aplikacji**, a następnie znajdź w **menu bocznym**.\n\n**Harmonogram** — Zaplanuj swój dzień, przypisując zadania do konkretnych godzin. Przeciągnij zadania do widoku **Harmonogram** na pasku bocznym.\n\n**Integracje** — Po włączeniu w Funkcjach aplikacji importuj zadania z Jira, GitHub, GitLab, Gitea, OpenProject, CalDAV i wielu innych. Możesz również zintegrować swój kalendarz. Skonfiguruj je w **Panelu dostawców zgłoszeń**.\n\n**Nawyki** — Śledź powtarzające się nawyki i rutyny. Znajdziesz je w **menu bocznym** po włączeniu.\n\n**Wtyczki** — Dodaj funkcje takie jak Pogromca Prokrastynacji, Automatyzacje lub Przypomnienia głosowe. Przejdź do **Ustawienia → Wtyczki**.\n\n**Personalizacja** — Motywy, tryb ciemny, skróty klawiaturowe, język i narzędzia produktywności — wszystko znajdziesz w **Ustawieniach**."
-    }
-  },
   "F": {
     "IOS_SHARE": {
       "SAVE": "Zapisz",
@@ -278,6 +256,7 @@
       "S": {
         "CAL_PROVIDER_ERROR": "Błąd dostawcy kalendarza: {{errTxt}}",
         "CAL_PROVIDER_NOT_ICAL": "Adres URL kalendarza nie zwrócił danych iCal. Link udostępniania mógł wygasnąć, zostać unieważniony albo wymagać logowania — spróbuj wygenerować nowy URL udostępniania.",
+        "CONNECT": "Połącz",
         "EVENT_HIDDEN": "Ukryto wydarzenie",
         "EVENT_MOVED": "Przeniesiono wydarzenie",
         "EVENT_RESCHEDULED": "Przełożono wydarzenie",
@@ -760,8 +739,14 @@
         "DAYS_WORKED": "Przepracowane dni",
         "FOCUS_SESSION_TRENDS": "Sesje skupienia w czasie",
         "GLOBAL_METRICS": "Metryki globalne",
+        "HEATMAP_SHARE_FAILED": "Nie udało się udostępnić heatmapy",
+        "HEATMAP_SHARE_TAGLINE": "{{title}} – z aplikacji Super Productivity",
+        "HEATMAP_SHARED_TO_DEVICE": "Heatmapa została zapisana do pamięci urządzenia",
+        "HEATMAP_SHARED_TO_PATH": "Heatmapa została zapisana do {{path}}",
         "NO_ADDITIONAL_DATA_YET": "Nie zebrano jeszcze dodatkowych danych. Użyj formularza w panelu „Ocena” w podsumowaniu dnia, aby je dodać.",
         "PRODUCTIVITY_BREAKDOWN_OVER_TIME": "Produktywność i zrównoważony rozwój w czasie",
+        "SHARE_HEATMAP": "Udostępnij heatmapę",
+        "SHARE_STATS": "Udostępnij statystyki produktywności",
         "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Liczniki kliknięć w czasie",
         "SIMPLE_COUNTERS": "Proste liczniki",
         "SIMPLE_STOPWATCH_COUNTERS_OVER_TIME": "Stoper odlicza czas",
@@ -838,6 +823,7 @@
       },
       "D_FULLSCREEN": {
         "CONFIRM_DISCARD_MSG": "Masz niezapisane zmiany. Odrzucić je?",
+        "CONFIRM_SAVE_BEFORE_OPENING_NEW_TASK": "Czy zapisać bieżącą notatkę przed otwarciem nowego zadania?",
         "TOOLBAR": {
           "BOLD": "Pogrubienie",
           "BULLET_LIST": "Lista punktowana",
@@ -996,7 +982,7 @@
       "COMPLETE": {
         "COMPLETED_ON": "Zakończono {{date}}",
         "REOPEN": "Otwórz ponownie",
-        "NOTICE": "Ten projekt jest zakończony.",
+        "NOTICE": "Ten projekt został zakończony.",
         "ERROR": "Nie udało się zakończyć projektu. Spróbuj ponownie.",
         "RESOLVE": {
           "MSG": "nadal ma {{nr}} nieukończonych zadań. Co powinno się z nimi stać?",
@@ -1006,7 +992,7 @@
         },
         "CONFIRM": {
           "TITLE": "Zakończyć projekt?",
-          "MSG": "Zakończyć <strong>{{title}}</strong> i przenieść go do zarchiwizowanych projektów?"
+          "MSG": "Zakończyć <strong>{{title}}</strong> i przenieść go do archiwum?"
         },
         "CELEBRATION": {
           "TITLE": "Projekt zakończony!",
@@ -1062,7 +1048,7 @@
       "ARCHIVED_NOTICE": "Ten projekt jest zarchiwizowany.",
       "ARCHIVED_PROJECTS": {
         "EMPTY": "Brak zarchiwizowanych projektów.",
-        "LINK_LABEL": "Zarchiwizowane projekty",
+        "NAV_LABEL": "Archiwum",
         "SEARCH": "Szukaj zarchiwizowanych projektów",
         "UNARCHIVE": "Przywróć projekt"
       }
@@ -1101,6 +1087,8 @@
           "OTHER": "<strong>{{title}}</strong> zaczyna się o <strong>{{start}}</strong>!<br> (i {{nrOfOtherBanners}} inne zadania są wymagalne)"
         }
       },
+      "EXACT_ALARM_HINT": "Przypomnienia o zadaniu mogą być opóźnione, ponieważ opcja \"Alarmy i przypomnienia\" w opcjach aplikacji Androida jest wyłączona.",
+      "EXACT_ALARM_OPEN_SETTINGS": "Otwórz ustawienia",
       "S_ACTIVE_TASK_DUE": "Termin zadania, nad którym obecnie pracujesz, właśnie minął!<br/> ({{title}})",
       "S_REMINDER_ERR": "Błąd interfejsu przypomnień"
     },
@@ -1144,6 +1132,7 @@
       "TOGGLE_TIME_SCHEDULING_HINT": "Ctrl+1 przełącza planowanie czasu"
     },
     "SEARCH_BAR": {
+      "DELETED": "Usunięto",
       "INCLUDE_COMPLETED": "Uwzględnij ukończone i zarchiwizowane zadania",
       "INFO": "Kliknij ikonę listy, aby wyszukać zarchiwizowane zadania",
       "NO_RESULTS": "Nie znaleziono zadań pasujących do twojego wyszukiwania",
@@ -1499,7 +1488,6 @@
           "L_NEW_PASSWORD": "Nowe hasło szyfrowania",
           "L_REMOVE_ENCRYPTION": "Lub usuń szyfrowanie",
           "L_SERVER_URL": "URL serwera",
-          "LOGIN_INSTRUCTIONS": "Kliknij poniższy przycisk, aby otworzyć stronę logowania serwera. Po zalogowaniu skopiuj token dostępu i wklej go tutaj.",
           "PASSWORD_MIN_LENGTH": "Hasło musi mieć co najmniej 8 znaków",
           "PASSWORDS_DONT_MATCH": "Hasła nie są zgodne",
           "REMOVE_ENCRYPTION_WARNING": "Usunięcie szyfrowania spowoduje usunięcie wszystkich danych serwera i ponowne przesłanie danych bez szyfrowania. Wszystkie urządzenia będą wymagały ponownej konfiguracji.",
@@ -1805,11 +1793,12 @@
         "DROP_ATTACHMENT": "Upuść tutaj, aby dodać do zadania „{{title}}”",
         "DUPLICATE": "Powiel",
         "EDIT_DEADLINE": "Edytuj termin",
-        "EDIT_SCHEDULED": "Edytuj przypomnienie",
+        "EDIT_SCHEDULED": "Przełóż",
         "ESTIMATE": "Szacunek",
         "FOCUS_SESSION": "Rozpocznij sesję skupienia",
         "MARK_DONE": "Oznacz jako ukończone",
         "MARK_UNDONE": "Oznacz jako nieukończone",
+        "MARK_WONT_DO": "Nie będzie realizowane",
         "MOVE_TO_BACKLOG": "Przenieś do backlogu",
         "MOVE_TO_BOTTOM": "Przenieś na spód",
         "MOVE_TO_OTHER_PROJECT": "Przenieś do innego projektu",
@@ -1829,10 +1818,12 @@
         "SET_DEADLINE": "Ustaw termin",
         "SHOW_HIDDEN_DONE_SUB_TASKS": "+ {{nr}} ukończonych podzadań",
         "SHOW_HIDDEN_SUB_TASKS": "+ {{nr}} podzadań",
+        "SUB_TASK_PROGRESS": "Ukończone podzadania: {{done}} z {{total}}",
         "TIME_CONFLICT": "Nakłada się na inne zaplanowane zadanie",
         "TOGGLE_ATTACHMENTS": "Pokaż/ukryj załączniki",
         "TOGGLE_DETAIL_PANEL": "Pokaż/ukryj dodatkowe informacje",
         "TOGGLE_DONE": "Oznacz jako ukończone/nieukończone",
+        "TOGGLE_DONE_WONT_DO": "Ukończono jako niezrealizowane. Przełącz status ukończenia",
         "TOGGLE_SUB_TASK_VISIBILITY": "Przełącz widoczność podzadań",
         "TOGGLE_TAGS": "Przełącz tagi",
         "TRACK_TIME": "Rozpocznij śledzenie czasu",
@@ -1842,6 +1833,7 @@
       },
       "D_CONFIRM_DELETE": {
         "MSG": "Czy na pewno chcesz usunąć zadanie \"{{title}}\"?",
+        "MSG_PLAINSPACE": "Czy usunąć zadanie \"{{title}}\"? Zostanie również usunięte dla wszystkich w Plainspace.",
         "OK": "Usuń"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
@@ -1856,7 +1848,10 @@
         "ADD_TIME": "Dodaj godzinę",
         "REMIND_AT": "Przypomnij",
         "REMOVE_DEADLINE": "Usuń termin",
+        "RO_1D": "1 dzień przed",
         "RO_1H": "1 godzinę przed",
+        "RO_1W": "1 tydzień przed",
+        "RO_3D": "3 dni przed",
         "RO_5M": "5 minut przed",
         "RO_10M": "10 minut przed",
         "RO_15M": "15 minut przed",
@@ -1864,6 +1859,22 @@
         "RO_AT_DEADLINE": "W momencie terminu",
         "RO_NEVER": "Nigdy",
         "SET_DEADLINE": "Ustaw termin"
+      },
+      "D_RECENTLY_DELETED": {
+        "CONFIRM_EMPTY": "Czy chcesz usunąć trwale wszystkie z sekcji Ostatnio usunięte na tym urządzeniu?",
+        "DELETED_ON": "Usunięto {{date}}",
+        "EMPTY": "Opróżnij",
+        "INTRO": "Skasowane zadania można przywrócić z tego urządzenia w ciągu {{days}} dni.",
+        "LINK": "Ostatnio usunięte",
+        "NONE": "Nic nie zostało usunięte w ciągu ostatnich {{days}} dni.",
+        "RESTORE": "Przywróć",
+        "RESTORE_ARIA": "Przywróć \"{{title}}\"",
+        "RESTORED": "Przywrócono \"{{title}}\"",
+        "SUB_TASKS": {
+          "ONE": "+{{nr}} podzadanie",
+          "OTHER": "+{{nr}} podzadań"
+        },
+        "TITLE": "Ostatnio usunięte"
       },
       "D_REMINDER_VIEW": {
         "ADD_TO_TODAY": "Dodaj do Dzisiaj",
@@ -1942,6 +1953,10 @@
           "MSG": {
             "ONE": "Usunąć <strong>{{count}}</strong> zadanie? Jego podzadania też zostaną usunięte.",
             "OTHER": "Usunąć zadania: <strong>{{count}}</strong>? Podzadania też zostaną usunięte."
+          },
+          "MSG_PLAINSPACE": {
+            "ONE": "Czy usunąć <strong>{{count}}</strong> zadanie? Obejmie to również podzadania. Zostanie to w całości usunięte dla wszystkich w przestrzeni Plainspace.",
+            "OTHER": "Czy usunąć <strong>{{count}}</strong> zadań? Obejmie to również podzadania. Zostaną one w całości usunięte dla wszystkich w przestrzeni Plainspace."
           },
           "OK": "Usuń"
         },
@@ -2023,6 +2038,8 @@
         "DEADLINE_REMOVED": "Termin usunięty",
         "DEADLINE_SET": "Termin ustawiony na {{date}}",
         "DELETED": "Usunięto zadanie \"{{title}}\"",
+        "DELETED_FIND_IN_HISTORY": "Usunięto zadanie \"{{title}}\". Możesz w ciągu {{days}} dni przywrócić je poprzez Historia → Ostatnio usunięte.",
+        "DELETED_FIND_IN_SEARCH": "Usunięto zadanie \"{{title}}\". Wciąż można je wyszukać w panelu Szukaj przez {{days}} dni.",
         "EMPTY_TITLE_VIA_APP_URI": "Tytuł zadania był pusty, nie dodano żadnego zadania",
         "FOUND_MOVE_FROM_BACKLOG": "Przeniesiono zadanie <strong>{{title}}</strong> z backlogu na dzisiejszą listę zadań",
         "FOUND_MOVE_FROM_OTHER_LIST": "Dodano zadanie <strong>{{title}}</strong> z <strong>{{contextTitle}}</strong> na bieżącą listę",
@@ -2070,6 +2087,7 @@
         "MONTHLY_LAST_DAY_AND_TIME": "Co miesiąc, ostatniego dnia o {{timeStr}}",
         "MONTHLY_NTH_WEEKDAY": "Co miesiąc, {{ordinalStr}} {{weekdayStr}}",
         "MONTHLY_NTH_WEEKDAY_AND_TIME": "Co miesiąc, {{ordinalStr}} {{weekdayStr}}, {{timeStr}}",
+        "UNTIL": "{{repeatStr}}, do {{untilStr}}",
         "WEEKLY_CURRENT_WEEKDAY": "{{weekdayStr}} co tydzień",
         "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "{{weekdayStr}} co tydzień, {{timeStr}}",
         "YEARLY_CURRENT_DATE": "Co rok, {{dayAndMonthStr}}",
@@ -2097,6 +2115,12 @@
         "ADVANCED_CFG": "Zaawansowana konfiguracja",
         "EDIT": "Edytuj powtarzanie zadania",
         "HEATMAP_LABEL": "Aktywność",
+        "INHERITED_SUBTASKS": "",
+        "NEXT_OCCURRENCE": "Następne nowe wystąpienie: {{date}}",
+        "NEXT_OCCURRENCE_AFTER_COMPLETION": "Nowe wystąpienie pojawi się tuż po ukończeniu obecnego",
+        "NEXT_OCCURRENCE_FROM_COMPLETION": "Następne wystąpienie: {{date}}, później, jeśli obecne zostanie ukończone po terminie",
+        "NEXT_OCCURRENCE_UNSAVED": "",
+        "NEXT_OCCURRENCE_WAIT_FOR_COMPLETION": "Następne wystąpienie: {{date}}, jeśli obecne zostanie ukończone",
         "TAG_LABEL": "Tagi",
         "TIME_SPENT_THIS_MONTH": "Ten miesiąc",
         "TIME_SPENT_THIS_WEEK": "W tym tygodniu",
@@ -2147,6 +2171,7 @@
         "SKIP_INSTANCE": "Pomiń na dziś",
         "REPEAT_CYCLE": "Jednostka powtarzania",
         "REPEAT_EVERY": "Powtarzaj co",
+        "REPEAT_UNTIL_DAY": "Powtarzaj do (opcjonalne)",
         "SATURDAY": "Sobota",
         "SCHEDULE_TYPE_LABEL": "Typ harmonogramu",
         "SKIP_OVERDUE": "Pomiń zaległe wystąpienia",
@@ -2301,7 +2326,7 @@
       "CMP": {
         "DAYS_WORKED": "Przepracowane dni:",
         "EXPORT_DATA": "Eksportuj dane",
-        "MONTH_WORKED": "Przepracowany miesiąc:",
+        "MONTH_WORKED": "Przepracowano miesięcy:",
         "REPEATING_TASK": "Powtarzające się zadanie",
         "RESTORE_TASK_FROM_ARCHIVE": "Przywróć zadanie z archiwum",
         "TASKS": "Zadania",
@@ -2371,6 +2396,7 @@
     },
     "EXPORT_DATA": "Eksportuj dane",
     "IMPORT_FROM_FILE": "Importuj z pliku",
+    "IMPORT_FROM_TICKTICK": "Importuj z TickTick",
     "IMPORT_FROM_TODOIST": "Importuj z Todoist",
     "IMPORT_FROM_URL": "Importuj z URL",
     "IMPORT_FROM_URL_DIALOG_DESCRIPTION": "Wprowadź pełny URL pliku kopii zapasowej JSON Super Productivity, który chcesz zaimportować.",
@@ -2447,6 +2473,7 @@
     "APP_FEATURES": {
       "BOARDS": "Tablice",
       "DONATE_PAGE": "Strona darowizn",
+      "EXTEND_WITH_PLUGINS": "Znajdź więcej funkcji w sekcji Wtyczki",
       "FINISH_DAY": "Zakończ dzień",
       "FOCUS_MODE": "Tryb skupienia",
       "HABITS": "Nawyki",
@@ -2552,6 +2579,7 @@
       "HELP": "Tryb skupienia otwiera ekran bez rozpraszaczy, ułatwiając skupienie się na wykonywanym zadaniu.",
       "L_AUTO_START_FOCUS_ON_PLAY": "Rozpocznij sesję skupienia, gdy zacznę śledzić zadanie",
       "L_FOCUS_MODE_SOUND": "Dźwięk tła podczas sesji skupienia",
+      "L_FOCUS_MODE_SOUND_VOLUME": "Głośność dźwięków tła (% głośności głównej)",
       "L_MANUAL_BREAK_START": "Ręcznie rozpoczynaj przerwy (Pomodoro)",
       "L_PAUSE_TRACKING_DURING_BREAK": "Wstrzymaj śledzenie zadania podczas przerwy",
       "L_SHOW_PREPARATION_SCREEN": "Pokaż ekran przygotowania przed każdą sesją (odliczanie rakiety)",
@@ -2908,6 +2936,14 @@
     "JIRA_LOAD_ISSUE": "Jira: Ładowanie danych zgłoszenia...",
     "UNKNOWN": "Ładowanie danych zdalnych"
   },
+  "HEATMAP": {
+    "DAY_TOOLTIP": {
+      "ONE": "{{date}}: {{taskCount}} zadanie, {{timeSpent}}",
+      "OTHER": "{{date}}: {{taskCount}} zadań, {{timeSpent}}"
+    },
+    "LEGEND_LESS": "Mniej",
+    "LEGEND_MORE": "Więcej"
+  },
   "MH": {
     "ADD_NEW_TASK": "Dodaj nowe zadanie",
     "ADD_SECTION": "Dodaj sekcję",
@@ -2997,7 +3033,6 @@
     "SUCCESS": "Migracja gotowa! Ponowne uruchamianie aplikacji teraz..."
   },
   "NOTIFICATION": {
-    "EXACT_ALARM_DENIED": "Odmówiono uprawnień do dokładnego alarmu. Przypomnienia mogą być opóźnione nawet o 15 minut.",
     "TASK_ALREADY_COMPLETED": "Zadanie już ukończone",
     "TASK_MARKED_DONE": "Zadanie oznaczone jako wykonane"
   },
@@ -3005,17 +3040,9 @@
     "HINTS": {
       "CREATE_TASK": "Kliknij +, aby dodać pierwsze zadanie",
       "CREATE_TASK_TOUCH": "Dotknij +, aby dodać pierwsze zadanie",
-      "DECLINED": "Nie ma problemu. Znajdziesz go w Pomoc → Krótki przewodnik, kiedy zechcesz.",
-      "MORE_FALLBACK": "Więcej jest już włączone: projekty, śledzenie czasu, Planer…",
-      "NO_THANKS": "Nie, dziękuję",
-      "SHOW_ME_MORE": "Pokaż więcej ›",
-      "DONE_TITLE": "Wszystko gotowe",
-      "EXPLORE_INBOX": "W Twojej skrzynce odbiorczej czekają dodatkowe, opcjonalne wskazówki. Możesz je wypróbować lub usunąć, kiedy tylko zechcesz.",
-      "GOT_IT": "Rozumiem",
       "TASK_SWIPE_LEFT_TOUCH": "Przesuń zadanie w lewo, aby zobaczyć więcej akcji",
-      "TODAY_AND_INBOX": "To zadanie jest zaplanowane na dziś, więc widać je w {{todayIcon}} <b>Dzisiaj</b>. Zadania bez własnego projektu zostają w {{inboxIcon}} <b>Skrzynka odbiorcza</b>.",
-      "TODAY_AND_INBOX_PHONE": "To zadanie jest zaplanowane na dziś, więc widać je w {{todayIcon}} <b>Dzisiaj</b>. Zadania bez własnego projektu zostają w {{inboxIcon}} <b>Skrzynka odbiorcza</b>, pod ☰.",
-      "TASK_SWIPE_RIGHT_TOUCH": "Przesuń zadanie w prawo, aby oznaczyć je jako ukończone",
+      "TODAY_AND_INBOX": "To zadanie jest zaplanowane na dziś, więc znajdziesz je w panelu Dzisiaj. Zadania bez przypisanego projektu znajdują się w panelu Skrzynka odbiorcza.",
+      "TODAY_AND_INBOX_PHONE": "To zadanie jest zaplanowane na dziś, więc znajdziesz je w panelu Dzisiaj. Zadania bez przypisanego projektu znajdują się w panelu Skrzynka odbiorcza, pod ikoną ☰.",
       "OR_PRESS": "lub naciśnij",
       "SKIP_ARIA": "Zamknij wskazówkę"
     },
@@ -3147,7 +3174,6 @@
   },
   "PLUGINS": {
     "ACTION_TYPE_NOT_ALLOWED": "Typ akcji '{{type}}' jest niedozwolony",
-    "ALLOWED_HOSTS": "Dostęp do sieci",
     "ALREADY_INITIALIZED": "Wtyczka jest już zainicjalizowana",
     "AUTHORED_BY": "autor: {{author}}",
     "CANNOT_DELETE_INBOX": "Projektu Skrzynka odbiorcza nie można usunąć",
@@ -3172,6 +3198,7 @@
     "FAILED_TO_LOAD_CONFIG": "Nie udało się załadować konfiguracji wtyczki",
     "FAILED_TO_REMOVE": "Nie udało się usunąć wtyczki",
     "FAILED_TO_SAVE_CONFIG": "Nie udało się zapisać konfiguracji wtyczki",
+    "FIELD_NOT_IN_PLUGIN_API": "\"{{field}}\" nie jest częścią API wtyczek",
     "FIELD_NOT_UPDATABLE": "\"{{field}}\" nie może być ustawione przez updateTask — zmiana zadania nadrzędnego nie jest obsługiwana. Twórz podzadania za pomocą addTask({ parentId }) lub przebuduj strukturę przez batchUpdateForProject",
     "FILE_TOO_LARGE": "Plik jest zbyt duży ({{fileSize}}MB). Maksymalny rozmiar to {{maxSize}}MB",
     "GO_BACK": "Wróć",
@@ -3181,7 +3208,6 @@
     "INDEX_HTML_NOT_LOADED": "Nie załadowano index.html wtyczki",
     "INDEX_HTML_TOO_LARGE": "index.html wtyczki jest za duży (maks. {{maxSize}}KB)",
     "INSTALL_PLUGIN": "Zainstaluj wtyczkę",
-    "INSTALL_WARNING": "Przed zainstalowaniem wtyczki upewnij się, że ufasz jej źródłu i rozumiesz żądane uprawnienia.",
     "INSTALLING": "Instalowanie...",
     "LANGUAGES": "Języki:",
     "LOADING_INTERFACE": "Ładowanie interfejsu wtyczki...",
@@ -3238,7 +3264,13 @@
     "UPLOAD_PLUGIN_INSTRUCTION": "Prześlij plik ZIP wtyczki, aby ją zainstalować:",
     "VALIDATION_FAILED": "Walidacja nie powiodła się: {{errors}}",
     "NODE_EXECUTION_BRIDGE_UNAVAILABLE": "Nie udało się połączyć z mostem wykonawczym Node.js. Spróbuj wyłączyć i ponownie włączyć wtyczkę.",
-    "PLUGIN_LOAD_FAILED": "Nie udało się wczytać wtyczki „{{pluginName}}”: {{error}}"
+    "PLUGIN_LOAD_FAILED": "Nie udało się wczytać wtyczki „{{pluginName}}”: {{error}}",
+    "DETAILS": "Szczegóły",
+    "COMMUNITY_PLUGINS": "Wtyczki społecznościowe",
+    "COMMUNITY_WARNING": "Wtyczki społecznościowe nie są sprawdzane przez zespół Super Productivity. Instalujesz na własne ryzyko.",
+    "COMMUNITY_INSTALLED": "Zainstalowano",
+    "GROUP_INTEGRATIONS": "Integracje",
+    "GROUP_OTHER": "Pozostałe wtyczki"
   },
   "PM": {
     "ALL_TASKS_TITLE": "Metryki (wszystkie zadania)",
