@@ -23,7 +23,7 @@ import { DialogPromptComponent } from '../../ui/dialog-prompt/dialog-prompt.comp
 import { expandAnimation, expandFadeAnimation } from '../../ui/animations/expand.ani';
 import { LayoutService } from '../../core-ui/layout/layout.service';
 import { TakeABreakService } from '../take-a-break/take-a-break.service';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import {
   animationFrameScheduler,
   from,
@@ -59,7 +59,7 @@ import {
 import { CdkScrollable } from '@angular/cdk/scrolling';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatIcon } from '@angular/material/icon';
-import { MatButton, MatMiniFabButton } from '@angular/material/button';
+import { MatButton, MatIconButton, MatMiniFabButton } from '@angular/material/button';
 import { TaskListComponent } from '../tasks/task-list/task-list.component';
 import { SplitComponent } from './split/split.component';
 import { BacklogComponent } from './backlog/backlog.component';
@@ -132,6 +132,8 @@ const INITIAL_CUSTOMIZED_UNDONE_TASKS: CustomizedUndoneTasks = { list: [] };
     MatIcon,
     MatMiniFabButton,
     MatButton,
+    MatIconButton,
+    RouterLink,
     TaskListComponent,
     SplitComponent,
     BacklogComponent,
