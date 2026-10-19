@@ -5,6 +5,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs/operators';
 import { PluginService } from '../../plugin.service';
@@ -15,10 +16,8 @@ import { PluginConfigService } from '../../plugin-config.service';
 import { MAX_PLUGIN_ZIP_SIZE } from '../../plugin.const';
 import {
   MatCard,
-  MatCardActions,
   MatCardContent,
   MatCardHeader,
-  MatCardSubtitle,
   MatCardTitle,
 } from '@angular/material/card';
 import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
@@ -26,6 +25,8 @@ import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatChip, MatChipSet } from '@angular/material/chips';
 import { MatTooltip } from '@angular/material/tooltip';
+import { MatMenu, MatMenuItem, MatMenuTrigger } from '@angular/material/menu';
+import { MatTab, MatTabGroup } from '@angular/material/tabs';
 import { MatError } from '@angular/material/form-field';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -36,7 +37,6 @@ import { IS_ELECTRON } from '../../../app.constants';
 import { PluginLog } from '../../../core/log';
 import { SnackService } from '../../../core/snack/snack.service';
 import { PluginBridgeService } from '../../plugin-bridge.service';
-import { CollapsibleComponent } from '../../../ui/collapsible/collapsible.component';
 import { DEFAULT_LANGUAGE, LanguageCode } from '../../../core/locale.constants';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { escapeHtml } from '../../../util/escape-html';
@@ -105,17 +105,29 @@ const getLanguageName = (
   }
 };
 
+/** Falls back to the runtime's default locale for a malformed code. */
+const createCollator = (locale: string): Intl.Collator => {
+  const options: Intl.CollatorOptions = { sensitivity: 'base', numeric: true };
+  try {
+    return new Intl.Collator([locale], options);
+  } catch {
+    return new Intl.Collator(undefined, options);
+  }
+};
+
+/** Tab indexes of the plugins page; "Built-in" opens by default. */
+export const PLUGIN_TAB_INDEX = { BUILT_IN: 0, CUSTOM: 1 } as const;
+
 @Component({
   selector: 'plugin-management',
   templateUrl: './plugin-management.component.html',
   styleUrls: ['./plugin-management.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
+    NgTemplateOutlet,
     MatCard,
-    MatCardActions,
     MatCardHeader,
     MatCardTitle,
-    MatCardSubtitle,
     MatCardContent,
     MatSlideToggle,
     MatIcon,
@@ -125,9 +137,13 @@ const getLanguageName = (
     MatChipSet,
     MatError,
     MatTooltip,
+    MatMenu,
+    MatMenuItem,
+    MatMenuTrigger,
+    MatTab,
+    MatTabGroup,
     TranslatePipe,
     PluginIconComponent,
-    CollapsibleComponent,
   ],
 })
 export class PluginManagementComponent {
@@ -152,9 +168,14 @@ export class PluginManagementComponent {
     { initialValue: this._translateService.getCurrentLang() },
   );
 
-  /** One formatter per UI language, shared by every plugin card. */
+  /** One formatter per UI language, shared by every plugin row. */
   private readonly _languageDisplayNames = computed(() =>
     createLanguageDisplayNames(this._uiLang() || DEFAULT_LANGUAGE),
+  );
+
+  /** Sorts plugin names the way the UI language does. */
+  private readonly _nameCollator = computed(() =>
+    createCollator(this._uiLang() || DEFAULT_LANGUAGE),
   );
 
   readonly communityPlugins = signal<CommunityPlugin[]>(
@@ -236,21 +257,23 @@ export class PluginManagementComponent {
   // Development and E2E builds (plain `ng build`) are not `production`, so they list them.
   private readonly _isShowDevPlugins = !environment.production;
   // Dev-only plugins seen enabled stay listed, so disabling one does not make it vanish.
-  // Filled from inside pluginGroups (via isPluginListed); it only ever grows while this
+  // Filled from inside _listedPluginsByName (via isPluginListed); it only ever grows while this
   // page is open, so re-running the computed gives the same result.
   private readonly _shownDevPluginIds = new Set<string>();
 
-  // Uploaded plugins, then built-in integrations (issue and calendar providers), then
-  // other built-ins, each in load order. Grouped by origin and type rather than enabled
-  // state, so a card never moves while its toggle is used.
-  readonly pluginGroups = computed(() => {
-    const plugins = this.allPlugins().filter((p) => this._isListed(p));
-    const states = this._pluginService.pluginStates();
-    const isUploaded = (p: PluginInstance): boolean =>
-      states.get(p.manifest.id)?.type === 'uploaded';
-    const builtIn = plugins.filter((p) => !isUploaded(p));
+  // Rows are sorted by name and never by enabled state, so a row stays where it is
+  // while its toggle is used.
+  private readonly _listedPluginsByName = computed(() => {
+    const collator = this._nameCollator();
+    return this.allPlugins()
+      .filter((p) => this._isListed(p))
+      .sort((a, b) => collator.compare(a.manifest.name, b.manifest.name));
+  });
+
+  // The "Built-in" tab: integrations (issue and calendar providers), then other plugins.
+  readonly builtInPluginGroups = computed(() => {
+    const builtIn = this._listedPluginsByName().filter((p) => !this._isUploadedState(p));
     return [
-      { titleKey: T.PLUGINS.GROUP_UPLOADED, plugins: plugins.filter(isUploaded) },
       {
         titleKey: T.PLUGINS.GROUP_INTEGRATIONS,
         plugins: builtIn.filter((p) => this.isIssueProviderPlugin(p)),
@@ -261,6 +284,16 @@ export class PluginManagementComponent {
       },
     ].filter((group) => group.plugins.length > 0);
   });
+
+  // The "Custom" tab lists these between the install card and the community catalog.
+  readonly uploadedPlugins = computed(() =>
+    this._listedPluginsByName().filter((p) => this._isUploadedState(p)),
+  );
+
+  readonly selectedTabIndex = signal<number>(PLUGIN_TAB_INDEX.BUILT_IN);
+
+  /** Ids of plugins whose details area is open. */
+  readonly expandedPluginIds = signal<ReadonlySet<string>>(new Set());
 
   // Upload state
   readonly isUploading = signal<boolean>(false);
@@ -348,6 +381,12 @@ export class PluginManagementComponent {
     }
   }
 
+  private _isUploadedState(plugin: PluginInstance): boolean {
+    return (
+      this._pluginService.pluginStates().get(plugin.manifest.id)?.type === 'uploaded'
+    );
+  }
+
   private _isListed(plugin: PluginInstance): boolean {
     return isPluginListed(plugin, this._isShowDevPlugins, this._shownDevPluginIds);
   }
@@ -413,7 +452,7 @@ export class PluginManagementComponent {
     try {
       const plugin = await this._pluginService.loadPluginFromZip(file);
       // A plugin whose code fails at load time still resolves, with `error`
-      // set and its card showing the failure; only a clean load gets a snack.
+      // set and its row showing the failure; only a clean load gets a snack.
       if (!plugin.error) {
         this._snackService.open({
           type: 'SUCCESS',
@@ -520,6 +559,17 @@ export class PluginManagementComponent {
     } finally {
       this.isUploading.set(false);
     }
+  }
+
+  toggleDetails(plugin: PluginInstance): void {
+    const id = plugin.manifest.id;
+    this.expandedPluginIds.update((ids) => {
+      const next = new Set(ids);
+      if (!next.delete(id)) {
+        next.add(id);
+      }
+      return next;
+    });
   }
 
   isUploadedPlugin(plugin: PluginInstance): boolean {
@@ -655,27 +705,6 @@ export class PluginManagementComponent {
   getOtherPermissions(plugin: PluginInstance): string[] {
     const described = new Set(this.getApiAccess(plugin).map((a) => a.permission));
     return (plugin.manifest.permissions ?? []).filter((p) => !described.has(p));
-  }
-
-  getDetailsTitle(plugin: PluginInstance): string {
-    const details = this._translateService.instant(T.PLUGINS.DETAILS);
-    const summary = this.getPermissionsHooksTitle(plugin);
-    return summary ? `${details} · ${summary}` : details;
-  }
-
-  getPermissionsHooksTitle(plugin: PluginInstance): string {
-    const parts: string[] = [];
-    const pCount = plugin.manifest.permissions?.length || 0;
-    const hCount = plugin.manifest.hooks?.length || 0;
-
-    if (pCount > 0) {
-      parts.push(`${this._translateService.instant(T.PLUGINS.PERMISSIONS)} (${pCount})`);
-    }
-    if (hCount > 0) {
-      parts.push(`${this._translateService.instant(T.PLUGINS.HOOKS)} (${hCount})`);
-    }
-
-    return parts.join(' / ');
   }
 
   hasConfigHandler(plugin: PluginInstance): boolean {

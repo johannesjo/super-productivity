@@ -14,6 +14,12 @@ test.describe.serial('Plugin Management Feature Check', () => {
 
     const pluginMgmt = page.locator('plugin-management');
     await expect(pluginMgmt).toBeVisible({ timeout: 10000 });
+    // Built-in plugins open by default; installing lives in the "Custom" tab.
+    await expect(pluginMgmt.getByRole('tab', { name: 'Built-in' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    await pluginMgmt.getByRole('tab', { name: 'Custom' }).click();
     await expect(
       pluginMgmt.getByRole('button', { name: /Choose Plugin File/i }),
     ).toBeVisible();
@@ -33,6 +39,7 @@ test.describe.serial('Plugin Management Feature Check', () => {
 
     const pluginManagement = page.locator('plugin-management');
     await expect(pluginManagement).toBeVisible({ timeout: 10000 });
+    await pluginManagement.getByRole('tab', { name: 'Custom' }).click();
     await expect(
       pluginManagement.locator('.community-plugins-card mat-card-title'),
     ).toContainText('Community Plugins');

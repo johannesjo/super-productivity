@@ -13,10 +13,14 @@ import { PluginBridgeService } from '../../plugin-bridge.service';
 import { PluginCacheService } from '../../plugin-cache.service';
 import { PluginConfigService } from '../../plugin-config.service';
 import { PluginMetaPersistenceService } from '../../plugin-meta-persistence.service';
-import { PluginInstance, PluginManifest, PluginHooks } from '../../plugin-api.model';
+import { PluginInstance, PluginManifest } from '../../plugin-api.model';
 import { PluginService } from '../../plugin.service';
 import { PluginState } from '../../plugin-state.model';
-import { isPluginListed, PluginManagementComponent } from './plugin-management.component';
+import {
+  isPluginListed,
+  PLUGIN_TAB_INDEX,
+  PluginManagementComponent,
+} from './plugin-management.component';
 import { T } from '../../../t.const';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { CommunityPlugin } from '../../util/community-plugin.util';
@@ -41,14 +45,17 @@ describe('PluginManagementComponent', () => {
       .and.returnValue(Promise.resolve(true));
     layoutToggleSpy = jasmine.createSpy('toggleAddTaskPanel');
     isShowIssuePanel = signal(false);
+    const pluginStates = signal(new Map<string, PluginState>());
     TestBed.configureTestingModule({
       imports: [PluginManagementComponent, TranslateModule.forRoot()],
       providers: [
         {
           provide: PluginService,
           useValue: {
-            pluginStates: signal(new Map()),
+            pluginStates,
             loadPluginFromZip: loadPluginFromZipSpy,
+            getPluginPath: (id: string) => pluginStates().get(id)?.path,
+            getPluginIconsSignal: () => signal(new Map()),
           },
         },
         {
@@ -86,7 +93,7 @@ describe('PluginManagementComponent', () => {
         },
         {
           provide: PluginBridgeService,
-          useValue: {},
+          useValue: { hasConfigHandler: () => false },
         },
         {
           provide: SnackService,
@@ -162,7 +169,7 @@ describe('PluginManagementComponent', () => {
 
   it('shows a success snack after a plugin ZIP installs', async () => {
     loadPluginFromZipSpy.and.returnValue(
-      Promise.resolve({ manifest: { name: 'My Plugin' } }),
+      Promise.resolve({ manifest: { id: 'my-plugin', name: 'My Plugin' } }),
     );
 
     await component.onFileSelected(zipInputEvent());
@@ -177,7 +184,10 @@ describe('PluginManagementComponent', () => {
 
   it('shows no snack when the plugin loads but fails to run', async () => {
     loadPluginFromZipSpy.and.returnValue(
-      Promise.resolve({ manifest: { name: 'My Plugin' }, error: 'boom' }),
+      Promise.resolve({
+        manifest: { id: 'my-plugin', name: 'My Plugin' },
+        error: 'boom',
+      }),
     );
 
     await component.onFileSelected(zipInputEvent());
@@ -196,7 +206,7 @@ describe('PluginManagementComponent', () => {
 
   it('shows the risk warning before installing and installs only when confirmed', async () => {
     loadPluginFromZipSpy.and.returnValue(
-      Promise.resolve({ manifest: { name: 'My Plugin' } }),
+      Promise.resolve({ manifest: { id: 'my-plugin', name: 'My Plugin' } }),
     );
     const openSpy = stubConfirmDialog(true);
 
@@ -251,29 +261,6 @@ describe('PluginManagementComponent', () => {
         isEnabled: true,
       }),
     ).toBe(false);
-  });
-
-  it('counts every declared permission and hook in the details title', () => {
-    // instant() echoes the key here (no translations loaded).
-    expect(
-      component.getPermissionsHooksTitle({
-        manifest: {
-          ...baseManifest,
-          permissions: ['http', 'getTasks'],
-          allowedHosts: ['api.example.com'],
-          hooks: [PluginHooks.TASK_COMPLETE],
-        },
-        loaded: true,
-        isEnabled: true,
-      }),
-    ).toBe('PLUGINS.PERMISSIONS (2) / PLUGINS.HOOKS (1)');
-    expect(
-      component.getPermissionsHooksTitle({
-        manifest: { ...baseManifest, hooks: [PluginHooks.TASK_COMPLETE] },
-        loaded: true,
-        isEnabled: true,
-      }),
-    ).toBe('PLUGINS.HOOKS (1)');
   });
 
   it('lists every declared permission exactly once, as checked access or as other', () => {
@@ -335,6 +322,7 @@ describe('PluginManagementComponent', () => {
       // may lack the optional authorUrl or release.
       (component as { isInAppInstall: boolean }).isInAppInstall = true;
       component.communityPlugins.set([plugin]);
+      component.selectedTabIndex.set(PLUGIN_TAB_INDEX.CUSTOM);
       fixture.detectChanges();
     });
 
@@ -474,42 +462,152 @@ describe('PluginManagementComponent', () => {
     return openSpy;
   };
 
-  it('groups uploaded plugins, then built-in integrations, then other built-ins', () => {
-    const state = (
-      id: string,
-      type: PluginState['type'],
-      manifestType?: PluginManifest['type'],
-    ): PluginState => ({
-      manifest: { ...baseManifest, id, name: id, type: manifestType },
-      status: 'not-loaded',
-      path: type === 'uploaded' ? `uploaded://${id}` : `assets/bundled-plugins/${id}`,
-      type,
-      isEnabled: false,
-    });
-    const pluginStates = TestBed.inject(PluginService).pluginStates as WritableSignal<
-      Map<string, PluginState>
-    >;
-    pluginStates.set(
-      new Map([
-        ['builtin-a', state('builtin-a', 'built-in')],
-        ['github', state('github', 'built-in', 'issueProvider')],
-        ['uploaded-a', state('uploaded-a', 'uploaded', 'issueProvider')],
-        ['builtin-b', state('builtin-b', 'built-in')],
-      ]),
-    );
+  describe('plugin lists', () => {
+    let pluginStates: WritableSignal<Map<string, PluginState>>;
 
-    expect(
-      component
-        .pluginGroups()
-        .map((g) => [g.titleKey, g.plugins.map((p) => p.manifest.id)]),
-    ).toEqual([
-      [T.PLUGINS.GROUP_UPLOADED, ['uploaded-a']],
-      [T.PLUGINS.GROUP_INTEGRATIONS, ['github']],
-      [T.PLUGINS.GROUP_OTHER, ['builtin-a', 'builtin-b']],
-    ]);
-    // Empty again so the template (rendered on teardown) needs no further stubs.
-    pluginStates.set(new Map());
-    expect(component.pluginGroups()).toEqual([]);
+    const state = (
+      name: string,
+      type: PluginState['type'],
+      opts: { manifestType?: PluginManifest['type']; isEnabled?: boolean } = {},
+    ): PluginState => {
+      const id = name.toLowerCase().replace(/\s+/g, '-');
+      return {
+        manifest: { ...baseManifest, id, name, type: opts.manifestType },
+        status: 'not-loaded',
+        path: type === 'uploaded' ? `uploaded://${id}` : `assets/bundled-plugins/${id}`,
+        type,
+        isEnabled: opts.isEnabled ?? false,
+      };
+    };
+    const setStates = (...states: PluginState[]): void =>
+      pluginStates.set(new Map(states.map((st) => [st.manifest.id, st])));
+    const names = (plugins: PluginInstance[]): string[] =>
+      plugins.map((p) => p.manifest.name);
+    const rowNames = (): string[] =>
+      Array.from(
+        fixture.nativeElement.querySelectorAll('.plugin-row .plugin-row-name'),
+        (el: Element) => el.textContent?.trim() ?? '',
+      );
+
+    beforeEach(() => {
+      pluginStates = TestBed.inject(PluginService).pluginStates as WritableSignal<
+        Map<string, PluginState>
+      >;
+    });
+
+    it('splits built-in plugins into integrations and other plugins, each by name', () => {
+      setStates(
+        state('Zeta', 'built-in'),
+        state('GitHub', 'built-in', { manifestType: 'issueProvider' }),
+        state('alpha', 'built-in', { isEnabled: true }),
+        state('Uploaded', 'uploaded', { manifestType: 'issueProvider' }),
+        state('Azure', 'built-in', { manifestType: 'issueProvider' }),
+      );
+
+      expect(
+        component.builtInPluginGroups().map((g) => [g.titleKey, names(g.plugins)]),
+      ).toEqual([
+        [T.PLUGINS.GROUP_INTEGRATIONS, ['Azure', 'GitHub']],
+        [T.PLUGINS.GROUP_OTHER, ['alpha', 'Zeta']],
+      ]);
+    });
+
+    it('lists uploaded plugins by name, apart from the built-in ones', () => {
+      setStates(
+        state('Plugin 10', 'uploaded'),
+        state('bundled', 'built-in'),
+        state('Plugin 9', 'uploaded'),
+        state('Écrire', 'uploaded'),
+      );
+
+      expect(names(component.uploadedPlugins())).toEqual([
+        'Écrire',
+        'Plugin 9',
+        'Plugin 10',
+      ]);
+    });
+
+    it('keeps the order when a plugin is enabled', () => {
+      setStates(state('B', 'built-in'), state('A', 'built-in'));
+      const before = names(component.builtInPluginGroups()[0].plugins);
+
+      setStates(state('B', 'built-in', { isEnabled: true }), state('A', 'built-in'));
+
+      expect(names(component.builtInPluginGroups()[0].plugins)).toEqual(before);
+    });
+
+    it('shows built-in plugins by default and uploaded ones in the "Custom" tab', async () => {
+      setStates(state('Bundled', 'built-in'), state('Uploaded', 'uploaded'));
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(rowNames()).toEqual(['Bundled']);
+
+      component.selectedTabIndex.set(PLUGIN_TAB_INDEX.CUSTOM);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(rowNames()).toEqual(['Uploaded']);
+      const row = fixture.nativeElement.querySelector('.plugin-row');
+      expect(row.querySelector('.more-actions-btn')).not.toBeNull();
+    });
+
+    it('offers no "more actions" menu on built-in plugins, which cannot be removed', async () => {
+      setStates(state('Bundled', 'built-in'));
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(fixture.nativeElement.querySelector('.more-actions-btn')).toBeNull();
+    });
+
+    it('shows the loading icon in the settings button slot, so the controls keep their place', async () => {
+      const configurable = state('Configurable', 'built-in', { isEnabled: true });
+      configurable.manifest.jsonSchemaCfg = 'config-schema.json';
+      const slot = (): HTMLElement =>
+        fixture.nativeElement.querySelector('.plugin-controls .control-slot');
+      const controlCount = (): number =>
+        fixture.nativeElement.querySelector('.plugin-controls').children.length;
+
+      setStates({ ...configurable, status: 'loading' });
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const loadingControlCount = controlCount();
+
+      expect(slot().querySelector('.loading-icon')).not.toBeNull();
+      expect(slot().querySelector('button')).toBeNull();
+
+      setStates({ ...configurable, status: 'loaded' });
+      fixture.detectChanges();
+
+      expect(slot().querySelector('.loading-icon')).toBeNull();
+      expect(slot().querySelector('button')).not.toBeNull();
+      expect(controlCount()).toBe(loadingControlCount);
+    });
+
+    it('opens and closes the details of one plugin from its summary', async () => {
+      setStates(state('First', 'built-in'), state('Second', 'built-in'));
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const summaries = (): HTMLButtonElement[] =>
+        Array.from(fixture.nativeElement.querySelectorAll('.plugin-summary'));
+
+      expect(fixture.nativeElement.querySelector('.plugin-details')).toBeNull();
+
+      summaries()[1].click();
+      fixture.detectChanges();
+
+      const details = fixture.nativeElement.querySelectorAll('.plugin-details');
+      expect(details.length).toBe(1);
+      expect(details[0].textContent).toContain('second');
+      expect(summaries()[1].getAttribute('aria-expanded')).toBe('true');
+      expect(summaries()[1].getAttribute('aria-controls')).toBe(details[0].id);
+      expect(summaries()[0].getAttribute('aria-expanded')).toBe('false');
+
+      summaries()[1].click();
+      fixture.detectChanges();
+
+      expect(fixture.nativeElement.querySelector('.plugin-details')).toBeNull();
+    });
   });
 
   describe('listed community plugins', () => {
@@ -574,6 +672,23 @@ describe('PluginManagementComponent', () => {
         plugin: listed,
         release: listed.release!,
       });
+    });
+
+    it('offers the update in the installed plugin row', async () => {
+      (component as { isInAppInstall: boolean }).isInAppInstall = true;
+      pluginStates.set(new Map([['listed', uploaded('listed', '1.1.0')]]));
+      component.selectedTabIndex.set(PLUGIN_TAB_INDEX.CUSTOM);
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const installSpy = spyOn(component, 'installCommunityPlugin').and.resolveTo();
+
+      const updateBtn = fixture.nativeElement.querySelector(
+        '.plugin-row .plugin-row-action button',
+      );
+      expect(updateBtn?.textContent).toContain(T.PLUGINS.COMMUNITY_UPDATE);
+
+      updateBtn.click();
+      expect(installSpy).toHaveBeenCalledOnceWith(listed);
     });
 
     it('ignores a built-in plugin with the same id', () => {
@@ -666,20 +781,6 @@ describe('PluginManagementComponent', () => {
     });
   });
 
-  it('titles the details section with the permission summary when there is one', () => {
-    const withHooks = {
-      manifest: { ...baseManifest, hooks: [PluginHooks.TASK_COMPLETE] },
-      loaded: true,
-      isEnabled: true,
-    };
-    const plain = { manifest: baseManifest, loaded: true, isEnabled: true };
-
-    expect(component.getDetailsTitle(withHooks)).toBe(
-      'PLUGINS.DETAILS · PLUGINS.HOOKS (1)',
-    );
-    expect(component.getDetailsTitle(plain)).toBe('PLUGINS.DETAILS');
-  });
-
   describe('clearPluginCache', () => {
     let clearCacheSpy: jasmine.Spy;
     let clearUploadedSpy: jasmine.Spy;
@@ -714,7 +815,7 @@ describe('PluginManagementComponent', () => {
     });
 
     afterEach(() => {
-      // Plugin cards are not under test and need service methods this mock lacks.
+      // Plugin rows are not under test and need service methods this mock lacks.
       pluginStates.set(new Map());
     });
 

@@ -122,7 +122,7 @@ export const waitForPluginManagementInit = async (
 
     const result = await page.waitForFunction(
       () => {
-        const cards = document.querySelectorAll('plugin-management mat-card');
+        const cards = document.querySelectorAll('plugin-management .plugin-row');
         return cards.length > 0;
       },
       { timeout: 10000 },
@@ -158,9 +158,11 @@ export const enablePluginWithVerification = async (
   const pluginCardResult = await page
     .waitForFunction(
       (name) => {
-        const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
+        const cards = Array.from(
+          document.querySelectorAll('plugin-management .plugin-row'),
+        );
         const targetCard = cards.find((card) => {
-          const title = card.querySelector('mat-card-title')?.textContent || '';
+          const title = card.querySelector('.plugin-row-name')?.textContent || '';
           return title.includes(name);
         });
 
@@ -181,9 +183,9 @@ export const enablePluginWithVerification = async (
 
   // Enable the plugin
   const enableResult = await page.evaluate((name) => {
-    const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
+    const cards = Array.from(document.querySelectorAll('plugin-management .plugin-row'));
     const targetCard = cards.find((card) => {
-      const title = card.querySelector('mat-card-title')?.textContent || '';
+      const title = card.querySelector('.plugin-row-name')?.textContent || '';
       return title.includes(name);
     });
 
@@ -215,9 +217,11 @@ export const enablePluginWithVerification = async (
   // Wait for the toggle state to update
   await page.waitForFunction(
     (name) => {
-      const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
+      const cards = Array.from(
+        document.querySelectorAll('plugin-management .plugin-row'),
+      );
       const targetCard = cards.find((card) => {
-        const title = card.querySelector('mat-card-title')?.textContent || '';
+        const title = card.querySelector('.plugin-row-name')?.textContent || '';
         return title.includes(name);
       });
 
@@ -301,9 +305,11 @@ export const disablePluginWithVerification = async (
   const pluginCardResult = await page
     .waitForFunction(
       (name) => {
-        const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
+        const cards = Array.from(
+          document.querySelectorAll('plugin-management .plugin-row'),
+        );
         const targetCard = cards.find((card) => {
-          const title = card.querySelector('mat-card-title')?.textContent || '';
+          const title = card.querySelector('.plugin-row-name')?.textContent || '';
           return title.includes(name);
         });
         return !!targetCard;
@@ -320,9 +326,9 @@ export const disablePluginWithVerification = async (
 
   // Check current state and click to disable if needed
   const disableResult = await page.evaluate((name) => {
-    const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
+    const cards = Array.from(document.querySelectorAll('plugin-management .plugin-row'));
     const targetCard = cards.find((card) => {
-      const title = card.querySelector('mat-card-title')?.textContent || '';
+      const title = card.querySelector('.plugin-row-name')?.textContent || '';
       return title.includes(name);
     });
 
@@ -373,9 +379,11 @@ export const disablePluginWithVerification = async (
   try {
     await page.waitForFunction(
       (name) => {
-        const cards = Array.from(document.querySelectorAll('plugin-management mat-card'));
+        const cards = Array.from(
+          document.querySelectorAll('plugin-management .plugin-row'),
+        );
         const targetCard = cards.find((card) => {
-          const title = card.querySelector('mat-card-title')?.textContent || '';
+          const title = card.querySelector('.plugin-row-name')?.textContent || '';
           return title.includes(name);
         });
 
