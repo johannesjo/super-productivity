@@ -14,6 +14,7 @@ import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { LOCAL_ACTIONS } from '../../util/local-actions.token';
 import { TaskService } from '../../features/tasks/task.service';
 import { Task } from '../../features/tasks/task.model';
+import { isWontDoTask } from '../../features/tasks/util/is-wont-do-task';
 import { IssueProviderPluginType } from '../../features/issue/issue.model';
 import { selectIssueProviderState } from '../../features/issue/store/issue-provider.selectors';
 import { IssueProviderActions } from '../../features/issue/store/issue-provider.actions';
@@ -22,7 +23,10 @@ import { TrackTimeDialogData } from '../../features/issue/shared/dialog-track-ti
 import { SnackService } from '../../core/snack/snack.service';
 import { getErrorTxt } from '../../util/get-error-text';
 import { T } from '../../t.const';
-import { PluginIssueProviderRegistryService } from './plugin-issue-provider-registry.service';
+import {
+  PluginIssueProviderRegistryService,
+  toPluginSvgIcon,
+} from './plugin-issue-provider-registry.service';
 import { PluginHttpService } from './plugin-http.service';
 import { withPluginOAuthTokenKey } from '../oauth/plugin-oauth-token-key.util';
 
@@ -54,7 +58,7 @@ interface TimeTrackingCtx {
   pluginConfig: Record<string, unknown>;
   http: PluginHttp;
   providerName: string;
-  icon: string;
+  icon: string | undefined;
 }
 
 @Injectable()
@@ -74,7 +78,7 @@ export class PluginTimeTrackingEffects {
         ofType(TaskSharedActions.updateTask),
         filter(({ task }) => task.changes.isDone === true),
         concatMap(({ task }) => this._taskService.getByIdOnce$(task.id as string)),
-        filter((task) => !!task),
+        filter((task) => !!task && !isWontDoTask(task)),
         concatMap((task) =>
           task.parentId
             ? this._taskService
@@ -136,7 +140,7 @@ export class PluginTimeTrackingEffects {
       pluginConfig,
       http,
       providerName,
-      icon: provider.icon,
+      icon: toPluginSvgIcon(provider.icon, provider.pluginId),
     };
   }
 

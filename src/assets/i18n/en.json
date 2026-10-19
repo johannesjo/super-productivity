@@ -92,21 +92,9 @@
     "INTRO_2": "If you value this approach and want to keep the project healthy and evolving, a voluntary donation is greatly appreciated."
   },
   "EXAMPLE_TASKS": {
-    "LEARN_KEYBOARD_SHORTCUTS": {
-      "TITLE": "Learn the keyboard shortcuts",
-      "NOTES": "Super Productivity is designed to be used with the keyboard. Learn the shortcuts to work faster.\n\n**How to start:**\n1. Open the **sidebar menu**\n2. Go to **Help**\n3. Click **How to: Keyboard Navigation**"
-    },
-    "CREATE_PROJECT": {
-      "TITLE": "Create your first project",
-      "NOTES": "Projects help you organize your tasks by topic. Each project has its own task list and backlog.\n\n**How to create a project:**\n1. Click the **+** button next to **Projects** in the sidebar\n2. Give it a name and pick a color\n3. Start adding tasks to it"
-    },
-    "SET_UP_SYNC": {
-      "TITLE": "Set up Sync",
-      "NOTES": "Keep your data safe and accessible across devices.\n\n**How to set up:**\n1. Open **Settings** (gear icon in the sidebar)\n2. Go to **Sync**\n3. Choose a provider: SuperSync, Nextcloud, Dropbox, or local file sync\n4. Follow the setup instructions"
-    },
-    "GO_FURTHER": {
-      "TITLE": "Go further",
-      "NOTES": "There is much more to discover!\n\n**App Features** (in Settings) — Enable integrations, habits, and other features. Go to **Settings → App Features** to see what's available.\n\n**Boards** — Visualize your tasks in customizable Kanban-style boards. Enable them in **App Features**, then find them in the **sidebar menu**.\n\n**Schedule** — Plan your day by scheduling tasks at specific times. Enable it in **App Features**, then drag tasks onto the **Schedule** view in the sidebar to organize your timeline.\n\n**Integrations** — Once enabled in App Features, import tasks from Jira, GitHub, GitLab, Gitea, OpenProject, CalDAV, and many more. You can also integrate your calendar. Configure them in the **Issue Provider Panel**.\n\n**Habits** — Track recurring habits and routines. Find them in the **sidebar menu** once enabled.\n\n**Focus mode & Finish Day** — Work in distraction-free focus sessions and wrap up your day with a short review. Enable them in **App Features**.\n\n**Plugins** — Add features like the Procrastination Buster, Automations, or Voice Reminders. Go to **Settings → Plugins**.\n\n**Customize** — Themes, dark mode, keyboard shortcuts, language, and productivity helpers are all in **Settings**."
+    "GETTING_STARTED": {
+      "TITLE": "Optional: getting started tips",
+      "NOTES": "Nothing here is required. Delete this task whenever you like.\n\n- **Today and Inbox**: Today shows what is planned for today. Tasks without a project of your own stay in Inbox. A task can appear in both lists.\n- **Projects**: group tasks by topic with the **+** next to **Projects** in the sidebar.\n- **Sync**: keep your data on several devices under **Settings → Sync & Backup**.\n- **Coming from Todoist or TickTick?** Import your tasks under **Settings → Sync & Backup → Import/Export**.\n- **Tours**: **Help → How to** in the sidebar menu shows short syntax and keyboard navigation step by step. Close a tour whenever you like.\n- **Make it yours**: pick a theme or dark mode, and switch features like boards, schedule, habits, focus mode or integrations on or off under **Settings → General**. Plugins add even more."
     }
   },
   "F": {
@@ -274,6 +262,7 @@
       "S": {
         "CAL_PROVIDER_ERROR": "Calendar Provider Error: {{errTxt}}",
         "CAL_PROVIDER_NOT_ICAL": "Calendar URL did not return iCal data. The share link may be expired, revoked, or require sign-in — try generating a new share URL.",
+        "CONNECT": "Connect",
         "EVENT_HIDDEN": "Calendar event hidden",
         "EVENT_MOVED": "Event moved",
         "EVENT_RESCHEDULED": "Event rescheduled",
@@ -325,8 +314,8 @@
         "QUIT": "Quit",
         "TITLE": "Finish your day before quitting?",
         "UNARCHIVED_TASKS": {
-          "ONE": "1 completed task in your Today list hasn't been moved to the archive yet.",
-          "OTHER": "{{nr}} completed tasks in your Today list haven't been moved to the archive yet."
+          "ONE": "1 done task in your Today list hasn't been moved to the archive yet.",
+          "OTHER": "{{nr}} done tasks in your Today list haven't been moved to the archive yet."
         }
       }
     },
@@ -1066,7 +1055,7 @@
       "ARCHIVED_NOTICE": "This project is archived.",
       "ARCHIVED_PROJECTS": {
         "EMPTY": "No archived projects.",
-        "LINK_LABEL": "Archived projects",
+        "NAV_LABEL": "Archived",
         "SEARCH": "Search archived projects",
         "UNARCHIVE": "Restore project"
       }
@@ -1105,6 +1094,8 @@
           "OTHER": "<strong>{{title}}</strong> starts at <strong>{{start}}</strong>!<br> (and {{nrOfOtherBanners}} other tasks are due)"
         }
       },
+      "EXACT_ALARM_HINT": "Reminders may be delayed because \"Alarms & reminders\" is turned off for this app in Android settings.",
+      "EXACT_ALARM_OPEN_SETTINGS": "Open settings",
       "S_ACTIVE_TASK_DUE": "The task you are currently working on is now due!<br/> ({{title}})",
       "S_REMINDER_ERR": "Error for reminder interface"
     },
@@ -1148,6 +1139,7 @@
       "TOGGLE_TIME_SCHEDULING_HINT": "Ctrl+1 to toggle time scheduling"
     },
     "SEARCH_BAR": {
+      "DELETED": "Deleted",
       "INCLUDE_COMPLETED": "Include completed and archived tasks",
       "INFO": "Start typing to search for tasks, notes, projects or tags",
       "NO_RESULTS": "No tasks, notes, projects or tags found matching your search",
@@ -1364,6 +1356,10 @@
         "USE_REMOTE": "Use Server Data",
         "USE_REMOTE_CONFIRM": "This replaces this device's data with the server's and discards {{count}} local change(s). Continue?"
       },
+      "D_UNDECRYPTABLE_REMOTE": {
+        "MESSAGE": "Your sync server holds at least {{count}} change(s) that this device has not applied because it could not decrypt them. They may be your work from another device, saved under a different or older encryption password.\n\nOverwriting the server deletes them permanently, and this device cannot bring them back.\n\nBefore you overwrite, sync again and try your older encryption passwords with Retry Decrypt in the Decryption Failed dialog. Only continue if you are sure you no longer need these changes.",
+        "TITLE": "Some synced data could not be decrypted"
+      },
       "FORM": {
         "BTN_CHANGE_PASSWORD": "Change Password",
         "BTN_DISABLE_ENCRYPTION": "Disable Encryption",
@@ -1454,11 +1450,53 @@
         },
         "PASSWORD_SET_INFO": "🔒 Encryption password is set.",
         "SUPER_SYNC": {
-          "ACCESS_TOKEN_DESCRIPTION": "Paste a token for your SuperSync account. On another device, reuse this token or sign in again to get another one.",
+          "ACCESS_TOKEN_DESCRIPTION": "Use the same token on your other devices.",
           "BTN_CHANGE_PASSWORD": "Change Password",
           "BTN_DISABLE_ENCRYPTION": "Disable Encryption",
           "BTN_ENABLE_ENCRYPTION": "Enable Encryption",
-          "BTN_GET_TOKEN": "Open Server & Get Token",
+          "BTN_GET_TOKEN": "Sign in & get token",
+          "CAPTURE_A_COPY_SETUP": "Copy Claude Code command",
+          "CAPTURE_A_COPY_TOKEN": "Copy token",
+          "CAPTURE_A_COPY_URL": "Copy server URL",
+          "CAPTURE_A_REVOKE": "Revoke {{name}}",
+          "CAPTURE_A_REVOKE_DISCARD": "Revoke {{name}} and delete its waiting tasks",
+          "CAPTURE_OAUTH_HINT": "For Claude web: add this URL as a connector, choose Sign in now and Use Claude’s published identity, then enter a connection code. New tasks arrive after your next sync.",
+          "CAPTURE_BTN_CONNECT_CODE": "Create connection code",
+          "CAPTURE_CONNECT_CODE_WARNING": "Enter it only on a page you opened from your assistant. Works once and replaces any previous code.",
+          "CAPTURE_L_CONNECT_CODE": "Connection code",
+          "CAPTURE_L_CODE_EXPIRES": "Expires at",
+          "CAPTURE_BTN_REFRESH_CONNECTIONS": "Refresh connections",
+          "CAPTURE_BTN_CREATE_TOKEN": "Create token",
+          "CAPTURE_BTN_OFF": "Turn off",
+          "CAPTURE_BTN_ON": "Let AI assistants add tasks",
+          "CAPTURE_BTN_REVOKE": "Revoke",
+          "CAPTURE_BTN_REVOKE_DISCARD": "Revoke and delete {{count}} waiting",
+          "CAPTURE_GRANTS_EMPTY": "None connected yet.",
+          "CAPTURE_GRANT_INFO": "Created {{created}} · last used {{lastUsed}} · expires {{expires}}",
+          "CAPTURE_GRANT_NEVER_USED": "never",
+          "CAPTURE_GRANT_WAITING": "{{count}} waiting",
+          "CAPTURE_OPTIONAL": "Optional",
+          "CAPTURE_STATE_OFF": "Off",
+          "CAPTURE_STATE_ON": "On",
+          "CAPTURE_MANUAL_TOKENS": "Manual tokens for scripts and other clients",
+          "CAPTURE_CONNECTIONS": "Connected assistants",
+          "CAPTURE_A_COPY_CODE": "Copy connection code",
+          "CAPTURE_INFO": "Lets AI assistants add tasks to your Inbox. They can't read your tasks or sync data.",
+          "CAPTURE_L_CLIENT_NAME": "Assistant name",
+          "CAPTURE_L_MCP_URL": "Server URL for assistants (MCP)",
+          "CAPTURE_L_SETUP": "Claude Code: run this in a terminal",
+          "CAPTURE_L_TOKEN": "Token",
+          "CAPTURE_OFF_CONFIRM": "Turn off AI assistants? All assistants lose access and waiting tasks ({{count}}) are deleted.",
+          "CAPTURE_OFF_CONFIRM_NONE": "Turn off AI assistants? All assistants lose access.",
+          "CAPTURE_PRIVACY": "Your assistant's provider and the sync server see each task you send. Your existing tasks aren't shared. Turn on sync encryption to keep waiting tasks hidden from the server. Anyone who runs the server or can access your sync account could also add or read new tasks.",
+          "CAPTURE_REVOKE_CONFIRM": "Revoke \"{{name}}\"? Tasks it already sent still arrive.",
+          "CAPTURE_REVOKE_DISCARD_CONFIRM": "Revoke \"{{name}}\" and delete its waiting tasks ({{count}})?",
+          "CAPTURE_SAVE_FIRST": "Save and enable SuperSync first to let AI assistants add tasks.",
+          "CAPTURE_S_COPY_FAILED": "Couldn't copy. Select the text and copy it yourself.",
+          "CAPTURE_S_ERROR": "Couldn't update AI assistant access. Please try again.",
+          "CAPTURE_S_UNSUPPORTED": "This sync server doesn't support AI assistants. Its operator can turn them on.",
+          "CAPTURE_TITLE": "AI assistants",
+          "CAPTURE_TOKEN_ONCE": "Copy it now. It is shown only once and is valid for one year.",
           "CHANGE_PASSWORD_SUCCESS": "Encryption password changed successfully",
           "CHANGE_PASSWORD_WARNING": "WARNING: This will permanently delete ALL sync history and backups on the server! Previous versions cannot be recovered. Your current data will be re-uploaded with the new password. All other devices will need the new password.",
           "DISABLE_ENCRYPTION_ENABLE_FIRST": "Please enable sync and save your SuperSync configuration first, then try again.",
@@ -1473,7 +1511,7 @@
           "DISABLE_ENCRYPTION_WARNING": "WARNING: This will permanently delete ALL encrypted sync data on the server! This is necessary because encrypted operations cannot be mixed with unencrypted ones.",
           "DISABLE_ENCRYPTION_WHAT_HAPPENS": "What will happen:",
           "E2E_ENCRYPTION_DESCRIPTION": "Will be slower, but more secure",
-          "E2E_ENCRYPTION_INFO": "SuperSync uses end-to-end encryption. Your data is encrypted on this device before it leaves, using a password you choose during setup.",
+          "E2E_ENCRYPTION_INFO": "Your data is end-to-end encrypted on this device with a password you choose.",
           "ENABLE_ENCRYPTION_ITEM_1": "All sync history and backups on the server will be deleted",
           "ENABLE_ENCRYPTION_ITEM_2": "Your current data will be re-uploaded with encryption",
           "ENABLE_ENCRYPTION_ITEM_3": "All other devices will need to enter this encryption password",
@@ -1503,7 +1541,6 @@
           "L_NEW_PASSWORD": "New Encryption Password",
           "L_REMOVE_ENCRYPTION": "Or Remove Encryption",
           "L_SERVER_URL": "Server URL",
-          "LOGIN_INSTRUCTIONS": "Click the button below to open the server login page. After logging in, copy your access token and paste it here.",
           "PASSWORD_MIN_LENGTH": "Password must be at least 8 characters",
           "PASSWORDS_DONT_MATCH": "Passwords do not match",
           "REMOVE_ENCRYPTION_WARNING": "Removing encryption will delete all server data and re-upload your data without encryption. All devices will need to reconfigure.",
@@ -1640,6 +1677,7 @@
         "UNKNOWN_ERROR": "Unknown Sync Error: {{err}}",
         "UNSUPPORTED_MULTI_ENTITY_CONFLICT": "Sync stopped because some changes cannot be merged safely. Choose Resolve… or sync manually to choose which version to keep. This replaces all data on one side. Please report this code: {{details}}",
         "UPLOAD_ERROR": "Unknown Upload Error (Settings correct?): {{err}}",
+        "UPLOAD_REJECTED_REPEATEDLY": "Your changes couldn't be uploaded for several syncs in a row. They stay on this device and sync keeps retrying. If this continues, check your sync server or proxy settings.",
         "UPLOAD_OPS_REJECTED": "{{count}} operation(s) were permanently rejected by the server and won't be synced.",
         "VECTOR_CLOCK_LIMIT_REACHED": "Sync tidied up old device entries ({{originalSize}} → {{maxSize}}). This is normal. To clear them for good: sync all devices, then export and re-import a backup (Settings → Import/Export).",
         "VERSION_TOO_OLD": "Your app version is too old for the synced data. Please update!",
@@ -1814,6 +1852,7 @@
         "FOCUS_SESSION": "Start focus session",
         "MARK_DONE": "Mark as completed",
         "MARK_UNDONE": "Mark as not completed",
+        "MARK_WONT_DO": "Won't do",
         "MOVE_TO_BACKLOG": "Move to backlog",
         "MOVE_TO_BOTTOM": "Move to bottom",
         "MOVE_TO_OTHER_PROJECT": "Move to project",
@@ -1831,12 +1870,14 @@
         "REMOVE_FROM_MY_DAY": "Remove from Today",
         "SCHEDULE": "Schedule task",
         "SET_DEADLINE": "Set deadline",
-        "SHOW_HIDDEN_DONE_SUB_TASKS": "+ {{nr}} completed subtasks",
+        "SHOW_HIDDEN_DONE_SUB_TASKS": "+ {{nr}} done subtasks",
         "SHOW_HIDDEN_SUB_TASKS": "+ {{nr}} subtasks",
+        "SUB_TASK_PROGRESS": "Subtasks: {{done}} of {{total}} done",
         "TIME_CONFLICT": "Overlaps with another scheduled task",
         "TOGGLE_ATTACHMENTS": "Show/hide attachments",
         "TOGGLE_DETAIL_PANEL": "Show/hide task panel",
         "TOGGLE_DONE": "Toggle completion status",
+        "TOGGLE_DONE_WONT_DO": "Finished as won't do. Toggle completion status",
         "TOGGLE_SUB_TASK_VISIBILITY": "Toggle subtask visibility",
         "TOGGLE_TAGS": "Toggle tags",
         "TRACK_TIME": "Start tracking time",
@@ -1846,6 +1887,7 @@
       },
       "D_CONFIRM_DELETE": {
         "MSG": "Are you sure you want to delete the task \"{{title}}\"?",
+        "MSG_PLAINSPACE": "Delete the task \"{{title}}\"? It is also deleted in Plainspace for everyone in the Space.",
         "OK": "Delete"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {
@@ -1871,6 +1913,22 @@
         "RO_AT_DEADLINE": "At deadline",
         "RO_NEVER": "Never",
         "SET_DEADLINE": "Set deadline"
+      },
+      "D_RECENTLY_DELETED": {
+        "CONFIRM_EMPTY": "Permanently remove everything in Recently deleted on this device?",
+        "DELETED_ON": "Deleted {{date}}",
+        "EMPTY": "Empty",
+        "INTRO": "Deleted tasks stay here on this device for {{days}} days.",
+        "LINK": "Recently deleted",
+        "NONE": "Nothing deleted in the last {{days}} days.",
+        "RESTORE": "Restore",
+        "RESTORE_ARIA": "Restore \"{{title}}\"",
+        "RESTORED": "Restored \"{{title}}\"",
+        "SUB_TASKS": {
+          "ONE": "+{{nr}} subtask",
+          "OTHER": "+{{nr}} subtasks"
+        },
+        "TITLE": "Recently deleted"
       },
       "D_REMINDER_VIEW": {
         "ADD_TO_TODAY": "Add to Today",
@@ -1949,6 +2007,10 @@
           "MSG": {
             "ONE": "Delete <strong>{{count}}</strong> task? Its subtasks are deleted too.",
             "OTHER": "Delete <strong>{{count}}</strong> tasks? Subtasks are deleted too."
+          },
+          "MSG_PLAINSPACE": {
+            "ONE": "Delete <strong>{{count}}</strong> task? Its subtasks are deleted too. It is also deleted in Plainspace for everyone in the Space.",
+            "OTHER": "Delete <strong>{{count}}</strong> tasks? Subtasks are deleted too. Plainspace tasks among them are also deleted for everyone in their Space."
           },
           "OK": "Delete"
         },
@@ -2030,6 +2092,8 @@
         "DEADLINE_REMOVED": "Deadline removed",
         "DEADLINE_SET": "Deadline set for {{date}}",
         "DELETED": "Deleted task \"{{title}}\"",
+        "DELETED_FIND_IN_HISTORY": "Deleted task \"{{title}}\". For {{days}} days, you can restore it from History → Recently deleted.",
+        "DELETED_FIND_IN_SEARCH": "Deleted task \"{{title}}\". Search still finds it for {{days}} days.",
         "EMPTY_TITLE_VIA_APP_URI": "Task title was empty, no task was added",
         "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>\"{{title}}\"</strong> from backlog to the Today task list",
         "FOUND_MOVE_FROM_OTHER_LIST": "Added task <strong>\"{{title}}\"</strong> from <strong>{{contextTitle}}</strong> to current list",
@@ -2077,6 +2141,7 @@
         "MONTHLY_LAST_DAY_AND_TIME": "Monthly on the last day, {{timeStr}}",
         "MONTHLY_NTH_WEEKDAY": "Monthly on the {{ordinalStr}} {{weekdayStr}}",
         "MONTHLY_NTH_WEEKDAY_AND_TIME": "Monthly on the {{ordinalStr}} {{weekdayStr}}, {{timeStr}}",
+        "UNTIL": "{{repeatStr}}, until {{untilStr}}",
         "WEEKLY_CURRENT_WEEKDAY": "Weekly on {{weekdayStr}}",
         "WEEKLY_CURRENT_WEEKDAY_AND_TIME": "Weekly on {{weekdayStr}}, {{timeStr}}",
         "YEARLY_CURRENT_DATE": "Yearly on {{dayAndMonthStr}}",
@@ -2160,6 +2225,7 @@
         "SKIP_INSTANCE": "Skip for today",
         "REPEAT_CYCLE": "Recur cycle",
         "REPEAT_EVERY": "Recur every",
+        "REPEAT_UNTIL_DAY": "Recur until (optional)",
         "SATURDAY": "Saturday",
         "SCHEDULE_TYPE_LABEL": "Schedule type",
         "SKIP_OVERDUE": "Don't let overdue instances pile up",
@@ -2303,6 +2369,9 @@
         "STOPPED_ON": "Stopped on {{device}}",
         "TRACKING_ON": "Tracking on {{device}}",
         "WAS_TRACKING_ON": "Was tracking on {{device}}"
+      },
+      "B": {
+        "MOVED_TO": "Tracking moved to {{device}} – stopped “{{title}}” here"
       },
       "S": {
         "MOVED_TO": "Tracking moved to {{device}}",
@@ -2462,6 +2531,7 @@
     "APP_FEATURES": {
       "BOARDS": "Boards",
       "DONATE_PAGE": "Donate page",
+      "EXTEND_WITH_PLUGINS": "Find more features in Plugins",
       "FINISH_DAY": "Finish day",
       "FOCUS_MODE": "Focus mode",
       "HABITS": "Habits",
@@ -2567,6 +2637,7 @@
       "HELP": "Focus mode opens a distraction-free screen to help you focus on your current task. Time tracking and the focus session timer are always kept in sync — pausing one pauses the other.",
       "L_AUTO_START_FOCUS_ON_PLAY": "Start a focus session when I start tracking a task",
       "L_FOCUS_MODE_SOUND": "Ambient sound during focus sessions",
+      "L_FOCUS_MODE_SOUND_VOLUME": "Ambient sound volume (% of main volume)",
       "L_MANUAL_BREAK_START": "Enable Pomodoro overtime (keep timer running until manually ended)",
       "L_PAUSE_TRACKING_DURING_BREAK": "Pause task tracking during breaks",
       "L_SHOW_PREPARATION_SCREEN": "Show preparation screen before each session (rocket countdown)",
@@ -2736,11 +2807,31 @@
       "IS_DISABLE_ANIMATIONS": "Disable all animations",
       "IS_DISABLE_CELEBRATION": "Disable celebration in daily summary",
       "IS_LOCAL_REST_API_ENABLED": "Enable local REST API (desktop only)",
-      "IS_LOCAL_REST_API_ENABLED_HINT": "Allows local scripts to control the running app via http://127.0.0.1:3876. Requests require the access token shown below; keep it private and regenerate it if it may have been exposed. Any application running as you on this computer can read the token and modify your tasks.",
+      "IS_LOCAL_REST_API_ENABLED_HINT": "Allows local scripts to control the running app via http://127.0.0.1:3876. Requests require the access token shown below; keep it private and regenerate it if it may have been exposed. Any application running as you on this computer can read the token and modify your tasks. This setting applies to this computer only and is not synced.",
       "LOCAL_REST_API_TOKEN": "Access Token",
       "LOCAL_REST_API_TOKEN_REGENERATE": "Regenerate Access Token",
       "LOCAL_REST_API_TOKEN_ERROR": "Could not store the access token, so the API is not running. Check that Super Productivity can write to its data folder, then use Regenerate to retry.",
       "LOCAL_REST_API_TOKEN_REGENERATE_ERROR": "Could not save the new access token. The previous token is still valid.",
+      "LOCAL_REST_API_TOGGLE_ERROR": "Could not save the local REST API setting.",
+      "LOCAL_REST_API_STATUS_LISTENING": "Running at {{url}}",
+      "LOCAL_REST_API_STATUS_PORT_IN_USE": "Not running: port {{port}} is used by another program. Free it, then switch this off and on again.",
+      "LOCAL_REST_API_STATUS_PERMISSION_DENIED": "Not running: this installation is not allowed to accept local connections.",
+      "LOCAL_REST_API_STATUS_ERROR": "Not running: the API could not start. The app log has details.",
+      "IS_ASSISTANT_ACCESS_ENABLED": "Enable assistant access (MCP, desktop only)",
+      "IS_ASSISTANT_ACCESS_ENABLED_HINT": "Lets an AI assistant on this computer (for example Claude Code or Codex) read your tasks or add tasks to the Inbox through the Model Context Protocol, limited to the permissions below. The assistant sends what it reads to its model provider, which may be a cloud service. Applies to this computer only and is not synced.",
+      "ASSISTANT_ACCESS_PERMISSIONS": "Permissions",
+      "ASSISTANT_ACCESS_SCOPE_READ": "Read tasks: titles, status, dates, projects and tags",
+      "ASSISTANT_ACCESS_SCOPE_READ_NOTES": "Also read task notes",
+      "ASSISTANT_ACCESS_SCOPE_CAPTURE": "Add new tasks to the Inbox",
+      "ASSISTANT_ACCESS_KEY": "Access key",
+      "ASSISTANT_ACCESS_KEY_GENERATE": "Generate access key",
+      "ASSISTANT_ACCESS_KEY_REPLACE": "Replace access key",
+      "ASSISTANT_ACCESS_KEY_SHOWN_ONCE": "Copy this key now. It is not stored and will not be shown again; replace it if it is lost.",
+      "ASSISTANT_ACCESS_KEY_EXISTS": "An access key is set. Replacing it disconnects assistants that use the old one.",
+      "ASSISTANT_ACCESS_SETUP": "Connect an assistant",
+      "ASSISTANT_ACCESS_SETUP_CLAUDE_CODE": "Claude Code: run this command",
+      "ASSISTANT_ACCESS_SETUP_JSON": "Other MCP clients that support HTTP servers:",
+      "ASSISTANT_ACCESS_SAVE_ERROR": "Could not save the assistant access setting.",
       "IS_MINIMIZE_TO_TRAY": "Minimize to tray (desktop only)",
       "IS_SHOW_TIP_LONGER": "Show productivity tip on app start a little longer",
       "IS_TRAY_SHOW_CURRENT_COUNTDOWN": "Show current countdown in the tray / status menu (macOS only)",
@@ -2812,8 +2903,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Take a break reminder sound",
+      "DING": "Ding",
       "DONE_SOUND": "Task completed sound",
       "IS_INCREASE_DONE_PITCH": "Increase pitch for every task completed",
+      "SMALL_DING": "Small Ding",
+      "SOUND_1": "Sound 1",
+      "SOUND_2": "Sound 2",
+      "SOUND_3": "Sound 3",
+      "SOUND_4": "Sound 4",
+      "SOUND_5": "Sound 5",
+      "SOUND_6": "Sound 6",
+      "SOUND_7": "Sound 7",
       "TITLE": "Sound",
       "TRACK_TIME_SOUND": "Track time reminder sound",
       "VOLUME": "Volume"
@@ -2979,6 +3079,7 @@
     "SYNC_STATE": {
       "ERROR": "Sync problem — click to retry",
       "IN_SYNC": "In sync — click to sync now",
+      "IN_SYNC_CONFIRMED": "In sync, server checked just now — click to sync now",
       "OFFLINE": "You're offline — sync resumes when you reconnect",
       "SYNCING": "Syncing…"
     },
@@ -2995,6 +3096,7 @@
   },
   "MIGRATE": {
     "C_DOWNLOAD_BACKUP": "Do you want to download a backup of your legacy data (can be used with older versions of Super Productivity)?",
+    "C_IMPORT_PRE_V13_DATA": "Data from Super Productivity 12 or older was found on this device ({{tasks}} tasks, {{projects}} projects), but this version did not carry it over. Import it now? A copy is offered as a download first.\n\nIf you cancel, the old data stays untouched on this device, but you will not be asked again.",
     "DETECTED_LEGACY": "Detected legacy data. We will migrate it for you!",
     "DIALOG_MESSAGE": "We're updating how your data is stored for improved sync reliability. A backup will be downloaded automatically.",
     "DIALOG_TITLE": "Migrating Your Data",
@@ -3010,7 +3112,6 @@
     "SUCCESS": "Migration done! Restarting app now..."
   },
   "NOTIFICATION": {
-    "EXACT_ALARM_DENIED": "Exact alarm permission denied. Reminders may be delayed by up to 15 minutes.",
     "TASK_ALREADY_COMPLETED": "Task already completed",
     "TASK_MARKED_DONE": "Task marked as done"
   },
@@ -3018,11 +3119,9 @@
     "HINTS": {
       "CREATE_TASK": "Click + to add your first task",
       "CREATE_TASK_TOUCH": "Tap + to add your first task",
-      "DONE_TITLE": "You're all set",
-      "EXPLORE_INBOX": "Some optional tips are waiting in your Inbox. Try them or delete them, whenever you like.",
-      "GOT_IT": "Got it",
       "TASK_SWIPE_LEFT_TOUCH": "Swipe task left for more actions",
-      "TASK_SWIPE_RIGHT_TOUCH": "Swipe task right to mark it as done",
+      "TODAY_AND_INBOX": "This task is planned for today, so it shows in Today. Tasks without a project of your own stay in Inbox.",
+      "TODAY_AND_INBOX_PHONE": "This task is planned for today, so it shows in Today. Tasks without a project of your own stay in Inbox, under ☰.",
       "OR_PRESS": "or press",
       "SKIP_ARIA": "Close tip"
     }
@@ -3123,7 +3222,6 @@
   },
   "PLUGINS": {
     "ACTION_TYPE_NOT_ALLOWED": "Action type \"{{type}}\" is not allowed",
-    "ALLOWED_HOSTS": "Network access",
     "ALREADY_INITIALIZED": "Plugin is already initialized",
     "AUTHORED_BY": "by {{author}}",
     "CANNOT_DELETE_INBOX": "The Inbox project cannot be deleted",
@@ -3133,6 +3231,7 @@
     "CODE_TOO_LARGE": "Plugin code is too large (max {{maxSize}}MB)",
     "CONFIGURATION": "Configuration",
     "CONFIGURE": "Configure",
+    "CONFIRM_CLEAR_CACHE": "Remove uploaded plugins ({{count}})? Their saved secrets, connected accounts and Node.js execution permissions will be deleted too. Bundled plugins are not affected.",
     "CONFIRM_DISABLE_WITH_ISSUE_PROVIDERS": "This plugin provides issue integration that is currently in use ({{count}} issue provider(s)). Disabling it will temporarily break issue syncing for those providers until the plugin is re-enabled. Are you sure you want to disable \"{{name}}\"?",
     "CONFIRM_REMOVE": "Are you sure you want to remove the plugin \"{{name}}\"?",
     "ELECTRON_API_NOT_AVAILABLE": "Electron API is not available",
@@ -3148,6 +3247,7 @@
     "FAILED_TO_LOAD_CONFIG": "Failed to load plugin configuration",
     "FAILED_TO_REMOVE": "Failed to remove plugin",
     "FAILED_TO_SAVE_CONFIG": "Failed to save plugin configuration",
+    "FIELD_NOT_IN_PLUGIN_API": "\"{{field}}\" is not part of the plugin API",
     "FIELD_NOT_UPDATABLE": "\"{{field}}\" cannot be set via updateTask — re-parenting is not supported. Create subtasks with addTask({ parentId }), or restructure via batchUpdateForProject",
     "FILE_TOO_LARGE": "File too large ({{fileSize}}MB). Maximum size is {{maxSize}}MB",
     "GO_BACK": "Go Back",
@@ -3157,7 +3257,6 @@
     "INDEX_HTML_NOT_LOADED": "Plugin index.html not loaded",
     "INDEX_HTML_TOO_LARGE": "Plugin index.html is too large (max {{maxSize}}KB)",
     "INSTALL_PLUGIN": "Install Plugin",
-    "INSTALL_WARNING": "Before installing a plugin, ensure you trust its source and understand the permissions it requests.",
     "INSTALLING": "Installing...",
     "LANGUAGES": "Languages:",
     "LOADING_INTERFACE": "Loading plugin interface...",
@@ -3214,7 +3313,29 @@
     "UPLOAD_PLUGIN_INSTRUCTION": "Upload a plugin ZIP file to install it:",
     "VALIDATION_FAILED": "Validation failed: {{errors}}",
     "NODE_EXECUTION_BRIDGE_UNAVAILABLE": "Could not connect to the Node.js execution bridge. Please try disabling and re-enabling the plugin.",
-    "PLUGIN_LOAD_FAILED": "Plugin \"{{pluginName}}\" failed to load: {{error}}"
+    "PLUGIN_LOAD_FAILED": "Plugin \"{{pluginName}}\" failed to load: {{error}}",
+    "INTRO": "Plugins run inside the app without a sandbox. Built-in plugins are maintained by the Super Productivity team; plugins you upload are not reviewed and can access all your data, so only install ones you trust.",
+    "THIRD_PARTY": "Third-party",
+    "DETAILS": "Details",
+    "COMMUNITY_PLUGINS": "Community Plugins",
+    "COMMUNITY_WARNING": "Community plugins are not reviewed by the Super Productivity team. Install them at your own risk.",
+    "COMMUNITY_GET_LISTED": "Get your plugin to show up here",
+    "COMMUNITY_INSTALL": "Install v{{version}}",
+    "COMMUNITY_UPDATE": "Update to v{{version}}",
+    "COMMUNITY_INSTALLED": "Installed",
+    "COMMUNITY_DOWNLOAD": "Download v{{version}}",
+    "COMMUNITY_DOWNLOAD_FAILED": "Could not download \"{{name}}\". Download its ZIP from the plugin page and install it below.",
+    "COMMUNITY_DOWNLOAD_TOO_LARGE": "The download of \"{{name}}\" is larger than {{maxSize}} MB and was not installed.",
+    "COMMUNITY_HASH_MISMATCH": "The download of \"{{name}}\" does not match the listed version and was not installed.",
+    "COMMUNITY_MANIFEST_MISMATCH": "The download of \"{{name}}\" is not the listed plugin version and was not installed.",
+    "GROUP_UPLOADED": "Uploaded plugins",
+    "GROUP_INTEGRATIONS": "Integrations",
+    "GROUP_OTHER": "Other plugins",
+    "DECLARED_ACCESS": "Checked permissions",
+    "CAN_RUN_SYSTEM_COMMANDS": "Run system commands and access your files (desktop app only)",
+    "CAN_REQUEST_HOSTS": "Send plugin API requests to {{hosts}}",
+    "CAN_DELETE_PROJECTS": "Delete projects through the plugin API",
+    "OTHER_PERMISSIONS": "Other declared permissions"
   },
   "PM": {
     "ALL_TASKS_TITLE": "Metrics (all tasks)",

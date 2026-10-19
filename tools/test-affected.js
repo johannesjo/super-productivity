@@ -29,7 +29,8 @@ const STYLE_URLS_RE = /\bstyleUrls\s*:\s*\[([^\]]*)\]/g;
 const SETUP_FILES = ['src/test.ts', 'src/polyfills.ts'];
 // Non-TS sources nothing imports: global styles (karma `styles`), scss
 // partials (@use isn't tracked) and assets fetched at runtime. Translations
-// other than en.json are never loaded by specs.
+// are excluded: specs only import en.json directly, which the graph follows,
+// and never load other locales.
 const UNTRACKED_RESOURCE_RE = /^src\/(?!assets\/i18n\/).*\.(html|json|scss)$/;
 const FLAGS = new Set(['--base', '--list']);
 // Changes here affect every spec (build/test setup) or are invisible to the graph.
@@ -43,7 +44,7 @@ const git = (...args) =>
 
 const stripJsonComments = (text) => text.replace(/^\s*\/\/.*$/gm, '');
 
-/** Builds a resolver for import specifiers, mirroring tsconfig `baseUrl: ./` + `paths`. */
+/** Builds a resolver for import specifiers, mirroring tsconfig `paths` (incl. `src/*`). */
 const createResolver = (fileSet, tsPaths) => {
   const tryResolve = (base) =>
     [base, `${base}.ts`, `${base}.d.ts`, `${base}/index.ts`].find((c) =>
@@ -54,7 +55,7 @@ const createResolver = (fileSet, tsPaths) => {
       return tryResolve(path.posix.join(path.posix.dirname(from), spec));
     }
     if (tsPaths[spec]) return tryResolve(path.posix.normalize(tsPaths[spec][0]));
-    // baseUrl is the repo root, so `src/app/...` imports resolve from there
+    // the `src/*` path alias maps to the repo root, so `src/app/...` resolves from there
     return tryResolve(spec);
   };
 };

@@ -2814,8 +2814,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Påminnelseljud för paus",
+      "DING": "Pling",
       "DONE_SOUND": "Ljud för uppgift markerad som klar",
       "IS_INCREASE_DONE_PITCH": "Öka takten för varje utförd uppgift",
+      "SMALL_DING": "Litet pling",
+      "SOUND_1": "Ljud 1",
+      "SOUND_2": "Ljud 2",
+      "SOUND_3": "Ljud 3",
+      "SOUND_4": "Ljud 4",
+      "SOUND_5": "Ljud 5",
+      "SOUND_6": "Ljud 6",
+      "SOUND_7": "Ljud 7",
       "TITLE": "Ljud",
       "TRACK_TIME_SOUND": "Ljud för påminnelse om spårningstid",
       "VOLUME": "Volym"

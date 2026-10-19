@@ -86,6 +86,7 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       | Observable<TaskRepeatCfg | undefined>
       | Subject<TaskRepeatCfg>,
     renderTemplate = false,
+    { startOfNextDayDiffMs = 0 }: { startOfNextDayDiffMs?: number } = {},
   ): Promise<ComponentFixture<DialogEditTaskRepeatCfgComponent>> => {
     mockDialogRef = jasmine.createSpyObj('MatDialogRef', ['close']);
     mockMatDialog = jasmine.createSpyObj('MatDialog', ['open']);
@@ -103,8 +104,10 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
     mockDateService = jasmine.createSpyObj('DateService', [
       'todayStr',
       'getLogicalTodayDate',
+      'getStartOfNextDayDiffMs',
     ]);
     mockDateService.todayStr.and.returnValue(MOCK_TODAY_STR);
+    mockDateService.getStartOfNextDayDiffMs.and.returnValue(startOfNextDayDiffMs);
     mockDateService.getLogicalTodayDate.and.returnValue(new Date(MOCK_TODAY));
 
     // Set up the return value for the repeat-config lookup before creating the component
@@ -247,6 +250,58 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
   });
 
   describe('isLoading signal', () => {
+    it('copies an existing task priority into a new repeat config', async () => {
+      const fixture = await setupTestBed({ task: { ...mockTask, priority: 'high' } });
+      expect(fixture.componentInstance.repeatCfg().priority).toBe(3);
+    });
+
+    it('does not turn a missing legacy priority into an update on save', async () => {
+      const fixture = await setupTestBed({ repeatCfg: mockRepeatCfg });
+      fixture.componentInstance.save();
+      const changes =
+        mockTaskRepeatCfgService.updateTaskRepeatCfg.calls.mostRecent().args[1];
+      expect('priority' in changes).toBe(false);
+    });
+
+    it('shows None for a legacy config loaded through an existing task without changing its priority', async () => {
+      const fixture = await setupTestBed(
+        { task: { ...mockTask, repeatCfgId: mockRepeatCfg.id } },
+        of(mockRepeatCfg),
+        true,
+      );
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const headers = fixture.nativeElement.querySelectorAll('.collapsible-header');
+      headers[headers.length - 1].click();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      const loader = TestbedHarnessEnvironment.loader(fixture);
+      const prioritySelect = await loader.getHarness(
+        MatSelectHarness.with({ selector: '[id*="priority"]' }),
+      );
+      expect(await prioritySelect.getValueText()).toBe(T.F.TASK.CMP.PRIORITY_NONE);
+      await prioritySelect.clickOptions({ text: T.F.TASK.CMP.PRIORITY_NONE });
+      fixture.componentInstance.save();
+
+      const changes =
+        mockTaskRepeatCfgService.updateTaskRepeatCfg.calls.mostRecent().args[1];
+      expect('priority' in changes).toBe(false);
+    });
+
+    it('offers to update instances when the series priority is cleared', async () => {
+      const fixture = await setupTestBed({
+        repeatCfg: { ...mockRepeatCfg, priority: 3 },
+      });
+      fixture.componentInstance.repeatCfg.update((cfg) => ({ ...cfg, priority: null }));
+      fixture.componentInstance.save();
+      expect(mockTaskRepeatCfgService.updateTaskRepeatCfg).toHaveBeenCalledWith(
+        mockRepeatCfg.id,
+        jasmine.objectContaining({ priority: null }),
+        true,
+      );
+    });
+
     it('should be false when repeatCfg is provided directly (sync path)', async () => {
       const fixture = await setupTestBed({ repeatCfg: mockRepeatCfg });
       const component = fixture.componentInstance;
@@ -397,6 +452,26 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       });
 
       expect(fixture.componentInstance.repeatCfg().startDate).toBe('2026-06-12');
+    });
+
+    it('starts an undated task on the logical today (#3378)', async () => {
+      const fixture = await setupTestBed({ task: mockTask });
+
+      expect(fixture.componentInstance.repeatCfg().startDate).toBe(MOCK_TODAY_STR);
+    });
+
+    it('starts a late-night timed task on its logical day (#3378)', async () => {
+      const hourMs = 60 * 60 * 1000;
+      // 02:00 on 06-10 is the late night of logical 06-09 with a 05:00 day start
+      const lateNightTask = {
+        ...mockTask,
+        dueWithTime: new Date(2026, 5, 10, 2, 0).getTime(),
+      } as TaskCopy;
+      const fixture = await setupTestBed({ task: lateNightTask }, undefined, false, {
+        startOfNextDayDiffMs: 5 * hourMs,
+      });
+
+      expect(fixture.componentInstance.repeatCfg().startDate).toBe('2026-06-09');
     });
 
     it('returns the created config ID when saving', async () => {
@@ -690,6 +765,16 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
         monthlyWeekOfMonth: null,
       });
       expect(normalized.monthlyWeekOfMonth).toBeUndefined();
+    });
+
+    it('converts a cleared repeatUntilDay (null) to undefined (#10091)', async () => {
+      const fixture = await setupTestBed({ task: mockTask });
+      const normalized = (fixture.componentInstance as any)._normalizeMonthlyAnchor({
+        quickSetting: 'DAILY',
+        repeatUntilDay: null,
+      });
+      expect('repeatUntilDay' in normalized).toBe(true);
+      expect(normalized.repeatUntilDay).toBeUndefined();
     });
   });
 
@@ -1191,6 +1276,16 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       const component = await setup({ repeatCfg: dailyCfg });
 
       component.repeatCfg.update((cfg) => ({ ...cfg, quickSetting: 'MONDAY_TO_FRIDAY' }));
+
+      expect(component.hasUnsavedScheduleChanges()).toBe(true);
+    });
+
+    // repeatUntilDay is not schedule-affecting for the reschedule effect, but an
+    // unsaved end date can still leave no next occurrence.
+    it('treats a changed end date as an unsaved schedule change', async () => {
+      const component = await setup({ repeatCfg: dailyCfg });
+
+      component.repeatCfg.update((cfg) => ({ ...cfg, repeatUntilDay: '2099-12-31' }));
 
       expect(component.hasUnsavedScheduleChanges()).toBe(true);
     });

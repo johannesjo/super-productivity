@@ -2793,8 +2793,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Dźwięk przypomnienia o przerwie",
+      "DING": "Dzwonek",
       "DONE_SOUND": "Dźwięk ukończonego zadania",
       "IS_INCREASE_DONE_PITCH": "Zwiększaj tonację po każdym wykonanym zadaniu",
+      "SMALL_DING": "Mały dzwonek",
+      "SOUND_1": "Dźwięk 1",
+      "SOUND_2": "Dźwięk 2",
+      "SOUND_3": "Dźwięk 3",
+      "SOUND_4": "Dźwięk 4",
+      "SOUND_5": "Dźwięk 5",
+      "SOUND_6": "Dźwięk 6",
+      "SOUND_7": "Dźwięk 7",
       "TITLE": "Dźwięk",
       "TRACK_TIME_SOUND": "Dźwięk przypomnienia o mierzeniu czasu",
       "VOLUME": "Głośność"

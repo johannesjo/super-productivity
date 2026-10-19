@@ -23,6 +23,7 @@ export const BUNDLED_PLUGIN_PATHS = [
   'assets/bundled-plugins/google-calendar-provider',
   'assets/bundled-plugins/caldav-calendar-provider',
   'assets/bundled-plugins/doc-mode',
+  'assets/bundled-plugins/app-auto-track',
   'assets/bundled-plugins/todoist-import',
   'assets/bundled-plugins/ticktick-import',
   'assets/bundled-plugins/parallel-code',
@@ -38,6 +39,7 @@ export const BUNDLED_PLUGIN_PATHS = [
 export const BUNDLED_PLUGIN_IDS = new Set<string>([
   'ai-productivity-prompts',
   'api-test-plugin',
+  'app-auto-track',
   'automations',
   'azure-devops-issue-provider',
   'brain-dump',
@@ -58,4 +60,10 @@ export const BUNDLED_PLUGIN_IDS = new Set<string>([
   'trello-issue-provider',
   'voice-reminder',
   'yesterday-tasks',
+]);
+
+// Bundled plugins that exist for development and E2E only. The plugins page hides them in
+// production builds unless they are already enabled. They still ship and load as before.
+export const DEV_ONLY_BUNDLED_PLUGIN_IDS: ReadonlySet<string> = new Set([
+  'api-test-plugin',
 ]);

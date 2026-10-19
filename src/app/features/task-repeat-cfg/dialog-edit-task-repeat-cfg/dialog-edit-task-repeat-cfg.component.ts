@@ -53,7 +53,7 @@ import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-f
 import { RepeatTaskHeatmapComponent } from '../repeat-task-heatmap/repeat-task-heatmap.component';
 import { CollapsibleComponent } from '../../../ui/collapsible/collapsible.component';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
-import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
+import { getRepeatDueWithTime } from '../store/get-repeat-due-with-time.util';
 import { remindOptionToMilliseconds } from '../../tasks/util/remind-option-to-milliseconds';
 import { isValidSplitTime } from '../../../util/is-valid-split-time';
 import { DateService } from '../../../core/date/date.service';
@@ -61,6 +61,7 @@ import { MAT_SELECT_CONFIG } from '@angular/material/select';
 import { getNextCreatedOccurrence } from '../store/get-next-created-occurrence.util';
 import { getNewestPossibleDueDate } from '../store/get-newest-possible-due-date.util';
 import { SCHEDULE_AFFECTING_FIELDS } from '../store/schedule-affecting-fields.const';
+import { getTaskPriority } from '../../tasks/task-priority.const';
 
 // Fields whose change requires offering "Update all task instances?" — covers
 // what propagates to existing tasks (vs. schedule fields, which only affect
@@ -68,6 +69,7 @@ import { SCHEDULE_AFFECTING_FIELDS } from '../store/schedule-affecting-fields.co
 const RELEVANT_KEYS_FOR_UPDATE_ALL_TASKS: (keyof TaskRepeatCfgCopy)[] = [
   'title',
   'defaultEstimate',
+  'priority',
   'remindAt',
   'startTime',
   'notes',
@@ -87,12 +89,14 @@ const WEEKDAY_KEYS: (keyof TaskRepeatCfgCopy)[] = [
 ];
 
 // Unsaved edits to these would move the next occurrence. quickSetting is only
-// expanded into the pattern fields on save, and repeatFromCompletionDate moves
-// the anchor, so both count here although the reschedule effect ignores them.
+// expanded into the pattern fields on save, repeatFromCompletionDate moves the
+// anchor and repeatUntilDay can leave no next occurrence, so they count here
+// although the reschedule effect ignores them.
 const NEXT_OCCURRENCE_FIELDS: (keyof TaskRepeatCfgCopy)[] = [
   ...SCHEDULE_AFFECTING_FIELDS,
   'quickSetting',
   'repeatFromCompletionDate',
+  'repeatUntilDay',
 ];
 
 // TASK_REPEAT_CFG_FORM_CFG
@@ -182,9 +186,10 @@ export class DialogEditTaskRepeatCfgComponent {
     const hasValidTime = !!currentCfg.startTime && isValidSplitTime(currentCfg.startTime);
 
     if (currentCfg.startDate && hasValidTime) {
-      const dt = getDateTimeFromClockString(
+      const dt = getRepeatDueWithTime(
         currentCfg.startTime!,
         dateStrToUtcDate(currentCfg.startDate),
+        this._dateService.getStartOfNextDayDiffMs(),
       );
       dummyTask.dueWithTime = dt;
       if (remindAt && remindAt !== TaskReminderOptionId.DoNotRemind) {
@@ -393,6 +398,7 @@ export class DialogEditTaskRepeatCfgComponent {
     if (this._data.repeatCfg) {
       // Process the repeat config to determine if quickSetting needs to be changed to CUSTOM
       const processedCfg = this._processQuickSettingForDate({ ...this._data.repeatCfg });
+      processedCfg.priority = getTaskPriority(processedCfg.priority);
       if (processedCfg.startTime && processedCfg.remindAt === undefined) {
         processedCfg.remindAt =
           this._data.defaultRemindOption ??
@@ -401,7 +407,10 @@ export class DialogEditTaskRepeatCfgComponent {
       }
 
       // Set initial value for comparison
-      this.repeatCfgInitial.set({ ...this._data.repeatCfg });
+      this.repeatCfgInitial.set({
+        ...this._data.repeatCfg,
+        priority: getTaskPriority(this._data.repeatCfg.priority),
+      });
       return processedCfg;
     } else if (this._data.task) {
       const startTime = this._data.task.dueWithTime
@@ -416,7 +425,12 @@ export class DialogEditTaskRepeatCfgComponent {
         startDate:
           this._data.initialStartDate ??
           this._data.task.dueDay ??
-          getDbDateStr(this._data.task.dueWithTime || undefined),
+          // the logical day, so a late-night time keeps its night (#3378)
+          (this._data.task.dueWithTime
+            ? getDbDateStr(
+                this._data.task.dueWithTime - this._dateService.getStartOfNextDayDiffMs(),
+              )
+            : this._dateService.todayStr()),
         startTime,
         remindAt: startTime
           ? (this._data.defaultRemindOption ??
@@ -428,6 +442,7 @@ export class DialogEditTaskRepeatCfgComponent {
         notes: this._data.task.notes || undefined,
         tagIds: unique(this._data.task.tagIds),
         defaultEstimate: this._data.task.timeEstimate,
+        priority: getTaskPriority(this._data.task.priority),
       };
     } else {
       throw new Error('Invalid params given for repeat dialog!');
@@ -543,7 +558,8 @@ export class DialogEditTaskRepeatCfgComponent {
     }
 
     // Normalize the monthly anchor fields at the boundary: convert the form's
-    // `null` sentinel to `undefined`, and strip a stale `monthlyLastDay` flag.
+    // `null` sentinels (incl. a cleared end date) to `undefined`, and strip a
+    // stale `monthlyLastDay` flag.
     const finalRepeatCfg = this._normalizeMonthlyAnchor(this.repeatCfg());
 
     if (this.isEdit()) {
@@ -592,6 +608,7 @@ export class DialogEditTaskRepeatCfgComponent {
       monthlyWeekOfMonth?: unknown;
       monthlyLastDay?: boolean;
       quickSetting?: string;
+      repeatUntilDay?: string | null;
     },
   >(cfg: T): T {
     let result = cfg;
@@ -608,6 +625,11 @@ export class DialogEditTaskRepeatCfgComponent {
     // preset — strip it for any other quick setting (#7726).
     if (result.monthlyLastDay && result.quickSetting !== 'MONTHLY_LAST_DAY') {
       result = { ...result, monthlyLastDay: undefined };
+    }
+    // A cleared end-date picker can leave `null`; persist `undefined` so the
+    // clear is sent via `clearedFields` (#10091).
+    if (result.repeatUntilDay === null) {
+      result = { ...result, repeatUntilDay: undefined };
     }
     return result;
   }
@@ -685,9 +707,10 @@ export class DialogEditTaskRepeatCfgComponent {
   }
 
   private _setRepeatCfgInitiallyForEditOnly(repeatCfg: TaskRepeatCfg): void {
-    const processedCfg = this._processQuickSettingForDate(repeatCfg);
+    const normalizedCfg = { ...repeatCfg, priority: getTaskPriority(repeatCfg.priority) };
+    const processedCfg = this._processQuickSettingForDate(normalizedCfg);
     this.repeatCfg.set(processedCfg);
-    this.repeatCfgInitial.set({ ...repeatCfg });
+    this.repeatCfgInitial.set(normalizedCfg);
   }
 
   private _getReferenceDate(): Date {

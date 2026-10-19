@@ -139,6 +139,14 @@ export class ConfigSectionComponent implements OnInit, OnDestroy {
     this.save.emit($event);
   }
 
+  rowActions(): ConfigSectionAction[] {
+    return (this.section?.actions ?? []).filter((action) => action.isRow);
+  }
+
+  buttonActions(): ConfigSectionAction[] {
+    return (this.section?.actions ?? []).filter((action) => !action.isRow);
+  }
+
   isActionPending(action: ConfigSectionAction): boolean {
     return this._pendingActions.has(action);
   }

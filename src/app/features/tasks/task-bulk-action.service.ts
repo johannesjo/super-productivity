@@ -30,6 +30,11 @@ import { truncate } from '../../util/truncate';
 import { remindOptionToMilliseconds } from './util/remind-option-to-milliseconds';
 import { getDeadlineAutoPlanFields } from './util/get-deadline-auto-plan-fields';
 import { playDoneSound } from './util/play-done-sound';
+import {
+  getTaskDeleteConfirmData,
+  isTaskDeleteConfirmRequired,
+} from './util/get-task-delete-confirm';
+import { PLAINSPACE_TYPE } from '../issue/issue.const';
 import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
 import { TranslateService, TranslateStore } from '@ngx-translate/core';
 import { getPluralKey } from '../../util/get-plural-key';
@@ -156,8 +161,10 @@ export class TaskBulkActionService {
 
   /**
    * More than one task always confirms, regardless of `isConfirmBeforeDelete`:
-   * there is no undo for a bulk delete yet. A single selected task takes the
-   * normal single-task path (setting + undo snack).
+   * there is no undo for a bulk delete yet. For the same reason that confirm
+   * keeps the default initial focus on Cancel, so Delete then Enter cannot
+   * remove a whole selection. A single selected task takes the normal
+   * single-task path (setting + undo snack).
    *
    * Top-level tasks go through `deleteTasks` in one op. A subtask whose parent
    * survives goes through the singular `deleteTask` instead: older clients'
@@ -181,7 +188,9 @@ export class TaskBulkActionService {
           data: {
             okTxt: T.F.TASK.MULTI_SELECT.D_CONFIRM_DELETE.OK,
             message: this._plural(
-              'F.TASK.MULTI_SELECT.D_CONFIRM_DELETE.MSG',
+              tasks.some((t) => t.issueType === PLAINSPACE_TYPE)
+                ? 'F.TASK.MULTI_SELECT.D_CONFIRM_DELETE.MSG_PLAINSPACE'
+                : 'F.TASK.MULTI_SELECT.D_CONFIRM_DELETE.MSG',
               tasks.length,
             ),
             translateParams: { count: tasks.length },
@@ -210,15 +219,11 @@ export class TaskBulkActionService {
   private async _deleteSingle(task: Task): Promise<void> {
     const isConfirmBeforeDelete =
       this._globalConfigService.cfg()?.tasks?.isConfirmBeforeDelete ?? true;
-    if (isConfirmBeforeDelete) {
+    if (isTaskDeleteConfirmRequired(task, isConfirmBeforeDelete)) {
       const isConfirm = await firstValueFrom(
         this._matDialog
           .open(DialogConfirmComponent, {
-            data: {
-              okTxt: T.F.TASK.D_CONFIRM_DELETE.OK,
-              message: T.F.TASK.D_CONFIRM_DELETE.MSG,
-              translateParams: { title: truncate(task.title) },
-            },
+            data: getTaskDeleteConfirmData(task, truncate(task.title)),
           })
           .afterClosed(),
       );

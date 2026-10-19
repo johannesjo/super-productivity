@@ -180,25 +180,6 @@ export const waitForAppReady = async (
 };
 
 /**
- * Wait for UI to settle after an action (e.g., adding a task).
- * Uses Angular stability as the primary signal rather than fixed timeouts.
- * Falls back to a minimal timeout if Angular stability check fails.
- */
-export const waitForUISettle = async (page: Page): Promise<void> => {
-  if (page.isClosed()) {
-    return;
-  }
-  try {
-    await waitForAngularStability(page, 2000);
-  } catch {
-    // Fall back to minimal fixed timeout if stability check fails
-    if (!page.isClosed()) {
-      await page.waitForTimeout(200);
-    }
-  }
-};
-
-/**
  * Wait for local state changes to persist before triggering sync.
  * This ensures IndexedDB writes have completed after UI state changes.
  * Uses Angular stability + networkidle as indicators that async operations have settled.
@@ -224,6 +205,25 @@ export const waitForStatePersistence = async (page: Page): Promise<void> => {
   if (!page.isClosed()) {
     await page.waitForTimeout(200);
   }
+};
+
+/**
+ * Wait until every captured op is written to IndexedDB. Ops are written
+ * asynchronously, so a reload right after a change can drop the last ones.
+ * Needs the E2E helpers that non-production builds expose in `main.ts`.
+ */
+export const flushPendingWrites = async (page: Page): Promise<void> => {
+  await page.evaluate(async () => {
+    const helpers = (
+      window as unknown as {
+        __e2eTestHelpers?: { flushPendingWrites: () => Promise<unknown> };
+      }
+    ).__e2eTestHelpers;
+    if (!helpers) {
+      throw new Error('E2E test helpers are not exposed');
+    }
+    await helpers.flushPendingWrites();
+  });
 };
 
 /**

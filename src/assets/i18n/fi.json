@@ -2856,8 +2856,17 @@
     },
     "SOUND": {
       "BREAK_REMINDER_SOUND": "Ota tauko -muistutuksen ääni",
+      "DING": "Kellon kilahdus",
       "DONE_SOUND": "Tehtävä merkitty valmiiksi -ääni",
       "IS_INCREASE_DONE_PITCH": "Nosta säveltä jokaisesta valmistuneesta tehtävästä",
+      "SMALL_DING": "Pienen kellon kilahdus",
+      "SOUND_1": "Ääni 1",
+      "SOUND_2": "Ääni 2",
+      "SOUND_3": "Ääni 3",
+      "SOUND_4": "Ääni 4",
+      "SOUND_5": "Ääni 5",
+      "SOUND_6": "Ääni 6",
+      "SOUND_7": "Ääni 7",
       "TITLE": "Ääni",
       "TRACK_TIME_SOUND": "Seuraa aikaa -muistutuksen ääni",
       "VOLUME": "Äänenvoimakkuus"

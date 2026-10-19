@@ -947,7 +947,12 @@ export class IssueService {
    * devices (#9776), so the clear goes through `dismissReminderOnly`, whose
    * reducer sets it deterministically. Rare enough that the extra op is fine.
    */
-  private _updateTaskFromPoll(task: Task, taskChanges: Partial<Task>): void {
+  private _updateTaskFromPoll(task: Task, taskChangesIn: Partial<Task>): void {
+    // A done write to a task that is already done would only stamp a new
+    // `doneOn`: it moves the completion date and turns a won't-do task into a
+    // completed one (`isWontDoTask`).
+    const { isDone, ...rest } = taskChangesIn;
+    const taskChanges = isDone === true && task.isDone ? rest : taskChangesIn;
     const { changes, isClearRemindAt } = withRemindAtForDueChange(
       task,
       taskChanges,
@@ -971,9 +976,9 @@ export class IssueService {
     return this.ISSUE_SERVICE_MAP[key];
   }
 
-  private _getProviderIcon(key: IssueProviderKey): string {
+  private _getProviderIcon(key: IssueProviderKey): string | undefined {
     if (this._pluginRegistry.hasProvider(key)) {
-      return this._pluginRegistry.getIcon(key);
+      return this._pluginRegistry.getSvgIcon(key);
     }
     return ISSUE_PROVIDER_ICON_MAP[key as BuiltInIssueProviderKey];
   }

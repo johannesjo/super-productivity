@@ -56,6 +56,10 @@ import { DialogDeadlineComponent } from '../../dialog-deadline/dialog-deadline.c
 import { DialogTimeEstimateComponent } from '../../dialog-time-estimate/dialog-time-estimate.component';
 import { throttle } from '../../../../util/decorators';
 import { DialogConfirmComponent } from '../../../../ui/dialog-confirm/dialog-confirm.component';
+import {
+  getTaskDeleteConfirmData,
+  isTaskDeleteConfirmRequired,
+} from '../../util/get-task-delete-confirm';
 import { isTouchActive } from 'src/app/util/input-intent';
 import { T } from 'src/app/t.const';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -93,6 +97,7 @@ import {
   PluginTaskContextMenuRegistryService,
 } from '../../../../plugins/plugin-task-context-menu-registry.service';
 import { PluginTaskContextMenuTarget } from '@super-productivity/plugin-api';
+import { getWontDoChanges } from '../../util/is-wont-do-task';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -238,9 +243,8 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
     this.isInSubTaskList = !!this._elementRef.nativeElement.closest('.sub-tasks');
     const host = this._elementRef.nativeElement as HTMLElement;
     this.isInTaskRow =
-      !!host.closest(
-        'task, [data-board-selection-scope] planner-task[data-task-selectable="true"]',
-      ) && !host.closest('task-detail-panel');
+      !!host.closest('task, planner-task[data-task-selectable="true"]') &&
+      !host.closest('task-detail-panel');
 
     setTimeout(() => {
       if (!this._isOpenedFromKeyboard) {
@@ -507,14 +511,10 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
     const isConfirmBeforeDelete =
       this._globalConfigService.cfg()?.tasks?.isConfirmBeforeDelete ?? true;
 
-    if (isConfirmBeforeDelete) {
+    if (isTaskDeleteConfirmRequired(this.task, isConfirmBeforeDelete)) {
       this._matDialog
         .open(DialogConfirmComponent, {
-          data: {
-            okTxt: T.F.TASK.D_CONFIRM_DELETE.OK,
-            message: T.F.TASK.D_CONFIRM_DELETE.MSG,
-            translateParams: { title: this.task.title },
-          },
+          data: getTaskDeleteConfirmData(this.task),
         })
         .afterClosed()
         .subscribe(async (isConfirm) => {
@@ -600,6 +600,11 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
     } else {
       this._taskService.setDone(this.task.id);
     }
+  }
+
+  // Finishing as won't do still marks the task done; only the reason differs.
+  setWontDo(): void {
+    this._taskService.update(this.task.id, getWontDoChanges(Date.now()));
   }
 
   addToMyDay(): void {

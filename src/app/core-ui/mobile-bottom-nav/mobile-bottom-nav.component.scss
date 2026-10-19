@@ -41,7 +41,9 @@
     border-radius: var(--radius-xl);
     transition: var(--transition-standard);
 
-    &:hover {
+    // No `:active` here: as a `mat-button` it already has Material's
+    // pressed state layer and ripple.
+    @include hoverWithPointer {
       background-color: var(--state-hover);
     }
 
@@ -87,7 +89,7 @@
     box-shadow: var(--whiteframe-shadow-4dp);
     transition: var(--transition-standard);
 
-    &:hover {
+    @include hoverWithPointer {
       transform: scale(1.05);
       box-shadow: var(--whiteframe-shadow-6dp);
     }
@@ -109,14 +111,6 @@
       font-size: 28px;
       width: 28px;
       height: 28px;
-    }
-
-    // On Android, hide during the slide-up entrance animation.
-    // var(--transition-standard) on .add-task-button already transitions opacity,
-    // so removing the class fades in automatically.
-    &.hide-for-native {
-      opacity: 0;
-      pointer-events: none;
     }
   }
 }

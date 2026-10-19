@@ -4,8 +4,6 @@ on:
     branches:
       - master
       - main
-    paths-ignore:
-      - 'docs/wiki/**'
   workflow_dispatch:
     inputs: {}
   release:
@@ -19,6 +17,53 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # PRs that only touch docs/** or Markdown skip the build, test and E2E jobs
+  # (Documentation Links covers them). The skip lives here rather than in
+  # paths-ignore so CI Gate still reports and can stay a required check.
+  changes:
+    name: Detect code changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      code: ${{ steps.detect.outputs.code }}
+    steps:
+      - name: Check out Git repository
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Detect non-docs changes
+        id: detect
+        env:
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${PR_HEAD:-}" ]; then
+            echo "Not a PR — running everything."
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          # HEAD is the refs/pull/N/merge commit: [base tip, PR head]. Diff the
+          # PR head against its merge-base so later base commits don't count.
+          BASE_TIP="$(git rev-parse HEAD^1)"
+          MERGE_BASE="$(git merge-base "${BASE_TIP}" "${PR_HEAD}")"
+          CHANGED_FILES="$(git diff --name-only --no-renames "${MERGE_BASE}" "${PR_HEAD}")"
+          echo "Changed files:"
+          echo "${CHANGED_FILES}"
+
+          # An empty diff runs everything rather than passing on nothing.
+          code=true
+          if [ -n "${CHANGED_FILES}" ] && ! grep -Evq '^docs/|\.md$' <<< "${CHANGED_FILES}"; then
+            code=false
+          fi
+
+          echo "→ code=${code}"
+          echo "code=${code}" >> "$GITHUB_OUTPUT"
+
   # Verify package-lock.json only uses the official npm registry.
   # Prevents contributors using mirror registries from rewriting all resolved URLs.
   check-lockfile-registry:
@@ -32,13 +77,26 @@ jobs:
           persist-credentials: false
       - name: Reject non-standard registry URLs
         run: |
-          BAD_COUNT=$(grep '"resolved": "https\?://' package-lock.json | grep -cv 'registry.npmjs.org' || true)
-          if [ "$BAD_COUNT" -gt 0 ]; then
-            echo "::error::package-lock.json contains $BAD_COUNT resolved URLs pointing to a non-standard registry."
-            echo "Examples:"
-            grep '"resolved": "https\?://' package-lock.json | grep -v 'registry.npmjs.org' | head -5
-            echo ""
-            echo "Please delete node_modules and package-lock.json, then run 'npm install' with the default registry (https://registry.npmjs.org/)."
+          # The plugin-dev workspace has its own lockfile, installed by release builds.
+          for LOCKFILE in package-lock.json packages/plugin-dev/package-lock.json; do
+            BAD_COUNT=$(grep '"resolved": "https\?://' "$LOCKFILE" | grep -cv 'registry.npmjs.org' || true)
+            if [ "$BAD_COUNT" -gt 0 ]; then
+              echo "::error::$LOCKFILE contains $BAD_COUNT resolved URLs pointing to a non-standard registry."
+              echo "Examples:"
+              grep '"resolved": "https\?://' "$LOCKFILE" | grep -v 'registry.npmjs.org' | head -5
+              echo ""
+              echo "Rewrite those 'resolved' URLs to https://registry.npmjs.org/ (or run 'npm install --registry=https://registry.npmjs.org/' next to it). Deleting the lockfile would re-resolve every dependency."
+              exit 1
+            fi
+          done
+      # npm reads no parent .npmrc inside packages/plugin-dev (its own npm
+      # project), so it carries a copy; keep the settings identical.
+      - name: Check plugin-dev .npmrc mirrors the root one
+        run: |
+          # Compare settings only: skip comments (# or ;) and blank lines.
+          settings() { grep -Ev '^[[:space:]]*([#;]|$)' "$1" | sed 's/[[:space:]]*=[[:space:]]*/=/'; }
+          if ! diff <(settings .npmrc) <(settings packages/plugin-dev/.npmrc); then
+            echo "::error::packages/plugin-dev/.npmrc settings differ from the root .npmrc (diff above). Keep them identical."
             exit 1
           fi
 
@@ -68,6 +126,8 @@ jobs:
   # serial job behind lint: the critical path is the slowest branch, not the sum.
   lint:
     name: Lint
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -83,6 +143,8 @@ jobs:
 
   unit-tests:
     name: Unit Tests
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -102,7 +164,12 @@ jobs:
 
   e2e-build:
     name: Build E2E Frontend
-    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    # Owner PRs run E2E on sponsored Blacksmith runners for faster feedback; everything else
+    # stays on GitHub. Repo variable USE_BLACKSMITH is the kill switch (unset = GitHub only);
+    # unset it if these jobs sit queued (app uninstalled or sponsorship ended).
+    runs-on: ${{ vars.USE_BLACKSMITH == 'true' && github.event.pull_request.user.login == 'johannesjo' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest' }}
     timeout-minutes: 20
     steps:
       - name: Check out Git repository
@@ -118,7 +185,7 @@ jobs:
           test -f .tmp/angular-dist/browser/index.html || (echo "Build output missing" && exit 1)
           test -f .tmp/angular-dist/browser/assets/bundled-plugins/api-test-plugin/manifest.json || (echo "Plugin assets missing from build" && exit 1)
       - name: Upload Build Artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ci-e2e-build-${{ github.run_id }}
           path: .tmp/angular-dist
@@ -127,7 +194,7 @@ jobs:
   e2e:
     name: E2E ${{ matrix.shard }}/3
     needs: e2e-build
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.USE_BLACKSMITH == 'true' && github.event.pull_request.user.login == 'johannesjo' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest' }}
     timeout-minutes: 40
     strategy:
       fail-fast: false
@@ -141,7 +208,7 @@ jobs:
       - name: Setup E2E Environment
         uses: ./.github/actions/setup-e2e
       - name: Download Build Artifact
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v4
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v4
         with:
           name: ci-e2e-build-${{ github.run_id }}
           path: .tmp/angular-dist
@@ -151,7 +218,7 @@ jobs:
         run: npm run e2e -- --project=chromium --shard=${{ matrix.shard }}/3
       - name: 'Upload E2E results on failure'
         if: ${{ failure() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: e2eResults-${{ matrix.shard }}
           path: .tmp/e2e-test-results/**/*.*
@@ -161,7 +228,7 @@ jobs:
   e2e-webkit-smoke:
     name: E2E WebKit Smoke
     needs: e2e-build
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.USE_BLACKSMITH == 'true' && github.event.pull_request.user.login == 'johannesjo' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest' }}
     timeout-minutes: 20
     steps:
       - name: Check out Git repository
@@ -173,7 +240,7 @@ jobs:
         with:
           browsers: webkit
       - name: Download Build Artifact
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v4
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v4
         with:
           name: ci-e2e-build-${{ github.run_id }}
           path: .tmp/angular-dist
@@ -183,7 +250,7 @@ jobs:
           E2E_WEBKIT_SMOKE: 'true'
       - name: 'Upload E2E results on failure'
         if: ${{ failure() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: e2eResults-webkit-smoke
           path: .tmp/e2e-test-results/**/*.*
@@ -194,7 +261,9 @@ jobs:
   # Lighthouse is designed to audit the performance, accessibility, SEO, and other metrics of a web application.
   pwa-lighthouse:
     name: PWA & Lighthouse
-    runs-on: ubuntu-latest
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: ${{ vars.USE_BLACKSMITH == 'true' && github.event.pull_request.user.login == 'johannesjo' && 'blacksmith-4vcpu-ubuntu-2404' || 'ubuntu-latest' }}
     timeout-minutes: 30
     env:
       UNSPLASH_KEY: ${{ secrets.UNSPLASH_KEY }}
@@ -217,7 +286,7 @@ jobs:
 
       - name: 'Upload PWA results on failure'
         if: ${{ failure() }}
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: pwaResults
           path: .tmp/e2e-test-results/pwa-test-results
@@ -258,12 +327,14 @@ jobs:
 
   # Single stable check to mark required in branch protection, so the split
   # and sharded jobs above can change without editing the protection rules.
-  # Skipped jobs (PR-only checks on release runs) count as passing.
+  # Skipped jobs (PR-only checks on release runs, code jobs on docs-only PRs)
+  # count as passing.
   # always(), not !cancelled(): a skipped required check would count as passing.
   ci-gate:
     name: CI Gate
     if: ${{ always() }}
     needs:
+      - changes
       - check-lockfile-registry
       - dependency-vulnerability-review
       - lint

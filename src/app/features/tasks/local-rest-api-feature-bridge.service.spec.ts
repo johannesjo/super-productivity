@@ -15,6 +15,7 @@ describe('LocalRestApiFeatureBridgeService', () => {
   beforeEach(() => {
     taskServiceMock = jasmine.createSpyObj<TaskService>('TaskService', [
       'createNewTaskWithDefaults',
+      'addTimeSpentAndSync',
     ]);
     issueServiceMock = jasmine.createSpyObj<IssueService>('IssueService', ['issueLink']);
 
@@ -67,5 +68,18 @@ describe('LocalRestApiFeatureBridgeService', () => {
     expect(action.task.id).toBe('literal-sub');
     expect(action.parentId).toBe('parent-1');
     expect(action.isIgnoreShortSyntax).toBe(true);
+  });
+
+  it('should add time spent on a given day through addTimeSpentAndSync', () => {
+    const task = { id: 'task-1' } as Task;
+
+    service.addTimeSpentOnDay(task, 3600000, '2026-05-10');
+
+    expect(taskServiceMock.addTimeSpentAndSync).toHaveBeenCalledOnceWith(
+      task,
+      3600000,
+      '2026-05-10',
+    );
+    expect(dispatchSpy).not.toHaveBeenCalled();
   });
 });

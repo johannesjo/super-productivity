@@ -7,6 +7,7 @@ import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { REMOTE_ISSUE_DELETE_DEFER_MS } from '../../../app.constants';
 import { TaskService } from '../../tasks/task.service';
 import { Task } from '../../tasks/task.model';
+import { isWontDoTask } from '../../tasks/util/is-wont-do-task';
 import { selectAllTasks } from '../../tasks/store/task.selectors';
 import { IssueProviderService } from '../issue-provider.service';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
@@ -31,6 +32,11 @@ import { T } from '../../../t.const';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { deleteTag, deleteTags } from '../../tag/store/tag.actions';
 import { IssueSyncAdapterResolverService } from './issue-sync-adapter-resolver.service';
+import { shortSyntax } from '../../tasks/short-syntax';
+import { selectShortSyntaxConfig } from '../../config/store/global-config.reducer';
+import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
+import { selectAllTagsWithoutMyDay } from '../../tag/store/tag.reducer';
+import { selectUnarchivedProjects } from '../../project/store/project.selectors';
 import { PluginIssueProviderRegistryService } from '../../../plugins/issue-provider/plugin-issue-provider-registry.service';
 
 const SYNCABLE_TASK_FIELDS: ReadonlySet<string> = new Set([
@@ -112,6 +118,12 @@ const ACTION_EXTRACTORS: Record<
     const a = action as ReturnType<typeof PlannerActions.transferTask>;
     return { taskId: a.task.id, changes: { dueDay: a.newDay } };
   },
+};
+
+const omitIsDone = (changes: Partial<Task>): Partial<Task> => {
+  const rest = { ...changes };
+  delete rest.isDone;
+  return rest;
 };
 
 @Injectable()
@@ -261,6 +273,9 @@ export class IssueTwoWaySyncEffects {
         // restoreDeletedTask can undo the local delete; nothing can undo the
         // remote one, so it waits out the undo window. mergeMap rather than
         // concatMap, or N deletes would queue up N windows.
+        // shortcut: in-memory timer — quitting inside the window drops the
+        // remote delete (orphaned remote item); persist pending deletes if
+        // that is reported.
         mergeMap(({ task }) =>
           timer(REMOTE_ISSUE_DELETE_DEFER_MS).pipe(
             takeUntil(
@@ -308,7 +323,7 @@ export class IssueTwoWaySyncEffects {
         filter(({ task, issue }) => !task.issueId && !issue),
         filter(({ task }) => !task.parentId),
         filter(({ task }) => !!task.projectId),
-        concatMap(({ task }) =>
+        concatMap(({ task, isIgnoreShortSyntax }) =>
           this._store.select(selectEnabledIssueProviders).pipe(
             first(),
             map((providers) =>
@@ -327,13 +342,30 @@ export class IssueTwoWaySyncEffects {
                 .getCfgOnce$(provider.id, provider.issueProviderKey)
                 .pipe(
                   concatMap((cfg) =>
-                    from(adapter.createIssue!(task.title, cfg)).pipe(
-                      concatMap(async ({ issueId, issueNumber, issueData }) => {
+                    from(
+                      this._getTitleWithoutShortSyntax(task, isIgnoreShortSyntax),
+                    ).pipe(
+                      concatMap((title) =>
+                        from(adapter.createIssue!(title, cfg)).pipe(
+                          map((created) => ({ ...created, title })),
+                        ),
+                      ),
+                      concatMap(async ({ issueId, issueNumber, issueData, title }) => {
                         this._trackSyncOriginatedTask(task.id);
                         try {
                           const titlePrefix =
                             issueNumber != null ? `#${issueNumber} ` : '';
                           const syncValues = adapter.extractSyncValues(issueData);
+                          // Keep a title that changed since the add (short syntax
+                          // landed, or the user renamed it during the round-trip);
+                          // never write the action's raw snapshot back.
+                          const currentTask = await firstValueFrom(
+                            this._taskService.getByIdOnce$(task.id),
+                          );
+                          const localTitle =
+                            currentTask && currentTask.title !== task.title
+                              ? currentTask.title
+                              : title;
                           this._taskService.update(task.id, {
                             issueId,
                             issueType: provider.issueProviderKey,
@@ -342,8 +374,8 @@ export class IssueTwoWaySyncEffects {
                             issueWasUpdated: false,
                             issueLastSyncedValues: syncValues,
                             title: titlePrefix
-                              ? `${titlePrefix}${task.title}`
-                              : task.title,
+                              ? `${titlePrefix}${localTitle}`
+                              : localTitle,
                           });
 
                           // Push initial task values (e.g. dueWithTime from short syntax)
@@ -378,6 +410,33 @@ export class IssueTwoWaySyncEffects {
       ),
     { dispatch: false },
   );
+
+  /**
+   * The short-syntax effect cleans the title on the same addTask, but its parse
+   * is async (lazy date-parser import) and nothing orders it against this
+   * effect. Parse here with the same inputs so the remote issue is never
+   * created with the raw tokens (#10024).
+   */
+  private async _getTitleWithoutShortSyntax(
+    task: Task,
+    isIgnoreShortSyntax?: boolean,
+  ): Promise<string> {
+    if (isIgnoreShortSyntax) {
+      return task.title;
+    }
+    const [cfg, tags, projects] = await Promise.all([
+      firstValueFrom(this._store.select(selectShortSyntaxConfig)),
+      firstValueFrom(this._store.select(selectAllTagsWithoutMyDay)),
+      firstValueFrom(this._store.select(selectUnarchivedProjects)),
+    ]);
+    const r = await shortSyntax(
+      task,
+      cfg || DEFAULT_GLOBAL_CONFIG.shortSyntax,
+      tags,
+      projects,
+    );
+    return r?.taskChanges.title ?? task.title;
+  }
 
   private async _pushInitialValues(
     task: Task,
@@ -539,10 +598,12 @@ export class IssueTwoWaySyncEffects {
       );
   }
 
-  private _pushChanges$(task: Task, changes: Partial<Task>): Observable<unknown> {
+  private _pushChanges$(task: Task, changesIn: Partial<Task>): Observable<unknown> {
     if (!task.issueType || !task.issueProviderId || !task.issueId) {
       return EMPTY;
     }
+    // A won't-do task was not completed, so its `isDone` is never pushed.
+    const changes = isWontDoTask(task) ? omitIsDone(changesIn) : changesIn;
     const issueType = task.issueType as IssueProviderKey;
     const issueProviderId = task.issueProviderId;
     const issueId = task.issueId;

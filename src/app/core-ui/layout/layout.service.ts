@@ -72,6 +72,8 @@ export class LayoutService {
 
   readonly selectedTimeView = signal<'week' | 'month' | 'day'>('week');
   readonly isWorkViewScrolled = signal<boolean>(false);
+  /** The side nav is open as the phone layout's overlay menu. */
+  readonly isMobileSideNavOpen = signal<boolean>(false);
   readonly isShowAddTaskBar = toSignal(this.isShowAddTaskBar$, { initialValue: false });
 
   readonly isXs = toSignal(

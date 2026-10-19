@@ -787,7 +787,14 @@ fallbacks:
 - WebDAV/Nextcloud can enforce atomic replacement when a read returns a strong
   ETag, which the upload sends as `If-Match`. Without a strong ETag, `rev` falls
   back to a content hash; the pre-upload GET detects an already-stale writer but
-  cannot close the GET→PUT race, so concurrency protection is best effort.
+  cannot close the GET→PUT race, so concurrency protection is best effort. A
+  strong generic-WebDAV ETag with a content-coding suffix (`-gzip`, `-br`,
+  `-deflate`) counts as missing: the origin compares `If-Match` against the bare
+  tag, and deriving that tag could match a different revision (#9251, #10808).
+  When the pre-upload GET also carries ownCloud/Nextcloud's `OC-ETag`, the PUT
+  sends that as `If-Match`, narrowing the race. Those servers keep the same tag
+  for two writes within one second, so the content-hash check stays, and a
+  write landing in that same second can still slip through.
 - LocalFile also uses a content hash and a read/check/write sequence with no
   cross-process CAS. It is a single-writer, backup-only transport, not a safe
   concurrent multi-device writer.
@@ -1126,7 +1133,12 @@ below holds:
   the server. Any other pending op may be one that another tab uploaded and has
   not marked synced yet (acknowledgements are deferred past piggyback
   processing). The move also holds the UPLOAD lock, so no other tab uploads
-  meanwhile.
+  meanwhile. A pending `syncTimeSpent` delta of this client is the exception,
+  e.g. one tracked while the rejected upload was in flight (#10614): if it was
+  stored after all and this tab re-uploads it first,
+  [receipt recovery](time-delta-retry-recovery.md) restores its clock. If the
+  uploading tab acknowledges it first, the local clock can differ from the
+  stored one; the op id is unchanged, so its time still counts once.
 - **Moved ops commute with every later op of the task the server already
   accepted from this client** (`isDisjointMergeEligible`). Next to a crossing
   delta the server accepts this client's own delta and then each later op, which

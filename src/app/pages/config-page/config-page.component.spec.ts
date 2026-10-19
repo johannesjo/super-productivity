@@ -256,5 +256,69 @@ describe('ConfigPageComponent', () => {
 
       expect(getCollapsible().isExpanded).toBe(true);
     });
+
+    it('points the importer search results at the real Import/Export section', () => {
+      // The section's own hit comes from the live tab configs, so this fails
+      // if the tabs are reordered or the section key changes under the
+      // hand-written importer targets.
+      component.onSearchChange(T.GCF.IMEX.TITLE);
+      const sectionHit = component.searchResults.find(
+        (r) => r.labelKey === T.GCF.IMEX.TITLE,
+      );
+      expect(sectionHit).toBeDefined();
+
+      for (const key of [
+        T.FILE_IMEX.IMPORT_FROM_TODOIST,
+        T.FILE_IMEX.IMPORT_FROM_TICKTICK,
+      ]) {
+        component.onSearchChange(key);
+        const hit = component.searchResults.find((r) => r.labelKey === key);
+        expect(hit?.tabIndex).toBe(sectionHit!.tabIndex);
+        expect(hit?.sectionKey).toBe(sectionHit!.sectionKey);
+        expect(hit?.scrollSelector).toBe(sectionHit!.scrollSelector);
+      }
+    });
+  });
+
+  describe('App Features open by default', () => {
+    const APP_FEATURES = { title: '', key: 'appFeatures' } as ConfigFormSection<unknown>;
+    const OTHER = { title: '', key: 'localization' } as ConfigFormSection<unknown>;
+
+    it('starts expanded while other sections start collapsed', () => {
+      expect(component.isSectionExpanded(APP_FEATURES)).toBe(true);
+      expect(component.isSectionExpanded(OTHER)).toBe(false);
+    });
+
+    it('stays collapsed once collapsed by hand', () => {
+      component.onSectionExpandedChange(APP_FEATURES, false);
+
+      expect(component.isSectionExpanded(APP_FEATURES)).toBe(false);
+    });
+
+    it('keeps a search-expanded section open when App Features is collapsed', () => {
+      component.expandedSection = 'localization';
+
+      component.onSectionExpandedChange(APP_FEATURES, false);
+
+      expect(component.isSectionExpanded(OTHER)).toBe(true);
+    });
+
+    it('carries a plugins action that switches to the Plugins tab', async () => {
+      const action = component.generalFormCfg
+        .find((s) => s.key === 'appFeatures')
+        ?.actions?.find((a) => a.label === T.GCF.APP_FEATURES.EXTEND_WITH_PLUGINS);
+
+      await action?.onClick();
+
+      expect(action).toBeDefined();
+      expect(component.selectedTabIndex).toBe(4);
+    });
+
+    it('reopens via its search result after being collapsed', () => {
+      component.onSectionExpandedChange(APP_FEATURES, false);
+      component.expandedSection = 'appFeatures';
+
+      expect(component.isSectionExpanded(APP_FEATURES)).toBe(true);
+    });
   });
 });
