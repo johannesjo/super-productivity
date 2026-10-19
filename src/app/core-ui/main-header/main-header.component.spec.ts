@@ -930,8 +930,10 @@ describe('MainHeaderComponent action placement', () => {
     // without a network interface. Real time, not fakeAsync: the debounce timer
     // runs in the zone of whichever spec subscribed to the shared stream first.
     beforeEach(async () => {
+      // Subscribe first: the first subscriber adds the event listeners.
+      const isBackOnline = firstValueFrom(isOnline$.pipe(filter(Boolean)));
       window.dispatchEvent(new Event('online'));
-      await firstValueFrom(isOnline$.pipe(filter(Boolean)));
+      await isBackOnline;
     });
 
     const readySync = (patch: Partial<typeof syncWrapperState> = {}): void => {
