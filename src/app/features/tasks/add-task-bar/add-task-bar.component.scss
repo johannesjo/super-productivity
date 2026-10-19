@@ -275,13 +275,19 @@
       align-self: stretch;
       height: auto;
       border-radius: 0;
-      // The submit + is the primary action while composing — full strength and
-      // tinted, not the dimmed treatment the other icons share. Colour the icon
-      // via the MDC token (the icon inherits it) rather than a .mat-*/.mdc-*
-      // selector override.
+      // The submit button is the primary action while composing — a filled
+      // primary block, not the dimmed treatment the other icons share. Colours
+      // go through the button tokens rather than a .mat-*/.mdc-* override.
       opacity: 1;
-      --mdc-icon-button-icon-color: var(--c-primary);
-      color: var(--c-primary);
+      background-color: var(--c-primary);
+      --mat-icon-button-icon-color: var(--c-contrast);
+      --mat-icon-button-state-layer-color: var(--c-contrast);
+      --mat-icon-button-ripple-color: color-mix(
+        in srgb,
+        var(--c-contrast) 20%,
+        transparent
+      );
+      color: var(--c-contrast);
     }
   }
 
