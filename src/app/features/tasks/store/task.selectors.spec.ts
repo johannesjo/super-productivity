@@ -260,6 +260,7 @@ describe('Task Selectors', () => {
     fromSelectors.selectAllTasksInActiveProjects.release();
     fromSelectors.selectOverdueTasks.release();
     fromSelectors.selectAllTasksWithDueTimeSorted.release();
+    fromSelectors.selectAllDoneIds.release();
     selectTodayStr.release();
     selectStartOfNextDayDiffMs.release();
     selectProjectFeatureState.release();
