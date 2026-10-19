@@ -94,7 +94,7 @@
   "EXAMPLE_TASKS": {
     "GETTING_STARTED": {
       "TITLE": "Optional: getting started tips",
-      "NOTES": "Nothing here is required. Delete this task whenever you like.\n\n- **Projects**: group tasks by topic with the **+** next to **Projects** in the sidebar.\n- **Sync**: keep your data on several devices under **Settings → Sync & Backup**.\n- **Keyboard**: open **Help → How to: Keyboard Navigation** in the sidebar menu.\n- **Make it yours**: pick a theme or dark mode, and switch features like boards, schedule, habits, focus mode or integrations on or off under **Settings → General**. Plugins add even more."
+      "NOTES": "Nothing here is required. Delete this task whenever you like.\n\n- **Today and Inbox**: Today shows what is planned for today. Tasks without a project of your own stay in Inbox. A task can appear in both lists.\n- **Projects**: group tasks by topic with the **+** next to **Projects** in the sidebar.\n- **Sync**: keep your data on several devices under **Settings → Sync & Backup**.\n- **Coming from Todoist or TickTick?** Import your tasks under **Settings → Sync & Backup → Import/Export**.\n- **Tours**: **Help → How to** in the sidebar menu shows short syntax and keyboard navigation step by step. Close a tour whenever you like.\n- **Make it yours**: pick a theme or dark mode, and switch features like boards, schedule, habits, focus mode or integrations on or off under **Settings → General**. Plugins add even more."
     }
   },
   "F": {
@@ -1140,6 +1140,7 @@
       "TOGGLE_TIME_SCHEDULING_HINT": "Ctrl+1 to toggle time scheduling"
     },
     "SEARCH_BAR": {
+      "DELETED": "Deleted",
       "INCLUDE_COMPLETED": "Include completed and archived tasks",
       "INFO": "Start typing to search for tasks, notes, projects or tags",
       "NO_RESULTS": "No tasks, notes, projects or tags found matching your search",
@@ -1852,6 +1853,7 @@
         "FOCUS_SESSION": "Start focus session",
         "MARK_DONE": "Mark as completed",
         "MARK_UNDONE": "Mark as not completed",
+        "MARK_WONT_DO": "Won't do",
         "MOVE_TO_BACKLOG": "Move to backlog",
         "MOVE_TO_BOTTOM": "Move to bottom",
         "MOVE_TO_OTHER_PROJECT": "Move to project",
@@ -1869,13 +1871,14 @@
         "REMOVE_FROM_MY_DAY": "Remove from Today",
         "SCHEDULE": "Schedule task",
         "SET_DEADLINE": "Set deadline",
-        "SHOW_HIDDEN_DONE_SUB_TASKS": "+ {{nr}} completed subtasks",
+        "SHOW_HIDDEN_DONE_SUB_TASKS": "+ {{nr}} done subtasks",
         "SHOW_HIDDEN_SUB_TASKS": "+ {{nr}} subtasks",
         "SUB_TASK_PROGRESS": "Subtasks: {{done}} of {{total}} done",
         "TIME_CONFLICT": "Overlaps with another scheduled task",
         "TOGGLE_ATTACHMENTS": "Show/hide attachments",
         "TOGGLE_DETAIL_PANEL": "Show/hide task panel",
         "TOGGLE_DONE": "Toggle completion status",
+        "TOGGLE_DONE_WONT_DO": "Finished as won't do. Toggle completion status",
         "TOGGLE_SUB_TASK_VISIBILITY": "Toggle subtask visibility",
         "TOGGLE_TAGS": "Toggle tags",
         "TRACK_TIME": "Start tracking time",
@@ -1911,6 +1914,22 @@
         "RO_AT_DEADLINE": "At deadline",
         "RO_NEVER": "Never",
         "SET_DEADLINE": "Set deadline"
+      },
+      "D_RECENTLY_DELETED": {
+        "CONFIRM_EMPTY": "Permanently remove everything in Recently deleted on this device?",
+        "DELETED_ON": "Deleted {{date}}",
+        "EMPTY": "Empty",
+        "INTRO": "Deleted tasks stay here on this device for {{days}} days.",
+        "LINK": "Recently deleted",
+        "NONE": "Nothing deleted in the last {{days}} days.",
+        "RESTORE": "Restore",
+        "RESTORE_ARIA": "Restore \"{{title}}\"",
+        "RESTORED": "Restored \"{{title}}\"",
+        "SUB_TASKS": {
+          "ONE": "+{{nr}} subtask",
+          "OTHER": "+{{nr}} subtasks"
+        },
+        "TITLE": "Recently deleted"
       },
       "D_REMINDER_VIEW": {
         "ADD_TO_TODAY": "Add to Today",
@@ -2074,6 +2093,8 @@
         "DEADLINE_REMOVED": "Deadline removed",
         "DEADLINE_SET": "Deadline set for {{date}}",
         "DELETED": "Deleted task \"{{title}}\"",
+        "DELETED_FIND_IN_HISTORY": "Deleted task \"{{title}}\". For {{days}} days, you can restore it from History → Recently deleted.",
+        "DELETED_FIND_IN_SEARCH": "Deleted task \"{{title}}\". Search still finds it for {{days}} days.",
         "EMPTY_TITLE_VIA_APP_URI": "Task title was empty, no task was added",
         "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>\"{{title}}\"</strong> from backlog to the Today task list",
         "FOUND_MOVE_FROM_OTHER_LIST": "Added task <strong>\"{{title}}\"</strong> from <strong>{{contextTitle}}</strong> to current list",
@@ -3099,11 +3120,9 @@
     "HINTS": {
       "CREATE_TASK": "Click + to add your first task",
       "CREATE_TASK_TOUCH": "Tap + to add your first task",
-      "DONE_TITLE": "You're all set",
-      "EXPLORE_INBOX": "Some optional tips are waiting in your Inbox. Try them or delete them, whenever you like.",
-      "GOT_IT": "Got it",
       "TASK_SWIPE_LEFT_TOUCH": "Swipe task left for more actions",
-      "TASK_SWIPE_RIGHT_TOUCH": "When you've finished a task, swipe it right to mark it done",
+      "TODAY_AND_INBOX": "This task is planned for today, so it shows in Today. Tasks without a project of your own stay in Inbox.",
+      "TODAY_AND_INBOX_PHONE": "This task is planned for today, so it shows in Today. Tasks without a project of your own stay in Inbox, under ☰.",
       "OR_PRESS": "or press",
       "SKIP_ARIA": "Close tip"
     }
@@ -3229,6 +3248,7 @@
     "FAILED_TO_LOAD_CONFIG": "Failed to load plugin configuration",
     "FAILED_TO_REMOVE": "Failed to remove plugin",
     "FAILED_TO_SAVE_CONFIG": "Failed to save plugin configuration",
+    "FIELD_NOT_IN_PLUGIN_API": "\"{{field}}\" is not part of the plugin API",
     "FIELD_NOT_UPDATABLE": "\"{{field}}\" cannot be set via updateTask — re-parenting is not supported. Create subtasks with addTask({ parentId }), or restructure via batchUpdateForProject",
     "FILE_TOO_LARGE": "File too large ({{fileSize}}MB). Maximum size is {{maxSize}}MB",
     "GO_BACK": "Go Back",
@@ -3300,8 +3320,15 @@
     "DETAILS": "Details",
     "COMMUNITY_PLUGINS": "Community Plugins",
     "COMMUNITY_WARNING": "Community plugins are not reviewed by the Super Productivity team. Install them at your own risk.",
-    "COMMUNITY_STARS": "{{count}} stars",
     "COMMUNITY_GET_LISTED": "Get your plugin to show up here",
+    "COMMUNITY_INSTALL": "Install v{{version}}",
+    "COMMUNITY_UPDATE": "Update to v{{version}}",
+    "COMMUNITY_INSTALLED": "Installed",
+    "COMMUNITY_DOWNLOAD": "Download v{{version}}",
+    "COMMUNITY_DOWNLOAD_FAILED": "Could not download \"{{name}}\". Download its ZIP from the plugin page and install it below.",
+    "COMMUNITY_DOWNLOAD_TOO_LARGE": "The download of \"{{name}}\" is larger than {{maxSize}} MB and was not installed.",
+    "COMMUNITY_HASH_MISMATCH": "The download of \"{{name}}\" does not match the listed version and was not installed.",
+    "COMMUNITY_MANIFEST_MISMATCH": "The download of \"{{name}}\" is not the listed plugin version and was not installed.",
     "GROUP_UPLOADED": "Uploaded plugins",
     "GROUP_INTEGRATIONS": "Integrations",
     "GROUP_OTHER": "Other plugins",

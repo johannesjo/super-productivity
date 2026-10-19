@@ -51,15 +51,23 @@ import COMMUNITY_PLUGINS_DATA from '../../../../assets/community-plugins.json';
 import { PluginApiAccess, PluginSecurityService } from '../../plugin-security';
 import { DEV_ONLY_BUNDLED_PLUGIN_IDS } from '../../bundled-plugins.const';
 import { environment } from '../../../../environments/environment';
+import { IS_NATIVE_PLATFORM } from '../../../util/is-native-platform';
+import {
+  CommunityPlugin,
+  CommunityPluginDownloadError,
+  CommunityPluginDownloadFailure,
+  CommunityPluginRelease,
+  CommunityPluginStatus,
+  downloadVerifiedCommunityPlugin,
+  getCommunityPluginStatus,
+} from '../../util/community-plugin.util';
 
-interface CommunityPlugin {
-  name: string;
-  shortDescription: string;
-  url: string;
-  author: string;
-  authorUrl?: string;
-  stars?: number;
-}
+const COMMUNITY_DOWNLOAD_ERROR_KEYS: Record<CommunityPluginDownloadFailure, string> = {
+  download: T.PLUGINS.COMMUNITY_DOWNLOAD_FAILED,
+  tooLarge: T.PLUGINS.COMMUNITY_DOWNLOAD_TOO_LARGE,
+  hashMismatch: T.PLUGINS.COMMUNITY_HASH_MISMATCH,
+  manifestMismatch: T.PLUGINS.COMMUNITY_MANIFEST_MISMATCH,
+};
 
 interface PluginManifestAuthor {
   author?: unknown;
@@ -155,8 +163,49 @@ export class PluginManagementComponent {
     ),
   );
 
+  /** Versions of uploaded plugins, by id; listed entries are matched against these. */
+  private readonly _uploadedPluginVersions = computed(() => {
+    const versions = new Map<string, string>();
+    for (const [id, state] of this._pluginService.pluginStates()) {
+      if (state.type === 'uploaded') {
+        versions.set(id, state.manifest.version);
+      }
+    }
+    return versions;
+  });
+
+  readonly communityPluginRows = computed(() => {
+    const versions = this._uploadedPluginVersions();
+    return this.communityPlugins().map((plugin) => {
+      const status: CommunityPluginStatus = plugin.id
+        ? getCommunityPluginStatus(plugin, versions.get(plugin.id))
+        : 'notInstalled';
+      return { plugin, status };
+    });
+  });
+
+  /** Listed entries with a newer release than the installed plugin, by plugin id. */
+  readonly communityUpdates = computed(() => {
+    const updates = new Map<
+      string,
+      { plugin: CommunityPlugin; release: CommunityPluginRelease }
+    >();
+    for (const { plugin, status } of this.communityPluginRows()) {
+      if (status === 'updateAvailable' && plugin.id && plugin.release) {
+        updates.set(plugin.id, { plugin, release: plugin.release });
+      }
+    }
+    return updates;
+  });
+
   T: typeof T = T;
   readonly IS_ELECTRON = IS_ELECTRON;
+  /**
+   * The web app cannot download from release hosts that send no CORS headers
+   * (GitHub, Codeberg), so it links to the ZIP for a manual install instead.
+   * Electron adds the header itself; Capacitor fetches natively.
+   */
+  readonly isInAppInstall = IS_ELECTRON || IS_NATIVE_PLATFORM;
 
   // Plugin size limits for display
   readonly maxPluginSizeMB = (MAX_PLUGIN_ZIP_SIZE / 1024 / 1024).toFixed(1);
@@ -381,6 +430,55 @@ export class PluginManagementComponent {
           ? error.message
           : this._translateService.instant(T.PLUGINS.FAILED_TO_INSTALL),
       );
+    } finally {
+      this.isUploading.set(false);
+    }
+  }
+
+  /**
+   * Installs or updates a listed plugin from its pinned release. Shows the same risk
+   * warning as a ZIP upload: the checksum proves the file is the listed one, not
+   * that its code was reviewed.
+   */
+  async installCommunityPlugin(plugin: CommunityPlugin): Promise<void> {
+    const { id, release } = plugin;
+    if (!id || !release || this.isUploading()) {
+      return;
+    }
+    // Re-checked: another install may have started while the dialog was open.
+    if (!(await this._confirmInstall()) || this.isUploading()) {
+      return;
+    }
+
+    this.isUploading.set(true);
+    try {
+      const file = await downloadVerifiedCommunityPlugin(id, release);
+      const installed = await this._pluginService.loadPluginFromZip(file);
+      if (!installed.error) {
+        this._snackService.open({
+          type: 'SUCCESS',
+          msg: T.PLUGINS.PLUGIN_INSTALLED,
+          translateParams: { name: installed.manifest.name },
+        });
+      }
+    } catch (error) {
+      PluginLog.err('Failed to install community plugin:', id, error);
+      if (error instanceof CommunityPluginDownloadError) {
+        this._snackService.open({
+          type: 'ERROR',
+          msg: COMMUNITY_DOWNLOAD_ERROR_KEYS[error.reason],
+          translateParams: { name: plugin.name, maxSize: this.maxPluginSizeMB },
+        });
+      } else if (error instanceof Error) {
+        // loadPluginFromZip throws translated messages, as shown for ZIP uploads.
+        this._snackService.open({
+          type: 'ERROR',
+          msg: error.message,
+          isSkipTranslate: true,
+        });
+      } else {
+        this._snackService.open({ type: 'ERROR', msg: T.PLUGINS.FAILED_TO_INSTALL });
+      }
     } finally {
       this.isUploading.set(false);
     }
