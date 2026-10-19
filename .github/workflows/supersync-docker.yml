@@ -74,11 +74,17 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Lowercase repository owner
+        id: vars
+        shell: bash
+        run: |
+          echo "owner=${GITHUB_REPOSITORY_OWNER@L}" >> $GITHUB_OUTPUT
+
       - name: Extract metadata (tags)
         id: meta
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302
         with:
-          images: ghcr.io/${{ github.repository_owner }}/supersync
+          images: ghcr.io/${{ steps.vars.outputs.owner }}/supersync
           tags: |
             type=raw,value=latest
             type=sha,prefix={{branch}}-
@@ -203,7 +209,13 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}#
+
+      - name: Lowercase repository owner
+        id: vars
+        shell: bash
+        run: |
+          echo "owner=${GITHUB_REPOSITORY_OWNER@L}" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
@@ -234,7 +246,7 @@ jobs:
           context: .
           file: ./packages/super-sync-server/Dockerfile
           push: true
-          tags: ghcr.io/${{ github.repository_owner }}/supersync:${{ steps.tag.outputs.tag }}
+          tags: ghcr.io/${{ steps.vars.outputs.owner }}/supersync:${{ steps.tag.outputs.tag }}
           build-args: |
             VCS_REF=${{ steps.source-ref.outputs.revision }}
           no-cache: true
