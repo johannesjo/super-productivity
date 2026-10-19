@@ -59,6 +59,7 @@ import { WorkContextService } from '../features/work-context/work-context.servic
 import { ProjectService } from '../features/project/project.service';
 import { INBOX_PROJECT } from '../features/project/project.const';
 import { TagService } from '../features/tag/tag.service';
+import { filterOutTodayTag } from '../root-store/meta/task-shared-meta-reducers/task-shared-helpers';
 import typia from 'typia';
 import { distinctUntilChanged, first, map, take, timeout } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
@@ -899,10 +900,11 @@ export class PluginBridgeService implements OnDestroy {
       );
     }
 
-    // Validate that referenced project and tags exist if they are being updated
-    await this._validateTaskReferences(updates.projectId, updates.tagIds);
+    // TODAY is virtual: strip it so a read-modify-write on a legacy task doesn't fail.
+    const tagIds = updates.tagIds && filterOutTodayTag(updates.tagIds);
+    await this._validateTaskReferences(updates.projectId, tagIds);
 
-    const { projectId, ...otherUpdates } = updates;
+    const { projectId, ...otherUpdates } = tagIds ? { ...updates, tagIds } : updates;
 
     if (projectId !== undefined) {
       const taskWithSubTasks = await firstValueFrom(
@@ -944,19 +946,15 @@ export class PluginBridgeService implements OnDestroy {
   async addTask(taskData: PluginCreateTaskData): Promise<string> {
     typia.assert<PluginCreateTaskData>(taskData);
 
-    // Validate that referenced project, tags, and parent task exist
-    await this._validateTaskReferences(
-      taskData.projectId,
-      taskData.tagIds,
-      taskData.parentId,
-    );
+    const tagIds = filterOutTodayTag(taskData.tagIds || []);
+    await this._validateTaskReferences(taskData.projectId, tagIds, taskData.parentId);
 
     // One mapping from PluginCreateTaskData to task defaults for both branches:
     // maintaining it twice is how `dueDay` came to be honoured for main tasks
     // and silently dropped for subtasks.
     const additional: Partial<TaskCopy> = {
       projectId: taskData.projectId || undefined,
-      tagIds: taskData.tagIds || [],
+      tagIds,
       notes: taskData.notes || '',
       timeEstimate: taskData.timeEstimate || 0,
       isDone: taskData.isDone || false,
@@ -1834,7 +1832,7 @@ export class PluginBridgeService implements OnDestroy {
       }
     }
 
-    // Validate tags exist if provided. TODAY is virtual and never goes in task.tagIds.
+    // Validate tags exist if provided
     if (tagIds && tagIds.length > 0) {
       const tags = await this._tagService.tagsNoMyDayAndNoList$.pipe(first()).toPromise();
 

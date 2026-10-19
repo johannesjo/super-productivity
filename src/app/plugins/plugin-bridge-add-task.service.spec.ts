@@ -288,24 +288,40 @@ describe('PluginBridgeService.addTask() — subtask creation', () => {
 
   // TODAY is virtual: membership comes from dueDay/dueWithTime and the id must
   // never land in task.tagIds (ARCHITECTURE-DECISIONS.md Decision #2). getAllTags()
-  // returns it, so a plugin can easily pass it back (#10737).
+  // returns it, and legacy tasks can still carry it on disk, so plugins send it
+  // back on read-modify-write. It is stripped, not rejected (#10737).
   describe('tagIds — virtual TODAY tag', () => {
-    it('addTask rejects the TODAY tag id', async () => {
+    it('addTask strips TODAY and stores the rest', async () => {
       const { service, taskService } = setup(true);
 
-      await expectAsync(
-        service.addTask({ title: 'task', tagIds: ['t1', TODAY_TAG.id] }),
-      ).toBeRejectedWithError(/TAGS_DO_NOT_EXIST.*TODAY/);
+      await service.addTask({ title: 'task', tagIds: ['t1', TODAY_TAG.id] });
 
-      expect(taskService.add).not.toHaveBeenCalled();
+      const additional = taskService.add.calls.mostRecent().args[2] as Partial<TaskCopy>;
+      expect(additional.tagIds).toEqual(['t1']);
     });
 
-    it('updateTask rejects the TODAY tag id', async () => {
+    it('updateTask strips TODAY and stores the rest', async () => {
+      const { service, taskService } = setup(true);
+
+      await service.updateTask('parent-1', { tagIds: ['t1', TODAY_TAG.id] });
+
+      expect(taskService.update).toHaveBeenCalledWith('parent-1', { tagIds: ['t1'] });
+    });
+
+    it('updateTask with only TODAY ends up with an empty tagIds', async () => {
+      const { service, taskService } = setup(true);
+
+      await service.updateTask('parent-1', { tagIds: [TODAY_TAG.id] });
+
+      expect(taskService.update).toHaveBeenCalledWith('parent-1', { tagIds: [] });
+    });
+
+    it('still rejects unknown tag ids next to TODAY', async () => {
       const { service, taskService } = setup(true);
 
       await expectAsync(
-        service.updateTask('parent-1', { tagIds: ['t1', TODAY_TAG.id] }),
-      ).toBeRejectedWithError(/TAGS_DO_NOT_EXIST.*TODAY/);
+        service.updateTask('parent-1', { tagIds: [TODAY_TAG.id, 'nope'] }),
+      ).toBeRejectedWithError(/TAGS_DO_NOT_EXIST.*nope/);
 
       expect(taskService.update).not.toHaveBeenCalled();
     });
