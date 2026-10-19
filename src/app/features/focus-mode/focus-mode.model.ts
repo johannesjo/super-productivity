@@ -123,7 +123,7 @@ export const getCountdownDurationForTask = (
   task: Readonly<{ timeEstimate: number; timeSpent: number }>,
 ): number => {
   const remaining = task.timeEstimate - task.timeSpent;
-  if (task.timeEstimate <= 0 || remaining <= 0) {
+  if (remaining <= 0) {
     return defaultDuration;
   }
   return Math.min(defaultDuration, Math.ceil(remaining / MINUTE_MS) * MINUTE_MS);

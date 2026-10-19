@@ -358,6 +358,7 @@ describe('FocusModeService.tryStartSessionForTask', () => {
   let mode: FocusModeMode;
   let timerPurpose: 'work' | 'break' | null;
   let focusCfg: { isShowPreparation?: boolean };
+  let strategyDuration: number;
   const task = {
     ...DEFAULT_TASK,
     id: 't1',
@@ -369,6 +370,7 @@ describe('FocusModeService.tryStartSessionForTask', () => {
     mode = FocusModeMode.Countdown;
     timerPurpose = null;
     focusCfg = {};
+    strategyDuration = 25 * MIN;
     const storeSpy = jasmine.createSpyObj('Store', [
       'select',
       'dispatch',
@@ -389,7 +391,9 @@ describe('FocusModeService.tryStartSessionForTask', () => {
         { provide: GlobalConfigService, useValue: { pomodoroConfig: () => null } },
         {
           provide: FocusModeStrategyFactory,
-          useValue: { getStrategy: () => ({ initialSessionDuration: 25 * MIN }) },
+          useValue: {
+            getStrategy: () => ({ initialSessionDuration: strategyDuration }),
+          },
         },
       ],
     });
@@ -410,6 +414,21 @@ describe('FocusModeService.tryStartSessionForTask', () => {
     expect(dispatch).toHaveBeenCalledWith(
       actions.startFocusSession({ duration: 25 * MIN, taskId: 't1' }),
     );
+  });
+
+  it('starts flowtime with an open-ended duration', () => {
+    mode = FocusModeMode.Flowtime;
+    strategyDuration = 0;
+    service.tryStartSessionForTask(task);
+    expect(dispatch).toHaveBeenCalledWith(
+      actions.startFocusSession({ duration: 0, taskId: 't1' }),
+    );
+  });
+
+  it('does nothing during a break', () => {
+    timerPurpose = 'break';
+    expect(service.tryStartSessionForTask(task)).toBe(false);
+    expect(dispatch).not.toHaveBeenCalled();
   });
 
   it('does nothing when a session is already active', () => {
