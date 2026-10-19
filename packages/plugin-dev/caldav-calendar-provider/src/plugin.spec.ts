@@ -1042,6 +1042,186 @@ END:VCALENDAR`;
       }, 10000);
     });
 
+    // Naver (caldav.calendar.naver.com) answers a calendar-query REPORT with
+    // href+etag only — the requested <calendar-data> is omitted — so every
+    // event was silently dropped and the calendar appeared empty. The data is
+    // fetched afterwards via calendar-multiget, which Naver does answer with
+    // payloads (verified against the live server).
+    describe('calendar-data fallback (Naver-style servers)', () => {
+      const cfg = {
+        serverUrl: 'https://caldav.calendar.naver.com',
+        username: 'user',
+        password: 'pass',
+        readCalendarIds: ['/caldav/user/calendar/default/'],
+      };
+
+      /** Naver-shaped calendar-query result: getetag only, no calendar-data. */
+      const naverQueryResponse = `<?xml version="1.0" encoding="UTF-8"?>
+<D:multistatus xmlns:D="DAV:" xmlns:caldav="urn:ietf:params:xml:ns:caldav">
+  <D:response>
+    <D:href>/caldav/user/calendar/default/event-one%40naver.com.ics</D:href>
+    <D:propstat>
+      <D:prop><D:getetag>"2026-10-01 19:15:56"</D:getetag></D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+  <D:response>
+    <D:href>/caldav/user/calendar/default/event-two%40naver.com.ics</D:href>
+    <D:propstat>
+      <D:prop><D:getetag>"2026-10-02 09:00:00"</D:getetag></D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>`;
+
+      const ics = (uid: string, summary: string): string =>
+        `BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+UID:${uid}
+DTSTART:20260320T100000Z
+DTEND:20260320T110000Z
+SUMMARY:${summary}
+END:VEVENT
+END:VCALENDAR`;
+
+      const multigetResponse = `<?xml version="1.0" encoding="UTF-8"?>
+<D:multistatus xmlns:D="DAV:" xmlns:caldav="urn:ietf:params:xml:ns:caldav">
+  <D:response>
+    <D:href>/caldav/user/calendar/default/event-one%40naver.com.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"2026-10-01 19:15:56"</D:getetag>
+        <caldav:calendar-data>${ics('event-one', 'Naver Event One')}</caldav:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+  <D:response>
+    <D:href>/caldav/user/calendar/default/event-two%40naver.com.ics</D:href>
+    <D:propstat>
+      <D:prop>
+        <D:getetag>"2026-10-02 09:00:00"</D:getetag>
+        <caldav:calendar-data>${ics('event-two', 'Naver Event Two')}</caldav:calendar-data>
+      </D:prop>
+      <D:status>HTTP/1.1 200 OK</D:status>
+    </D:propstat>
+  </D:response>
+</D:multistatus>`;
+
+      const makeHttp = (routeRequest: (body: string) => Promise<string>) => ({
+        get: vi.fn(),
+        post: vi.fn(),
+        put: vi.fn(),
+        patch: vi.fn(),
+        delete: vi.fn(),
+        request: vi.fn((_m: string, _u: string, body: string) => routeRequest(body)),
+      });
+
+      beforeEach(() => {
+        vi.useFakeTimers();
+        vi.setSystemTime(new Date('2026-03-15T00:00:00Z'));
+      });
+
+      afterEach(() => {
+        vi.useRealTimers();
+      });
+
+      it('fetches missing calendar-data via calendar-multiget', async () => {
+        const http = makeHttp(async (body) => {
+          if (body.includes('calendar-multiget')) return multigetResponse;
+          return naverQueryResponse;
+        });
+
+        const events = await definition.getNewIssuesForBacklog!(cfg as any, http as any);
+
+        expect(events).toHaveLength(2);
+        expect(events.map((e) => e.title).sort()).toEqual([
+          'Naver Event One',
+          'Naver Event Two',
+        ]);
+        expect(http.request).toHaveBeenCalledTimes(2);
+        const [method, url, multigetBody] = http.request.mock.calls[1];
+        expect(method).toBe('REPORT');
+        expect(url).toBe(
+          'https://caldav.calendar.naver.com/caldav/user/calendar/default/',
+        );
+        expect(multigetBody).toContain('calendar-multiget');
+        // Both hrefs must be requested, XML-escaped as-is.
+        expect(multigetBody).toContain(
+          '/caldav/user/calendar/default/event-one%40naver.com.ics',
+        );
+        expect(multigetBody).toContain(
+          '/caldav/user/calendar/default/event-two%40naver.com.ics',
+        );
+      });
+
+      it('falls back to per-event GETs when multiget is rejected', async () => {
+        const http = makeHttp(async (body) => {
+          if (body.includes('calendar-multiget')) {
+            throw Object.assign(new Error('Bad Request'), { status: 400 });
+          }
+          return naverQueryResponse;
+        });
+        http.get = vi.fn(async (url: string) =>
+          url.includes('event-one')
+            ? ics('event-one', 'Naver Event One')
+            : ics('event-two', 'Naver Event Two'),
+        );
+
+        const events = await definition.getNewIssuesForBacklog!(cfg as any, http as any);
+
+        expect(events).toHaveLength(2);
+        expect(http.get).toHaveBeenCalledTimes(2);
+        expect(http.get).toHaveBeenCalledWith(
+          'https://caldav.calendar.naver.com/caldav/user/calendar/default/event-one%40naver.com.ics',
+          { responseType: 'text' },
+        );
+      });
+
+      it('returns [] without throwing when the data cannot be fetched at all', async () => {
+        const pluginLog = (globalThis as any).PluginAPI.log;
+        pluginLog.warn.mockClear();
+        const http = makeHttp(async (body) => {
+          if (body.includes('calendar-multiget')) {
+            throw Object.assign(new Error('Bad Request'), { status: 400 });
+          }
+          return naverQueryResponse;
+        });
+        http.get = vi.fn().mockRejectedValue(new Error('Gone'));
+
+        const events = await definition.getNewIssuesForBacklog!(cfg as any, http as any);
+
+        expect(events).toEqual([]);
+        expect(pluginLog.warn).toHaveBeenCalledWith(
+          '[CalDAV] Skipped 2 event(s) whose data could not be fetched',
+        );
+      });
+
+      it('does not send a multiget when the query already returned data', async () => {
+        const nextcloudResponse = `<?xml version="1.0"?>
+<d:multistatus xmlns:d="DAV:" xmlns:cal="urn:ietf:params:xml:ns:caldav">
+  <d:response>
+    <d:href>/caldav/user/calendar/default/event-one.ics</d:href>
+    <d:propstat>
+      <d:prop>
+        <d:getetag>"abc"</d:getetag>
+        <cal:calendar-data>${ics('event-one', 'Inline Event')}</cal:calendar-data>
+      </d:prop>
+      <d:status>HTTP/1.1 200 OK</d:status>
+    </d:propstat>
+  </d:response>
+</d:multistatus>`;
+        const http = makeHttp(async () => nextcloudResponse);
+
+        const events = await definition.getNewIssuesForBacklog!(cfg as any, http as any);
+
+        expect(events).toHaveLength(1);
+        expect(events[0].title).toBe('Inline Event');
+        expect(http.request).toHaveBeenCalledTimes(1);
+      });
+    });
+
     describe('parseCompoundId / toCompoundId (W2 — server-controlled href safety)', () => {
       // A hostile or quirky CalDAV server returns an href containing what
       // looks like the old occurrence suffix (`::<digits>`). After fix, the

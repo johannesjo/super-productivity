@@ -516,6 +516,25 @@ const buildCalendarQueryBody = (start: string, end: string): string =>
   </c:filter>
 </c:calendar-query>`;
 
+/** Escape a string for embedding as XML text content (hrefs are re-embedded) */
+const escapeXmlText = (text: string): string =>
+  text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+
+/** Build REPORT body for calendar-multiget (RFC 4791 section 7.9) */
+const buildCalendarMultigetBody = (eventHrefs: string[]): string =>
+  `<?xml version="1.0" encoding="UTF-8"?>
+<c:calendar-multiget xmlns:d="DAV:" xmlns:c="${CALDAV_NS}">
+  <d:prop>
+    <d:getetag/>
+    <c:calendar-data/>
+  </d:prop>
+${eventHrefs.map((href) => `  <d:href>${escapeXmlText(href)}</d:href>`).join('\n')}
+</c:calendar-multiget>`;
+
 /** Get text content from an XML element, searching by local name across namespaces */
 const getXmlText = (parent: Element, localName: string): string => {
   // Try known namespaces
@@ -611,12 +630,14 @@ const parseEventResponses = (xml: string): CalendarEventResponse[] => {
     const rawHref = getXmlText(resp, 'href');
     const etag = getXmlText(resp, 'getetag').replace(/"/g, '');
     const calendarData = getXmlText(resp, 'calendar-data');
-    if (rawHref && calendarData) {
-      // Normalize href to pathname so IDs are consistent with createIssue
+    if (rawHref) {
+      // Normalize href to pathname so IDs are consistent with createIssue.
       const href =
         rawHref.startsWith('http://') || rawHref.startsWith('https://')
           ? new URL(rawHref).pathname
           : rawHref;
+      // calendarData may be '' — some servers (e.g. Naver) answer a
+      // calendar-query with href+etag only; ensureEventData fills it in.
       events.push({ href, etag, calendarData });
     }
   }
@@ -1092,6 +1113,64 @@ const expandIcalToSearchResults = (
 /** Minimum lookback for the read window, like the iCal provider's START_OFFSET. */
 const LOOKBACK_MS = 2 * 60 * 60 * 1000;
 
+/**
+ * Some CalDAV servers (e.g. Naver, caldav.calendar.naver.com) answer a
+ * calendar-query REPORT with the matching hrefs and etags but omit the
+ * requested <calendar-data> payload, so every event was silently dropped.
+ * Re-fetch those bodies with calendar-multiget (which those servers answer
+ * with data), chunked to keep request bodies a sane size. A multiget failure
+ * falls back to plain GETs of the individual resources; events whose body
+ * still can't be fetched are skipped by the caller.
+ */
+const MULTIGET_CHUNK_SIZE = 50;
+
+const ensureEventData = async (
+  http: PluginHttp,
+  calUrl: string,
+  responses: CalendarEventResponse[],
+): Promise<void> => {
+  const missing = responses.filter((r) => !r.calendarData);
+  if (missing.length === 0) return;
+
+  const dataByHref = new Map<string, string>();
+  for (let i = 0; i < missing.length; i += MULTIGET_CHUNK_SIZE) {
+    const chunk = missing.slice(i, i + MULTIGET_CHUNK_SIZE);
+    try {
+      const xml = await http.request<string>(
+        'REPORT',
+        calUrl,
+        buildCalendarMultigetBody(chunk.map((c) => c.href)),
+        {
+          headers: { ...caldavHeaders(), Depth: '1' },
+          responseType: 'text',
+        },
+      );
+      for (const r of parseEventResponses(xml)) {
+        if (r.calendarData) dataByHref.set(r.href, r.calendarData);
+      }
+    } catch {
+      // multiget unsupported or rejected — per-event GET below may still work
+    }
+  }
+
+  for (const r of missing) {
+    const viaMultiget = dataByHref.get(r.href);
+    if (viaMultiget) {
+      r.calendarData = viaMultiget;
+      continue;
+    }
+    try {
+      // Relative resolution against the (already origin-checked) calendar URL
+      // cannot escape its origin, so no extra SSRF check is needed here.
+      r.calendarData = await http.get<string>(new URL(r.href, calUrl).toString(), {
+        responseType: 'text',
+      });
+    } catch {
+      // leave empty — the caller skips events without data
+    }
+  }
+};
+
 /** Fetch events from a single calendar via REPORT */
 const fetchEventsForCalendar = async (
   http: PluginHttp,
@@ -1127,15 +1206,31 @@ const fetchEventsForCalendar = async (
   );
 
   const responses = parseEventResponses(xml);
-  return responses.flatMap((r) =>
-    expandIcalToSearchResults(
-      r.calendarData,
-      calendarHref,
-      r.href,
-      rangeStartMs,
-      rangeEndMs,
-    ),
-  );
+  await ensureEventData(http, calUrl, responses);
+
+  const out: PluginSearchResult[] = [];
+  let withoutData = 0;
+  for (const r of responses) {
+    if (!r.calendarData) {
+      withoutData++;
+      continue;
+    }
+    out.push(
+      ...expandIcalToSearchResults(
+        r.calendarData,
+        calendarHref,
+        r.href,
+        rangeStartMs,
+        rangeEndMs,
+      ),
+    );
+  }
+  if (withoutData > 0) {
+    PluginAPI.log.warn(
+      `[CalDAV] Skipped ${withoutData} event(s) whose data could not be fetched`,
+    );
+  }
+  return out;
 };
 
 /** Fetch events from all read calendars, merged and sorted by start time */
