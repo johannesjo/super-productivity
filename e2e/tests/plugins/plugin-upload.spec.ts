@@ -39,8 +39,13 @@ test.describe.serial('Plugin Upload', () => {
 
     await uploadTestPlugin(page);
 
+    // The new row is revealed and briefly highlighted, so the upload never looks
+    // like nothing happened (#10477).
     const row = pluginRow(page);
     await expect(row).toBeVisible({ timeout: 15000 });
+    await expect(row).toHaveClass(/isHighlighted/);
+    await expect(row).toBeInViewport();
+    await expect(row).not.toHaveClass(/isHighlighted/, { timeout: 5000 });
 
     // Only the "Custom" tab lists uploaded plugins
     await openTab(page, 'Built-in');

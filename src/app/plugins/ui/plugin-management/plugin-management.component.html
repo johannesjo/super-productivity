@@ -177,8 +177,11 @@
       @let isExpanded = expandedPluginIds().has(pluginId);
       @let isLoading = isPluginLoading(plugin);
       <li
+        #pluginRow
         class="plugin-row"
+        [attr.data-plugin-id]="pluginId"
         [class.isExpanded]="isExpanded"
+        [class.isHighlighted]="highlightedPluginId() === pluginId"
       >
         <div class="plugin-row-main">
           <plugin-icon

@@ -68,6 +68,7 @@ mat-card {
 // actions, details) goes in the content column, so it is exactly as wide as the
 // summary and never runs under the controls.
 .plugin-row {
+  position: relative;
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
@@ -77,6 +78,19 @@ mat-card {
 
   &:last-child {
     border-bottom: 0;
+  }
+
+  // Marks a just-installed plugin for a few seconds, like a task revealed by search.
+  // Inset from the row's top and bottom so it stays clear of the group heading and
+  // the next row, and widened into the list's side padding so it does not touch
+  // the icon or the toggle.
+  &.isHighlighted::after {
+    content: '';
+    position: absolute;
+    inset: var(--s-half) calc(-1 * var(--s));
+    border: var(--focus-ring-width) solid var(--c-accent);
+    border-radius: var(--radius-sm);
+    pointer-events: none;
   }
 }
 

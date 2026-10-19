@@ -608,6 +608,77 @@ describe('PluginManagementComponent', () => {
 
       expect(fixture.nativeElement.querySelector('.plugin-details')).toBeNull();
     });
+
+    describe('after a plugin ZIP installs', () => {
+      const install = async (installed: PluginState): Promise<void> => {
+        loadPluginFromZipSpy.and.callFake(async () => {
+          pluginStates.update((states) =>
+            new Map(states).set(installed.manifest.id, installed),
+          );
+          return { manifest: installed.manifest, loaded: false, isEnabled: false };
+        });
+        await component.onFileSelected(zipInputEvent());
+        fixture.detectChanges();
+        await fixture.whenStable();
+      };
+
+      it('shows the plugin in the "Custom" tab, scrolled into view and highlighted', async () => {
+        setStates(state('Bundled', 'built-in'));
+        fixture.detectChanges();
+        const scrollSpy = spyOn(HTMLElement.prototype, 'scrollIntoView');
+
+        await install(state('New Plugin', 'uploaded'));
+
+        expect(component.selectedTabIndex()).toBe(PLUGIN_TAB_INDEX.CUSTOM);
+        const highlighted = fixture.nativeElement.querySelectorAll('.isHighlighted');
+        expect(highlighted.length).toBe(1);
+        expect(highlighted[0].dataset.pluginId).toBe('new-plugin');
+        expect(scrollSpy).toHaveBeenCalledOnceWith({
+          behavior: 'smooth',
+          block: 'center',
+        });
+        expect(scrollSpy.calls.mostRecent().object).toBe(highlighted[0]);
+      });
+
+      describe('with a mocked clock', () => {
+        beforeEach(() => {
+          jasmine.clock().install();
+        });
+
+        afterEach(() => {
+          jasmine.clock().uninstall();
+        });
+
+        it('removes the highlight after a few seconds', async () => {
+          await install(state('New Plugin', 'uploaded'));
+
+          jasmine.clock().tick(2999);
+          expect(component.highlightedPluginId()).toBe('new-plugin');
+
+          jasmine.clock().tick(1);
+          expect(component.highlightedPluginId()).toBeNull();
+        });
+
+        it('keeps a second upload highlighted for its full time', async () => {
+          await install(state('First Plugin', 'uploaded'));
+          jasmine.clock().tick(2000);
+
+          await install(state('Second Plugin', 'uploaded'));
+          jasmine.clock().tick(2000);
+
+          expect(component.highlightedPluginId()).toBe('second-plugin');
+        });
+      });
+
+      it('highlights nothing when the ZIP fails to install', async () => {
+        loadPluginFromZipSpy.and.rejectWith(new Error('bad zip'));
+
+        await component.onFileSelected(zipInputEvent());
+
+        expect(component.highlightedPluginId()).toBeNull();
+        expect(component.selectedTabIndex()).toBe(PLUGIN_TAB_INDEX.BUILT_IN);
+      });
+    });
   });
 
   describe('listed community plugins', () => {
@@ -725,6 +796,18 @@ describe('PluginManagementComponent', () => {
         translateParams: { name: 'Listed' },
       });
       expect(component.isUploading()).toBe(false);
+    });
+
+    it('shows the installed plugin in the "Custom" tab, highlighted, like a ZIP upload', async () => {
+      stubConfirmDialog(true);
+      loadPluginFromZipSpy.and.returnValue(
+        Promise.resolve({ manifest: { id: 'listed', name: 'Listed' } }),
+      );
+
+      await component.installCommunityPlugin(listed);
+
+      expect(component.selectedTabIndex()).toBe(PLUGIN_TAB_INDEX.CUSTOM);
+      expect(component.highlightedPluginId()).toBe('listed');
     });
 
     it('downloads nothing when the risk warning is cancelled', async () => {

@@ -1,9 +1,14 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
+  DestroyRef,
+  ElementRef,
   inject,
+  Injector,
   signal,
+  viewChildren,
 } from '@angular/core';
 import { NgTemplateOutlet } from '@angular/common';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -118,6 +123,9 @@ const createCollator = (locale: string): Intl.Collator => {
 /** Tab indexes of the plugins page; "Built-in" opens by default. */
 export const PLUGIN_TAB_INDEX = { BUILT_IN: 0, CUSTOM: 1 } as const;
 
+/** How long a just-installed plugin's row stays highlighted. */
+const INSTALLED_PLUGIN_HIGHLIGHT_MS = 3000;
+
 @Component({
   selector: 'plugin-management',
   templateUrl: './plugin-management.component.html',
@@ -160,6 +168,7 @@ export class PluginManagementComponent {
   private readonly _pluginBridge = inject(PluginBridgeService);
   private readonly _pluginSecurity = inject(PluginSecurityService);
   private readonly _snackService = inject(SnackService);
+  private readonly _injector = inject(Injector);
   private readonly _allIssueProviders = this._store.selectSignal(selectAllIssueProviders);
 
   /** Current UI language; follows `TranslateService.use()` so a switch re-renders. */
@@ -294,6 +303,15 @@ export class PluginManagementComponent {
 
   /** Ids of plugins whose details area is open. */
   readonly expandedPluginIds = signal<ReadonlySet<string>>(new Set());
+
+  /** The just-installed plugin, highlighted for a moment after its row is revealed. */
+  readonly highlightedPluginId = signal<string | null>(null);
+  private _highlightTimeout?: number;
+  private readonly _pluginRows = viewChildren<ElementRef<HTMLElement>>('pluginRow');
+
+  constructor() {
+    inject(DestroyRef).onDestroy(() => window.clearTimeout(this._highlightTimeout));
+  }
 
   // Upload state
   readonly isUploading = signal<boolean>(false);
@@ -453,6 +471,7 @@ export class PluginManagementComponent {
       const plugin = await this._pluginService.loadPluginFromZip(file);
       // A plugin whose code fails at load time still resolves, with `error`
       // set and its row showing the failure; only a clean load gets a snack.
+      this._revealInstalledPlugin(plugin.manifest.id);
       if (!plugin.error) {
         this._snackService.open({
           type: 'SUCCESS',
@@ -494,6 +513,7 @@ export class PluginManagementComponent {
     try {
       const file = await downloadVerifiedCommunityPlugin(id, release);
       const installed = await this._pluginService.loadPluginFromZip(file);
+      this._revealInstalledPlugin(installed.manifest.id);
       if (!installed.error) {
         this._snackService.open({
           type: 'SUCCESS',
@@ -570,6 +590,30 @@ export class PluginManagementComponent {
       }
       return next;
     });
+  }
+
+  /**
+   * Shows the installed plugin's row: in the "Custom" tab, scrolled into view and
+   * highlighted for a moment, so an upload never looks like nothing happened (#10477).
+   */
+  private _revealInstalledPlugin(pluginId: string): void {
+    this.selectedTabIndex.set(PLUGIN_TAB_INDEX.CUSTOM);
+    this.highlightedPluginId.set(pluginId);
+    window.clearTimeout(this._highlightTimeout);
+    this._highlightTimeout = window.setTimeout(() => {
+      if (this.highlightedPluginId() === pluginId) {
+        this.highlightedPluginId.set(null);
+      }
+    }, INSTALLED_PLUGIN_HIGHLIGHT_MS);
+
+    afterNextRender(
+      () => {
+        this._pluginRows()
+          .find((row) => row.nativeElement.dataset['pluginId'] === pluginId)
+          ?.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      },
+      { injector: this._injector },
+    );
   }
 
   isUploadedPlugin(plugin: PluginInstance): boolean {
