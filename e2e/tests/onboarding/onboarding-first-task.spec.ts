@@ -383,7 +383,8 @@ test.describe('First-run onboarding', () => {
       await expect(hint).toHaveCount(0);
       await page.locator('.mobile-menu-close').tap();
       await expect(page.locator(INBOX_NAV_ITEM)).toBeHidden();
-      await expect(hint).toContainText(`${INBOX_TIP}, under ☰`);
+      await expect(hint).toContainText(INBOX_TIP);
+      await expect(hint).toContainText('Inbox, under ☰');
       await hint.getByRole('button', { name: 'Close tip' }).tap();
       await expect(hint).toHaveCount(0);
       assertNoRuntimeBrowserErrors(runtimeErrors, 'mobile onboarding');
