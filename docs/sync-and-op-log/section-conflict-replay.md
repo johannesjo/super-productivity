@@ -265,15 +265,19 @@ the replacement payload must be checked against the released-fleet rules in
 Content reorder recovery reuses existing action payloads without a schema or
 persisted-model change. Its E2E covers both note and dated-habit resolution
 histories consumed by unmodified v19.1.0. Older clients that resolve first retain
-their original safety gate; see the [S2 validation report](../plans/2026-09-26-sync-S2-result.md)
-and [dated-habit result](../plans/2026-09-26-sync-habit-date-reorder-result.md)
+their original safety gate; see [#10275](https://github.com/super-productivity/super-productivity/pull/10275)
+and [#10295](https://github.com/super-productivity/super-productivity/pull/10295)
 for released-asset provenance and the tested limits.
 
 The provider suite checks both GitLab and Jira replacement histories against
 unmodified v19.1.0 assets, including restart and the rendered tab order. If that
 released client encounters the conflict first, it still stops with pending work intact;
-the new resolver cannot change old-client behavior. See the
-[provider fix validation](../plans/2026-09-26-sync-issue-provider-reorder-reproduction.md#provider-independent-recovery).
+the new resolver cannot change old-client behavior. Admission is
+provider-independent: any `ISSUE_PROVIDER_UPDATE` with a nonempty `changes`
+object whose `id` is absent or equals the declared provider qualifies, because
+`updateOne` leaves the ordered IDs unchanged unless the identity changes.
+Deletions, competing reorders, malformed changes and identity changes stay
+unsupported ([#10294](https://github.com/super-productivity/super-productivity/pull/10294)).
 
 The structural rule's E2E checks, against unmodified v19.1.0 assets, that a
 released receiver renders a reissued pin once, that it consumes a project order

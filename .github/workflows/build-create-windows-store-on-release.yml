@@ -23,9 +23,6 @@ jobs:
     if: '!github.event.release.prerelease'
 
     steps:
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v6
-        with:
-          node-version: 22
       # required because setting via env.TZ does not work on windows
       - name: Set timezone to Europe Standard Time
         uses: szenius/set-timezone@1f9716b0f7120e344f0c62bb7b1ee98819aefd42 # v2.0
@@ -36,6 +33,9 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
           persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v6
+        with:
+          node-version-file: .nvmrc
       # work around for npm installs from git+https://github.com/johannesjo/J2M.git
       - name: Reconfigure git to use HTTP authentication
         run: >

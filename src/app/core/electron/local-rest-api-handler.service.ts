@@ -895,6 +895,12 @@ export class LocalRestApiHandlerService {
         if (!task) {
           return createErrorResponse(requestId, 404, 'TASK_NOT_FOUND', 'Task not found');
         }
+        // An echoed `isDone: true` (GET→PATCH round trip) would only stamp a
+        // new `doneOn`: it moves the completion date and turns a won't-do task
+        // into a completed one.
+        if (changes.isDone === true && task.isDone) {
+          delete (changes as Record<string, unknown>).isDone;
+        }
 
         const deadlineFields = Object.fromEntries(
           DEADLINE_FIELDS.filter((field) => hasOwn(changes, field)).map((field) => [

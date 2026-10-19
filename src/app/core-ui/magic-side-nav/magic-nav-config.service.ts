@@ -246,13 +246,6 @@ export class MagicNavConfigService {
             } as NavItem,
           ]
         : []),
-      {
-        type: 'route',
-        id: 'scheduled-list',
-        label: T.MH.ALL_PLANNED_LIST,
-        icon: NAV_SECTION_ICON.SCHEDULED_LIST,
-        route: '/scheduled-list',
-      },
 
       // Help Menu (rendered as mat-menu)
       // Donation links are disabled on native iOS and every macOS desktop build

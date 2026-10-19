@@ -377,6 +377,13 @@ test.describe('First-run onboarding', () => {
       await expect(hint).toContainText(MODEL_TIP);
       await expect(hint).toContainText('Inbox, under ☰');
       await expectHintOnInboxChip(page, 'My first mobile task');
+      // The tip would sit above the opened menu: it steps aside until it closes.
+      await page.locator('mobile-bottom-nav nav > button:last-of-type').tap();
+      await expect(page.locator(INBOX_NAV_ITEM)).toBeVisible();
+      await expect(hint).toHaveCount(0);
+      await page.locator('.mobile-menu-close').tap();
+      await expect(page.locator(INBOX_NAV_ITEM)).toBeHidden();
+      await expect(hint).toContainText(`${INBOX_TIP}, under ☰`);
       await hint.getByRole('button', { name: 'Close tip' }).tap();
       await expect(hint).toHaveCount(0);
       assertNoRuntimeBrowserErrors(runtimeErrors, 'mobile onboarding');

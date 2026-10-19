@@ -155,8 +155,9 @@ Center.
   `ghcr.io/super-productivity/supersync:latest` and `master-<sha>`. The prune keeps
   the 15 newest master images and excludes `v*`, so release tags stay available.
 - Pre-release and manual Apple workflows upload builds without submitting them for
-  App Review. See [the TestFlight plan](plans/2026-07-14-ios-testflight-master-builds.md)
-  for proposed additional branch behavior; it is not current behavior.
+  App Review. Public TestFlight builds come only from the PR label workflow, see
+  [Apple release automation](apple-release-automation.md#public-testflight-builds-label-triggered);
+  `master` pushes do not build for TestFlight.
 
 ## Reproducible Android builds
 

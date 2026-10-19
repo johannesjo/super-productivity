@@ -35,6 +35,7 @@ const EXAMPLE_TASK = makeTask('example', { projectId: 'INBOX_PROJECT' });
 describe('OnboardingHintService', () => {
   let store: MockStore;
   let isShowAddTaskBar: WritableSignal<boolean>;
+  let isMobileSideNavOpen: WritableSignal<boolean>;
   let selectedTaskId: WritableSignal<string | null>;
   let isTaskContextMenuOpen: WritableSignal<boolean>;
   let syncEnabled: WritableSignal<boolean>;
@@ -116,6 +117,7 @@ describe('OnboardingHintService', () => {
     localStorage.setItem(LS.EXAMPLE_TASKS_CREATED, 'true');
 
     isShowAddTaskBar = signal(false);
+    isMobileSideNavOpen = signal(false);
     selectedTaskId = signal(null);
     isTaskContextMenuOpen = signal(false);
     syncEnabled = signal(false);
@@ -134,7 +136,11 @@ describe('OnboardingHintService', () => {
         provideMockStore(),
         {
           provide: LayoutService,
-          useValue: { isShowAddTaskBar, isShowMobileBottomNav: signal(false) },
+          useValue: {
+            isShowAddTaskBar,
+            isMobileSideNavOpen,
+            isShowMobileBottomNav: signal(false),
+          },
         },
         {
           provide: DataInitStateService,
@@ -439,6 +445,17 @@ describe('OnboardingHintService', () => {
   });
 
   describe('on phones', () => {
+    // The tips sit above the phone menu; the last one points at the menu (☰).
+    it('hides while the menu is open', () => {
+      const service = createPhoneService();
+      addFirstTask([EXAMPLE_TASK]);
+      expect(service.currentStep()).toBe('task-swipe-left');
+      isMobileSideNavOpen.set(true);
+      expect(service.currentStep()).toBeNull();
+      isMobileSideNavOpen.set(false);
+      expect(service.currentStep()).toBe('task-swipe-left');
+    });
+
     it('introduces swipe left, then Today and the Inbox', () => {
       const service = createPhoneService();
       addFirstTask([EXAMPLE_TASK]);
