@@ -4,7 +4,12 @@ import { concatMap, startWith, tap } from 'rxjs/operators';
 import { SnackService } from '../../../core/snack/snack.service';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { DroidLog } from '../../../core/log';
-import { androidInterface, AndroidShareData } from '../android-interface';
+import {
+  androidInterface,
+  AndroidReminderSnoozeEvent,
+  AndroidShareData,
+  parseReminderTapQueue,
+} from '../android-interface';
 import { TaskService } from '../../tasks/task.service';
 import { TaskAttachmentService } from '../../tasks/task-attachment/task-attachment.service';
 import { T } from '../../../t.const';
@@ -26,32 +31,37 @@ export class AndroidEffects {
     createEffect(
       () =>
         androidInterface.onShareWithAttachment$.pipe(
-          tap((shareData) => {
-            // Guard against empty payloads (e.g. stale share data persisted by an
-            // older app version) so we never create a blank, attachment-less task.
-            if (!shareData?.path?.trim()) {
-              DroidLog.warn('Ignoring share intent with empty content');
-              return;
-            }
-            const taskTitle = buildTaskTitle(shareData);
-            const taskId = this._taskService.add(taskTitle);
-            const icon = shareData.type === 'LINK' ? 'link' : 'file_present';
-            this._taskAttachmentService.addAttachment(taskId, {
-              title:
-                shareData.subject?.trim() || shareData.title?.trim() || shareData.path,
-              type: shareData.type,
-              path: shareData.path,
-              icon,
-              id: null,
-            });
-            this._snackService.open({
-              type: 'SUCCESS',
-              msg: 'Task created from share',
-            });
-          }),
+          tap((shareData) => this.createTaskFromShare(shareData)),
         ),
       { dispatch: false },
     );
+
+  /** Public for tests: `handleShare$` only exists inside the Android WebView. */
+  createTaskFromShare(shareData: AndroidShareData): void {
+    // Guard against empty payloads (e.g. stale share data persisted by an
+    // older app version) so we never create a blank, attachment-less task.
+    if (!shareData?.path?.trim()) {
+      DroidLog.warn('Ignoring share intent with empty content');
+      return;
+    }
+    const taskTitle = buildTaskTitle(shareData);
+    // isIgnoreShortSyntax: a share is untrusted external content (often a web
+    // page title), so `#tag`/`@date`/`+project` tokens are stored literally, as
+    // for the iOS share extension and the URL scheme actions.
+    const taskId = this._taskService.add(taskTitle, false, {}, false, true);
+    const icon = shareData.type === 'LINK' ? 'link' : 'file_present';
+    this._taskAttachmentService.addAttachment(taskId, {
+      title: shareData.subject?.trim() || shareData.title?.trim() || shareData.path,
+      type: shareData.type,
+      path: shareData.path,
+      icon,
+      id: null,
+    });
+    this._snackService.open({
+      type: 'SUCCESS',
+      msg: 'Task created from share',
+    });
+  }
 
   showForegroundServiceFailure$ =
     IS_ANDROID_WEB_VIEW &&
@@ -76,8 +86,10 @@ export class AndroidEffects {
       { dispatch: false },
     );
 
-  // Import tasks captured natively (startup quick-add overlay) on cold start and
-  // every resume. concatMap keeps imports serial; startWith covers cold start.
+  // Import tasks left in the native capture inbox by the removed startup
+  // quick-add overlay of an older app version, on cold start and every resume
+  // (a retry if the first import failed). concatMap keeps imports serial;
+  // startWith covers cold start.
   importNativeCaptures$ =
     IS_ANDROID_WEB_VIEW &&
     createEffect(
@@ -131,8 +143,7 @@ export class AndroidEffects {
             try {
               const snoozeQueue = androidInterface.getReminderSnoozeQueue?.();
               if (snoozeQueue) {
-                const events: { taskId: string; newRemindAt: number }[] =
-                  JSON.parse(snoozeQueue);
+                const events: AndroidReminderSnoozeEvent[] = JSON.parse(snoozeQueue);
                 // eslint-disable-next-line local-rules/no-user-content-in-logs -- grandfathered log baseline (2026-09), not yet triaged
                 DroidLog.log('Resume: found reminder snooze queue', events);
                 for (const event of events) {
@@ -147,7 +158,7 @@ export class AndroidEffects {
               const tapTaskId = androidInterface.getReminderTapQueue?.();
               if (tapTaskId) {
                 DroidLog.log('Resume: found reminder tap queue', tapTaskId);
-                androidInterface.onReminderTap$.next(tapTaskId);
+                androidInterface.onReminderTap$.next(parseReminderTapQueue(tapTaskId));
               }
             } catch (e) {
               DroidLog.err('Failed to process reminder tap queue on resume', e);

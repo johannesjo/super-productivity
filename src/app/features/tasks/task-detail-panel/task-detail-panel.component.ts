@@ -93,6 +93,7 @@ import {
 } from '../add-subtask-input/add-subtask-input.component';
 import { findNextTaskAfterSubtree } from '../../../util/find-adjacent-focusable';
 import { TaskContextMenuComponent } from '../task-context-menu/task-context-menu.component';
+import { isWontDoTask } from '../util/is-wont-do-task';
 
 @Component({
   selector: 'task-detail-panel',
@@ -761,7 +762,13 @@ export class TaskDetailPanelComponent implements OnInit, AfterViewInit, OnDestro
 
     dialogRef.afterClosed().subscribe((doneOn) => {
       if (typeof doneOn === 'number') {
-        this.taskService.update(this.task().id, { doneOn });
+        // A won't-do task is one whose `wontDoOn` matches its `doneOn`, so a
+        // new date moves both; moving `doneOn` alone would complete it.
+        const task = this.task();
+        this.taskService.update(task.id, {
+          doneOn,
+          ...(isWontDoTask(task) && { wontDoOn: doneOn }),
+        });
       }
     });
   }

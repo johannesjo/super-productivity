@@ -5,6 +5,10 @@ implemented (see [Implementation](#implementation-pr-1)); "How it works today"
 below describes the code before it. Tracker: #10393, queue item 1. Findings:
 #10382.
 
+**Sections:** [Problem](#problem) · [How it works today](#how-it-works-today) · [Options](#options) · [Released clients and graceful degradation](#released-clients-and-graceful-degradation) · [Fuzz pins and E2E proof](#fuzz-pins-and-e2e-proof) · [Recommendation](#recommendation) · [Decisions for @johannesjo](#decisions-for-johannesjo) · [Outcome](#outcome) · [Implementation (PR 1)](#implementation-pr-1) · [Per-field winners (#10422)](#per-field-winners-10422)
+
+Line numbers: `rg -n '^#{1,3} ' <this file>`, then read one section with `sed -n`.
+
 ## Problem
 
 After a conflict, the resolving device uploads a replace-mode `[X] LWW Update`
@@ -80,8 +84,8 @@ unless noted.
    - `'patch'` or any other mode, including none → `updateOne`;
    - an absent entity → `addOne` with the `RECREATE_FALLBACK` backfill. NOTE is
      added raw, and a marked `recreatesEntityAfterDelete` patch is ignored.
-   - Tasks keep their project, tag and Today lists in step. Nothing keeps
-     `note.todayOrder` in step.
+   - Tasks keep their project, tag and Today lists in step; notes keep
+     `note.todayOrder` in step with `isPinnedToToday` (#10379).
 9. The envelope is `LwwUpdatePayload`
    ([`operation.types.ts`](../../packages/sync-core/src/operation.types.ts)).
    Its flat `actionPayload` extracts as `{}`, so the merge sees a resolution op
@@ -165,8 +169,8 @@ hydration must replay identically.
 - **Today's merge would fix both note pins** once NOTE has a
   `RECREATE_FALLBACK` entry (lock vs pin, content vs pin): their fields are
   disjoint.
-- **A clean regression pin also needs `todayOrder` upkeep** in
-  `lwwUpdateMetaReducer`. Otherwise `divergence:.note.todayOrder.*` stays.
+- **`todayOrder` upkeep in `lwwUpdateMetaReducer`**, which a clean regression
+  pin also needs, landed in #10659 (#10379).
 
 ## Released clients and graceful degradation
 
@@ -181,9 +185,10 @@ Checked with `git show v18.15.0:` and `git show v19.1.0:`.
 **The hazards of sending a `'patch'` where a `'replace'` went before:**
 
 1. **Clears.** v18.15.0 ignores `clearedFields`, and v19.1.0 applies it. The
-   v18.22.0 boundary is from
-   [contributor-sync-model.md](./contributor-sync-model.md) ("Clearing a
-   field", #9776), not checked against a tag.
+   LWW payload apply (`clearedFields` in `operation-converter.util.ts`) first
+   shipped in v18.21.2 (`633a27b`, checked with
+   `git tag --contains`); [contributor-sync-model.md](./contributor-sync-model.md)
+   ("Clearing a field", #9776) rounds this to v18.22.0.
    - An older receiver keeps a stale value, e.g. a cleared `dueWithTime` or
      `reminderId`, where `setOne` cleared it.
    - This is the same documented residual as `asPatchSnapshotIfTypeShadowed`.
@@ -218,14 +223,14 @@ Expected outcomes are by code reading and have not been run. Each fix PR turns
 its pins into regression pins and leaves all others unchanged, including those
 of #10380 and #10381.
 
-| Pin                                                         | A (pieces 1–3)               | B                                | C                         | NOTE admission                         |
-| ----------------------------------------------------------- | ---------------------------- | -------------------------------- | ------------------------- | -------------------------------------- |
-| done status lost when both devices rename                   | fixed                        | — (superseded path unchanged)    | —                         | —                                      |
-| tracked time lost to a later concurrent rename              | fixed, via the rebased delta | —                                | with A                    | —                                      |
-| note lock lost to an unpin; note content loses to an unpin  | —                            | lock only; `todayOrder` diverges | —                         | fixed, if `todayOrder` is kept in step |
-| habit count lost to a rename; habit rename loses to a count | —                            | —                                | —                         | —                                      |
-| two devices tracking one unscheduled task (#10378)          | —                            | —                                | time, local-win direction | —                                      |
-| task rename loses to tracking (#10260)                      | —                            | —                                | —                         | —                                      |
+| Pin                                                         | A (pieces 1–3)               | B                             | C                         | NOTE admission                                 |
+| ----------------------------------------------------------- | ---------------------------- | ----------------------------- | ------------------------- | ---------------------------------------------- |
+| done status lost when both devices rename                   | fixed                        | — (superseded path unchanged) | —                         | —                                              |
+| tracked time lost to a later concurrent rename              | fixed, via the rebased delta | —                             | with A                    | —                                              |
+| note lock lost to an unpin; note content loses to an unpin  | —                            | lock only                     | —                         | fixed (`todayOrder` kept in step since #10659) |
+| habit count lost to a rename; habit rename loses to a count | —                            | —                             | —                         | —                                              |
+| two devices tracking one unscheduled task (#10378)          | —                            | —                             | time, local-win direction | —                                              |
+| task rename loses to tracking (#10260)                      | —                            | —                             | —                         | —                                              |
 
 **Start from an E2E** (rule 12: both conflict directions, both timestamp
 winners):
@@ -371,8 +376,11 @@ proof. Retiring the snapshot does not remove it from durable replay.
 This does not permit extracting per-action payloads, reading incoming resolution
 values, merging resolution rows, or building a derived field index (decisions
 3, 5 and 11). Existing time-bearing replacements and active older resolvers
-remain capable of erasing time. Readers before v18.22.0 ignore patch clears;
-accepting that additional clear limitation for this exception remains pending.
+remain capable of erasing time. Readers before v18.21.2 ignore patch clears
+and may keep a stale optional value; decision 3 covers this as the same
+residual with the same end date, the enforced version floor (#10397). A
+`'replace'` here instead would lose tracked time (#10393 open question 6,
+decided 2026-10-06).
 
 **Decision 5a (2026-10-01, #10421).** Asked whether rule 1 below stays within
 decision 5, @johannesjo answered: "Ponder in sub agent and act according to
@@ -397,7 +405,7 @@ known habit trade (`noReorder:20725006`); otherwise TASK only.
 ## Implementation (PR 1)
 
 [`conflict-field-patch.util.ts`](../../src/app/op-log/sync/conflict-field-patch.util.ts)
-holds the rules; `ConflictResolutionService._tryCreateFieldPatch` builds the op.
+holds the rules; `ConflictLocalWinOpsService._tryCreateFieldPatch` builds the op.
 
 - **Overlap:** every update-vs-update conflict of a TASK, PROJECT, TAG or
   SIMPLE_COUNTER whose ops are readable resolves per field (#10422, see

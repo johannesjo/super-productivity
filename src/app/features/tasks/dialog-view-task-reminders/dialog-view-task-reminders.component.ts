@@ -45,6 +45,10 @@ import { DateService } from '../../../core/date/date.service';
 import { MatTooltip } from '@angular/material/tooltip';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import {
+  getTaskDeleteConfirmData,
+  isTaskDeleteConfirmRequired,
+} from '../util/get-task-delete-confirm';
 import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 
 const MINUTES_TO_MILLISECONDS = 1000 * 60;
@@ -399,15 +403,11 @@ export class DialogViewTaskRemindersComponent implements OnDestroy {
     }
     const isConfirmBeforeDelete =
       this._globalConfigService.cfg()?.tasks?.isConfirmBeforeDelete ?? true;
-    if (isConfirmBeforeDelete) {
+    if (isTaskDeleteConfirmRequired(task, isConfirmBeforeDelete)) {
       this._subs.add(
         this._matDialog
           .open(DialogConfirmComponent, {
-            data: {
-              okTxt: T.F.TASK.D_CONFIRM_DELETE.OK,
-              message: T.F.TASK.D_CONFIRM_DELETE.MSG,
-              translateParams: { title: task.title },
-            },
+            data: getTaskDeleteConfirmData(task),
           })
           .afterClosed()
           .subscribe((isConfirm) => {

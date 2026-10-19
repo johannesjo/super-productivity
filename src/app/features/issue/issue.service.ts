@@ -24,8 +24,6 @@ import {
   DEFAULT_ISSUE_STRS,
   JIRA_TYPE,
   OPEN_PROJECT_TYPE,
-  REDMINE_TYPE,
-  NEXTCLOUD_DECK_TYPE,
   PLAINSPACE_TYPE,
 } from './issue.const';
 import { TaskService } from '../tasks/task.service';
@@ -43,11 +41,11 @@ import { GitlabCommonInterfacesService } from './providers/gitlab/gitlab-common-
 import { CaldavCommonInterfacesService } from './providers/caldav/caldav-common-interfaces.service';
 import { OpenProjectCommonInterfacesService } from './providers/open-project/open-project-common-interfaces.service';
 // Gitea is now a plugin — no built-in service needed
-import { RedmineCommonInterfacesService } from './providers/redmine/redmine-common-interfaces.service';
+// Redmine is now a plugin — no built-in service needed
 // Linear is now a plugin — no built-in service needed
 // ClickUp is now a plugin — no built-in service needed
 // Azure DevOps is now a plugin — no built-in service needed
-import { NextcloudDeckCommonInterfacesService } from './providers/nextcloud-deck/nextcloud-deck-common-interfaces.service';
+// Nextcloud Deck is now a plugin — no built-in service needed
 import { PlainspaceCommonInterfacesService } from './providers/plainspace/plainspace-common-interfaces.service';
 import { SnackService } from '../../core/snack/snack.service';
 import { T } from '../../t.const';
@@ -97,10 +95,6 @@ export class IssueService {
   private _gitlabCommonInterfacesService = inject(GitlabCommonInterfacesService);
   private _caldavCommonInterfaceService = inject(CaldavCommonInterfacesService);
   private _openProjectInterfaceService = inject(OpenProjectCommonInterfacesService);
-  private _redmineInterfaceService = inject(RedmineCommonInterfacesService);
-  private _nextcloudDeckCommonInterfaceService = inject(
-    NextcloudDeckCommonInterfacesService,
-  );
   private _plainspaceCommonInterfaceService = inject(PlainspaceCommonInterfacesService);
   private _calendarCommonInterfaceService = inject(CalendarCommonInterfacesService);
   private _issueProviderService = inject(IssueProviderService);
@@ -121,9 +115,7 @@ export class IssueService {
     [JIRA_TYPE]: this._jiraCommonInterfacesService,
     [CALDAV_TYPE]: this._caldavCommonInterfaceService,
     [OPEN_PROJECT_TYPE]: this._openProjectInterfaceService,
-    [REDMINE_TYPE]: this._redmineInterfaceService,
     [ICAL_TYPE]: this._calendarCommonInterfaceService,
-    [NEXTCLOUD_DECK_TYPE]: this._nextcloudDeckCommonInterfaceService,
     [PLAINSPACE_TYPE]: this._plainspaceCommonInterfaceService,
   };
 
@@ -955,7 +947,12 @@ export class IssueService {
    * devices (#9776), so the clear goes through `dismissReminderOnly`, whose
    * reducer sets it deterministically. Rare enough that the extra op is fine.
    */
-  private _updateTaskFromPoll(task: Task, taskChanges: Partial<Task>): void {
+  private _updateTaskFromPoll(task: Task, taskChangesIn: Partial<Task>): void {
+    // A done write to a task that is already done would only stamp a new
+    // `doneOn`: it moves the completion date and turns a won't-do task into a
+    // completed one (`isWontDoTask`).
+    const { isDone, ...rest } = taskChangesIn;
+    const taskChanges = isDone === true && task.isDone ? rest : taskChangesIn;
     const { changes, isClearRemindAt } = withRemindAtForDueChange(
       task,
       taskChanges,
@@ -979,9 +976,9 @@ export class IssueService {
     return this.ISSUE_SERVICE_MAP[key];
   }
 
-  private _getProviderIcon(key: IssueProviderKey): string {
+  private _getProviderIcon(key: IssueProviderKey): string | undefined {
     if (this._pluginRegistry.hasProvider(key)) {
-      return this._pluginRegistry.getIcon(key);
+      return this._pluginRegistry.getSvgIcon(key);
     }
     return ISSUE_PROVIDER_ICON_MAP[key as BuiltInIssueProviderKey];
   }

@@ -111,6 +111,18 @@ describe('FinishDayBeforeCloseEffects._handleCloseDecision()', () => {
     });
   });
 
+  // Finish Day archives won't-do tasks as well.
+  it("counts tasks finished as won't do", async () => {
+    showDialogSpy.and.returnValue(Promise.resolve('cancel'));
+
+    await effects._handleCloseDecision([
+      { ...doneTask, doneOn: 5, wontDoOn: 5 },
+      undoneTask,
+    ]);
+
+    expect(showDialogSpy).toHaveBeenCalledWith(1);
+  });
+
   describe('when there are no done tasks', () => {
     it('calls setDone immediately without showing a dialog', async () => {
       await effects._handleCloseDecision([undoneTask]);

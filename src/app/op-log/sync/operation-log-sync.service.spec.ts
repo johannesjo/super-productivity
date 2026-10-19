@@ -372,6 +372,8 @@ describe('OperationLogSyncService', () => {
           provide: OperationLogDownloadService,
           useValue: jasmine.createSpyObj('OperationLogDownloadService', [
             'downloadRemoteOps',
+            'getUndecryptableRemoteOps',
+            'clearUndecryptableRemoteOps',
           ]),
         },
         { provide: LockService, useValue: lockServiceSpy },
@@ -1950,6 +1952,62 @@ describe('OperationLogSyncService', () => {
 
           expect(forceUploadSpy).toHaveBeenCalled();
           expect(outcome.kind).toBe('no_new_ops');
+        });
+
+        it('cancels USE_LOCAL when the user declines deleting undecryptable remote ops', async () => {
+          const incomingImport: Operation = {
+            ...remoteOp(),
+            id: 'import-in-prefix',
+            actionType: ActionType.LOAD_ALL_DATA,
+            opType: OpType.SyncImport,
+            entityType: 'ALL',
+            entityId: undefined,
+          };
+          downloadServiceSpy.downloadRemoteOps.and.resolveTo({
+            newOps: [incomingImport],
+            latestServerSeq: 17,
+            needsFullStateUpload: false,
+            success: true,
+            providerMode: 'superSyncOps',
+            failedFileCount: 0,
+            decryptErrorAfterKeptPrefix: decryptError,
+          });
+          opLogStoreSpy.getUnsynced.and.resolveTo([
+            {
+              seq: 1,
+              op: {
+                ...remoteOp(),
+                id: 'local-op-1',
+                clientId: 'client-A',
+                payload: { title: 'Local Title' },
+                vectorClock: { clientA: 1 },
+              },
+              appliedAt: Date.now(),
+              source: 'local',
+            },
+          ]);
+          stateSnapshotServiceSpy.getStateSnapshot.and.returnValue({
+            task: { ids: ['task-1'] },
+            project: { ids: [INBOX_PROJECT.id] },
+            tag: { ids: [TODAY_TAG.id] },
+            note: { ids: [] },
+          } as any);
+          syncImportConflictDialogServiceSpy.showConflictDialog.and.resolveTo(
+            'USE_LOCAL',
+          );
+          const localState = TestBed.inject(SyncLocalStateService);
+          spyOn(localState, 'confirmOverwriteOfUndecryptableRemoteOps').and.returnValue(
+            false,
+          );
+          const forceUploadSpy = spyOn(service, 'forceUploadLocalState');
+
+          const outcome = await service.downloadRemoteOps(provider, {
+            keepDecryptedPrefix: true,
+          });
+
+          expect(localState.confirmOverwriteOfUndecryptableRemoteOps).toHaveBeenCalled();
+          expect(forceUploadSpy).not.toHaveBeenCalled();
+          expect(outcome.kind).toBe('cancelled');
         });
 
         it('still reports the decrypt error when the cursor stayed behind the prefix', async () => {
@@ -4896,6 +4954,10 @@ describe('OperationLogSyncService', () => {
       );
       expect(opLogStoreSpy.getOpById).toHaveBeenCalledOnceWith('force-import');
       expect(result).toEqual({ hasUnresolvedOps: false });
+      // #9256: the clean slate deleted the ops this device could not decrypt.
+      expect(
+        TestBed.inject(OperationLogDownloadService).clearUndecryptableRemoteOps,
+      ).toHaveBeenCalled();
     });
 
     it('should upload pending ops after creating SYNC_IMPORT', async () => {
@@ -4966,6 +5028,10 @@ describe('OperationLogSyncService', () => {
       await expectAsync(service.forceUploadLocalState(mockProvider)).toBeRejectedWith(
         error,
       );
+      // The server was not replaced, so the undecryptable ops are still there.
+      expect(
+        TestBed.inject(OperationLogDownloadService).clearUndecryptableRemoteOps,
+      ).not.toHaveBeenCalled();
     });
 
     it('should reject when mandatory encryption blocks the force upload', async () => {

@@ -41,6 +41,6 @@ test.describe.serial('Plugin Management Feature Check', () => {
     ).toBeVisible();
     await expect(
       pluginManagement.getByRole('link', { name: /Get your plugin to show up here/i }),
-    ).toHaveAttribute('href', /community-plugins\.json/);
+    ).toHaveAttribute('href', /plugin-development\.md#get-listed-in-the-app/);
   });
 });

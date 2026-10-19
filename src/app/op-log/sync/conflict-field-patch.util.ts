@@ -18,6 +18,10 @@ import { ActionType, isLwwUpdatePayload, OpType } from '../core/operation.types'
 import type { EntityConflict, Operation } from '../core/operation.types';
 import type { EntityType } from '../core/operation.types';
 import { RECREATE_FALLBACK } from '../core/recreate-fallback.const';
+import type {
+  MixedSourceWrittenOperation,
+  OperationLogStoreService,
+} from '../persistence/operation-log-store.service';
 import {
   compareVectorClocks,
   mergeVectorClocks,
@@ -333,50 +337,50 @@ export const keptLocalTimeDeltas = (
 };
 
 /**
- * SuperSync only: move kept pending deltas and newly written field patches past
- * durable remote rows. Caller holds OPERATION_LOG, preventing upload selection
- * of the fresh patches until their clocks are final. Never include local-win
- * snapshots: their stale fields could then dominate newer remote edits. Older
- * pending patches are also excluded: only deltas have receipt recovery.
+ * Kept deltas SuperSync re-clocks eagerly: beside merged patches and readable
+ * remote wins. Undefined when there is none.
  */
-export const rebaseKeptTimeDeltas = async (
-  store: {
-    getOpById: (opId: string) => Promise<
-      | {
-          source: string;
-          syncedAt?: number;
-          rejectedAt?: number;
-          reducerRejectedAt?: number;
-        }
-      | undefined
-    >;
-    rebasePendingLocalOps: (
-      opIds: readonly string[],
-      clockToDominate: VectorClock,
-    ) => Promise<Operation[]>;
-  },
-  kept: { opIds: Set<string>; clockToDominate: VectorClock },
-  successorIds: string[],
-  assertFence?: (context: string) => void,
-): Promise<Operation[]> => {
-  const pendingDeltaIds: string[] = [];
-  for (const opId of kept.opIds) {
-    const entry = await store.getOpById(opId);
-    if (
-      entry?.source === 'local' &&
-      entry.syncedAt === undefined &&
-      entry.rejectedAt === undefined &&
-      entry.reducerRejectedAt === undefined
-    ) {
-      pendingDeltaIds.push(opId);
-    }
+export const keptTimeDeltasToRebase = (
+  merged: { conflict: EntityConflict }[],
+  resolutions: { conflict: EntityConflict; winner: 'local' | 'remote' }[],
+): { opIds: Set<string>; clockToDominate: VectorClock } | undefined => {
+  const kept = keptLocalTimeDeltas([
+    ...merged.map((m) => m.conflict),
+    ...timeDeltasSurvivingRemoteWins(resolutions, 'task'),
+  ]);
+  return kept.opIds.size > 0 ? kept : undefined;
+};
+
+type OpLogAppender = Pick<
+  OperationLogStoreService,
+  'appendBatchSkipDuplicates' | 'appendMixedSourceBatchSkipDuplicates'
+>;
+type RebaseKept = NonNullable<
+  Parameters<OperationLogStoreService['appendMixedSourceBatchSkipDuplicates']>[1]
+>['rebaseKept'];
+
+/**
+ * Writes LWW remote winners as pending rows. With `rebaseKept`, the kept deltas
+ * re-clock in the same commit: a crash between two commits would leave a stale
+ * delta that the server rejects and folds into an absolute update (#10614).
+ */
+export const appendRemoteWinners = async (
+  store: OpLogAppender,
+  ops: Operation[],
+  rebaseKept: RebaseKept,
+): Promise<MixedSourceWrittenOperation[]> => {
+  const options = { pendingApply: true };
+  if (rebaseKept) {
+    const batch = { ops, source: 'remote' as const, options };
+    return (await store.appendMixedSourceBatchSkipDuplicates([batch], { rebaseKept }))
+      .written;
   }
-  if (pendingDeltaIds.length === 0) return [];
-  assertFence?.('kept time delta rebase');
-  return store.rebasePendingLocalOps(
-    [...pendingDeltaIds, ...successorIds],
-    kept.clockToDominate,
+  const { writtenOps, seqs } = await store.appendBatchSkipDuplicates(
+    ops,
+    'remote',
+    options,
   );
+  return writtenOps.map((op, i) => ({ op, seq: seqs[i], source: 'remote' }));
 };
 
 /**

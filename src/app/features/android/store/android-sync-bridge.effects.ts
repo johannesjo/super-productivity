@@ -13,6 +13,8 @@ import { skipWhileApplyingRemoteOps } from '../../../util/skip-during-sync.opera
 import { DroidLog } from '../../../core/log';
 import { CurrentProviderPrivateCfg } from '../../../op-log/core/types/sync.types';
 import { isShallowEqual } from '../../../util/is-shallow-equal';
+import { GlobalConfigService } from '../../config/global-config.service';
+import { ReminderConfig } from '../../config/global-config.model';
 
 const isNonNull = <T>(value: T | null): value is T => value !== null;
 
@@ -57,6 +59,23 @@ export const bridgeCommandEqual = (
   b: SuperSyncCredentialBridgeCommand | null,
 ): boolean => (a === null || b === null ? a === b : isShallowEqual(a, b));
 
+export type BackgroundReminderSettings = {
+  isDisabled: boolean;
+  useAlarmStyle: boolean;
+};
+
+/**
+ * The reminder settings the native SyncReminderWorker needs to schedule alarms
+ * like the app would (see capacitor-reminder.service.ts). Defaults match the
+ * worker's behavior before settings were mirrored.
+ */
+export const getBackgroundReminderSettings = (
+  cfg: ReminderConfig | undefined,
+): BackgroundReminderSettings => ({
+  isDisabled: !!cfg?.disableReminders,
+  useAlarmStyle: !!cfg?.useAlarmStyleReminders,
+});
+
 /**
  * Mirrors SuperSync credentials to native SharedPreferences so the
  * background SyncReminderWorker can authenticate against the server
@@ -65,6 +84,7 @@ export const bridgeCommandEqual = (
 @Injectable()
 export class AndroidSyncBridgeEffects {
   private _providerManager = inject(SyncProviderManager);
+  private _globalConfigService = inject(GlobalConfigService);
 
   syncSuperSyncCredentialsToNative$ =
     IS_ANDROID_WEB_VIEW &&
@@ -98,6 +118,32 @@ export class AndroidSyncBridgeEffects {
               );
               androidInterface.clearSuperSyncCredentials?.();
             }
+          }),
+        ),
+      { dispatch: false },
+    );
+
+  /**
+   * Mirrors the reminder settings so the background worker does not schedule
+   * alarms while reminders are disabled and uses alarm style when enabled.
+   *
+   * SYNC-SAFE without skipWhileApplyingRemoteOps: dispatch:false and an
+   * idempotent native call only. A setting changed on another device must
+   * reach the worker too, so remote config updates are deliberately mirrored.
+   */
+  syncReminderSettingsToNative$ =
+    IS_ANDROID_WEB_VIEW &&
+    createEffect(
+      () =>
+        this._globalConfigService.cfg$.pipe(
+          map((cfg) => getBackgroundReminderSettings(cfg?.reminder)),
+          distinctUntilChanged(
+            (a, b) =>
+              a.isDisabled === b.isDisabled && a.useAlarmStyle === b.useAlarmStyle,
+          ),
+          tap(({ isDisabled, useAlarmStyle }) => {
+            // Optional chaining: old APKs don't have this method yet.
+            androidInterface.setBackgroundReminderSettings?.(isDisabled, useAlarmStyle);
           }),
         ),
       { dispatch: false },

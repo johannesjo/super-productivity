@@ -197,7 +197,7 @@ describe('AddTaskBarComponent', () => {
     });
     mockProjectService = jasmine.createSpyObj(
       'ProjectService',
-      [],
+      ['moveTaskToTodayList'],
       createProjectSignals(mockProjects),
     );
     mockTagService = jasmine.createSpyObj(
@@ -488,6 +488,22 @@ describe('AddTaskBarComponent', () => {
           day: '2024-05-20',
           isAddToTop: false,
         }),
+      );
+      expect(mockTaskService.moveToCurrentWorkContext).not.toHaveBeenCalled();
+    });
+
+    it('moves a backlog task picked in a project to its regular list (#10838)', async () => {
+      const suggestion = {
+        title: 'Existing task',
+        taskId: 'task-1',
+        projectId: 'project-2',
+      } as AddTaskSuggestion;
+
+      await component.onTaskSuggestionSelected(suggestion);
+
+      expect(mockProjectService.moveTaskToTodayList).toHaveBeenCalledOnceWith(
+        'task-1',
+        'project-2',
       );
       expect(mockTaskService.moveToCurrentWorkContext).not.toHaveBeenCalled();
     });

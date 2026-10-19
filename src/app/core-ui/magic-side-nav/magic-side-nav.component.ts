@@ -1,3 +1,4 @@
+import { TaskMultiDragService } from '../../features/tasks/task-multi-drag.service';
 /* eslint-disable @typescript-eslint/naming-convention */
 import {
   AfterViewInit,
@@ -91,6 +92,7 @@ export class MagicSideNavComponent implements OnDestroy, AfterViewInit {
   private readonly _dataInitStateService = inject(DataInitStateService);
   private readonly _router = inject(Router);
   private _dragDropRegistry = inject(DragDropRegistry);
+  private _multiDrag = inject(TaskMultiDragService);
   private _externalDragService = inject(ScheduleExternalDragService);
   private _pointerUpSubscription: Subscription | null = null;
 
@@ -191,6 +193,13 @@ export class MagicSideNavComponent implements OnDestroy, AfterViewInit {
       if (this.isMobile()) {
         this.mobileVisibleChange.emit(this.showMobileMenuOverlay());
       }
+    });
+
+    // Lets app-level overlays (onboarding tips) step aside while the menu is open.
+    effect(() => {
+      this._layoutService.isMobileSideNavOpen.set(
+        this.isMobile() && this.showMobileMenuOverlay(),
+      );
     });
 
     // Sync history state with mobile menu visibility status
@@ -686,6 +695,27 @@ export class MagicSideNavComponent implements OnDestroy, AfterViewInit {
   }
 
   private _handlePointerUp(event: MouseEvent | TouchEvent): void {
+    const ids = [...this._multiDrag.ids()];
+    if (ids.length > 1) {
+      if (this._multiDrag.isCancelled()) return;
+      const position = getPointerPosition(event);
+      const projectId = position
+        ? document
+            .elementFromPoint(position.x, position.y)
+            ?.closest('nav-item[data-project-id]')
+            ?.getAttribute('data-project-id')
+        : null;
+      if (projectId) {
+        this._externalDragService.setCancelNextDrop(true);
+        this._externalDragService
+          .activeDragRef()
+          ?.ended.pipe(take(1))
+          .subscribe(() => {
+            void this._multiDrag.moveToProject(projectId, ids);
+          });
+      }
+      return;
+    }
     const draggedTask = this._externalDragService.activeTask();
 
     // exclude recurring tasks

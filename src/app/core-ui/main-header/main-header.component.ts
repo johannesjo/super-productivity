@@ -186,13 +186,13 @@ export class MainHeaderComponent implements OnDestroy {
     { initialValue: false },
   );
   isOnline = toSignal(isOnline$);
-  // State-aware tooltip for the sync button: the icon alone (sync_problem /
+  // State-aware tooltip for the sync button: the icon alone (sync_error /
   // wifi_off) signals a problem but never explains it. Surfacing the state in
   // the tooltip is the ambient counterpart to suppressing the transient
   // network snack on automatic syncs — a persistent problem stays discoverable
   // by glancing at / hovering the always-present header button.
-  // Precedence mirrors the icon @if cascade in the template (disabled →
-  // offline → error → syncing → in-sync); keep the two in sync.
+  // Precedence mirrors `syncIcon` (disabled → offline → error → syncing →
+  // in-sync); keep the two in sync.
   syncTooltip = computed(() => {
     if (!this.syncIsEnabledAndReady()) {
       return T.MH.TRIGGER_SYNC;
@@ -207,9 +207,44 @@ export class MainHeaderComponent implements OnDestroy {
       return T.MH.SYNC_STATE.SYNCING;
     }
     if (this.hasNoPendingOps()) {
-      return T.MH.SYNC_STATE.IN_SYNC;
+      return this.superSyncIsConfirmedInSync()
+        ? T.MH.SYNC_STATE.IN_SYNC_CONFIRMED
+        : T.MH.SYNC_STATE.IN_SYNC;
     }
     return T.MH.TRIGGER_SYNC;
+  });
+  // One icon per state, nothing drawn over it (#10427). All but `wifi_off` are
+  // the SVG icons in `BUILT_IN_SVG_ICONS`: one sync ring at the header's icon
+  // size, with a check, "!" or slash inside, so the arrows stay identical
+  // across states and in-sync differs from pending only by the check.
+  // Same precedence as `syncTooltip`.
+  syncIcon = computed(() => {
+    if (!this.syncIsEnabledAndReady()) {
+      return 'sync_off';
+    }
+    if (!this.isOnline()) {
+      return 'wifi_off';
+    }
+    if (this.syncState() === 'ERROR') {
+      return 'sync_error';
+    }
+    if (this.isSyncInProgress()) {
+      return 'sync_ring';
+    }
+    return this.hasNoPendingOps() ? 'sync_done' : 'sync_ring';
+  });
+  isSyncIconSpinning = computed(
+    () => this.syncIcon() === 'sync_ring' && !!this.isSyncInProgress(),
+  );
+  // Test hook for the E2E sync helpers, which wait on these states. 'local':
+  // every local change is uploaded. 'remote': the remote was also checked
+  // within the last minute. Deliberately independent of the spinner and
+  // the error state, as the checkmark badges it replaces were.
+  syncConfirmation = computed(() => {
+    if (!this.syncIsEnabledAndReady() || !this.isOnline() || !this.hasNoPendingOps()) {
+      return null;
+    }
+    return this.superSyncIsConfirmedInSync() ? 'remote' : 'local';
   });
   readonly isTimeTrackingEnabled = computed(() => {
     return this.globalConfigService.appFeatures().isTimeTrackingEnabled;

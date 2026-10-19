@@ -23,21 +23,27 @@ import { IS_ANDROID_WEB_VIEW } from './app/util/is-android-web-view';
 import { androidInterface } from './app/features/android/android-interface';
 import { AndroidBackButtonService } from './app/features/android/android-back-button.service';
 import { IS_IOS_NATIVE, IS_NATIVE_PLATFORM } from './app/util/is-native-platform';
-import { DataInitStateService } from './app/core/data-init/data-init-state.service';
 // Type definitions for window.ea are in ./app/core/window-ea.d.ts
 import { App as CapacitorApp } from '@capacitor/app';
 import { GlobalErrorHandler } from './app/core/error-handler/global-error-handler.class';
-import { bootstrapApplication, BrowserModule } from '@angular/platform-browser';
+import {
+  bootstrapApplication,
+  BrowserModule,
+  REMOVE_STYLES_ON_COMPONENT_DESTROY,
+} from '@angular/platform-browser';
 import {
   HTTP_INTERCEPTORS,
   provideHttpClient,
   withInterceptorsFromDi,
+  withXhr,
 } from '@angular/common/http';
 import { MarkdownModule, MARKED_OPTIONS, SANITIZE } from 'ngx-markdown';
 import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
 import { IS_TOUCH_PRIMARY } from './app/util/is-mouse-primary';
 import { FeatureStoresModule } from './app/root-store/feature-stores.module';
+import { REMOTE_APPLY_LISTENER } from './app/op-log/apply/remote-apply-listener.token';
+import { RecentlyDeletedService } from './app/features/tasks/recently-deleted/recently-deleted.service';
 import {
   MATERIAL_ANIMATIONS,
   MatNativeDateModule,
@@ -49,6 +55,7 @@ import { MatDatepickerIntl } from '@angular/material/datepicker';
 import { FormlyConfigModule } from './app/ui/formly-config.module';
 import { provideFormlyConfig } from '@ngx-formly/core';
 import { PRIORITY_ICON_PRESET_SELECT_FORMLY_CONFIG } from './app/features/config/priority-icon-preset-select/priority-icon-preset-select.component';
+import { AGENT_CAPTURE_SETTINGS_FORMLY_CONFIG } from './app/features/tasks/agent-capture/agent-capture-settings/agent-capture-settings.component';
 import { markedOptionsFactory } from './app/ui/marked-options-factory';
 import { MaterialCssVarsModule } from 'angular-material-css-vars';
 import { DEFAULT_TODAY_TAG_COLOR } from './app/features/work-context/work-context.const';
@@ -92,6 +99,9 @@ import { LocalRestApiFeatureBridgeService } from './app/features/tasks/local-res
 import { LOCAL_REST_API_FEATURE_BRIDGE } from './app/core/electron/local-rest-api-feature-bridge';
 import { LOCAL_REST_API_FEATURE_ROUTES } from './app/core/electron/local-rest-api-feature-routes';
 import { LocalRestApiTaskRepeatCfgRoutesService } from './app/features/task-repeat-cfg/local-rest-api-task-repeat-cfg-routes.service';
+import { LocalRestApiAssistantCaptureRoutesService } from './app/features/tasks/assistant-capture/local-rest-api-assistant-capture-routes.service';
+import { LocalRestApiNoteRoutesService } from './app/features/note/local-rest-api-note-routes.service';
+import { LocalRestApiSimpleCounterRoutesService } from './app/features/simple-counter/local-rest-api-simple-counter-routes.service';
 import { PluginOAuthRedirectHandler } from './app/plugins/oauth/plugin-oauth-redirect.handler';
 import { OAuthCallbackHandlerService } from './app/imex/sync/oauth-callback-handler.service';
 import { GlobalConfigService } from './app/features/config/global-config.service';
@@ -144,9 +154,10 @@ bootstrapApplication(AppComponent, {
     // timeout, so a failed or stalled chunk load degrades to the default locale
     // instead of failing bootstrap or holding up first render indefinitely.
     provideAppInitializer(() => registerNavigatorLocale()),
-    // Feature-owned formly type, registered here rather than in ui/'s
+    // Feature-owned formly types, registered here rather than in ui/'s
     // FormlyConfigModule so ui/ does not import from features/.
     provideFormlyConfig(PRIORITY_ICON_PRESET_SELECT_FORMLY_CONFIG),
+    provideFormlyConfig(AGENT_CAPTURE_SETTINGS_FORMLY_CONFIG),
     // Provide configuration for TranslateHttpLoader
     {
       provide: TRANSLATE_HTTP_LOADER_CONFIG,
@@ -200,7 +211,7 @@ bootstrapApplication(AppComponent, {
       EffectsModule.forRoot([]),
       // StoreDevtoolsModule lazy-loaded in dev mode after bootstrap
       ReactiveFormsModule,
-      ServiceWorkerModule.register('ngsw-worker.js', {
+      ServiceWorkerModule.register('sw.js', {
         enabled:
           !IS_ELECTRON &&
           !IS_NATIVE_PLATFORM &&
@@ -208,6 +219,10 @@ bootstrapApplication(AppComponent, {
         // Register the ServiceWorker as soon as the application is stable
         // or after 30 seconds (whichever comes first).
         registrationStrategy: 'registerWhenStable:30000',
+        // sw.js loads ngsw-worker.js via importScripts; without this, update
+        // checks may take that import from the HTTP cache. Keep in sync with
+        // the register() call below, or each call flips the registration.
+        updateViaCache: 'none',
       }),
       TranslateModule.forRoot({
         fallbackLang: DEFAULT_LANGUAGE,
@@ -219,7 +234,7 @@ bootstrapApplication(AppComponent, {
       CdkDropListGroup,
     ),
     { provide: ErrorHandler, useClass: GlobalErrorHandler },
-    provideHttpClient(withInterceptorsFromDi()),
+    provideHttpClient(withXhr(), withInterceptorsFromDi()),
     {
       provide: HTTP_INTERCEPTORS,
       useClass: NetworkRetryInterceptorService,
@@ -234,9 +249,25 @@ bootstrapApplication(AppComponent, {
       provide: LOCAL_REST_API_FEATURE_BRIDGE,
       useClass: LocalRestApiFeatureBridgeService,
     },
+    { provide: REMOTE_APPLY_LISTENER, useExisting: RecentlyDeletedService },
     {
       provide: LOCAL_REST_API_FEATURE_ROUTES,
       useClass: LocalRestApiTaskRepeatCfgRoutesService,
+      multi: true,
+    },
+    {
+      provide: LOCAL_REST_API_FEATURE_ROUTES,
+      useClass: LocalRestApiAssistantCaptureRoutesService,
+      multi: true,
+    },
+    {
+      provide: LOCAL_REST_API_FEATURE_ROUTES,
+      useClass: LocalRestApiNoteRoutesService,
+      multi: true,
+    },
+    {
+      provide: LOCAL_REST_API_FEATURE_ROUTES,
+      useClass: LocalRestApiSimpleCounterRoutesService,
       multi: true,
     },
     {
@@ -273,6 +304,13 @@ bootstrapApplication(AppComponent, {
       ? [{ provide: MAT_DIALOG_DEFAULT_OPTIONS, useValue: { autoFocus: false } }]
       : []),
     provideAnimationsAsync(),
+    // Keep component <style> elements once added. Removing them when the last
+    // instance is destroyed means every snack and dialog adds its stylesheets on
+    // open and removes them on close; each change makes the browser rebuild its
+    // style rules and recalc styles, which stutters the open/close animations.
+    // Component styles must therefore never rely on being removed: no unscoped
+    // `::ng-deep` rules.
+    { provide: REMOVE_STYLES_ON_COMPONENT_DESTROY, useValue: false },
     {
       provide: MATERIAL_ANIMATIONS,
       deps: [GlobalConfigService],
@@ -410,15 +448,6 @@ bootstrapApplication(AppComponent, {
     });
   }
 
-  // Dismiss native startup overlay after all data is loaded (Android only)
-  if (IS_ANDROID_WEB_VIEW) {
-    appRef.injector.get(DataInitStateService).isAllDataLoadedInitially$.subscribe(() => {
-      import('./app/core/startup-overlay/startup-overlay.service').then((m) => {
-        appRef.injector.get(m.StartupOverlayService).processAndDismiss();
-      });
-    });
-  }
-
   // Initialize touch fix for Material menus
   initializeMatMenuTouchFix();
 
@@ -440,13 +469,31 @@ bootstrapApplication(AppComponent, {
 
   // Lazily load and register focus-mode effects during idle time.
   // Safe to defer: focus-mode requires explicit user activation (clicking the
-  // focus button), which cannot happen before idle callback fires.
+  // focus button), which cannot happen before idle callback fires. Restoring a
+  // session killed in the background waits for data load, so it is not raced either.
   const registerLazyEffects = async (): Promise<void> => {
-    const { FocusModeEffects } =
-      await import('./app/features/focus-mode/store/focus-mode.effects');
+    const [{ FocusModeEffects }, sessionPersistence] = await Promise.all([
+      import('./app/features/focus-mode/store/focus-mode.effects'),
+      IS_IOS_NATIVE
+        ? import('./app/features/focus-mode/store/focus-mode-session-persistence.effects')
+        : null,
+    ]);
     const envInjector = appRef.injector.get(EnvironmentInjector);
     createEnvironmentInjector(
-      [importProvidersFrom(EffectsModule.forFeature([FocusModeEffects]))],
+      [
+        importProvidersFrom(
+          // Session restore relies on FocusModeEffects (completion, logging),
+          // so it registers after them. iOS only: it kills backgrounded
+          // WebViews; Android recovers from its native foreground service, and
+          // on desktop a closed app means the user ended the session.
+          EffectsModule.forFeature([
+            FocusModeEffects,
+            ...(sessionPersistence
+              ? [sessionPersistence.FocusModeSessionPersistenceEffects]
+              : []),
+          ]),
+        ),
+      ],
       envInjector,
     );
   };
@@ -503,10 +550,12 @@ bootstrapApplication(AppComponent, {
     !IS_NATIVE_PLATFORM
   ) {
     Log.log('Registering Service worker');
-    return navigator.serviceWorker.register('ngsw-worker.js').catch((err: unknown) => {
-      Log.log('Service Worker Registration Error');
-      Log.err(err);
-    });
+    return navigator.serviceWorker
+      .register('sw.js', { updateViaCache: 'none' })
+      .catch((err: unknown) => {
+        Log.log('Service Worker Registration Error');
+        Log.err(err);
+      });
   } else if ('serviceWorker' in navigator && (IS_ELECTRON || IS_NATIVE_PLATFORM)) {
     navigator.serviceWorker
       .getRegistrations()

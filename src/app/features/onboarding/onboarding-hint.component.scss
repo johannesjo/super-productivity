@@ -27,17 +27,6 @@
   flex: 1;
 }
 
-.hint-title {
-  font-weight: bold;
-  margin-bottom: var(--s-quarter);
-}
-
-.hint-buttons {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: var(--s-half);
-}
-
 .hint-message {
   display: flex;
   align-items: center;
@@ -106,6 +95,8 @@
 
 .hint-arrow {
   position: absolute;
+  // decorative; it can overlap the "+" FAB it points at and swallow taps
+  pointer-events: none;
   width: 8px;
   height: 8px;
   background: var(--card-bg);

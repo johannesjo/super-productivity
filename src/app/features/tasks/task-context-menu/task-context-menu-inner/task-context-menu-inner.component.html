@@ -93,17 +93,6 @@
     }
   </div>
 
-  @if (isTouchActive() && isInTaskRow) {
-    <button
-      (click)="enterSelectionMode()"
-      mat-menu-item
-    >
-      <span class="menuItemLeft">
-        <mat-icon>checklist_rtl</mat-icon>
-        {{ T.F.TASK.MULTI_SELECT.SELECT_ENTRY | translate }}
-      </span>
-    </button>
-  }
   @if (
     isTimeTrackingEnabled() &&
     ((isAdvancedControls() && isTouchActive()) || !isAdvancedControls()) &&
@@ -373,6 +362,30 @@
     </button>
   }
 
+  @if (isTouchActive() && isInTaskRow) {
+    <button
+      (click)="enterSelectionMode()"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon>checklist_rtl</mat-icon>
+        {{ T.F.TASK.MULTI_SELECT.SELECT_ENTRY | translate }}
+      </span>
+    </button>
+  }
+
+  @if (!task.isDone) {
+    <button
+      (click)="setWontDo()"
+      mat-menu-item
+    >
+      <span class="menuItemLeft">
+        <mat-icon>block</mat-icon>
+        {{ T.F.TASK.CMP.MARK_WONT_DO | translate }}
+      </span>
+    </button>
+  }
+
   <button
     (click)="deleteTask()"
     class="color-warn"
@@ -493,7 +506,7 @@
             [title]="project.title"
             [icon]="project.icon"
             [defaultIcon]="DEFAULT_PROJECT_ICON"
-            [color]="project.theme?.primary"
+            [color]="$safeNavigationMigration(project.theme?.primary)"
             [folderPath]="projectFolderMap().get(project.id)"
           ></select-option-row>
         </button>

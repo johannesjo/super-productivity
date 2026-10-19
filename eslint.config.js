@@ -433,14 +433,13 @@ module.exports = tseslint.config(
   // never grow. When you shrink one, lower its cap to lock the cleanup in; a
   // cap may only ever go down. Delete an entry once its file is under 1200.
   ...Object.entries({
-    'src/app/op-log/sync/conflict-resolution.service.ts': 4496,
     'src/app/op-log/sync-providers/file-based/file-based-sync-adapter.service.ts': 3175,
-    'src/app/op-log/persistence/operation-log-store.service.ts': 3074,
+    'src/app/op-log/persistence/operation-log-store.service.ts': 3071,
     'src/app/op-log/sync/operation-log-sync.service.ts': 2564,
-    'src/app/plugins/plugin-bridge.service.ts': 2351,
-    'src/app/imex/sync/sync-wrapper.service.ts': 2084,
-    'src/app/plugins/plugin.service.ts': 1857,
-    'src/app/features/tasks/task.service.ts': 1531,
+    'src/app/plugins/plugin-bridge.service.ts': 2345,
+    'src/app/imex/sync/sync-wrapper.service.ts': 2079,
+    'src/app/plugins/plugin.service.ts': 1851,
+    'src/app/features/tasks/task.service.ts': 1527,
   }).map(([file, max]) => ({
     files: [file],
     rules: {
@@ -453,6 +452,7 @@ module.exports = tseslint.config(
     extends: [...angular.configs.templateRecommended, prettierRecommended],
     rules: {
       '@angular-eslint/template/no-negated-async': 'off',
+      '@angular-eslint/template/no-positive-tabindex': 'error',
       'prettier/prettier': 'error',
     },
   },
