@@ -180,6 +180,12 @@ jobs:
             registry.npmjs.org:443
             objects.githubusercontent.com:443
 
+      - name: Lowercase repository owner
+        id: vars
+        shell: bash
+        run: |
+          echo "owner=${GITHUB_REPOSITORY_OWNER@L}" >> $GITHUB_OUTPUT
+
       - name: Resolve release tag
         id: tag
         shell: bash
@@ -210,12 +216,6 @@ jobs:
           registry: ghcr.io
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Lowercase repository owner
-        id: vars
-        shell: bash
-        run: |
-          echo "owner=${GITHUB_REPOSITORY_OWNER@L}" >> $GITHUB_OUTPUT
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
