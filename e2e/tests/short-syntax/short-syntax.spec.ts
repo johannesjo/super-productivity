@@ -66,16 +66,16 @@ const getTaskStateByTitle = async (
 
 /**
  * The nth occurrence of `weekday` counting from today (n = 1 is the next
- * occurrence), mirroring the parser's `@<n><weekday>` resolution: the first
- * occurrence is anchored at 12:00, so on that weekday after noon it is a week
- * later. Evaluated in the browser so it uses the same local wall clock the
- * parser ran with.
+ * occurrence), mirroring the parser's `@<n><weekday>` resolution. Evaluated in
+ * the browser so it uses the same local wall clock the parser ran with.
  */
 const nthWeekdayDueDay = (page: Page, weekday: number, nth: number): Promise<string> =>
   page.evaluate(
     (args) => {
       const now = new Date();
       const diff = (args.weekday - now.getDay() + 7) % 7;
+      // The first occurrence is anchored at 12:00 like the app's
+      // getNextWeekdayDate, so after noon on that weekday it is next week's.
       const due = new Date(now.getFullYear(), now.getMonth(), now.getDate() + diff, 12);
       if (due.getTime() < now.getTime()) {
         due.setDate(due.getDate() + 7);
@@ -119,9 +119,8 @@ test.describe('Short Syntax', () => {
     // "@2monday" is the Monday after next, so the task is not in the Today
     // list; pass null as the expectedVisibleTitle to skip that wait.
     const taskTitle = `${testPrefix}-Nth Weekday`;
-    // Sampled on both sides of creation so a local noon or midnight passing
-    // between them cannot fail the assertion. The suite runs near local noon
-    // (see e2e/utils/test-timezone.ts).
+    // Sampled on both sides of creation so a local-midnight rollover between
+    // them cannot fail the assertion (see e2e/utils/test-timezone.ts).
     const dueDayBeforeAdd = await nthWeekdayDueDay(page, 1, 2);
 
     await workViewPage.addTask(`${taskTitle} @2monday`, false, null);
