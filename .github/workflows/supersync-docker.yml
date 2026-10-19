@@ -234,7 +234,7 @@ jobs:
           context: .
           file: ./packages/super-sync-server/Dockerfile
           push: true
-          tags: ghcr.io/super-productivity/supersync:${{ steps.tag.outputs.tag }}
+          tags: ghcr.io/${{ github.repository_owner }}/supersync:${{ steps.tag.outputs.tag }}
           build-args: |
             VCS_REF=${{ steps.source-ref.outputs.revision }}
           no-cache: true
