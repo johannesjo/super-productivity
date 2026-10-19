@@ -253,25 +253,13 @@
   }
 
   // Holds the add button. Always in the layout so the input width never jumps;
-  // the button itself is a raised, rounded primary block that pokes out past
-  // the bar's top edge (and its right edge, when nothing follows it), like a
-  // FAB pinned to the corner. Pinned to the top so it stays put while the input
-  // wraps.
+  // the button itself is a raised, rounded primary block inset from the bar's
+  // edges. Pinned to the top so it stays put while the input wraps.
   .separator-box {
     align-self: flex-start;
     display: flex;
-    padding-inline: var(--s-half);
+    padding: var(--s-half);
     transition: opacity var(--transition-fast);
-    --overlap: var(--s);
-
-    // Only stick out sideways when it is the bar's last control; on phones the
-    // bar sits a few px from the screen edge, so keep it inside there.
-    &:last-child {
-      @include mq(xs) {
-        padding-right: 0;
-        margin-right: calc(-1 * var(--overlap));
-      }
-    }
 
     // Reserve the button's space while the field is empty without letting it
     // show or take clicks. `visibility:hidden` is not enough here: mat-icon's
@@ -288,12 +276,12 @@
     }
 
     .add-task-submit-btn {
-      width: 48px;
-      height: 48px;
-      margin-top: calc(-1 * var(--overlap));
+      width: 36px;
+      height: 36px;
+      padding: 0;
       // The primary action while composing — colours and shape go through the
       // button tokens rather than a .mat-*/.mdc-* override.
-      --mat-icon-button-container-shape: var(--radius-lg);
+      --mat-icon-button-container-shape: var(--radius-md);
       --mat-icon-button-icon-color: var(--c-contrast);
       --mat-icon-button-state-layer-color: var(--c-contrast);
       --mat-icon-button-ripple-color: color-mix(
@@ -301,23 +289,23 @@
         var(--c-contrast) 20%,
         transparent
       );
-      border-radius: var(--radius-lg);
+      border-radius: var(--radius-md);
       background-color: var(--c-primary);
       color: var(--c-contrast);
       opacity: 1;
-      box-shadow: var(--whiteframe-shadow-3dp);
+      box-shadow: var(--whiteframe-shadow-2dp);
       transition:
         box-shadow var(--transition-fast),
         transform var(--transition-fast);
 
       &:hover,
       &:focus-visible {
-        box-shadow: var(--whiteframe-shadow-6dp);
+        box-shadow: var(--whiteframe-shadow-4dp);
         transform: translateY(-1px);
       }
 
       &:active {
-        box-shadow: var(--whiteframe-shadow-2dp);
+        box-shadow: var(--whiteframe-shadow-1dp);
         transform: translateY(0);
       }
     }
