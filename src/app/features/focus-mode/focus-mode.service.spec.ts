@@ -12,6 +12,8 @@ import { FocusScreen, FocusModeMode, FocusMainUIState } from './focus-mode.model
 import * as selectors from './store/focus-mode.selectors';
 import * as actions from './store/focus-mode.actions';
 import { selectFocusModeConfig } from '../config/store/global-config.reducer';
+import { FocusModeStrategyFactory } from './focus-mode-strategies';
+import { DEFAULT_TASK, TaskCopy } from '../tasks/task.model';
 
 describe('FocusModeService', () => {
   let service: FocusModeService;
@@ -346,5 +348,79 @@ describe('FocusModeService', () => {
     it('should initialize with Main screen by default', fakeAsync(() => {
       expect(service.currentScreen()).toBe(FocusScreen.Main);
     }));
+  });
+});
+
+describe('FocusModeService.tryStartSessionForTask', () => {
+  const MIN = 60_000;
+  let service: FocusModeService;
+  let dispatch: jasmine.Spy;
+  let mode: FocusModeMode;
+  let timerPurpose: 'work' | 'break' | null;
+  let focusCfg: { isShowPreparation?: boolean };
+  const task = {
+    ...DEFAULT_TASK,
+    id: 't1',
+    timeEstimate: 15 * MIN,
+    timeSpent: 0,
+  } as TaskCopy;
+
+  beforeEach(() => {
+    mode = FocusModeMode.Countdown;
+    timerPurpose = null;
+    focusCfg = {};
+    const storeSpy = jasmine.createSpyObj('Store', [
+      'select',
+      'dispatch',
+      'selectSignal',
+    ]);
+    storeSpy.select.and.returnValue(of(null));
+    storeSpy.selectSignal.and.callFake((selector: unknown) => {
+      if (selector === selectors.selectMode) return () => mode;
+      if (selector === selectors.selectTimer) return () => ({ purpose: timerPurpose });
+      if (selector === selectFocusModeConfig) return () => focusCfg;
+      return () => null;
+    });
+    dispatch = storeSpy.dispatch;
+    TestBed.configureTestingModule({
+      providers: [
+        FocusModeService,
+        { provide: Store, useValue: storeSpy },
+        { provide: GlobalConfigService, useValue: { pomodoroConfig: () => null } },
+        {
+          provide: FocusModeStrategyFactory,
+          useValue: { getStrategy: () => ({ initialSessionDuration: 25 * MIN }) },
+        },
+      ],
+    });
+    service = TestBed.inject(FocusModeService);
+  });
+
+  it('starts a countdown capped to the remaining estimate and shows the overlay', () => {
+    expect(service.tryStartSessionForTask(task)).toBe(true);
+    expect(dispatch).toHaveBeenCalledWith(
+      actions.startFocusSession({ duration: 15 * MIN, taskId: 't1' }),
+    );
+    expect(dispatch).toHaveBeenCalledWith(actions.showFocusOverlay());
+  });
+
+  it('keeps the configured duration for pomodoro', () => {
+    mode = FocusModeMode.Pomodoro;
+    service.tryStartSessionForTask(task);
+    expect(dispatch).toHaveBeenCalledWith(
+      actions.startFocusSession({ duration: 25 * MIN, taskId: 't1' }),
+    );
+  });
+
+  it('does nothing when a session is already active', () => {
+    timerPurpose = 'work';
+    expect(service.tryStartSessionForTask(task)).toBe(false);
+    expect(dispatch).not.toHaveBeenCalled();
+  });
+
+  it('does nothing when the preparation screen is enabled', () => {
+    focusCfg = { isShowPreparation: true };
+    expect(service.tryStartSessionForTask(task)).toBe(false);
+    expect(dispatch).not.toHaveBeenCalled();
   });
 });

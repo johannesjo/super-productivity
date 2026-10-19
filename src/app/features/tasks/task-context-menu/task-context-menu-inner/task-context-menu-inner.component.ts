@@ -75,6 +75,7 @@ import { DateAdapter } from '@angular/material/core';
 import { ICAL_TYPE } from '../../../issue/issue.const';
 import { IssueIconPipe } from '../../../issue/issue-icon/issue-icon.pipe';
 import { showFocusOverlay } from '../../../focus-mode/store/focus-mode.actions';
+import { FocusModeService } from '../../../focus-mode/focus-mode.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TagService } from '../../../tag/tag.service';
 import { DialogPromptComponent } from '../../../../ui/dialog-prompt/dialog-prompt.component';
@@ -143,6 +144,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   private readonly _taskDuplicateService = inject(TaskDuplicateService);
   private readonly _taskMoveToProjectService = inject(TaskMoveToProjectService);
   private readonly _taskMultiSelectService = inject(TaskMultiSelectService);
+  private readonly _focusModeService = inject(FocusModeService);
   private readonly _pluginTaskContextMenuRegistry = inject(
     PluginTaskContextMenuRegistryService,
   );
@@ -460,6 +462,9 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   }
 
   goToFocusMode(): void {
+    if (this._focusModeService.tryStartSessionForTask(this.task)) {
+      return;
+    }
     this._taskService.setCurrentId(this.task.id);
     this._store.dispatch(showFocusOverlay());
   }
