@@ -17,7 +17,10 @@ import {
 } from '../android-widget.model';
 import { Task } from '../../tasks/task.model';
 import { getDeviceLabel } from '../../tracking-presence/get-device-label.util';
-import { RemoteSessionView } from '../../tracking-presence/tracking-presence.model';
+import {
+  PRESENCE_STALE_AFTER_MS,
+  RemoteSessionView,
+} from '../../tracking-presence/tracking-presence.model';
 
 /**
  * The instant the logical day `dayStr` stops being "today": local midnight after it,
@@ -91,6 +94,7 @@ export const resolveRemoteCurrentTask = (
     title: task.title,
     deviceLabel: view.session.payload.deviceLabel,
     isLocal: false,
+    expiresAt: view.session.receivedAt + PRESENCE_STALE_AFTER_MS,
   };
   if (task.projectId) {
     currentTask.projectId = task.projectId;

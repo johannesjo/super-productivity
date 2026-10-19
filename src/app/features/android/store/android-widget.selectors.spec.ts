@@ -7,7 +7,10 @@ import {
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { Task } from '../../tasks/task.model';
 import { Project } from '../../project/project.model';
-import { RemoteSessionView } from '../../tracking-presence/tracking-presence.model';
+import {
+  PRESENCE_STALE_AFTER_MS,
+  RemoteSessionView,
+} from '../../tracking-presence/tracking-presence.model';
 import { getDeviceLabel } from '../../tracking-presence/get-device-label.util';
 
 describe('getWidgetValidUntil', () => {
@@ -257,6 +260,7 @@ describe('resolveRemoteCurrentTask', () => {
     ({
       isStale: partial.isStale ?? false,
       session: {
+        receivedAt: 1_000,
         payload: {
           state: partial.state ?? 'tracking',
           taskId: partial.taskId ?? 't1',
@@ -294,6 +298,7 @@ describe('resolveRemoteCurrentTask', () => {
       title: 'Write report',
       deviceLabel: 'Desktop',
       isLocal: false,
+      expiresAt: 1_000 + PRESENCE_STALE_AFTER_MS,
     });
   });
 });

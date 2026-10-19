@@ -28,6 +28,12 @@ export interface AndroidWidgetCurrentTask {
   deviceLabel: string;
   /** True when tracked on this device; false when tracked remotely (SuperSync presence). */
   isLocal: boolean;
+  /**
+   * Epoch ms after which native must stop showing this as live. Set only for remote
+   * sessions (`receivedAt + PRESENCE_STALE_AFTER_MS`): the JS staleness ticker cannot
+   * run once Android reclaims the process, so the native widget enforces it itself.
+   */
+  expiresAt?: number;
 }
 
 export interface AndroidWidgetData {

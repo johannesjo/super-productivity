@@ -114,8 +114,9 @@ class TaskListWidgetProvider : AppWidgetProvider() {
                 return context.getString(R.string.widget_header_title) to null
             }
             val meta = WidgetData.parseMeta(json)
+            val nowMs = System.currentTimeMillis()
             // The verdict lives in WidgetData.headerFor (pure, tested); this only renders it.
-            val header = when (val h = WidgetData.headerFor(meta, System.currentTimeMillis())) {
+            val header = when (val h = WidgetData.headerFor(meta, nowMs)) {
                 is WidgetHeader.Today -> context.getString(R.string.widget_header_title)
                 is WidgetHeader.Outdated -> h.dayMs?.let { dayMs ->
                     context.getString(
@@ -129,7 +130,7 @@ class TaskListWidgetProvider : AppWidgetProvider() {
                     )
                 } ?: context.getString(R.string.widget_header_outdated_unknown)
             }
-            return header to WidgetData.parseCurrentTask(json)
+            return header to WidgetData.parseCurrentTask(json, nowMs)
         }
 
         /**

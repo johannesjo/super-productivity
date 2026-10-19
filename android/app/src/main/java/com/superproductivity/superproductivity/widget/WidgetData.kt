@@ -102,15 +102,21 @@ object WidgetData {
     /**
      * The `currentTask` field, or null when nothing is tracked (locally or, via
      * SuperSync tracking-presence, remotely) — same degrade-to-null contract as
-     * every other field here, never a title-less stub.
+     * every other field here, never a title-less stub. Also null once the session's
+     * `expiresAt` has passed at [nowMs].
      */
-    fun parseCurrentTask(json: String): WidgetCurrentTask? {
+    fun parseCurrentTask(json: String, nowMs: Long): WidgetCurrentTask? {
         return try {
             val root = JSONObject(json)
             if (root.optInt("v", -1) != SUPPORTED_VERSION) {
                 return null
             }
             val task = root.optJSONObject("currentTask") ?: return null
+            // A remote session carries its own deadline: JS cannot expire it once the
+            // process is gone, and a saved blob would otherwise read "tracking" forever.
+            if (task.has("expiresAt") && nowMs >= task.getLong("expiresAt")) {
+                return null
+            }
             WidgetCurrentTask(
                 title = task.getString("title"),
                 deviceLabel = task.optString("deviceLabel", "")
