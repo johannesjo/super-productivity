@@ -44,6 +44,8 @@ const VIEWPORT_MARGIN_PX = 8;
 const SIDE_ARROW_TOP_PX = 18;
 /** Slightly longer than the slide transition (--transition-duration-l) */
 const SLIDE_MS = 400;
+// shortcut: polls while a polled step is up (only `organize`) — observe the
+// nav's expanded state instead if more steps need it.
 const POLL_TARGET_MS = 500;
 
 const ANIMATION_DONE_EVENTS = [
@@ -136,7 +138,8 @@ export class OnboardingHintComponent {
   private _translateService = inject(TranslateService);
   private _ngZone = inject(NgZone);
   private _activeStep: HintStep | null = null;
-  private _announcedStep: HintStep | null = null;
+  // Step and message: a step's tip can change, e.g. once the side nav expands.
+  private _announced: { step: HintStep; messageKey: string } | null = null;
   private _targetEl: HTMLElement | null = null;
   private _repositionFrame: number | null = null;
   private _pulsingEl: HTMLElement | null = null;
@@ -250,10 +253,10 @@ export class OnboardingHintComponent {
   }
 
   private _announce(step: HintStep, messageKey: string): void {
-    if (this._announcedStep === step) {
+    if (this._announced?.step === step && this._announced.messageKey === messageKey) {
       return;
     }
-    this._announcedStep = step;
+    this._announced = { step, messageKey };
     const html = this._translateService.instant(messageKey, HINT_ICON_PARAMS_EMPTY);
     void this._liveAnnouncer.announce(stripTags(html));
   }

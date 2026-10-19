@@ -1,5 +1,5 @@
 import { expect, test } from '../../fixtures/test.fixture';
-import { Locator, Page } from '@playwright/test';
+import { devices, Locator, Page } from '@playwright/test';
 import {
   assertNoRuntimeBrowserErrors,
   attachPageErrorCollector,
@@ -41,6 +41,10 @@ const reachTourOffer = async (page: Page, title: string): Promise<Locator> => {
   await page.mouse.click(640, 600);
   return hint;
 };
+
+const pixel5TestOptions = { ...devices['Pixel 5'] };
+// Keep the configured Chromium: the device preset would select WebKit.
+Reflect.deleteProperty(pixel5TestOptions, 'defaultBrowserType');
 
 const openQuickTourFromHelp = async (page: Page): Promise<void> => {
   await page.locator('magic-side-nav').getByText('Help', { exact: true }).click();
@@ -179,5 +183,142 @@ test.describe('Quick tour', () => {
     await expect(page.locator('onboarding-hint')).toHaveCount(0);
     assertNoRuntimeBrowserErrors(runtimeErrors, 'quick tour skipped');
     await page.close();
+  });
+  test('Help → Quick tour ends a running How-to tour', async ({ isolatedContext }) => {
+    const page = await isolatedContext.newPage();
+    const runtimeErrors = attachPageErrorCollector(page, 'quick tour over shepherd');
+    installDevErrorDialogHandler(page, 'quick tour over shepherd');
+    const hint = await reachTourOffer(page, `Shepherd task ${Date.now()}`);
+    await hint.getByRole('button', { name: 'No thanks' }).click();
+    await expect(hint).toHaveCount(0, { timeout: 5000 });
+
+    await page.locator('magic-side-nav').getByText('Help', { exact: true }).click();
+    await page.getByText('How to: Create a task', { exact: true }).click();
+    const tourStep = page.locator('.shepherd-element');
+    await expect(tourStep).toContainText('Create a task');
+
+    await openQuickTourFromHelp(page);
+    await expect(page.locator('onboarding-hint')).toContainText('1 of 5');
+    await expect(tourStep).toHaveCount(0);
+    assertNoRuntimeBrowserErrors(runtimeErrors, 'quick tour over shepherd');
+    await page.close();
+  });
+
+  test('task steps are skipped once the task is out of view', async ({
+    isolatedContext,
+  }) => {
+    const page = await isolatedContext.newPage();
+    const runtimeErrors = attachPageErrorCollector(page, 'quick tour off today');
+    installDevErrorDialogHandler(page, 'quick tour off today');
+    const hint = await reachTourOffer(page, `Off-Today task ${Date.now()}`);
+    await hint.getByRole('button', { name: 'Show me more ›' }).click();
+    await expect(hint).toContainText('1 of 5');
+
+    // Leaving Today removes the row the task steps point at.
+    await page.locator('magic-side-nav .tour-planner').first().click();
+    await expect(page).toHaveURL(/\/planner/);
+    await expect(page.locator('onboarding-hint')).toContainText(
+      'Make a project of your own',
+    );
+    await expect(page.locator('onboarding-hint')).toContainText('3 of 5');
+    assertNoRuntimeBrowserErrors(runtimeErrors, 'quick tour off today');
+    await page.close();
+  });
+
+  test('a collapsed side nav is expanded first, then + is shown', async ({
+    isolatedContext,
+  }) => {
+    const page = await isolatedContext.newPage();
+    const runtimeErrors = attachPageErrorCollector(page, 'quick tour collapsed');
+    installDevErrorDialogHandler(page, 'quick tour collapsed');
+    const hint = await reachTourOffer(page, `Collapsed task ${Date.now()}`);
+    await hint.getByRole('button', { name: 'Show me more ›' }).click();
+    await hint.getByRole('button', { name: 'Next ›' }).click();
+    await hint.getByRole('button', { name: 'Next ›' }).click();
+    await expect(hint).toContainText('3 of 5');
+
+    const toggle = page.locator('magic-side-nav .mode-toggle').first();
+    await toggle.click();
+    await expect(hint).toContainText('Expand the side nav');
+    await expect(toggle).toHaveClass(/onboarding-pulse/);
+    // Screen readers hear the changed tip, not only the first one of a step.
+    await expect(page.locator('.cdk-live-announcer-element')).toContainText(
+      'Expand the side nav',
+    );
+
+    await toggle.click();
+    await expect(hint).toContainText('Create one with +');
+    await expect(page.locator('[data-nav-btn="add-project"]')).toHaveClass(
+      /onboarding-pulse/,
+    );
+    assertNoRuntimeBrowserErrors(runtimeErrors, 'quick tour collapsed');
+    await page.close();
+  });
+
+  test.describe('phone', () => {
+    test.use(pixel5TestOptions);
+
+    test('organizes via ☰, then teaches the task menu on a new run', async ({
+      isolatedContext,
+    }) => {
+      const page = await isolatedContext.newPage();
+      const runtimeErrors = attachPageErrorCollector(page, 'quick tour phone');
+      installDevErrorDialogHandler(page, 'quick tour phone');
+      await openFreshApp(page);
+      await page.getByRole('button', { name: 'Add new task' }).tap();
+      const input = page.locator('add-task-bar.global .main-input');
+      await input.fill('Phone tour task');
+      await input.press('Enter');
+      await expect(page.locator('add-task-bar.global')).toBeHidden();
+      const hint = page.locator('onboarding-hint');
+      await expect(hint).toContainText('Swipe task left');
+
+      // Part 1 on phones often ends with the task done: no task steps follow.
+      await page.locator('task').first().locator('done-toggle').tap();
+      await expect(hint).toContainText('under ☰');
+      await hint.getByRole('button', { name: 'Show me more ›' }).tap();
+      await expect(hint).toContainText('Projects and tags live under ☰');
+      await expect(hint).toContainText('1 of 3');
+
+      // ☰ opens the drawer; the tip moves to its Tags +.
+      await page.locator('.tour-navMenuBtn').tap();
+      const addTagBtn = page.locator('.nav-sidenav.mobile [data-nav-btn="add-tag"]');
+      await expect(addTagBtn).toHaveClass(/onboarding-pulse/);
+      await expect(hint).toContainText('Create one with +');
+      await addTagBtn.tap();
+      await page.locator('dialog-create-tag input[name="title"]').fill('Phone tag');
+      await page.getByRole('button', { name: 'Save' }).tap();
+      await expect(page.locator('dialog-create-tag')).toHaveCount(0);
+      await expect(hint).toContainText('Plan the next days');
+      await expect(hint).toContainText('2 of 3');
+
+      // The drawer stays open, so the tip points at its Planner.
+      await page.locator('magic-side-nav .tour-planner').first().tap();
+      await expect(page).toHaveURL(/\/planner/);
+      const card = page.locator('quick-tour-card');
+      await expect(card).toContainText('3 of 3');
+      await expect(card).toContainText('Search everything from ☰');
+      await card.getByRole('button', { name: 'Done' }).tap();
+      await expect(card).toHaveCount(0);
+
+      // A new run with an undone task starts on its swipe menu.
+      await page.goto('/#/tag/TODAY/tasks');
+      await page.getByRole('button', { name: 'Add new task' }).tap();
+      await input.fill('Second phone task');
+      await input.press('Enter');
+      // Past part 1 the composer stays open for the next task.
+      await expect(
+        page.locator('task').filter({ hasText: 'Second phone task' }),
+      ).toHaveCount(1);
+      await input.press('Escape');
+      await expect(page.locator('add-task-bar.global')).toBeHidden();
+      await page.locator('.tour-navMenuBtn').tap();
+      await page.getByText('Help', { exact: true }).first().tap();
+      await page.getByText('Quick tour', { exact: true }).tap();
+      await expect(hint).toContainText('Swipe a task left for its menu');
+      await expect(hint).toContainText('1 of 4');
+      assertNoRuntimeBrowserErrors(runtimeErrors, 'quick tour phone');
+      await page.close();
+    });
   });
 });

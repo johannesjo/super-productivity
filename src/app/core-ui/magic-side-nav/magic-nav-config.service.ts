@@ -321,7 +321,7 @@ export class MagicNavConfigService {
             id: 'help-quick-tour',
             label: T.MH.HM.QUICK_TOUR,
             icon: 'explore',
-            action: () => this._quickTourService.start(),
+            action: () => this._startQuickTour(),
           },
           {
             type: 'action',
@@ -592,6 +592,14 @@ export class MagicNavConfigService {
 
   private _openBugReport(): void {
     window.open(getGithubErrorUrl('', undefined, true), '_blank');
+  }
+
+  private _startQuickTour(): void {
+    // Here, not in QuickTourService: ShepherdService already injects it.
+    if (this._shepherdService.isActive) {
+      this._shepherdService.cancel();
+    }
+    this._quickTourService.start();
   }
 
   private _startTour(tourId: TourId): void {
