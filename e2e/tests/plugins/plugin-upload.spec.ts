@@ -9,7 +9,10 @@ const TEST_PLUGIN_ZIP = path.resolve(__dirname, '../../../src/assets/test-plugin
 // Rows are matched by name: the id sits in the collapsed details
 const TEST_PLUGIN_NAME = 'Test Upload Plugin';
 
-const openTab = async (page: Page, name: 'Built-in' | 'Custom'): Promise<void> => {
+const openTab = async (
+  page: Page,
+  name: 'Features' | 'Integrations' | 'Custom',
+): Promise<void> => {
   const tab = page.locator('plugin-management').getByRole('tab', { name });
   await tab.click();
   await expect(tab).toHaveAttribute('aria-selected', 'true');
@@ -48,7 +51,9 @@ test.describe.serial('Plugin Upload', () => {
     await expect(row).not.toHaveClass(/isHighlighted/, { timeout: 5000 });
 
     // Only the "Custom" tab lists uploaded plugins
-    await openTab(page, 'Built-in');
+    await openTab(page, 'Features');
+    await expect(pluginRow(page)).toHaveCount(0);
+    await openTab(page, 'Integrations');
     await expect(pluginRow(page)).toHaveCount(0);
     await openTab(page, 'Custom');
 

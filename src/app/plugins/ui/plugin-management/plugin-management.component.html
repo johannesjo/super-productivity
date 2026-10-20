@@ -4,18 +4,16 @@
   [mat-stretch-tabs]="false"
   animationDuration="0ms"
 >
-  <mat-tab [label]="T.PLUGINS.TAB_BUILT_IN | translate">
-    @for (group of builtInPluginGroups(); track group.titleKey) {
-      <h3 class="group-title">{{ group.titleKey | translate }}</h3>
-      <ng-container
-        *ngTemplateOutlet="pluginList; context: { $implicit: group.plugins }"
-      ></ng-container>
-    } @empty {
-      <div class="empty-state">
-        <mat-icon>extension_off</mat-icon>
-        <p>{{ T.PS.NO_PLUGINS_INSTALLED | translate }}</p>
-      </div>
-    }
+  <mat-tab [label]="T.PLUGINS.TAB_FEATURES | translate">
+    <ng-container
+      *ngTemplateOutlet="builtInPluginList; context: { $implicit: featurePlugins() }"
+    ></ng-container>
+  </mat-tab>
+
+  <mat-tab [label]="T.PLUGINS.GROUP_INTEGRATIONS | translate">
+    <ng-container
+      *ngTemplateOutlet="builtInPluginList; context: { $implicit: integrationPlugins() }"
+    ></ng-container>
   </mat-tab>
 
   <mat-tab [label]="T.PLUGINS.TAB_CUSTOM | translate">
@@ -166,6 +164,22 @@
     </mat-card>
   </mat-tab>
 </mat-tab-group>
+
+<ng-template
+  #builtInPluginList
+  let-plugins
+>
+  @if (plugins.length > 0) {
+    <ng-container
+      *ngTemplateOutlet="pluginList; context: { $implicit: plugins }"
+    ></ng-container>
+  } @else {
+    <div class="empty-state">
+      <mat-icon>extension_off</mat-icon>
+      <p>{{ T.PS.NO_PLUGINS_INSTALLED | translate }}</p>
+    </div>
+  }
+</ng-template>
 
 <ng-template
   #pluginList

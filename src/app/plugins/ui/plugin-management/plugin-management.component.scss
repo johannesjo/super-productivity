@@ -56,12 +56,15 @@ mat-card {
 .plugin-list {
   list-style: none;
   margin: 0;
-  // Indented under its group heading, so the rows read as part of that group.
   padding: 0;
-  padding-inline-start: var(--s2);
   // Settings makes tab bodies `overflow: visible`, so without this the one-line
   // descriptions would size the whole tab to their full, unwrapped width.
   contain: inline-size;
+}
+
+// Indented under its group heading, so the rows read as part of that group.
+.group-title + .plugin-list {
+  padding-inline-start: var(--s2);
 }
 
 // Icon, content and controls columns. Everything under the summary (errors,

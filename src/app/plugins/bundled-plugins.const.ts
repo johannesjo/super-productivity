@@ -67,3 +67,12 @@ export const BUNDLED_PLUGIN_IDS = new Set<string>([
 export const DEV_ONLY_BUNDLED_PLUGIN_IDS: ReadonlySet<string> = new Set([
   'api-test-plugin',
 ]);
+
+// Bundled plugins that connect to another app or a file but are not issue providers:
+// the TickTick and Todoist importers and sync.md. The plugins page lists them under
+// Integrations, next to the issue and calendar providers.
+export const INTEGRATION_BUNDLED_PLUGIN_IDS: ReadonlySet<string> = new Set([
+  'sync-md',
+  'ticktick-import',
+  'todoist-import',
+]);

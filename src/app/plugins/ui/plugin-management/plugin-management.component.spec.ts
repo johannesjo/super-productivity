@@ -495,7 +495,7 @@ describe('PluginManagementComponent', () => {
       >;
     });
 
-    it('splits built-in plugins into integrations and other plugins, each by name', () => {
+    it('splits built-in plugins into features and integrations, each by name', () => {
       setStates(
         state('Zeta', 'built-in'),
         state('GitHub', 'built-in', { manifestType: 'issueProvider' }),
@@ -504,12 +504,26 @@ describe('PluginManagementComponent', () => {
         state('Azure', 'built-in', { manifestType: 'issueProvider' }),
       );
 
-      expect(
-        component.builtInPluginGroups().map((g) => [g.titleKey, names(g.plugins)]),
-      ).toEqual([
-        [T.PLUGINS.GROUP_INTEGRATIONS, ['Azure', 'GitHub']],
-        [T.PLUGINS.GROUP_OTHER, ['alpha', 'Zeta']],
+      expect(names(component.featurePlugins())).toEqual(['alpha', 'Zeta']);
+      expect(names(component.integrationPlugins())).toEqual(['Azure', 'GitHub']);
+    });
+
+    it('lists the TickTick and Todoist importers and sync.md under integrations', () => {
+      setStates(
+        state('Todoist Import', 'built-in'),
+        state('GitHub', 'built-in', { manifestType: 'issueProvider' }),
+        state('TickTick Import', 'built-in'),
+        state('Sync MD', 'built-in'),
+        state('Brain Dump', 'built-in'),
+      );
+
+      expect(names(component.integrationPlugins())).toEqual([
+        'GitHub',
+        'Sync MD',
+        'TickTick Import',
+        'Todoist Import',
       ]);
+      expect(names(component.featurePlugins())).toEqual(['Brain Dump']);
     });
 
     it('lists uploaded plugins by name, apart from the built-in ones', () => {
@@ -529,19 +543,29 @@ describe('PluginManagementComponent', () => {
 
     it('keeps the order when a plugin is enabled', () => {
       setStates(state('B', 'built-in'), state('A', 'built-in'));
-      const before = names(component.builtInPluginGroups()[0].plugins);
+      const before = names(component.featurePlugins());
 
       setStates(state('B', 'built-in', { isEnabled: true }), state('A', 'built-in'));
 
-      expect(names(component.builtInPluginGroups()[0].plugins)).toEqual(before);
+      expect(names(component.featurePlugins())).toEqual(before);
     });
 
-    it('shows built-in plugins by default and uploaded ones in the "Custom" tab', async () => {
-      setStates(state('Bundled', 'built-in'), state('Uploaded', 'uploaded'));
+    it('shows feature plugins by default and the others in their own tabs', async () => {
+      setStates(
+        state('Bundled', 'built-in'),
+        state('GitHub', 'built-in', { manifestType: 'issueProvider' }),
+        state('Uploaded', 'uploaded'),
+      );
       fixture.detectChanges();
       await fixture.whenStable();
 
       expect(rowNames()).toEqual(['Bundled']);
+
+      component.selectedTabIndex.set(PLUGIN_TAB_INDEX.INTEGRATIONS);
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(rowNames()).toEqual(['GitHub']);
 
       component.selectedTabIndex.set(PLUGIN_TAB_INDEX.CUSTOM);
       fixture.detectChanges();
@@ -676,7 +700,7 @@ describe('PluginManagementComponent', () => {
         await component.onFileSelected(zipInputEvent());
 
         expect(component.highlightedPluginId()).toBeNull();
-        expect(component.selectedTabIndex()).toBe(PLUGIN_TAB_INDEX.BUILT_IN);
+        expect(component.selectedTabIndex()).toBe(PLUGIN_TAB_INDEX.FEATURES);
       });
     });
   });

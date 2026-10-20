@@ -14,8 +14,8 @@ test.describe.serial('Plugin Management Feature Check', () => {
 
     const pluginMgmt = page.locator('plugin-management');
     await expect(pluginMgmt).toBeVisible({ timeout: 10000 });
-    // Built-in plugins open by default; installing lives in the "Custom" tab.
-    await expect(pluginMgmt.getByRole('tab', { name: 'Built-in' })).toHaveAttribute(
+    // Feature plugins open by default; installing lives in the "Custom" tab.
+    await expect(pluginMgmt.getByRole('tab', { name: 'Features' })).toHaveAttribute(
       'aria-selected',
       'true',
     );

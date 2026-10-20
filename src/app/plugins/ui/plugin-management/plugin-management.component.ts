@@ -54,7 +54,10 @@ import { selectAll as selectAllIssueProviders } from '../../../features/issue/st
 import { LayoutService } from '../../../core-ui/layout/layout.service';
 import COMMUNITY_PLUGINS_DATA from '../../../../assets/community-plugins.json';
 import { PluginApiAccess, PluginSecurityService } from '../../plugin-security';
-import { DEV_ONLY_BUNDLED_PLUGIN_IDS } from '../../bundled-plugins.const';
+import {
+  DEV_ONLY_BUNDLED_PLUGIN_IDS,
+  INTEGRATION_BUNDLED_PLUGIN_IDS,
+} from '../../bundled-plugins.const';
 import { environment } from '../../../../environments/environment';
 import { Capacitor } from '@capacitor/core';
 import {
@@ -120,8 +123,8 @@ const createCollator = (locale: string): Intl.Collator => {
   }
 };
 
-/** Tab indexes of the plugins page; "Built-in" opens by default. */
-export const PLUGIN_TAB_INDEX = { BUILT_IN: 0, CUSTOM: 1 } as const;
+/** Tab indexes of the plugins page; "Features" opens by default. */
+export const PLUGIN_TAB_INDEX = { FEATURES: 0, INTEGRATIONS: 1, CUSTOM: 2 } as const;
 
 /** How long a just-installed plugin's row stays highlighted. */
 const INSTALLED_PLUGIN_HIGHLIGHT_MS = 3000;
@@ -279,27 +282,26 @@ export class PluginManagementComponent {
       .sort((a, b) => collator.compare(a.manifest.name, b.manifest.name));
   });
 
-  // The "Built-in" tab: integrations (issue and calendar providers), then other plugins.
-  readonly builtInPluginGroups = computed(() => {
-    const builtIn = this._listedPluginsByName().filter((p) => !this._isUploadedState(p));
-    return [
-      {
-        titleKey: T.PLUGINS.GROUP_INTEGRATIONS,
-        plugins: builtIn.filter((p) => this.isIssueProviderPlugin(p)),
-      },
-      {
-        titleKey: T.PLUGINS.GROUP_OTHER,
-        plugins: builtIn.filter((p) => !this.isIssueProviderPlugin(p)),
-      },
-    ].filter((group) => group.plugins.length > 0);
-  });
+  private readonly _builtInPlugins = computed(() =>
+    this._listedPluginsByName().filter((p) => !this._isUploadedState(p)),
+  );
+
+  // The "Features" tab: built-in plugins that are not integrations.
+  readonly featurePlugins = computed(() =>
+    this._builtInPlugins().filter((p) => !this._isIntegrationPlugin(p)),
+  );
+
+  // The "Integrations" tab: built-in issue and calendar providers, importers and sync.md.
+  readonly integrationPlugins = computed(() =>
+    this._builtInPlugins().filter((p) => this._isIntegrationPlugin(p)),
+  );
 
   // The "Custom" tab lists these between the install card and the community catalog.
   readonly uploadedPlugins = computed(() =>
     this._listedPluginsByName().filter((p) => this._isUploadedState(p)),
   );
 
-  readonly selectedTabIndex = signal<number>(PLUGIN_TAB_INDEX.BUILT_IN);
+  readonly selectedTabIndex = signal<number>(PLUGIN_TAB_INDEX.FEATURES);
 
   /** Ids of plugins whose details area is open. */
   readonly expandedPluginIds = signal<ReadonlySet<string>>(new Set());
@@ -402,6 +404,13 @@ export class PluginManagementComponent {
   private _isUploadedState(plugin: PluginInstance): boolean {
     return (
       this._pluginService.pluginStates().get(plugin.manifest.id)?.type === 'uploaded'
+    );
+  }
+
+  private _isIntegrationPlugin(plugin: PluginInstance): boolean {
+    return (
+      this.isIssueProviderPlugin(plugin) ||
+      INTEGRATION_BUNDLED_PLUGIN_IDS.has(plugin.manifest.id)
     );
   }
 
