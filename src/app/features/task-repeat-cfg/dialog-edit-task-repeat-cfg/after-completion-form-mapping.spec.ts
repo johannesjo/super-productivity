@@ -202,6 +202,25 @@ describe('after-completion form mapping (#5388)', () => {
       });
     });
 
+    it('keeps a legacy fixed preset with its anchor when only other fields changed', () => {
+      const legacyPreset = cfg({
+        quickSetting: 'MONTHLY_LAST_DAY',
+        repeatFromCompletionDate: true,
+        repeatCycle: 'MONTHLY',
+        monthlyLastDay: true,
+      });
+      const model = { ...toRepeatCfgFormModel(legacyPreset), title: 'Renamed' };
+      const kept = keepUneditedAfterCompletionSchedule(
+        legacyPreset,
+        model,
+        toStoredRepeatCfg(model),
+      );
+      expect(getTaskRepeatCfgChanges(legacyPreset, kept)).toEqual({
+        title: 'Renamed',
+        waitForCompletion: true,
+      });
+    });
+
     it('converts the schedule once the user edits it', () => {
       const model = { ...toRepeatCfgFormModel(legacy), repeatEvery: 3 };
       const stored = toStoredRepeatCfg(model);

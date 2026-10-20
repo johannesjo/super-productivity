@@ -1478,6 +1478,28 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       component.save();
       expect(updateChanges()).toEqual({});
     });
+
+    it('keeps a legacy fixed preset with the after-completion flag on an unrelated save', async () => {
+      const fixture = await setupTestBed({
+        repeatCfg: {
+          ...mockRepeatCfg,
+          quickSetting: 'MONTHLY_LAST_DAY',
+          repeatFromCompletionDate: true,
+          waitForCompletion: true,
+          repeatCycle: 'MONTHLY',
+          monthlyLastDay: true,
+        },
+      });
+      const component = fixture.componentInstance;
+
+      expect(component.repeatCfg().quickSetting).toBe(AFTER_COMPLETION_PRESET);
+      expect(component.hasUnsavedScheduleChanges()).toBe(false);
+      component.onModelChange({ ...component.repeatCfg(), title: 'Renamed' });
+      component.save();
+
+      // monthlyLastDay is schedule-affecting: stripping it would move the open copy.
+      expect(updateChanges()).toEqual({ title: 'Renamed' });
+    });
   });
   describe('"If you fall behind" (#5388 follow-up)', () => {
     const savedCfg = (): TaskRepeatCfg =>

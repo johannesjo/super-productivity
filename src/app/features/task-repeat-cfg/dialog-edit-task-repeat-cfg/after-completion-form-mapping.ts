@@ -88,6 +88,10 @@ export const toStoredRepeatCfg = <TCfg extends MappedFields>(
 };
 
 const AFTER_COMPLETION_SCHEDULE_KEYS = [
+  // A legacy config can carry a fixed preset next to the after-completion flag.
+  // Rewriting it as CUSTOM would also strip a MONTHLY_LAST_DAY anchor
+  // (_normalizeMonthlyAnchor), a schedule-affecting change.
+  'quickSetting',
   'repeatCycle',
   'repeatEvery',
   'monthlyWeekOfMonth',
@@ -97,7 +101,7 @@ const AFTER_COMPLETION_SCHEDULE_KEYS = [
 
 /**
  * A stored after-completion config can predate the dialog's representation
- * (a weekday-based weekly cycle, monthly anchors). Rewriting those
+ * (a fixed preset, a weekday-based weekly cycle, monthly anchors). Rewriting those
  * schedule-affecting fields makes rescheduleTaskOnRepeatCfgUpdate$ relocate the
  * open copy, e.g. move an overdue one into the future. So they are only
  * converted when the user edited the schedule in the dialog; an unrelated save
