@@ -76,6 +76,9 @@ export enum LS {
   // added, so a reload after that does not start onboarding over.
   ONBOARDING_PRESET_DONE = 'SUP_ONBOARDING_PRESET_DONE',
   ONBOARDING_HINTS_DONE = 'SUP_ONBOARDING_HINTS_DONE',
+  // Quick tour (device-local, never synced): the running step and its task, so
+  // a reload resumes it. Removed once the tour ends.
+  QUICK_TOUR_STATE = 'SUP_QUICK_TOUR_STATE',
 
   LAST_FULLSCREEN_EDIT_VIEW_MODE = 'SUP_LAST_FULLSCREEN_EDIT_VIEW_MODE',
 

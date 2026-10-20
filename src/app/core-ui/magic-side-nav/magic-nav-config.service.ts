@@ -8,6 +8,7 @@ import { WorkContextService } from '../../features/work-context/work-context.ser
 import { TagService } from '../../features/tag/tag.service';
 import { ShepherdService } from '../../features/shepherd/shepherd.service';
 import { TourId } from '../../features/shepherd/shepherd-steps.const';
+import { QuickTourService } from '../../features/onboarding/quick-tour.service';
 import { T } from '../../t.const';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { getGithubErrorUrl } from '../../core/error-handler/global-error-handler.util';
@@ -46,6 +47,7 @@ export class MagicNavConfigService {
   private readonly _workContextService = inject(WorkContextService);
   private readonly _tagService = inject(TagService);
   private readonly _shepherdService = inject(ShepherdService);
+  private readonly _quickTourService = inject(QuickTourService);
   private readonly _matDialog = inject(MatDialog);
   private readonly _store = inject(Store);
   private readonly _pluginBridge = inject(PluginBridgeService);
@@ -309,6 +311,13 @@ export class MagicNavConfigService {
           },
           {
             type: 'action',
+            id: 'help-quick-tour',
+            label: T.MH.HM.QUICK_TOUR,
+            icon: 'explore',
+            action: () => this._startQuickTour(),
+          },
+          {
+            type: 'action',
             id: 'tour-create-task',
             label: T.MH.HM.CREATE_TASK,
             icon: 'add_task',
@@ -405,6 +414,7 @@ export class MagicNavConfigService {
         icon: NAV_SECTION_ICON.PLANNER,
         route: '/planner',
         featureConfigKey: 'isPlannerEnabled',
+        tourClass: 'tour-planner',
       });
     }
 
@@ -575,6 +585,14 @@ export class MagicNavConfigService {
 
   private _openBugReport(): void {
     window.open(getGithubErrorUrl('', undefined, true), '_blank');
+  }
+
+  private _startQuickTour(): void {
+    // Here, not in QuickTourService: ShepherdService already injects it.
+    if (this._shepherdService.isActive) {
+      this._shepherdService.cancel();
+    }
+    this._quickTourService.start();
   }
 
   private _startTour(tourId: TourId): void {
