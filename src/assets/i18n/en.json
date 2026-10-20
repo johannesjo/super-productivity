@@ -210,6 +210,8 @@
         "IS_ADD_SUB_TASKS": "Also import subtasks when a task is added",
         "POLL_INTERVAL_MINUTES": "Poll interval (minutes)",
         "TWO_WAY_SYNC_BOTH": "Both (bidirectional)",
+        "TWO_WAY_SYNC_DELETE_ON_SERVER": "Delete the CalDAV task when the linked task is deleted",
+        "TWO_WAY_SYNC_DELETE_ON_SERVER_DESCRIPTION": "Only tasks deleted in Super Productivity. A single task is deleted on the server once its undo period has passed; several selected tasks right after you confirm.",
         "TWO_WAY_SYNC_NOTES": "Notes / Description sync direction",
         "TWO_WAY_SYNC_OFF": "Off",
         "TWO_WAY_SYNC_PULL_ONLY": "Pull only (read from CalDAV)",

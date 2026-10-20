@@ -78,6 +78,20 @@ export class CaldavSyncAdapterService implements IssueSyncAdapter<CaldavCfg> {
     };
   }
 
+  /**
+   * Deletes the VTODO when its SP task is deleted (via the generic
+   * `deleteIssueOnTaskDelete$` effects, after the undo window) — but only when
+   * the user opted in. The generic remote-delete path has no gate of its own, so
+   * without this check implementing the hook would delete server data for every
+   * existing CalDAV user (#10096).
+   */
+  async deleteIssue(issueId: string, cfg: CaldavCfg): Promise<void> {
+    if (!cfg.twoWaySync?.deleteOnServer) {
+      return;
+    }
+    await firstValueFrom(this._caldavClientService.deleteTask$(cfg, issueId));
+  }
+
   getIssueLastUpdated(issue: Record<string, unknown>): number {
     return issue['etag_hash'] as number;
   }

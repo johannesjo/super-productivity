@@ -5,6 +5,12 @@ export interface CaldavTwoWaySyncCfg {
   isDone?: SyncDirection;
   title?: SyncDirection;
   notes?: SyncDirection;
+  /**
+   * Delete the VTODO on the server when its linked task is deleted in SP (after
+   * the undo window). Default off: writing deletions to someone's real calendar
+   * must not switch on by upgrading (#10096).
+   */
+  deleteOnServer?: boolean;
 }
 
 export interface CaldavCfg extends BaseIssueProviderCfg {

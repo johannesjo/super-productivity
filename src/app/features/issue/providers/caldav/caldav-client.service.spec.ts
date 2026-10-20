@@ -174,6 +174,56 @@ describe('CaldavClientService.updateFields$ – completion push', () => {
   });
 });
 
+describe('CaldavClientService.deleteTask$', () => {
+  let svc: CaldavClientService;
+  let snack: jasmine.SpyObj<SnackService>;
+
+  beforeEach(() => {
+    snack = jasmine.createSpyObj('SnackService', ['open']);
+    TestBed.configureTestingModule({
+      providers: [CaldavClientService, { provide: SnackService, useValue: snack }],
+    });
+    svc = TestBed.inject(CaldavClientService);
+  });
+
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('deletes the VTODO guarded by the ETag it just fetched', async () => {
+    const davTask = {
+      data: 'BEGIN:VCALENDAR\r\nEND:VCALENDAR',
+      url: 'https://cal.example.com/todo-del-1.ics',
+      etag: '"etag-1"',
+      delete: jasmine.createSpy('delete').and.resolveTo(undefined),
+    };
+    spyOn(svc as any, '_getCalendar').and.resolveTo({ readOnly: false });
+    spyOn(CaldavClientService as any, '_findTaskByUid').and.resolveTo([davTask]);
+
+    await firstValueFrom(svc.deleteTask$(MOCK_CFG, 'todo-del-1'));
+
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    expect(davTask.delete).toHaveBeenCalledOnceWith({ 'If-Match': '"etag-1"' });
+  });
+
+  it('treats a VTODO that is already gone as deleted, without a snack', async () => {
+    spyOn(svc as any, '_getCalendar').and.resolveTo({ readOnly: false });
+    spyOn(CaldavClientService as any, '_findTaskByUid').and.resolveTo([]);
+
+    await firstValueFrom(svc.deleteTask$(MOCK_CFG, 'gone'));
+
+    expect(snack.open).not.toHaveBeenCalled();
+  });
+
+  it('refuses to delete from a read-only calendar', async () => {
+    const findSpy = spyOn(CaldavClientService as any, '_findTaskByUid');
+    spyOn(svc as any, '_getCalendar').and.resolveTo({ readOnly: true });
+
+    await expectAsync(firstValueFrom(svc.deleteTask$(MOCK_CFG, 'x'))).toBeRejected();
+
+    expect(findSpy).not.toHaveBeenCalled();
+    expect(snack.open).toHaveBeenCalled();
+  });
+});
+
 // ─── _getXhrProvider / _getAndroidXhrProvider ─────────────────────────────────
 
 const MOCK_CFG: CaldavCfg = {
