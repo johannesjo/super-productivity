@@ -8,7 +8,12 @@ import { isImageUrlSimple } from '../../util/is-image-url';
 import { formatTimeHHmm } from '../../util/format-time-hhmm';
 import { TaskAttachment } from './task-attachment/task-attachment.model';
 import { nanoid } from 'nanoid';
-import type { Chrono, ParsedResult, ParsingContext, ParsingResult } from 'chrono-node';
+import type { ParsedResult } from 'chrono-node';
+import { loadShortSyntaxDateParser } from './short-syntax-date-parser';
+import {
+  DateInputLocale,
+  DEFAULT_DATE_INPUT_LOCALE,
+} from '../../core/date-time-format/date-input-locale';
 import {
   RepeatCycleOption,
   RepeatQuickSetting,
@@ -69,54 +74,6 @@ const CH_TAG = '#';
 const CH_DUE = '@';
 const CH_DEADLINE = '!';
 const ALL_SPECIAL = `(\\${CH_PRO}|\\${CH_TAG}|\\${CH_DUE}|\\${CH_DEADLINE})`;
-
-let customDateParserPromise: Promise<Chrono> | null = null;
-let customDateParserCache: Chrono | null = null;
-
-const loadCustomDateParser = (): Promise<Chrono> => {
-  if (customDateParserCache) {
-    return Promise.resolve(customDateParserCache);
-  }
-  if (!customDateParserPromise) {
-    customDateParserPromise = import('chrono-node').then(({ casual }) => {
-      const parser = casual.clone();
-      parser.refiners.push({
-        refine: (context: ParsingContext, results: ParsingResult[]) => {
-          results.forEach((result) => {
-            const { refDate, text, start } = result;
-            const regex = / [5-9][0-9]$/;
-            const yearIndex = text.search(regex);
-            // The year pattern in Chrono's source code is (?:[1-9][0-9]{0,3}\\s{0,2}(?:BE|AD|BC|BCE|CE)|[1-2][0-9]{3}|[5-9][0-9]|2[0-5]).
-            // This means any two-digit numeric value from 50 to 99 will be considered a year.
-            // Link: https://github.com/wanasit/chrono/blob/54e7ff12f9185e735ee860c25922b2ab2367d40b/src/locales/en/constants.ts#L234C30-L234C108
-            // When someone creates a task like "Test @25/4 90m", Chrono will return
-            // the year as 1990, which is an undesirable behaviour in most cases.
-            if (yearIndex !== -1) {
-              result.text = text.slice(0, yearIndex);
-              const current = new Date();
-              let year = current.getFullYear();
-              const impliedDate = start.get('day');
-              const impliedMonth = start.get('month');
-              if (
-                (impliedMonth && impliedMonth < refDate.getMonth() + 1) ||
-                (impliedMonth === refDate.getMonth() + 1 &&
-                  impliedDate &&
-                  impliedDate < refDate.getDate())
-              ) {
-                year += 1;
-              }
-              result.start.assign('year', year);
-            }
-          });
-          return results;
-        },
-      });
-      customDateParserCache = parser;
-      return parser;
-    });
-  }
-  return customDateParserPromise;
-};
 
 // The following project name extraction pattern attempts to improve on the
 // previous version by not immediately terminating upon encountering a short
@@ -465,6 +422,10 @@ export const shortSyntax = async (
   // can be created for the result — the add-task bar. Title edits of existing
   // tasks keep parsing it as a plain date.
   isParseRepeat: boolean = false,
+  // Date words of the UI language and the day/month order of `3/1`
+  // (DateTimeFormatService.dateInputLocale). English-only, month-first when
+  // left out.
+  dateLocale: DateInputLocale = DEFAULT_DATE_INPUT_LOCALE,
 ): Promise<
   | {
       taskChanges: Partial<Task> & ShortSyntaxMarkers;
@@ -518,7 +479,7 @@ export const shortSyntax = async (
       pushRanges('estimate', timeResult.ranges);
       isTitleChanged = true;
     }
-    const dueResult = await parseScheduledDate(tracked, now, isParseRepeat);
+    const dueResult = await parseScheduledDate(tracked, now, isParseRepeat, dateLocale);
     if (dueResult) {
       repeat = dueResult.repeat || null;
       taskChanges = { ...taskChanges, ...dueResult.changes };
@@ -530,7 +491,7 @@ export const shortSyntax = async (
   // don't allow for issue tasks: imported titles like "Crash on save !3"
   // would otherwise get an unasked-for deadline
   if (config.isEnableDeadline && !task.issueId) {
-    const deadlineResult = await parseDeadlineDate(tracked, now);
+    const deadlineResult = await parseDeadlineDate(tracked, now, dateLocale);
     if (deadlineResult) {
       taskChanges = { ...taskChanges, ...deadlineResult.changes };
       pushRanges('deadline', deadlineResult.ranges);
@@ -855,7 +816,8 @@ const parseShortSyntaxDate = async (
   now: Date,
   regEx: RegExp,
   isDeadline: boolean,
-  isParseRepeat: boolean = false,
+  isParseRepeat: boolean,
+  dateLocale: DateInputLocale,
 ): Promise<DateStageResult | null> => {
   if (!tracked.text) {
     return null;
@@ -877,7 +839,7 @@ const parseShortSyntaxDate = async (
     if (!isDeadline && isParseRepeat) {
       const repeatResult = parseRepeatSyntax(rr[0].substring(1));
       if (repeatResult) {
-        return await applyRepeatSyntax(tracked, now, rr[0], repeatResult);
+        return await applyRepeatSyntax(tracked, now, rr[0], repeatResult, dateLocale);
       }
     }
 
@@ -892,10 +854,11 @@ const parseShortSyntaxDate = async (
         triggerIndex,
         nthWeekdayResult,
         isDeadline,
+        dateLocale,
       );
     }
 
-    const dateParser = await loadCustomDateParser();
+    const dateParser = await loadShortSyntaxDateParser(dateLocale);
     const parsedDateArr = dateParser.parse(rr[0], now, {
       forwardDate: true,
     });
@@ -1042,10 +1005,11 @@ const applyRepeatSyntax = async (
   now: Date,
   dueMatch: string,
   repeatResult: RepeatSyntaxResult,
+  dateLocale: DateInputLocale,
 ): Promise<DateStageResult> => {
   const { repeat, chronoText, consumedLength, weekday, dayOfMonth } = repeatResult;
   const anchorCycle = anchorCycleOf(repeat);
-  const dateParser = await loadCustomDateParser();
+  const dateParser = await loadShortSyntaxDateParser(dateLocale);
   const parsedDateArr = chronoText
     ? dateParser.parse(chronoText, now, { forwardDate: true })
     : [];
@@ -1203,9 +1167,10 @@ const applyNthWeekdaySyntax = async (
   triggerIndex: number,
   nthWeekdayResult: NthWeekdaySyntaxResult,
   isDeadline: boolean,
+  dateLocale: DateInputLocale,
 ): Promise<DateStageResult> => {
   const { nth, weekday, chronoText, consumedLength } = nthWeekdayResult;
-  const dateParser = await loadCustomDateParser();
+  const dateParser = await loadShortSyntaxDateParser(dateLocale);
   let parsedDateArr = chronoText
     ? dateParser.parse(chronoText, now, { forwardDate: true })
     : [];
@@ -1334,15 +1299,31 @@ const applyNthWeekdaySyntax = async (
 const parseScheduledDate = (
   tracked: TrackedTitle,
   now: Date,
-  isParseRepeat: boolean = false,
+  isParseRepeat: boolean,
+  dateLocale: DateInputLocale,
 ): Promise<DateStageResult | null> =>
-  parseShortSyntaxDate(tracked, now, SHORT_SYNTAX_DUE_REG_EX, false, isParseRepeat);
+  parseShortSyntaxDate(
+    tracked,
+    now,
+    SHORT_SYNTAX_DUE_REG_EX,
+    false,
+    isParseRepeat,
+    dateLocale,
+  );
 
 const parseDeadlineDate = (
   tracked: TrackedTitle,
   now: Date,
+  dateLocale: DateInputLocale,
 ): Promise<DateStageResult | null> =>
-  parseShortSyntaxDate(tracked, now, SHORT_SYNTAX_DEADLINE_REG_EX, true);
+  parseShortSyntaxDate(
+    tracked,
+    now,
+    SHORT_SYNTAX_DEADLINE_REG_EX,
+    true,
+    false,
+    dateLocale,
+  );
 
 // Every token is consumed and the last one wins ("p3 ... p1" is High): a
 // token left in the title would be parsed again by the add-task effect, which

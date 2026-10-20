@@ -16,6 +16,10 @@ import { TimeSpentOnDay, TaskPriority, TaskReminderOptionId } from '../task.mode
 import { TaskAttachment } from '../task-attachment/task-attachment.model';
 import { millisecondsDiffToDeadlineRemindOption } from '../util/remind-option-to-milliseconds';
 import { getTaskPriority } from '../task-priority.const';
+import {
+  DateInputLocale,
+  DEFAULT_DATE_INPUT_LOCALE,
+} from '../../../core/date-time-format/date-input-locale';
 
 interface PreviousParseResult {
   cleanText: string | null;
@@ -86,6 +90,7 @@ export class AddTaskBarParserService {
     defaultProject: Project,
     defaultDate?: string,
     defaultTime?: string,
+    dateLocale: DateInputLocale = DEFAULT_DATE_INPUT_LOCALE,
   ): Promise<void> {
     const parseRunId = ++this._parseRunId;
 
@@ -119,6 +124,7 @@ export class AddTaskBarParserService {
       undefined,
       'replace',
       true,
+      dateLocale,
     );
 
     if (parseRunId !== this._parseRunId) {
