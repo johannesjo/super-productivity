@@ -38,4 +38,11 @@
   <string name="widget_description">Shows today\'s tasks with quick done action</string>
   <string name="widget_empty">No tasks for today</string>
   <string name="widget_task_done">Toggle task done</string>
+
+  <!-- Launcher shortcuts (long-press the app icon), res/xml/shortcuts.xml.
+       Same set and wording as the iOS Home Screen quick actions; Android
+       recommends at most ~10 characters. -->
+  <string name="shortcut_add_task">New task</string>
+  <string name="shortcut_today">Today</string>
+  <string name="shortcut_inbox">Inbox</string>
 </resources>
