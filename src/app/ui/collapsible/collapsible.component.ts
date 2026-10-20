@@ -81,7 +81,9 @@ export class CollapsibleComponent implements OnInit, OnDestroy {
   }
 
   onHeaderKeydown(ev: KeyboardEvent): void {
-    if (!this.isGroup) {
+    // Keys on a projected header action (e.g. a link button) belong to that
+    // action; handling them here would toggle the group and cancel its click.
+    if (!this.isGroup || ev.target !== ev.currentTarget) {
       return;
     }
 

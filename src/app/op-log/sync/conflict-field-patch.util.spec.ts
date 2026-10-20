@@ -516,34 +516,6 @@ describe('conflict-field-patch.util', () => {
       expect(changes['doneOn']).toBeUndefined();
     });
 
-    // An undone task can't stay won't do (`updateWontDoForTask`).
-    it('clears isWontDo beside an undone toggle', () => {
-      const [{ changes }] = localWinningFieldGroups(
-        sides([edit({ isDone: false })], [edit({ title: 'b' }, { timestamp: 500 })]),
-      );
-      expect('isWontDo' in changes).toBeTrue();
-      expect(changes['isWontDo']).toBeUndefined();
-    });
-
-    // Marking a task done again keeps its won't do, which depends on state.
-    it('leaves isWontDo out beside a done toggle', () => {
-      const [{ changes }] = localWinningFieldGroups(
-        sides([edit({ isDone: true })], [edit({ title: 'b' }, { timestamp: 500 })]),
-      );
-      expect('isWontDo' in changes).toBeFalse();
-    });
-
-    it('lists isWontDo among the fields an undone toggle supersedes', () => {
-      expect(
-        supersededPatchFields(
-          [edit({ isDone: false })],
-          'TASK' as EntityType,
-          'task',
-          'task-1',
-        ),
-      ).toEqual(['isDone', 'doneOn', 'isWontDo']);
-    });
-
     it('keeps a doneOn the op carried', () => {
       expect(
         localWinningFieldGroups(
@@ -553,6 +525,36 @@ describe('conflict-field-patch.util', () => {
           ),
         )[0].changes['doneOn'],
       ).toBe(7);
+    });
+
+    // Won't do is a `wontDoOn` equal to `doneOn` (`isWontDoTask`), written by
+    // one op, so the newer edit's `doneOn` decides: a `wontDoOn` left beside
+    // another `doneOn` no longer counts.
+    describe("won't do against a concurrent completion", () => {
+      const wontDoAt = (t: number): Operation =>
+        edit({ isDone: true, doneOn: t, wontDoOn: t }, { id: 'w', timestamp: t });
+      const completionAt = (t: number): Operation =>
+        edit({ isDone: true, doneOn: t }, { id: 'c', timestamp: t, clientId: 'B' });
+
+      it('gives a newer completion its doneOn on both sides', () => {
+        expect(localWinningFieldGroups(sides([wontDoAt(1000)], [completionAt(2000)])))
+          .withContext("won't-do side")
+          .toEqual([{ timestamp: 1000, changes: { wontDoOn: 1000 } }]);
+        expect(localWinningFieldGroups(sides([completionAt(2000)], [wontDoAt(1000)])))
+          .withContext('completion side')
+          .toEqual([{ timestamp: 2000, changes: { isDone: true, doneOn: 2000 } }]);
+      });
+
+      it("gives a newer won't do its matching pair on both sides", () => {
+        expect(localWinningFieldGroups(sides([wontDoAt(2000)], [completionAt(1000)])))
+          .withContext("won't-do side")
+          .toEqual([
+            { timestamp: 2000, changes: { isDone: true, doneOn: 2000, wontDoOn: 2000 } },
+          ]);
+        expect(localWinningFieldGroups(sides([completionAt(1000)], [wontDoAt(2000)])))
+          .withContext('completion side')
+          .toEqual([]);
+      });
     });
   });
 
@@ -585,18 +587,7 @@ describe('conflict-field-patch.util', () => {
           { id: 'task-1', title: 'row', isDone: true, doneOn: 5 },
           'task',
         ),
-      ).toEqual({ isDone: true, doneOn: 5, isWontDo: undefined });
-    });
-
-    it('re-emits the stored isWontDo beside a surviving done toggle', () => {
-      const local = edit({ isDone: true }, { id: 'l' });
-      expect(
-        survivingLocalFields(
-          conflictOf([local], [lwwRow]),
-          { id: 'task-1', title: 'row', isDone: true, doneOn: 5, isWontDo: true },
-          'task',
-        ),
-      ).toEqual({ isDone: true, doneOn: 5, isWontDo: true });
+      ).toEqual({ isDone: true, doneOn: 5 });
     });
 
     it('re-emits nothing when the row overwrote every local field', () => {
@@ -646,7 +637,6 @@ describe('conflict-field-patch.util', () => {
       expect(createPatch).toHaveBeenCalledWith(conflict, {
         isDone: true,
         doneOn: undefined,
-        isWontDo: undefined,
       });
       expect(
         await buildSurvivingFieldPatches(

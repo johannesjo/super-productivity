@@ -20,7 +20,6 @@ import {
   removeTaskFromParentSideEffects,
   reCalcTimesForParentIfParent,
   updateDoneOnForTask,
-  updateWontDoForTask,
   updateTimeEstimateForTask,
   updateTimeSpentForTask,
 } from '../../../features/tasks/store/task.reducer.util';
@@ -211,7 +210,7 @@ const handleConvertToMainTask = (
     task as Task,
   );
 
-  const taskStateAfterConvert = taskAdapter.updateOne(
+  const updatedTaskState = taskAdapter.updateOne(
     {
       id: task.id,
       changes: {
@@ -246,16 +245,6 @@ const handleConvertToMainTask = (
     },
     taskStateAfterParentCleanup,
   );
-  // The DONE-list drop sets isDone directly, so normalize isWontDo like any
-  // other done toggle: dragging out of DONE clears it.
-  const updatedTaskState =
-    isDone !== undefined && storedTask
-      ? updateWontDoForTask(
-          storedTask,
-          { id: task.id, changes: { isDone } },
-          taskStateAfterConvert,
-        )
-      : taskStateAfterConvert;
 
   let updatedState = {
     ...state,
@@ -943,7 +932,6 @@ const handleUpdateTask = (
     },
     taskState,
   );
-  taskState = updateWontDoForTask(currentTask, cleanedTaskUpdate, taskState);
 
   updatedState = {
     ...updatedState,

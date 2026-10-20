@@ -39,13 +39,13 @@ jobs:
             contentdelivery.itunes.apple.com:443
             idmsa.apple.com:443
 
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v6
-        with:
-          node-version: 22
       - name: Check out Git repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
           persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v6
+        with:
+          node-version-file: .nvmrc
       # work around for npm installs from git+https://github.com/johannesjo/J2M.git
       - name: Reconfigure git to use HTTP authentication
         run: >

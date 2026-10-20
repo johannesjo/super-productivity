@@ -257,7 +257,8 @@ describe('IssueTwoWaySyncEffects', () => {
         issueProviderId: 'provider-1',
         issueLastSyncedValues: { status: 'NEEDS-ACTION' },
         isDone: true,
-        isWontDo: true,
+        doneOn: 5,
+        wontDoOn: 5,
       });
 
       taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
@@ -267,7 +268,7 @@ describe('IssueTwoWaySyncEffects', () => {
 
       actions$.next(
         TaskSharedActions.updateTask({
-          task: { id: 'task-1', changes: { isDone: true, isWontDo: true } },
+          task: { id: 'task-1', changes: { isDone: true, doneOn: 5, wontDoOn: 5 } },
         }),
       );
 

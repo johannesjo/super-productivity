@@ -141,7 +141,7 @@ describe('GlobalConfigReducer', () => {
       // Existing values preserved
       expect(result.idle.isEnableIdleTimeTracking).toBe(true);
       expect(result.idle.minIdleTime).toBe(5 * 60 * 1000);
-      // Missing value filled from default (must be false = opt-in)
+      // Missing value filled from default
       expect(result.idle.isSuppressIdleDuringFocusMode).toBe(
         DEFAULT_GLOBAL_CONFIG.idle.isSuppressIdleDuringFocusMode,
       );

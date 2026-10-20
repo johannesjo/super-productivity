@@ -15,7 +15,7 @@
   @if (isPlannerEnabled()) {
     <button
       mat-button
-      class="nav-button"
+      class="nav-button tour-planner"
       routerLink="/planner"
       routerLinkActive="active"
       [attr.aria-label]="T.MH.PLANNER | translate"
@@ -97,7 +97,7 @@
 
   <button
     mat-button
-    class="nav-button"
+    class="nav-button tour-navMenuBtn"
     (click)="toggleMobileNav()"
     [attr.aria-label]="T.MH.PROJECT_MENU | translate"
   >
@@ -116,6 +116,7 @@
       [class.active]="activePluginId() === button.pluginId && isShowPluginPanel()"
     >
       <plugin-icon
+        matMenuItemIcon
         [pluginId]="button.pluginId"
         [fallbackIcon]="button.icon || 'extension'"
       ></plugin-icon>

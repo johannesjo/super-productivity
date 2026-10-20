@@ -42,7 +42,10 @@ export class TaskDuplicateService {
         title: subTask.title,
         additional: {
           isDone: subTask.isDone,
-          ...(isWontDoTask(subTask) && { isWontDo: true }),
+          ...(isWontDoTask(subTask) && {
+            doneOn: subTask.doneOn,
+            wontDoOn: subTask.wontDoOn,
+          }),
           projectId: subTask.projectId,
           ...(subTask.dueDay && { dueDay: subTask.dueDay }),
           ...(subTask.dueWithTime && { dueWithTime: subTask.dueWithTime }),
