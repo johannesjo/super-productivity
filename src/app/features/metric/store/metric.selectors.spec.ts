@@ -1,4 +1,5 @@
 import {
+  selectEvaluationLineChartData,
   selectFocusSessionLineChartData,
   selectFocusSessionLineChartDataComplete,
   selectSimpleCounterClickCounterLineChartData,
@@ -236,5 +237,35 @@ describe('Metric Selectors - Focus Sessions', () => {
     expect(sliced.labels).toEqual([dayTwo]);
     expect(sliced.datasets[0].data).toEqual([0]);
     expect(sliced.datasets[1].data).toEqual([0]);
+  });
+});
+
+describe('Metric Selectors - Evaluation', () => {
+  it('should chart impact and energy for rated days in date order', () => {
+    const mockState: MetricState = {
+      ids: ['2024-01-03', '2024-01-01', '2024-01-02'],
+      entities: {
+        '2024-01-01': { id: '2024-01-01', impactOfWork: 3, energyCheckin: 2 },
+        '2024-01-02': { id: '2024-01-02', focusSessions: [60000] },
+        '2024-01-03': { id: '2024-01-03', impactOfWork: null, energyCheckin: 1 },
+      },
+    };
+
+    const chart = selectEvaluationLineChartData.projector(mockState);
+
+    expect(chart.labels).toEqual(['2024-01-01', '2024-01-03']);
+    expect(chart.datasets[0].label).toBe('Impact (1-4)');
+    expect(chart.datasets[0].data).toEqual([3, undefined]);
+    expect(chart.datasets[1].label).toBe('Energy (1-3)');
+    expect(chart.datasets[1].data).toEqual([2, 1]);
+  });
+
+  it('should return no labels when no day is rated', () => {
+    const mockState: MetricState = {
+      ids: ['2024-01-01'],
+      entities: { '2024-01-01': { id: '2024-01-01', focusSessions: [] } },
+    };
+
+    expect(selectEvaluationLineChartData.projector(mockState).labels).toEqual([]);
   });
 });
