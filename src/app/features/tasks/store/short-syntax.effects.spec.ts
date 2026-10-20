@@ -1,4 +1,6 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
+import { DEFAULT_DATE_INPUT_LOCALE } from '../../../core/date-time-format/date-input-locale';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { provideMockStore } from '@ngrx/store/testing';
 import { BehaviorSubject, of, Subject } from 'rxjs';
@@ -130,6 +132,10 @@ describe('ShortSyntaxEffects', () => {
         { provide: LayoutService, useValue: layoutServiceSpy },
         { provide: WorkContextService, useValue: workContextServiceMock },
         { provide: LOCAL_ACTIONS, useValue: actions$ },
+        {
+          provide: DateTimeFormatService,
+          useValue: { dateInputLocale: () => DEFAULT_DATE_INPUT_LOCALE },
+        },
         { provide: TaskTimeSyncService, useValue: taskTimeSyncServiceSpy },
       ],
     });
