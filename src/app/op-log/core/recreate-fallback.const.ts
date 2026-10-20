@@ -62,6 +62,12 @@ import { DEFAULT_TASK_REPEAT_CFG } from '../../features/task-repeat-cfg/task-rep
  * defaults recreate a PAUSED config: a config recreated from a patch has no
  * title or schedule to speak of, and must not start generating blank tasks.
  * A full replace snapshot carries its own `isPaused`, which wins the spread.
+ * RELEASED-RECEIVER RESIDUAL (the hazard decision 4 keeps NOTE out for):
+ * v18.15.0–v19.2.0 have no TASK_REPEAT_CFG entry, so a released device that
+ * applied a concurrent `deleteTaskRepeatCfg` (payload `{id}` only) and loses
+ * to this type's patch adds the config raw — no title, schedule or
+ * `isPaused` — which fails validation and data repair has no rule for.
+ * It needs that delete to be concurrent with the patch row and older than it.
  * METRIC, ISSUE_PROVIDER still fall through to the
  * legacy behavior — add an entry here when there is evidence the
  * partial-payload path fires for them. NOTE has that evidence (#10380) but
