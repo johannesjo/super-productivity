@@ -68,7 +68,7 @@
   }
 
   // Muted rather than faded: opacity took past days below 3:1 in both themes.
-  &.is-past {
+  &.is-past:not(.is-active) {
     color: var(--text-color-muted);
   }
 

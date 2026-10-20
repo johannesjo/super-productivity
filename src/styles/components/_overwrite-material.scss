@@ -64,6 +64,13 @@ body.isDarkTheme {
 .isTouchOnly .mat-mdc-chip-remove.mat-icon {
   padding-block: var(--s);
   margin-block: calc(var(--s) * -1);
+
+  // Keep the focus ring and state layer on the glyph, not the padded box.
+  &::before,
+  &::after {
+    top: var(--s);
+    bottom: var(--s);
+  }
 }
 
 .mat-drawer.mat-drawer-side {

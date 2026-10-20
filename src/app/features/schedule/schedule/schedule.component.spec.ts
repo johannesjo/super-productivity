@@ -1746,6 +1746,8 @@ describe('ScheduleComponent', () => {
     it('starts on the day view on a phone without a saved choice', () => {
       createWith(true, null);
       expect(mockLayoutService.selectedTimeView()).toBe('day');
+      // Not persisted, so a wider window later still starts on the week view.
+      expect(localStorage.getItem(LS.SELECTED_TIME_VIEW)).toBeNull();
     });
 
     it('starts on the week view on wider screens without a saved choice', () => {
