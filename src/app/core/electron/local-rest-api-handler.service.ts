@@ -9,6 +9,7 @@ import { TaskService } from '../../features/tasks/task.service';
 import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports -- grandfathered layer-boundary debt
 import { TaskArchiveService } from '../../features/archive/task-archive.service';
+import { ArchiveOperationHandler } from '../../op-log/apply/archive-operation-handler.service';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports -- grandfathered layer-boundary debt
 import { ProjectService } from '../../features/project/project.service';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports -- grandfathered layer-boundary debt
@@ -373,6 +374,7 @@ const isTaskInToday = (
 export class LocalRestApiHandlerService {
   private readonly _taskService = inject(TaskService);
   private readonly _taskArchiveService = inject(TaskArchiveService);
+  private readonly _archiveOperationHandler = inject(ArchiveOperationHandler);
   private readonly _projectService = inject(ProjectService);
   private readonly _tagService = inject(TagService);
   private readonly _dateService = inject(DateService);
@@ -1099,6 +1101,11 @@ export class LocalRestApiHandlerService {
     }
 
     this._taskService.restoreTask(archivedTask, subTasks);
+    // The dispatch adds the task to the store; removing it from the archive
+    // runs afterwards as a queued side effect. Wait for it, so a 200 means the
+    // task has left the archive, the same as archive's 200 means it has
+    // entered it (#9952).
+    await this._archiveOperationHandler.whenLocalOperationsSettled();
     const restoredTask = await this._getTaskById(taskId);
     return createSuccessResponse(requestId, 200, restoredTask);
   }

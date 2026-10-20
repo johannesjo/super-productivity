@@ -142,6 +142,32 @@ export class ArchiveOperationHandler implements ArchiveSideEffectPort<Persistent
     ArchiveCompressionService,
   );
 
+  // Tail of the local operation queue. Never rejects, so one failed operation
+  // does not block the ones after it.
+  private _localQueue: Promise<void> = Promise.resolve();
+
+  /**
+   * Queue a local action's archive side effects behind every local action
+   * queued before it. ArchiveOperationHandlerEffects calls this synchronously
+   * on dispatch, so a caller that dispatches and then awaits
+   * whenLocalOperationsSettled() knows the archive reflects its action (#9952).
+   *
+   * @returns Promise that settles with this action's own outcome
+   */
+  enqueueLocalOperation(action: PersistentAction): Promise<void> {
+    const run = this._localQueue.then(() => this.handleOperation(action));
+    this._localQueue = run.catch(() => undefined);
+    return run;
+  }
+
+  /**
+   * Resolves once every local operation queued so far has finished,
+   * whether it succeeded or failed.
+   */
+  whenLocalOperationsSettled(): Promise<void> {
+    return this._localQueue;
+  }
+
   /**
    * Process an action and handle any archive-related side effects.
    *

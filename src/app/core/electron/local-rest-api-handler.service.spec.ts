@@ -37,12 +37,14 @@ import {
   focusModeReducer,
   initialState as initialFocusModeState,
 } from '../../features/focus-mode/store/focus-mode.reducer';
+import { ArchiveOperationHandler } from '../../op-log/apply/archive-operation-handler.service';
 
 describe('LocalRestApiHandlerService', () => {
   let isDataLoaded$: BehaviorSubject<boolean>;
   let service: LocalRestApiHandlerService;
   let taskServiceMock: jasmine.SpyObj<TaskService>;
   let taskArchiveServiceMock: jasmine.SpyObj<TaskArchiveService>;
+  let archiveOperationHandlerMock: jasmine.SpyObj<ArchiveOperationHandler>;
   let projectServiceMock: jasmine.SpyObj<ProjectService>;
   let tagServiceMock: jasmine.SpyObj<TagService>;
   let dateServiceMock: jasmine.SpyObj<DateService>;
@@ -198,6 +200,14 @@ describe('LocalRestApiHandlerService', () => {
     );
     (taskArchiveServiceMock as any).hasTask.and.returnValue(Promise.resolve(false));
 
+    archiveOperationHandlerMock = jasmine.createSpyObj<ArchiveOperationHandler>(
+      'ArchiveOperationHandler',
+      ['whenLocalOperationsSettled'],
+    );
+    archiveOperationHandlerMock.whenLocalOperationsSettled.and.returnValue(
+      Promise.resolve(),
+    );
+
     projectServiceMock = jasmine.createSpyObj(
       'ProjectService',
       ['add', 'update', 'remove', 'archive'],
@@ -241,6 +251,7 @@ describe('LocalRestApiHandlerService', () => {
         LocalRestApiHandlerService,
         { provide: TaskService, useValue: taskServiceMock },
         { provide: TaskArchiveService, useValue: taskArchiveServiceMock },
+        { provide: ArchiveOperationHandler, useValue: archiveOperationHandlerMock },
         { provide: ProjectService, useValue: projectServiceMock },
         { provide: TagService, useValue: tagServiceMock },
         { provide: DateService, useValue: dateServiceMock },
@@ -2915,6 +2926,34 @@ describe('LocalRestApiHandlerService', () => {
 
         expect(response.body.ok).toBe(true);
         expect(taskServiceMock.restoreTask).toHaveBeenCalled();
+      });
+
+      it('should not respond before the archive removal has settled (#9952)', async () => {
+        const archivedTask = createMockTask('archivedTask1', { isDone: true });
+        (taskArchiveServiceMock as any).hasTask.and.returnValue(Promise.resolve(true));
+        (taskArchiveServiceMock as any).getById.and.returnValue(
+          Promise.resolve(archivedTask),
+        );
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(archivedTask),
+        });
+        let settleArchive!: () => void;
+        archiveOperationHandlerMock.whenLocalOperationsSettled.and.returnValue(
+          new Promise<void>((resolve) => (settleArchive = resolve)),
+        );
+        let response: LocalRestApiResponsePayload | undefined;
+
+        const responsePromise = sendRequestAndWait(
+          createRequest('POST', '/tasks/archivedTask1/restore'),
+        ).then((r) => (response = r));
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(taskServiceMock.restoreTask).toHaveBeenCalled();
+        expect(response).toBeUndefined();
+
+        settleArchive();
+        await responsePromise;
+        expect(response?.status).toBe(200);
       });
 
       it('should return 404 if task not in archive', async () => {
