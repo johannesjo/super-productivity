@@ -14,6 +14,7 @@ test.describe('Task reminder lead times', () => {
     workViewPage,
     taskPage,
     testPrefix,
+    waitForNav,
   }) => {
     test.setTimeout(REMINDER_MAX_WAIT_TIME + 60000);
     await workViewPage.waitForTaskList();
@@ -27,6 +28,7 @@ test.describe('Task reminder lead times', () => {
     // one day earlier fires within the test.
     const due = new Date(Date.now() + DAY_MS + 90000);
     const scheduleDialog = page.locator(cssSelectors.DIALOG_SCHEDULE_TASK);
+    const remindSelect = scheduleDialog.locator('mat-select[name="type"]');
 
     await task.focus();
     await page.keyboard.press('s');
@@ -41,18 +43,22 @@ test.describe('Task reminder lead times', () => {
       .click();
     await fillTimeInput(page, due);
 
-    await scheduleDialog.locator('mat-select[name="type"]').click();
+    // refilling the time re-creates the select; wait out the old one's leave animation
+    await expect(remindSelect).toHaveCount(1);
+    await remindSelect.click();
     await page.locator('mat-option').filter({ hasText: ONE_DAY_BEFORE }).click();
     await scheduleDialog.locator('[data-test-id="schedule-submit-btn"]').click();
     await expect(scheduleDialog).toBeHidden({ timeout: 10000 });
 
-    // Reopening reads the lead time back instead of collapsing it to 1 hour
+    // Reopening reads the lead time back instead of collapsing it to 1 hour.
+    // A task due tomorrow leaves Today, so reopen it from the Inbox.
+    await page.getByRole('menuitem', { name: 'Inbox' }).click();
+    await waitForNav();
+    await expect(task).toBeVisible();
     await task.focus();
     await page.keyboard.press('s');
     await expect(scheduleDialog).toBeVisible({ timeout: 10000 });
-    await expect(scheduleDialog.locator('mat-select[name="type"]')).toContainText(
-      ONE_DAY_BEFORE,
-    );
+    await expect(remindSelect).toContainText(ONE_DAY_BEFORE);
     await page.keyboard.press('Escape');
     await expect(scheduleDialog).toBeHidden({ timeout: 10000 });
 
