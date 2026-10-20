@@ -540,6 +540,13 @@ describe('encryption', () => {
       );
     });
 
+    it('keeps rethrowing WebCryptoNotAvailableError from decryptBatch when the Argon2 path fails first', async () => {
+      const encrypted = await encryptBatch([DATA], PASSWORD);
+      await expect(decryptBatch(encrypted, 'wrong_password')).rejects.toBeInstanceOf(
+        WebCryptoNotAvailableError,
+      );
+    });
+
     it('throws WebCryptoNotAvailableError on legacy decrypt in fallback mode', async () => {
       // Re-enable WebCrypto to produce legacy ciphertext, then disable it.
       Object.defineProperty(globalThis.crypto, 'subtle', {
