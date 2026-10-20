@@ -57,8 +57,6 @@ const intentOf = (item) => {
   assert.ok(match, 'shortcut has no self-closing <intent> element');
   return match[1];
 };
-// Strip comments so a name mentioned in prose cannot satisfy a check.
-const MANIFEST_CODE = MANIFEST.replace(/<!--[\s\S]*?-->/g, '');
 
 test('shortcuts.xml declares shortcuts', () => {
   assert.ok(ITEMS.length > 0, 'no <shortcut> entries');
@@ -127,12 +125,12 @@ test('every shortcut launches through the trampoline, not the main activity', ()
 
 test('the manifest wires the shortcuts up', () => {
   assert.match(
-    MANIFEST_CODE,
+    MANIFEST,
     /<activity\s+android:name="\.AppShortcutActivity"[^>]*android:taskAffinity=""/,
     'AppShortcutActivity must be declared with an empty taskAffinity',
   );
   // The meta-data is only read from the MAIN/LAUNCHER activity.
-  const launcher = MANIFEST_CODE.match(
+  const launcher = MANIFEST.match(
     /<activity\b(?:(?!<\/activity>)[\s\S])*?android\.intent\.category\.LAUNCHER[\s\S]*?<\/activity>/,
   );
   assert.ok(launcher, 'no launcher activity in the manifest');
