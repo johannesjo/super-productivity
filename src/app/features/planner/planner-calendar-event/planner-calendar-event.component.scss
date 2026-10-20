@@ -19,6 +19,7 @@
   }
 
   border-color: var(--extra-border-color);
+  border-left: 3px solid var(--cal-event-color, var(--extra-border-color));
 
   &:hover {
     border-color: var(--c-accent);
