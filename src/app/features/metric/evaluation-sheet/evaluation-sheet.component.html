@@ -30,22 +30,6 @@
     <div class="hint">{{ T.F.METRIC.EVAL_FORM.ENERGY_LEVEL_HINT | translate }}</div>
   </div>
 
-  <div class="time-summary">
-    <div class="time-item">
-      <span class="time-label">{{
-        T.F.METRIC.EVAL_FORM.FOCUS_WORK_TIME | translate
-      }}</span>
-      <span class="time-value">{{ deepWorkTime() | msToClockString }}</span>
-    </div>
-
-    <div class="time-item">
-      <span class="time-label">{{
-        T.F.METRIC.EVAL_FORM.TOTAL_WORK_TIME | translate
-      }}</span>
-      <span class="time-value">{{ totalWorkTimeMs() | msToClockString }}</span>
-    </div>
-  </div>
-
   <reflection-note [dayStr]="day()"></reflection-note>
 
   <!--      <section class="notes-for-tomorrow">-->

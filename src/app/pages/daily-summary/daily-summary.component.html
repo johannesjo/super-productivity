@@ -198,10 +198,7 @@
           class="tab-inner"
           style="max-width: 600px"
         >
-          <evaluation-sheet
-            [dayStr$]="dayStr$"
-            [timeWorkedToday]="timeWorked$ | async"
-          ></evaluation-sheet>
+          <evaluation-sheet [dayStr$]="dayStr$"></evaluation-sheet>
         </section>
       </mat-tab>
     }
