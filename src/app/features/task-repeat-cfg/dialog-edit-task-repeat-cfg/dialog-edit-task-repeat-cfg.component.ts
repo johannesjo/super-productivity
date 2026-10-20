@@ -73,13 +73,33 @@ import {
   toRepeatCfgFormModel,
   toStoredRepeatCfg,
 } from './after-completion-form-mapping';
+import {
+  FallBehindChoice,
+  fromFallBehindChoice,
+  toFallBehindChoice,
+} from './fall-behind-choice';
 
 type StoredRepeatCfg = Omit<TaskRepeatCfgCopy, 'id'> | TaskRepeatCfg;
-// The dialog's model may carry the dialog-only "After I complete it…" preset;
-// toStoredRepeatCfg turns it back into a persistable config.
-type RepeatCfgModel =
+// The dialog's model may carry the dialog-only "After I complete it…" preset
+// and "If you fall behind" choice; _getFinalRepeatCfg turns it back into a
+// persistable config.
+type RepeatCfgModel = (
   | RepeatCfgFormModel<Omit<TaskRepeatCfgCopy, 'id'>>
-  | RepeatCfgFormModel<TaskRepeatCfg>;
+  | RepeatCfgFormModel<TaskRepeatCfg>
+) & { fallBehind?: FallBehindChoice };
+
+const FALL_BEHIND_HINTS: Record<FallBehindChoice, string> = {
+  KEEP: T.F.TASK_REPEAT.F.FALL_BEHIND_KEEP_HINT,
+  LATEST: T.F.TASK_REPEAT.F.FALL_BEHIND_LATEST_HINT,
+  WAIT: T.F.TASK_REPEAT.F.FALL_BEHIND_WAIT_HINT,
+};
+
+const withFallBehind = <TModel extends RepeatCfgModel>(
+  model: TModel,
+): TModel & { fallBehind: FallBehindChoice } => ({
+  ...model,
+  fallBehind: toFallBehindChoice(model),
+});
 
 // Fields whose change requires offering "Update all task instances?" — covers
 // what propagates to existing tasks (vs. schedule fields, which only affect
@@ -266,6 +286,9 @@ export class DialogEditTaskRepeatCfgComponent {
   // Preset and schedule type before the latest form change. Formly writes into
   // the model object it was given, so the previous signal value can't be used.
   private _modeSnapshot: AfterCompletionModeState = this._toModeState(this.repeatCfg());
+  private _fallBehindSnapshot = this.repeatCfg().fallBehind;
+  // Until the user picks a choice, a new config follows the schedule's default.
+  private _isFallBehindTouched = false;
   isAfterCompletion = computed(
     () => this.repeatCfg().quickSetting === AFTER_COMPLETION_PRESET,
   );
@@ -359,7 +382,7 @@ export class DialogEditTaskRepeatCfgComponent {
   });
 
   essentialFormFields = signal<FormlyFieldConfig[]>([]);
-  advancedFormFields = signal<FormlyFieldConfig[]>(TASK_REPEAT_CFG_ADVANCED_FORM_CFG);
+  advancedFormFields = signal<FormlyFieldConfig[]>([]);
 
   formGroup1 = signal(new UntypedFormGroup({}));
   formGroup2 = signal(new UntypedFormGroup({}));
@@ -414,12 +437,32 @@ export class DialogEditTaskRepeatCfgComponent {
   }
 
   onModelChange(model: RepeatCfgModel): void {
-    const synced = syncAfterCompletionMode(
+    let synced = syncAfterCompletionMode(
       this._modeSnapshot,
       model,
       this._getFixedWaitForCompletion(),
     );
+    if (synced.fallBehind && synced.fallBehind !== this._fallBehindSnapshot) {
+      this._isFallBehindTouched = true;
+      synced = { ...synced, ...fromFallBehindChoice(synced.fallBehind) };
+    } else if (
+      !this._isFallBehindTouched &&
+      !this.isEdit() &&
+      synced.quickSetting !== AFTER_COMPLETION_PRESET
+    ) {
+      // Re-seed the schedule's default live while it is visible and untouched.
+      const skipOverdue = getDefaultSkipOverdue(
+        synced as Pick<TaskRepeatCfgCopy, 'quickSetting' | 'repeatCycle' | 'repeatEvery'>,
+      );
+      if (skipOverdue !== !!synced.skipOverdue) {
+        synced = { ...synced, skipOverdue };
+      }
+    }
+    if (synced.fallBehind !== toFallBehindChoice(synced)) {
+      synced = withFallBehind(synced);
+    }
     this._modeSnapshot = this._toModeState(synced);
+    this._fallBehindSnapshot = synced.fallBehind;
     this.repeatCfg.set(synced);
   }
 
@@ -440,12 +483,12 @@ export class DialogEditTaskRepeatCfgComponent {
         ...this._data.repeatCfg,
         priority: getTaskPriority(this._data.repeatCfg.priority),
       });
-      return toRepeatCfgFormModel(processedCfg);
+      return withFallBehind(toRepeatCfgFormModel(processedCfg));
     } else if (this._data.task) {
       const startTime = this._data.task.dueWithTime
         ? clockStringFromDate(this._data.task.dueWithTime)
         : undefined;
-      return {
+      return withFallBehind({
         ...DEFAULT_TASK_REPEAT_CFG,
         // New configs open on the "Daily" quick setting, where collapsing empty
         // overdue instances is both useful and safe; see getDefaultSkipOverdue.
@@ -472,7 +515,7 @@ export class DialogEditTaskRepeatCfgComponent {
         tagIds: unique(this._data.task.tagIds),
         defaultEstimate: this._data.task.timeEstimate,
         priority: getTaskPriority(this._data.task.priority),
-      };
+      });
     } else {
       throw new Error('Invalid params given for repeat dialog!');
     }
@@ -555,6 +598,24 @@ export class DialogEditTaskRepeatCfgComponent {
     };
 
     this.essentialFormFields.set(formConfig);
+
+    // The hint follows the picked "If you fall behind" option.
+    this.advancedFormFields.set(
+      TASK_REPEAT_CFG_ADVANCED_FORM_CFG.map((field) =>
+        field.key === 'fallBehind'
+          ? {
+              ...field,
+              expressionProperties: {
+                ...field.expressionProperties,
+                ['templateOptions.description']: (model: RepeatCfgModel) =>
+                  translateService.instant(
+                    FALL_BEHIND_HINTS[model.fallBehind ?? toFallBehindChoice(model)],
+                  ),
+              },
+            }
+          : field,
+      ),
+    );
   }
 
   save(): void {
@@ -619,14 +680,9 @@ export class DialogEditTaskRepeatCfgComponent {
       this.close();
     } else {
       // Seed skipOverdue from the FINAL schedule (the initial default assumed
-      // Daily; the user may have switched to e.g. Monthly). Skip this only when
-      // the user explicitly toggled the Advanced checkbox, so an opt-in/out is
-      // honoured. For any new non-Daily config whose Advanced panel is opened
-      // but left untouched, the checkbox may visibly show the seeded ON while we
-      // persist the safe re-derived value — an accepted, conservative display
-      // gap in a rarely-opened panel (never persists the wrong value).
-      const skipOverdueTouched = this.formGroup2().get('skipOverdue')?.dirty ?? false;
-      const newRepeatCfg = skipOverdueTouched
+      // Daily; the user may have switched to e.g. Monthly), the same default
+      // "If you fall behind" shows while untouched. A picked choice is honoured.
+      const newRepeatCfg = this._isFallBehindTouched
         ? finalRepeatCfg
         : { ...finalRepeatCfg, skipOverdue: getDefaultSkipOverdue(finalRepeatCfg) };
       const createdRepeatCfgId = this._taskRepeatCfgService.addTaskRepeatCfgToTask(
@@ -639,13 +695,15 @@ export class DialogEditTaskRepeatCfgComponent {
   }
 
   /**
-   * The config as it will be stored: the dialog-only preset is resolved
-   * (toStoredRepeatCfg), then the monthly anchor fields are normalized at the
+   * The config as it will be stored: the dialog-only fields are dropped (the
+   * fall-behind choice is already mapped onto waitForCompletion/skipOverdue)
+   * or resolved (toStoredRepeatCfg), then the monthly anchor fields are normalized at the
    * boundary: the form's `null` sentinels (incl. a cleared end date) become
    * `undefined`, and a stale `monthlyLastDay` flag is stripped.
    */
   private _getFinalRepeatCfg(): StoredRepeatCfg {
-    const model = this.repeatCfg();
+    const model = { ...this.repeatCfg() };
+    delete model.fallBehind;
     const initial = this.repeatCfgInitial();
     const stored = toStoredRepeatCfg(model) as StoredRepeatCfg;
     return this._normalizeMonthlyAnchor(
@@ -779,11 +837,12 @@ export class DialogEditTaskRepeatCfgComponent {
 
   private _setRepeatCfgInitiallyForEditOnly(repeatCfg: TaskRepeatCfg): void {
     const normalizedCfg = { ...repeatCfg, priority: getTaskPriority(repeatCfg.priority) };
-    const processedCfg = toRepeatCfgFormModel(
-      this._processQuickSettingForDate(normalizedCfg),
+    const processedCfg = withFallBehind(
+      toRepeatCfgFormModel(this._processQuickSettingForDate(normalizedCfg)),
     );
     this.repeatCfg.set(processedCfg);
     this._modeSnapshot = this._toModeState(processedCfg);
+    this._fallBehindSnapshot = processedCfg.fallBehind;
     this.repeatCfgInitial.set(normalizedCfg);
   }
 

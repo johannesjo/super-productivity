@@ -14,7 +14,7 @@ import { TestbedHarnessEnvironment } from '@angular/cdk/testing/testbed';
 import { TranslateModule } from '@ngx-translate/core';
 import { provideMockStore } from '@ngrx/store/testing';
 import { Observable, of, Subject } from 'rxjs';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { ReactiveFormsModule } from '@angular/forms';
 // FormlyConfigModule (not FormlyModule) is needed here to register custom
 // field types and validation within the TestBed injector.
 import { FormlyConfigModule } from '../../../ui/formly-config.module';
@@ -1020,21 +1020,15 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       expect(savedCfg().skipOverdue).toBe(false);
     });
 
-    it('respects an explicit user toggle over the schedule-derived default', async () => {
+    it('respects an explicit "If you fall behind" choice over the derived default', async () => {
       const fixture = await setupTestBed({ task: mockTask });
       const component = fixture.componentInstance;
 
-      // User opened Advanced and ticked skipOverdue ON for a monthly task;
-      // a dirty control means the derived OFF default must not override it.
-      const ctrl = new FormControl(true);
-      ctrl.markAsDirty();
-      component.formGroup2().addControl('skipOverdue', ctrl);
-      component.repeatCfg.update((c) => ({
-        ...c,
+      component.onModelChange({
+        ...component.repeatCfg(),
         quickSetting: 'MONTHLY_FIRST_DAY',
-        skipOverdue: true,
-      }));
-
+      });
+      component.onModelChange({ ...component.repeatCfg(), fallBehind: 'LATEST' });
       component.save();
 
       expect(savedCfg().skipOverdue).toBe(true);
@@ -1483,6 +1477,97 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       expect(component.repeatCfg().waitForCompletion).toBe(true);
       component.save();
       expect(updateChanges()).toEqual({});
+    });
+  });
+  describe('"If you fall behind" (#5388 follow-up)', () => {
+    const savedCfg = (): TaskRepeatCfg =>
+      mockTaskRepeatCfgService.addTaskRepeatCfgToTask.calls.mostRecent()
+        .args[2] as TaskRepeatCfg;
+    const updateChanges = (): Partial<TaskRepeatCfg> =>
+      mockTaskRepeatCfgService.updateTaskRepeatCfg.calls.mostRecent()
+        .args[1] as Partial<TaskRepeatCfg>;
+
+    it('shows the schedule default for a new config and re-seeds it while untouched', async () => {
+      const fixture = await setupTestBed({ task: mockTask });
+      const component = fixture.componentInstance;
+
+      expect(component.repeatCfg().fallBehind).toBe('LATEST');
+      component.onModelChange({
+        ...component.repeatCfg(),
+        quickSetting: 'MONTHLY_FIRST_DAY',
+      });
+      expect(component.repeatCfg().fallBehind).toBe('KEEP');
+      component.onModelChange({ ...component.repeatCfg(), quickSetting: 'DAILY' });
+      expect(component.repeatCfg().fallBehind).toBe('LATEST');
+    });
+
+    it('keeps a picked choice when the schedule changes afterwards', async () => {
+      const fixture = await setupTestBed({ task: mockTask });
+      const component = fixture.componentInstance;
+
+      component.onModelChange({ ...component.repeatCfg(), fallBehind: 'KEEP' });
+      component.onModelChange({ ...component.repeatCfg(), quickSetting: 'CUSTOM' });
+      component.onModelChange({
+        ...component.repeatCfg(),
+        repeatCycle: 'DAILY',
+        repeatEvery: 1,
+      });
+      component.save();
+
+      expect(savedCfg().skipOverdue).toBe(false);
+      expect(savedCfg().waitForCompletion).toBe(false);
+    });
+
+    it('writes "Wait" without skipping, so nothing silently disappears', async () => {
+      const fixture = await setupTestBed({
+        repeatCfg: { ...mockRepeatCfg, repeatCycle: 'DAILY', skipOverdue: true },
+      });
+      const component = fixture.componentInstance;
+
+      component.onModelChange({ ...component.repeatCfg(), fallBehind: 'WAIT' });
+      component.save();
+
+      expect(updateChanges()).toEqual({ waitForCompletion: true, skipOverdue: false });
+    });
+
+    it('shows a legacy config with both flags as "Wait" and keeps both until changed', async () => {
+      const fixture = await setupTestBed({
+        repeatCfg: {
+          ...mockRepeatCfg,
+          repeatCycle: 'DAILY',
+          waitForCompletion: true,
+          skipOverdue: true,
+        },
+      });
+      const component = fixture.componentInstance;
+
+      expect(component.repeatCfg().fallBehind).toBe('WAIT');
+      component.onModelChange({ ...component.repeatCfg(), title: 'Renamed' });
+      component.save();
+
+      expect(updateChanges()).toEqual({ title: 'Renamed' });
+    });
+
+    it('never stores the dialog-only choice', async () => {
+      const fixture = await setupTestBed({ task: mockTask });
+      fixture.componentInstance.save();
+      expect('fallBehind' in savedCfg()).toBe(false);
+    });
+
+    it('describes the picked choice', async () => {
+      const fixture = await setupTestBed({ task: mockTask });
+      const field = fixture.componentInstance
+        .advancedFormFields()
+        .find((f) => f.key === 'fallBehind');
+      const describe = field?.expressionProperties?.['templateOptions.description'] as (
+        model: object,
+      ) => string;
+      expect(describe({ fallBehind: 'WAIT' })).toBe(
+        T.F.TASK_REPEAT.F.FALL_BEHIND_WAIT_HINT,
+      );
+      expect(describe({ fallBehind: 'KEEP' })).toBe(
+        T.F.TASK_REPEAT.F.FALL_BEHIND_KEEP_HINT,
+      );
     });
   });
 });

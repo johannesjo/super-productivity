@@ -235,6 +235,23 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
 ];
 
 export const TASK_REPEAT_CFG_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
+  // "If you fall behind": one choice for waitForCompletion + skipOverdue. The
+  // `fallBehind` key is dialog-only; the component maps it to those fields and
+  // sets the hint for the picked option. Hidden after completion, which waits.
+  {
+    key: 'fallBehind',
+    type: 'select',
+    resetOnHide: false,
+    hideExpression: (model: any) => model.quickSetting === AFTER_COMPLETION_PRESET,
+    templateOptions: {
+      label: T.F.TASK_REPEAT.F.FALL_BEHIND,
+      options: [
+        { value: 'KEEP', label: T.F.TASK_REPEAT.F.FALL_BEHIND_KEEP },
+        { value: 'LATEST', label: T.F.TASK_REPEAT.F.FALL_BEHIND_LATEST },
+        { value: 'WAIT', label: T.F.TASK_REPEAT.F.FALL_BEHIND_WAIT },
+      ],
+    },
+  },
   // Optional inclusive end day (#10091). The picker emits Date | null; persist
   // a YYYY-MM-DD string and `undefined` when cleared, so the clear syncs via
   // `clearedFields` instead of storing a null.
@@ -309,27 +326,5 @@ export const TASK_REPEAT_CFG_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
       description: T.F.TASK_REPEAT.F.DISABLE_AUTO_UPDATE_SUBTASKS_DESCRIPTION,
     },
     className: 'sp-formly-child-option',
-  },
-  {
-    key: 'waitForCompletion',
-    type: 'checkbox',
-    defaultValue: false,
-    resetOnHide: false,
-    // Implied after completion: there is no completion to count from while
-    // the current copy is still open.
-    hideExpression: (model: any) => model.quickSetting === AFTER_COMPLETION_PRESET,
-    templateOptions: {
-      label: T.F.TASK_REPEAT.F.WAIT_FOR_COMPLETION,
-      description: T.F.TASK_REPEAT.F.WAIT_FOR_COMPLETION_DESCRIPTION,
-    },
-  },
-  {
-    key: 'skipOverdue',
-    type: 'checkbox',
-    defaultValue: false,
-    templateOptions: {
-      label: T.F.TASK_REPEAT.F.SKIP_OVERDUE,
-      description: T.F.TASK_REPEAT.F.SKIP_OVERDUE_DESCRIPTION,
-    },
   },
 ];

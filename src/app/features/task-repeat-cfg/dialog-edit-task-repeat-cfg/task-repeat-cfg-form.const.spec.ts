@@ -124,13 +124,19 @@ describe('TaskRepeatCfgFormConfig', () => {
       ).toBe(true);
     });
 
-    it('hides "only create next task after completion", which is implied there', () => {
-      const wait = TASK_REPEAT_CFG_ADVANCED_FORM_CFG.find(
-        (f) => f.key === 'waitForCompletion',
+    it('replaces the two pile-up checkboxes with one "If you fall behind" choice', () => {
+      const keys = TASK_REPEAT_CFG_ADVANCED_FORM_CFG.map((f) => f.key);
+      expect(keys).not.toContain('waitForCompletion');
+      expect(keys).not.toContain('skipOverdue');
+      const fallBehind = TASK_REPEAT_CFG_ADVANCED_FORM_CFG.find(
+        (f) => f.key === 'fallBehind',
       );
-      expect(hide(wait, { quickSetting: 'CUSTOM' })).toBe(false);
-      expect(hide(wait, { quickSetting: AFTER_COMPLETION_PRESET })).toBe(true);
-      expect(wait?.resetOnHide).toBe(false);
+      expect(
+        (fallBehind?.templateOptions?.options as { value: string }[]).map((o) => o.value),
+      ).toEqual(['KEEP', 'LATEST', 'WAIT']);
+      // after completion always waits
+      expect(hide(fallBehind, { quickSetting: 'CUSTOM' })).toBe(false);
+      expect(hide(fallBehind, { quickSetting: AFTER_COMPLETION_PRESET })).toBe(true);
     });
   });
 
