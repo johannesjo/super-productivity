@@ -35,11 +35,10 @@ export class EvaluationSheetComponent {
   readonly T = T;
   // Internal signals
 
-  private readonly _resolvedDay$ = toObservable(this.dayStr$).pipe(
+  private readonly _day$ = toObservable(this.dayStr$).pipe(
     switchMap((custom$) => custom$ ?? this._globalTrackingIntervalService.todayDateStr$),
     shareReplay({ bufferSize: 1, refCount: true }),
   );
-  private readonly _day$ = this._resolvedDay$;
   readonly day = toSignal(this._day$, {
     initialValue: this._globalTrackingIntervalService.todayDateStr(),
   });
