@@ -260,6 +260,19 @@ describe('Metric Selectors - Evaluation', () => {
     expect(chart.datasets[1].data).toEqual([2, 1]);
   });
 
+  it('should treat a cleared impact rating (0) as a gap', () => {
+    const mockState: MetricState = {
+      ids: ['2024-01-01'],
+      entities: { '2024-01-01': { id: '2024-01-01', impactOfWork: 0, energyCheckin: 3 } },
+    };
+
+    const chart = selectEvaluationLineChartData.projector(mockState);
+
+    expect(chart.labels).toEqual(['2024-01-01']);
+    expect(chart.datasets[0].data).toEqual([undefined]);
+    expect(chart.datasets[1].data).toEqual([3]);
+  });
+
   it('should return no labels when no day is rated', () => {
     const mockState: MetricState = {
       ids: ['2024-01-01'],

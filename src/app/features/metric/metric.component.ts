@@ -89,6 +89,23 @@ export class MetricComponent {
       },
     },
   };
+  // Fixed 0-4 axis so the 1-4 impact and 1-3 energy ratings read on the same scale.
+  evaluationChartOptions: ChartConfiguration<
+    'line',
+    (number | undefined)[],
+    string
+  >['options'] = {
+    responsive: true,
+    scales: {
+      y: {
+        min: 0,
+        max: 4,
+        ticks: {
+          stepSize: 1,
+        },
+      },
+    },
+  };
   lineChartType: ChartType = 'line';
 
   /**
