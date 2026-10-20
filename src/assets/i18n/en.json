@@ -212,6 +212,8 @@
         "IS_ADD_SUB_TASKS": "Also import subtasks when a task is added",
         "POLL_INTERVAL_MINUTES": "Poll interval (minutes)",
         "TWO_WAY_SYNC_BOTH": "Both (bidirectional)",
+        "TWO_WAY_SYNC_CREATE_ON_SERVER": "Create a CalDAV task for each new task in the default project",
+        "TWO_WAY_SYNC_CREATE_ON_SERVER_DESCRIPTION": "Needs a \"Default Super Productivity Project\" (Advanced Config). Only top-level tasks you add there; subtasks, repeating tasks and tasks added from an issue stay local. If a category filter is set, the new CalDAV task gets that category.",
         "TWO_WAY_SYNC_DELETE_ON_SERVER": "Delete the CalDAV task when the linked task is deleted",
         "TWO_WAY_SYNC_DELETE_ON_SERVER_DESCRIPTION": "Only tasks deleted in Super Productivity. A single task is deleted on the server once its undo period has passed; several selected tasks right after you confirm.",
         "TWO_WAY_SYNC_NOTES": "Notes / Description sync direction",

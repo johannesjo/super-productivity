@@ -174,6 +174,120 @@ describe('CaldavClientService.updateFields$ – completion push', () => {
   });
 });
 
+describe('CaldavClientService.createTask$', () => {
+  let svc: CaldavClientService;
+  let snack: jasmine.SpyObj<SnackService>;
+  const UID = 'sp-todo-task-1@super-productivity';
+  const existing = (
+    data = 'BEGIN:VCALENDAR\r\nBEGIN:VTODO\r\nUID:' +
+      UID +
+      '\r\nSUMMARY:Buy milk\r\nEND:VTODO\r\nEND:VCALENDAR',
+  ): object => ({
+    data,
+    url: 'https://cal.example.com/x.ics',
+    etag: '"e1"',
+  });
+
+  beforeEach(() => {
+    snack = jasmine.createSpyObj('SnackService', ['open']);
+    TestBed.configureTestingModule({
+      providers: [CaldavClientService, { provide: SnackService, useValue: snack }],
+    });
+    svc = TestBed.inject(CaldavClientService);
+  });
+
+  afterEach(() => TestBed.resetTestingModule());
+
+  it('PUTs a VTODO named after its UID without overwriting an existing one', async () => {
+    const cal = { readOnly: false, createObject: jasmine.createSpy().and.resolveTo({}) };
+    spyOn(svc as any, '_getCalendar').and.resolveTo(cal);
+    spyOn(CaldavClientService as any, '_findTaskByUid').and.resolveTo([existing()]);
+
+    const issue = await firstValueFrom(
+      svc.createTask$(
+        { ...MOCK_CFG, categoryFilter: 'work' },
+        { uid: UID, summary: 'Buy milk' },
+      ),
+    );
+
+    const [name, headers, data] = cal.createObject.calls.mostRecent().args;
+    expect(name).toBe(encodeURIComponent(UID) + '.ics');
+    expect(headers['If-None-Match']).toBe('*');
+    expect(data).toContain('BEGIN:VTODO');
+    expect(data).toContain('UID:' + UID);
+    expect(data).toContain('SUMMARY:Buy milk');
+    expect(data).toContain('STATUS:NEEDS-ACTION');
+    // without the filter's category the VTODO would vanish from every import
+    expect(data).toContain('CATEGORIES:work');
+    expect(issue.id).toBe(UID);
+  });
+
+  it('writes no CATEGORIES without a category filter', async () => {
+    const cal = { readOnly: false, createObject: jasmine.createSpy().and.resolveTo({}) };
+    spyOn(svc as any, '_getCalendar').and.resolveTo(cal);
+    spyOn(CaldavClientService as any, '_findTaskByUid').and.resolveTo([existing()]);
+
+    await firstValueFrom(svc.createTask$(MOCK_CFG, { uid: UID, summary: 'Buy milk' }));
+
+    expect(cal.createObject.calls.mostRecent().args[2]).not.toContain('CATEGORIES');
+  });
+
+  it('resolves to the existing VTODO when it was already created (412)', async () => {
+    const cal = {
+      readOnly: false,
+      createObject: jasmine.createSpy().and.rejectWith({ status: 412 }),
+    };
+    spyOn(svc as any, '_getCalendar').and.resolveTo(cal);
+    spyOn(CaldavClientService as any, '_findTaskByUid').and.resolveTo([existing()]);
+
+    const issue = await firstValueFrom(
+      svc.createTask$(MOCK_CFG, { uid: UID, summary: 'Buy milk' }),
+    );
+
+    expect(issue.id).toBe(UID);
+    expect(snack.open).not.toHaveBeenCalled();
+  });
+
+  it('succeeds when the PUT landed but the follow-up lookup of createObject failed', async () => {
+    const cal = {
+      readOnly: false,
+      createObject: jasmine.createSpy().and.rejectWith({ status: 500 }),
+    };
+    spyOn(svc as any, '_getCalendar').and.resolveTo(cal);
+    spyOn(CaldavClientService as any, '_findTaskByUid').and.resolveTo([existing()]);
+
+    const issue = await firstValueFrom(
+      svc.createTask$(MOCK_CFG, { uid: UID, summary: 'Buy milk' }),
+    );
+
+    expect(issue.id).toBe(UID);
+  });
+
+  it('fails when the VTODO is missing after a failed PUT', async () => {
+    const cal = {
+      readOnly: false,
+      createObject: jasmine.createSpy().and.rejectWith({ status: 500 }),
+    };
+    spyOn(svc as any, '_getCalendar').and.resolveTo(cal);
+    spyOn(CaldavClientService as any, '_findTaskByUid').and.resolveTo([]);
+
+    await expectAsync(
+      firstValueFrom(svc.createTask$(MOCK_CFG, { uid: UID, summary: 'Buy milk' })),
+    ).toBeRejected();
+    expect(snack.open).toHaveBeenCalled();
+  });
+
+  it('refuses to create in a read-only calendar', async () => {
+    const cal = { readOnly: true, createObject: jasmine.createSpy() };
+    spyOn(svc as any, '_getCalendar').and.resolveTo(cal);
+
+    await expectAsync(
+      firstValueFrom(svc.createTask$(MOCK_CFG, { uid: UID, summary: 'Buy milk' })),
+    ).toBeRejected();
+    expect(cal.createObject).not.toHaveBeenCalled();
+  });
+});
+
 describe('CaldavClientService.deleteTask$', () => {
   let svc: CaldavClientService;
   let snack: jasmine.SpyObj<SnackService>;

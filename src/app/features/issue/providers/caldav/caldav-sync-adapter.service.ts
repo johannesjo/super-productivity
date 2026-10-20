@@ -4,6 +4,7 @@ import { IssueSyncAdapter } from '../../two-way-sync/issue-sync-adapter.interfac
 import { FieldMapping, FieldSyncConfig } from '../../two-way-sync/issue-sync.model';
 import { CaldavCfg } from './caldav.model';
 import { CaldavClientService } from './caldav-client.service';
+import { taskIdToCaldavUid } from './caldav-uid.util';
 
 const CALDAV_FIELD_MAPPINGS: FieldMapping[] = [
   {
@@ -75,6 +76,31 @@ export class CaldavSyncAdapterService implements IssueSyncAdapter<CaldavCfg> {
       completed: issue['completed'],
       summary: issue['summary'],
       note: issue['note'],
+    };
+  }
+
+  /**
+   * Uploads a new task as a VTODO (via the generic `autoCreateIssueOnTaskAdd$`
+   * effect, only when the user opted in — see `_hasAutoCreateEnabled`). The UID
+   * derives from the task id, so a repeated create resolves to the same VTODO.
+   */
+  async createIssue(
+    title: string,
+    cfg: CaldavCfg,
+    ctx?: { taskId: string },
+  ): Promise<{ issueId: string; issueData: Record<string, unknown> }> {
+    if (!ctx?.taskId) {
+      throw new Error('CalDAV createIssue needs the task id');
+    }
+    const issue = await firstValueFrom(
+      this._caldavClientService.createTask$(cfg, {
+        uid: taskIdToCaldavUid(ctx.taskId),
+        summary: title,
+      }),
+    );
+    return {
+      issueId: issue.id,
+      issueData: issue as unknown as Record<string, unknown>,
     };
   }
 

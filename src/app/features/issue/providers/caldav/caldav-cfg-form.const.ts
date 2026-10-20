@@ -43,6 +43,18 @@ const TWO_WAY_SYNC_FORM_FIELDS: LimitedFormlyFieldConfig<IssueProviderCaldav>[] 
         },
       },
       {
+        key: 'twoWaySync.createOnServer',
+        type: 'checkbox',
+        expressions: {
+          // eslint-disable-next-line @typescript-eslint/naming-convention
+          'props.disabled': '!model.defaultProjectId',
+        },
+        props: {
+          label: T.F.CALDAV.FORM.TWO_WAY_SYNC_CREATE_ON_SERVER,
+          description: T.F.CALDAV.FORM.TWO_WAY_SYNC_CREATE_ON_SERVER_DESCRIPTION,
+        },
+      },
+      {
         key: 'twoWaySync.deleteOnServer',
         type: 'checkbox',
         props: {
