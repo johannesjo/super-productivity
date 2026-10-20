@@ -3967,9 +3967,28 @@ describe('shortSyntax localized dates', () => {
       expect(formatDateToISO(dueOf(r))).toBe('2027-01-03');
     });
 
+    it('should follow the date format for locales with a fixed date order', async () => {
+      // chrono's Russian parser is always day-first and its Japanese one always
+      // month-first; English reads the same text in the user's order
+      const ru = await parseIn({ language: 'ru', isDayFirst: false }, 'Task @3/1');
+      expect(formatDateToISO(dueOf(ru))).toBe('2027-03-01');
+      const ja = await parseIn({ language: 'ja', isDayFirst: true }, 'Task @3/1');
+      expect(formatDateToISO(dueOf(ja))).toBe('2027-01-03');
+    });
+
+    it('should let the UI language win a tie in a locale that follows the date order', async () => {
+      // French reads "mar 3" as Tuesday at 3:00, English as March 3
+      const r = await parseIn({ language: 'fr', isDayFirst: true }, 'Task @mar 3');
+      expect(r?.taskChanges.title).toBe('Task');
+      const due = dueOf(r);
+      expect(due.getDay()).toBe(2);
+      expect(due.getHours()).toBe(3);
+    });
+
     it('should keep the two-digit-year fix in locale parsers', async () => {
-      // "90" would otherwise be read as the year 1990
-      const r = await parseIn({ language: 'de', isDayFirst: true }, 'Task @25/4 90');
+      // "90" would otherwise be read as the year 1990. Only the German parser
+      // reads this whole phrase, so the fix must run on it, not just English.
+      const r = await parseIn({ language: 'de', isDayFirst: true }, 'Task @25. April 90');
       const due = dueOf(r);
       expect(due.getFullYear()).toBeGreaterThanOrEqual(2026);
       expect(due.getDate()).toBe(25);

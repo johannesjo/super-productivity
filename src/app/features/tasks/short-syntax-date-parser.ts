@@ -15,6 +15,18 @@ interface ChronoLocale {
   createCasualConfiguration: (littleEndian?: boolean) => ChronoConfiguration;
 }
 
+// Locales that ignore the date-order argument (ru and uk are always day-first,
+// ja always month-first, zh reads no slash dates). The text both parsers read
+// identically is then always numeric, and only English follows the user's date
+// format, so English wins that tie.
+const FIXED_DATE_ORDER_LANGUAGES: ReadonlySet<string> = new Set([
+  LanguageCode.ja,
+  LanguageCode.ru,
+  LanguageCode.uk,
+  LanguageCode.zh,
+  LanguageCode.zh_tw,
+]);
+
 /** What the `@` / `!` stages need from a date parser */
 export interface ShortSyntaxDateParser {
   parse(text: string, ref: Date, option?: ParsingOption): ParsedResult[];
@@ -100,13 +112,20 @@ const createChrono = (
 
 // The UI-language result wins only where it is the better match: it must start
 // earlier, or at the same place and run longer, than the English one. Ties go
-// to the UI language. So "@tomorrow 3pm" stays English under a German UI
-// (German alone only reads the "3pm" further in), and "@morgen 15 Uhr" is
+// to the UI language, unless it ignores the date order (see
+// FIXED_DATE_ORDER_LANGUAGES). So "@tomorrow 3pm" stays English under a German
+// UI (German alone only reads the "3pm" further in), and "@morgen 15 Uhr" is
 // German because English finds nothing.
-const isBetterMatch = (a: ParsedResult, b: ParsedResult): boolean =>
-  a.index < b.index || (a.index === b.index && a.text.length >= b.text.length);
+const isBetterMatch = (a: ParsedResult, b: ParsedResult, isTieWinner: boolean): boolean =>
+  a.index < b.index ||
+  (a.index === b.index &&
+    (a.text.length > b.text.length || (a.text.length === b.text.length && isTieWinner)));
 
-const combine = (uiParser: Chrono, enParser: Chrono): ShortSyntaxDateParser => ({
+const combine = (
+  uiParser: Chrono,
+  enParser: Chrono,
+  isUiTieWinner: boolean,
+): ShortSyntaxDateParser => ({
   parse: (text, ref, option) => {
     const uiResults = uiParser.parse(text, ref, option);
     const enResults = enParser.parse(text, ref, option);
@@ -116,7 +135,9 @@ const combine = (uiParser: Chrono, enParser: Chrono): ShortSyntaxDateParser => (
     if (!enResults.length) {
       return uiResults;
     }
-    return isBetterMatch(uiResults[0], enResults[0]) ? uiResults : enResults;
+    return isBetterMatch(uiResults[0], enResults[0], isUiTieWinner)
+      ? uiResults
+      : enResults;
   },
 });
 
@@ -124,10 +145,11 @@ const parserCache = new Map<string, ShortSyntaxDateParser>();
 const parserPromiseCache = new Map<string, Promise<ShortSyntaxDateParser>>();
 
 /**
- * The date parser for the given date input locale: English plus the UI language when chrono-node ships a locale for it,
- * never every language — a word that is a date in a language the user does not
- * write ("mar", Spanish for Tuesday) would otherwise eat ordinary title text.
- * Numeric dates follow the date format's day/month order in both parsers.
+ * The date parser for the given date input locale: English plus the UI
+ * language when chrono-node ships a locale for it, never every language — a
+ * word that is a date in a language the user does not write ("mar", Spanish
+ * for Tuesday) would otherwise eat ordinary title text. Numeric dates follow
+ * the date format's day/month order.
  */
 export const loadShortSyntaxDateParser = (
   locale: DateInputLocale,
@@ -144,7 +166,11 @@ export const loadShortSyntaxDateParser = (
     promise = Promise.all([loadEn(), loadUiLocale?.()]).then(([en, ui]) => {
       const enParser = createChrono(en.Chrono, en, locale.isDayFirst);
       const parser = ui
-        ? combine(createChrono(en.Chrono, ui, locale.isDayFirst), enParser)
+        ? combine(
+            createChrono(en.Chrono, ui, locale.isDayFirst),
+            enParser,
+            !FIXED_DATE_ORDER_LANGUAGES.has(language),
+          )
         : enParser;
       parserCache.set(key, parser);
       return parser;

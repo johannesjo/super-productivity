@@ -1,9 +1,12 @@
 import { TestBed, fakeAsync, tick } from '@angular/core/testing';
 import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
-import { DEFAULT_DATE_INPUT_LOCALE } from '../../../core/date-time-format/date-input-locale';
+import {
+  DateInputLocale,
+  DEFAULT_DATE_INPUT_LOCALE,
+} from '../../../core/date-time-format/date-input-locale';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { provideMockStore } from '@ngrx/store/testing';
-import { BehaviorSubject, of, Subject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of, Subject } from 'rxjs';
 import { ShortSyntaxEffects } from './short-syntax.effects';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { addNewTagsFromShortSyntax, addSubTask } from './task.actions';
@@ -48,6 +51,7 @@ describe('ShortSyntaxEffects', () => {
     activeWorkContextId: string;
   };
   let taskTimeSyncServiceSpy: jasmine.SpyObj<TaskTimeSyncService>;
+  let dateInputLocale: DateInputLocale;
 
   const createTask = (id: string, partial: Partial<Task> = {}): Task => ({
     ...DEFAULT_TASK,
@@ -117,6 +121,7 @@ describe('ShortSyntaxEffects', () => {
       activeWorkContextId: 'project-1',
     };
     taskTimeSyncServiceSpy = jasmine.createSpyObj('TaskTimeSyncService', ['flushOne']);
+    dateInputLocale = DEFAULT_DATE_INPUT_LOCALE;
 
     TestBed.configureTestingModule({
       providers: [
@@ -134,7 +139,7 @@ describe('ShortSyntaxEffects', () => {
         { provide: LOCAL_ACTIONS, useValue: actions$ },
         {
           provide: DateTimeFormatService,
-          useValue: { dateInputLocale: () => DEFAULT_DATE_INPUT_LOCALE },
+          useValue: { dateInputLocale: () => dateInputLocale },
         },
         { provide: TaskTimeSyncService, useValue: taskTimeSyncServiceSpy },
       ],
@@ -193,6 +198,29 @@ describe('ShortSyntaxEffects', () => {
       expect(emittedAction).toBeDefined();
       expect(emittedAction.type).toBe(TaskSharedActions.applyShortSyntax.type);
     }));
+
+    it('should parse dates in the date input locale', async () => {
+      dateInputLocale = { language: 'de', isDayFirst: true };
+      const task = createTask('task-1', { title: 'Call @morgen 15 Uhr' });
+      taskServiceMock.getByIdOnce$.and.returnValue(of(task));
+      const emitted = firstValueFrom(effects.shortSyntax$);
+
+      actions$.next(
+        TaskSharedActions.addTask({
+          task,
+          workContextId: 'project-1',
+          workContextType: WorkContextType.PROJECT,
+          isAddToBacklog: false,
+          isAddToBottom: false,
+        }),
+      );
+
+      const action = (await emitted) as ReturnType<
+        typeof TaskSharedActions.applyShortSyntax
+      >;
+      expect(action.taskChanges.title).toBe('Call');
+      expect(new Date(action.taskChanges.dueWithTime as number).getHours()).toBe(15);
+    });
 
     it('should parse short syntax for sub-tasks added via addSubTask (#8568)', fakeAsync(() => {
       const task = createTask('sub-1', {
