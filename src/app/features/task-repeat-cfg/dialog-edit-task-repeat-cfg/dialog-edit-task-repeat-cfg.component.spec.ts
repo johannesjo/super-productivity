@@ -1611,4 +1611,98 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       expect(updateChanges()).toEqual({ isPaused: true });
     });
   });
+  describe('rule summary', () => {
+    const NO_WEEKDAYS = {
+      monday: false,
+      tuesday: false,
+      wednesday: false,
+      thursday: false,
+      friday: false,
+      saturday: false,
+      sunday: false,
+    };
+    const spyTranslate = (): void => {
+      spyOn(TestBed.inject(TranslateService), 'instant').and.callFake(
+        (key: string | string[], params?: object) =>
+          params ? `${key}|${JSON.stringify(params)}` : key,
+      );
+    };
+
+    it('is hidden when the preset label already says it all', async () => {
+      const fixture = await setupTestBed({ task: mockTask });
+      expect(fixture.componentInstance.ruleSummary()).toBeNull();
+    });
+
+    it('states a custom rule and the dates it falls on', async () => {
+      const fixture = await setupTestBed({ task: mockTask });
+      spyTranslate();
+      const component = fixture.componentInstance;
+
+      component.onModelChange({
+        ...component.repeatCfg(),
+        quickSetting: 'CUSTOM',
+        repeatCycle: 'WEEKLY',
+        repeatEvery: 2,
+        ...NO_WEEKDAYS,
+        monday: true,
+        wednesday: true,
+      });
+
+      const summary = component.ruleSummary();
+      expect(summary?.text).toContain(T.F.TASK_REPEAT.ADD_INFO_PANEL.EVERY_X_WEEKLY);
+      // MOCK_TODAY Tue 2026-06-09 starts the 2-week blocks
+      expect(summary?.fallsOn).toContain(T.F.TASK_REPEAT.D_EDIT.RULE_FALLS_ON);
+      expect(summary?.fallsOn).toContain('Jun 10');
+      expect(summary?.fallsOn).toContain('Jun 15');
+      expect(summary?.fallsOn).toContain('Jun 24');
+    });
+
+    it('describes after completion without dates', async () => {
+      const fixture = await setupTestBed({ task: mockTask });
+      const component = fixture.componentInstance;
+
+      component.onModelChange({
+        ...component.repeatCfg(),
+        quickSetting: AFTER_COMPLETION_PRESET,
+      });
+      component.onModelChange({
+        ...component.repeatCfg(),
+        repeatCycle: 'WEEKLY',
+        repeatEvery: 2,
+      });
+
+      expect(component.ruleSummary()).toEqual({
+        text: T.F.TASK_REPEAT.ADD_INFO_PANEL.AFTER_COMPLETION_X_WEEKS,
+        fallsOn: null,
+      });
+    });
+
+    it('says when the series is paused', async () => {
+      const fixture = await setupTestBed({
+        repeatCfg: { ...mockRepeatCfg, repeatCycle: 'DAILY', isPaused: true },
+      });
+      expect(fixture.componentInstance.ruleSummary()).toEqual({
+        text: T.F.TASK_REPEAT.D_EDIT.RULE_PAUSED,
+        fallsOn: null,
+      });
+    });
+
+    it('mentions a fall-behind choice that differs from the default', async () => {
+      const fixture = await setupTestBed({
+        repeatCfg: {
+          ...mockRepeatCfg,
+          quickSetting: 'WEEKLY_CURRENT_WEEKDAY',
+          repeatCycle: 'WEEKLY',
+          ...NO_WEEKDAYS,
+          friday: true,
+          skipOverdue: true,
+        },
+      });
+      spyTranslate();
+
+      const summary = fixture.componentInstance.ruleSummary();
+      expect(summary?.text).toContain(T.F.TASK_REPEAT.D_EDIT.RULE_WITH_POLICY);
+      expect(summary?.text).toContain(T.F.TASK_REPEAT.D_EDIT.RULE_ONLY_LATEST);
+    });
+  });
 });

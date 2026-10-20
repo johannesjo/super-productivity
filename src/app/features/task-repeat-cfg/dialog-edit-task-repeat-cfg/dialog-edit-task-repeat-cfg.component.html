@@ -85,6 +85,21 @@
         </div>
       }
 
+      @if (ruleSummary(); as summary) {
+        <div
+          class="rule-summary"
+          aria-live="polite"
+        >
+          <mat-icon>repeat</mat-icon>
+          <div>
+            <div class="rule-summary-text">{{ summary.text }}</div>
+            @if (summary.fallsOn) {
+              <div class="rule-summary-dates">{{ summary.fallsOn }}</div>
+            }
+          </div>
+        </div>
+      }
+
       <collapsible [title]="T.F.TASK_REPEAT.D_EDIT.ADVANCED_CFG | translate">
         <chip-list-input
           (addItem)="addTag($event)"

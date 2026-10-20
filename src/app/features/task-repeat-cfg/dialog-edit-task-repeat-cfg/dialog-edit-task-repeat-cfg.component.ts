@@ -74,6 +74,8 @@ import {
   toStoredRepeatCfg,
 } from './after-completion-form-mapping';
 import { getResumeCursorChanges } from './get-resume-cursor-changes';
+import { getRulePreviewDates } from './get-rule-preview-dates';
+import { getTaskRepeatInfoText } from '../../tasks/task-detail-panel/get-task-repeat-info-text.util';
 import {
   FallBehindChoice,
   fromFallBehindChoice,
@@ -93,6 +95,12 @@ const FALL_BEHIND_HINTS: Record<FallBehindChoice, string> = {
   KEEP: T.F.TASK_REPEAT.F.FALL_BEHIND_KEEP_HINT,
   LATEST: T.F.TASK_REPEAT.F.FALL_BEHIND_LATEST_HINT,
   WAIT: T.F.TASK_REPEAT.F.FALL_BEHIND_WAIT_HINT,
+};
+
+const FALL_BEHIND_SUMMARY: Record<FallBehindChoice, string> = {
+  KEEP: T.F.TASK_REPEAT.D_EDIT.RULE_KEEPS_EVERY_COPY,
+  LATEST: T.F.TASK_REPEAT.D_EDIT.RULE_ONLY_LATEST,
+  WAIT: T.F.TASK_REPEAT.D_EDIT.RULE_WAITS,
 };
 
 const withFallBehind = <TModel extends RepeatCfgModel>(
@@ -360,6 +368,72 @@ export class DialogEditTaskRepeatCfgComponent {
         ? T.F.TASK_REPEAT.D_EDIT.NEXT_OCCURRENCE_FROM_COMPLETION
         : T.F.TASK_REPEAT.D_EDIT.NEXT_OCCURRENCE;
     return this._translateService.instant(key, { date });
+  });
+
+  // The rule in one sentence plus the dates it falls on, below the schedule
+  // controls. Only shown when it says more than the preset label does.
+  ruleSummary = computed<{ text: string; fallsOn: string | null } | null>(() => {
+    const model = this.repeatCfg();
+    const cfg = this._getPreviewRepeatCfg();
+    const isAfterCompletion = model.quickSetting === AFTER_COMPLETION_PRESET;
+    const choice = toFallBehindChoice(cfg);
+    const defaultChoice: FallBehindChoice = getDefaultSkipOverdue(cfg)
+      ? 'LATEST'
+      : 'KEEP';
+    const isNonDefaultPolicy = !isAfterCompletion && choice !== defaultChoice;
+    const isShown =
+      isCustomOrAfterCompletionPreset(model.quickSetting) ||
+      !!cfg.repeatUntilDay ||
+      isNonDefaultPolicy ||
+      cfg.isPaused;
+    if (!isShown || this.isWeekdaySelectionInvalid()) {
+      return null;
+    }
+    const translate = this._translateService;
+    if (cfg.isPaused) {
+      return {
+        text: translate.instant(T.F.TASK_REPEAT.D_EDIT.RULE_PAUSED),
+        fallsOn: null,
+      };
+    }
+    const [key, params] = getTaskRepeatInfoText(
+      cfg,
+      this._dateTimeFormatService.currentLocale(),
+      this._dateTimeFormatService,
+      translate,
+    );
+    const ruleStr = translate.instant(key, params);
+    const text = isNonDefaultPolicy
+      ? translate.instant(T.F.TASK_REPEAT.D_EDIT.RULE_WITH_POLICY, {
+          ruleStr,
+          policyStr: translate.instant(FALL_BEHIND_SUMMARY[choice]),
+        })
+      : ruleStr;
+
+    // After completion has no fixed dates; every single day needs no list.
+    const isPlainDaily = cfg.repeatCycle === 'DAILY' && cfg.repeatEvery === 1;
+    const dates =
+      isAfterCompletion || isPlainDaily
+        ? []
+        : getRulePreviewDates(
+            cfg,
+            this._dateService.getLogicalTodayDate(),
+            !this.isEdit(),
+          );
+    const fallsOn = dates.length
+      ? translate.instant(T.F.TASK_REPEAT.D_EDIT.RULE_FALLS_ON, {
+          dates: dates
+            .map((date) =>
+              date.toLocaleDateString(this._dateTimeFormatService.textLocale(), {
+                weekday: 'short',
+                day: 'numeric',
+                month: 'short',
+              }),
+            )
+            .join(' · '),
+        })
+      : null;
+    return { text, fallsOn };
   });
 
   hasUnsavedScheduleChanges = computed(() => {
@@ -726,6 +800,20 @@ export class DialogEditTaskRepeatCfgComponent {
           )
         : stored,
     );
+  }
+
+  // The final config with the preset expanded, as save() does, so the summary
+  // describes the pattern fields a preset only writes on save.
+  private _getPreviewRepeatCfg(): TaskRepeatCfg {
+    const quickSetting = this.repeatCfg().quickSetting;
+    const cfg = this._getFinalRepeatCfg();
+    const presetUpdates = isCustomOrAfterCompletionPreset(quickSetting)
+      ? undefined
+      : getQuickSettingUpdates(
+          quickSetting as RepeatQuickSetting,
+          cfg.startDate ? dateStrToUtcDate(cfg.startDate) : undefined,
+        );
+    return { ...cfg, ...presetUpdates } as TaskRepeatCfg;
   }
 
   private _toModeState(model: RepeatCfgModel): AfterCompletionModeState {

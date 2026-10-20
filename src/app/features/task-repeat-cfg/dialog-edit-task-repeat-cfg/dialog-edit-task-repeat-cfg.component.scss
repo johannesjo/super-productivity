@@ -157,3 +157,19 @@ mat-dialog-actions {
 .spacer {
   flex: 1 1 auto;
 }
+
+// The rule in one sentence, below the schedule controls.
+.rule-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s);
+  margin-bottom: var(--s2);
+}
+
+.rule-summary-text {
+  font-weight: 500;
+}
+
+.rule-summary-dates {
+  color: var(--text-color-muted);
+}
