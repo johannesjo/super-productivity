@@ -296,6 +296,10 @@ export class DialogEditTaskRepeatCfgComponent {
   // the model object it was given, so the previous signal value can't be used.
   private _modeSnapshot: AfterCompletionModeState = this._toModeState(this.repeatCfg());
   private _fallBehindSnapshot = this.repeatCfg().fallBehind;
+  // Waiting behaviour to restore when the user leaves "After I complete it…":
+  // the latest one of a fixed schedule, none for a config that opened as after
+  // completion (where waiting was implied).
+  private _fixedWaitForCompletion = this._toFixedWaitForCompletion(this.repeatCfg());
   // Until the user picks a choice, a new config follows the schedule's default.
   private _isFallBehindTouched = false;
   isAfterCompletion = computed(
@@ -515,7 +519,7 @@ export class DialogEditTaskRepeatCfgComponent {
     let synced = syncAfterCompletionMode(
       this._modeSnapshot,
       model,
-      this._getFixedWaitForCompletion(),
+      this._fixedWaitForCompletion,
     );
     if (synced.fallBehind && synced.fallBehind !== this._fallBehindSnapshot) {
       this._isFallBehindTouched = true;
@@ -538,6 +542,9 @@ export class DialogEditTaskRepeatCfgComponent {
     }
     this._modeSnapshot = this._toModeState(synced);
     this._fallBehindSnapshot = synced.fallBehind;
+    if (synced.quickSetting !== AFTER_COMPLETION_PRESET) {
+      this._fixedWaitForCompletion = !!synced.waitForCompletion;
+    }
     this.repeatCfg.set(synced);
   }
 
@@ -823,12 +830,8 @@ export class DialogEditTaskRepeatCfgComponent {
     };
   }
 
-  // Waiting behaviour to restore when the user leaves "After I complete it…":
-  // the stored one for a fixed schedule, none for a config that was already
-  // after completion (where waiting was implied).
-  private _getFixedWaitForCompletion(): boolean {
-    const initial = this.repeatCfgInitial();
-    return !!initial && !initial.repeatFromCompletionDate && !!initial.waitForCompletion;
+  private _toFixedWaitForCompletion(model: RepeatCfgModel): boolean {
+    return model.quickSetting !== AFTER_COMPLETION_PRESET && !!model.waitForCompletion;
   }
 
   private _normalizeMonthlyAnchor<
@@ -942,6 +945,7 @@ export class DialogEditTaskRepeatCfgComponent {
     this.repeatCfg.set(processedCfg);
     this._modeSnapshot = this._toModeState(processedCfg);
     this._fallBehindSnapshot = processedCfg.fallBehind;
+    this._fixedWaitForCompletion = this._toFixedWaitForCompletion(processedCfg);
     this.repeatCfgInitial.set(normalizedCfg);
   }
 

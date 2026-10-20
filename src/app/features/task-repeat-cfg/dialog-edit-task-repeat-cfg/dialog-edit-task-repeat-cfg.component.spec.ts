@@ -1479,6 +1479,27 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       expect(updateChanges()).toEqual({});
     });
 
+    it('keeps a picked "Wait" when the schedule type is switched there and back', async () => {
+      const fixture = await setupTestBed({
+        repeatCfg: { ...mockRepeatCfg, quickSetting: 'CUSTOM' },
+      });
+      const component = fixture.componentInstance;
+
+      component.onModelChange({ ...component.repeatCfg(), fallBehind: 'WAIT' });
+      component.onModelChange({
+        ...component.repeatCfg(),
+        repeatFromCompletionDate: true,
+      });
+      component.onModelChange({
+        ...component.repeatCfg(),
+        repeatFromCompletionDate: false,
+      });
+
+      expect(component.repeatCfg().fallBehind).toBe('WAIT');
+      component.save();
+      expect(updateChanges()).toEqual({ waitForCompletion: true });
+    });
+
     it('keeps a legacy fixed preset with the after-completion flag on an unrelated save', async () => {
       const fixture = await setupTestBed({
         repeatCfg: {
