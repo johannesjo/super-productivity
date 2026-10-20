@@ -329,3 +329,13 @@ Steps 1–3 ship as **one PR**: they rewrite the same dialog files, and separate
 - **Attachments:** v1 picked B with a separate editor (product M7, logic M8). Deferred; template-shape B recommended.
 - **Other cuts:** the completion snack, the chip "next" text, the overview refactor, `isIgnoreShortSyntax`, the toggle chips, Ends ▾ (product m2–m9).
 - **Phasing:** smallest-win PR first (product M10).
+
+## 10. As built (deviations from §4–§8)
+
+- **Existing after-completion configs (§8 Q2):** their schedule fields are converted (weeks as days, monthly anchors cleared) only once the user edits the schedule in the dialog. An unrelated save keeps them as stored: rewriting schedule-affecting fields makes `rescheduleTaskOnRepeatCfgUpdate$` move the open copy, e.g. an overdue one into the future. Waiting for completion is still written on any save, since it moves nothing (`keepUneditedAfterCompletionSchedule`).
+- **Resume (§4.5):** the E2E reproduced a backfill. The first app start after resuming created the newest date missed while paused as an overdue copy. So resuming a fixed schedule moves the creation cursor to the logical yesterday, in the same update as `isPaused: false` (`getResumeCursorChanges`). This is the safe form of v1's idea: it never moves the cursor back, and it skips after-completion schedules, where the cursor is the anchor. Resuming on a scheduled day creates that day's copy right away (local only, next to the #7768 call).
+- **Pause guard:** `_getActionsForTaskRepeatCfg` returns early for a paused config, which fixes the wait-for-completion leak.
+- **Add-task bar:** the "After I complete it…" entry is dialog-only. The bar's repeat menu shares the option builder but turns presets straight into configs.
+- **Layout:** "Ends on" stays in Options, and the Options header shows its title only. The summary line is added next to the existing "Next new instance" line, which keeps its saved-config meaning.
+- **Plurals:** the new count strings follow the helper's existing convention (a singular key plus an "X" key), not `getPluralKey`. The helper has no `TranslateStore`, and #10952 applies to all of these keys alike.
+- **Unused keys:** `WAIT_FOR_COMPLETION*` and `SKIP_OVERDUE*` are no longer referenced; they are left for `npm run int:unused` so the other languages are cleaned in one pass.
