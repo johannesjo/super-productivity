@@ -79,7 +79,8 @@ export const isArchiveAffectingAction = (action: Action): action is PersistentAc
  *
  * ## Entry Points
  *
- * 1. **Local operations**: Called by ArchiveOperationHandlerEffects after action dispatch
+ * 1. **Local operations**: Called by ArchiveOperationHandlerEffects after action dispatch,
+ *    through the local queue (enqueueLocalOperation)
  * 2. **Remote operations**: Called by OperationApplierService after applying remote operations
  *
  * ## Why This Architecture
