@@ -59,6 +59,13 @@ body.isDarkTheme {
   --mat-chip-outline-width: 1px !important;
 }
 
+// The chip remove icon is the whole tap target and only 18px tall. On touch,
+// pad it to the chip's height without moving the layout (negative margin).
+.isTouchOnly .mat-mdc-chip-remove.mat-icon {
+  padding-block: var(--s);
+  margin-block: calc(var(--s) * -1);
+}
+
 .mat-drawer.mat-drawer-side {
   // should be below notes panel
   z-index: 1 !important;
