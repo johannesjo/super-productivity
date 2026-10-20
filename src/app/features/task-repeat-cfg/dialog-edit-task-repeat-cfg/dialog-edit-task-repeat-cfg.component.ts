@@ -18,6 +18,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
 import {
   DEFAULT_TASK_REPEAT_CFG,
+  RepeatQuickSetting,
   TaskRepeatCfg,
   TaskRepeatCfgCopy,
 } from '../task-repeat-cfg.model';
@@ -62,6 +63,23 @@ import { getNextCreatedOccurrence } from '../store/get-next-created-occurrence.u
 import { getNewestPossibleDueDate } from '../store/get-newest-possible-due-date.util';
 import { SCHEDULE_AFFECTING_FIELDS } from '../store/schedule-affecting-fields.const';
 import { getTaskPriority } from '../../tasks/task-priority.const';
+import {
+  AFTER_COMPLETION_PRESET,
+  AfterCompletionModeState,
+  isCustomOrAfterCompletionPreset,
+  keepUneditedAfterCompletionSchedule,
+  RepeatCfgFormModel,
+  syncAfterCompletionMode,
+  toRepeatCfgFormModel,
+  toStoredRepeatCfg,
+} from './after-completion-form-mapping';
+
+type StoredRepeatCfg = Omit<TaskRepeatCfgCopy, 'id'> | TaskRepeatCfg;
+// The dialog's model may carry the dialog-only "After I complete it…" preset;
+// toStoredRepeatCfg turns it back into a persistable config.
+type RepeatCfgModel =
+  | RepeatCfgFormModel<Omit<TaskRepeatCfgCopy, 'id'>>
+  | RepeatCfgFormModel<TaskRepeatCfg>;
 
 // Fields whose change requires offering "Update all task instances?" — covers
 // what propagates to existing tasks (vs. schedule fields, which only affect
@@ -244,8 +262,12 @@ export class DialogEditTaskRepeatCfgComponent {
   isHeatmapExpanded = false;
 
   repeatCfgInitial = signal<TaskRepeatCfgCopy | undefined>(undefined);
-  repeatCfg = signal<Omit<TaskRepeatCfgCopy, 'id'> | TaskRepeatCfg>(
-    this._initializeRepeatCfg(),
+  repeatCfg = signal<RepeatCfgModel>(this._initializeRepeatCfg());
+  // Preset and schedule type before the latest form change. Formly writes into
+  // the model object it was given, so the previous signal value can't be used.
+  private _modeSnapshot: AfterCompletionModeState = this._toModeState(this.repeatCfg());
+  isAfterCompletion = computed(
+    () => this.repeatCfg().quickSetting === AFTER_COMPLETION_PRESET,
   );
   isLoading = signal<boolean>(false);
   isEdit = computed(() => {
@@ -321,10 +343,7 @@ export class DialogEditTaskRepeatCfgComponent {
     if (!saved) {
       return false;
     }
-    const changes = getTaskRepeatCfgChanges(
-      saved,
-      this._normalizeMonthlyAnchor(this.repeatCfg()),
-    );
+    const changes = getTaskRepeatCfgChanges(saved, this._getFinalRepeatCfg());
     return NEXT_OCCURRENCE_FIELDS.some((field) => field in changes);
   });
 
@@ -394,7 +413,17 @@ export class DialogEditTaskRepeatCfgComponent {
     });
   }
 
-  private _initializeRepeatCfg(): Omit<TaskRepeatCfgCopy, 'id'> | TaskRepeatCfg {
+  onModelChange(model: RepeatCfgModel): void {
+    const synced = syncAfterCompletionMode(
+      this._modeSnapshot,
+      model,
+      this._getFixedWaitForCompletion(),
+    );
+    this._modeSnapshot = this._toModeState(synced);
+    this.repeatCfg.set(synced);
+  }
+
+  private _initializeRepeatCfg(): RepeatCfgModel {
     if (this._data.repeatCfg) {
       // Process the repeat config to determine if quickSetting needs to be changed to CUSTOM
       const processedCfg = this._processQuickSettingForDate({ ...this._data.repeatCfg });
@@ -411,7 +440,7 @@ export class DialogEditTaskRepeatCfgComponent {
         ...this._data.repeatCfg,
         priority: getTaskPriority(this._data.repeatCfg.priority),
       });
-      return processedCfg;
+      return toRepeatCfgFormModel(processedCfg);
     } else if (this._data.task) {
       const startTime = this._data.task.dueWithTime
         ? clockStringFromDate(this._data.task.dueWithTime)
@@ -452,18 +481,27 @@ export class DialogEditTaskRepeatCfgComponent {
   private _initializeFormConfig(): void {
     const translateService = this._translateService;
 
-    const buildOptions = (refDate: Date): { value: string; label: string }[] =>
+    const buildOptions = (refDate: Date): { value: string; label: string }[] => {
       // Read currentLocale() reactively each time options are built so the
       // correct locale is used even when the config store hasn't emitted yet
       // at construction time (previously captured once as a const → en-GB).
       // textLocale() localizes the spelled-out weekday name (UI language under
       // the ISO option), while numeric day/month keep currentLocale().
-      buildRepeatQuickSettingOptions(
+      const options: { value: string; label: string }[] = buildRepeatQuickSettingOptions(
         refDate,
         this._dateTimeFormatService.currentLocale(),
         translateService,
         this._dateTimeFormatService.textLocale(),
       );
+      // Dialog-only entry (#5388), just above Custom. The add-task bar shares the
+      // builder but has no after-completion flow, so it is added here.
+      const customIdx = options.findIndex((o) => o.value === 'CUSTOM');
+      options.splice(customIdx, 0, {
+        value: AFTER_COMPLETION_PRESET,
+        label: translateService.instant(T.F.TASK_REPEAT.F.Q_AFTER_COMPLETION),
+      });
+      return options;
+    };
 
     const formConfig = TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG.map((field) => ({
       ...field,
@@ -543,13 +581,13 @@ export class DialogEditTaskRepeatCfgComponent {
     const currentRepeatCfg = this.repeatCfg();
 
     // workaround for formly not always updating hidden fields correctly (in time??)
-    if (currentRepeatCfg.quickSetting !== 'CUSTOM') {
+    if (!isCustomOrAfterCompletionPreset(currentRepeatCfg.quickSetting)) {
       // Pass startDate to use correct weekday for WEEKLY_CURRENT_WEEKDAY (fixes #5806)
       const referenceDate = currentRepeatCfg.startDate
         ? dateStrToUtcDate(currentRepeatCfg.startDate)
         : undefined;
       const updatesForQuickSetting = getQuickSettingUpdates(
-        currentRepeatCfg.quickSetting,
+        currentRepeatCfg.quickSetting as RepeatQuickSetting,
         referenceDate,
       );
       if (updatesForQuickSetting) {
@@ -557,10 +595,7 @@ export class DialogEditTaskRepeatCfgComponent {
       }
     }
 
-    // Normalize the monthly anchor fields at the boundary: convert the form's
-    // `null` sentinels (incl. a cleared end date) to `undefined`, and strip a
-    // stale `monthlyLastDay` flag.
-    const finalRepeatCfg = this._normalizeMonthlyAnchor(this.repeatCfg());
+    const finalRepeatCfg = this._getFinalRepeatCfg();
 
     if (this.isEdit()) {
       const initial = this.repeatCfgInitial();
@@ -601,6 +636,42 @@ export class DialogEditTaskRepeatCfgComponent {
       );
       this.close(createdRepeatCfgId);
     }
+  }
+
+  /**
+   * The config as it will be stored: the dialog-only preset is resolved
+   * (toStoredRepeatCfg), then the monthly anchor fields are normalized at the
+   * boundary: the form's `null` sentinels (incl. a cleared end date) become
+   * `undefined`, and a stale `monthlyLastDay` flag is stripped.
+   */
+  private _getFinalRepeatCfg(): StoredRepeatCfg {
+    const model = this.repeatCfg();
+    const initial = this.repeatCfgInitial();
+    const stored = toStoredRepeatCfg(model) as StoredRepeatCfg;
+    return this._normalizeMonthlyAnchor(
+      initial
+        ? keepUneditedAfterCompletionSchedule<StoredRepeatCfg>(
+            initial,
+            model as RepeatCfgFormModel<StoredRepeatCfg>,
+            stored,
+          )
+        : stored,
+    );
+  }
+
+  private _toModeState(model: RepeatCfgModel): AfterCompletionModeState {
+    return {
+      quickSetting: model.quickSetting,
+      repeatFromCompletionDate: model.repeatFromCompletionDate,
+    };
+  }
+
+  // Waiting behaviour to restore when the user leaves "After I complete it…":
+  // the stored one for a fixed schedule, none for a config that was already
+  // after completion (where waiting was implied).
+  private _getFixedWaitForCompletion(): boolean {
+    const initial = this.repeatCfgInitial();
+    return !!initial && !initial.repeatFromCompletionDate && !!initial.waitForCompletion;
   }
 
   private _normalizeMonthlyAnchor<
@@ -708,8 +779,11 @@ export class DialogEditTaskRepeatCfgComponent {
 
   private _setRepeatCfgInitiallyForEditOnly(repeatCfg: TaskRepeatCfg): void {
     const normalizedCfg = { ...repeatCfg, priority: getTaskPriority(repeatCfg.priority) };
-    const processedCfg = this._processQuickSettingForDate(normalizedCfg);
+    const processedCfg = toRepeatCfgFormModel(
+      this._processQuickSettingForDate(normalizedCfg),
+    );
     this.repeatCfg.set(processedCfg);
+    this._modeSnapshot = this._toModeState(processedCfg);
     this.repeatCfgInitial.set(normalizedCfg);
   }
 

@@ -87,6 +87,45 @@ export const toStoredRepeatCfg = <TCfg extends MappedFields>(
   } as TCfg;
 };
 
+const AFTER_COMPLETION_SCHEDULE_KEYS = [
+  'repeatCycle',
+  'repeatEvery',
+  'monthlyWeekOfMonth',
+  'monthlyWeekday',
+  'monthlyLastDay',
+] as const;
+
+/**
+ * A stored after-completion config can predate the dialog's representation
+ * (a weekday-based weekly cycle, monthly anchors). Rewriting those
+ * schedule-affecting fields makes rescheduleTaskOnRepeatCfgUpdate$ relocate the
+ * open copy, e.g. move an overdue one into the future. So they are only
+ * converted when the user edited the schedule in the dialog; an unrelated save
+ * keeps the stored schedule as it is (waiting still applies, it moves nothing).
+ */
+export const keepUneditedAfterCompletionSchedule = <TCfg extends MappedFields>(
+  initial: TCfg,
+  model: RepeatCfgFormModel<TCfg>,
+  stored: TCfg,
+): TCfg => {
+  if (!initial.repeatFromCompletionDate || !stored.repeatFromCompletionDate) {
+    return stored;
+  }
+  const shownInitially = toRepeatCfgFormModel(initial);
+  const isScheduleEdited =
+    shownInitially.quickSetting !== model.quickSetting ||
+    shownInitially.repeatCycle !== model.repeatCycle ||
+    Number(shownInitially.repeatEvery) !== Number(model.repeatEvery);
+  if (isScheduleEdited) {
+    return stored;
+  }
+  const kept = { ...stored };
+  for (const key of AFTER_COMPLETION_SCHEDULE_KEYS) {
+    (kept as Record<string, unknown>)[key] = initial[key];
+  }
+  return kept;
+};
+
 export type AfterCompletionModeState = Pick<
   RepeatCfgFormModel<MappedFields>,
   'quickSetting' | 'repeatFromCompletionDate'

@@ -1,6 +1,7 @@
 import {
   AFTER_COMPLETION_PRESET,
   isCustomOrAfterCompletionPreset,
+  keepUneditedAfterCompletionSchedule,
   syncAfterCompletionMode,
   toRepeatCfgFormModel,
   toStoredRepeatCfg,
@@ -175,6 +176,48 @@ describe('after-completion form mapping (#5388)', () => {
         repeatEvery: 14,
         waitForCompletion: true,
       });
+    });
+  });
+
+  describe('keepUneditedAfterCompletionSchedule', () => {
+    const legacy = cfg({
+      quickSetting: 'CUSTOM',
+      repeatFromCompletionDate: true,
+      repeatCycle: 'WEEKLY',
+      repeatEvery: 2,
+      monday: true,
+      monthlyWeekOfMonth: 3,
+    });
+
+    it('keeps a legacy schedule when only other fields changed', () => {
+      const model = { ...toRepeatCfgFormModel(legacy), title: 'Renamed' };
+      const kept = keepUneditedAfterCompletionSchedule(
+        legacy,
+        model,
+        toStoredRepeatCfg(model),
+      );
+      expect(getTaskRepeatCfgChanges(legacy, kept)).toEqual({
+        title: 'Renamed',
+        waitForCompletion: true,
+      });
+    });
+
+    it('converts the schedule once the user edits it', () => {
+      const model = { ...toRepeatCfgFormModel(legacy), repeatEvery: 3 };
+      const stored = toStoredRepeatCfg(model);
+      expect(keepUneditedAfterCompletionSchedule(legacy, model, stored)).toBe(stored);
+      expect(stored.repeatCycle).toBe('DAILY');
+      expect(stored.repeatEvery).toBe(21);
+    });
+
+    it('does nothing for a config that was not after completion', () => {
+      const fixed = cfg({ quickSetting: 'CUSTOM', repeatCycle: 'WEEKLY' });
+      const model = {
+        ...toRepeatCfgFormModel(fixed),
+        quickSetting: AFTER_COMPLETION_PRESET,
+      };
+      const stored = toStoredRepeatCfg(model);
+      expect(keepUneditedAfterCompletionSchedule(fixed, model, stored)).toBe(stored);
     });
   });
 

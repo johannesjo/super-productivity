@@ -35,7 +35,12 @@
           <span class="planned-start-date-btn-content">
             <mat-icon>today</mat-icon>
             <span class="planned-date-label">
-              {{ T.F.TASK_REPEAT.F.START_DATE | translate }}:
+              {{
+                (isAfterCompletion()
+                  ? T.F.TASK_REPEAT.F.FIRST_OCCURRENCE
+                  : T.F.TASK_REPEAT.F.START_DATE
+                ) | translate
+              }}:
             </span>
             <span class="planned-date-val">{{ plannedStartDateStr() }}</span>
             @if (repeatCfg().remindAt && repeatCfg().remindAt !== 'DoNotRemind') {
@@ -64,7 +69,7 @@
       }
 
       <formly-form
-        (modelChange)="repeatCfg.set($event)"
+        (modelChange)="onModelChange($event)"
         [form]="formGroup1()"
         [fields]="essentialFormFields()"
         [model]="repeatCfg()"
@@ -91,7 +96,7 @@
         ></chip-list-input>
 
         <formly-form
-          (modelChange)="repeatCfg.set($event)"
+          (modelChange)="onModelChange($event)"
           [form]="formGroup2()"
           [fields]="advancedFormFields()"
           [model]="repeatCfg()"
@@ -101,6 +106,22 @@
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
+    @if (isEdit()) {
+      <button
+        (click)="remove()"
+        [attr.aria-label]="T.G.REMOVE | translate"
+        class="icon-on-small"
+        color="warn"
+        mat-stroked-button
+        type="button"
+      >
+        <mat-icon>delete_forever</mat-icon>
+        <span class="hide-on-small">{{ T.G.REMOVE | translate }}</span>
+      </button>
+      <!-- Destructive action apart from Save -->
+      <span class="spacer"></span>
+    }
+
     <button
       (click)="close()"
       [attr.aria-label]="T.G.CANCEL | translate"
@@ -112,30 +133,17 @@
       <span class="hide-on-small">{{ T.G.CANCEL | translate }}</span>
     </button>
 
-    @if (isEdit()) {
-      @if (canRemoveInstance()) {
-        <button
-          (click)="deleteInstance()"
-          [attr.aria-label]="skipInstanceButtonText()"
-          class="icon-on-small"
-          color="primary"
-          mat-stroked-button
-          type="button"
-        >
-          <mat-icon>event_busy</mat-icon>
-          <span class="hide-on-small">{{ skipInstanceButtonText() }}</span>
-        </button>
-      }
+    @if (isEdit() && canRemoveInstance()) {
       <button
-        (click)="remove()"
-        [attr.aria-label]="T.G.REMOVE | translate"
+        (click)="deleteInstance()"
+        [attr.aria-label]="skipInstanceButtonText()"
         class="icon-on-small"
-        color="warn"
+        color="primary"
         mat-stroked-button
         type="button"
       >
-        <mat-icon>delete_forever</mat-icon>
-        <span class="hide-on-small">{{ T.G.REMOVE | translate }}</span>
+        <mat-icon>event_busy</mat-icon>
+        <span class="hide-on-small">{{ skipInstanceButtonText() }}</span>
       </button>
     }
 

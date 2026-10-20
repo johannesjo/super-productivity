@@ -30,6 +30,7 @@ import { TaskCopy } from '../../tasks/task.model';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { DateService } from '../../../core/date/date.service';
+import { AFTER_COMPLETION_PRESET } from './after-completion-form-mapping';
 
 describe('DialogEditTaskRepeatCfgComponent', () => {
   let mockDialogRef: jasmine.SpyObj<MatDialogRef<DialogEditTaskRepeatCfgComponent>>;
@@ -1339,6 +1340,149 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       component.repeatCfg.update((cfg) => ({ ...cfg, shouldInheritSubtasks: true }));
 
       expect(component.inheritedSubtaskTitles()).toEqual([]);
+    });
+  });
+  describe('after completion (#5388)', () => {
+    const savedCfg = (): TaskRepeatCfg =>
+      mockTaskRepeatCfgService.addTaskRepeatCfgToTask.calls.mostRecent()
+        .args[2] as TaskRepeatCfg;
+    const updateChanges = (): Partial<TaskRepeatCfg> =>
+      mockTaskRepeatCfgService.updateTaskRepeatCfg.calls.mostRecent()
+        .args[1] as Partial<TaskRepeatCfg>;
+
+    it('offers "After I complete it…" just above Custom', async () => {
+      const fixture = await setupTestBed({ task: mockTask });
+      const quickSetting = fixture.componentInstance
+        .essentialFormFields()
+        .find((f) => f.key === 'quickSetting');
+      const values = (quickSetting?.templateOptions?.options as { value: string }[]).map(
+        (o) => o.value,
+      );
+      expect(values.slice(-2)).toEqual([AFTER_COMPLETION_PRESET, 'CUSTOM']);
+    });
+
+    it('saves "every 2 weeks after I complete it" as 14 days, waiting, as CUSTOM', async () => {
+      const fixture = await setupTestBed({ task: mockTask });
+      const component = fixture.componentInstance;
+
+      component.onModelChange({
+        ...component.repeatCfg(),
+        quickSetting: AFTER_COMPLETION_PRESET,
+      });
+      component.onModelChange({
+        ...component.repeatCfg(),
+        repeatCycle: 'WEEKLY',
+        repeatEvery: 2,
+        monday: false,
+        tuesday: false,
+        wednesday: false,
+        thursday: false,
+        friday: false,
+      });
+
+      // no weekday is needed after completion
+      expect(component.isWeekdaySelectionInvalid()).toBe(false);
+      component.save();
+
+      expect(savedCfg().quickSetting).toBe('CUSTOM');
+      expect(savedCfg().repeatFromCompletionDate).toBe(true);
+      expect(savedCfg().waitForCompletion).toBe(true);
+      expect(savedCfg().repeatCycle).toBe('DAILY');
+      expect(savedCfg().repeatEvery).toBe(14);
+    });
+
+    it('switches the preset when the schedule type radio is set', async () => {
+      const fixture = await setupTestBed({ task: mockTask });
+      const component = fixture.componentInstance;
+
+      component.onModelChange({ ...component.repeatCfg(), quickSetting: 'CUSTOM' });
+      component.onModelChange({
+        ...component.repeatCfg(),
+        repeatFromCompletionDate: true,
+      });
+
+      expect(component.repeatCfg().quickSetting).toBe(AFTER_COMPLETION_PRESET);
+      expect(component.isAfterCompletion()).toBe(true);
+    });
+
+    it('opens a stored 14-day after-completion config as 2 weeks and saves no changes', async () => {
+      const afterCfg: TaskRepeatCfg = {
+        ...mockRepeatCfg,
+        quickSetting: 'CUSTOM',
+        repeatFromCompletionDate: true,
+        waitForCompletion: true,
+        repeatCycle: 'DAILY',
+        repeatEvery: 14,
+      };
+      const fixture = await setupTestBed({ repeatCfg: afterCfg });
+      const component = fixture.componentInstance;
+
+      expect(component.repeatCfg().quickSetting).toBe(AFTER_COMPLETION_PRESET);
+      expect(component.repeatCfg().repeatCycle).toBe('WEEKLY');
+      expect(component.repeatCfg().repeatEvery).toBe(2);
+      expect(component.hasUnsavedScheduleChanges()).toBe(false);
+
+      component.save();
+
+      expect(updateChanges()).toEqual({});
+    });
+
+    const legacyCfg: TaskRepeatCfg = {
+      ...mockRepeatCfg,
+      quickSetting: 'CUSTOM',
+      repeatFromCompletionDate: true,
+      waitForCompletion: false,
+      repeatCycle: 'WEEKLY',
+      repeatEvery: 2,
+    };
+
+    it('keeps a legacy weekday-based schedule on an unrelated save, so the open copy stays put', async () => {
+      const fixture = await setupTestBed({ repeatCfg: legacyCfg });
+      const component = fixture.componentInstance;
+
+      component.onModelChange({ ...component.repeatCfg(), title: 'Renamed' });
+      component.save();
+
+      // Schedule fields would make the reschedule effect relocate the open copy.
+      expect(updateChanges()).toEqual({ title: 'Renamed', waitForCompletion: true });
+    });
+
+    it('converts a legacy weekday-based schedule once the user edits it', async () => {
+      const fixture = await setupTestBed({ repeatCfg: legacyCfg });
+      const component = fixture.componentInstance;
+
+      component.onModelChange({ ...component.repeatCfg(), repeatEvery: 3 });
+      component.save();
+
+      expect(updateChanges()).toEqual({
+        repeatCycle: 'DAILY',
+        repeatEvery: 21,
+        waitForCompletion: true,
+      });
+    });
+
+    it('restores the stored waiting behaviour when switching back to a fixed schedule', async () => {
+      const fixedWaitingCfg: TaskRepeatCfg = {
+        ...mockRepeatCfg,
+        quickSetting: 'CUSTOM',
+        waitForCompletion: true,
+      };
+      const fixture = await setupTestBed({ repeatCfg: fixedWaitingCfg });
+      const component = fixture.componentInstance;
+
+      component.onModelChange({
+        ...component.repeatCfg(),
+        quickSetting: AFTER_COMPLETION_PRESET,
+      });
+      component.onModelChange({
+        ...component.repeatCfg(),
+        repeatFromCompletionDate: false,
+      });
+
+      expect(component.repeatCfg().quickSetting).toBe('CUSTOM');
+      expect(component.repeatCfg().waitForCompletion).toBe(true);
+      component.save();
+      expect(updateChanges()).toEqual({});
     });
   });
 });

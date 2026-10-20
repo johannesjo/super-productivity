@@ -3,6 +3,8 @@ import {
   TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG,
 } from './task-repeat-cfg-form.const';
 import { T } from '../../../t.const';
+import { FormlyFieldConfig } from '@ngx-formly/core';
+import { AFTER_COMPLETION_PRESET } from './after-completion-form-mapping';
 
 describe('TaskRepeatCfgFormConfig', () => {
   it('should not contain startDate in essential form fields', () => {
@@ -73,6 +75,65 @@ describe('TaskRepeatCfgFormConfig', () => {
     );
   });
 
+  describe('after completion (#5388)', () => {
+    const repeatContainer = TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG.find(
+      (field) => field.fieldGroupClassName === 'repeat-config-container',
+    );
+    const hide = (field: FormlyFieldConfig | undefined, model: object): boolean =>
+      (field?.hideExpression as (m: object) => boolean)(model);
+
+    it('shows the custom block for Custom and for the after-completion preset', () => {
+      expect(hide(repeatContainer, { quickSetting: 'CUSTOM' })).toBe(false);
+      expect(hide(repeatContainer, { quickSetting: AFTER_COMPLETION_PRESET })).toBe(
+        false,
+      );
+      expect(hide(repeatContainer, { quickSetting: 'DAILY' })).toBe(true);
+    });
+
+    it('puts the schedule type first in the custom block, as translated radios', () => {
+      const scheduleType = repeatContainer?.fieldGroup?.[0];
+      expect(scheduleType?.key).toBe('repeatFromCompletionDate');
+      expect(scheduleType?.type).toBe('radio');
+      expect(scheduleType?.hideExpression).toBeUndefined();
+      expect(scheduleType?.templateOptions?.options).toEqual([
+        { value: false, label: T.F.TASK_REPEAT.F.SCHEDULE_TYPE_FIXED },
+        { value: true, label: T.F.TASK_REPEAT.F.SCHEDULE_TYPE_AFTER_COMPLETION },
+      ]);
+    });
+
+    it('no longer offers the schedule type in the advanced form', () => {
+      expect(
+        TASK_REPEAT_CFG_ADVANCED_FORM_CFG.some(
+          (f) => f.key === 'repeatFromCompletionDate',
+        ),
+      ).toBe(false);
+    });
+
+    it('hides the monthly pattern after completion', () => {
+      const monthlyAnchor = repeatContainer?.fieldGroup?.find(
+        (field) => field.fieldGroupClassName === 'monthly-anchor',
+      );
+      expect(
+        hide(monthlyAnchor, { repeatCycle: 'MONTHLY', quickSetting: 'CUSTOM' }),
+      ).toBe(false);
+      expect(
+        hide(monthlyAnchor, {
+          repeatCycle: 'MONTHLY',
+          quickSetting: AFTER_COMPLETION_PRESET,
+        }),
+      ).toBe(true);
+    });
+
+    it('hides "only create next task after completion", which is implied there', () => {
+      const wait = TASK_REPEAT_CFG_ADVANCED_FORM_CFG.find(
+        (f) => f.key === 'waitForCompletion',
+      );
+      expect(hide(wait, { quickSetting: 'CUSTOM' })).toBe(false);
+      expect(hide(wait, { quickSetting: AFTER_COMPLETION_PRESET })).toBe(true);
+      expect(wait?.resetOnHide).toBe(false);
+    });
+  });
+
   describe('weekdays group visibility (issue #8025)', () => {
     const repeatContainer = TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG.find(
       (field) => field.fieldGroupClassName === 'repeat-config-container',
@@ -112,6 +173,17 @@ describe('TaskRepeatCfgFormConfig', () => {
       expect(className({ repeatCycle: 'MONTHLY' })).toBe('repeat-cfg-hidden');
       expect(className({ repeatCycle: 'YEARLY' })).toBe('repeat-cfg-hidden');
       expect(className({ repeatCycle: 'DAILY' })).toBe('repeat-cfg-hidden');
+    });
+
+    it('hides the weekdays after completion, where weeks are a plain interval (#5388)', () => {
+      const className = weekdaysGroup?.expressionProperties?.['className'] as (model: {
+        repeatCycle: string;
+        quickSetting: string;
+      }) => string;
+      expect(className({ repeatCycle: 'WEEKLY', quickSetting: 'CUSTOM' })).toBe('');
+      expect(
+        className({ repeatCycle: 'WEEKLY', quickSetting: AFTER_COMPLETION_PRESET }),
+      ).toBe('repeat-cfg-hidden');
     });
 
     // The group stays mounted, but the CUSTOM container above it still hides via

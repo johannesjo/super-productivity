@@ -3,6 +3,10 @@ import { T } from '../../../t.const';
 import { RepeatQuickSetting, TaskRepeatCfg } from '../task-repeat-cfg.model';
 import { getQuickSettingUpdates } from './get-quick-setting-updates';
 import { getDbDateStr } from '../../../util/get-db-date-str';
+import {
+  AFTER_COMPLETION_PRESET,
+  isCustomOrAfterCompletionPreset,
+} from './after-completion-form-mapping';
 
 const updateParent = (
   field: FormlyFieldConfig,
@@ -49,8 +53,23 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
   {
     fieldGroupClassName: 'repeat-config-container',
     resetOnHide: false,
-    hideExpression: (model: any) => model.quickSetting !== 'CUSTOM',
+    hideExpression: (model: any) => !isCustomOrAfterCompletionPreset(model.quickSetting),
     fieldGroup: [
+      // At the top so it is visible for every interval, including 1 (#5388).
+      // The component keeps it in step with the "After I complete it…" preset.
+      {
+        key: 'repeatFromCompletionDate',
+        type: 'radio',
+        defaultValue: false,
+        resetOnHide: false,
+        templateOptions: {
+          label: T.F.TASK_REPEAT.F.SCHEDULE_TYPE_LABEL,
+          options: [
+            { value: false, label: T.F.TASK_REPEAT.F.SCHEDULE_TYPE_FIXED },
+            { value: true, label: T.F.TASK_REPEAT.F.SCHEDULE_TYPE_AFTER_COMPLETION },
+          ],
+        },
+      },
       {
         fieldGroupClassName: 'repeat-cycle',
         fieldGroup: [
@@ -86,7 +105,10 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
       {
         fieldGroupClassName: 'monthly-anchor',
         resetOnHide: false,
-        hideExpression: (model: any) => model.repeatCycle !== 'MONTHLY',
+        // After completion is a plain interval from the completion day.
+        hideExpression: (model: any) =>
+          model.repeatCycle !== 'MONTHLY' ||
+          model.quickSetting === AFTER_COMPLETION_PRESET,
         fieldGroup: [
           {
             key: 'monthlyWeekOfMonth',
@@ -140,8 +162,13 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
         // CUSTOM container itself is hidden (quickSetting != CUSTOM).
         fieldGroupClassName: 'weekdays',
         expressionProperties: {
-          className: (model: TaskRepeatCfg) =>
-            model.repeatCycle === 'WEEKLY' ? '' : 'repeat-cfg-hidden',
+          // Weekdays do not apply after completion: "2 weeks after I complete it"
+          // is stored as 14 days (toStoredRepeatCfg).
+          className: (model: { repeatCycle: string; quickSetting: string }) =>
+            model.repeatCycle === 'WEEKLY' &&
+            model.quickSetting !== AFTER_COMPLETION_PRESET
+              ? ''
+              : 'repeat-cfg-hidden',
         },
         fieldGroup: [
           {
@@ -216,6 +243,7 @@ export const TASK_REPEAT_CFG_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
     type: 'date',
     templateOptions: {
       label: T.F.TASK_REPEAT.F.REPEAT_UNTIL_DAY,
+      description: T.F.TASK_REPEAT.F.REPEAT_UNTIL_DAY_DESCRIPTION,
     },
     parsers: [
       (value: Date | string | null | undefined) =>
@@ -261,47 +289,6 @@ export const TASK_REPEAT_CFG_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
       rows: 4,
     },
   },
-  // Schedule type: from due date or from completion
-  {
-    key: 'repeatFromCompletionDate',
-    type: 'select',
-    defaultValue: false,
-    resetOnHide: false,
-    hideExpression: (model: any) => {
-      // Only show for custom settings with intervals > 1
-      if (model.quickSetting !== 'CUSTOM') {
-        return true;
-      }
-      return false;
-    },
-    templateOptions: {
-      label: T.F.TASK_REPEAT.F.SCHEDULE_TYPE_LABEL,
-      options: [],
-    },
-    expressionProperties: {
-      ['templateOptions.options']: (model: any) => {
-        const repeatEvery = model.repeatEvery || 1;
-        const cycleMap: Record<string, string> = {
-          DAILY: repeatEvery === 1 ? 'day' : 'days',
-          WEEKLY: repeatEvery === 1 ? 'week' : 'weeks',
-          MONTHLY: repeatEvery === 1 ? 'month' : 'months',
-          YEARLY: repeatEvery === 1 ? 'year' : 'years',
-        };
-        const cycleName = cycleMap[model.repeatCycle] || 'days';
-
-        return [
-          {
-            value: false,
-            label: `Fixed schedule (every ${repeatEvery} ${cycleName} from start date)`,
-          },
-          {
-            value: true,
-            label: `After completion (${repeatEvery} ${cycleName} after I finish)`,
-          },
-        ];
-      },
-    },
-  },
   {
     key: 'shouldInheritSubtasks',
     type: 'checkbox',
@@ -327,6 +314,10 @@ export const TASK_REPEAT_CFG_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
     key: 'waitForCompletion',
     type: 'checkbox',
     defaultValue: false,
+    resetOnHide: false,
+    // Implied after completion: there is no completion to count from while
+    // the current copy is still open.
+    hideExpression: (model: any) => model.quickSetting === AFTER_COMPLETION_PRESET,
     templateOptions: {
       label: T.F.TASK_REPEAT.F.WAIT_FOR_COMPLETION,
       description: T.F.TASK_REPEAT.F.WAIT_FOR_COMPLETION_DESCRIPTION,
