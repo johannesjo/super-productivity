@@ -21,6 +21,11 @@ import { TIME_TRACKING_FEATURE_KEY } from '../../../features/time-tracking/store
 import { appStateFeatureKey } from '../../app-state/app-state.reducer';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { SIMPLE_COUNTER_FEATURE_NAME } from '../../../features/simple-counter/store/simple-counter.reducer';
+import { TASK_REPEAT_CFG_FEATURE_NAME } from '../../../features/task-repeat-cfg/store/task-repeat-cfg.selectors';
+import {
+  DEFAULT_TASK_REPEAT_CFG,
+  TaskRepeatCfg,
+} from '../../../features/task-repeat-cfg/task-repeat-cfg.model';
 import {
   SimpleCounter,
   SimpleCounterType,
@@ -1282,6 +1287,62 @@ describe('lwwUpdateMetaReducer', () => {
         expect(counter.type).toBe(SimpleCounterType.StopWatch);
         expect(appDataValidators.simpleCounter(counterState as never).success).toBe(true);
       });
+    });
+  });
+
+  // #10958 admitted TASK_REPEAT_CFG to field patches, so a device that applied
+  // a concurrent delete can recreate a config from a partial patch.
+  describe('[TASK_REPEAT_CFG] LWW Update recreate (#10958)', () => {
+    const makeStateWithCfgs = (): Partial<RootState> =>
+      ({
+        [TASK_REPEAT_CFG_FEATURE_NAME]: { ids: [], entities: {} },
+      }) as unknown as Partial<RootState>;
+
+    it('recreates a schema-valid, paused config from a partial patch', () => {
+      const action = {
+        type: '[TASK_REPEAT_CFG] LWW Update',
+        id: 'cfg_partial',
+        lastTaskCreation: 1000,
+        lastTaskCreationDay: '2026-06-16',
+        meta: {
+          isPersistent: true,
+          entityType: 'TASK_REPEAT_CFG',
+          entityId: 'cfg_partial',
+        },
+      };
+
+      reducer(makeStateWithCfgs(), action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      const cfgState = updatedState[TASK_REPEAT_CFG_FEATURE_NAME];
+      const cfg = cfgState?.entities['cfg_partial'] as TaskRepeatCfg;
+      expect(cfg.isPaused).toBe(true);
+      expect(cfg.lastTaskCreationDay).toBe('2026-06-16');
+      expect(appDataValidators.taskRepeatCfg(cfgState as never).success).toBe(true);
+    });
+
+    it('keeps the isPaused a full snapshot carries', () => {
+      const action = {
+        type: '[TASK_REPEAT_CFG] LWW Update',
+        ...DEFAULT_TASK_REPEAT_CFG,
+        id: 'cfg_full',
+        title: 'Daily',
+        isPaused: false,
+        meta: {
+          isPersistent: true,
+          entityType: 'TASK_REPEAT_CFG',
+          entityId: 'cfg_full',
+        },
+      };
+
+      reducer(makeStateWithCfgs(), action);
+
+      const updatedState = mockReducer.calls.mostRecent().args[0] as Partial<RootState>;
+      const cfg = updatedState[TASK_REPEAT_CFG_FEATURE_NAME]?.entities[
+        'cfg_full'
+      ] as TaskRepeatCfg;
+      expect(cfg.isPaused).toBe(false);
+      expect(cfg.title).toBe('Daily');
     });
   });
 

@@ -3,6 +3,7 @@ import { DEFAULT_TASK } from '../../features/tasks/task.model';
 import { DEFAULT_PROJECT, INBOX_PROJECT } from '../../features/project/project.const';
 import { DEFAULT_TAG } from '../../features/tag/tag.const';
 import { EMPTY_SIMPLE_COUNTER } from '../../features/simple-counter/simple-counter.const';
+import { DEFAULT_TASK_REPEAT_CFG } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 
 /**
  * Per-entity-type fallback used when an LWW Update recreates an entity that
@@ -54,7 +55,14 @@ import { EMPTY_SIMPLE_COUNTER } from '../../features/simple-counter/simple-count
  * (`isEnabled: false`) on the deleting device only — the holder keeps its real
  * type via `updateOne` merge, so the fleet diverges on `type`. Acceptable vs.
  * the previous dead-end; a full fix needs a tombstone (snapshot) delete op.
- * TASK_REPEAT_CFG, METRIC, ISSUE_PROVIDER still fall through to the
+ * TASK_REPEAT_CFG was added for #10958: without an entry, the repeat
+ * generation's `lastTaskCreation*` update crossing an edit on another device
+ * (e.g. enabling `skipOverdue`) fell back to whole-entity LWW, and the later
+ * generation's replace snapshot reverted the edit on every device. Its
+ * defaults recreate a PAUSED config: a config recreated from a patch has no
+ * title or schedule to speak of, and must not start generating blank tasks.
+ * A full replace snapshot carries its own `isPaused`, which wins the spread.
+ * METRIC, ISSUE_PROVIDER still fall through to the
  * legacy behavior — add an entry here when there is evidence the
  * partial-payload path fires for them. NOTE has that evidence (#10380) but
  * stays out on purpose: an entry would admit it to field patches, which waits
@@ -94,5 +102,10 @@ export const RECREATE_FALLBACK: Partial<Record<EntityType, RecreateFallback>> = 
     // branch). Listing them would also make the meta-reducer warn misreport a
     // legitimately-null `icon` as "missing". `defaults` still backfills them.
     requiredKeys: ['title', 'type', 'countOnDay'],
+  },
+  TASK_REPEAT_CFG: {
+    defaults: { ...DEFAULT_TASK_REPEAT_CFG, isPaused: true },
+    // Only the warn reads these (no on-disk heal branch for this type).
+    requiredKeys: ['title', 'repeatCycle', 'repeatEvery', 'tagIds'],
   },
 };
