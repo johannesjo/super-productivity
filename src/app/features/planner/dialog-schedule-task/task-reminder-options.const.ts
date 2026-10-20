@@ -60,3 +60,13 @@ const LONG_LEAD_OPTION_IDS: TaskReminderOptionId[] = [
  */
 export const TASK_REMINDER_OPTIONS_WITHOUT_LONG_LEAD: TaskReminderOption[] =
   TASK_REMINDER_OPTIONS.filter((opt) => !LONG_LEAD_OPTION_IDS.includes(opt.value));
+
+/**
+ * Maps a long lead time to the longest option a persisted option id may hold,
+ * for paths where a task-level pick (offering every option) flows into a
+ * repeat config.
+ */
+export const toPersistableRemindOption = (
+  id: TaskReminderOptionId,
+): TaskReminderOptionId =>
+  LONG_LEAD_OPTION_IDS.includes(id) ? TaskReminderOptionId.h1 : id;

@@ -2,6 +2,7 @@ import { TaskReminderOptionId } from '../../tasks/task.model';
 import {
   TASK_REMINDER_OPTIONS,
   TASK_REMINDER_OPTIONS_WITHOUT_LONG_LEAD,
+  toPersistableRemindOption,
 } from './task-reminder-options.const';
 
 describe('task reminder options', () => {
@@ -21,5 +22,14 @@ describe('task reminder options', () => {
     LONG_LEAD.forEach((id) => expect(values).not.toContain(id));
     expect(values).toContain(TaskReminderOptionId.h1);
     expect(values.length).toBe(TASK_REMINDER_OPTIONS.length - LONG_LEAD.length);
+  });
+
+  it('should map long lead times to 1 hour where the option id is persisted', () => {
+    LONG_LEAD.forEach((id) =>
+      expect(toPersistableRemindOption(id)).toBe(TaskReminderOptionId.h1),
+    );
+    TASK_REMINDER_OPTIONS_WITHOUT_LONG_LEAD.forEach((opt) =>
+      expect(toPersistableRemindOption(opt.value)).toBe(opt.value),
+    );
   });
 });
