@@ -660,6 +660,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
             ...repeatUpdates,
             title,
             notes: taskData.notes,
+            // Later occurrences take their priority from the config, so a
+            // "p1 @daily" must land here too, not only on the first instance
+            priority: taskData.priority,
             tagIds: taskData.tagIds ?? [],
             defaultEstimate: state.estimate || 0,
             startTime: state.time || undefined,

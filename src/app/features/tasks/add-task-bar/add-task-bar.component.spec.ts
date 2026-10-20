@@ -782,6 +782,26 @@ describe('AddTaskBarComponent', () => {
       expect(repeatCfg.notes).toBe('Join from the meeting room');
     });
 
+    it('should copy a syntax-parsed priority to an inline repeat config', async () => {
+      mockTaskService.add.and.returnValue('task-1');
+      const addRepeatCfgSpy = spyOn(
+        TestBed.inject(TaskRepeatCfgService),
+        'addTaskRepeatCfgToTask',
+      );
+
+      component.stateService.updateInputTxt('Daily standup p1');
+      component.stateService.updateCleanText('Daily standup');
+      component.stateService.updatePriority(3);
+      component.stateService.updateRepeatSetting({
+        type: 'PRESET',
+        quickSetting: 'DAILY',
+      });
+
+      await component.addTask();
+
+      expect(addRepeatCfgSpy.calls.mostRecent().args[2].priority).toBe(3);
+    });
+
     it('seeds skipOverdue ON for an inline Daily repeat (#8644)', async () => {
       mockTaskService.add.and.returnValue('task-1');
       const addRepeatCfgSpy = spyOn(
