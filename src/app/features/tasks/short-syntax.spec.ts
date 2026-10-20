@@ -17,6 +17,10 @@ import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
 import { INBOX_PROJECT } from '../project/project.const';
 import { RepeatQuickSetting } from '../task-repeat-cfg/task-repeat-cfg.model';
 import { findSpringForwardSunday } from './dst.test-helper';
+import {
+  DEFAULT_DATE_INPUT_LOCALE,
+  DateInputLocale,
+} from '../../core/date-time-format/date-input-locale';
 
 const TASK: TaskCopy = {
   id: 'id',
@@ -3744,5 +3748,251 @@ describe('shortSyntax nth weekday (@2monday)', () => {
     // Literal positions: expectedRanges() would find the first copy of the
     // token text, which is exactly the ambiguity under test.
     expect(r?.parsedRanges).toEqual([{ type: 'deadline', start: 12, end: 20 }]);
+  });
+});
+
+describe('shortSyntax localized dates', () => {
+  // Tuesday, before the times used below
+  const NOW = new Date(2026, 9, 20, 10, 0, 0, 0);
+
+  const parseIn = async (
+    locale: DateInputLocale,
+    title: string,
+    cfg = CONFIG,
+    isParseRepeat = false,
+  ): ReturnType<typeof shortSyntax> =>
+    shortSyntax({ ...TASK, title }, cfg, [], [], NOW, 'combine', isParseRepeat, locale);
+
+  const dueOf = (r: Awaited<ReturnType<typeof shortSyntax>>): Date =>
+    new Date(r?.taskChanges.dueWithTime as number);
+
+  // language → [tomorrow, friday, today at 18:00]. Each locale's date order is
+  // its own convention here; the date-order block below varies it.
+  const CASES: [
+    language: string,
+    isDayFirst: boolean,
+    words: [string, string, string],
+  ][] = [
+    ['de', true, ['morgen', 'Freitag', 'heute 18:00']],
+    ['es', true, ['mañana', 'viernes', 'hoy 18:00']],
+    ['fi', true, ['huomenna', 'perjantai', 'tänään klo 18']],
+    // "18h" would be a time estimate, see below
+    ['fr', true, ['demain', 'vendredi', "aujourd'hui 18:00"]],
+    ['it', true, ['domani', 'venerdì', 'oggi 18:00']],
+    ['ja', false, ['明日', '金曜日', '今日18時']],
+    ['nl', true, ['morgen', 'vrijdag', 'vandaag 18:00']],
+    ['pt', true, ['amanhã', 'sexta-feira', 'hoje 18:00']],
+    ['pt-br', true, ['amanhã', 'sexta-feira', 'hoje 18:00']],
+    ['ru', true, ['завтра', 'пятница', 'сегодня 18:00']],
+    // chrono's Swedish locale does not join a day word and a clock time
+    ['sv', false, ['imorgon', 'fredag', '18:00']],
+    ['uk', true, ['завтра', "п'ятниця", 'сьогодні 18:00']],
+    ['vi', true, ['ngày mai', 'thứ sáu', 'hôm nay 18:00']],
+    ['zh', false, ['明天', '星期五', '今天下午6点']],
+    ['zh-tw', false, ['明天', '星期五', '今天下午6點']],
+  ];
+
+  CASES.forEach(([language, isDayFirst, [tomorrow, friday, todayAt18]]) => {
+    describe(language, () => {
+      const locale = { language, isDayFirst };
+
+      it(`should parse "${tomorrow}" as tomorrow`, async () => {
+        const r = await parseIn(locale, `Task @${tomorrow}`);
+        expect(r?.taskChanges.title).toBe('Task');
+        expect(formatDateToISO(dueOf(r))).toBe('2026-10-21');
+        expect(r?.taskChanges.hasPlannedTime).toBe(false);
+      });
+
+      it(`should parse "${friday}" as the next Friday`, async () => {
+        const r = await parseIn(locale, `Task @${friday}`);
+        expect(r?.taskChanges.title).toBe('Task');
+        expect(formatDateToISO(dueOf(r))).toBe('2026-10-23');
+      });
+
+      it(`should parse "${todayAt18}" as today at 18:00`, async () => {
+        const r = await parseIn(locale, `Task @${todayAt18}`);
+        expect(r?.taskChanges.title).toBe('Task');
+        const due = dueOf(r);
+        expect(formatDateToISO(due)).toBe('2026-10-20');
+        expect(due.getHours()).toBe(18);
+        expect(due.getMinutes()).toBe(0);
+      });
+
+      it('should still parse English dates', async () => {
+        const r = await parseIn(locale, 'Task @tomorrow 3pm');
+        expect(r?.taskChanges.title).toBe('Task');
+        const due = dueOf(r);
+        expect(formatDateToISO(due)).toBe('2026-10-21');
+        expect(due.getHours()).toBe(15);
+      });
+
+      it('should parse localized deadlines', async () => {
+        const r = await parseIn(locale, `Task !${tomorrow}`, {
+          ...CONFIG,
+          isEnableDeadline: true,
+        });
+        expect(r?.taskChanges.title).toBe('Task');
+        expect(formatDateToISO(new Date(r?.taskChanges.deadlineWithTime as number))).toBe(
+          '2026-10-21',
+        );
+      });
+    });
+  });
+
+  it('should keep the time in a localized time-only remainder of a recurrence', async () => {
+    const r = await parseIn(
+      { language: 'de', isDayFirst: true },
+      'Standup @every friday 15 Uhr',
+      CONFIG,
+      true,
+    );
+    expect(r?.repeat).toEqual({ type: 'PRESET', quickSetting: 'WEEKLY_CURRENT_WEEKDAY' });
+    expect(r?.taskChanges.title).toBe('Standup');
+    const due = dueOf(r);
+    expect(formatDateToISO(due)).toBe('2026-10-23');
+    expect(due.getHours()).toBe(15);
+  });
+
+  it('should keep a localized time after an nth weekday', async () => {
+    const r = await parseIn({ language: 'de', isDayFirst: true }, 'Task @2monday 15 Uhr');
+    expect(r?.taskChanges.title).toBe('Task');
+    const due = dueOf(r);
+    expect(formatDateToISO(due)).toBe('2026-11-02');
+    expect(due.getHours()).toBe(15);
+  });
+
+  it('should read an hour written with "h" as a time estimate, not a time', async () => {
+    // The estimate syntax runs before the date parsers, so the French "18h"
+    // stays an estimate; "18:00" is the unambiguous way to write the time
+    const r = await parseIn({ language: 'fr', isDayFirst: true }, 'Task @demain 18h');
+    expect(r?.taskChanges.title).toBe('Task');
+    expect(r?.taskChanges.timeEstimate).toBe(18 * 60 * 60 * 1000);
+    expect(formatDateToISO(dueOf(r))).toBe('2026-10-21');
+    expect(r?.taskChanges.hasPlannedTime).toBe(false);
+  });
+
+  it('should leave a time the locale cannot join to its day word in the title', async () => {
+    // chrono's Swedish locale reads only "idag"; the earlier match wins over
+    // the English "18:00" further in
+    const r = await parseIn({ language: 'sv', isDayFirst: false }, 'Task @idag 18:00');
+    // removing a token mid-title keeps both neighbouring spaces
+    expect(r?.taskChanges.title).toMatch(/^Task\s+18:00$/);
+    expect(formatDateToISO(dueOf(r))).toBe('2026-10-20');
+    expect(r?.taskChanges.hasPlannedTime).toBe(false);
+  });
+
+  it('should prefer the English reading when it starts earlier', async () => {
+    // German alone reads only the "3pm" further in, which would leave
+    // "tomorrow" in the title and schedule today
+    const r = await parseIn({ language: 'de', isDayFirst: true }, 'Call @tomorrow 3pm');
+    expect(r?.taskChanges.title).toBe('Call');
+    expect(formatDateToISO(dueOf(r))).toBe('2026-10-21');
+  });
+
+  describe('languages beyond English and the UI language', () => {
+    it('should not parse date words of other languages for English users', async () => {
+      const r = await parseIn(DEFAULT_DATE_INPUT_LOCALE, 'Task @morgen');
+      expect(r?.taskChanges.dueWithTime).toBeUndefined();
+    });
+
+    it('should not parse another language than the UI language', async () => {
+      // "demain" is French; a German UI only adds German
+      const r = await parseIn({ language: 'de', isDayFirst: true }, 'Task @demain');
+      expect(r?.taskChanges.dueWithTime).toBeUndefined();
+    });
+
+    it('should read a word as a date only in the language that has it', async () => {
+      // "mar" is a Spanish abbreviation of martes (Tuesday), ordinary text in English
+      const es = await parseIn({ language: 'es', isDayFirst: true }, 'Task @mar');
+      expect(es?.taskChanges.title).toBe('Task');
+      expect(new Date(es?.taskChanges.dueWithTime as number).getDay()).toBe(2);
+
+      const en = await parseIn(DEFAULT_DATE_INPUT_LOCALE, 'Task @mar');
+      expect(en?.taskChanges.dueWithTime).toBeUndefined();
+    });
+
+    it('should parse English only for a UI language without a chrono locale', async () => {
+      const ko = { language: 'ko', isDayFirst: false };
+      const tomorrow = await parseIn(ko, 'Task @tomorrow');
+      expect(formatDateToISO(dueOf(tomorrow))).toBe('2026-10-21');
+      const morgen = await parseIn(ko, 'Task @morgen');
+      expect(morgen?.taskChanges.dueWithTime).toBeUndefined();
+    });
+
+    it('should match the UI language case-insensitively', async () => {
+      const r = await parseIn({ language: 'PT-BR', isDayFirst: true }, 'Task @amanhã');
+      expect(formatDateToISO(dueOf(r))).toBe('2026-10-21');
+    });
+  });
+
+  // #9340: an ambiguous numeric date follows the user's date format, in English
+  // and in the locale parsers alike
+  describe('date order', () => {
+    it('should read 3/1 as March 1 for a month-first date format', async () => {
+      const r = await parseIn({ language: 'en', isDayFirst: false }, 'Task @3/1');
+      expect(formatDateToISO(dueOf(r))).toBe('2027-03-01');
+    });
+
+    it('should read 3/1 as 3 January for a day-first date format', async () => {
+      const r = await parseIn({ language: 'en', isDayFirst: true }, 'Task @3/1');
+      expect(formatDateToISO(dueOf(r))).toBe('2027-01-03');
+    });
+
+    it('should read a full numeric date day-first for a day-first date format', async () => {
+      const r = await parseIn({ language: 'en', isDayFirst: true }, 'Task @03-01-2027');
+      expect(formatDateToISO(dueOf(r))).toBe('2027-01-03');
+    });
+
+    it('should still read an impossible month as the day for a month-first format', async () => {
+      const r = await parseIn({ language: 'en', isDayFirst: false }, 'Task @25/4');
+      expect(formatDateToISO(dueOf(r))).toBe('2027-04-25');
+    });
+
+    it('should read ISO dates the same in either order', async () => {
+      for (const isDayFirst of [true, false]) {
+        const r = await parseIn({ language: 'en', isDayFirst }, 'Task @2027-03-01');
+        expect(formatDateToISO(dueOf(r))).toBe('2027-03-01');
+      }
+    });
+
+    it('should follow the date format, not the locale default, for German', async () => {
+      // A German UI with a US date format picked in the settings
+      const r = await parseIn({ language: 'de', isDayFirst: false }, 'Task @3/1');
+      expect(formatDateToISO(dueOf(r))).toBe('2027-03-01');
+    });
+
+    it('should follow the date format, not the locale default, for Italian', async () => {
+      // chrono's Italian parser defaults to month-first
+      const r = await parseIn({ language: 'it', isDayFirst: true }, 'Task @3/1');
+      expect(formatDateToISO(dueOf(r))).toBe('2027-01-03');
+    });
+
+    it('should follow the date format for locales with a fixed date order', async () => {
+      // chrono's Russian parser is always day-first and its Japanese one always
+      // month-first; English reads the same text in the user's order
+      const ru = await parseIn({ language: 'ru', isDayFirst: false }, 'Task @3/1');
+      expect(formatDateToISO(dueOf(ru))).toBe('2027-03-01');
+      const ja = await parseIn({ language: 'ja', isDayFirst: true }, 'Task @3/1');
+      expect(formatDateToISO(dueOf(ja))).toBe('2027-01-03');
+    });
+
+    it('should let the UI language win a tie in a locale that follows the date order', async () => {
+      // French reads "mar 3" as Tuesday at 3:00, English as March 3
+      const r = await parseIn({ language: 'fr', isDayFirst: true }, 'Task @mar 3');
+      expect(r?.taskChanges.title).toBe('Task');
+      const due = dueOf(r);
+      expect(due.getDay()).toBe(2);
+      expect(due.getHours()).toBe(3);
+    });
+
+    it('should keep the two-digit-year fix in locale parsers', async () => {
+      // "90" would otherwise be read as the year 1990. Only the German parser
+      // reads this whole phrase, so the fix must run on it, not just English.
+      const r = await parseIn({ language: 'de', isDayFirst: true }, 'Task @25. April 90');
+      const due = dueOf(r);
+      expect(due.getFullYear()).toBeGreaterThanOrEqual(2026);
+      expect(due.getDate()).toBe(25);
+      expect(due.getMonth()).toBe(3);
+    });
   });
 });

@@ -1,4 +1,5 @@
 import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
+import { DEFAULT_DATE_INPUT_LOCALE } from 'src/app/core/date-time-format/date-input-locale';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
@@ -168,8 +169,10 @@ describe('AddTaskBarComponent', () => {
     'textLocale',
     // Reached by the actions bar's date chip as soon as a state has a time on it
     'formatTime',
+    'dateInputLocale',
   ]);
   mockDateTimeFormatService.currentLocale.and.returnValue('en-US');
+  mockDateTimeFormatService.dateInputLocale.and.returnValue(DEFAULT_DATE_INPUT_LOCALE);
   mockDateTimeFormatService.textLocale.and.returnValue('en-US');
   mockDateTimeFormatService.formatTime.and.callFake((timestamp: number) =>
     new Date(timestamp).toLocaleTimeString('en-US', {
