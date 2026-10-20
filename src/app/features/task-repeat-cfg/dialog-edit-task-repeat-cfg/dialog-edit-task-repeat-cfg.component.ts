@@ -73,6 +73,7 @@ import {
   toRepeatCfgFormModel,
   toStoredRepeatCfg,
 } from './after-completion-form-mapping';
+import { getResumeCursorChanges } from './get-resume-cursor-changes';
 import {
   FallBehindChoice,
   fromFallBehindChoice,
@@ -667,7 +668,17 @@ export class DialogEditTaskRepeatCfgComponent {
       // would make rescheduleTaskOnRepeatCfgUpdate$ fire on every save (its
       // filter checks `field in changes`), pushing today's task to tomorrow
       // when only the time was edited (issue #7373).
-      const changes = getTaskRepeatCfgChanges(initial, finalRepeatCfg);
+      const logicalYesterday = new Date(this._dateService.getLogicalTodayDate());
+      logicalYesterday.setDate(logicalYesterday.getDate() - 1);
+      const changes = {
+        ...getTaskRepeatCfgChanges(initial, finalRepeatCfg),
+        // Resuming must not add the dates missed while paused (same op).
+        ...getResumeCursorChanges(
+          initial,
+          finalRepeatCfg,
+          getDbDateStr(logicalYesterday),
+        ),
+      };
       const isRelevantChangesForUpdateAllTasks = RELEVANT_KEYS_FOR_UPDATE_ALL_TASKS.some(
         (k) => k in changes,
       );

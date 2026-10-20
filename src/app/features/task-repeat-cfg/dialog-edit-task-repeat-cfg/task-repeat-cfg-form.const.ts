@@ -252,6 +252,15 @@ export const TASK_REPEAT_CFG_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
       ],
     },
   },
+  {
+    key: 'isPaused',
+    type: 'checkbox',
+    defaultValue: false,
+    templateOptions: {
+      label: T.F.TASK_REPEAT.F.IS_PAUSED,
+      description: T.F.TASK_REPEAT.F.IS_PAUSED_DESCRIPTION,
+    },
+  },
   // Optional inclusive end day (#10091). The picker emits Date | null; persist
   // a YYYY-MM-DD string and `undefined` when cleared, so the clear syncs via
   // `clearedFields` instead of storing a null.

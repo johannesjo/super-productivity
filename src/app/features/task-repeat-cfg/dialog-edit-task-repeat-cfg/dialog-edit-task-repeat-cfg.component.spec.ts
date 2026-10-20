@@ -1570,4 +1570,45 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       );
     });
   });
+  describe('pause (#3589)', () => {
+    const updateChanges = (): Partial<TaskRepeatCfg> =>
+      mockTaskRepeatCfgService.updateTaskRepeatCfg.calls.mostRecent()
+        .args[1] as Partial<TaskRepeatCfg>;
+
+    it('resumes in one update that also skips the dates missed while paused', async () => {
+      const fixture = await setupTestBed({
+        repeatCfg: {
+          ...mockRepeatCfg,
+          repeatCycle: 'DAILY',
+          isPaused: true,
+          lastTaskCreationDay: '2026-06-01',
+        },
+      });
+      const component = fixture.componentInstance;
+
+      component.onModelChange({ ...component.repeatCfg(), isPaused: false });
+      component.save();
+
+      expect(mockTaskRepeatCfgService.updateTaskRepeatCfg).toHaveBeenCalledTimes(1);
+      expect(updateChanges()).toEqual(
+        jasmine.objectContaining({
+          isPaused: false,
+          // MOCK_TODAY is 2026-06-09
+          lastTaskCreationDay: '2026-06-08',
+        }),
+      );
+    });
+
+    it('pauses without touching the creation cursor', async () => {
+      const fixture = await setupTestBed({
+        repeatCfg: { ...mockRepeatCfg, repeatCycle: 'DAILY' },
+      });
+      const component = fixture.componentInstance;
+
+      component.onModelChange({ ...component.repeatCfg(), isPaused: true });
+      component.save();
+
+      expect(updateChanges()).toEqual({ isPaused: true });
+    });
+  });
 });

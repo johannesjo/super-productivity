@@ -2198,6 +2198,8 @@
         "FRIDAY": "Friday",
         "INHERIT_SUBTASKS": "Inherit subtasks",
         "INHERIT_SUBTASKS_DESCRIPTION": "When enabled, subtasks from the most recent task instance will be recreated with the recurring task",
+        "IS_PAUSED": "Paused",
+        "IS_PAUSED_DESCRIPTION": "No new copies are added while paused, and dates missed while paused are not added when you resume.",
         "MONDAY": "Monday",
         "MONTHLY_MODE_DAY_OF_MONTH": "Day of month",
         "MONTHLY_MODE_DAY_OF_MONTH_DESCRIPTION": "\"Day of month\" uses the day shown in Start date.",
