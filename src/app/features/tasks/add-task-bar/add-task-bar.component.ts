@@ -532,6 +532,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         taskData.timeSpentOnDay = state.spent;
       }
 
+      if (state.priority) {
+        taskData.priority = state.priority;
+      }
+
       if (state.deadlineDate) {
         if (state.deadlineTime && isValidSplitTime(state.deadlineTime)) {
           const deadlineDateObj = dateStrToUtcDate(state.deadlineDate);

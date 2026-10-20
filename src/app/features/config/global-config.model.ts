@@ -96,6 +96,8 @@ export type ShortSyntaxConfig = Readonly<{
   isEnableProject: boolean;
   isEnableDue: boolean;
   isEnableDeadline?: boolean;
+  // Optional for on-disk configs that predate it; absent means off
+  isEnablePriority?: boolean;
   isEnableTag: boolean;
   urlBehavior?: 'keep' | 'extract' | 'keep-and-attach';
 }>;

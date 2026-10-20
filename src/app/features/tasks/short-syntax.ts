@@ -1,4 +1,4 @@
-import { Task, TaskCopy } from './task.model';
+import { Task, TaskCopy, TaskPriority } from './task.model';
 import { getDbDateStr } from '../../util/get-db-date-str';
 import { stringToMs } from '../../ui/duration/string-to-ms.pipe';
 import { Tag } from '../tag/tag.model';
@@ -29,6 +29,7 @@ export type ShortSyntaxTokenType =
   | 'due'
   | 'deadline'
   | 'estimate'
+  | 'priority'
   | 'tag'
   | 'project'
   | 'url';
@@ -410,6 +411,16 @@ const parseNthWeekdaySyntax = (
   };
 };
 
+// Todoist-style priority: "p1" is the most important, so it maps to the
+// highest of SP's levels. Only a whole, whitespace-delimited word counts, which
+// keeps "mp3", "p10", "#p1", "+p1" and "p1." out. "p4" is deliberately not a
+// token: in Todoist it means "no priority", which is what a new task already
+// has, and on a title edit it would silently clear a priority the user set.
+const SHORT_SYNTAX_PRIORITY_REG_EX = /(?:^|\s)p([1-3])(?=\s|$)/i;
+/* eslint-disable @typescript-eslint/naming-convention */
+const PRIORITY_FOR_TOKEN_NR: Record<string, TaskPriority> = { 1: 3, 2: 2, 3: 1 };
+/* eslint-enable @typescript-eslint/naming-convention */
+
 const SHORT_SYNTAX_DEADLINE_REG_EX = new RegExp(
   `\\${CH_DEADLINE}[^${ALL_SPECIAL}]+`,
   'gi',
@@ -488,10 +499,22 @@ export const shortSyntax = async (
     ranges.forEach((r) => parsedRanges.push({ type, ...r }));
   };
 
+  // First, so the due stage never sees the token: "@someday p1" would
+  // otherwise hand its "1" to the numeric-hour fallback. Not for issue tasks:
+  // imported titles like "P1 crash on save" would get an unasked-for priority.
+  if (config.isEnablePriority && !task.issueId) {
+    const priorityResult = parsePriorityTracked(tracked);
+    if (priorityResult) {
+      taskChanges = { ...taskChanges, priority: priorityResult.priority };
+      pushRanges('priority', priorityResult.ranges);
+      isTitleChanged = true;
+    }
+  }
+
   if (config.isEnableDue) {
     const timeResult = parseTimeSpentTracked(task, tracked);
     if (timeResult) {
-      taskChanges = { ...timeResult.changes };
+      taskChanges = { ...taskChanges, ...timeResult.changes };
       pushRanges('estimate', timeResult.ranges);
       isTitleChanged = true;
     }
@@ -1320,6 +1343,30 @@ const parseDeadlineDate = (
   now: Date,
 ): Promise<DateStageResult | null> =>
   parseShortSyntaxDate(tracked, now, SHORT_SYNTAX_DEADLINE_REG_EX, true);
+
+// Every token is consumed and the last one wins ("p3 ... p1" is High): a
+// token left in the title would be parsed again by the add-task effect, which
+// re-runs short syntax on the add bar's already-cleaned title.
+const parsePriorityTracked = (
+  tracked: TrackedTitle,
+): { priority: TaskPriority; ranges: TextRange[] } | null => {
+  let priority: TaskPriority | null = null;
+  const ranges: TextRange[] = [];
+  let m: RegExpExecArray | null;
+  while ((m = SHORT_SYNTAX_PRIORITY_REG_EX.exec(tracked.text))) {
+    // The match may start with the whitespace before the token
+    const start = m.index + m[0].length - 2;
+    const end = start + 2;
+    ranges.push(...tracked.rawRanges(start, end));
+    // Take one adjacent space with the token so a mid-title removal leaves no
+    // double space behind ("Fix p1 login" → "Fix login")
+    const hasSpaceAfter = /\s/.test(tracked.text.charAt(end));
+    tracked.remove(start, hasSpaceAfter ? end + 1 : end);
+    tracked.trim();
+    priority = PRIORITY_FOR_TOKEN_NR[m[1]];
+  }
+  return priority ? { priority, ranges } : null;
+};
 
 const parseTimeSpentTracked = (
   task: Partial<TaskCopy>,

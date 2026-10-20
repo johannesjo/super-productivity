@@ -35,6 +35,13 @@ export const SHORT_SYNTAX_FORM_CFG: ConfigFormSection<ShortSyntaxConfig> = {
       },
     },
     {
+      key: 'isEnablePriority',
+      type: 'checkbox',
+      templateOptions: {
+        label: T.GCF.SHORT_SYNTAX.IS_ENABLE_PRIORITY,
+      },
+    },
+    {
       key: 'urlBehavior',
       type: 'select',
       templateOptions: {

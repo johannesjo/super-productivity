@@ -12,9 +12,10 @@ import {
 } from '../short-syntax';
 import { ShortSyntaxConfig } from '../../config/global-config.model';
 import { getDbDateStr } from '../../../util/get-db-date-str';
-import { TimeSpentOnDay, TaskReminderOptionId } from '../task.model';
+import { TimeSpentOnDay, TaskPriority, TaskReminderOptionId } from '../task.model';
 import { TaskAttachment } from '../task-attachment/task-attachment.model';
 import { millisecondsDiffToDeadlineRemindOption } from '../util/remind-option-to-milliseconds';
+import { getTaskPriority } from '../task-priority.const';
 
 interface PreviousParseResult {
   cleanText: string | null;
@@ -32,6 +33,7 @@ interface PreviousParseResult {
   isDeadlineFromSyntax: boolean;
   repeat: AddTaskBarRepeat | null;
   isRepeatFromSyntax: boolean;
+  priority: TaskPriority | null;
 }
 
 const isSameRepeat = (
@@ -185,6 +187,7 @@ export class AddTaskBarParserService {
         isDeadlineFromSyntax: false,
         repeat: wasRepeatFromSyntax ? null : currentState.repeat || null,
         isRepeatFromSyntax: false,
+        priority: null,
       };
     } else {
       // Extract parsed values
@@ -275,6 +278,7 @@ export class AddTaskBarParserService {
         isDeadlineFromSyntax: hasParsedDeadline,
         repeat,
         isRepeatFromSyntax: !!parseResult.repeat,
+        priority: getTaskPriority(parseResult.taskChanges.priority),
       };
     }
 
@@ -395,6 +399,13 @@ export class AddTaskBarParserService {
       } else if (currentState.repeat) {
         this._stateService.clearRepeatSetting();
       }
+    }
+
+    if (
+      !this._previousParseResult ||
+      this._previousParseResult.priority !== currentResult.priority
+    ) {
+      this._stateService.updatePriority(currentResult.priority);
     }
 
     // Store current result as previous for next comparison

@@ -547,6 +547,24 @@ describe('AddTaskBarComponent', () => {
       expect(secondTaskData.tagIds).toEqual(['tag-1']);
     });
 
+    it('should pass a syntax-parsed priority to the new task and reset it after', async () => {
+      mockTaskService.add.and.returnValue('task-1');
+
+      component.stateService.updateInputTxt('Fix login bug p1');
+      component.stateService.updateCleanText('Fix login bug');
+      component.stateService.updatePriority(3);
+      await component.addTask();
+
+      const [title, , taskData] = mockTaskService.add.calls.mostRecent().args as [
+        string,
+        boolean,
+        Partial<TaskCopy>,
+      ];
+      expect(title).toBe('Fix login bug');
+      expect(taskData.priority).toBe(3);
+      expect(component.stateService.state().priority).toBeNull();
+    });
+
     // #5461: a repeat-preset task with no explicit date must default to the
     // logical "today" (offset-aware), not the calendar date. These assert the
     // component reads DateService.todayStr() — a regression to getDbDateStr()
