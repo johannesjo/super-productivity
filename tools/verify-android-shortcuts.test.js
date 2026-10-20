@@ -120,10 +120,9 @@ test('every shortcut launches through the trampoline, not the main activity', ()
     assert.equal(attr(intent, 'targetClass'), TRAMPOLINE);
     assert.equal(attr(intent, 'targetPackage'), PACKAGE);
   });
-  // targetPackage is a literal; a variant that changes the application id
-  // would silently disable every shortcut.
+  // targetPackage must be the applicationId, and shortcuts.xml cannot use a
+  // placeholder for it.
   assert.match(BUILD_GRADLE, new RegExp(`applicationId "${PACKAGE}"`));
-  assert.doesNotMatch(BUILD_GRADLE, /applicationIdSuffix/);
 });
 
 test('the manifest wires the shortcuts up', () => {

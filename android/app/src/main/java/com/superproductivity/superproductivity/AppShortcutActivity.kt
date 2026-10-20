@@ -28,16 +28,12 @@ class AppShortcutActivity : Activity() {
         val launchIntent = if (LaunchDecider(this).shouldSwitchToNewActivity()) {
             Intent(this, CapacitorMainActivity::class.java).apply {
                 action = Intent.ACTION_VIEW
-                data = intent?.data?.takeIf { it.scheme == APP_URL_SCHEME }
+                data = intent.data
             }
         } else {
             Intent(this, FullscreenActivity::class.java)
         }
         startActivity(launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
         finish()
-    }
-
-    private companion object {
-        const val APP_URL_SCHEME = "com.super-productivity.app"
     }
 }
