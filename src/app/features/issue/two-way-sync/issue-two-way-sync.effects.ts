@@ -278,9 +278,14 @@ export class IssueTwoWaySyncEffects {
         // that is reported.
         mergeMap(({ task }) =>
           timer(REMOTE_ISSUE_DELETE_DEFER_MS).pipe(
+            // Both the snack's UNDO and a restore from "Recently deleted"
+            // inside the window must keep the remote issue.
             takeUntil(
               this._actions$.pipe(
-                ofType(TaskSharedActions.restoreDeletedTask),
+                ofType(
+                  TaskSharedActions.restoreDeletedTask,
+                  TaskSharedActions.restoreTask,
+                ),
                 filter(({ task: restored }) => restored.id === task.id),
               ),
             ),

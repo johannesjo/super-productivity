@@ -682,7 +682,8 @@ export class CaldavClientService {
     }
     const task = tasks[0];
     if (task.delete) {
-      // If-Match: never delete a version of the VTODO this device hasn't seen.
+      // If-Match on the ETag just fetched: a write that lands between this
+      // lookup and the DELETE fails it instead of being deleted unseen.
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const headers: Record<string, string> = task.etag ? { 'If-Match': task.etag } : {};
       await task.delete(headers).catch((err) => this._handleNetErr(err));
