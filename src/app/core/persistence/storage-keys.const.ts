@@ -113,6 +113,10 @@ export enum LS {
   NAV_SIDEBAR_WIDTH = 'SUP_NAV_SIDEBAR_WIDTH',
   RIGHT_PANEL_WIDTH = 'SUP_RIGHT_PANEL_WIDTH',
 
+  // Destination of the phone bottom nav's second slot. Device-local, never
+  // synced: the bar only exists on narrow screens.
+  BOTTOM_NAV_SLOT = 'SUP_BOTTOM_NAV_SLOT',
+
   // Task view customizer
   TASK_VIEW_CUSTOMIZER_BY_CONTEXT = 'SUP_TASK_VIEW_CUSTOMIZER_BY_CONTEXT',
 }
