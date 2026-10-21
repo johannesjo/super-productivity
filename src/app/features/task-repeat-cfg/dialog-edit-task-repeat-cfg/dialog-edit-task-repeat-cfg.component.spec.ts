@@ -1034,7 +1034,7 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
         ...component.repeatCfg(),
         quickSetting: 'MONTHLY_FIRST_DAY',
       });
-      component.onModelChange({ ...component.repeatCfg(), fallBehind: 'LATEST' });
+      component.onModelChange({ ...component.repeatCfg(), fallBehind: 'LATEST' }, true);
       component.save();
 
       expect(savedCfg().skipOverdue).toBe(true);
@@ -1491,7 +1491,7 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       });
       const component = fixture.componentInstance;
 
-      component.onModelChange({ ...component.repeatCfg(), fallBehind: 'WAIT' });
+      component.onModelChange({ ...component.repeatCfg(), fallBehind: 'WAIT' }, true);
       component.onModelChange({
         ...component.repeatCfg(),
         repeatFromCompletionDate: true,
@@ -1554,7 +1554,7 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       const fixture = await setupTestBed({ task: mockTask });
       const component = fixture.componentInstance;
 
-      component.onModelChange({ ...component.repeatCfg(), fallBehind: 'KEEP' });
+      component.onModelChange({ ...component.repeatCfg(), fallBehind: 'KEEP' }, true);
       component.onModelChange({ ...component.repeatCfg(), quickSetting: 'CUSTOM' });
       component.onModelChange({
         ...component.repeatCfg(),
@@ -1567,13 +1567,33 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       expect(savedCfg().waitForCompletion).toBe(false);
     });
 
+    // Formly can emit a second, older copy of its model, e.g. when a field
+    // hides after a change. It must not count as picking "If you fall behind".
+    it('ignores a stale fall-behind value from another form', async () => {
+      const fixture = await setupTestBed({ task: mockTask });
+      const component = fixture.componentInstance;
+      const stale = {
+        ...component.repeatCfg(),
+        quickSetting: 'MONTHLY_FIRST_DAY' as const,
+      };
+      component.onModelChange(stale);
+      expect(component.repeatCfg().fallBehind).toBe('KEEP');
+      component.onModelChange({ ...component.repeatCfg(), quickSetting: 'DAILY' });
+      expect(component.repeatCfg().fallBehind).toBe('LATEST');
+
+      component.onModelChange({ ...stale, quickSetting: 'DAILY' });
+
+      expect(component.repeatCfg().fallBehind).toBe('LATEST');
+      expect(component.repeatCfg().skipOverdue).toBe(true);
+    });
+
     it('writes "Wait" without skipping, so nothing silently disappears', async () => {
       const fixture = await setupTestBed({
         repeatCfg: { ...mockRepeatCfg, repeatCycle: 'DAILY', skipOverdue: true },
       });
       const component = fixture.componentInstance;
 
-      component.onModelChange({ ...component.repeatCfg(), fallBehind: 'WAIT' });
+      component.onModelChange({ ...component.repeatCfg(), fallBehind: 'WAIT' }, true);
       component.save();
 
       expect(updateChanges()).toEqual({ waitForCompletion: true, skipOverdue: false });
@@ -1771,6 +1791,36 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       const summary = fixture.componentInstance.ruleSummary();
       expect(summary?.text).toContain(T.F.TASK_REPEAT.D_EDIT.RULE_WITH_POLICY);
       expect(summary?.text).toContain(T.F.TASK_REPEAT.D_EDIT.RULE_ONLY_LATEST);
+    });
+
+    it('shows the year once a "Falls on" date leaves this year', async () => {
+      const fixture = await setupTestBed({
+        repeatCfg: {
+          ...mockRepeatCfg,
+          quickSetting: 'CUSTOM',
+          repeatCycle: 'YEARLY',
+          repeatEvery: 2,
+          startDate: '2026-06-10',
+        },
+      });
+      spyTranslate();
+
+      const fallsOn = fixture.componentInstance.ruleSummary()?.fallsOn;
+      expect(fallsOn).toContain('2028');
+      expect(fallsOn).toContain('2030');
+    });
+
+    it('shows no summary for an interval the form rejects', async () => {
+      const fixture = await setupTestBed({
+        repeatCfg: {
+          ...mockRepeatCfg,
+          quickSetting: 'CUSTOM',
+          repeatCycle: 'DAILY',
+          repeatEvery: 0,
+        },
+      });
+
+      expect(fixture.componentInstance.ruleSummary()).toBeNull();
     });
   });
 });

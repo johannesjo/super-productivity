@@ -36,9 +36,11 @@ mat-dialog-actions {
   }
 }
 
+// One width for every preset and with Options open, so nothing reflows.
 .form-wrapper {
+  width: 620px;
   min-width: 280px;
-  max-width: 620px;
+  max-width: 100%;
 }
 
 :host collapsible {
@@ -62,7 +64,7 @@ mat-dialog-actions {
 // Four to a row on desktop, two on a phone, instead of two big tiles a row.
 :host::ng-deep .weekdays {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 0 var(--s);
 
   > * {
@@ -114,6 +116,12 @@ mat-dialog-actions {
 
 .planned-date-val {
   cursor: pointer;
+}
+
+// Reminder badge and button side by side in one suffix slot.
+.start-date-suffix {
+  display: inline-flex;
+  align-items: center;
 }
 
 .next-occurrence {

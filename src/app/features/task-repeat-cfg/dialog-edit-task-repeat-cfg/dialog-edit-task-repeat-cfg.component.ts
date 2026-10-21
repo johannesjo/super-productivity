@@ -201,11 +201,12 @@ export class DialogEditTaskRepeatCfgComponent {
     // Spelled-out weekday/month names follow the UI language under the ISO 8601
     // option (the `sv` sentinel would otherwise leak Swedish, e.g. "ons 15 juli
     // 2026"). The clock time below keeps currentLocale() so 24h is preserved.
+    // The year only when it isn't this one, so date and time fit beside "Ends on".
     const formattedDate = date.toLocaleDateString(
       this._dateTimeFormatService.textLocale(),
       {
         weekday: 'short',
-        year: 'numeric',
+        year: date.getFullYear() === new Date().getFullYear() ? undefined : 'numeric',
         month: 'short',
         day: 'numeric',
       },
@@ -408,7 +409,9 @@ export class DialogEditTaskRepeatCfgComponent {
       !!cfg.repeatUntilDay ||
       isNonDefaultPolicy ||
       cfg.isPaused;
-    if (!isShown || this.isWeekdaySelectionInvalid()) {
+    // Not for input the form rejects, e.g. "Every 0 days".
+    const isEveryValid = Number.isInteger(cfg.repeatEvery) && cfg.repeatEvery >= 1;
+    if (!isShown || !isEveryValid || this.isWeekdaySelectionInvalid()) {
       return null;
     }
     const translate = this._translateService;
@@ -441,6 +444,10 @@ export class DialogEditTaskRepeatCfgComponent {
       isAfterCompletion || isPlainDaily
         ? []
         : getRulePreviewDates(cfg, this._getPreviewStartDate(), !this.isEdit());
+    // With the year once a date leaves this one, or yearly rules read as the
+    // same date three times.
+    const thisYear = new Date().getFullYear();
+    const isOtherYear = dates.some((date) => date.getFullYear() !== thisYear);
     const fallsOn = dates.length
       ? translate.instant(T.F.TASK_REPEAT.D_EDIT.RULE_FALLS_ON, {
           dates: dates
@@ -449,6 +456,7 @@ export class DialogEditTaskRepeatCfgComponent {
                 weekday: 'short',
                 day: 'numeric',
                 month: 'short',
+                year: isOtherYear ? 'numeric' : undefined,
               }),
             )
             .join(' · '),
@@ -538,7 +546,27 @@ export class DialogEditTaskRepeatCfgComponent {
     });
   }
 
-  onModelChange(model: RepeatCfgModel): void {
+  /**
+   * @param isBehaviourForm the emitting form holds "If you fall behind".
+   */
+  onModelChange(emitted: RepeatCfgModel, isBehaviourForm = false): void {
+    // waitForCompletion and skipOverdue are no form control, and fallBehind is
+    // one only in the behaviour form. Formly can emit a copy of its model that
+    // predates the dialog's last adjustment (e.g. a second emission when a field
+    // hides), so these come from the dialog's own state.
+    const current = this.repeatCfg();
+    const isStale =
+      emitted.waitForCompletion !== current.waitForCompletion ||
+      emitted.skipOverdue !== current.skipOverdue ||
+      (!isBehaviourForm && emitted.fallBehind !== current.fallBehind);
+    const model: RepeatCfgModel = isStale
+      ? {
+          ...emitted,
+          waitForCompletion: current.waitForCompletion,
+          skipOverdue: current.skipOverdue,
+          fallBehind: isBehaviourForm ? emitted.fallBehind : current.fallBehind,
+        }
+      : emitted;
     let synced = syncAfterCompletionMode(
       this._modeSnapshot,
       model,
@@ -563,7 +591,7 @@ export class DialogEditTaskRepeatCfgComponent {
     if (synced.fallBehind !== toFallBehindChoice(synced)) {
       synced = withFallBehind(synced);
     }
-    if (synced !== model) {
+    if (synced !== emitted) {
       this._keepFocusAcrossRebuild();
     }
     this._modeSnapshot = this._toModeState(synced);

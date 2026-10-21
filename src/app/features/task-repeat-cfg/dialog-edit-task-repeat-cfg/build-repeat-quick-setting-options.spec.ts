@@ -60,7 +60,7 @@ describe('buildRepeatQuickSettingOptions', () => {
     expect(options.map((o) => o.icon)).toEqual([
       'today',
       'work',
-      'view_week',
+      'calendar_view_week',
       'calendar_month',
       'calendar_month',
       'calendar_month',

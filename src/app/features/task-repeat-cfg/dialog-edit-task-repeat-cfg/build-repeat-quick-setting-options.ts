@@ -14,7 +14,7 @@ const ORDINAL_KEYS = [
 export const REPEAT_QUICK_SETTING_ICON: Record<RepeatQuickSetting, string> = {
   DAILY: 'today',
   MONDAY_TO_FRIDAY: 'work',
-  WEEKLY_CURRENT_WEEKDAY: 'view_week',
+  WEEKLY_CURRENT_WEEKDAY: 'calendar_view_week',
   MONTHLY_CURRENT_DATE: 'calendar_month',
   MONTHLY_FIRST_DAY: 'calendar_month',
   MONTHLY_LAST_DAY: 'calendar_month',

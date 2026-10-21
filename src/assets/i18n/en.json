@@ -2188,7 +2188,7 @@
         "RULE_FALLS_ON": "Falls on: {{dates}}",
         "RULE_KEEPS_EVERY_COPY": "keeps every copy",
         "RULE_ONLY_LATEST": "only the latest is kept",
-        "RULE_PAUSED": "Paused: no new copies until you resume",
+        "RULE_PAUSED": "paused, no new copies until you resume",
         "RULE_WAITS": "waits until done",
         "RULE_WITH_POLICY": "{{ruleStr}} · {{policyStr}}",
         "TAG_LABEL": "Tags",

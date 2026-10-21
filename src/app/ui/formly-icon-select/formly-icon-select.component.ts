@@ -44,7 +44,7 @@ export interface IconSelectOption {
     >
       <mat-select-trigger>
         @for (item of iconOptions; track $index) {
-          @if (item.value === formControl.value) {
+          @if (props.compareWith(item.value, formControl.value)) {
             <span class="trigger">
               @if (item.icon) {
                 <mat-icon [fontIcon]="item.icon"></mat-icon>

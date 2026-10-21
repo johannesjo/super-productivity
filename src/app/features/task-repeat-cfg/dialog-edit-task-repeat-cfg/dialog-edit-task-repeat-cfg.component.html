@@ -31,21 +31,21 @@
         </div>
       }
 
-      <!-- What the rule means: summary, dates, next copy -->
-      @if (ruleSummary(); as summary) {
-        <div
-          class="rule-summary"
-          aria-live="polite"
-        >
-          <mat-icon>repeat</mat-icon>
-          <div>
-            <div class="rule-summary-text">{{ summary.text }}</div>
-            @if (summary.fallsOn) {
-              <div class="rule-summary-dates">{{ summary.fallsOn }}</div>
-            }
+      <!-- What the rule means: summary, dates, next copy. The live region stays
+           mounted, so the summary is announced when it first appears. -->
+      <div aria-live="polite">
+        @if (ruleSummary(); as summary) {
+          <div class="rule-summary">
+            <mat-icon>repeat</mat-icon>
+            <div>
+              <div class="rule-summary-text">{{ summary.text }}</div>
+              @if (summary.fallsOn) {
+                <div class="rule-summary-dates">{{ summary.fallsOn }}</div>
+              }
+            </div>
           </div>
-        </div>
-      }
+        }
+      </div>
 
       @if (nextOccurrenceText(); as nextOccurrenceText) {
         <div class="next-occurrence">
@@ -67,37 +67,41 @@
               ) | translate
             }}
           </mat-label>
+          <!-- One tab stop: the button. The input is only a click target, and
+               Enter must not submit the dialog's form. -->
           <input
             matInput
             readonly
+            tabindex="-1"
             class="planned-date-val"
-            aria-haspopup="dialog"
             [value]="plannedStartDateStr()"
             (click)="openScheduleDialog()"
-            (keydown.enter)="openScheduleDialog()"
+            (keydown.enter)="$event.preventDefault(); openScheduleDialog()"
           />
-          @if (repeatCfg().remindAt && repeatCfg().remindAt !== 'DoNotRemind') {
-            <mat-icon
-              matSuffix
-              class="reminder-badge"
-              >alarm</mat-icon
-            >
-          }
-          <button
+          <span
             matSuffix
-            mat-icon-button
-            type="button"
-            class="planned-start-date-btn"
-            [attr.aria-label]="
-              (isAfterCompletion()
-                ? T.F.TASK_REPEAT.F.FIRST_OCCURRENCE
-                : T.F.TASK_REPEAT.F.START_DATE
-              ) | translate
-            "
-            (click)="openScheduleDialog()"
+            class="start-date-suffix"
           >
-            <mat-icon>edit_calendar</mat-icon>
-          </button>
+            @if (repeatCfg().remindAt && repeatCfg().remindAt !== 'DoNotRemind') {
+              <mat-icon class="reminder-badge">alarm</mat-icon>
+            }
+            <button
+              mat-icon-button
+              type="button"
+              class="planned-start-date-btn"
+              aria-haspopup="dialog"
+              [attr.aria-label]="
+                ((isAfterCompletion()
+                  ? T.F.TASK_REPEAT.F.FIRST_OCCURRENCE
+                  : T.F.TASK_REPEAT.F.START_DATE
+                ) | translate) +
+                (plannedStartDateStr() ? ': ' + plannedStartDateStr() : '')
+              "
+              (click)="openScheduleDialog()"
+            >
+              <mat-icon>calendar_today</mat-icon>
+            </button>
+          </span>
         </mat-form-field>
 
         <formly-form
@@ -112,7 +116,7 @@
       <collapsible [title]="T.F.TASK_REPEAT.D_EDIT.ADVANCED_CFG | translate">
         <!-- How the series behaves -->
         <formly-form
-          (modelChange)="onModelChange($event)"
+          (modelChange)="onModelChange($event, true)"
           [form]="formGroupBehaviour()"
           [fields]="behaviourFormFields()"
           [model]="repeatCfg()"
