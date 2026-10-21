@@ -348,25 +348,50 @@ const WEEKDAY_KEYS = [
   'sunday',
 ] as const;
 
+// 2024-01-01 is a Monday.
+const getWeekdayNames = (locale: string, weekday: 'short' | 'narrow'): string[] =>
+  WEEKDAY_KEYS.map((_, dayIndex) =>
+    new Date(2024, 0, 1 + dayIndex).toLocaleDateString(locale, { weekday }),
+  );
+
+// Longer short names do not fit seven chips on a phone.
+const MAX_CHIP_LABEL_LENGTH = 4;
+
 /**
- * Puts the locale's short weekday name ("Mon", "Di", "週一") on each weekday
- * chip; the translated full name stays its accessible label. Returns a copy.
+ * The chip text for each weekday, Monday first: the locale's short name ("Mon",
+ * "Di", "週一"). Where those are too long for a chip on a phone and the narrow
+ * names still tell the days apart, the narrow ones: Arabic and Persian short
+ * names are the full words, which a chip clips to a shared prefix ("ال").
+ */
+export const getWeekdayChipLabels = (locale: string): string[] => {
+  const short = getWeekdayNames(locale, 'short');
+  if (short.every((name) => name.length <= MAX_CHIP_LABEL_LENGTH)) {
+    return short;
+  }
+  const narrow = getWeekdayNames(locale, 'narrow');
+  return new Set(narrow).size === narrow.length ? narrow : short;
+};
+
+/**
+ * Puts the chip text from getWeekdayChipLabels on each weekday chip; the
+ * translated full name stays its accessible label. Returns a copy.
  */
 export const withWeekdayShortLabels = (
   fields: FormlyFieldConfig[],
   locale: string,
+  labels: string[] = getWeekdayChipLabels(locale),
 ): FormlyFieldConfig[] =>
   fields.map((field) => {
     const dayIndex = WEEKDAY_KEYS.indexOf(field.key as (typeof WEEKDAY_KEYS)[number]);
     if (dayIndex !== -1) {
-      // 2024-01-01 is a Monday.
-      const shortLabel = new Date(2024, 0, 1 + dayIndex).toLocaleDateString(locale, {
-        weekday: 'short',
-      });
+      const shortLabel = labels[dayIndex];
       return { ...field, templateOptions: { ...field.templateOptions, shortLabel } };
     }
     return field.fieldGroup
-      ? { ...field, fieldGroup: withWeekdayShortLabels(field.fieldGroup, locale) }
+      ? {
+          ...field,
+          fieldGroup: withWeekdayShortLabels(field.fieldGroup, locale, labels),
+        }
       : field;
   });
 

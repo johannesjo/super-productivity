@@ -3,6 +3,7 @@ import {
   TASK_REPEAT_CFG_BEHAVIOUR_FORM_CFG,
   TASK_REPEAT_CFG_END_FORM_CFG,
   TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG,
+  getWeekdayChipLabels,
   withRepeatCycleUnits,
   withWeekdayShortLabels,
 } from './task-repeat-cfg-form.const';
@@ -235,6 +236,22 @@ describe('TaskRepeatCfgFormConfig', () => {
       expect(
         weekdaysGroup?.fieldGroup?.[0].templateOptions?.['shortLabel'],
       ).toBeUndefined();
+    });
+
+    // Arabic short names are the full words, all starting with "ال"; clipped
+    // on a phone the seven chips read the same.
+    it('uses the narrow names where the short ones are too long for a chip', () => {
+      const arabic = getWeekdayChipLabels('ar');
+      expect(arabic.every((label) => label.length === 1)).toBe(true);
+      expect(new Set(arabic).size).toBe(7);
+    });
+
+    it('keeps the short names where the narrow ones repeat a letter', () => {
+      // Polish narrow names are "P W Ś C P S N": Monday and Friday would match.
+      expect(getWeekdayChipLabels('pl')[4]).toBe(
+        new Date(2024, 0, 5).toLocaleDateString('pl', { weekday: 'short' }),
+      );
+      expect(getWeekdayChipLabels('en-US')[0]).toBe('Mon');
     });
 
     it('should NOT use hideExpression (it would re-freeze the checkboxes)', () => {

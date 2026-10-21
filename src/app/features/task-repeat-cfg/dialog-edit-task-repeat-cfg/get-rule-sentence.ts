@@ -9,6 +9,8 @@ import { isValidSplitTime } from '../../../util/is-valid-split-time';
 import { getDateTimeFromClockString } from '../../../util/get-date-time-from-clock-string';
 
 const MONDAY_TO_FRIDAY = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday'];
+// In the order of the day chips above the summary.
+const MONDAY_FIRST = [...TASK_REPEAT_WEEKDAY_MAP.slice(1), TASK_REPEAT_WEEKDAY_MAP[0]];
 
 const ORDINAL_KEYS = [
   T.F.TASK_REPEAT.F.ORD_FIRST_NTH,
@@ -28,7 +30,7 @@ const getWeeklyKey = (
   cfg: TaskRepeatCfg,
   locale: string,
 ): [string, Record<string, string | number>] | null => {
-  const days = TASK_REPEAT_WEEKDAY_MAP.filter((day) => cfg[day]);
+  const days = MONDAY_FIRST.filter((day) => cfg[day]);
   if (!days.length) {
     return null;
   }

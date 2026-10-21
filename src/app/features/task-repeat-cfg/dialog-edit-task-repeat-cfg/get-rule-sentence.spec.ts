@@ -76,6 +76,12 @@ describe('getRuleSentence', () => {
     ).toBe('Every 2 weeks on Monday, Wednesday, and Friday');
   });
 
+  it('lists the days Monday first, like the day chips', () => {
+    expect(
+      sentence({ repeatCycle: 'WEEKLY', ...NO_DAYS, sunday: true, saturday: true }),
+    ).toBe('Every week on Saturday and Sunday');
+  });
+
   it('uses the preset sentences where they say it', () => {
     expect(sentence({ repeatCycle: 'WEEKLY', ...NO_DAYS, friday: true })).toBe(
       'Every week on Friday',
