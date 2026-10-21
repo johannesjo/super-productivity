@@ -1,10 +1,15 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { firstValueFrom } from 'rxjs';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { Log } from '../../core/log';
 import { PlainspaceAccount } from './plainspace-account.model';
 import { PlainspaceApiService } from '../issue/providers/plainspace/plainspace-api.service';
 import { DEFAULT_PLAINSPACE_CFG } from '../issue/providers/plainspace/plainspace-cfg-form.const';
+import { PlainspaceConnectionStateService } from '../issue/providers/plainspace/plainspace-connection-state.service';
+import { IssueProviderPlainspace } from '../issue/issue.model';
+import { IssueProviderActions } from '../issue/store/issue-provider.actions';
+import { selectAll as selectAllIssueProviders } from '../issue/store/issue-provider.selectors';
 
 const DEFAULT_HOST = 'https://plainspace.org';
 
@@ -25,6 +30,8 @@ export type PlainspaceConnectResult = 'ok' | 'invalid-token' | 'unreachable' | '
 @Injectable({ providedIn: 'root' })
 export class PlainspaceAccountService {
   private readonly _api = inject(PlainspaceApiService);
+  private readonly _store = inject(Store);
+  private readonly _connectionState = inject(PlainspaceConnectionStateService);
   private readonly _account = signal<PlainspaceAccount | null>(this._load());
   private _logoutVersion = 0;
 
@@ -37,12 +44,22 @@ export class PlainspaceAccountService {
    * Validates a PAT against the host (`GET /api/integration/me`) and, on
    * success, stores it. Reports *why* it failed so the caller can tell a
    * rejected token apart from an unreachable host (#9988).
+   *
+   * A reconnect also hands the new token to every Plainspace provider that
+   * still holds a token it replaces (#8616): `replacedToken` (a provider's
+   * reconnect) and this device's previous account token when it is the same
+   * account. Plainspace keeps one active token per account and minting one
+   * revokes the previous, so both are dead once the new one exists. Matching
+   * on the token itself scopes it to the same host and account; a provider
+   * holding any other token keeps it.
    */
   async connect(
     token: string,
     host: string = DEFAULT_HOST,
+    replacedToken?: string | null,
   ): Promise<PlainspaceConnectResult> {
     const logoutVersion = this._logoutVersion;
+    const previous = this._account();
     const res = await firstValueFrom(
       this._api.verifyToken$({ ...DEFAULT_PLAINSPACE_CFG, host, token }),
     );
@@ -54,8 +71,23 @@ export class PlainspaceAccountService {
       return 'aborted';
     }
     const account: PlainspaceAccount = { host, token, email: res.me.email };
-    this._account.set(account);
-    this._save(account);
+    // The previous account's token only stands for this one if it is the same
+    // person on the same host; "Use a different token" may switch accounts,
+    // and the same email on another host is a different account.
+    const isSameAccount =
+      previous?.email === account.email && previous?.host === account.host;
+    // Reconnecting one provider of another account (another host, or another
+    // email on the same host) must not replace this device's saved account,
+    // used by "Collaborate on Plainspace": its token is still valid.
+    const isOtherAccountReconnect = !!replacedToken && !!previous && !isSameAccount;
+    if (!isOtherAccountReconnect) {
+      this._account.set(account);
+      this._save(account);
+    }
+    await this._replaceProviderTokens(
+      [replacedToken, isSameAccount ? previous?.token : null],
+      token,
+    );
     return 'ok';
   }
 
@@ -63,6 +95,35 @@ export class PlainspaceAccountService {
     this._logoutVersion++;
     this._account.set(null);
     localStorage.removeItem(LS.PLAINSPACE_ACCOUNT);
+  }
+
+  /** One `updateIssueProvider` op per provider that held a replaced token. */
+  private async _replaceProviderTokens(
+    replacedTokens: (string | null | undefined)[],
+    newToken: string,
+  ): Promise<void> {
+    const oldTokens = replacedTokens.filter((t): t is string => !!t && t !== newToken);
+    if (!oldTokens.length) {
+      return;
+    }
+    const providers = await firstValueFrom(this._store.select(selectAllIssueProviders));
+    const ids = providers
+      .filter(
+        (ip): ip is IssueProviderPlainspace =>
+          ip.issueProviderKey === 'PLAINSPACE' &&
+          !!ip.token &&
+          oldTokens.includes(ip.token),
+      )
+      .map((ip) => ip.id);
+    for (const id of ids) {
+      this._store.dispatch(
+        IssueProviderActions.updateIssueProvider({
+          issueProvider: { id, changes: { token: newToken } },
+        }),
+      );
+    }
+    this._connectionState.clear(ids);
+    Log.log('Plainspace: replaced provider token', { providerIds: ids });
   }
 
   private _load(): PlainspaceAccount | null {
