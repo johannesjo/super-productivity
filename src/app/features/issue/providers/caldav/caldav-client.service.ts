@@ -675,12 +675,20 @@ export class CaldavClientService {
     const tasks = await CaldavClientService._findTaskByUid(cal, uid).catch((err) =>
       this._handleNetErr(err),
     );
+    // The UID text-match is a substring match (RFC 4791 §9.7.5), so it can also
+    // return VTODOs whose UID merely contains this one; delete only the exact one.
+    const ICAL = await loadIcalModule();
+    const task = tasks.find(
+      (t) =>
+        new ICAL.Component(ICAL.parse(t.data))
+          .getFirstSubcomponent('vtodo')
+          ?.getFirstPropertyValue('uid') === uid,
+    );
     // Already gone on the server (deleted there, or by another device) — the
     // goal state is reached, so stay silent.
-    if (tasks.length < 1) {
+    if (!task) {
       return;
     }
-    const task = tasks[0];
     if (task.delete) {
       // If-Match on the ETag just fetched: a write that lands between this
       // lookup and the DELETE fails it instead of being deleted unseen.

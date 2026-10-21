@@ -188,13 +188,26 @@ describe('CaldavClientService.deleteTask$', () => {
 
   afterEach(() => TestBed.resetTestingModule());
 
+  const davTodo = (
+    uid: string,
+    etag: string,
+  ): { data: string; url: string; etag: string; delete: jasmine.Spy } => ({
+    data: [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'BEGIN:VTODO',
+      `UID:${uid}`,
+      'SUMMARY:x',
+      'END:VTODO',
+      'END:VCALENDAR',
+    ].join('\r\n'),
+    url: `https://cal.example.com/${uid}.ics`,
+    etag,
+    delete: jasmine.createSpy('delete').and.resolveTo(undefined),
+  });
+
   it('deletes the VTODO guarded by the ETag it just fetched', async () => {
-    const davTask = {
-      data: 'BEGIN:VCALENDAR\r\nEND:VCALENDAR',
-      url: 'https://cal.example.com/todo-del-1.ics',
-      etag: '"etag-1"',
-      delete: jasmine.createSpy('delete').and.resolveTo(undefined),
-    };
+    const davTask = davTodo('todo-del-1', '"etag-1"');
     spyOn(svc as any, '_getCalendar').and.resolveTo({ readOnly: false });
     spyOn(CaldavClientService as any, '_findTaskByUid').and.resolveTo([davTask]);
 
@@ -202,6 +215,21 @@ describe('CaldavClientService.deleteTask$', () => {
 
     // eslint-disable-next-line @typescript-eslint/naming-convention
     expect(davTask.delete).toHaveBeenCalledOnceWith({ 'If-Match': '"etag-1"' });
+  });
+
+  it('deletes only the exact UID, not one the substring UID match also returned', async () => {
+    const containing = davTodo('x-todo-del-1-y', '"etag-other"');
+    const exact = davTodo('todo-del-1', '"etag-1"');
+    spyOn(svc as any, '_getCalendar').and.resolveTo({ readOnly: false });
+    spyOn(CaldavClientService as any, '_findTaskByUid').and.resolveTo([
+      containing,
+      exact,
+    ]);
+
+    await firstValueFrom(svc.deleteTask$(MOCK_CFG, 'todo-del-1'));
+
+    expect(containing.delete).not.toHaveBeenCalled();
+    expect(exact.delete).toHaveBeenCalledTimes(1);
   });
 
   it('treats a VTODO that is already gone as deleted, without a snack', async () => {
