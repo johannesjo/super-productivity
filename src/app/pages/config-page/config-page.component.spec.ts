@@ -13,6 +13,7 @@ import { ShareService } from '../../core/share/share.service';
 import { MatDialog } from '@angular/material/dialog';
 import { TranslateService } from '@ngx-translate/core';
 import { LocalBackupService } from '../../imex/local-backup/local-backup.service';
+import { DialogBackupsListComponent } from '../../imex/local-backup/dialog-backups-list/dialog-backups-list.component';
 import { IS_ANDROID_WEB_VIEW_TOKEN } from '../../util/is-android-web-view';
 import { T } from '../../t.const';
 import { getAutomaticBackUpFormCfg } from '../../features/config/form-cfgs/automatic-backups-form.const';
@@ -186,6 +187,18 @@ describe('ConfigPageComponent', () => {
         expect(sections.length).toBe(1);
         expect(JSON.stringify(sections[0].items)).toContain(folder);
         expect(findLastBackupLine()).toBeTruthy();
+        const imexSection = component.globalImexFormCfg.find(
+          (s) => s.customSection === 'FILE_IMPORT_EXPORT',
+        );
+        const browseActions = imexSection?.actions?.filter(
+          (action) => action.label === T.GCF.AUTO_BACKUPS.BROWSE,
+        );
+        expect(browseActions?.length).toBe(1);
+        mockMatDialog.open.calls.reset();
+        await browseActions?.[0].onClick();
+        expect(mockMatDialog.open).toHaveBeenCalledOnceWith(DialogBackupsListComponent, {
+          restoreFocus: true,
+        });
       }
       expect(pickBackupFolder).toHaveBeenCalledTimes(2);
     } finally {

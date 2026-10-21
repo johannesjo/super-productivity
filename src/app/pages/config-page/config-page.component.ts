@@ -202,27 +202,7 @@ export class ConfigPageComponent implements OnInit {
     this.generalFormCfg = GLOBAL_GENERAL_FORM_CONFIG.slice();
     this.timeTrackingFormCfg = GLOBAL_TIME_TRACKING_FORM_CONFIG.slice();
     this.pluginsShortcutsFormCfg = GLOBAL_PLUGINS_FORM_CONFIG.slice();
-    // "Browse backups" lives on the Import/Export section so every platform
-    // (incl. web, which has no automatic backups) can reach the recovery ring.
-    this.globalImexFormCfg = GLOBAL_IMEX_FORM_CONFIG.map((section) =>
-      section.customSection === 'FILE_IMPORT_EXPORT'
-        ? {
-            ...section,
-            actions: [
-              ...(section.actions ?? []),
-              {
-                label: T.GCF.AUTO_BACKUPS.BROWSE,
-                icon: 'history',
-                onClick: () => {
-                  this._matDialog.open(DialogBackupsListComponent, {
-                    restoreFocus: true,
-                  });
-                },
-              },
-            ],
-          }
-        : section,
-    );
+    this.globalImexFormCfg = this._buildImexBaseCfg();
     this.globalProductivityConfigFormCfg = GLOBAL_PRODUCTIVITY_FORM_CONFIG.slice();
     this.globalTasksFormCfg = GLOBAL_TASKS_FORM_CONFIG.slice();
 
@@ -255,6 +235,30 @@ export class ConfigPageComponent implements OnInit {
     });
   }
 
+  private _buildImexBaseCfg(): ConfigFormConfig {
+    // "Browse backups" lives on the Import/Export section so every platform
+    // (incl. web, which has no automatic backups) can reach the recovery ring.
+    return GLOBAL_IMEX_FORM_CONFIG.map((section) =>
+      section.customSection === 'FILE_IMPORT_EXPORT'
+        ? {
+            ...section,
+            actions: [
+              ...(section.actions ?? []),
+              {
+                label: T.GCF.AUTO_BACKUPS.BROWSE,
+                icon: 'history',
+                onClick: () => {
+                  this._matDialog.open(DialogBackupsListComponent, {
+                    restoreFocus: true,
+                  });
+                },
+              },
+            ],
+          }
+        : section,
+    );
+  }
+
   /**
    * (Re)builds the Electron auto-backups section from the backup folder main
    * reports. Called again after a folder pick so the displayed path and the
@@ -263,7 +267,7 @@ export class ConfigPageComponent implements OnInit {
   private _updateAutomaticBackUpCfg(): void {
     window.ea.getBackupPath().then((backupPath) => {
       this.globalImexFormCfg = [
-        ...GLOBAL_IMEX_FORM_CONFIG,
+        ...this._buildImexBaseCfg(),
         getAutomaticBackUpFormCfg(
           backupPath,
           [
