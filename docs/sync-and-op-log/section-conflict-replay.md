@@ -70,8 +70,9 @@ The recognized crossings are:
 - a content reorder crossing a single-entity patch of an entity it lists, under
   the structural rule below;
 - a section placement or removal crossing a `SECTION_UPDATE` patch of a section
-  it declares, under the same rule: the placement writes only the declared
-  sections' `taskIds`, so a collapse or rename of either section of a
+  it declares, under the same rule: a placement writes only the declared
+  sections' `taskIds` (a removal also the work context's task order, which no
+  section patch writes), so a collapse or rename of either section of a
   cross-section move commutes with it (#10969). Another task's placement or
   removal in the same lists, and a section delete, still stop: two placements
   of different tasks in one list do not commute by order; and
