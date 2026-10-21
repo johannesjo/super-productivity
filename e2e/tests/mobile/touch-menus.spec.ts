@@ -19,14 +19,17 @@ const longPress = async (page: Page, target: Locator): Promise<void> => {
   const x = box.x + halfWidth;
   const y = box.y + halfHeight;
   const cdp = await page.context().newCDPSession(page);
-  await cdp.send('Input.dispatchTouchEvent', {
-    type: 'touchStart',
-    touchPoints: [{ x, y }],
-  });
-  // The gesture is defined by elapsed time, so this delay is the behavior.
-  await page.waitForTimeout(LONG_PRESS_MS);
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-  await cdp.detach();
+  try {
+    await cdp.send('Input.dispatchTouchEvent', {
+      type: 'touchStart',
+      touchPoints: [{ x, y }],
+    });
+    // The gesture is defined by elapsed time, so this delay is the behavior.
+    await page.waitForTimeout(LONG_PRESS_MS);
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  } finally {
+    await cdp.detach();
+  }
 };
 
 const swipeLeft = async (page: Page, target: Locator): Promise<void> => {
@@ -38,19 +41,22 @@ const swipeLeft = async (page: Page, target: Locator): Promise<void> => {
   const x = box.x + startOffset;
   const y = box.y + halfHeight;
   const cdp = await page.context().newCDPSession(page);
-  await cdp.send('Input.dispatchTouchEvent', {
-    type: 'touchStart',
-    touchPoints: [{ x, y }],
-  });
-  for (let step = 1; step <= 5; step++) {
-    const distance = stepWidth * step;
+  try {
     await cdp.send('Input.dispatchTouchEvent', {
-      type: 'touchMove',
-      touchPoints: [{ x: x - distance, y }],
+      type: 'touchStart',
+      touchPoints: [{ x, y }],
     });
+    for (let step = 1; step <= 5; step++) {
+      const distance = stepWidth * step;
+      await cdp.send('Input.dispatchTouchEvent', {
+        type: 'touchMove',
+        touchPoints: [{ x: x - distance, y }],
+      });
+    }
+    await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
+  } finally {
+    await cdp.detach();
   }
-  await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
-  await cdp.detach();
 };
 
 // The shared add-task flow clicks with a mouse; a touch pointerdown switches
@@ -95,10 +101,16 @@ test.describe('Phone menus (touch)', () => {
     await longPress(page, plannerRow.locator('a.nav-link'));
     await waitForMenuSettled(page);
     await expect(page.getByRole('menuitem', { name: 'Disable feature' })).toBeVisible();
-    // The press opened the menu and did not also follow the link.
+    // Releasing the press neither followed the link nor let the following
+    // click land on the backdrop and close the menu again.
     expect(page.url()).toBe(url);
+    const backdrop = page.locator('.cdk-overlay-backdrop').last();
+    // A closing menu keeps its backdrop in the DOM while it fades out; only an
+    // open one carries the showing class.
+    await expect(backdrop).toHaveClass(/cdk-overlay-backdrop-showing/);
     // Escape would close the drawer too; the backdrop closes only the menu.
-    await page.locator('.cdk-overlay-backdrop').last().tap();
+    // Tap a corner far from the menu, which opens next to the row.
+    await backdrop.tap({ position: { x: 10, y: 780 } });
     await expect(page.locator('.mat-mdc-menu-panel')).toHaveCount(0);
 
     // A project row sits in the drag tree: holding still must still open its

@@ -40,6 +40,7 @@ export class ContextMenuComponent implements OnInit {
   isEnabled = input<boolean>(true);
   // Opens the menu on a stationary touch long-press of the right-click trigger.
   // Off by default: most triggers sit in drag lists where long-press means drag.
+  // Read once on init, like the trigger elements: bind a constant.
   isTouchLongPress = input<boolean>(false);
 
   readonly contextMenuTriggerEl = viewChild.required('contextMenuTriggerEl', {
