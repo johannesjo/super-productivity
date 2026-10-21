@@ -21,6 +21,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { CaldavSyncAdapterService } from '../providers/caldav/caldav-sync-adapter.service';
 import { PlainspaceSyncAdapterService } from '../providers/plainspace/plainspace-sync-adapter.service';
 import { SnackService } from '../../../core/snack/snack.service';
+import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 import {
   DeletedTaskIssueSidecarService,
   DeletedTaskIssueInfo,
@@ -134,6 +135,7 @@ export class IssueTwoWaySyncEffects {
   private readonly _issueProviderService = inject(IssueProviderService);
   private readonly _adapterRegistry = inject(IssueSyncAdapterRegistryService);
   private readonly _snackService = inject(SnackService);
+  private readonly _dateTimeFormatService = inject(DateTimeFormatService);
   private readonly _deletedTaskIssueSidecar = inject(DeletedTaskIssueSidecarService);
   private readonly _deletedTagTitlesSidecar = inject(DeletedTagTitlesSidecarService);
   private readonly _adapterResolver = inject(IssueSyncAdapterResolverService);
@@ -278,9 +280,14 @@ export class IssueTwoWaySyncEffects {
         // that is reported.
         mergeMap(({ task }) =>
           timer(REMOTE_ISSUE_DELETE_DEFER_MS).pipe(
+            // Both the snack's UNDO and a restore from "Recently deleted"
+            // inside the window must keep the remote issue.
             takeUntil(
               this._actions$.pipe(
-                ofType(TaskSharedActions.restoreDeletedTask),
+                ofType(
+                  TaskSharedActions.restoreDeletedTask,
+                  TaskSharedActions.restoreTask,
+                ),
                 filter(({ task: restored }) => restored.id === task.id),
               ),
             ),
@@ -434,6 +441,10 @@ export class IssueTwoWaySyncEffects {
       cfg || DEFAULT_GLOBAL_CONFIG.shortSyntax,
       tags,
       projects,
+      undefined,
+      'combine',
+      false,
+      this._dateTimeFormatService.dateInputLocale(),
     );
     return r?.taskChanges.title ?? task.title;
   }

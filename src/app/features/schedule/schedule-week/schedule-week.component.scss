@@ -288,6 +288,11 @@
   display: inline-flex;
   align-items: center;
   gap: var(--s-half);
+  max-width: calc(100% - var(--s-half));
+
+  @include mq(xs, max) {
+    right: var(--s-quarter);
+  }
 }
 
 .over-budget-badge {
@@ -305,17 +310,13 @@
   background: var(--over-budget-badge-bg);
   color: var(--c-warn);
   font: inherit;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   line-height: 1;
   white-space: nowrap;
 
   &:focus-visible {
     outline: var(--focus-ring-width) solid var(--focus-ring-color);
     outline-offset: var(--focus-ring-offset);
-  }
-
-  @include mq(xs, max) {
-    font-size: 10px;
   }
 }
 
@@ -438,7 +439,7 @@
   > div {
     left: 0;
     font-weight: bold;
-    font-size: 10px;
+    font-size: var(--font-size-xs);
     position: absolute;
     bottom: 100%;
     line-height: 1;

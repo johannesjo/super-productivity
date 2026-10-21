@@ -1,4 +1,5 @@
 import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
+import { DEFAULT_DATE_INPUT_LOCALE } from 'src/app/core/date-time-format/date-input-locale';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
@@ -168,8 +169,10 @@ describe('AddTaskBarComponent', () => {
     'textLocale',
     // Reached by the actions bar's date chip as soon as a state has a time on it
     'formatTime',
+    'dateInputLocale',
   ]);
   mockDateTimeFormatService.currentLocale.and.returnValue('en-US');
+  mockDateTimeFormatService.dateInputLocale.and.returnValue(DEFAULT_DATE_INPUT_LOCALE);
   mockDateTimeFormatService.textLocale.and.returnValue('en-US');
   mockDateTimeFormatService.formatTime.and.callFake((timestamp: number) =>
     new Date(timestamp).toLocaleTimeString('en-US', {
@@ -547,6 +550,24 @@ describe('AddTaskBarComponent', () => {
       expect(secondTaskData.tagIds).toEqual(['tag-1']);
     });
 
+    it('should pass a syntax-parsed priority to the new task and reset it after', async () => {
+      mockTaskService.add.and.returnValue('task-1');
+
+      component.stateService.updateInputTxt('Fix login bug p1');
+      component.stateService.updateCleanText('Fix login bug');
+      component.stateService.updatePriority(3);
+      await component.addTask();
+
+      const [title, , taskData] = mockTaskService.add.calls.mostRecent().args as [
+        string,
+        boolean,
+        Partial<TaskCopy>,
+      ];
+      expect(title).toBe('Fix login bug');
+      expect(taskData.priority).toBe(3);
+      expect(component.stateService.state().priority).toBeNull();
+    });
+
     // #5461: a repeat-preset task with no explicit date must default to the
     // logical "today" (offset-aware), not the calendar date. These assert the
     // component reads DateService.todayStr() — a regression to getDbDateStr()
@@ -762,6 +783,26 @@ describe('AddTaskBarComponent', () => {
 
       const repeatCfg = addRepeatCfgSpy.calls.mostRecent().args[2];
       expect(repeatCfg.notes).toBe('Join from the meeting room');
+    });
+
+    it('should copy a syntax-parsed priority to an inline repeat config', async () => {
+      mockTaskService.add.and.returnValue('task-1');
+      const addRepeatCfgSpy = spyOn(
+        TestBed.inject(TaskRepeatCfgService),
+        'addTaskRepeatCfgToTask',
+      );
+
+      component.stateService.updateInputTxt('Daily standup p1');
+      component.stateService.updateCleanText('Daily standup');
+      component.stateService.updatePriority(3);
+      component.stateService.updateRepeatSetting({
+        type: 'PRESET',
+        quickSetting: 'DAILY',
+      });
+
+      await component.addTask();
+
+      expect(addRepeatCfgSpy.calls.mostRecent().args[2].priority).toBe(3);
     });
 
     it('seeds skipOverdue ON for an inline Daily repeat (#8644)', async () => {

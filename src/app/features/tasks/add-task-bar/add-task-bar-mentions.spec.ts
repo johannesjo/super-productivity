@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { DEFAULT_DATE_INPUT_LOCALE } from '../../../core/date-time-format/date-input-locale';
 import { Component, signal } from '@angular/core';
 import { BehaviorSubject, of } from 'rxjs';
 import { Store } from '@ngrx/store';
@@ -131,6 +132,7 @@ describe('AddTaskBarComponent Mentions Integration', () => {
       'DateTimeFormatService',
       ['currentLocale', 'textLocale'],
       {
+        dateInputLocale: () => DEFAULT_DATE_INPUT_LOCALE,
         dateFormat: () => ({
           parse: 'MM/dd/yyyy',
           display: { dateInput: 'MM/dd/yyyy' },

@@ -47,6 +47,7 @@ import {
 } from 'rxjs/operators';
 import { IS_ANDROID_WEB_VIEW_TOKEN } from '../../../util/is-android-web-view';
 import { IosKeyboardService } from '../../../core/theme/ios-keyboard.service';
+import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 import { BehaviorSubject, combineLatest, from, Observable } from 'rxjs';
 import { MatDialog } from '@angular/material/dialog';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
@@ -150,6 +151,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
   private readonly _taskRepeatCfgService = inject(TaskRepeatCfgService);
   private readonly _markdownPasteService = inject(MarkdownPasteService);
   private readonly _dateService = inject(DateService);
+  private readonly _dateTimeFormatService = inject(DateTimeFormatService);
   private readonly _menuTreeService = inject(MenuTreeService);
   readonly stateService = inject(AddTaskBarStateService);
   readonly iosKeyboardService = inject(IosKeyboardService);
@@ -278,6 +280,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
           projects,
           defaultColor: activeWorkContext?.theme?.primary || DEFAULT_PROJECT_COLOR,
           shortSyntaxConfig,
+          dateLocale: this._dateTimeFormatService.dateInputLocale(),
         }),
       ),
     ),
@@ -438,6 +441,7 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
                 defaultProject!,
                 date,
                 time,
+                this._dateTimeFormatService.dateInputLocale(),
               ),
             );
           },
@@ -530,6 +534,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
 
       if (state.spent) {
         taskData.timeSpentOnDay = state.spent;
+      }
+
+      if (state.priority) {
+        taskData.priority = state.priority;
       }
 
       if (state.deadlineDate) {
@@ -656,6 +664,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
             ...repeatUpdates,
             title,
             notes: taskData.notes,
+            // Later occurrences take their priority from the config, so a
+            // "p1 @daily" must land here too, not only on the first instance
+            priority: taskData.priority,
             tagIds: taskData.tagIds ?? [],
             defaultEstimate: state.estimate || 0,
             startTime: state.time || undefined,

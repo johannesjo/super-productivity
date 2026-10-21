@@ -6,7 +6,7 @@ import { ScheduleService } from '../schedule.service';
 import { MatDialog } from '@angular/material/dialog';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { DateAdapter } from '@angular/material/core';
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
 import { of } from 'rxjs';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import {
@@ -26,6 +26,7 @@ import { selectMapOfAllTasksInActiveProjects } from '../../tasks/store/task.sele
 import { selectStartOfNextDayDiffMs } from '../../../root-store/app-state/app-state.selectors';
 import { DEFAULT_TASK, Task } from '../../tasks/task.model';
 import { DateService } from '../../../core/date/date.service';
+import { LS } from '../../../core/persistence/storage-keys.const';
 
 describe('ScheduleComponent', () => {
   const mockLocalization = signal({ firstDayOfWeek: 1, dateTimeLocale: 'en-US' });
@@ -33,6 +34,7 @@ describe('ScheduleComponent', () => {
   let fixture: ComponentFixture<ScheduleComponent>;
   let mockTaskService: jasmine.SpyObj<TaskService>;
   let mockLayoutService: jasmine.SpyObj<LayoutService>;
+  let mockIsXs: WritableSignal<boolean>;
   let mockScheduleService: jasmine.SpyObj<ScheduleService>;
   let mockMatDialog: jasmine.SpyObj<MatDialog>;
   let mockGlobalTrackingIntervalService: jasmine.SpyObj<GlobalTrackingIntervalService>;
@@ -47,8 +49,10 @@ describe('ScheduleComponent', () => {
     mockTaskService = jasmine.createSpyObj('TaskService', ['currentTaskId']);
     (mockTaskService as any).currentTaskId = signal(null);
 
+    mockIsXs = signal(false);
     mockLayoutService = jasmine.createSpyObj('LayoutService', [], {
       selectedTimeView: signal('week'),
+      isXs: mockIsXs,
     });
 
     mockScheduleService = jasmine.createSpyObj('ScheduleService', [
@@ -1833,5 +1837,53 @@ describe('ScheduleComponent', () => {
       expect(deadlines['2026-01-20']?.length || 0).toBe(1);
       expect(deadlines['2026-01-20']?.[0]?.id).toBe('task-1');
     }));
+  });
+
+  describe('initial time view', () => {
+    let savedView: string | null;
+
+    beforeEach(() => {
+      savedView = localStorage.getItem(LS.SELECTED_TIME_VIEW);
+    });
+
+    afterEach(() => {
+      if (savedView === null) {
+        localStorage.removeItem(LS.SELECTED_TIME_VIEW);
+      } else {
+        localStorage.setItem(LS.SELECTED_TIME_VIEW, savedView);
+      }
+    });
+
+    const createWith = (isXs: boolean, saved: string | null): void => {
+      if (saved === null) {
+        localStorage.removeItem(LS.SELECTED_TIME_VIEW);
+      } else {
+        localStorage.setItem(LS.SELECTED_TIME_VIEW, saved);
+      }
+      mockIsXs.set(isXs);
+      TestBed.createComponent(ScheduleComponent);
+    };
+
+    it('starts on the day view on a phone without a saved choice', () => {
+      createWith(true, null);
+      expect(mockLayoutService.selectedTimeView()).toBe('day');
+      // Not persisted, so a wider window later still starts on the week view.
+      expect(localStorage.getItem(LS.SELECTED_TIME_VIEW)).toBeNull();
+    });
+
+    it('starts on the week view on wider screens without a saved choice', () => {
+      createWith(false, null);
+      expect(mockLayoutService.selectedTimeView()).toBe('week');
+    });
+
+    it('keeps a saved week view on a phone', () => {
+      createWith(true, 'week');
+      expect(mockLayoutService.selectedTimeView()).toBe('week');
+    });
+
+    it('keeps a saved month view on a phone', () => {
+      createWith(true, 'month');
+      expect(mockLayoutService.selectedTimeView()).toBe('month');
+    });
   });
 });

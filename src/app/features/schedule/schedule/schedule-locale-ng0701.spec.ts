@@ -63,6 +63,7 @@ describe('issue #7383 — NG0701 race on /schedule', () => {
 
       mockLayoutService = jasmine.createSpyObj('LayoutService', [], {
         selectedTimeView: signal('month'),
+        isXs: signal(false),
       });
 
       mockScheduleService = jasmine.createSpyObj('ScheduleService', [
