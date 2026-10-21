@@ -1466,13 +1466,123 @@ describe('ConflictResolutionService — disjoint-field merge', () => {
     expect(appliedOpIds()[0]).toBe('remote-skip-overdue');
     const patch = mergedOpArgs('cfg-1');
     expect(patch).toBeDefined();
-    expect((patch!.payload as { lwwUpdateMode?: string }).lwwUpdateMode).toBe('patch');
+    // No RECREATE_FALLBACK: one full replace snapshot of the merged config, so
+    // a released receiver holding a concurrent delete recreates it whole.
+    expect((patch!.payload as { lwwUpdateMode?: string }).lwwUpdateMode).toBe('replace');
     expect(extractActionPayload(patch!.payload)).toEqual({
       id: 'cfg-1',
+      title: 'Daily',
+      skipOverdue: true,
       lastTaskCreation: 3000,
       lastTaskCreationDay: '2026-06-16',
     });
     expect(mockOpLogStore.markRejected).not.toHaveBeenCalledWith(['remote-skip-overdue']);
+  });
+
+  describe('(a5c) repeat-config merged snapshot (#10958)', () => {
+    const cfgOp = (
+      id: string,
+      clientId: string,
+      timestamp: number,
+      changes: Record<string, unknown>,
+      entityType: EntityType = 'TASK_REPEAT_CFG',
+    ): Operation =>
+      op({
+        id,
+        clientId,
+        timestamp,
+        actionType: `[${entityType}] Update` as ActionType,
+        entityType,
+        entityId: 'cfg-1',
+        vectorClock: { [clientId]: 1 },
+        payload: {
+          [getPayloadKey(entityType) ?? entityType.toLowerCase()]: {
+            id: 'cfg-1',
+            changes,
+          },
+        },
+      });
+    const rejected = (): string[] =>
+      mockOpLogStore.markRejected.calls.allArgs().flat(2) as string[];
+    const resolve = (
+      entityType: EntityType,
+      localOps: Operation[],
+      remote: Operation[],
+    ): ReturnType<typeof service.autoResolveConflictsLWW> =>
+      service.autoResolveConflictsLWW([
+        { ...conflictOf(localOps, remote, 'cfg-1'), entityType },
+      ]);
+
+    it('keeps an older local skipOverdue edit beside a newer remote generation', async () => {
+      mockStore.select.and.returnValue(
+        of({ id: 'cfg-1', title: 'Daily', skipOverdue: true, lastTaskCreation: 1 }),
+      );
+      await resolve(
+        'TASK_REPEAT_CFG',
+        [cfgOp('local-skip', 'A', 1000, { skipOverdue: true })],
+        [cfgOp('remote-generation', 'B', 2000, { lastTaskCreation: 2000 })],
+      );
+
+      expect(appliedOpIds()[0]).toBe('remote-generation');
+      const snapshot = mergedOpArgs('cfg-1')!;
+      expect((snapshot.payload as { lwwUpdateMode?: string }).lwwUpdateMode).toBe(
+        'replace',
+      );
+      // Stamped at the local write it carries, not at the newer remote one.
+      expect(snapshot.timestamp).toBe(1000);
+      expect(extractActionPayload(snapshot.payload)).toEqual({
+        id: 'cfg-1',
+        title: 'Daily',
+        skipOverdue: true,
+        lastTaskCreation: 2000,
+      });
+      expect(rejected()).toContain('local-skip');
+    });
+
+    it('keeps whole-entity LWW beside a remote LWW row', async () => {
+      mockStore.select.and.returnValue(
+        of({ id: 'cfg-1', title: 'Daily', skipOverdue: true }),
+      );
+      const row = op({
+        id: 'remote-row',
+        clientId: 'B',
+        timestamp: 500,
+        actionType: '[TASK_REPEAT_CFG] LWW Update' as ActionType,
+        entityType: 'TASK_REPEAT_CFG',
+        entityId: 'cfg-1',
+        vectorClock: { B: 1 },
+        payload: {
+          actionPayload: { id: 'cfg-1', title: 'Renamed', skipOverdue: false },
+          entityChanges: [],
+          lwwUpdateMode: 'replace',
+        },
+      });
+      await resolve(
+        'TASK_REPEAT_CFG',
+        [cfgOp('local-skip', 'A', 1000, { skipOverdue: true })],
+        [row],
+      );
+
+      // The local side won as a whole: the row is rejected, not applied.
+      expect(appliedOpIds()).not.toContain('remote-row');
+      expect(rejected()).toContain('remote-row');
+    });
+
+    // Scope: only MERGED_SNAPSHOT_TYPES. Other fallback-less adapter types
+    // keep whole-entity LWW until a reported loss admits them.
+    for (const entityType of ['METRIC', 'ISSUE_PROVIDER', 'SECTION', 'NOTE'] as const) {
+      it(`keeps whole-entity LWW for ${entityType}`, async () => {
+        mockStore.select.and.returnValue(of({ id: 'cfg-1', title: 'Local' }));
+        await resolve(
+          entityType,
+          [cfgOp('local-edit', 'A', 2000, { title: 'Local' })],
+          [cfgOp('remote-edit', 'B', 1000, { notes: 'Remote' })],
+        );
+
+        expect(appliedOpIds()).not.toContain('remote-edit');
+        expect(rejected()).toContain('remote-edit');
+      });
+    }
   });
 
   it('(a6) aborts resolution when appending the merged op fails', async () => {
@@ -1895,10 +2005,9 @@ describe('ConflictResolutionService — disjoint-field merge', () => {
     });
 
     // Decision 5a extended (#10393, #10448) reads a remote row's keys only for
-    // types with a RECREATE_FALLBACK (TASK_REPEAT_CFG since #10958); NOTE
-    // stays out (decision 4).
-    it('reads a remote patch row per field only for TASK, PROJECT, TAG, SIMPLE_COUNTER and TASK_REPEAT_CFG (decision 5a)', async () => {
-      const admitted = ['TASK', 'PROJECT', 'TAG', 'SIMPLE_COUNTER', 'TASK_REPEAT_CFG'];
+    // TASK, PROJECT, TAG and SIMPLE_COUNTER; NOTE stays out (decision 4).
+    it('reads a remote patch row per field only for TASK, PROJECT, TAG and SIMPLE_COUNTER (decision 5a)', async () => {
+      const admitted = ['TASK', 'PROJECT', 'TAG', 'SIMPLE_COUNTER'];
       const notEntities = ['MIGRATION', 'RECOVERY', 'ALL'];
       const payloadKeyFor = (type: EntityType): string =>
         getPayloadKey(type) ?? type.toLowerCase();

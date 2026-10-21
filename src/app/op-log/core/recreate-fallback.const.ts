@@ -3,7 +3,6 @@ import { DEFAULT_TASK } from '../../features/tasks/task.model';
 import { DEFAULT_PROJECT, INBOX_PROJECT } from '../../features/project/project.const';
 import { DEFAULT_TAG } from '../../features/tag/tag.const';
 import { EMPTY_SIMPLE_COUNTER } from '../../features/simple-counter/simple-counter.const';
-import { DEFAULT_TASK_REPEAT_CFG } from '../../features/task-repeat-cfg/task-repeat-cfg.model';
 
 /**
  * Per-entity-type fallback used when an LWW Update recreates an entity that
@@ -55,22 +54,12 @@ import { DEFAULT_TASK_REPEAT_CFG } from '../../features/task-repeat-cfg/task-rep
  * (`isEnabled: false`) on the deleting device only — the holder keeps its real
  * type via `updateOne` merge, so the fleet diverges on `type`. Acceptable vs.
  * the previous dead-end; a full fix needs a tombstone (snapshot) delete op.
- * TASK_REPEAT_CFG was added for #10958: without an entry, the repeat
- * generation's `lastTaskCreation*` update crossing an edit on another device
- * (e.g. enabling `skipOverdue`) fell back to whole-entity LWW, and the later
- * generation's replace snapshot reverted the edit on every device. Its
- * defaults recreate a PAUSED config: a config recreated from a patch has no
- * title or schedule to speak of, and must not start generating blank tasks.
- * A full replace snapshot carries its own `isPaused`, which wins the spread.
- * RELEASED-RECEIVER RESIDUAL (the hazard decision 4 keeps NOTE out for):
- * v18.15.0–v19.2.0 have no TASK_REPEAT_CFG entry, so a released device that
- * applied a concurrent `deleteTaskRepeatCfg` (payload `{id}` only) and loses
- * to this type's patch adds the config raw — no title, schedule or
- * `isPaused` — which fails validation and data repair has no rule for.
- * It needs that delete to be concurrent with the patch row and older than it.
- * METRIC, ISSUE_PROVIDER still fall through to the
+ * TASK_REPEAT_CFG, METRIC, ISSUE_PROVIDER still fall through to the
  * legacy behavior — add an entry here when there is evidence the
- * partial-payload path fires for them. NOTE has that evidence (#10380) but
+ * partial-payload path fires for them. TASK_REPEAT_CFG resolves per field
+ * without an entry: it re-sends one full replace snapshot instead of patches
+ * (`MERGED_SNAPSHOT_TYPES`, #10958), because released receivers lack an
+ * entry for it. NOTE has that evidence (#10380) but
  * stays out on purpose: an entry would admit it to field patches, which waits
  * until v19.1.0 leaves the fleet (#10393, decision 4). Its recreate gets the
  * whole note from `deleteNote`'s optional `note` instead; a delete op without
@@ -108,10 +97,5 @@ export const RECREATE_FALLBACK: Partial<Record<EntityType, RecreateFallback>> = 
     // branch). Listing them would also make the meta-reducer warn misreport a
     // legitimately-null `icon` as "missing". `defaults` still backfills them.
     requiredKeys: ['title', 'type', 'countOnDay'],
-  },
-  TASK_REPEAT_CFG: {
-    defaults: { ...DEFAULT_TASK_REPEAT_CFG, isPaused: true },
-    // Only the warn reads these (no on-disk heal branch for this type).
-    requiredKeys: ['title', 'repeatCycle', 'repeatEvery', 'tagIds'],
   },
 };
