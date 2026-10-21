@@ -27,6 +27,11 @@ import {
   expectTaskUpdate,
   expectTaskUpdates,
 } from './test-utils';
+import {
+  getWontDoChanges,
+  isCompletedTask,
+  isWontDoTask,
+} from '../../../features/tasks/util/is-wont-do-task';
 
 describe('taskSharedCrudMetaReducer', () => {
   let mockReducer: jasmine.Spy;
@@ -2322,6 +2327,22 @@ describe('taskSharedCrudMetaReducer', () => {
       expect(
         (resultState[TAG_FEATURE_NAME].entities['TODAY'] as Tag).taskIds,
       ).not.toContain('task1');
+    });
+
+    // Won't do is a `wontDoOn` equal to `doneOn`: reopening clears `doneOn`
+    // and completing stamps a new one, so the old `wontDoOn` stops counting.
+    it("leaves a completed task after won't do, reopen and complete", () => {
+      let state: RootState = createStateWithExistingTasks(['task1'], [], ['task1']);
+      const taskAfter = (changes: Partial<Task>): Task => {
+        state = metaReducer(state, createUpdateTaskAction('task1', changes));
+        return state[TASK_FEATURE_NAME].entities['task1'] as Task;
+      };
+
+      expect(isWontDoTask(taskAfter(getWontDoChanges(1000)))).toBe(true);
+      const reopened = taskAfter({ isDone: false });
+      expect(reopened.doneOn).toBeUndefined();
+      expect(reopened.wontDoOn).toBe(1000);
+      expect(isCompletedTask(taskAfter({ isDone: true }))).toBe(true);
     });
 
     it('should add completed task to TODAY_TAG.taskIds', () => {

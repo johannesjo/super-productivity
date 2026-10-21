@@ -65,7 +65,6 @@ import { T } from 'src/app/t.const';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { selectTaskByIdWithSubTaskData } from '../../store/task.selectors';
-import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { getDbDateStr } from '../../../../util/get-db-date-str';
 import { PlannerActions } from '../../../planner/store/planner.actions';
@@ -75,6 +74,7 @@ import { DateAdapter } from '@angular/material/core';
 import { ICAL_TYPE } from '../../../issue/issue.const';
 import { IssueIconPipe } from '../../../issue/issue-icon/issue-icon.pipe';
 import { showFocusOverlay } from '../../../focus-mode/store/focus-mode.actions';
+import { FocusModeService } from '../../../focus-mode/focus-mode.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TagService } from '../../../tag/tag.service';
 import { DialogPromptComponent } from '../../../../ui/dialog-prompt/dialog-prompt.component';
@@ -97,6 +97,7 @@ import {
   PluginTaskContextMenuRegistryService,
 } from '../../../../plugins/plugin-task-context-menu-registry.service';
 import { PluginTaskContextMenuTarget } from '@super-productivity/plugin-api';
+import { getWontDoChanges } from '../../util/is-wont-do-task';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -109,7 +110,6 @@ import { PluginTaskContextMenuTarget } from '@super-productivity/plugin-api';
     MatDivider,
     TranslateModule,
     MatMenuTrigger,
-    MatIconButton,
     MatTooltip,
     IssueIconPipe,
     MenuTouchFixDirective,
@@ -142,6 +142,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   private readonly _taskDuplicateService = inject(TaskDuplicateService);
   private readonly _taskMoveToProjectService = inject(TaskMoveToProjectService);
   private readonly _taskMultiSelectService = inject(TaskMultiSelectService);
+  private readonly _focusModeService = inject(FocusModeService);
   private readonly _pluginTaskContextMenuRegistry = inject(
     PluginTaskContextMenuRegistryService,
   );
@@ -459,6 +460,9 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   }
 
   goToFocusMode(): void {
+    if (this._focusModeService.tryStartSessionForTask(this.task)) {
+      return;
+    }
     this._taskService.setCurrentId(this.task.id);
     this._store.dispatch(showFocusOverlay());
   }
@@ -599,6 +603,11 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
     } else {
       this._taskService.setDone(this.task.id);
     }
+  }
+
+  // Finishing as won't do still marks the task done; only the reason differs.
+  setWontDo(): void {
+    this._taskService.update(this.task.id, getWontDoChanges(Date.now()));
   }
 
   addToMyDay(): void {

@@ -570,51 +570,6 @@ class JavaScriptInterface(
         return ReminderSnoozeQueue.getAndClear(activity)
     }
 
-    /**
-     * Phase 1: Get partial text from the startup overlay without hiding it.
-     * The native input stays visible so the user sees a seamless transition.
-     */
-    @Suppress("unused")
-    @JavascriptInterface
-    fun getStartupOverlayPartialText(): String? {
-        var partialText: String? = null
-        if (activity is com.superproductivity.superproductivity.CapacitorMainActivity) {
-            val latch = java.util.concurrent.CountDownLatch(1)
-            activity.runOnUiThread {
-                partialText = activity.getStartupOverlayPartialText()
-                latch.countDown()
-            }
-            latch.await(2, java.util.concurrent.TimeUnit.SECONDS)
-        }
-        return partialText
-    }
-
-    /**
-     * Phase 2: Hide the startup overlay after the web input is ready.
-     */
-    @Suppress("unused")
-    @JavascriptInterface
-    fun hideStartupOverlay() {
-        if (activity is com.superproductivity.superproductivity.CapacitorMainActivity) {
-            activity.runOnUiThread {
-                activity.hideStartupOverlay()
-            }
-        }
-    }
-
-    /**
-     * Dismiss startup overlay immediately (no partial text transfer).
-     */
-    @Suppress("unused")
-    @JavascriptInterface
-    fun dismissStartupOverlay() {
-        if (activity is com.superproductivity.superproductivity.CapacitorMainActivity) {
-            activity.runOnUiThread {
-                activity.dismissStartupOverlay()
-            }
-        }
-    }
-
     @Suppress("unused")
     @JavascriptInterface
     fun setSuperSyncCredentials(baseUrl: String, accessToken: String) {

@@ -6,11 +6,15 @@ import { ScheduleService } from '../schedule.service';
 import { MatDialog } from '@angular/material/dialog';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { DateAdapter } from '@angular/material/core';
-import { signal } from '@angular/core';
+import { signal, WritableSignal } from '@angular/core';
 import { of } from 'rxjs';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
-import { selectCalendarProviders } from '../../issue/store/issue-provider.selectors';
+import {
+  selectCalendarProviders,
+  selectEnabledIssueProviders,
+} from '../../issue/store/issue-provider.selectors';
 import { HiddenCalendarProvidersService } from '../../calendar-integration/hidden-calendar-providers.service';
+import { PluginIssueProviderRegistryService } from '../../../plugins/issue-provider/plugin-issue-provider-registry.service';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { SCHEDULE_CONSTANTS } from '../schedule.constants';
 import { GlobalConfigService } from '../../config/global-config.service';
@@ -19,6 +23,7 @@ import { CalendarEventActionsService } from '../../calendar-integration/calendar
 import { registerLocaleData } from '@angular/common';
 import localeSv from '@angular/common/locales/sv';
 import { DateService } from '../../../core/date/date.service';
+import { LS } from '../../../core/persistence/storage-keys.const';
 
 describe('ScheduleComponent', () => {
   const mockLocalization = signal({ firstDayOfWeek: 1, dateTimeLocale: 'en-US' });
@@ -26,6 +31,7 @@ describe('ScheduleComponent', () => {
   let fixture: ComponentFixture<ScheduleComponent>;
   let mockTaskService: jasmine.SpyObj<TaskService>;
   let mockLayoutService: jasmine.SpyObj<LayoutService>;
+  let mockIsXs: WritableSignal<boolean>;
   let mockScheduleService: jasmine.SpyObj<ScheduleService>;
   let mockMatDialog: jasmine.SpyObj<MatDialog>;
   let mockGlobalTrackingIntervalService: jasmine.SpyObj<GlobalTrackingIntervalService>;
@@ -40,8 +46,10 @@ describe('ScheduleComponent', () => {
     mockTaskService = jasmine.createSpyObj('TaskService', ['currentTaskId']);
     (mockTaskService as any).currentTaskId = signal(null);
 
+    mockIsXs = signal(false);
     mockLayoutService = jasmine.createSpyObj('LayoutService', [], {
       selectedTimeView: signal('week'),
+      isXs: mockIsXs,
     });
 
     mockScheduleService = jasmine.createSpyObj('ScheduleService', [
@@ -1322,6 +1330,140 @@ describe('ScheduleComponent', () => {
     });
   });
 
+  describe('plugin calendar providers', () => {
+    const icalProvider = (id: string): any => ({
+      id,
+      isEnabled: true,
+      issueProviderKey: 'ICAL',
+      icalUrl: `https://example.com/${id}.ics`,
+    });
+    const pluginProvider = (id: string, key = 'plugin:cal'): any => ({
+      id,
+      isEnabled: true,
+      issueProviderKey: key,
+      pluginId: 'cal',
+      pluginConfig: {},
+    });
+
+    beforeEach(() => {
+      localStorage.removeItem('SUP_HIDDEN_CALENDAR_PROVIDER_IDS');
+      TestBed.inject(HiddenCalendarProvidersService).setHidden([]);
+    });
+
+    afterEach(() => {
+      TestBed.inject(MockStore).resetSelectors();
+    });
+
+    it('includes plugin issue providers that opt into the agenda view', () => {
+      const store = TestBed.inject(MockStore);
+      spyOn(
+        TestBed.inject(PluginIssueProviderRegistryService),
+        'getUseAgendaView',
+      ).and.returnValue(true);
+      store.overrideSelector(selectCalendarProviders, []);
+      store.overrideSelector(selectEnabledIssueProviders, [pluginProvider('p1')]);
+      store.refreshState();
+      fixture.detectChanges();
+      expect(component.enabledCalendarProviders().map((p) => p.id)).toEqual(['p1']);
+    });
+
+    it('excludes plugin providers that do not use the agenda view', () => {
+      const store = TestBed.inject(MockStore);
+      spyOn(
+        TestBed.inject(PluginIssueProviderRegistryService),
+        'getUseAgendaView',
+      ).and.returnValue(false);
+      store.overrideSelector(selectCalendarProviders, []);
+      store.overrideSelector(selectEnabledIssueProviders, [pluginProvider('p1')]);
+      store.refreshState();
+      fixture.detectChanges();
+      expect(component.enabledCalendarProviders()).toEqual([]);
+    });
+
+    it('materializes color and label per provider row', () => {
+      const store = TestBed.inject(MockStore);
+      spyOn(
+        TestBed.inject(PluginIssueProviderRegistryService),
+        'getUseAgendaView',
+      ).and.returnValue(true);
+      store.overrideSelector(selectCalendarProviders, [
+        { ...icalProvider('ical'), color: '#123456' },
+      ]);
+      store.overrideSelector(selectEnabledIssueProviders, [pluginProvider('plug')]);
+      store.refreshState();
+      fixture.detectChanges();
+      expect(component.calProviderRows()).toEqual([
+        { id: 'ical', color: '#123456', label: 'example.com' },
+        { id: 'plug', color: jasmine.stringMatching(/^hsl\(/), label: 'plugin:cal' },
+      ]);
+    });
+
+    it('shows the filter button for one iCal plus one plugin calendar provider', () => {
+      const store = TestBed.inject(MockStore);
+      spyOn(
+        TestBed.inject(PluginIssueProviderRegistryService),
+        'getUseAgendaView',
+      ).and.returnValue(true);
+      store.overrideSelector(selectCalendarProviders, [icalProvider('ical')]);
+      store.overrideSelector(selectEnabledIssueProviders, [
+        icalProvider('ical'),
+        pluginProvider('plug'),
+      ]);
+      store.refreshState();
+      fixture.detectChanges();
+      expect(component.showCalFilterBtn()).toBe(true);
+    });
+  });
+
+  describe('calProviderLabel', () => {
+    it('normalizes a URL-shaped label to host-only', () => {
+      expect(
+        component.calProviderLabel({
+          id: 'p',
+          isEnabled: true,
+          issueProviderKey: 'plugin:cal',
+          pluginId: 'cal',
+          pluginConfig: { serverUrl: 'https://calendar.example.com/dav/' },
+        } as any),
+      ).toBe('calendar.example.com');
+    });
+
+    it('collapses an opaque-scheme plugin label to the provider key', () => {
+      expect(
+        component.calProviderLabel({
+          id: 'p',
+          isEnabled: true,
+          issueProviderKey: 'plugin:cal',
+          pluginId: 'cal',
+          pluginConfig: { serverUrl: 'javascript:alert(1)' },
+        } as any),
+      ).toBe('plugin:cal');
+    });
+
+    it('leaves a plain plugin label untouched', () => {
+      expect(
+        component.calProviderLabel({
+          id: 'p',
+          isEnabled: true,
+          issueProviderKey: 'plugin:cal',
+          pluginId: 'cal',
+          pluginConfig: { name: 'Work: shared' },
+        } as any),
+      ).toBe('Work: shared');
+    });
+
+    it('leaves an already host-only iCal label untouched', () => {
+      expect(
+        component.calProviderLabel({
+          id: 'p',
+          isEnabled: true,
+          issueProviderKey: 'ICAL',
+          icalUrl: 'https://feeds.example.com/cal.ics',
+        } as any),
+      ).toBe('feeds.example.com');
+    });
+  });
+
   describe('weeksToShow computed', () => {
     it('should calculate weeks from days array length', () => {
       // Arrange - mock returns 7 days
@@ -1573,6 +1715,54 @@ describe('ScheduleComponent', () => {
       // Rect-based math landed 20% of the distance from midnight too far —
       // hundreds of pixels. What is left here is sub-pixel rounding.
       expect(Math.abs(scaledWrapper.scrollTop - plainTop)).toBeLessThan(2);
+    });
+  });
+
+  describe('initial time view', () => {
+    let savedView: string | null;
+
+    beforeEach(() => {
+      savedView = localStorage.getItem(LS.SELECTED_TIME_VIEW);
+    });
+
+    afterEach(() => {
+      if (savedView === null) {
+        localStorage.removeItem(LS.SELECTED_TIME_VIEW);
+      } else {
+        localStorage.setItem(LS.SELECTED_TIME_VIEW, savedView);
+      }
+    });
+
+    const createWith = (isXs: boolean, saved: string | null): void => {
+      if (saved === null) {
+        localStorage.removeItem(LS.SELECTED_TIME_VIEW);
+      } else {
+        localStorage.setItem(LS.SELECTED_TIME_VIEW, saved);
+      }
+      mockIsXs.set(isXs);
+      TestBed.createComponent(ScheduleComponent);
+    };
+
+    it('starts on the day view on a phone without a saved choice', () => {
+      createWith(true, null);
+      expect(mockLayoutService.selectedTimeView()).toBe('day');
+      // Not persisted, so a wider window later still starts on the week view.
+      expect(localStorage.getItem(LS.SELECTED_TIME_VIEW)).toBeNull();
+    });
+
+    it('starts on the week view on wider screens without a saved choice', () => {
+      createWith(false, null);
+      expect(mockLayoutService.selectedTimeView()).toBe('week');
+    });
+
+    it('keeps a saved week view on a phone', () => {
+      createWith(true, 'week');
+      expect(mockLayoutService.selectedTimeView()).toBe('week');
+    });
+
+    it('keeps a saved month view on a phone', () => {
+      createWith(true, 'month');
+      expect(mockLayoutService.selectedTimeView()).toBe('month');
     });
   });
 });

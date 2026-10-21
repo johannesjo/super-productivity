@@ -145,8 +145,9 @@ export interface AndroidInterface {
   // Reminder done queue - get task IDs marked done from notifications
   getReminderDoneQueue?(): string | null;
 
-  // Native capture inbox (startup quick-add overlay). Non-destructive read of a
-  // JSON array, or null if the inbox could not be read; see CaptureInbox.kt.
+  // Native capture inbox, holding captures left by the removed startup quick-add
+  // overlay of an older app version. Non-destructive read of a JSON array, or
+  // null if the inbox could not be read; see CaptureInbox.kt.
   getPendingCaptures?(): string | null;
   // Delete one capture after its task is persisted. Returns false on failure.
   acknowledgeCapture?(id: string): boolean;
@@ -157,11 +158,6 @@ export interface AndroidInterface {
 
   // Re-render the home screen widget from the current widget_data snapshot
   updateWidget?(): void;
-
-  // Startup overlay
-  getStartupOverlayPartialText?(): string | null;
-  hideStartupOverlay?(): void;
-  dismissStartupOverlay?(): void;
 
   // added here only
   // ReplaySubject so cold-start onResume emissions arriving before the JS

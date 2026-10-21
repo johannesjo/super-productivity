@@ -59,6 +59,25 @@ body.isDarkTheme {
   --mat-chip-outline-width: 1px !important;
 }
 
+// The chip remove icon is the whole tap target and only 18px tall. On touch,
+// pad it to the chip's height without moving the layout (negative margin).
+.isTouchOnly .mat-mdc-chip-remove.mat-icon {
+  padding-block: var(--s);
+  margin-block: calc(var(--s) * -1);
+
+  // Keep the focus ring and state layer on the glyph, not the padded box
+  // (Material insets them at 0 and -3px from the unpadded icon).
+  &::before {
+    top: var(--s);
+    bottom: var(--s);
+  }
+
+  &::after {
+    top: calc(var(--s) - 3px);
+    bottom: calc(var(--s) - 3px);
+  }
+}
+
 .mat-drawer.mat-drawer-side {
   // should be below notes panel
   z-index: 1 !important;
@@ -313,10 +332,6 @@ mat-option.isDone {
   display: flex;
   justify-content: space-between;
   align-items: center;
-
-  plugin-icon {
-    margin-right: 14px;
-  }
 
   span {
     margin-right: auto;

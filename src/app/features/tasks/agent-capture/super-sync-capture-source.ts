@@ -8,9 +8,7 @@ import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions'
 import { CaptureKeyConfig } from '../../config/global-config.model';
 import { INBOX_PROJECT } from '../../project/project.const';
 import { WorkContextType } from '../../work-context/work-context.model';
-import { DEFAULT_TASK, Task, TaskReminderOptionId } from '../task.model';
-import { remindOptionToMilliseconds } from '../util/remind-option-to-milliseconds';
-import { isValidDBDateStr } from '../../../util/get-db-date-str';
+import { DEFAULT_TASK, TaskReminderOptionId } from '../task.model';
 import { addTaskRepeatCfgToTask } from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 import { nanoid } from 'nanoid';
 import {
@@ -18,6 +16,7 @@ import {
   parseCaptureRepeat,
   toCaptureRepeatCfg,
 } from './capture-repeat-cfg';
+import { parseDueDay, parseDueTime, toSchedule, toStartTime } from './capture-schedule';
 import { NativeCaptureSource } from '../native-capture/native-capture-importer.service';
 
 /** Never rename: installs keep their receipts under it. */
@@ -26,7 +25,6 @@ export const AGENT_CAPTURE_RECEIPTS_KEY = 'sp-agent-capture-receipts';
 // Server limits (capture.const.ts), re-checked before a payload becomes a synced task.
 const TITLE_MAX_CHARS = 500;
 const NOTES_MAX_CHARS = 8 * 1024;
-const DUE_TIME_RE = /^([01]\d|2[0-3]):([0-5]\d)$/;
 
 /** The server has no capture routes (feature off, rollback, other server). */
 export class CaptureUnsupportedError extends Error {
@@ -171,19 +169,6 @@ export const neutralizeAutoloadMedia = (notes: string): string =>
   // `!+`: dropping one `!` of `!![` would leave a working `![`.
   notes.replace(/!+\[/g, '[').replace(AUTOLOAD_TAG, '&lt;');
 
-// Years 0000-0099 pass the shape check but `new Date(y, …)` maps them to
-// 19xx; the server never seals them, so drop them like any other bad day.
-const parseDueDay = (value: unknown): string | undefined =>
-  typeof value === 'string' && isValidDBDateStr(value) && !value.startsWith('00')
-    ? value
-    : undefined;
-
-const parseDueTime = (value: unknown): [number, number] | undefined => {
-  if (typeof value !== 'string') return undefined;
-  const m = DUE_TIME_RE.exec(value);
-  return m ? [Number(m[1]), Number(m[2])] : undefined;
-};
-
 /**
  * Optional v1 fields. An invalid day or time is dropped rather than failing
  * the capture: the task still lands, unscheduled, as on apps before them.
@@ -221,34 +206,6 @@ export const toCaptureTask = (payload: unknown): AgentCapture['task'] => {
   };
 };
 
-/**
- * A day alone becomes `dueDay`; with a time, `dueWithTime` in this device's
- * time zone (dueDay cleared, ARCHITECTURE-DECISIONS.md Decision #1). Resolved
- * here, before the op, so replay never depends on the replaying device.
- */
-const toSchedule = (
-  task: NonNullable<AgentCapture['task']>,
-  defaultRemindOption: TaskReminderOptionId,
-): Pick<Task, 'dueDay' | 'dueWithTime' | 'hasPlannedTime' | 'remindAt'> => {
-  if (!task.dueDay) return {};
-  if (!task.dueTime) return { dueDay: task.dueDay };
-  const [year, month, day] = task.dueDay.split('-').map(Number);
-  const dueWithTime = new Date(
-    year,
-    month - 1,
-    day,
-    task.dueTime[0],
-    task.dueTime[1],
-  ).getTime();
-  const remindAt = remindOptionToMilliseconds(dueWithTime, defaultRemindOption);
-  return {
-    dueDay: undefined,
-    dueWithTime,
-    hasPlannedTime: true,
-    ...(remindAt === undefined ? {} : { remindAt }),
-  };
-};
-
 const addInboxTaskAction = (
   capture: AgentCapture,
   defaultEstimate: number,
@@ -274,8 +231,6 @@ const addInboxTaskAction = (
   });
 };
 
-const pad2 = (n: number): string => String(n).padStart(2, '0');
-
 /**
  * Makes a recurring capture's task repeatable, as the add-task bar does after
  * its addTask: the same action, so the same effects pick the first occurrence.
@@ -286,9 +241,7 @@ const addRepeatCfgAction = (
 ): ReturnType<typeof addTaskRepeatCfgToTask> | null => {
   const task = capture.task as NonNullable<AgentCapture['task']>;
   if (!task.repeat) return null;
-  const startTime = task.dueTime
-    ? `${pad2(task.dueTime[0])}:${pad2(task.dueTime[1])}`
-    : undefined;
+  const startTime = toStartTime(task.dueTime);
   const cfg = toCaptureRepeatCfg(task.repeat, {
     title: task.title,
     notes: task.notes,

@@ -246,6 +246,12 @@ describe('LocalRestApiTaskRepeatCfgRoutesService', () => {
   });
 
   describe('POST /task-repeat-cfgs', () => {
+    it('copies the task priority when making it recurring', async () => {
+      tasks['t1'] = { ...tasks['t1'], priority: 'high' };
+      await handle(request('POST', '/task-repeat-cfgs', { taskId: 't1' }));
+      expect(createdCfg().priority).toBe(3);
+    });
+
     it('makes a task repeat daily by default, like the repeat dialog', async () => {
       const response = await handle(
         request('POST', '/task-repeat-cfgs', { taskId: 't1' }),

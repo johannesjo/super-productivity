@@ -23,7 +23,6 @@ import { IS_ANDROID_WEB_VIEW } from './app/util/is-android-web-view';
 import { androidInterface } from './app/features/android/android-interface';
 import { AndroidBackButtonService } from './app/features/android/android-back-button.service';
 import { IS_IOS_NATIVE, IS_NATIVE_PLATFORM } from './app/util/is-native-platform';
-import { DataInitStateService } from './app/core/data-init/data-init-state.service';
 // Type definitions for window.ea are in ./app/core/window-ea.d.ts
 import { App as CapacitorApp } from '@capacitor/app';
 import { GlobalErrorHandler } from './app/core/error-handler/global-error-handler.class';
@@ -43,6 +42,8 @@ import { MAT_FORM_FIELD_DEFAULT_OPTIONS } from '@angular/material/form-field';
 import { MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
 import { IS_TOUCH_PRIMARY } from './app/util/is-mouse-primary';
 import { FeatureStoresModule } from './app/root-store/feature-stores.module';
+import { REMOTE_APPLY_LISTENER } from './app/op-log/apply/remote-apply-listener.token';
+import { RecentlyDeletedService } from './app/features/tasks/recently-deleted/recently-deleted.service';
 import {
   MATERIAL_ANIMATIONS,
   MatNativeDateModule,
@@ -100,6 +101,7 @@ import { LOCAL_REST_API_FEATURE_ROUTES } from './app/core/electron/local-rest-ap
 import { LocalRestApiTaskRepeatCfgRoutesService } from './app/features/task-repeat-cfg/local-rest-api-task-repeat-cfg-routes.service';
 import { LocalRestApiAssistantCaptureRoutesService } from './app/features/tasks/assistant-capture/local-rest-api-assistant-capture-routes.service';
 import { LocalRestApiNoteRoutesService } from './app/features/note/local-rest-api-note-routes.service';
+import { LocalRestApiSimpleCounterRoutesService } from './app/features/simple-counter/local-rest-api-simple-counter-routes.service';
 import { PluginOAuthRedirectHandler } from './app/plugins/oauth/plugin-oauth-redirect.handler';
 import { OAuthCallbackHandlerService } from './app/imex/sync/oauth-callback-handler.service';
 import { GlobalConfigService } from './app/features/config/global-config.service';
@@ -209,7 +211,7 @@ bootstrapApplication(AppComponent, {
       EffectsModule.forRoot([]),
       // StoreDevtoolsModule lazy-loaded in dev mode after bootstrap
       ReactiveFormsModule,
-      ServiceWorkerModule.register('ngsw-worker.js', {
+      ServiceWorkerModule.register('sw.js', {
         enabled:
           !IS_ELECTRON &&
           !IS_NATIVE_PLATFORM &&
@@ -217,6 +219,10 @@ bootstrapApplication(AppComponent, {
         // Register the ServiceWorker as soon as the application is stable
         // or after 30 seconds (whichever comes first).
         registrationStrategy: 'registerWhenStable:30000',
+        // sw.js loads ngsw-worker.js via importScripts; without this, update
+        // checks may take that import from the HTTP cache. Keep in sync with
+        // the register() call below, or each call flips the registration.
+        updateViaCache: 'none',
       }),
       TranslateModule.forRoot({
         fallbackLang: DEFAULT_LANGUAGE,
@@ -243,6 +249,7 @@ bootstrapApplication(AppComponent, {
       provide: LOCAL_REST_API_FEATURE_BRIDGE,
       useClass: LocalRestApiFeatureBridgeService,
     },
+    { provide: REMOTE_APPLY_LISTENER, useExisting: RecentlyDeletedService },
     {
       provide: LOCAL_REST_API_FEATURE_ROUTES,
       useClass: LocalRestApiTaskRepeatCfgRoutesService,
@@ -256,6 +263,11 @@ bootstrapApplication(AppComponent, {
     {
       provide: LOCAL_REST_API_FEATURE_ROUTES,
       useClass: LocalRestApiNoteRoutesService,
+      multi: true,
+    },
+    {
+      provide: LOCAL_REST_API_FEATURE_ROUTES,
+      useClass: LocalRestApiSimpleCounterRoutesService,
       multi: true,
     },
     {
@@ -436,15 +448,6 @@ bootstrapApplication(AppComponent, {
     });
   }
 
-  // Dismiss native startup overlay after all data is loaded (Android only)
-  if (IS_ANDROID_WEB_VIEW) {
-    appRef.injector.get(DataInitStateService).isAllDataLoadedInitially$.subscribe(() => {
-      import('./app/core/startup-overlay/startup-overlay.service').then((m) => {
-        appRef.injector.get(m.StartupOverlayService).processAndDismiss();
-      });
-    });
-  }
-
   // Initialize touch fix for Material menus
   initializeMatMenuTouchFix();
 
@@ -547,10 +550,12 @@ bootstrapApplication(AppComponent, {
     !IS_NATIVE_PLATFORM
   ) {
     Log.log('Registering Service worker');
-    return navigator.serviceWorker.register('ngsw-worker.js').catch((err: unknown) => {
-      Log.log('Service Worker Registration Error');
-      Log.err(err);
-    });
+    return navigator.serviceWorker
+      .register('sw.js', { updateViaCache: 'none' })
+      .catch((err: unknown) => {
+        Log.log('Service Worker Registration Error');
+        Log.err(err);
+      });
   } else if ('serviceWorker' in navigator && (IS_ELECTRON || IS_NATIVE_PLATFORM)) {
     navigator.serviceWorker
       .getRegistrations()

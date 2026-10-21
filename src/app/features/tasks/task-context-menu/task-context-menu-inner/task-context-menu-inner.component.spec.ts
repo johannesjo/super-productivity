@@ -28,6 +28,8 @@ import { By } from '@angular/platform-browser';
 import { MatMenu } from '@angular/material/menu';
 import { TaskDuplicateService } from '../../task-duplicate.service';
 import { TaskMultiSelectService } from '../../task-multi-select.service';
+import { FocusModeService } from '../../../focus-mode/focus-mode.service';
+import { showFocusOverlay } from '../../../focus-mode/store/focus-mode.actions';
 import { T } from '../../../../t.const';
 import { PluginTaskContextMenuRegistryService } from '../../../../plugins/plugin-task-context-menu-registry.service';
 
@@ -55,6 +57,7 @@ describe('TaskContextMenuInnerComponent', () => {
   let taskDuplicateService: jasmine.SpyObj<TaskDuplicateService>;
   let addSubtaskInputService: jasmine.SpyObj<AddSubtaskInputService>;
   let store: MockStore;
+  let focusModeService: jasmine.SpyObj<FocusModeService>;
   let isTaskContextMenuOpen: ReturnType<typeof signal<boolean>>;
   let closeActiveTaskContextMenu: ReturnType<typeof signal<(() => void) | null>>;
 
@@ -68,8 +71,14 @@ describe('TaskContextMenuInnerComponent', () => {
       'getTasksWithSubTasksByRepeatCfgId$',
       'getArchiveTasksForRepeatCfgId',
       'update',
+      'setCurrentId',
+      'moveToTop',
+      'moveToBottom',
     ]);
     taskService.currentTaskId.and.returnValue('some-id');
+    focusModeService = jasmine.createSpyObj<FocusModeService>('FocusModeService', [
+      'tryStartSessionForTask',
+    ]);
     taskDuplicateService = jasmine.createSpyObj<TaskDuplicateService>(
       'TaskDuplicateService',
       ['duplicate'],
@@ -92,6 +101,7 @@ describe('TaskContextMenuInnerComponent', () => {
         { provide: TaskService, useValue: taskService },
         { provide: TaskDuplicateService, useValue: taskDuplicateService },
         { provide: AddSubtaskInputService, useValue: addSubtaskInputService },
+        { provide: FocusModeService, useValue: focusModeService },
         {
           provide: TaskRepeatCfgService,
           useValue: {
@@ -181,6 +191,27 @@ describe('TaskContextMenuInnerComponent', () => {
         flush();
       }));
     }
+  });
+
+  describe('goToFocusMode()', () => {
+    it('leaves starting to the focus mode service when it can start right away', () => {
+      focusModeService.tryStartSessionForTask.and.returnValue(true);
+      const dispatchSpy = spyOn(store, 'dispatch');
+      component.goToFocusMode();
+      expect(focusModeService.tryStartSessionForTask).toHaveBeenCalledWith(
+        component.task,
+      );
+      expect(taskService.setCurrentId).not.toHaveBeenCalled();
+      expect(dispatchSpy).not.toHaveBeenCalled();
+    });
+
+    it('tracks the task and opens the overlay when it cannot start right away', () => {
+      focusModeService.tryStartSessionForTask.and.returnValue(false);
+      const dispatchSpy = spyOn(store, 'dispatch');
+      component.goToFocusMode();
+      expect(taskService.setCurrentId).toHaveBeenCalledWith('task-default');
+      expect(dispatchSpy).toHaveBeenCalledWith(showFocusOverlay());
+    });
   });
 
   describe('enterSelectionMode()', () => {
@@ -507,6 +538,114 @@ describe('TaskContextMenuInnerComponent', () => {
     }));
   });
 
+  // One order on touch and desktop, frequent actions first and the destructive
+  // ones last, so Delete stays above the fold of a phone-sized menu.
+  describe('menu layout', () => {
+    const ITEM_KEYS = [
+      T.F.TASK.CMP.FOCUS_SESSION,
+      T.F.TASK.CMP.ADD_SUB_TASK,
+      T.F.TASK.CMP.ESTIMATE,
+      T.F.TASK.CMP.TOGGLE_TAGS,
+      T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT,
+      T.F.TASK.CMP.PRIORITY,
+      T.F.TASK.CMP.REORDER,
+      T.F.TASK.CMP.DUPLICATE,
+      T.F.TASK.CMP.MARK_WONT_DO,
+      T.F.TASK.CMP.DELETE,
+      T.F.TASK.CMP.MOVE_TO_TOP,
+      T.F.TASK.CMP.MOVE_TO_BOTTOM,
+    ];
+    const overlayItems = (): HTMLElement[] =>
+      Array.from(
+        document.querySelectorAll<HTMLElement>('.cdk-overlay-container [mat-menu-item]'),
+      );
+    const itemKeys = (items: HTMLElement[]): string[] =>
+      items
+        .map((el) => ITEM_KEYS.find((key) => el.textContent?.includes(key)))
+        .filter((key): key is string => !!key);
+    const openMenu = (): void => {
+      Object.assign(TestBed.inject(GlobalConfigService), {
+        appFeatures: () => ({ isFocusModeEnabled: true, isTimeTrackingEnabled: true }),
+      });
+      fixture.componentRef.setInput('isAdvancedControls', true);
+      component.taskSet = {
+        ...DEFAULT_TASK,
+        id: 'task-1',
+        projectId: 'project-current',
+      } as Task;
+      fixture.detectChanges();
+      component.contextMenuTrigger()?.openMenu();
+      fixture.detectChanges();
+      tick();
+    };
+    const closeMenus = (): void => {
+      component.contextMenuTrigger()?.closeMenu();
+      flush();
+    };
+
+    it('lists the actions in the agreed order', fakeAsync(() => {
+      openMenu();
+
+      expect(itemKeys(overlayItems())).toEqual([
+        T.F.TASK.CMP.FOCUS_SESSION,
+        T.F.TASK.CMP.ADD_SUB_TASK,
+        T.F.TASK.CMP.ESTIMATE,
+        T.F.TASK.CMP.TOGGLE_TAGS,
+        T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT,
+        T.F.TASK.CMP.PRIORITY,
+        T.F.TASK.CMP.REORDER,
+        T.F.TASK.CMP.DUPLICATE,
+        T.F.TASK.CMP.MARK_WONT_DO,
+        T.F.TASK.CMP.DELETE,
+      ]);
+      closeMenus();
+    }));
+
+    it('labels every date shortcut visibly', fakeAsync(() => {
+      openMenu();
+
+      const labels = Array.from(
+        document.querySelectorAll<HTMLElement>(
+          '.cdk-overlay-container .quick-access button',
+        ),
+      ).map((btn) => btn.querySelector('.quick-access-label')?.textContent?.trim());
+      expect(labels).toEqual([
+        T.G.TODAY,
+        T.G.TOMORROW,
+        T.G.NEXT_WEEK,
+        T.F.TASK.D_SCHEDULE_TASK.QA_LABEL_PICK_DATE,
+      ]);
+      closeMenus();
+    }));
+
+    it('moves to top and bottom from the Reorder submenu', fakeAsync(() => {
+      const openReorder = (): HTMLElement[] => {
+        openMenu();
+        const trigger = overlayItems().find((el) =>
+          el.textContent?.includes(T.F.TASK.CMP.REORDER),
+        );
+        expect(trigger).toBeDefined();
+        trigger!.click();
+        fixture.detectChanges();
+        tick();
+        return overlayItems();
+      };
+
+      openReorder()
+        .find((el) => el.textContent?.includes(T.F.TASK.CMP.MOVE_TO_TOP))!
+        .click();
+      flush();
+      expect(taskService.moveToTop).toHaveBeenCalledWith('task-1', undefined, false);
+
+      openReorder()
+        .find((el) => el.textContent?.includes(T.F.TASK.CMP.MOVE_TO_BOTTOM))!
+        .click();
+      flush();
+      expect(taskService.moveToBottom).toHaveBeenCalledWith('task-1', undefined, false);
+      closeMenus();
+    }));
+  });
+
   describe('priority submenu', () => {
     const menuItems = (selector: string): HTMLElement[] =>
       Array.from(
@@ -571,6 +710,26 @@ describe('TaskContextMenuInnerComponent', () => {
       expect(taskService.update).toHaveBeenCalledWith('task-1', { priority: null });
       closeMenus();
     }));
+  });
+
+  // A `wontDoOn` equal to `doneOn` marks won't do; both travel in the op, so
+  // every client, released ones included, stores the same pair.
+  describe('setWontDo()', () => {
+    it('finishes the task with a matching doneOn and wontDoOn', () => {
+      jasmine.clock().install();
+      jasmine.clock().mockDate(new Date(1_700_000_000_000));
+      try {
+        component.setWontDo();
+      } finally {
+        jasmine.clock().uninstall();
+      }
+
+      expect(taskService.update).toHaveBeenCalledOnceWith(component.task.id, {
+        isDone: true,
+        doneOn: 1_700_000_000_000,
+        wontDoOn: 1_700_000_000_000,
+      });
+    });
   });
 
   describe('duplicate()', () => {

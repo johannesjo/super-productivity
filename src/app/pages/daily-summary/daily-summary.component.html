@@ -158,26 +158,25 @@
   >
     <mat-tab [label]="'1. ' + (T.PDS.REVIEW_TASKS | translate)">
       <section class="tab-inner">
-        @if (tasksWorkedOnOrDoneOrRepeatableFlat$ | async; as tasks) {
-          @if (tasks?.length) {
+        @let tasks = tasksWorkedOnOrDoneOrRepeatableFlat$ | async;
+        <!-- Wait for the archive so the tables render once instead of growing
+        when archived tasks are appended. -->
+        @if (tasks && isArchiveLoaded()) {
+          @if (tasks.length) {
             <task-summary-tables
               [dayStr]="dayStr"
               [flatTasks]="tasks"
               [isForToday]="isForToday"
               [isShowYesterday]="isForToday && isIncludeYesterday"
             ></task-summary-tables>
-          } @else if (isArchiveLoaded()) {
-            <p>{{ T.PDS.NO_TASKS | translate }}</p>
-          } @else {
-            <mat-spinner style="margin: auto"></mat-spinner>
-          }
-          @if (tasks?.length) {
             <tasks-by-tag
               [dayStr]="dayStr"
               [flatTasks]="tasks"
               [isForToday]="isForToday"
               [isShowYesterday]="isForToday && isIncludeYesterday"
             ></tasks-by-tag>
+          } @else {
+            <p>{{ T.PDS.NO_TASKS | translate }}</p>
           }
           <section style="margin-top: 48px">
             <h3 style="font-weight: bold; margin-bottom: 4px">
@@ -199,10 +198,7 @@
           class="tab-inner"
           style="max-width: 600px"
         >
-          <evaluation-sheet
-            [dayStr$]="dayStr$"
-            [timeWorkedToday]="timeWorked$ | async"
-          ></evaluation-sheet>
+          <evaluation-sheet [dayStr$]="dayStr$"></evaluation-sheet>
         </section>
       </mat-tab>
     }
