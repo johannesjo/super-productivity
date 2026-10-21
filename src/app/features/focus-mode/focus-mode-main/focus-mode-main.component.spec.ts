@@ -566,6 +566,47 @@ describe('FocusModeMainComponent', () => {
       expect(startSessionDispatchCount).toBe(1);
     }));
 
+    it('should still start the session when the overlay closes during the inline launch', fakeAsync(() => {
+      component.displayDuration.set(900000);
+      focusModeServiceSpy.focusModeConfig.and.returnValue({
+        isSkipPreparation: false,
+      });
+
+      component.startSession();
+      expect(component.isLaunching()).toBe(true);
+
+      // Escape, the close button and Android back hide the overlay, which
+      // destroys this component before the rocket finishes. The Start the
+      // user already pressed must not be dropped.
+      fixture.destroy();
+
+      expect(mockStore.dispatch).toHaveBeenCalledWith(
+        actions.startFocusSession({ duration: 900000, taskId: mockTask.id }),
+      );
+
+      tick(800);
+
+      const startSessionDispatchCount = (mockStore.dispatch as jasmine.Spy).calls
+        .allArgs()
+        .filter(([action]) => action.type === actions.startFocusSession.type).length;
+      expect(startSessionDispatchCount).toBe(1);
+    }));
+
+    it('should not start a session on destroy when the inline launch was cancelled', fakeAsync(() => {
+      focusModeServiceSpy.focusModeConfig.and.returnValue({
+        isSkipPreparation: false,
+      });
+
+      component.startSession();
+      component.openTaskSelector();
+      fixture.destroy();
+      tick(800);
+
+      expect(mockStore.dispatch).not.toHaveBeenCalledWith(
+        jasmine.objectContaining({ type: actions.startFocusSession.type }),
+      );
+    }));
+
     it('should use zero duration for Flowtime on the default inline-start path', fakeAsync(() => {
       focusModeServiceSpy.focusModeConfig.and.returnValue({
         isSkipPreparation: false,
