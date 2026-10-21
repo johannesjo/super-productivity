@@ -370,7 +370,9 @@ export class DialogEditTaskRepeatCfgComponent {
       );
     }
     const now = new Date();
-    if (cfg.waitForCompletion) {
+    // After completion also waits, but completing re-anchors the schedule
+    // instead of releasing a held-back copy (updateStartDateOnComplete$).
+    if (cfg.waitForCompletion && !cfg.repeatFromCompletionDate) {
       // An occurrence that is already due is held back until the live instance
       // is done and is created at that moment, so its date is not predictable.
       const due = getNewestPossibleDueDate(saved as TaskRepeatCfg, now);
@@ -390,10 +392,10 @@ export class DialogEditTaskRepeatCfgComponent {
       month: 'short',
       day: 'numeric',
     });
-    const key = cfg.waitForCompletion
-      ? T.F.TASK_REPEAT.D_EDIT.NEXT_OCCURRENCE_WAIT_FOR_COMPLETION
-      : cfg.repeatFromCompletionDate
-        ? T.F.TASK_REPEAT.D_EDIT.NEXT_OCCURRENCE_FROM_COMPLETION
+    const key = cfg.repeatFromCompletionDate
+      ? T.F.TASK_REPEAT.D_EDIT.NEXT_OCCURRENCE_FROM_COMPLETION
+      : cfg.waitForCompletion
+        ? T.F.TASK_REPEAT.D_EDIT.NEXT_OCCURRENCE_WAIT_FOR_COMPLETION
         : T.F.TASK_REPEAT.D_EDIT.NEXT_OCCURRENCE;
     return this._translateService.instant(key, { date });
   });

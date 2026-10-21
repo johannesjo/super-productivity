@@ -1278,6 +1278,23 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       );
     });
 
+    // After completion always waits (#5388), but completing the open copy only
+    // re-anchors the schedule; no held-back copy is added at that moment.
+    it('keeps the completion wording for an after-completion config, also when one is due', async () => {
+      const component = await setup({
+        repeatCfg: {
+          ...dailyCfg,
+          repeatFromCompletionDate: true,
+          waitForCompletion: true,
+          lastTaskCreationDay: '2026-06-08',
+        },
+      });
+
+      expect(component.nextOccurrenceText()).toBe(
+        T.F.TASK_REPEAT.D_EDIT.NEXT_OCCURRENCE_FROM_COMPLETION,
+      );
+    });
+
     it('withholds the date while schedule changes are unsaved', async () => {
       const component = await setup({ repeatCfg: dailyCfg });
 
