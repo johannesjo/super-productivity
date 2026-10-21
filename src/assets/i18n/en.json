@@ -47,7 +47,9 @@
   "BN": {
     "SHOW_ISSUE_PANEL": "Issue Provider Panel",
     "SHOW_NOTES": "Project Notes",
-    "SHOW_SCHEDULE": "Schedule"
+    "SHOW_SCHEDULE": "Schedule",
+    "SLOT_CHANGE_HINT": "Long-press to change this button",
+    "SLOT_MENU_LABEL": "Choose this button's destination"
   },
   "CONFIRM": {
     "DELETE_SECTION": "Are you sure you want to delete this section? Tasks in it will be moved to the task list.",
