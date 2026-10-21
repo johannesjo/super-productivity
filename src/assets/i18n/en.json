@@ -2265,8 +2265,6 @@
         "REPEAT_UNTIL_DAY": "Ends on (optional)",
         "REPEAT_UNTIL_DAY_DESCRIPTION": "The last day is included.",
         "SATURDAY": "Saturday",
-        "SCHEDULE_TYPE_AFTER_COMPLETION": "After I complete it",
-        "SCHEDULE_TYPE_FIXED": "Fixed schedule",
         "SCHEDULE_TYPE_LABEL": "Schedule type",
         "SKIP_OVERDUE": "Don't let overdue instances pile up",
         "SKIP_OVERDUE_DESCRIPTION": "Stops unfinished recurring tasks from piling up as overdue duplicates. An empty missed instance is removed once a newer one exists; instances where you tracked time or completed subtasks are kept.",
