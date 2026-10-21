@@ -35,6 +35,7 @@ import {
   TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG,
 } from './task-repeat-cfg-form.const';
 import { buildRepeatQuickSettingOptions } from './build-repeat-quick-setting-options';
+import { IconSelectOption } from '../../../ui/formly-icon-select/formly-icon-select.component';
 import { T } from '../../../t.const';
 import { TagService } from '../../tag/tag.service';
 import { unique } from '../../../util/unique';
@@ -657,13 +658,13 @@ export class DialogEditTaskRepeatCfgComponent {
   private _initializeFormConfig(): void {
     const translateService = this._translateService;
 
-    const buildOptions = (refDate: Date): { value: string; label: string }[] => {
+    const buildOptions = (refDate: Date): IconSelectOption[] => {
       // Read currentLocale() reactively each time options are built so the
       // correct locale is used even when the config store hasn't emitted yet
       // at construction time (previously captured once as a const → en-GB).
       // textLocale() localizes the spelled-out weekday name (UI language under
       // the ISO option), while numeric day/month keep currentLocale().
-      const options: { value: string; label: string }[] = buildRepeatQuickSettingOptions(
+      const options: IconSelectOption[] = buildRepeatQuickSettingOptions(
         refDate,
         this._dateTimeFormatService.currentLocale(),
         translateService,
@@ -675,6 +676,7 @@ export class DialogEditTaskRepeatCfgComponent {
       options.splice(customIdx, 0, {
         value: AFTER_COMPLETION_PRESET,
         label: translateService.instant(T.F.TASK_REPEAT.F.Q_AFTER_COMPLETION),
+        icon: 'task_alt',
       });
       return options;
     };
@@ -704,7 +706,7 @@ export class DialogEditTaskRepeatCfgComponent {
     // Memoize to avoid rebuilding options on every formly change cycle
     let lastStartDate: string | undefined;
     let lastLocaleKey: string | undefined;
-    let cachedOptions: { value: string; label: string }[];
+    let cachedOptions: IconSelectOption[];
 
     // Update options when startDate or either locale changes. The key must track
     // textLocale, not just currentLocale: under the ISO option currentLocale()

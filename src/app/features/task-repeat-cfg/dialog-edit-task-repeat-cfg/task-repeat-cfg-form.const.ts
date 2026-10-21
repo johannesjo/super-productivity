@@ -30,7 +30,7 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
 
   {
     key: 'quickSetting',
-    type: 'select',
+    type: 'icon-select',
     defaultValue: 'DAILY',
     templateOptions: {
       required: true,

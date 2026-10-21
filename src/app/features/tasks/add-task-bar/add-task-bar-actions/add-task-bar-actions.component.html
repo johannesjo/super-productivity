@@ -254,11 +254,7 @@
       mat-menu-item
       (click)="selectRepeatQuickSetting(option.value)"
     >
-      @if (option.value === 'CUSTOM') {
-        <mat-icon>tune</mat-icon>
-      } @else {
-        <mat-icon>repeat</mat-icon>
-      }
+      <mat-icon [fontIcon]="option.icon"></mat-icon>
       {{ option.label }}
     </button>
   }
