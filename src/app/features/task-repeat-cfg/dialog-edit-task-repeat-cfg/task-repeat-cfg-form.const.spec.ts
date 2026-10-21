@@ -3,6 +3,7 @@ import {
   TASK_REPEAT_CFG_BEHAVIOUR_FORM_CFG,
   TASK_REPEAT_CFG_END_FORM_CFG,
   TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG,
+  withWeekdayShortLabels,
 } from './task-repeat-cfg-form.const';
 import { T } from '../../../t.const';
 import { FormlyFieldConfig } from '@ngx-formly/core';
@@ -183,6 +184,31 @@ describe('TaskRepeatCfgFormConfig', () => {
     // recreate the checkbox views on every cycle switch, which breaks their
     // wiring to the FormControls (clicks stop updating the model after a
     // Week -> Month -> Week round-trip). Visibility must be driven by CSS instead.
+    it('is a row of day chips named as a group', () => {
+      expect(weekdaysGroup?.wrappers).toEqual(['labelled-group']);
+      expect(weekdaysGroup?.templateOptions?.label).toBe(T.F.TASK_REPEAT.F.REPEAT_ON);
+      expect(weekdaysGroup?.fieldGroup?.every((f) => f.type === 'chip-checkbox')).toBe(
+        true,
+      );
+    });
+
+    it("puts the locale's short weekday names on the chips, as a copy", () => {
+      const fields = withWeekdayShortLabels(TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG, 'en-US');
+      const labelled = fields
+        .find((f) => f.fieldGroupClassName === 'repeat-config-container')
+        ?.fieldGroup?.find((f) => f.fieldGroupClassName === 'weekdays');
+
+      expect(labelled?.fieldGroup?.map((f) => f.templateOptions?.['shortLabel'])).toEqual(
+        ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+      );
+      expect(labelled?.fieldGroup?.[0].templateOptions?.label).toBe(
+        T.F.TASK_REPEAT.F.MONDAY,
+      );
+      expect(
+        weekdaysGroup?.fieldGroup?.[0].templateOptions?.['shortLabel'],
+      ).toBeUndefined();
+    });
+
     it('should NOT use hideExpression (it would re-freeze the checkboxes)', () => {
       expect(weekdaysGroup?.hideExpression).toBeUndefined();
     });

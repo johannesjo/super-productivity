@@ -2252,6 +2252,7 @@
         "SKIP_INSTANCE": "Skip for today",
         "REPEAT_CYCLE": "Recur cycle",
         "REPEAT_EVERY": "Recur every",
+        "REPEAT_ON": "Repeat on",
         "REPEAT_UNTIL_DAY": "Ends on (optional)",
         "REPEAT_UNTIL_DAY_DESCRIPTION": "The last day is included.",
         "SATURDAY": "Saturday",

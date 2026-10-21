@@ -141,12 +141,17 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
         // default `lazyRender`, hiding a field group destroys its child views and
         // recreates them on re-show, and the recreated mat-checkboxes lose their
         // wiring to the (re-registered) FormControls. After a cycle round-trip
-        // (Week -> Month -> Week) the checkboxes then look enabled but are inert:
+        // (Week -> Month -> Week) the checkboxes then looked enabled but were inert:
         // clicks no longer update the model (#8025). Keeping the group mounted and
         // toggling only its visibility preserves the control/view binding.
         // `resetOnHide: false` on each checkbox keeps the selection when the
         // CUSTOM container itself is hidden (quickSetting != CUSTOM).
         fieldGroupClassName: 'weekdays',
+        // A compact row of day chips, named as a group for screen readers.
+        wrappers: ['labelled-group'],
+        templateOptions: {
+          label: T.F.TASK_REPEAT.F.REPEAT_ON,
+        },
         expressionProperties: {
           // Weekdays do not apply after completion: "2 weeks after I complete it"
           // is stored as 14 days (toStoredRepeatCfg).
@@ -159,7 +164,7 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
         fieldGroup: [
           {
             key: 'monday',
-            type: 'checkbox',
+            type: 'chip-checkbox',
             resetOnHide: false,
             templateOptions: {
               label: T.F.TASK_REPEAT.F.MONDAY,
@@ -167,7 +172,7 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
           },
           {
             key: 'tuesday',
-            type: 'checkbox',
+            type: 'chip-checkbox',
             resetOnHide: false,
             templateOptions: {
               label: T.F.TASK_REPEAT.F.TUESDAY,
@@ -175,7 +180,7 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
           },
           {
             key: 'wednesday',
-            type: 'checkbox',
+            type: 'chip-checkbox',
             resetOnHide: false,
             templateOptions: {
               label: T.F.TASK_REPEAT.F.WEDNESDAY,
@@ -183,7 +188,7 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
           },
           {
             key: 'thursday',
-            type: 'checkbox',
+            type: 'chip-checkbox',
             resetOnHide: false,
             templateOptions: {
               label: T.F.TASK_REPEAT.F.THURSDAY,
@@ -191,7 +196,7 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
           },
           {
             key: 'friday',
-            type: 'checkbox',
+            type: 'chip-checkbox',
             resetOnHide: false,
             templateOptions: {
               label: T.F.TASK_REPEAT.F.FRIDAY,
@@ -199,7 +204,7 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
           },
           {
             key: 'saturday',
-            type: 'checkbox',
+            type: 'chip-checkbox',
             resetOnHide: false,
             templateOptions: {
               label: T.F.TASK_REPEAT.F.SATURDAY,
@@ -207,7 +212,7 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
           },
           {
             key: 'sunday',
-            type: 'checkbox',
+            type: 'chip-checkbox',
             resetOnHide: false,
             templateOptions: {
               label: T.F.TASK_REPEAT.F.SUNDAY,
@@ -332,3 +337,35 @@ export const TASK_REPEAT_CFG_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
     className: 'sp-formly-child-option',
   },
 ];
+
+const WEEKDAY_KEYS = [
+  'monday',
+  'tuesday',
+  'wednesday',
+  'thursday',
+  'friday',
+  'saturday',
+  'sunday',
+] as const;
+
+/**
+ * Puts the locale's short weekday name ("Mon", "Di", "週一") on each weekday
+ * chip; the translated full name stays its accessible label. Returns a copy.
+ */
+export const withWeekdayShortLabels = (
+  fields: FormlyFieldConfig[],
+  locale: string,
+): FormlyFieldConfig[] =>
+  fields.map((field) => {
+    const dayIndex = WEEKDAY_KEYS.indexOf(field.key as (typeof WEEKDAY_KEYS)[number]);
+    if (dayIndex !== -1) {
+      // 2024-01-01 is a Monday.
+      const shortLabel = new Date(2024, 0, 1 + dayIndex).toLocaleDateString(locale, {
+        weekday: 'short',
+      });
+      return { ...field, templateOptions: { ...field.templateOptions, shortLabel } };
+    }
+    return field.fieldGroup
+      ? { ...field, fieldGroup: withWeekdayShortLabels(field.fieldGroup, locale) }
+      : field;
+  });

@@ -31,6 +31,7 @@ import { UntypedFormGroup } from '@angular/forms';
 import {
   TASK_REPEAT_CFG_ADVANCED_FORM_CFG,
   TASK_REPEAT_CFG_BEHAVIOUR_FORM_CFG,
+  withWeekdayShortLabels,
   TASK_REPEAT_CFG_END_FORM_CFG,
   TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG,
 } from './task-repeat-cfg-form.const';
@@ -763,7 +764,9 @@ export class DialogEditTaskRepeatCfgComponent {
       },
     };
 
-    this.essentialFormFields.set(formConfig);
+    this.essentialFormFields.set(
+      withWeekdayShortLabels(formConfig, this._dateTimeFormatService.textLocale()),
+    );
 
     // The hint follows the picked "If you fall behind" option.
     this.behaviourFormFields.set(

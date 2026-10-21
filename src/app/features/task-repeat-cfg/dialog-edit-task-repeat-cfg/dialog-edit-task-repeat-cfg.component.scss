@@ -61,13 +61,14 @@ mat-dialog-actions {
   margin-bottom: var(--s2);
 }
 
-// Four to a row on desktop, two on a phone, instead of two big tiles a row.
+// One row of seven day chips, also on a phone.
 :host::ng-deep .weekdays {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 0 var(--s);
+  display: flex;
+  gap: var(--s-half);
+  margin-bottom: var(--s2);
 
   > * {
+    flex: 1 1 0;
     min-width: 0;
   }
 }

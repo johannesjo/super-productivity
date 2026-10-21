@@ -121,10 +121,11 @@ test.describe('Recurring Task - Custom weekday checkboxes frozen after cycle rou
     // Enter CUSTOM mode; repeatCycle defaults to WEEKLY with Mon-Fri checked.
     await setQuickSetting(page, /Custom recurring config/i);
 
+    // Each day is a chip: a native checkbox named by the day, inside its label.
+    const mondayInput = dialog.getByRole('checkbox', { name: 'Monday' });
     const mondayCheckbox = dialog
-      .locator('.weekdays mat-checkbox')
-      .filter({ hasText: /Monday/i });
-    const mondayInput = mondayCheckbox.locator('input[type="checkbox"]');
+      .locator('.weekdays label')
+      .filter({ has: page.getByRole('checkbox', { name: 'Monday' }) });
     await expect(mondayInput).toBeChecked(); // sanity: default Weekly has Monday on
 
     // The round-trip that triggers the bug: Week -> Month -> Week.
@@ -170,10 +171,11 @@ test.describe('Recurring Task - Custom weekday checkboxes frozen after cycle rou
     await setQuickSetting(page, /Custom recurring config/i);
     await setRepeatCycle(page, /^Week$/);
 
+    // Each day is a chip: a native checkbox named by the day, inside its label.
+    const tuesdayInput = dialog.getByRole('checkbox', { name: 'Tuesday' });
     const tuesdayCheckbox = dialog
-      .locator('.weekdays mat-checkbox')
-      .filter({ hasText: /Tuesday/i });
-    const tuesdayInput = tuesdayCheckbox.locator('input[type="checkbox"]');
+      .locator('.weekdays label')
+      .filter({ has: page.getByRole('checkbox', { name: 'Tuesday' }) });
     await expect(tuesdayInput).toBeChecked();
 
     await tuesdayCheckbox.click();
