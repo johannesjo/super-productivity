@@ -132,6 +132,8 @@ next run.
      are `git tag --contains <snapshot commit>`.
    - Re-check every dimension those changes touch against the code. Released
      changes go into the SP baseline, the rest under "Unreleased on master".
+     If a new release contains the snapshot commit, everything already listed
+     under "Unreleased on master" has shipped too: move it into the baseline.
      Don't carry an SP fact forward from memory.
 3. **Competitor side.** For each app, read its changelog or "what's new" page,
    pricing page and store listings for changes since the snapshot. Run subagents in
@@ -158,7 +160,7 @@ next run.
 5. **Public claims.** Compare the comparison pages on super-productivity.com, if
    reachable, against the scorecard and list contradictions in the PR description.
 6. **Format and open the PR.** Run
-   `npx --no-install prettier --write docs/market/scorecard.md`, then open one PR
+   `npx prettier --write docs/market/scorecard.md`, then open one PR
    titled `docs(market): scorecard refresh YYYY-MM`. Its description lists:
    - verdict changes
    - notable competitor releases and price changes

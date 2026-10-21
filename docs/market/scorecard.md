@@ -1,7 +1,7 @@
 # Market scorecard
 
 **Snapshot 2026-10** · SP v19.2.0, plus unreleased changes on `master` up to
-`78139c5` · target, competitor set and method: [README.md](README.md)
+`43269ba` (2026-10-21) · target, competitor set and method: [README.md](README.md)
 
 How this snapshot was gathered:
 
@@ -176,9 +176,19 @@ Merged after v19.2.0, up to `78139c5`. Re-score these when they ship:
   data (#10847, for #7892); decryption failures get diagnostics, and SP asks
   before overwriting remote data it can't decrypt (#10855, for #9256).
 
-Merged after `78139c5` (2026-10-20 and 21), and shown only in the gap list: dates
-in the UI language (#10970), priority with `p1`–`p3` (#10974), Android launcher
-shortcuts (#10971) and larger touch targets (#10975).
+Merged after `78139c5`, up to `43269ba` (2026-10-21), and so far shown only in
+the gap list:
+
+- **Capture:** `@` dates in the UI language and date order (#10970), and
+  priority with `p1`–`p3` (#10974).
+- **Platforms:** Android launcher shortcuts (#10971).
+- **Mobile polish:**
+  - larger touch targets and readable muted text (#10975)
+  - long-press menus in the side navigation (#10992)
+  - a choosable second slot in the bottom bar (#10990)
+- **Calendar:** opt-in CalDAV VTODO creation (#10991) and deletion (#10989).
+- **Reminders:** 1-day, 3-day and 1-week lead times (#10977).
+- **Metrics:** the productivity and sustainability scores were removed (#10968).
 
 ### TickTick
 
@@ -497,13 +507,13 @@ Status values are defined in [README.md](README.md#monthly-refresh) (step 4).
 | Gap                                                          | #     | Who has it                                            | Issue                | Status (2026-10)                                                  |
 | ------------------------------------------------------------ | ----- | ----------------------------------------------------- | -------------------- | ----------------------------------------------------------------- |
 | Sync trust: data-loss reports, whole-dataset conflict dialog | 18    | TickTick, Todoist                                     | #7892, #9256, #10393 | Partly on master (#10847, #10855)                                 |
-| Add a task from the Android widget                           | 1, 16 | TickTick, Todoist, To Do List                         | #5139                | PR open (#10612)                                                  |
+| Add a task from the Android widget                           | 1, 16 | TickTick, Todoist, To Do List                         | #5139                | Draft PR open (#10612)                                            |
 | Android app-icon shortcuts                                   | 1, 16 | TickTick, Todoist                                     | #7636                | On master (#10971)                                                |
 | Priority in the add-task syntax                              | 1     | Todoist                                               | #10887, #10904       | On master (#10974)                                                |
 | Dates in the user's language                                 | 1     | Todoist                                               | #9340                | On master (#10970)                                                |
 | Multiple reminders per task                                  | 6     | TickTick, Todoist                                     | #4331                | —                                                                 |
-| Two-way Outlook sync; creating CalDAV tasks                  | 4     | Todoist, planners (Outlook); Tasks.org (CalDAV tasks) | #5001, #3938, #2719  | PR open (#10991, CalDAV tasks)                                    |
-| Mobile UI refresh                                            | 17    | TickTick, Todoist                                     | #9225, #4864, #7637  | Partly on master (#10975)                                         |
+| Two-way Outlook sync; creating CalDAV tasks                  | 4     | Todoist, planners (Outlook); Tasks.org (CalDAV tasks) | #5001, #3938, #2719  | Partly on master (#10991, #10989: CalDAV tasks)                   |
+| Mobile UI refresh                                            | 17    | TickTick, Todoist                                     | #9225, #4864, #7637  | Partly on master (#10975, #10990, #10992)                         |
 | Start and end times per entry, timesheet editing             | 7     | Toggl Track, Clockify                                 | #6378, #7888, #7890  | —                                                                 |
 | Weekly planning and review                                   | 5     | Sunsama, Akiflow                                      | none                 | —                                                                 |
 | Nested subtasks                                              | 2     | TickTick, Todoist, Tasks.org                          | #2657                | —                                                                 |
