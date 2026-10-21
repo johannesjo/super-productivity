@@ -14,12 +14,13 @@ const MAX_STEPS = 30;
  * have no fixed dates, so callers don't show it for those.
  *
  * A new config starts from its first occurrence (the task itself becomes that
- * copy); an existing one from the logical today. Skipped dates are left out,
+ * copy); an existing one from `from`, inclusive (the dialog passes the logical
+ * tomorrow, since today already has its copy). Skipped dates are left out,
  * and the rule's end date is respected by the occurrence helpers.
  */
 export const getRulePreviewDates = (
   cfg: TaskRepeatCfg,
-  logicalToday: Date,
+  from: Date,
   isNewCfg: boolean,
   count = 3,
 ): Date[] => {
@@ -27,7 +28,7 @@ export const getRulePreviewDates = (
   const dates: Date[] = [];
   let next = isNewCfg
     ? getFirstRepeatOccurrence(cfg)
-    : getNextRepeatOccurrence(cfg, logicalToday, { inclusive: true });
+    : getNextRepeatOccurrence(cfg, from, { inclusive: true });
   for (let step = 0; next && dates.length < count && step < MAX_STEPS; step++) {
     if (!skipped.has(getDbDateStr(next))) {
       dates.push(next);
