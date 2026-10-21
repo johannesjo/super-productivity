@@ -3,9 +3,8 @@
 Oct 21, 2026 · status: direction proposed; implementation contracts in
 review · rev. 3: the scheduled time syncs directly (no separate shared time),
 a plan without a time clears it in Plainspace (decided), and deletion has one
-path · rev. 2 after a review by Astra (schedule
-contract, write protocol, deletion contract, token scoping, smaller first
-release)
+path · rev. 2 after a review by Astra (schedule contract, write protocol,
+deletion contract, token scoping, smaller first release)
 
 Super Productivity stays a single-user deep-work tool; Plainspace stays the
 place where tasks go when they need other people. What fails users today is
@@ -20,6 +19,10 @@ Builds on: [#8648](https://github.com/super-productivity/super-productivity/issu
 (product vision) and
 [`2026-06-30-connect-from-super-productivity.md`](https://github.com/super-productivity/plainspace/blob/main/docs/plans/2026-06-30-connect-from-super-productivity.md)
 (connect flow, Phase 2 device code). Resolves #8790, #9833, #8616; informs #8476.
+
+Mockups of every screen and contract below:
+[design canvas](https://claude.ai/artifact/Phtx9HgeANGnrhrLd48oGA) (private
+until shared by the maintainer).
 
 ## Decision
 
@@ -189,8 +192,8 @@ sync error. Cost: my timed plan for a shared task is visible to the Space, and
 a day-only plan removes the time others see. Date-only times wait until
 Plainspace has them; inventing a clock time is a new setting (declined in
 #9833). Dropped in rev. 3: rev. 2's separate shared time on the deadline
-fields with "plan follows until I replan" seeding. It kept planning private but needed a
-transitions table, a backfill and a second schedule in the UI.
+fields with "plan follows until I replan" seeding. It kept planning private
+but needed a transitions table, a backfill and a second schedule in the UI.
 
 **Decided (Oct 21): a plan without a time clears the Plainspace time.**
 Planning a shared task day-only, adding it to Today without a time, or
@@ -248,24 +251,26 @@ Creates are not retried automatically after a restart: without a persisted
 to be shared, and adding one is not worth it while the manual retry is safe.
 
 **Visible state** (a deliverable, not just a principle). In-memory, rebuilt on
-each poll: _waiting to sync_, _couldn't sync: reason · Retry_, _not shared ·
-Share_, _no longer in your Plainspace list_. Shown in the task detail panel's
-issue section and as a count in the provider's issue-panel header. Never in
-the task row template (hot path).
+each poll: _synced_ (quiet), _waiting to sync_, _couldn't sync: reason ·
+Retry_, _changed in both places: Plainspace's value kept, mine shown ·
+Dismiss_, _not shared · Share_, _no longer in your Plainspace list_. Shown in
+the task detail panel's Plainspace section, and as a count of waiting and
+failed changes in the shared project's header, only while there is one. Never
+in the task row template (hot path).
 
 ## Deletion and lost access
 
 Needs to be fixed before anything creates links automatically, because move-in
 and bulk sharing raise the blast radius of today's delete-for-everyone.
 
-| Event                                                | Plainspace                                                                                                      | Local                                                                                                  |
-| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| Delete a linked task assigned to me                  | Deleted for everyone after the undo window (exists; confirm text says so; restorable in Plainspace for 30 days) | Deleted; in Recently deleted                                                                           |
-| Delete a task no longer assigned to me               | Untouched (server refuses: not assigned to me)                                                                  | Deleted; normal confirm, no "for everyone" warning                                                     |
-| Delete the project                                   | Untouched (not a delete trigger, verified)                                                                      | Tasks deleted locally                                                                                  |
-| Remove the provider                                  | Untouched                                                                                                       | Tasks unlinked, notes and time kept (exists)                                                           |
-| Item deleted, unassigned or membership lost remotely | —                                                                                                               | Never deleted. Task, notes and time kept; state _no longer in your Plainspace list_; no further pushes |
-| Move the task out of the shared project              | Untouched, stays linked                                                                                         | —                                                                                                      |
+| Event                                                | Plainspace                                                                                                                           | Local                                                                                                  |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| Delete a linked task assigned to me                  | Deleted for everyone after the undo window (exists; confirm text says so and adds that it can be restored in Plainspace for 30 days) | Deleted; in Recently deleted                                                                           |
+| Delete a task no longer assigned to me               | Untouched (server refuses: not assigned to me)                                                                                       | Deleted; normal confirm, no "for everyone" warning                                                     |
+| Delete the project                                   | Untouched (not a delete trigger, verified)                                                                                           | Tasks deleted locally                                                                                  |
+| Remove the provider                                  | Untouched                                                                                                                            | Tasks unlinked, notes and time kept (exists)                                                           |
+| Item deleted, unassigned or membership lost remotely | —                                                                                                                                    | Never deleted. Task, notes and time kept; state _no longer in your Plainspace list_; no further pushes |
+| Move the task out of the shared project              | Untouched, stays linked                                                                                                              | —                                                                                                      |
 
 A missing item is never read as a deletion: the server returns the same 404
 for deleted, reassigned and lost-membership, by design.
@@ -396,6 +401,10 @@ date-only time.
 - **New E2E harness**: Plainspace has `docker-compose.e2e.yml`; add
   `npm run e2e:plainspace:file` alongside the SuperSync one and run it in the
   scheduled E2E workflow.
+- **Release 0 cases**: reconnect replaces the token only in providers that
+  held the old one (a second host or account keeps its own); a 401 asks to
+  reconnect; the invite link is shown after sharing and hidden for a private
+  Space.
 - **Release 1 cases**: title round-trip both ways; concurrent edit (remote wins,
   local shown in the error); response lost after create, then retry; app
   killed between create and link, then poll links instead of importing; two SP
@@ -405,6 +414,11 @@ date-only time.
   each reach Plainspace; a remote change lands in SP; concurrent change (remote
   wins); a recurring task's local edit is skipped and the next occurrence
   pulls; a task not assigned to me neither pushes nor pulls its time.
+- **Release 3 cases**: sharing N tasks creates N items, subtasks stay local; a
+  bulk share interrupted midway and repeated creates no duplicates; the
+  500-item limit blocks with a message.
+- **Phase 2 cases**: assign to a member, release to the Space, reassign back
+  to me (schedule returns); a delegated task pulls title and done only.
 - **Deletion cases**: each row of the deletion table.
 - Unit specs for the per-field decision table and the move-in effect.
 
