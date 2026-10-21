@@ -395,6 +395,46 @@ describe('ProjectService', () => {
       expect(addSubTaskCalls.length).toBe(1);
     }));
 
+    it('should not link copied tasks to the original repeat config', fakeAsync(() => {
+      /* eslint-disable @typescript-eslint/naming-convention */
+      store.overrideSelector(selectTaskFeatureState, {
+        ...initialTaskState,
+        entities: {
+          ...initialTaskState.entities,
+          'task-1': {
+            ...initialTaskState.entities['task-1']!,
+            repeatCfgId: 'repeat-cfg-1',
+            timeEstimate: 3600000,
+          },
+          'sub-task-1': {
+            ...initialTaskState.entities['sub-task-1']!,
+            repeatCfgId: 'repeat-cfg-1',
+            timeEstimate: 600000,
+          },
+        },
+      });
+      /* eslint-enable @typescript-eslint/naming-convention */
+      store.refreshState();
+      const project = createProject({
+        id: 'project-1',
+        title: 'Project 1',
+        taskIds: ['task-1'],
+      });
+      spyOn(service, 'getByIdOnce$').and.returnValue(of(project));
+      service.duplicateProject('project-1');
+      tick();
+      const copied = taskService.createNewTaskWithDefaults.calls
+        .allArgs()
+        .map(([args]) => args.additional);
+      expect(copied.map((additional) => additional?.repeatCfgId)).toEqual([
+        undefined,
+        undefined,
+      ]);
+      expect(copied.map((additional) => additional?.timeEstimate)).toEqual([
+        3600000, 600000,
+      ]);
+    }));
+
     it('should move backlog tasks to the new project backlog', fakeAsync(() => {
       const project = createProject({
         id: 'project-1',
