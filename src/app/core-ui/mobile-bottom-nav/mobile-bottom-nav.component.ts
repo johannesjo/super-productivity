@@ -124,6 +124,7 @@ export class MobileBottomNavComponent {
   private readonly _slotMenuTrigger = viewChild('slotMenuTrigger', {
     read: MatMenuTrigger,
   });
+  // `read` is required: on a mat-button the bare ref is the MatButton instance.
   private readonly _slotButton = viewChild('slotButton', { read: ElementRef });
   // A long-press must not also navigate when the press ends in a click.
   private _isSlotMenuGesture = false;

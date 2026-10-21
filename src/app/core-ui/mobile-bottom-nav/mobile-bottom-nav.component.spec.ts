@@ -316,6 +316,20 @@ describe('MobileBottomNavComponent', () => {
       expect(navigateByUrl).not.toHaveBeenCalled();
     });
 
+    it('returns focus to the slot button when the menu closes', async () => {
+      const cmp = await renderSlot();
+
+      cmp.openSlotMenu();
+      fixture.detectChanges();
+      document
+        .querySelector<HTMLElement>('.mobile-bottom-nav-slot-menu [role="menuitemradio"]')
+        ?.click();
+      fixture.detectChanges();
+      await fixture.whenStable();
+
+      expect(document.activeElement).toBe(slotBtn());
+    });
+
     it('stores a picked destination and navigates to it afterwards', async () => {
       const cmp = await renderSlot();
 
