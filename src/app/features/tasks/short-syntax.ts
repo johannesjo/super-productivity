@@ -369,11 +369,13 @@ const parseNthWeekdaySyntax = (
 };
 
 // Todoist-style priority: "p1" is the most important, so it maps to the
-// highest of SP's levels. Only a whole, whitespace-delimited word counts, which
-// keeps "mp3", "p10", "#p1", "+p1" and "p1." out. "p4" is deliberately not a
+// highest of SP's levels. Only a whole, whitespace-delimited, lowercase word
+// counts, which keeps "mp3", "p10", "#p1", "+p1", "p1." and "P1" out — the
+// syntax is on by default, and an uppercase "P1" is far more often part of a
+// title ("Fix P1 incident") than typed as syntax. "p4" is deliberately not a
 // token: in Todoist it means "no priority", which is what a new task already
 // has, and on a title edit it would silently clear a priority the user set.
-const SHORT_SYNTAX_PRIORITY_REG_EX = /(?:^|\s)p([1-3])(?=\s|$)/i;
+const SHORT_SYNTAX_PRIORITY_REG_EX = /(?:^|\s)p([1-3])(?=\s|$)/;
 /* eslint-disable @typescript-eslint/naming-convention */
 const PRIORITY_FOR_TOKEN_NR: Record<string, TaskPriority> = { 1: 3, 2: 2, 3: 1 };
 /* eslint-enable @typescript-eslint/naming-convention */
@@ -462,8 +464,10 @@ export const shortSyntax = async (
 
   // First, so the due stage never sees the token: "@someday p1" would
   // otherwise hand its "1" to the numeric-hour fallback. Not for issue tasks:
-  // imported titles like "P1 crash on save" would get an unasked-for priority.
-  if (config.isEnablePriority && !task.issueId) {
+  // imported titles like "p1 crash on save" would get an unasked-for priority.
+  // On unless explicitly disabled: persisted configs that predate the flag
+  // lack it, and the loader does not merge shortSyntax defaults per key.
+  if (config.isEnablePriority !== false && !task.issueId) {
     const priorityResult = parsePriorityTracked(tracked);
     if (priorityResult) {
       taskChanges = { ...taskChanges, priority: priorityResult.priority };

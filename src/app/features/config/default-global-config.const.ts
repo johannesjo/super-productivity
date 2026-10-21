@@ -80,7 +80,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isEnableProject: true,
     isEnableDue: true,
     isEnableDeadline: false,
-    isEnablePriority: false,
+    isEnablePriority: true,
     isEnableTag: true,
     urlBehavior: 'keep',
   },

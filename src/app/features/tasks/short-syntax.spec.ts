@@ -2605,7 +2605,8 @@ describe('parseTimeSpentChanges', () => {
 });
 
 describe('shortSyntax priority (p1-p3)', () => {
-  const PRIORITY_CONFIG: ShortSyntaxConfig = { ...CONFIG, isEnablePriority: true };
+  const PRIORITY_CONFIG: ShortSyntaxConfig = CONFIG;
+  const OFF_CONFIG: ShortSyntaxConfig = { ...CONFIG, isEnablePriority: false };
   const parse = (
     title: string,
     taskOverrides: Partial<TaskCopy> = {},
@@ -2621,15 +2622,20 @@ describe('shortSyntax priority (p1-p3)', () => {
       mode,
     );
 
-  it('should be disabled by default', async () => {
-    expect(CONFIG.isEnablePriority).toBe(false);
-    expect(await parse('Fix login bug p1', {}, CONFIG)).toBeUndefined();
+  it('should be enabled by default', async () => {
+    expect(CONFIG.isEnablePriority).toBe(true);
+    expect((await parse('Fix login bug p1', {}, CONFIG))?.taskChanges.priority).toBe(3);
   });
 
-  it('should be disabled for a config that predates the flag', async () => {
-    const { isEnablePriority, ...legacyConfig } = PRIORITY_CONFIG;
+  it('should be enabled for a config that predates the flag', async () => {
+    const { isEnablePriority, ...legacyConfig } = CONFIG;
     expect(isEnablePriority).toBe(true);
-    expect(await parse('Fix login bug p1', {}, legacyConfig)).toBeUndefined();
+    const r = await parse('Fix login bug p1', {}, legacyConfig);
+    expect(r?.taskChanges.priority).toBe(3);
+  });
+
+  it('should be disabled when switched off', async () => {
+    expect(await parse('Fix login bug p1', {}, OFF_CONFIG)).toBeUndefined();
   });
 
   [
@@ -2645,10 +2651,12 @@ describe('shortSyntax priority (p1-p3)', () => {
     });
   });
 
-  it('should be case-insensitive', async () => {
-    const r = await parse('Fix login bug P1');
-    expect(r?.taskChanges.priority).toBe(3);
-    expect(r?.taskChanges.title).toBe('Fix login bug');
+  it('should only match lowercase tokens', async () => {
+    expect(await parse('Fix login bug P1')).toBeUndefined();
+    expect(await parse('P2 Fix P3 incident')).toBeUndefined();
+    const r = await parse('Fix P1 incident p2');
+    expect(r?.taskChanges.priority).toBe(2);
+    expect(r?.taskChanges.title).toBe('Fix P1 incident');
   });
 
   it('should match at the start and mid-title without leaving a double space', async () => {
@@ -2729,7 +2737,7 @@ describe('shortSyntax priority (p1-p3)', () => {
   });
 
   it('should not parse priority for issue tasks', async () => {
-    expect(await parse('P1 crash on save', { issueId: 'ISSUE-1' })).toBeUndefined();
+    expect(await parse('p1 crash on save', { issueId: 'ISSUE-1' })).toBeUndefined();
   });
 
   describe('title edits (replace mode)', () => {
@@ -2757,7 +2765,7 @@ describe('shortSyntax priority (p1-p3)', () => {
 
     it('should not parse when the flag is off', async () => {
       expect(
-        await parse('Fix login bug p1', { priority: 1 }, CONFIG, 'replace'),
+        await parse('Fix login bug p1', { priority: 1 }, OFF_CONFIG, 'replace'),
       ).toBeUndefined();
     });
   });

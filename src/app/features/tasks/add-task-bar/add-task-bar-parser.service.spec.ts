@@ -393,7 +393,7 @@ describe('AddTaskBarParserService', () => {
       });
 
       it('should leave p1 in the text when the flag is off', async () => {
-        await parse('Fix login bug p1', mockConfig);
+        await parse('Fix login bug p1', { ...mockConfig, isEnablePriority: false });
 
         expect(mockStateService.updatePriority).toHaveBeenCalledWith(null);
         expect(mockStateService.updateCleanText).toHaveBeenCalledWith('Fix login bug p1');
