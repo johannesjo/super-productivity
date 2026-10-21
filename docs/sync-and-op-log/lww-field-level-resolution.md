@@ -670,9 +670,12 @@ client already receives for this type, so it recreates the config whole
 - A released device that resolves the crossing still uses whole-entity LWW.
 - A device that receives the snapshot while it holds its own pending edit of
   the config meets a row, so it resolves whole-entity (decision 5). If its
-  edit is newer, e.g. a third device's own generation on the same morning,
-  its snapshot of its pre-batch config carries the old values again, as on
-  master. Reading the row's values would need a new decision.
+  edit is newer, its snapshot of its pre-batch config carries the old values
+  again, as on master. Two devices suffice: when the editing device resolved,
+  the other device's next-day generation reverts the edit if it runs before
+  that device downloads the snapshot (offline, or a sync that fails or
+  outlasts the 30s `waitForSyncWindow` wait). Reading the row's values would
+  need a new decision (#11003).
 
 Admitting another type needs a reported loss (fix intake), an adapter
 entity, and no derived upkeep on LWW apply (NOTE stays out, decision 4).
