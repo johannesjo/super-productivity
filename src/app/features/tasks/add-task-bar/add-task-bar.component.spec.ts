@@ -692,6 +692,31 @@ describe('AddTaskBarComponent', () => {
       expect(addRepeatCfgSpy.calls.mostRecent().args[2].startDate).toBe('2026-03-30');
     });
 
+    // The schedule pick offers day/week lead times; a repeat config persists the
+    // option id, which released clients before v19.2.0 cannot convert.
+    it('should not persist a long lead time into a picked repeat config', async () => {
+      mockTaskService.add.and.returnValue('task-1');
+      const addRepeatCfgSpy = spyOn(
+        TestBed.inject(TaskRepeatCfgService),
+        'addTaskRepeatCfgToTask',
+      );
+
+      component.stateService.updateInputTxt('Standup');
+      component.stateService.updateCleanText('Standup');
+      component.stateService.updateDate('2026-03-30', '09:30');
+      component.stateService.updateRemindOption(TaskReminderOptionId.d1);
+      component.stateService.updateRepeatSetting({
+        type: 'PRESET',
+        quickSetting: 'DAILY',
+      });
+
+      await component.addTask();
+
+      expect(addRepeatCfgSpy.calls.mostRecent().args[2].remindAt).toBe(
+        TaskReminderOptionId.h1,
+      );
+    });
+
     // Nothing rolls the fallback to today on the way in — a recurrence with no
     // date never passes a date through the parser — so the config would keep a
     // weekend start date the user cannot see while the task itself is created

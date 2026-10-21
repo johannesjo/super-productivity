@@ -14,7 +14,7 @@ import { ShortSyntaxConfig } from '../../config/global-config.model';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { TimeSpentOnDay, TaskPriority, TaskReminderOptionId } from '../task.model';
 import { TaskAttachment } from '../task-attachment/task-attachment.model';
-import { millisecondsDiffToDeadlineRemindOption } from '../util/remind-option-to-milliseconds';
+import { millisecondsDiffToRemindOption } from '../util/remind-option-to-milliseconds';
 import { getTaskPriority } from '../task-priority.const';
 import {
   DateInputLocale,
@@ -246,7 +246,7 @@ export class AddTaskBarParserService {
         }
 
         if (parseResult.taskChanges.deadlineRemindAt) {
-          deadlineRemindOption = millisecondsDiffToDeadlineRemindOption(
+          deadlineRemindOption = millisecondsDiffToRemindOption(
             parseResult.taskChanges.deadlineWithTime,
             parseResult.taskChanges.deadlineRemindAt,
           );
