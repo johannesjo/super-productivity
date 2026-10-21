@@ -25,7 +25,7 @@ import { FieldType, FieldTypeConfig, FormlyModule } from '@ngx-formly/core';
       <span
         class="chip"
         aria-hidden="true"
-        >{{ props['shortLabel'] || props.label }}</span
+        ><span class="chip-text">{{ props['shortLabel'] || props.label }}</span></span
       >
     </label>
   `,
