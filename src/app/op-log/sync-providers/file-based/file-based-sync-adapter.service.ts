@@ -48,7 +48,10 @@ import { SnackService } from '../../../core/snack/snack.service';
 import { T } from '../../../t.const';
 import { mergeVectorClocks, compareVectorClocks } from '../../../core/util/vector-clock';
 import {
+  appendRecentOpsAtBatchBoundary,
   detectDownloadGap,
+  isSingleFileBufferPossiblyTrimmed,
+  isSplitBufferPossiblyTrimmed,
   getOpLogBaselineClock,
   isSnapshotBaseUnseen,
 } from './file-based-sync-gap.util';
@@ -739,15 +742,14 @@ export class FileBasedSyncAdapterService {
       mergedClock = mergeVectorClocks(mergedClock, op.vectorClock);
     }
 
-    // Merge recentOps - add new ops, trim to limit
-    const existingOps: SyncFileCompactOp[] = currentData?.recentOps || [];
-    const combinedOps = [...existingOps, ...compactOps];
-    const mergedOps = combinedOps.slice(-FILE_BASED_SYNC_CONSTANTS.MAX_RECENT_OPS);
-    if (combinedOps.length > mergedOps.length) {
-      OpLog.warn(
-        `FileBasedSyncAdapter: Trimmed ${combinedOps.length - mergedOps.length} old ops ` +
-          `from recentOps (${combinedOps.length} → ${mergedOps.length})`,
-      );
+    // Merge recentOps - add new ops, trim to limit at a batch boundary (#10973)
+    const recent = appendRecentOpsAtBatchBoundary(
+      currentData,
+      compactOps,
+      FILE_BASED_SYNC_CONSTANTS.MAX_RECENT_OPS,
+    );
+    if (recent.trimmedCount > 0) {
+      OpLog.warn(`FileBasedSyncAdapter: Trimmed ${recent.trimmedCount} old ops`);
     }
 
     // Load archive data from IndexedDB to include in sync file
@@ -758,11 +760,6 @@ export class FileBasedSyncAdapterService {
     const currentState = stripLocalOnlySyncSettingsFromAppData(
       localStateSnapshot ?? this._stateSnapshotService.getStateSnapshotForOperationLog(),
     );
-
-    // Compute oldestOpSyncVersion from the first (oldest) op in mergedOps.
-    // Ops without sv (from old sync files) are ignored — gap detection stays
-    // disabled until those ops are naturally trimmed out.
-    const oldestOpSyncVersion = mergedOps.length > 0 ? mergedOps[0]?.sv : undefined;
 
     const newData: FileBasedSyncData = {
       version: FILE_BASED_SYNC_CONSTANTS.FILE_VERSION,
@@ -775,8 +772,7 @@ export class FileBasedSyncAdapterService {
       state: currentState,
       archiveYoung,
       archiveOld,
-      recentOps: mergedOps,
-      oldestOpSyncVersion,
+      ...recent.fields,
     };
 
     return newData;
@@ -1196,6 +1192,7 @@ export class FileBasedSyncAdapterService {
       lastSeenClock,
       localClock: await getOpLogBaselineClock(this._opLogStore, sinceSeq, lastSeenClock),
       hasSnapshot: !!syncData.state,
+      isPossiblyTrimmed: isSingleFileBufferPossiblyTrimmed(syncData),
     });
     if (isCosmeticReset) {
       OpLog.normal(
@@ -1953,6 +1950,7 @@ export class FileBasedSyncAdapterService {
       clientId,
       recentOps: legacy.recentOps ?? [],
       oldestOpSyncVersion: legacy.oldestOpSyncVersion,
+      oldestBatchComplete: legacy.oldestBatchComplete,
       snapshotRef: {
         syncVersion: legacy.syncVersion,
         vectorClock: legacy.vectorClock,
@@ -2380,15 +2378,20 @@ export class FileBasedSyncAdapterService {
     }
     const schemaVersion = newOps[0]?.schemaVersion || opsFile?.schemaVersion || 1;
 
-    const combinedOps = [...existingOps, ...compactOps];
-
     // Compact only a fresh folder or a buffer exceeding MAX_RECENT_OPS. Trim
-    // back to SPLIT_COMPACTION_THRESHOLD so ordinary appends stay op-only.
+    // back to SPLIT_COMPACTION_THRESHOLD (at a batch boundary, #10973) so
+    // ordinary appends stay op-only.
     let snapshotRef = opsFile?.snapshotRef;
     const needsCompaction =
-      !snapshotRef || combinedOps.length > FILE_BASED_SYNC_CONSTANTS.MAX_RECENT_OPS;
-
-    let finalOps = combinedOps;
+      !snapshotRef ||
+      existingOps.length + compactOps.length > FILE_BASED_SYNC_CONSTANTS.MAX_RECENT_OPS;
+    const recent = appendRecentOpsAtBatchBoundary(
+      opsFile,
+      compactOps,
+      needsCompaction
+        ? FILE_BASED_SYNC_CONSTANTS.SPLIT_COMPACTION_THRESHOLD
+        : FILE_BASED_SYNC_CONSTANTS.MAX_RECENT_OPS,
+    );
     if (needsCompaction) {
       // The ONLY normal path that reads the full store snapshot.
       const stateData = await this._buildStateFileData(
@@ -2430,13 +2433,10 @@ export class FileBasedSyncAdapterService {
         rev: stateRev,
         file: genStateFile,
       };
-      finalOps = combinedOps.slice(-FILE_BASED_SYNC_CONSTANTS.SPLIT_COMPACTION_THRESHOLD);
       OpLog.normal(
         `FileBasedSyncAdapter: split compaction wrote sync-state.json (syncVersion=${newSyncVersion}), ` +
-          `trimmed recentOps ${combinedOps.length} → ${finalOps.length}`,
+          `trimmed ${recent.trimmedCount} recentOps`,
       );
-    } else {
-      finalOps = combinedOps.slice(-FILE_BASED_SYNC_CONSTANTS.MAX_RECENT_OPS);
     }
 
     // Unreachable: `needsCompaction` is true whenever `snapshotRef` was undefined,
@@ -2455,8 +2455,7 @@ export class FileBasedSyncAdapterService {
       snapshotBaseClock: opsFile?.snapshotBaseClock,
       lastModified: Date.now(),
       clientId,
-      recentOps: finalOps,
-      oldestOpSyncVersion: finalOps.length > 0 ? finalOps[0]?.sv : undefined,
+      ...recent.fields,
       snapshotRef,
     };
 
@@ -2649,6 +2648,7 @@ export class FileBasedSyncAdapterService {
       lastSeenClock,
       localClock: await getOpLogBaselineClock(this._opLogStore, sinceSeq, lastSeenClock),
       hasSnapshot: true,
+      isPossiblyTrimmed: isSplitBufferPossiblyTrimmed(opsFile),
     });
 
     // See _downloadOps: abort before committing a baseline read from a target
