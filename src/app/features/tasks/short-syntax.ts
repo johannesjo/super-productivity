@@ -465,8 +465,8 @@ export const shortSyntax = async (
   // First, so the due stage never sees the token: "@someday p1" would
   // otherwise hand its "1" to the numeric-hour fallback. Not for issue tasks:
   // imported titles like "p1 crash on save" would get an unasked-for priority.
-  // On unless explicitly disabled: persisted configs that predate the flag
-  // lack it, and the loader does not merge shortSyntax defaults per key.
+  // On unless explicitly disabled, so a config without the key (e.g. one
+  // passed in before loadAllData merged in DEFAULT_GLOBAL_CONFIG) stays on.
   if (config.isEnablePriority !== false && !task.issueId) {
     const priorityResult = parsePriorityTracked(tracked);
     if (priorityResult) {

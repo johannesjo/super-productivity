@@ -37,8 +37,9 @@ export const SHORT_SYNTAX_FORM_CFG: ConfigFormSection<ShortSyntaxConfig> = {
     {
       key: 'isEnablePriority',
       type: 'checkbox',
-      // Display-only seed: configs that predate the key lack it, and the
-      // parser treats missing as ON, so the checkbox must show checked
+      // Display-only seed for paths where the key can still be absent —
+      // hydration itself per-key-merges DEFAULT_GLOBAL_CONFIG.shortSyntax in
+      // the reducer. shortSyntax() treats missing as ON, so show it checked.
       defaultValue: true,
       templateOptions: {
         label: T.GCF.SHORT_SYNTAX.IS_ENABLE_PRIORITY,

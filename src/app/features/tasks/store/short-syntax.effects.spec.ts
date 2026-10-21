@@ -301,11 +301,8 @@ describe('ShortSyntaxEffects', () => {
       expect(taskTimeSyncServiceSpy.flushOne).toHaveBeenCalledOnceWith('task-1');
     }));
 
-    it('should set priority from a title edit when priority syntax is enabled', fakeAsync(() => {
-      globalConfigServiceMock.cfg.and.returnValue({
-        ...DEFAULT_GLOBAL_CONFIG,
-        shortSyntax: { ...DEFAULT_GLOBAL_CONFIG.shortSyntax, isEnablePriority: true },
-      });
+    it('should set priority from a title edit with the default config', fakeAsync(() => {
+      globalConfigServiceMock.cfg.and.returnValue(DEFAULT_GLOBAL_CONFIG);
       const task = createTask('task-1', { title: 'Fix login bug p1', priority: 1 });
       taskServiceMock.getByIdOnce$.and.returnValue(of(task));
 
