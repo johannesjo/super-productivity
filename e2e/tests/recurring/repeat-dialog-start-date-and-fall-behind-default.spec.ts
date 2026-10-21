@@ -75,7 +75,14 @@ test.describe('Recurring task - repeat dialog start date and fall-behind default
     // The schedule dialog the repeat dialog was opened from is still open.
     const scheduleDialogs = page.locator('dialog-schedule-task');
     const before = await scheduleDialogs.count();
-    await dialog.locator('.planned-date-val').focus();
+    // The dialog moves focus to its first field once it has opened; focus the
+    // start date only after that, or Enter lands in another field.
+    await page.waitForFunction(() =>
+      document.getAnimations().every((a) => a.playState !== 'running'),
+    );
+    const startDate = dialog.locator('.planned-date-val');
+    await startDate.focus();
+    await expect(startDate).toBeFocused();
     await page.keyboard.press('Enter');
 
     await expect(scheduleDialogs).toHaveCount(before + 1);
