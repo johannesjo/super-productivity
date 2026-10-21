@@ -76,7 +76,27 @@
         <action android:name="com.superproductivity.superproductivity.DONE" />
         <action android:name="com.superproductivity.superproductivity.PAUSE" />
       </intent-filter>
+
+      <!-- Launcher shortcuts (long-press the app icon). Must sit on the
+           MAIN/LAUNCHER activity; they target AppShortcutActivity below. -->
+      <meta-data
+        android:name="android.app.shortcuts"
+        android:resource="@xml/shortcuts" />
     </activity>
+
+    <!-- Trampoline for the launcher shortcuts in res/xml/shortcuts.xml: forwards
+         the shortcut's URL to CapacitorMainActivity without the CLEAR_TASK flag
+         Android forces on static shortcuts (see AppShortcutActivity.kt). Empty
+         taskAffinity + excludeFromRecents keep it out of the app's task and
+         recents. Not exported: the launcher starts shortcuts as this app, so
+         nothing else needs to reach it. -->
+    <activity
+      android:name=".AppShortcutActivity"
+      android:excludeFromRecents="true"
+      android:exported="false"
+      android:noHistory="true"
+      android:taskAffinity=""
+      android:theme="@android:style/Theme.NoDisplay" />
 
     <!-- All new Super-Productivity main activity, based on Capacitor to support offline use -->
     <activity
