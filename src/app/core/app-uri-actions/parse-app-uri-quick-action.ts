@@ -36,9 +36,11 @@ const isQuickActionHost = (host: string): host is QuickActionHost =>
  * Parses the UI-only actions on the `com.super-productivity.app://` custom URL
  * scheme: `add-task` (opens the quick-add-task input bar) and the two
  * navigation actions `today` / `inbox`. These are what the iOS home
- * screen quick actions (long-press the app icon) resolve to — each
- * `UIApplicationShortcutItem` carries one of these URLs in its user info and
- * the native side just opens it, so the whole mapping lives here.
+ * screen quick actions and the Android launcher shortcuts (long-press the app
+ * icon) resolve to — each `UIApplicationShortcutItem` / `res/xml/shortcuts.xml`
+ * entry carries one of these URLs and the native side just opens it, so the
+ * whole mapping lives here (`tools/verify-android-shortcuts.test.js` checks the
+ * Android side against `QUICK_ACTION_HOSTS`).
  *
  * Reached on iOS and Android. Android routes custom-scheme URLs per declared
  * host, so each host here also needs a `<data>` entry in `AndroidManifest.xml`

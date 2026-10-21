@@ -32,6 +32,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { T } from '../../../t.const';
 import { DateService } from '../../../core/date/date.service';
 import { AFTER_COMPLETION_PRESET } from './after-completion-form-mapping';
+import { TASK_REMINDER_OPTIONS_WITHOUT_LONG_LEAD } from '../../planner/dialog-schedule-task/task-reminder-options.const';
 
 describe('DialogEditTaskRepeatCfgComponent', () => {
   let mockDialogRef: jasmine.SpyObj<MatDialogRef<DialogEditTaskRepeatCfgComponent>>;
@@ -491,6 +492,19 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       fixture.componentInstance.save();
 
       expect(mockDialogRef.close).toHaveBeenCalledOnceWith('created-repeat-cfg');
+    });
+
+    // a repeat cfg persists the option id, which clients before v19.2.0 cannot
+    // convert for the day/week lead times
+    it('offers no long lead times in the schedule pick', async () => {
+      const fixture = await setupTestBed({ task: mockTask });
+
+      fixture.componentInstance.openScheduleDialog();
+
+      const data = mockMatDialog.open.calls.mostRecent().args[1]?.data as {
+        reminderOptions?: unknown;
+      };
+      expect(data.reminderOptions).toBe(TASK_REMINDER_OPTIONS_WITHOUT_LONG_LEAD);
     });
   });
 

@@ -65,6 +65,7 @@ import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-f
 import { RepeatTaskHeatmapComponent } from '../repeat-task-heatmap/repeat-task-heatmap.component';
 import { CollapsibleComponent } from '../../../ui/collapsible/collapsible.component';
 import { DialogScheduleTaskComponent } from '../../planner/dialog-schedule-task/dialog-schedule-task.component';
+import { TASK_REMINDER_OPTIONS_WITHOUT_LONG_LEAD } from '../../planner/dialog-schedule-task/task-reminder-options.const';
 import { getRepeatDueWithTime } from '../store/get-repeat-due-with-time.util';
 import { remindOptionToMilliseconds } from '../../tasks/util/remind-option-to-milliseconds';
 import { isValidSplitTime } from '../../../util/is-valid-split-time';
@@ -277,6 +278,7 @@ export class DialogEditTaskRepeatCfgComponent {
           targetDay: currentCfg.startDate || undefined,
           targetTime: hasValidTime ? currentCfg.startTime : undefined,
           minDate: this.isEdit() ? null : this._getReferenceDate(),
+          reminderOptions: TASK_REMINDER_OPTIONS_WITHOUT_LONG_LEAD,
         },
       })
       .afterClosed()

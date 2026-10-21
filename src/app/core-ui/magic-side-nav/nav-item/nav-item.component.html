@@ -47,6 +47,7 @@
     [contextMenu]="contextMenu"
     [rightClickTriggerEl]="routeBtn"
     [leftClickTriggerEl]="settingsBtn"
+    [isTouchLongPress]="true"
   ></context-menu>
 
   <ng-template #contextMenu>
@@ -91,6 +92,7 @@
     [contextMenu]="folderContextMenu"
     [rightClickTriggerEl]="folderBtn"
     [leftClickTriggerEl]="folderSettingsBtn"
+    [isTouchLongPress]="true"
   ></context-menu>
 
   <ng-template #folderContextMenu>
@@ -161,6 +163,7 @@
         [contextMenu]="featureContextMenu"
         [rightClickTriggerEl]="routeLink"
         [leftClickTriggerEl]="featureSettingsBtn"
+        [isTouchLongPress]="true"
       ></context-menu>
 
       <ng-template #featureContextMenu>

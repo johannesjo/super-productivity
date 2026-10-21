@@ -12,9 +12,14 @@ export interface IssueSyncAdapter<TCfg> {
   extractSyncValues(issue: Record<string, unknown>): Record<string, unknown>;
   /** Extract the provider-specific last-updated marker (e.g. timestamp or etag hash) */
   getIssueLastUpdated?(issue: Record<string, unknown>): number;
+  /**
+   * `ctx.taskId` is the SP task the issue is created for; a provider can derive
+   * a deterministic remote id from it so a repeated create can't duplicate.
+   */
   createIssue?(
     title: string,
     cfg: TCfg,
+    ctx?: { taskId: string },
   ): Promise<{
     issueId: string;
     issueNumber?: number;
