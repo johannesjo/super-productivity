@@ -193,9 +193,9 @@
     "authorUrl": "https://github.com/SileboxUnderfined",
     "id": "supergile-yougile-issue-provider",
     "release": {
-      "version": "0.1.0",
-      "downloadUrl": "https://github.com/SileboxUnderfined/SuperGile/releases/download/v0.1.0/supergile-0.1.0.zip",
-      "sha256": "eae90e2e4445a5d4b825564eb4a35618571f9a1bc8ea1aa392596599c5dd7b86"
+      "version": "0.1.1",
+      "downloadUrl": "https://github.com/SileboxUnderfined/SuperGile/releases/download/v0.1.1/supergile-0.1.1.zip",
+      "sha256": "67ebf31649f745950f38da4f58f6bf43ed73e89fb43d5b1537ff626f78fbca76"
     }
   }
 ]
