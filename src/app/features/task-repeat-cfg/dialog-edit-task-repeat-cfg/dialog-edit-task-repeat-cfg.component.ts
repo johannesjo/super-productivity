@@ -403,12 +403,6 @@ export class DialogEditTaskRepeatCfgComponent {
       return null;
     }
     const translate = this._translateService;
-    if (cfg.isPaused) {
-      return {
-        text: translate.instant(T.F.TASK_REPEAT.D_EDIT.RULE_PAUSED),
-        fallsOn: null,
-      };
-    }
     const [key, params] = getTaskRepeatInfoText(
       cfg,
       this._dateTimeFormatService.currentLocale(),
@@ -416,23 +410,28 @@ export class DialogEditTaskRepeatCfgComponent {
       translate,
     );
     const ruleStr = translate.instant(key, params);
-    const text = isNonDefaultPolicy
+    // Paused keeps the rule in view, so resuming needs no guessing.
+    const policyKey = cfg.isPaused
+      ? T.F.TASK_REPEAT.D_EDIT.RULE_PAUSED
+      : isNonDefaultPolicy
+        ? FALL_BEHIND_SUMMARY[choice]
+        : null;
+    const text = policyKey
       ? translate.instant(T.F.TASK_REPEAT.D_EDIT.RULE_WITH_POLICY, {
           ruleStr,
-          policyStr: translate.instant(FALL_BEHIND_SUMMARY[choice]),
+          policyStr: translate.instant(policyKey),
         })
       : ruleStr;
+    if (cfg.isPaused) {
+      return { text, fallsOn: null };
+    }
 
     // After completion has no fixed dates; every single day needs no list.
     const isPlainDaily = cfg.repeatCycle === 'DAILY' && cfg.repeatEvery === 1;
     const dates =
       isAfterCompletion || isPlainDaily
         ? []
-        : getRulePreviewDates(
-            cfg,
-            this._dateService.getLogicalTodayDate(),
-            !this.isEdit(),
-          );
+        : getRulePreviewDates(cfg, this._getPreviewStartDate(), !this.isEdit());
     const fallsOn = dates.length
       ? translate.instant(T.F.TASK_REPEAT.D_EDIT.RULE_FALLS_ON, {
           dates: dates
@@ -849,6 +848,16 @@ export class DialogEditTaskRepeatCfgComponent {
           )
         : stored,
     );
+  }
+
+  // An existing series already has today's copy (or skipped it), so its
+  // preview starts tomorrow, in line with "Next new copy".
+  private _getPreviewStartDate(): Date {
+    const day = new Date(this._dateService.getLogicalTodayDate());
+    if (this.isEdit()) {
+      day.setDate(day.getDate() + 1);
+    }
+    return day;
   }
 
   // The final config with the preset expanded, as save() does, so the summary

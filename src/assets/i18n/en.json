@@ -2245,7 +2245,7 @@
         "Q_MONTHLY_NTH_WEEKDAY": "Every month on the {{ordinalStr}} {{weekdayStr}}",
         "Q_WEEKLY_CURRENT_WEEKDAY": "Every week on {{weekdayStr}}",
         "Q_YEARLY_CURRENT_DATE": "Every year on the {{dayAndMonthStr}}",
-        "QUICK_SETTING": "Recurring Config",
+        "QUICK_SETTING": "Repeats",
         "REMIND_AT": "Remind at",
         "REMIND_AT_PLACEHOLDER": "Select when to remind",
         "SKIP_FOR_DATE": "Skip for {{date}}",

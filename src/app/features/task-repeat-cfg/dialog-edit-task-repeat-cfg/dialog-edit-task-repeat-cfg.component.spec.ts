@@ -1726,14 +1726,33 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       });
     });
 
-    it('says when the series is paused', async () => {
+    it('says when the series is paused and keeps the rule', async () => {
       const fixture = await setupTestBed({
         repeatCfg: { ...mockRepeatCfg, repeatCycle: 'DAILY', isPaused: true },
       });
-      expect(fixture.componentInstance.ruleSummary()).toEqual({
-        text: T.F.TASK_REPEAT.D_EDIT.RULE_PAUSED,
-        fallsOn: null,
+      spyTranslate();
+      const summary = fixture.componentInstance.ruleSummary();
+      expect(summary?.text).toContain(T.F.TASK_REPEAT.D_EDIT.RULE_WITH_POLICY);
+      expect(summary?.text).toContain(T.F.TASK_REPEAT.D_EDIT.RULE_PAUSED);
+      expect(summary?.text).toContain(T.F.TASK_REPEAT.ADD_INFO_PANEL.DAILY);
+      expect(summary?.fallsOn).toBeNull();
+    });
+
+    it('starts the dates of an existing series after today', async () => {
+      const fixture = await setupTestBed({
+        repeatCfg: {
+          ...mockRepeatCfg,
+          quickSetting: 'CUSTOM',
+          repeatCycle: 'DAILY',
+          repeatEvery: 2,
+          startDate: '2026-06-09',
+        },
       });
+      spyTranslate();
+      // MOCK_TODAY is Tue 2026-06-09, which already has its copy
+      const fallsOn = fixture.componentInstance.ruleSummary()?.fallsOn;
+      expect(fallsOn).not.toContain('Jun 9');
+      expect(fallsOn).toContain('Jun 11');
     });
 
     it('mentions a fall-behind choice that differs from the default', async () => {
