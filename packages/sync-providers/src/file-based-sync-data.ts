@@ -82,6 +82,14 @@ export interface FileBasedSyncData<
    * The syncVersion of the oldest operation in recentOps.
    */
   oldestOpSyncVersion?: number;
+
+  /**
+   * #10973: true when recentOps provably holds every operation of the batch
+   * `oldestOpSyncVersion` (writers since #10973 trim only at batch boundaries).
+   * Optional: older writers omit it and may have cut inside that batch, so
+   * readers treat absence as unproven. Older readers ignore it.
+   */
+  oldestBatchComplete?: boolean;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -134,6 +142,8 @@ export interface FileBasedOpsFile<
   clientId: string;
   recentOps: SyncFileCompactOp<TCompactOperation>[];
   oldestOpSyncVersion?: number;
+  /** Same meaning as FileBasedSyncData.oldestBatchComplete (#10973). */
+  oldestBatchComplete?: boolean;
   snapshotRef: FileBasedSnapshotRef;
   /**
    * Present only while converting a legacy v2 file. Readers must finish or

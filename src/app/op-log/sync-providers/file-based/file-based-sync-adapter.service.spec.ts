@@ -2818,38 +2818,45 @@ describe('FileBasedSyncAdapterService', () => {
       expect(result.gapDetected).toBeFalsy();
     });
 
-    it('should NOT detect gap at the boundary sinceSeq === oldestOpSyncVersion - 1 (SPAP-9 off-by-one)', async () => {
-      // Boundary: the oldest surviving op has sv = sinceSeq + 1. The client
-      // already has everything up to sinceSeq, and the very next op it needs
-      // (sinceSeq + 1) is present — nothing was trimmed out from under it, so
-      // this must NOT be treated as a gap. The old `> sinceSeq` test flagged it.
-      const maxOps = FILE_BASED_SYNC_CONSTANTS.MAX_RECENT_OPS;
-      const fullOps = Array.from({ length: maxOps }, (_, i) => ({
-        id: `op-${i}`,
-        c: 'other-client',
-        a: 'HA',
-        o: 'ADD',
-        e: 'TASK',
-        d: `task-${i}`,
-        v: { otherClient: i + 1 },
-        t: Date.now() + i,
-        s: 1,
-        p: {},
-        sv: 6 + Math.floor(i / 10), // oldest sv=6
-      }));
+    for (const { oldestBatchComplete, isGap } of [
+      { oldestBatchComplete: true, isGap: false },
+      { oldestBatchComplete: undefined, isGap: true },
+    ]) {
+      it(`full buffer at sinceSeq + 1: gap=${isGap}, certified=${oldestBatchComplete} (SPAP-9, #10973)`, async () => {
+        // Boundary: the oldest surviving op has sv = sinceSeq + 1. When the writer
+        // certifies that batch complete, nothing the client needs was trimmed, so
+        // this must NOT be a gap (the old `> sinceSeq` test flagged it, SPAP-9).
+        // #10973: without the marker, a released writer may have cut INSIDE batch
+        // sinceSeq + 1 of this full buffer, so the client needs the snapshot.
+        const maxOps = FILE_BASED_SYNC_CONSTANTS.MAX_RECENT_OPS;
+        const fullOps = Array.from({ length: maxOps }, (_, i) => ({
+          id: `op-${i}`,
+          c: 'other-client',
+          a: 'HA',
+          o: 'ADD',
+          e: 'TASK',
+          d: `task-${i}`,
+          v: { otherClient: i + 1 },
+          t: Date.now() + i,
+          s: 1,
+          p: {},
+          sv: 6 + Math.floor(i / 10), // oldest sv=6
+        }));
 
-      const data = createMockSyncData({
-        syncVersion: 60,
-        recentOps: fullOps,
-        oldestOpSyncVersion: 6,
+        const data = createMockSyncData({
+          syncVersion: 60,
+          recentOps: fullOps,
+          oldestOpSyncVersion: 6,
+          oldestBatchComplete,
+        });
+        mockProvider.downloadFile.and.returnValue(
+          Promise.resolve({ dataStr: addPrefix(data), rev: 'rev-1' }),
+        );
+
+        const result = await adapter.downloadOps(5); // sinceSeq=5, oldest=6
+        expect(!!result.gapDetected).toBe(isGap);
       });
-      mockProvider.downloadFile.and.returnValue(
-        Promise.resolve({ dataStr: addPrefix(data), rev: 'rev-1' }),
-      );
-
-      const result = await adapter.downloadOps(5); // sinceSeq=5, oldest=6 → contiguous
-      expect(result.gapDetected).toBeFalsy();
-    });
+    }
 
     it('should still detect gap when oldestOpSyncVersion > sinceSeq + 1 (ops actually trimmed)', async () => {
       const maxOps = FILE_BASED_SYNC_CONSTANTS.MAX_RECENT_OPS;
@@ -3030,6 +3037,8 @@ describe('FileBasedSyncAdapterService', () => {
       expect(uploadedData.recentOps[1].sv).toBe(1);
       // oldestOpSyncVersion should be sv of first op = 1
       expect(uploadedData.oldestOpSyncVersion).toBe(1);
+      // #10973: a buffer that starts with this batch holds all of it.
+      expect(uploadedData.oldestBatchComplete).toBeTrue();
     });
   });
 
