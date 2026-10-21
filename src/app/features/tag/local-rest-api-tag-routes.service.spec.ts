@@ -1,8 +1,11 @@
 import { TestBed } from '@angular/core/testing';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { BehaviorSubject } from 'rxjs';
 import { LocalRestApiTagRoutesService } from './local-rest-api-tag-routes.service';
 import { TagService } from './tag.service';
 import { Tag } from './tag.model';
+import { Task } from '../tasks/task.model';
+import { selectAllTasks } from '../tasks/store/task.selectors';
 import {
   DEFAULT_TAG,
   IMPORTANT_TAG,
@@ -19,6 +22,7 @@ describe('LocalRestApiTagRoutesService', () => {
   let service: LocalRestApiTagRoutesService;
   let tagServiceMock: jasmine.SpyObj<TagService>;
   let tags$: BehaviorSubject<Tag[]>;
+  let store: MockStore;
 
   const createTag = (id: string, overrides: Partial<Tag> = {}): Tag => ({
     ...DEFAULT_TAG,
@@ -26,6 +30,9 @@ describe('LocalRestApiTagRoutesService', () => {
     title: `Tag ${id}`,
     ...overrides,
   });
+
+  const createTask = (id: string, tagIds: string[], parentId?: string): Task =>
+    ({ id, tagIds, parentId, projectId: '' }) as Partial<Task> as Task;
 
   const request = (
     method: string,
@@ -92,9 +99,11 @@ describe('LocalRestApiTagRoutesService', () => {
       providers: [
         LocalRestApiTagRoutesService,
         { provide: TagService, useValue: tagServiceMock },
+        provideMockStore({ selectors: [{ selector: selectAllTasks, value: [] }] }),
       ],
     });
     service = TestBed.inject(LocalRestApiTagRoutesService);
+    store = TestBed.inject(MockStore);
   });
 
   describe('unowned requests', () => {
@@ -403,6 +412,61 @@ describe('LocalRestApiTagRoutesService', () => {
         expect(response.status).withContext(id).toBe(200);
         expect(tagServiceMock.deleteTag).toHaveBeenCalledWith(id);
       }
+    });
+
+    it('refuses a tag that still has tasks with 409 and the task count', async () => {
+      store.overrideSelector(selectAllTasks, [
+        createTask('a', ['t1']),
+        createTask('b', ['t1', URGENT_TAG.id]),
+        createTask('c', ['other']),
+      ]);
+      store.refreshState();
+
+      const response = await handle(request('DELETE', '/tags/t1'));
+
+      expect(response.status).toBe(409);
+      expect(errorCode(response)).toBe('TAG_NOT_EMPTY');
+      expect(response.body.ok ? undefined : response.body.error.details).toEqual({
+        taskCount: 2,
+      });
+      expectNoWrite();
+    });
+
+    it('counts tasks by their tagIds even when tag.taskIds lags behind', async () => {
+      // tag.taskIds only keeps the display order; the delete cascade, and
+      // with it an orphan delete, goes by task.tagIds.
+      store.overrideSelector(selectAllTasks, [createTask('sub', ['t1'], 'parent')]);
+      store.refreshState();
+
+      const response = await handle(request('DELETE', '/tags/t1'));
+
+      expect(response.status).toBe(409);
+      expect(response.body.ok ? undefined : response.body.error.details).toEqual({
+        taskCount: 1,
+      });
+      expectNoWrite();
+    });
+
+    it('ignores stale tag.taskIds entries for tasks that no longer exist', async () => {
+      tags$.next(
+        tags$.value.map((t) => (t.id === 't1' ? { ...t, taskIds: ['gone'] } : t)),
+      );
+
+      const response = await handle(request('DELETE', '/tags/t1'));
+
+      expect(response.status).toBe(200);
+      expect(tagServiceMock.deleteTag).toHaveBeenCalledOnceWith('t1');
+    });
+
+    it('refuses a board tag that still has tasks', async () => {
+      store.overrideSelector(selectAllTasks, [createTask('a', [URGENT_TAG.id])]);
+      store.refreshState();
+
+      const response = await handle(request('DELETE', `/tags/${URGENT_TAG.id}`));
+
+      expect(response.status).toBe(409);
+      expect(errorCode(response)).toBe('TAG_NOT_EMPTY');
+      expectNoWrite();
     });
 
     it('refuses the Today tag', async () => {

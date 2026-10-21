@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { Store } from '@ngrx/store';
 import { firstValueFrom } from 'rxjs';
 import typia, { IValidation } from 'typia';
 import {
@@ -14,6 +15,7 @@ import {
   createErrorResponse,
   createSuccessResponse,
 } from '../../core/electron/local-rest-api-response';
+import { selectAllTasks } from '../tasks/store/task.selectors';
 import { TODAY_TAG } from './tag.const';
 import { Tag } from './tag.model';
 import { TagService } from './tag.service';
@@ -45,6 +47,7 @@ const normalizeTagTitle = (title: string): string =>
 @Injectable()
 export class LocalRestApiTagRoutesService implements LocalRestApiFeatureRoutes {
   private readonly _tagService = inject(TagService);
+  private readonly _store = inject(Store);
 
   async handle(
     request: LocalRestApiRequestPayload,
@@ -154,8 +157,24 @@ export class LocalRestApiTagRoutesService implements LocalRestApiFeatureRoutes {
       return this._tagNotFound(requestId);
     }
 
-    // Also removes the tag from all tasks, active and archived, as the UI's
-    // "Delete tag" does.
+    // The UI's "Delete tag" strips the tag from its tasks, and deletes any
+    // task left with no project and no tag, after a confirm dialog a REST
+    // caller never sees. So a tag with tasks is refused like a non-empty
+    // project; callers untag the tasks first.
+    const taskCount = await this._countTasksWithTag(tagId);
+    if (taskCount > 0) {
+      return createErrorResponse(
+        requestId,
+        409,
+        'TAG_NOT_EMPTY',
+        `Tag still has ${taskCount} task${taskCount === 1 ? '' : 's'}; remove the tag from them before deleting it`,
+        { taskCount },
+      );
+    }
+
+    // As the UI's "Delete tag" does, this also removes the tag from archived
+    // tasks and repeat configs (deleting those left with no project and no
+    // tag) and deletes the tag's time-tracking data.
     this._tagService.deleteTag(tagId);
 
     return createSuccessResponse(requestId, 200, { deleted: true, id: tagId });
@@ -205,6 +224,15 @@ export class LocalRestApiTagRoutesService implements LocalRestApiFeatureRoutes {
       'A tag with this title already exists',
       { id: existing.id, title: existing.title },
     );
+  }
+
+  /**
+   * Membership comes from `task.tagIds`, subtasks included, as in the delete
+   * cascade; `tag.taskIds` only keeps the display order and can lag behind.
+   */
+  private async _countTasksWithTag(tagId: string): Promise<number> {
+    const tasks = await firstValueFrom(this._store.select(selectAllTasks));
+    return tasks.filter((task) => task.tagIds.includes(tagId)).length;
   }
 
   /**
