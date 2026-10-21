@@ -1,10 +1,12 @@
 # Multi-user collaboration: close the Plainspace seam
 
-Oct 21, 2026 · status: direction proposed; implementation contracts in
-review · rev. 3: the scheduled time syncs directly (no separate shared time),
-a plan without a time clears it in Plainspace (decided), and deletion has one
-path · rev. 2 after a review by Astra (schedule contract, write protocol,
-deletion contract, token scoping, smaller first release)
+Oct 21, 2026 · status: direction agreed; ready to implement · rev. 4: KISS
+pass. The protocol reuses the generic two-way-sync engine as it is; no
+conditional writes, no idempotency column, no capability negotiation, no
+server migration · rev. 3: the scheduled time syncs directly, a plan without
+a time clears it, one delete path · rev. 2 after a review by Astra (schedule
+contract, write protocol, deletion contract, token scoping, smaller first
+release)
 
 Super Productivity stays a single-user deep-work tool; Plainspace stays the
 place where tasks go when they need other people. What fails users today is
@@ -18,7 +20,7 @@ Builds on: [#8648](https://github.com/super-productivity/super-productivity/issu
 [`docs/plans/2026-06-02-super-productivity-integration.md`](https://github.com/super-productivity/plainspace/blob/main/docs/plans/2026-06-02-super-productivity-integration.md)
 (product vision) and
 [`2026-06-30-connect-from-super-productivity.md`](https://github.com/super-productivity/plainspace/blob/main/docs/plans/2026-06-30-connect-from-super-productivity.md)
-(connect flow, Phase 2 device code). Resolves #8790, #9833, #8616; informs #8476.
+(connect flow). Resolves #8790, #9833, #8616; informs #8476.
 
 Mockups of every screen and contract below:
 [design canvas](https://claude.ai/artifact/Phtx9HgeANGnrhrLd48oGA) (private
@@ -32,19 +34,19 @@ until shared by the maintainer).
    the assignee are shared with the Space. Time tracked, estimates, notes,
    subtasks, tags and Today order are never sent to Plainspace. SP's own sync
    still carries them between my devices.
-3. **The assignee owns the schedule.** While a task is assigned to me, its
-   timed schedule syncs both ways; a plan without a time shows as no time in
-   Plainspace (§ Scheduled time).
-4. **Contracts before features.** Every release below ships with its write,
-   recovery and deletion rules defined (§ Sync protocol, § Deletion and lost
-   access), not just its happy path.
-5. **Small releases, each shippable alone.** The first behavioural release is
-   safe pulls, title round-trips, recoverable move-in creation, visible sync
-   state and focused E2Es. Scheduled time, bulk sharing, device-code connect
-   and faster refresh ship separately.
-6. **Plainspace stays minimal.** No notes, subtasks or comments on Plainspace
-   items; its own non-goals already say so. Server work is a handful of
-   additive integration changes.
+3. **Only tasks assigned to me sync.** While a task is assigned to me, its
+   title, done state and timed schedule sync both ways. A task that is not (or
+   no longer) assigned to me is not synced, whatever the reason (§ Scheduled
+   time, § Deletion and lost access).
+4. **Reuse the engine that exists.** Plainspace already runs on SP's generic
+   two-way-sync engine, which keeps per-field baselines, fetches before it
+   writes and lets the remote win (§ Sync protocol). The plan fills its gaps
+   instead of adding a protocol on top.
+5. **Plainspace stays minimal.** One widened `PATCH` now, two small endpoints
+   for Phase 2, no migration. No notes, subtasks or comments on Plainspace
+   items; its own non-goals already say so.
+6. **Small releases, each shippable alone** (§ Releases). Accepted risks are
+   written down instead of guarded against (§ Accepted gaps).
 
 ## Evidence
 
@@ -82,36 +84,35 @@ privacy-first"), same-device multi-login (#5189 part 1; OS accounts cover it).
 
 ### What the code does today
 
-| Area            | Today                                                                                                                                                                  | Source                                                                     |
-| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
-| Push            | Only `isDone`. `pushChanges` returns early otherwise; `patchTask$` sends `{done}`                                                                                      | `plainspace-sync-adapter.service.ts:61,99-113`                             |
-| Push triggers   | `updateTask`, short syntax, schedule/reschedule/**unschedule**, tags, planner **plan-for-day/transfer**; fetch, then patch, no precondition                            | `issue-two-way-sync.effects.ts:153-216`, `compute-push-decisions.ts`       |
-| Pull            | Any `updatedAt` change overwrites title, done and `dueWithTime` together; no per-field baseline, so a local edit is lost when anyone touches the item                  | `plainspace-common-interfaces.service.ts:132-151`                          |
-| Schedule fields | Setting `dueWithTime` clears `dueDay` and vice versa                                                                                                                   | ARCHITECTURE-DECISIONS.md #1                                               |
-| Failed push     | Snack only, no retry, no lasting state                                                                                                                                 | `issue-two-way-sync.effects.ts:198-210`                                    |
-| Create          | Only on `addTask` of a root task in the bound project; create, then a second op links                                                                                  | `issue-two-way-sync.effects.ts:326-428`                                    |
-| Delete          | `deleteTask`/`deleteTasks` delete the Plainspace item for everyone after the undo window; deleting a project does not; removing the provider unlinks tasks, keeps them | same `:267-325`, `issue-provider-shared.reducer.ts:60-70`                  |
-| Missing items   | A task that leaves my `/tasks` list is left untouched; the server answers 404 for deleted, unassigned and no-longer-member alike                                       | `plainspace-common-interfaces.service.ts:94-130`, server `integration.ts`  |
-| Move in / out   | Moving in creates nothing; moving out keeps the link and keeps syncing                                                                                                 | `poll-issue-updates.effects.ts:139-146`                                    |
-| Share a project | Binds a provider; existing tasks stay local; the returned Space `url` is ignored, no invite link shown                                                                 | `plainspace-share.service.ts:51-110`                                       |
-| Connect         | Guided page on plainspace.org, then copy-paste the token; one PAT per email, minting revokes the old one; provider configs may point at different hosts                | `plainspace-connect-dialog.component.ts:66-80`, server `schema.ts:367-369` |
-| Latency         | 5-minute poll of the full assigned list                                                                                                                                | `plainspace.const.ts:7`                                                    |
-| E2E             | None                                                                                                                                                                   | —                                                                          |
+| Area            | Today                                                                                                                                                                  | Source                                                                       |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Engine          | Plainspace is registered on the generic two-way-sync engine: per-field baselines in `issueLastSyncedValues`, fetch right before a push, remote wins on conflict        | `issue-two-way-sync.effects.ts:150`, `compute-push-decisions.ts:79-90`       |
+| Push            | Only `isDone`. `pushChanges` returns early otherwise; `patchTask$` sends `{done}`                                                                                      | `plainspace-sync-adapter.service.ts:61,99-113`                               |
+| Pull            | Any `updatedAt` change overwrites title, done and `dueWithTime` together, ignoring the baselines, so a local edit is lost when anyone touches the item                 | `plainspace-common-interfaces.service.ts:132-151`                            |
+| Errors          | `getMyTasks$` and `getById$` turn every error, 401 and offline included, into an empty result; an offline push is dropped with no message                              | `plainspace-api.service.ts:141,171`                                          |
+| Schedule fields | Setting `dueWithTime` clears `dueDay` and vice versa                                                                                                                   | ARCHITECTURE-DECISIONS.md #1                                                 |
+| Create          | Only on `addTask` of a root task in the bound project; create, then a second op links                                                                                  | `issue-two-way-sync.effects.ts:326-428`                                      |
+| Delete          | `deleteTask`/`deleteTasks` delete the Plainspace item for everyone after the undo window; deleting a project does not; removing the provider unlinks tasks, keeps them | same `:267-325`, `issue-provider-shared.reducer.ts:60-70`                    |
+| Missing items   | A task that leaves my `/tasks` list is left untouched; the server answers 404 for deleted, unassigned and no-longer-member alike                                       | `plainspace-common-interfaces.service.ts:94-130`, server `integration.ts`    |
+| Move in / out   | Moving in creates nothing; moving out keeps the link and keeps syncing                                                                                                 | `poll-issue-updates.effects.ts:139-146`                                      |
+| Share a project | Binds a provider; existing tasks stay local; no invite link shown                                                                                                      | `plainspace-share.service.ts:51-110`                                         |
+| Space link      | SP already builds `{host}/{slug}`; Plainspace sends a visitor without identity to `/{slug}/join`                                                                       | `plainspace-api.service.ts:109-127`, plainspace `routes/Project.tsx:318-325` |
+| Connect         | Guided page on plainspace.org, then copy-paste the token; one PAT per email, minting revokes the old one; provider configs may point at different hosts                | `plainspace-connect-dialog.component.ts:66-80`, server `schema.ts:367-369`   |
+| Latency         | 5-minute poll of the full assigned list (at most 500 items per Space)                                                                                                  | `plainspace.const.ts:7`, plainspace `shared/src/constants.ts:29`             |
 
 ### What the Plainspace server offers
 
 The integration API (`packages/server/src/routes/integration.ts`, PAT auth)
-lists my tasks (`?updatedSince=` supported, no tombstones), creates (assigned
-to the caller, `:305`), patches **only** `{done}` (`:381-383`), deletes (soft,
+lists my tasks, creates (assigned to the caller, `:305`), patches **only**
+`{done}` and answers 422 to anything else (`:381-383`), deletes (soft,
 restorable in the web app for 30 days: `routes/items.ts:457`,
 `services/retention.ts:16`), lists and claims unassigned tasks, and creates
 Spaces. Items have `text` varchar(500), single `assignedTo`, `remindAt`
 (always an instant), `repeat`, and a row-level `updated_at` only; no notes,
-subtasks or comments. Live updates are SSE for member sessions only
-(`routes/sse.ts:12`). Spaces default to `sharingMode: 'open'`, so anyone with
-the join link can participate without an account. The member web API already
-edits text, `remindAt` and assignee; the integration endpoints mostly need auth
-and scoping, not new logic.
+subtasks or comments. Plainspace's own web app edits items with a plain
+read-merge-write `PATCH`, no precondition (`routes/items.ts:273-362`). Spaces
+default to `sharingMode: 'open'`, so anyone with the link can join without an
+account.
 
 ## Prior art
 
@@ -134,7 +135,7 @@ opened hands-on; treat single cells as approximate). Sources at the end.
   Sunsama's and Motion's personal planner over a shared source.
 - Today shows only my tasks; shared tasks enter my plan only when assigned to me.
 - No-account link invites (Plainspace already has them; SP just doesn't show the link).
-- Visible sync state instead of silent failure (Linear's pending-changes counter).
+- Visible sync failures instead of silent ones.
 
 **Deliberately don't**
 
@@ -152,7 +153,8 @@ opened hands-on; treat single cells as approximate). Sources at the end.
 | **A. Native shared projects in SuperSync**       | Rejected. Every load-bearing sync decision assumes one owner: `MAX_VECTOR_CLOCK_SIZE = 20` (members × devices overflow it), E2EE keyed to one user's password, `SYNC_IMPORT`/`BACKUP_IMPORT` drop concurrent ops (one member's restore would wipe the others), project delete-wins. Also contradicts the #10351 position on SP hosting shared data. |
 | **B. Same-device profiles**                      | Out of scope. A different problem (#5189 part 1); OS accounts cover it.                                                                                                                                                                                                                                                                             |
 | **C. Grow Plainspace into an SP-shaped tracker** | Rejected. Notes, subtasks and estimates on items are explicit Plainspace non-goals; its users are households and clubs who never install SP.                                                                                                                                                                                                        |
-| **D. Close the seam (chosen)**                   | Fixes every reported pain, needs no SP persisted-model change, keeps the server additive.                                                                                                                                                                                                                                                           |
+| **D. Move Plainspace to the plugin sync path**   | Not now. It is not less code (Plainspace is already on the generic engine) and changes synced provider keys (#8476).                                                                                                                                                                                                                                |
+| **E. Close the seam (chosen)**                   | Fixes every reported pain, needs no SP persisted-model change and no server migration.                                                                                                                                                                                                                                                              |
 
 ## The contract: shared task, private work
 
@@ -162,10 +164,10 @@ where new links come from. "Private" means _not sent to Plainspace_.
 
 | SP field                        | Plainspace   | Direction                                           | Notes                                                           |
 | ------------------------------- | ------------ | --------------------------------------------------- | --------------------------------------------------------------- |
-| `title`                         | `text`       | both                                                | Over 500 characters: not pushed, task shows a sync error        |
-| `isDone`                        | `checked`    | both                                                | Exists                                                          |
+| `title`                         | `text`       | both while assigned to me                           | Over 500 characters: not pushed, task shows a sync error        |
+| `isDone`                        | `checked`    | both while assigned to me                           | Exists                                                          |
 | `dueWithTime` (scheduled time)  | `remindAt`   | both while assigned to me; pull only when recurring | § Scheduled time. The mapping exists today, pull only           |
-| assignee                        | `assignedTo` | Phase 2, explicit action only                       | Not a task field in SP; shown from a live view-model            |
+| assignee                        | `assignedTo` | Phase 2, explicit action only                       | Not a task field in SP                                          |
 | time, estimate, notes, subtasks | —            | private                                             | Notes and subtasks become my private breakdown of a shared task |
 | tags, deadlines, Today order    | —            | private                                             |                                                                 |
 
@@ -176,31 +178,30 @@ The reported need: a due time set in SP should reach the people in the Space
 
 1. **Plainspace shows my timed schedule.** The value sent is `dueWithTime`, or
    "no time" when the task has none. Rescheduling, dragging in the planner,
-   planning a day without a time (which clears `dueWithTime`, ADR #1) and
-   unscheduling are all ordinary changes of that one value. No suppression
-   rules: Astra's "day-only reads as clearing" case is intended behaviour.
-2. **The assignee owns it.** It syncs only while the task is assigned to me.
-   The server refuses writes to other people's tasks anyway, and pulling their
-   time would put their work into my Today. Today every linked task is
-   assigned to me, so a pushed time reminds only me; others see it.
-3. **Repeating tasks: Plainspace sets the time.** Pull only; local edits are
-   skipped silently, as for other providers' recurring items
-   (`isExpectedSyncSkipError`), and the next occurrence overwrites them.
+   planning a day without a time and unscheduling are all ordinary changes of
+   that one value. Implemented with the engine's existing hook: a `dueDay`
+   mapping with `mutuallyExclusive: ['dueWithTime']`
+   (`compute-push-decisions.ts:101`) clears the remote time, no new rule.
+2. **The assignee owns it.** It syncs only while the task is assigned to me
+   (Decision 3). Today every linked task is assigned to me, so a pushed time
+   reminds only me; others see it.
+3. **Repeating tasks: Plainspace sets the time.** SP never pushes the time of a
+   recurring item; local edits stay until the next occurrence overwrites them.
+   No server guard: Plainspace's own web app allows editing it.
 
-Concurrent changes follow the protocol below: remote wins, mine shows in the
-sync error. Cost: my timed plan for a shared task is visible to the Space, and
-a day-only plan removes the time others see. Date-only times wait until
-Plainspace has them; inventing a clock time is a new setting (declined in
-#9833). Dropped in rev. 3: rev. 2's separate shared time on the deadline
-fields with "plan follows until I replan" seeding. It kept planning private
-but needed a transitions table, a backfill and a second schedule in the UI.
+Cost: my timed plan for a shared task is visible to the Space. Date-only
+times wait until Plainspace has them; inventing a clock time is a new setting
+(declined in #9833). Dropped in rev. 3: rev. 2's separate shared time on the
+deadline fields with "plan follows until I replan" seeding. It kept planning
+private but needed a transitions table, a backfill and a second schedule in
+the UI.
 
 **Decided (Oct 21): a plan without a time clears the Plainspace time.**
 Planning a shared task day-only, adding it to Today without a time, or
 unscheduling it sends "no time". Rejected: leaving Plainspace's time in place.
 
 - **One rule, no exception.** Keeping the old time would need a special case
-  ("a day-only plan counts as unchanged") in the per-field decision table.
+  ("a day-only plan counts as unchanged") in the per-field decisions.
 - **No stale reminders.** Plainspace's time is the assignee's reminder, i.e.
   mine. A kept "Fri 18:00" would remind me about a task I planned for Thursday
   or already did.
@@ -209,231 +210,235 @@ unscheduling it sends "no time". Rejected: leaving Plainspace's time in place.
   repeating tasks are pull only and unaffected.
 
 Cost: "Add to Today" on a task someone gave a time removes that time for
-everyone. A hard time ("campsite closes Fri 18:00") belongs in the title for
-now; Plainspace has no deadline field. Revisit trigger: users report losing
-times others set. The fix then is a confirm on that action, not a second sync
-rule.
+everyone, without the engine's "remote changed" check. A hard time
+("campsite closes Fri 18:00") belongs in the title for now; Plainspace has no
+deadline field. Revisit trigger: users report losing times others set. The
+fix then is a confirm on that action, not a second sync rule.
 
 ## Sync protocol
 
-**Field edits.** Each linked field has a baseline in `issueLastSyncedValues`.
-On every poll and after every local edit, per field:
+The generic engine already does most of it; this release fills three gaps.
 
-| Local vs baseline | Remote vs baseline | Action                                                           |
-| ----------------- | ------------------ | ---------------------------------------------------------------- |
-| same              | same               | nothing                                                          |
-| same              | changed            | pull                                                             |
-| changed           | same               | push (also covers edits made offline or before a restart)        |
-| changed           | changed            | remote wins (existing rule), local value shown in the sync error |
+**What exists.** Per-field baselines in `issueLastSyncedValues`; before a push
+the engine fetches the item and pushes only fields whose remote value still
+equals the baseline; otherwise the remote wins (`compute-push-decisions.ts`).
+That is the same last-writer-wins behaviour Plainspace's own web app has
+(`items.ts:273-362`), so SP is not stricter than Plainspace itself.
 
-**Conditional writes.** `PATCH` carries `ifUpdatedAt`, the item's row-level
-`updated_at` the decision was based on. The server answers 409 with the current
-item if the row changed since; SP recomputes the per-field table against it
-and retries at most twice. Row level is enough because field decisions happen
-on the client. This makes "remote wins" hold between fetch and write, and makes
-two SP devices retrying the same edit converge: the second write gets 409, sees
-the remote already equals its local value, and only advances its baseline.
-Against a server without preconditions SP pushes `done` only, as today.
+**Gap 1: the pull ignores the baselines.** Replace Plainspace's whole-row
+overwrite with a per-field pull: a field is pulled only when its remote value
+differs from its baseline. CalDAV already does this for the same row-level
+marker problem (`caldav-common-interfaces.service.ts:265-317`); move that into
+one helper both providers call.
 
-**Creates are idempotent.** `POST /tasks` carries `clientRef` (the SP task
-id); the server keeps it unique per Space and returns the existing item on a
-repeat. `SPTask` returns `clientRef`. Recovery:
+**Gap 2: edits made offline are dropped.** On each successful poll, a field
+whose local value differs from its baseline while the remote still equals it
+is pushed. The stored baseline is the queue: it survives restarts, and no
+outbox is stored. Two devices doing this converge without coordination: the
+second one's fetch sees the remote already equals its value. Skipped for
+fields that can't be pushed (a recurring item's time).
 
-| Failure                                 | Recovery                                                                                       |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------- |
-| Response lost                           | Retry with the same `clientRef` returns the same item                                          |
-| Created, but the link op never happened | The next poll sees an item whose `clientRef` is a local task id and links that task, no import |
-| Create failed or never ran (offline)    | Task stays unlinked and shows "Not shared · Share" in its detail panel; retry is safe          |
-| Two devices retry                       | Same `clientRef`, one item                                                                     |
+**Gap 3: errors are swallowed.** `getMyTasks$` and `getById$` stop turning
+errors into empty results. Everything derived from a poll, "no longer in your
+list" in particular, is computed only from a successful response, never from
+an offline or failed one.
 
-Creates are not retried automatically after a restart: without a persisted
-"pending" marker SP can't tell a failed share from a task that was never meant
-to be shared, and adding one is not worth it while the manual retry is safe.
+**Creates** stay as they are: create, then link. Never retried automatically.
+A task in a shared project that failed to share (offline, server error) is
+picked up by "Share N unshared tasks" (Release 3), which is safe to repeat
+because it only looks at unlinked tasks.
 
-**Visible state** (a deliverable, not just a principle). In-memory, rebuilt on
-each poll: _synced_ (quiet), _waiting to sync_, _couldn't sync: reason ·
-Retry_, _changed in both places: Plainspace's value kept, mine shown ·
-Dismiss_, _not shared · Share_, _no longer in your Plainspace list_. Shown in
-the task detail panel's Plainspace section, and as a count of waiting and
-failed changes in the shared project's header, only while there is one. Never
-in the task row template (hot path).
+**Older servers.** A server that rejects a new field (422) or doesn't echo it
+back is remembered per provider, in memory, for the session: SP stops pushing
+that field and shows "Plainspace server too old for title/time sync" once in
+the provider panel. Done keeps syncing as today. No capability negotiation.
+
+**Visible state.** In-memory, rebuilt on each poll, shown in the task detail
+panel's Plainspace section (never in the task row template, a hot path):
+_couldn't sync: reason · Retry_ and _no longer in your Plainspace list_. Per
+provider: _reconnect_ on 401, _server too old_. The existing failure snack
+stays. No pending-changes indicator, no header count.
 
 ## Deletion and lost access
 
 Needs to be fixed before anything creates links automatically, because move-in
 and bulk sharing raise the blast radius of today's delete-for-everyone.
 
-| Event                                                | Plainspace                                                                                                                           | Local                                                                                                  |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| Delete a linked task assigned to me                  | Deleted for everyone after the undo window (exists; confirm text says so and adds that it can be restored in Plainspace for 30 days) | Deleted; in Recently deleted                                                                           |
-| Delete a task no longer assigned to me               | Untouched (server refuses: not assigned to me)                                                                                       | Deleted; normal confirm, no "for everyone" warning                                                     |
-| Delete the project                                   | Untouched (not a delete trigger, verified)                                                                                           | Tasks deleted locally                                                                                  |
-| Remove the provider                                  | Untouched                                                                                                                            | Tasks unlinked, notes and time kept (exists)                                                           |
-| Item deleted, unassigned or membership lost remotely | —                                                                                                                                    | Never deleted. Task, notes and time kept; state _no longer in your Plainspace list_; no further pushes |
-| Move the task out of the shared project              | Untouched, stays linked                                                                                                              | —                                                                                                      |
+| Event                                                   | Plainspace                                                                                                                           | Local                                                                                                |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| Delete a linked task assigned to me                     | Deleted for everyone after the undo window (exists; confirm text says so and adds that it can be restored in Plainspace for 30 days) | Deleted; in Recently deleted                                                                         |
+| Delete a task no longer assigned to me                  | Untouched (server refuses: not assigned to me)                                                                                       | Deleted; normal confirm, no "for everyone" warning                                                   |
+| Delete the project                                      | Untouched (not a delete trigger, verified)                                                                                           | Tasks deleted locally                                                                                |
+| Remove the provider                                     | Untouched                                                                                                                            | Tasks unlinked, notes and time kept (exists)                                                         |
+| Handed off, deleted, unassigned or lost access remotely | —                                                                                                                                    | Never deleted. Task, notes and time kept; state _no longer in your Plainspace list_; no further sync |
+| Move the task out of the shared project                 | Untouched, stays linked                                                                                                              | —                                                                                                    |
 
 A missing item is never read as a deletion: the server returns the same 404
-for deleted, reassigned and lost-membership, by design.
+for deleted, reassigned and lost-membership, by design, and "missing" is only
+computed from a successful poll.
 
 Delete is one action. There is no separate "delete my copy": the warning
 appears only when the delete reaches Plainspace, i.e. the task is assigned to
-me. A task that is no longer mine (handed off, reassigned, gone from my list)
-is deleted locally like any other task.
+me. A task that is no longer mine is deleted locally like any other task.
 
 ## Releases
 
 Sizes are relative (S, M) and not commitments; each release has its own PRs.
 
-### Release 0: fix what's broken, say what syncs (S)
+### Release 0: fix what's broken, say what syncs (S, SP only)
 
 1. **Reproduce #9988** (Android connect) from the supplied logs; fix or ask for
    what's missing. Answer the thread either way.
 2. **Scoped token replacement.** A reconnect writes the new token only to
    providers whose current token equals the replaced one (same credential,
    so same host and account), one `IssueProviderActions.updateIssueProvider`
-   op per provider. A 401 means "Plainspace rejected the token, reconnect",
-   not "replaced". Closes #8616.
-3. **Show the invite link.** After sharing, and in the project's Plainspace
-   menu: "Copy invite link". Server returns `joinUrl` (null when the Space is
-   private) from `POST /spaces` and `GET /me`, so SP never builds Plainspace
-   URLs itself.
-4. **Say where data goes.** The share dialog states that titles, done state
+   op per provider. Closes #8616.
+3. **Stop hiding errors** (Gap 3): a 401 shows _reconnect_ on the provider.
+4. **Copy invite link** after sharing and in the project menu: the Space URL
+   SP already builds (`getSpaceUrl$`). Plainspace sends visitors without an
+   identity to the join page. A private Space shows its private notice
+   instead; no server change.
+5. **Say where data goes.** The share dialog states that titles, done state
    and scheduled times are stored on the Plainspace host. The wiki's
    "what syncs where" table is updated in the same PR as each release.
 
 ### Release 1: safe pulls, title round-trip, move-in (M)
 
-Server: `PATCH` accepts `title` and `ifUpdatedAt`; `POST /tasks` accepts
-`clientRef`; `GET /me` returns `capabilities: string[]` for features behind
-authentication.
+Server: `PATCH /integration/tasks/:id` accepts optional `done`, `title` and
+`scheduledAt` (`null` clears it), at least one present; field handling copied
+from the web app's item `PATCH` (`items.ts:299-307`), including clearing
+`notifiedAt` when the time changes. No migration. Ships `scheduledAt` now so
+Release 2 is client-only.
 
 SP:
 
-1. **Per-field pull** per the protocol table; reuse the plugin adapter's
-   baseline logic (`plugin-issue-provider-adapter.service.ts:683-740`) rather
-   than a second implementation. Fixes local edits being overwritten today.
-2. **Title both ways** with conditional writes.
-3. **Moving in shares** (#8790): a `LOCAL_ACTIONS` effect on
-   `moveToOtherProject` into a bound project reuses create-and-link with
-   `clientRef`. Moving out keeps the link.
-4. **Visible state** as above.
-5. **Plainspace E2E harness** and focused cases (§ Testing).
-6. **Older servers** keep done push and today's pulls; no new UI.
+1. **Per-field pull** (Gap 1), shared helper with CalDAV.
+2. **Poll-time push** of offline edits (Gap 2).
+3. **Title both ways**: `title: 'both'`; `pushChanges` sends it and checks the
+   echoed value; older servers per § Sync protocol.
+4. **Moving in shares** (#8790): add `moveToOtherProject` into a bound project
+   next to `addTask` in `autoCreateIssueOnTaskAdd$`. Moving out keeps the link.
+5. **Visible state** per § Sync protocol.
+6. **Refresh when I look**: a throttled full poll on window focus and app
+   resume. No delta polling.
 
-### Release 2: scheduled time both ways (S)
+### Release 2: scheduled time both ways (S, SP only)
 
-Server: `PATCH` accepts `scheduledAt` (or `null`), rejects it on recurring
-items (super-productivity/plainspace#40, community, is a starting point). SP:
-`dueWithTime` becomes a two-way field under § Scheduled time; no backfill, the
-pull mapping already exists. Closes #9833.
+`dueWithTime: 'both'`, plus the `dueDay` mapping with
+`mutuallyExclusive: ['dueWithTime']`; recurring items pull only. Closes #9833.
 
-### Release 3: share existing tasks (S)
+### Release 3: share existing tasks (S, SP only)
 
-The share dialog offers "Share these N open tasks" as an explicit
-confirmation, not a default. A per-task loop of create-and-link with
-`clientRef`; subtasks stay local. Blocks above Plainspace's 500 active items
-per Space and paces itself under the 100 creates/min limit. Depends on
-Release 1's idempotent create and on § Deletion being in place.
-
-### Separately shippable
-
-- **Device-code connect.** Server endpoints as planned in Plainspace's connect
-  plan Phase 2. SP calls the start endpoint without auth and falls back to the
-  paste flow on 404, so no authenticated discovery is needed. A second device
-  finds the synced token and does not mint a new one (minting revokes the
-  first).
-- **Refresh when I look.** Poll on window focus and app resume with
-  `updatedSince`; keep the 5-minute full poll, which catches removals (the
-  delta has no tombstones).
+"Share N unshared tasks": a sequential loop over the same create-and-link path
+for the unlinked root tasks of a shared project. Offered on the share success
+screen and in the project menu whenever such tasks exist; it also covers
+creates that failed earlier. Stops at the first 422 or 429; the server already
+enforces the 500-item cap and the rate limit. Subtasks stay local. Depends on
+§ Deletion being in place.
 
 ### Phase 2: hand a task to someone (M), #8648
 
-Server: `GET /integration/spaces/:id/members`; `PATCH` accepts `assigneeId` (a
-member, or `null` to release) for tasks assigned to the caller, matching the
-vision doc's "you acting on your own task"; `GET /tasks?ids=` for any task in
-a Space the caller belongs to (members already see every item in the web app).
+Server: `PATCH` accepts `assigneeId` (a member, or `null` to release) for tasks
+assigned to the caller, matching the vision doc's "you acting on your own
+task"; `GET /integration/spaces/:id/members`.
 
 SP:
 
 1. **Task context menu → "Assign to… / Release to Space"** on linked tasks.
    Menu only, never in the task row template.
-2. **A delegated task stays.** Its schedule is now the assignee's, so it is
-   unscheduled locally and no longer syncs (§ Scheduled time, rule 2). It
-   keeps its time, notes and subtasks, and shows the assignee's name from a
-   live, non-persisted view-model like the claim pool. Title and done keep
-   pulling via `GET /tasks?ids=`. Reassigned back to me, it returns to the
-   assigned-to-me path, schedule included.
+2. **After handing it off** the task is no longer mine: it is unscheduled
+   locally and shows _no longer in your Plainspace list_, exactly like a
+   remote reassignment. No live assignee name, no extra endpoint. Reassigned
+   back to me, it syncs again.
 3. **Not shared yet?** The menu entry offers to share the project first, then
    assign.
 
 ### Phase 3: only on evidence
 
-SSE for integration clients; a cross-project "Waiting on" view; plugin
-migration (#8476), decided after Phase 2 so synced provider-config key changes
-don't land with behaviour changes; day-only schedules once Plainspace has a
-date-only time.
+Device-code connect (needs two endpoints, a code store and a consent screen;
+none of the reported pains need it once #8616 and #9988 are fixed); live push
+for integration clients; a "Waiting on" view with live assignees; plugin
+migration (#8476); day-only schedules once Plainspace has a date-only time;
+`clientRef` idempotent creates if duplicates are reported.
+
+## Accepted gaps
+
+Recorded instead of guarded, per AGENTS.md "Hardening needs evidence". Each
+gets a fix only when it is reported.
+
+- **Same-field race.** Someone edits the same field within one fetch→PATCH
+  round trip: last writer wins, as in Plainspace's web app.
+- **Both sides change one field between polls.** Plainspace's value wins with
+  no conflict message.
+- **Lost create response, or a crash between create and link.** One visible
+  duplicate SP task (auto-imported), no data loss. Fix: `clientRef`.
+- **Old self-hosted servers** keep done-only sync until they upgrade.
+- **Clearing the time skips the remote-changed check** (Scheduled time,
+  decided cost).
+- **No cross-repo real-server E2E.** Contract drift is caught by Plainspace's
+  integration tests and the shared `SPTask` type.
+- **Delegated tasks** don't show their live title, done state or assignee in SP.
 
 ## Sync and long-term cost
 
-- **No SP persisted-model change.** Membership derives from
-  `issueType`/`issueProviderId`; baselines use `issueLastSyncedValues`; the
-  scheduled time uses the existing `dueWithTime` mapping; sync state and
-  assignee are in-memory view-models (AGENTS.md sync rule 13).
+- **No SP persisted-model change, no server migration.** Membership derives
+  from `issueType`/`issueProviderId`; baselines use `issueLastSyncedValues`;
+  the scheduled time uses the existing `dueWithTime` mapping; sync state is an
+  in-memory view-model (AGENTS.md sync rule 13).
 - **Ops.** Pulls and pushes are single-task `updateTask` ops; create and link
-  stay two ops, now recoverable; bulk share is a per-task loop (sync rule 6).
-  New effects inject `LOCAL_ACTIONS`, so remote ops never re-trigger a push.
+  stay two ops; bulk share is a per-task loop (sync rule 6). New effects inject
+  `LOCAL_ACTIONS`, so remote ops never re-trigger a push.
 - **Integration API is a contract** with released SP clients and self-hosted
-  Plainspace versions. Additive only: old clients keep sending `{done}`;
-  `clientRef` and `ifUpdatedAt` are optional; new clients detect authenticated
-  features via `capabilities` and keep today's behaviour without them.
+  Plainspace versions. Additive only: old clients keep sending `{done}`; new
+  clients fall back per field on older servers.
 - **Privacy.** Plainspace content is not end-to-end encrypted. Sharing is
   explicit and the dialog says so.
 - **Unreproduced risks, filed as issues with a reproduction first** (sync rule
-  15): a second device importing an auto-created task before the link op
-  arrives (`clientRef` gives the fix a key to match on); the update poll
-  lacking `skipDuringSyncWindow` (`poll-issue-updates.effects.ts:68-97`);
-  concurrent `restoreTask` of a recurring task with differing `timeSpentOnDay`.
+  15), not fixed in these PRs: the update poll lacking `skipDuringSyncWindow`
+  (`poll-issue-updates.effects.ts:68-97`); concurrent `restoreTask` of a
+  recurring task with differing `timeSpentOnDay`.
 - PRs touching `issue-two-way-sync.effects.ts` follow the sync-PR review rule
   (fresh-context review pass, findings in the PR body).
 
 ## Testing
 
-- **New E2E harness**: Plainspace has `docker-compose.e2e.yml`; add
-  `npm run e2e:plainspace:file` alongside the SuperSync one and run it in the
-  scheduled E2E workflow.
-- **Release 0 cases**: reconnect replaces the token only in providers that
-  held the old one (a second host or account keeps its own); a 401 asks to
-  reconnect; the invite link is shown after sharing and hidden for a private
-  Space.
-- **Release 1 cases**: title round-trip both ways; concurrent edit (remote wins,
-  local shown in the error); response lost after create, then retry; app
-  killed between create and link, then poll links instead of importing; two SP
-  devices retrying the same edit independently; offline edit, restart,
-  reconnect; move-in creates; older server keeps done push.
-- **Release 2 cases**: reschedule, planner drag, day-only plan and unschedule
-  each reach Plainspace; a remote change lands in SP; concurrent change (remote
-  wins); a recurring task's local edit is skipped and the next occurrence
-  pulls; a task not assigned to me neither pushes nor pulls its time.
-- **Release 3 cases**: sharing N tasks creates N items, subtasks stay local; a
-  bulk share interrupted midway and repeated creates no duplicates; the
-  500-item limit blocks with a message.
-- **Phase 2 cases**: assign to a member, release to the Space, reassign back
-  to me (schedule returns); a delegated task pulls title and done only.
-- **Deletion cases**: each row of the deletion table.
-- Unit specs for the per-field decision table and the move-in effect.
+- **E2E with a stubbed server.** Plainspace has no E2E harness in SP, so per
+  AGENTS.md's exemption the tests stub the integration API with a small
+  stateful `page.route` fake using real `SPTask` shapes, like the GitHub
+  provider's E2E (`github-sync-direction-9900.spec.ts`). The PR says why.
+  Plainspace's own `integration.test.ts` covers the server side.
+- **Release 0**: reconnect replaces the token only in providers that held the
+  old one (a second host or account keeps its own); a 401 asks to reconnect;
+  copy invite link.
+- **Release 1**: title round-trip both ways; a remote edit no longer
+  overwrites an unrelated local edit; offline edit, restart, reconnect, then
+  pushed; two devices pushing the same edit converge; move-in creates; an older
+  server (422) keeps done sync and shows "too old" once; offline never marks
+  tasks "no longer in your list".
+- **Release 2**: reschedule, planner drag, day-only plan and unschedule each
+  reach Plainspace; a remote change lands in SP; a recurring task's local edit
+  is not pushed and the next occurrence pulls; a task not assigned to me
+  neither pushes nor pulls its time.
+- **Release 3**: N unshared tasks become N items, subtasks stay local; a run
+  stopped midway and repeated creates no duplicates; a 422 or 429 stops it with
+  a message.
+- **Phase 2**: assign, release, reassign back (syncs again).
+- **Deletion**: each row of the deletion table.
+- Unit specs for the shared per-field pull helper and the move-in effect.
 
 ## Not doing
 
 Native multi-user in SuperSync, accounts or roles in SP, same-device
 profiles, notes/subtasks/comments on Plainspace items, multiple assignees,
 team or workload views, sharing time tracked, SP-hosted public links,
-per-list visibility settings.
+per-list visibility settings. Dropped in rev. 4 as unneeded: conditional
+writes (`ifUpdatedAt`), `clientRef`, `capabilities`, `joinUrl`, delta polling,
+`GET /tasks?ids=`, a server guard on recurring times, a pending-changes
+indicator, a docker E2E harness.
 
 ## Open questions for the maintainer
 
-1. **Direction.** Close the seam rather than build native multi-user (the
-   review agrees).
-2. **#3969.** Comment with the concrete scope and a tracking link; reopening
+1. **#3969.** Comment with the concrete scope and a tracking link; reopening
    the broad issue is optional.
 
 ## Sources
@@ -448,7 +453,6 @@ Vendor help pages, checked Oct 2026 via web search summaries:
 [Sunsama with teammates](https://help.sunsama.com/docs/using-sunsama-with-teammates);
 [Motion: workspaces and My Tasks](https://help.usemotion.com/product-and-feature-guides/projects/the-projects-tab/managing-workspaces-private-public-and-my-tasks);
 [Amazing Marvin: lists for non-users](https://help.amazingmarvin.com/en/articles/6348551-shared-lists-for-nonusers-of-marvin);
-[Linear offline mode](https://linear.app/docs/offline-mode);
 [Ink & Switch Keyhive](https://www.inkandswitch.com/project/keyhive/);
 [Jazz: lessons from classic](https://jazz.tools/blog/what-we-learned-from-classic-jazz).
 
