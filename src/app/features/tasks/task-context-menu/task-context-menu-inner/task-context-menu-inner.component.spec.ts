@@ -72,6 +72,8 @@ describe('TaskContextMenuInnerComponent', () => {
       'getArchiveTasksForRepeatCfgId',
       'update',
       'setCurrentId',
+      'moveToTop',
+      'moveToBottom',
     ]);
     taskService.currentTaskId.and.returnValue('some-id');
     focusModeService = jasmine.createSpyObj<FocusModeService>('FocusModeService', [
@@ -357,6 +359,114 @@ describe('TaskContextMenuInnerComponent', () => {
         component.pluginTaskContextMenuEntries().map((entry) => entry.entryId),
       ).toEqual(['subtask-action']);
     });
+  });
+
+  // One order on touch and desktop, frequent actions first and the destructive
+  // ones last, so Delete stays above the fold of a phone-sized menu.
+  describe('menu layout', () => {
+    const ITEM_KEYS = [
+      T.F.TASK.CMP.FOCUS_SESSION,
+      T.F.TASK.CMP.ADD_SUB_TASK,
+      T.F.TASK.CMP.ESTIMATE,
+      T.F.TASK.CMP.TOGGLE_TAGS,
+      T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT,
+      T.F.TASK.CMP.PRIORITY,
+      T.F.TASK.CMP.REORDER,
+      T.F.TASK.CMP.DUPLICATE,
+      T.F.TASK.CMP.MARK_WONT_DO,
+      T.F.TASK.CMP.DELETE,
+      T.F.TASK.CMP.MOVE_TO_TOP,
+      T.F.TASK.CMP.MOVE_TO_BOTTOM,
+    ];
+    const overlayItems = (): HTMLElement[] =>
+      Array.from(
+        document.querySelectorAll<HTMLElement>('.cdk-overlay-container [mat-menu-item]'),
+      );
+    const itemKeys = (items: HTMLElement[]): string[] =>
+      items
+        .map((el) => ITEM_KEYS.find((key) => el.textContent?.includes(key)))
+        .filter((key): key is string => !!key);
+    const openMenu = (): void => {
+      Object.assign(TestBed.inject(GlobalConfigService), {
+        appFeatures: () => ({ isFocusModeEnabled: true, isTimeTrackingEnabled: true }),
+      });
+      fixture.componentRef.setInput('isAdvancedControls', true);
+      component.taskSet = {
+        ...DEFAULT_TASK,
+        id: 'task-1',
+        projectId: 'project-current',
+      } as Task;
+      fixture.detectChanges();
+      component.contextMenuTrigger()?.openMenu();
+      fixture.detectChanges();
+      tick();
+    };
+    const closeMenus = (): void => {
+      component.contextMenuTrigger()?.closeMenu();
+      flush();
+    };
+
+    it('lists the actions in the agreed order', fakeAsync(() => {
+      openMenu();
+
+      expect(itemKeys(overlayItems())).toEqual([
+        T.F.TASK.CMP.FOCUS_SESSION,
+        T.F.TASK.CMP.ADD_SUB_TASK,
+        T.F.TASK.CMP.ESTIMATE,
+        T.F.TASK.CMP.TOGGLE_TAGS,
+        T.F.TASK.CMP.MOVE_TO_OTHER_PROJECT,
+        T.F.TASK.CMP.PRIORITY,
+        T.F.TASK.CMP.REORDER,
+        T.F.TASK.CMP.DUPLICATE,
+        T.F.TASK.CMP.MARK_WONT_DO,
+        T.F.TASK.CMP.DELETE,
+      ]);
+      closeMenus();
+    }));
+
+    it('labels every date shortcut visibly', fakeAsync(() => {
+      openMenu();
+
+      const labels = Array.from(
+        document.querySelectorAll<HTMLElement>(
+          '.cdk-overlay-container .quick-access button',
+        ),
+      ).map((btn) => btn.querySelector('.quick-access-label')?.textContent?.trim());
+      expect(labels).toEqual([
+        T.F.TASK.D_SCHEDULE_TASK.QA_LABEL_TODAY,
+        T.F.TASK.D_SCHEDULE_TASK.QA_LABEL_TOMORROW,
+        T.F.TASK.D_SCHEDULE_TASK.QA_LABEL_NEXT_WEEK,
+        T.F.TASK.D_SCHEDULE_TASK.QA_LABEL_PICK_DATE,
+      ]);
+      closeMenus();
+    }));
+
+    it('moves to top and bottom from the Reorder submenu', fakeAsync(() => {
+      const openReorder = (): HTMLElement[] => {
+        openMenu();
+        const trigger = overlayItems().find((el) =>
+          el.textContent?.includes(T.F.TASK.CMP.REORDER),
+        );
+        expect(trigger).toBeDefined();
+        trigger!.click();
+        fixture.detectChanges();
+        tick();
+        return overlayItems();
+      };
+
+      openReorder()
+        .find((el) => el.textContent?.includes(T.F.TASK.CMP.MOVE_TO_TOP))!
+        .click();
+      flush();
+      expect(taskService.moveToTop).toHaveBeenCalledWith('task-1', undefined, false);
+
+      openReorder()
+        .find((el) => el.textContent?.includes(T.F.TASK.CMP.MOVE_TO_BOTTOM))!
+        .click();
+      flush();
+      expect(taskService.moveToBottom).toHaveBeenCalledWith('task-1', undefined, false);
+      closeMenus();
+    }));
   });
 
   describe('priority submenu', () => {
