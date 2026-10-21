@@ -709,9 +709,12 @@ export class DialogEditTaskRepeatCfgComponent {
       return options;
     };
 
-    const formConfig = TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG.map((field) => ({
-      ...field,
-    }));
+    // Making a task recurring keeps that task's title, so the field only shows
+    // when editing a series: it is the one place to rename future copies, since
+    // renaming a copy renames just that copy.
+    const formConfig = TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG.map((field) =>
+      field.key === 'title' && !this.isEdit() ? { ...field, hide: true } : { ...field },
+    );
 
     // Clamp logic for startDate is now handled reactively by calendarMinDate signal
 

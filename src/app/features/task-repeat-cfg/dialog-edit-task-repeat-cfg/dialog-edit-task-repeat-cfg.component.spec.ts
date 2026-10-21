@@ -21,6 +21,7 @@ import { FormlyConfigModule } from '../../../ui/formly-config.module';
 import { CustomDateAdapter } from '../../../core/date-time-format/custom-date-adapter';
 
 import { DialogEditTaskRepeatCfgComponent } from './dialog-edit-task-repeat-cfg.component';
+import { FormlyFieldConfig } from '@ngx-formly/core';
 import { TaskRepeatCfgService } from '../task-repeat-cfg.service';
 import { TagService } from '../../tag/tag.service';
 import { GlobalConfigService } from '../../config/global-config.service';
@@ -1508,6 +1509,26 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       expect(updateChanges()).toEqual({ title: 'Renamed' });
     });
   });
+  describe('title field', () => {
+    const titleField = (fixture: {
+      componentInstance: DialogEditTaskRepeatCfgComponent;
+    }): FormlyFieldConfig | undefined =>
+      fixture.componentInstance.essentialFormFields().find((f) => f.key === 'title');
+
+    it('is hidden when making a task recurring, which keeps the task title', async () => {
+      const fixture = await setupTestBed({ task: mockTask });
+
+      expect(titleField(fixture)?.hide).toBe(true);
+      expect(fixture.componentInstance.repeatCfg().title).toBe(mockTask.title);
+    });
+
+    it('is shown when editing a series, to rename its future copies', async () => {
+      const fixture = await setupTestBed({ repeatCfg: mockRepeatCfg });
+
+      expect(titleField(fixture)?.hide).toBeFalsy();
+    });
+  });
+
   describe('"If you fall behind" (#5388 follow-up)', () => {
     const savedCfg = (): TaskRepeatCfg =>
       mockTaskRepeatCfgService.addTaskRepeatCfgToTask.calls.mostRecent()
