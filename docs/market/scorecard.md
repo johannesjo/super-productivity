@@ -8,15 +8,20 @@ How this snapshot was gathered:
 - **SP facts** were read from the code.
 - **Competitor facts** come from search-result excerpts of vendor pages, so they
   count as **snippet** unless marked otherwise. The research environment blocked
-  play.google.com, apps.apple.com, appbrain.com, alternativeto.net and reddit.com,
-  and direct fetches of ticktick.com and todoist.com failed.
+  play.google.com, apps.apple.com, appbrain.com, alternativeto.net, reddit.com and
+  the specialists' vendor sites, and direct fetches of ticktick.com and todoist.com
+  failed. GitHub was reachable, so open-source repos and docs were read directly.
 - Store ratings and prices need a direct check before anyone quotes them.
 
 ## Summary
 
 - **Must be best:** SP is better than all three general todo apps on every
-  must-be-best dimension, except focus against TickTick (a tie). Against the
-  specialists the picture is mixed; see [Specialists](#specialists).
+  must-be-best dimension, except focus against TickTick (a tie). It is also
+  better than every specialist on developer integrations, privacy and price.
+  Two must-be-best dimensions are not met yet (see [Specialists](#specialists)):
+  - **Time entries and reports:** Toggl Track and Clockify are better.
+  - **Daily planning:** Sunsama and Akiflow add weekly rituals and two-way
+    calendar sync.
 - **Must not lose badly:** this is where the distance to "best on the market"
   is. SP loses to TickTick and Todoist on all eight of these dimensions.
 - **To Do List:** SP wins on capability. It loses on the phone: first run, capture
@@ -301,7 +306,149 @@ The reasons for each verdict are in the sections below.
 
 ## Specialists
 
-<!-- SPECIALISTS -->
+Specialists are scored only on the dimensions they compete on. Time tracking is
+split in two, because the specialists beat SP on one half and lose on the other.
+
+| #   | Dimension                               | Toggl Track    | Clockify       | Sunsama        | Akiflow        | Motion         | Tasks.org | Vikunja | Things 3       |
+| --- | --------------------------------------- | -------------- | -------------- | -------------- | -------------- | -------------- | --------- | ------- | -------------- |
+| 4   | Calendar                                | —              | —              | Worse          | Worse          | Worse          | —         | —       | —              |
+| 5   | Daily planning and time-blocking        | —              | —              | Worse          | Worse          | Mixed          | —         | —       | —              |
+| 7   | Time tracking: tracking tied to tasks   | Better         | Better         | Better         | Better, by far | Better         | Better    | Better  | —              |
+| 7   | Time tracking: time entries and reports | Worse          | Worse          | —              | —              | —              | —         | —       | —              |
+| 8   | Focus and breaks                        | Better         | Better         | —              | —              | —              | —         | —       | —              |
+| 13  | Developer integrations                  | Better         | Better         | Better         | Better         | Better, by far | —         | —       | —              |
+| 19  | Offline, privacy, ownership             | Better, by far | Better, by far | Better, by far | Better, by far | Better, by far | Better    | Better  | Better, by far |
+| 20  | Price                                   | Better         | Better         | Better, by far | Better, by far | Better, by far | Better    | Better  | Better         |
+
+- **Must be best, not yet met:**
+  - **Time entries and reports** (dimension 7): Toggl and Clockify record start and
+    end times on every entry and let you fix or add time in a timesheet or
+    calendar (#6378, #7888, #7890).
+  - **Daily planning** (dimension 5):
+    - Sunsama and Akiflow add weekly planning and review rituals, which SP doesn't
+      have.
+    - All three planners sync calendars both ways with Google, Outlook and iCloud.
+- **Met:**
+  - developer integrations, privacy and price against every specialist
+  - focus against the time trackers
+  - time tracking tied to tasks against everyone
+
+### Time trackers: Toggl Track, Clockify
+
+- **Toggl Track:**
+  - "New Toggl" (formerly Toggl 2.0) became the main product in 2026-09. Classic
+    Track continues.
+  - Paid Starter is US$9–12 per user per month.
+  - No Linux desktop app.
+- **Clockify:**
+  - The free plan was cut on 2026-04-21: up to 5 users, PDF-only exports, a
+    31-day report range, and billable rates and estimates moved to paid plans.
+  - Paid plans start at US$3.99 per user per month.
+- **Both:**
+  - Account required.
+  - Neither can run several timers at once, so #5832 is not a gap against them.
+- **SP better:**
+  - no account
+  - tasks with estimates that roll up
+  - free worklog upload to Jira, OpenProject, Redmine and GitLab (Toggl's native
+    Jira integration needs Premium)
+  - free CSV export with chosen columns and rounding
+  - Flowtime mode and enforced breaks
+  - idle detection on Wayland
+- **They are better:**
+  - start and end times on every entry, and timesheet and calendar editing
+  - automatic tracking of apps, sites and calendar events
+  - a timer button in about 150 (Toggl) or 100 (Clockify) websites
+  - billable rates
+  - mature mobile apps
+- **Sources** (snippet unless marked): [Toggl pricing](https://toggl.com/pricing) ·
+  [Toggl extension](https://github.com/toggl/track-extension) (read) ·
+  [Clockify pricing](https://clockify.me/pricing) ·
+  [Clockify free-plan changes](https://clockify.me/help/administration/updates-to-clockify-free-plan) ·
+  [Clockify extension](https://github.com/clockify/browser-extension) (read)
+
+### Daily planners: Sunsama, Akiflow, Motion
+
+- **Price** (2026-10, unverified, sources conflict; none has a free tier):
+  - Sunsama: about US$17–22 per month.
+  - Akiflow: US$19–34 per month.
+  - Motion: US$19–49 per month, with AI credit limits.
+- **Sunsama:**
+  - Guided daily planning and shutdown, weekly planning and a weekly review.
+  - Rule-based auto-scheduling that asks "Overcommitted?" when the day is full.
+  - Two-way calendar sync with Google, Outlook and iCloud.
+  - Jira status is written back. GitHub is read-only, there is no GitLab, and
+    tracked time is not sent back to the source tool.
+  - No offline mode.
+- **Akiflow:**
+  - Universal inbox from Gmail, Slack and Teams.
+  - Daily and weekly planning and shutdown rituals.
+  - Two-way sync with Jira Cloud and GitHub.
+  - No GitLab, no per-task timer, no Linux app.
+- **Motion:**
+  - Continuous AI auto-scheduling with deadline estimates and overbooking
+    warnings.
+  - No native developer integrations.
+  - Users complain that the plan "keeps reshuffling itself".
+- **SP better:**
+  - GitLab, Gitea, Redmine, OpenProject and Azure DevOps
+  - writes back to GitHub
+  - worklog upload
+  - real time tracking
+  - a capacity view across about 15 days
+  - free, offline and Linux
+- **They are better:**
+  - weekly rituals
+  - two-way calendar sync
+  - one-key auto-scheduling
+  - email and chat as task sources
+- **Sources** (snippet):
+  [Sunsama daily planning](https://help.sunsama.com/docs/daily-planning) ·
+  [Sunsama auto-scheduling](https://help.sunsama.com/docs/timeboxing-auto-scheduling) ·
+  [Sunsama GitHub](https://help.sunsama.com/docs/github-integration) ·
+  [Akiflow rituals](https://akiflow.featurebase.app/en/help/articles/0805246-rituals) ·
+  [Akiflow Jira](https://akiflow.featurebase.app/en/changelog/boom-jira-software-cloud-2-ways-sync-integration) ·
+  [Motion integrations](https://www.usemotion.com/help/settings/integrations/reference-integrations/native-integrations)
+
+### Privacy-first: Tasks.org, Vikunja, Things 3
+
+- **Tasks.org** (GPL-3.0, Android; desktop alpha since 2026-04):
+  - **SP better:**
+    - SP has no telemetry in any build. Tasks.org's Play and desktop builds
+      include Firebase Crashlytics and PostHog, on by default (read:
+      `app/build.gradle.kts`, `Preferences.kt`).
+    - Tasks.org Cloud has no end-to-end encryption.
+    - On Play, CalDAV sync costs from US$0.99/yr.
+  - **Tasks.org better:**
+    - Its data is iCalendar, which any CalDAV client opens, with DAVx⁵ and EteSync
+      support.
+    - Location reminders, widgets, Wear OS, multi-level subtasks, custom filters.
+- **Vikunja** (AGPL-3.0, self-hosted):
+  - **SP better:**
+    - Vikunja is server-first, with no offline mode and no end-to-end encryption.
+    - Time tracking needs Pro.
+    - The mobile app is alpha.
+  - **Vikunja better:**
+    - Multi-user self-hosting with a CalDAV endpoint.
+    - Full ZIP export including attachments, and a generic CSV importer.
+- **Things 3:** Apple only; syncing needs a Things Cloud account without
+  end-to-end encryption, and there is no standard export. It is better on native
+  polish.
+- **Ideas worth checking against the principles:**
+  - DAVx⁵ through Android's tasks provider, as Tasks.org does. This is a narrower
+    route to #2719 than full two-way CalDAV.
+  - A "what syncs on each backend" table in the docs.
+  - An Exodus Privacy report for each SP build, as proof that there are no
+    trackers.
+- **Sources** (read unless marked):
+  [Tasks.org sync](https://github.com/tasks/docs/blob/main/docs/sync.md) ·
+  [Tasks.org build](https://github.com/tasks/tasks/blob/main/app/build.gradle.kts) ·
+  [Exodus](https://reports.exodus-privacy.eu.org/en/reports/search/org.tasks/)
+  (snippet) ·
+  [Vikunja import and export](https://github.com/go-vikunja/website/blob/main/src/content/help/import-and-export.mdx) ·
+  [Vikunja pricing](https://github.com/go-vikunja/website/blob/main/src/pages/pricing.astro) ·
+  [Things Cloud](https://culturedcode.com/things/support/articles/2803586/)
+  (snippet)
 
 ## Gaps
 
@@ -316,8 +463,10 @@ comparison ranked them.
 | Priority in the add-task syntax                              | 1     | Todoist                       | none                       | Work started     |
 | Dates in the user's language                                 | 1     | Todoist                       | #7473, #9340               | Work started     |
 | Multiple reminders per task                                  | 6     | TickTick, Todoist             | #4331                      | Design started   |
-| Two-way calendar and CalDAV sync                             | 4     | TickTick, Todoist             | #5001, #3938, #2719, #6378 | Plan started     |
+| Two-way calendar and CalDAV sync                             | 4     | TickTick, Todoist, planners   | #5001, #3938, #2719, #6378 | Plan started     |
 | Mobile UI refresh                                            | 17    | TickTick, Todoist             | #9225, #4864, #7637        | Audit started    |
+| Start and end times per entry, timesheet editing             | 7     | Toggl Track, Clockify         | #6378, #7888, #7890        | —                |
+| Weekly planning and review                                   | 5     | Sunsama, Akiflow              | none                       | —                |
 | Nested subtasks                                              | 2     | TickTick, Todoist             | #2657                      | —                |
 | iOS home-screen widget                                       | 16    | TickTick, Todoist             | #6373                      | —                |
 | Quick add from a notification                                | 1     | To Do List                    | none                       | —                |
