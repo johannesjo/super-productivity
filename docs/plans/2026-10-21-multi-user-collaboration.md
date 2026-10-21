@@ -1,15 +1,17 @@
 # Multi-user collaboration: close the Plainspace seam
 
 Oct 21, 2026 · status: direction proposed; implementation contracts in
-review · rev. 2 after a review by Astra (schedule contract, write protocol,
-deletion contract, token scoping, smaller first release)
+review · rev. 3: the scheduled time syncs directly (no separate shared time)
+and deletion has one path · rev. 2 after a review by Astra (schedule
+contract, write protocol, deletion contract, token scoping, smaller first
+release)
 
 Super Productivity stays a single-user deep-work tool; Plainspace stays the
 place where tasks go when they need other people. What fails users today is
 the seam between the two, not the absence of a native multi-user mode. This
 plan makes a Plainspace-linked project behave the way users already assume it
 does: what I change in SP reaches the Space, what others change reaches me, and
-my own planning, time and notes are not sent to Plainspace.
+how I work on a task (time, notes, subtasks) is not sent to Plainspace.
 
 Builds on: [#8648](https://github.com/super-productivity/super-productivity/issues/8648)
 (task-level delegation exploration), Plainspace's
@@ -22,19 +24,21 @@ Builds on: [#8648](https://github.com/super-productivity/super-productivity/issu
 
 1. **Fix the seam, don't build native multi-user.** No shared scopes in the
    SuperSync op-log, no accounts or roles in SP (§ Options considered).
-2. **Shared content, private plan.** Title, done, an explicit shared time and
-   (later) the assignee are shared with the Space. Time tracked, estimates,
-   notes, subtasks, tags and _all_ of my planning (`dueDay`, `dueWithTime`,
-   Today order) are never sent to Plainspace. SP's own sync still carries
-   them between my devices.
-3. **Contracts before features.** Every release below ships with its write,
+2. **Shared task, private work.** Title, done, the scheduled time and (later)
+   the assignee are shared with the Space. Time tracked, estimates, notes,
+   subtasks, tags and Today order are never sent to Plainspace. SP's own sync
+   still carries them between my devices.
+3. **The assignee owns the schedule.** While a task is assigned to me, its
+   timed schedule syncs both ways; a plan without a time shows as no time in
+   Plainspace (§ Scheduled time).
+4. **Contracts before features.** Every release below ships with its write,
    recovery and deletion rules defined (§ Sync protocol, § Deletion and lost
    access), not just its happy path.
-4. **Small releases, each shippable alone.** The first behavioural release is
+5. **Small releases, each shippable alone.** The first behavioural release is
    safe pulls, title round-trips, recoverable move-in creation, visible sync
-   state and focused E2Es. Shared time, bulk sharing, device-code connect and
-   faster refresh ship separately.
-5. **Plainspace stays minimal.** No notes, subtasks or comments on Plainspace
+   state and focused E2Es. Scheduled time, bulk sharing, device-code connect
+   and faster refresh ship separately.
+6. **Plainspace stays minimal.** No notes, subtasks or comments on Plainspace
    items; its own non-goals already say so. Server work is a handful of
    additive integration changes.
 
@@ -146,56 +150,46 @@ opened hands-on; treat single cells as approximate). Sources at the end.
 | **C. Grow Plainspace into an SP-shaped tracker** | Rejected. Notes, subtasks and estimates on items are explicit Plainspace non-goals; its users are households and clubs who never install SP.                                                                                                                                                                                                        |
 | **D. Close the seam (chosen)**                   | Fixes every reported pain, needs no SP persisted-model change, keeps the server additive.                                                                                                                                                                                                                                                           |
 
-## The contract: shared content, private plan
+## The contract: shared task, private work
 
 A task in a shared project is **linked** (`issueType === 'PLAINSPACE'`). A
 linked task stays shared wherever I file it; the shared project only decides
 where new links come from. "Private" means _not sent to Plainspace_.
 
-| SP field                         | Plainspace   | Direction                                  | Notes                                                                                |
-| -------------------------------- | ------------ | ------------------------------------------ | ------------------------------------------------------------------------------------ |
-| `title`                          | `text`       | both                                       | Over 500 characters: not pushed, task shows a sync error                             |
-| `isDone`                         | `checked`    | both                                       | Exists                                                                               |
-| `deadlineWithTime` (shared time) | `remindAt`   | both; pull only when recurring             | Release 2, pending decision (§ Shared time). Plainspace advances recurring items     |
-| `dueDay`, `dueWithTime` (plan)   | —            | never pushed; pulled only to _seed_ a plan | Seeding rule in § Shared time                                                        |
-| `deadlineDay`                    | —            | private                                    | `remindAt` always carries a time; inventing one is a new setting (declined in #9833) |
-| assignee                         | `assignedTo` | Phase 2, explicit action only              | Not a task field in SP; shown from a live view-model                                 |
-| time, estimate, notes, subtasks  | —            | private                                    | Notes and subtasks become my private breakdown of a shared task                      |
-| tags, Today order, reminders     | —            | private                                    |                                                                                      |
+| SP field                        | Plainspace   | Direction                                           | Notes                                                           |
+| ------------------------------- | ------------ | --------------------------------------------------- | --------------------------------------------------------------- |
+| `title`                         | `text`       | both                                                | Over 500 characters: not pushed, task shows a sync error        |
+| `isDone`                        | `checked`    | both                                                | Exists                                                          |
+| `dueWithTime` (scheduled time)  | `remindAt`   | both while assigned to me; pull only when recurring | § Scheduled time. The mapping exists today, pull only           |
+| assignee                        | `assignedTo` | Phase 2, explicit action only                       | Not a task field in SP; shown from a live view-model            |
+| time, estimate, notes, subtasks | —            | private                                             | Notes and subtasks become my private breakdown of a shared task |
+| tags, deadlines, Today order    | —            | private                                             |                                                                 |
 
-### Shared time
+### Scheduled time
 
-The reported need is specific: a due time set in SP should reach the people in
-the Space (#9833). The open choice is which SP field carries it.
+The reported need: a due time set in SP should reach the people in the Space
+(#9833). One field carries it, the task's existing schedule. Three rules:
 
-**Recommended: a separate shared time.** `deadlineWithTime` (+
-`deadlineRemindAt`) mirrors Plainspace's `remindAt`; my plan
-(`dueDay`/`dueWithTime`) is never pushed. Transitions, with `B` the last-seen
-remote time in `issueLastSyncedValues` and no new persisted field:
+1. **Plainspace shows my timed schedule.** The value sent is `dueWithTime`, or
+   "no time" when the task has none. Rescheduling, dragging in the planner,
+   planning a day without a time (which clears `dueWithTime`, ADR #1) and
+   unscheduling are all ordinary changes of that one value. No suppression
+   rules: Astra's "day-only reads as clearing" case is intended behaviour.
+2. **The assignee owns it.** It syncs only while the task is assigned to me.
+   The server refuses writes to other people's tasks anyway, and pulling their
+   time would put their work into my Today. Today every linked task is
+   assigned to me, so a pushed time reminds only me; others see it.
+3. **Repeating tasks: Plainspace sets the time.** Pull only; local edits are
+   skipped silently, as for other providers' recurring items
+   (`isExpectedSyncSkipError`), and the next occurrence overwrites them.
 
-| Event                                                | Result                                                                                                                        |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| I set or change the deadline time                    | Pushed (non-recurring only)                                                                                                   |
-| I clear the deadline                                 | Pushes "no time"                                                                                                              |
-| I plan, replan day-only, unschedule, move in planner | Nothing pushed                                                                                                                |
-| I delegate (Phase 2) and the task is unscheduled     | Nothing pushed                                                                                                                |
-| Remote time changes `B → R`                          | Deadline becomes `R`. The plan follows (`dueWithTime = R`) only if it is empty or still equals `B`, i.e. I never replanned it |
-| Remote time changes on a task not assigned to me     | Deadline only; the plan is never seeded                                                                                       |
-| Recurring item advances                              | Same as a remote change; a plan that was following moves to the next occurrence                                               |
-| Old client on another device                         | Keeps today's behaviour (remote time overwrites `dueWithTime`); no worse than now, converges once all devices update          |
-
-The "plan follows until I replan" rule keeps household recurring tasks landing
-on their day without letting the Space overwrite a plan I made. Cost: the
-shared time shows in SP as a deadline. Time-specific deadlines fire their own
-reminder but are not listed in Today by themselves
-(`task.selectors.ts:480-505`); the seeded plan covers that.
-
-**Alternative: timed planning is shared.** Map `remindAt` to `dueWithTime` as
-today, both ways. Simpler UI, but every plan change becomes a push candidate
-and needs explicit suppression rules: replanning day-only clears
-`dueWithTime` (ADR #1) and would read as "clear the shared time"; delegation's
-unschedule would too, and a baseline diff on the next poll would resurrect the
-push even if the immediate effect were suppressed. Not recommended.
+Concurrent changes follow the protocol below: remote wins, mine shows in the
+sync error. Cost: my timed plan for a shared task is visible to the Space, and
+a day-only plan removes the time others see. Date-only times wait until
+Plainspace has them; inventing a clock time is a new setting (declined in
+#9833). Dropped in rev. 3: rev. 2's separate shared time on the deadline
+fields with "plan follows until I replan" seeding. It kept planning private but needed a
+transitions table, a backfill and a second schedule in the UI.
 
 ## Sync protocol
 
@@ -247,7 +241,7 @@ and bulk sharing raise the blast radius of today's delete-for-everyone.
 | Event                                                | Plainspace                                                                                                      | Local                                                                                                  |
 | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | Delete a linked task assigned to me                  | Deleted for everyone after the undo window (exists; confirm text says so; restorable in Plainspace for 30 days) | Deleted; in Recently deleted                                                                           |
-| Delete a delegated task (Phase 2)                    | Untouched (server refuses: not assigned to me)                                                                  | Deleted; confirm text says "only your copy"                                                            |
+| Delete a task no longer assigned to me               | Untouched (server refuses: not assigned to me)                                                                  | Deleted; normal confirm, no "for everyone" warning                                                     |
 | Delete the project                                   | Untouched (not a delete trigger, verified)                                                                      | Tasks deleted locally                                                                                  |
 | Remove the provider                                  | Untouched                                                                                                       | Tasks unlinked, notes and time kept (exists)                                                           |
 | Item deleted, unassigned or membership lost remotely | —                                                                                                               | Never deleted. Task, notes and time kept; state _no longer in your Plainspace list_; no further pushes |
@@ -255,6 +249,11 @@ and bulk sharing raise the blast radius of today's delete-for-everyone.
 
 A missing item is never read as a deletion: the server returns the same 404
 for deleted, reassigned and lost-membership, by design.
+
+Delete is one action. There is no separate "delete my copy": the warning
+appears only when the delete reaches Plainspace, i.e. the task is assigned to
+me. A task that is no longer mine (handed off, reassigned, gone from my list)
+is deleted locally like any other task.
 
 ## Releases
 
@@ -273,8 +272,8 @@ Sizes are relative (S, M) and not commitments; each release has its own PRs.
    menu: "Copy invite link". Server returns `joinUrl` (null when the Space is
    private) from `POST /spaces` and `GET /me`, so SP never builds Plainspace
    URLs itself.
-4. **Say where data goes.** The share dialog states that titles (and, from
-   Release 2, shared times) are stored on the Plainspace host. The wiki's
+4. **Say where data goes.** The share dialog states that titles, done state
+   and scheduled times are stored on the Plainspace host. The wiki's
    "what syncs where" table is updated in the same PR as each release.
 
 ### Release 1: safe pulls, title round-trip, move-in (M)
@@ -296,12 +295,12 @@ SP:
 5. **Plainspace E2E harness** and focused cases (§ Testing).
 6. **Older servers** keep done push and today's pulls; no new UI.
 
-### Release 2: shared time (S–M), after the § Shared time decision
+### Release 2: scheduled time both ways (S)
 
-Server: `PATCH` accepts `scheduledAt`, rejects it on recurring items
-(super-productivity/plainspace#40, community, is a starting point). SP: the
-transitions table, including the one-time backfill of the deadline on
-existing linked tasks (one update op per task on the first poll).
+Server: `PATCH` accepts `scheduledAt` (or `null`), rejects it on recurring
+items (super-productivity/plainspace#40, community, is a starting point). SP:
+`dueWithTime` becomes a two-way field under § Scheduled time; no backfill, the
+pull mapping already exists. Closes #9833.
 
 ### Release 3: share existing tasks (S)
 
@@ -333,11 +332,12 @@ SP:
 
 1. **Task context menu → "Assign to… / Release to Space"** on linked tasks.
    Menu only, never in the task row template.
-2. **A delegated task stays.** It is unscheduled locally (plan only, nothing
-   pushed), keeps its time, notes and subtasks, and shows the assignee's name
-   from a live, non-persisted view-model like the claim pool. Its done state
-   keeps pulling via `GET /tasks?ids=`. Reassigned back to me, it returns to
-   the assigned-to-me path.
+2. **A delegated task stays.** Its schedule is now the assignee's, so it is
+   unscheduled locally and no longer syncs (§ Scheduled time, rule 2). It
+   keeps its time, notes and subtasks, and shows the assignee's name from a
+   live, non-persisted view-model like the claim pool. Title and done keep
+   pulling via `GET /tasks?ids=`. Reassigned back to me, it returns to the
+   assigned-to-me path, schedule included.
 3. **Not shared yet?** The menu entry offers to share the project first, then
    assign.
 
@@ -345,15 +345,15 @@ SP:
 
 SSE for integration clients; a cross-project "Waiting on" view; plugin
 migration (#8476), decided after Phase 2 so synced provider-config key changes
-don't land with behaviour changes; day-only shared time reusing
-`reminder.dueDateNotificationHour`.
+don't land with behaviour changes; day-only schedules once Plainspace has a
+date-only time.
 
 ## Sync and long-term cost
 
 - **No SP persisted-model change.** Membership derives from
   `issueType`/`issueProviderId`; baselines use `issueLastSyncedValues`; the
-  shared time uses the existing deadline fields; sync state and assignee are
-  in-memory view-models (AGENTS.md sync rule 13).
+  scheduled time uses the existing `dueWithTime` mapping; sync state and
+  assignee are in-memory view-models (AGENTS.md sync rule 13).
 - **Ops.** Pulls and pushes are single-task `updateTask` ops; create and link
   stay two ops, now recoverable; bulk share is a per-task loop (sync rule 6).
   New effects inject `LOCAL_ACTIONS`, so remote ops never re-trigger a push.
@@ -381,8 +381,10 @@ don't land with behaviour changes; day-only shared time reusing
   killed between create and link, then poll links instead of importing; two SP
   devices retrying the same edit independently; offline edit, restart,
   reconnect; move-in creates; older server keeps done push.
-- **Release 2 cases**: each row of the shared-time table, recurring advance
-  with and without a replanned task.
+- **Release 2 cases**: reschedule, planner drag, day-only plan and unschedule
+  each reach Plainspace; a remote change lands in SP; concurrent change (remote
+  wins); a recurring task's local edit is skipped and the next occurrence
+  pulls; a task not assigned to me neither pushes nor pulls its time.
 - **Deletion cases**: each row of the deletion table.
 - Unit specs for the per-field decision table and the move-in effect.
 
@@ -397,10 +399,9 @@ per-list visibility settings.
 
 1. **Direction.** Close the seam rather than build native multi-user (the
    review agrees).
-2. **Shared time.** Separate shared time on the deadline fields with "plan
-   follows until I replan" (recommended), or timed planning shared both ways?
-   If separate: label the deadline row "Shared time" on linked tasks, or keep
-   "Deadline"?
+2. **Day-only plans clear the Plainspace time.** Accepted as part of "the
+   assignee owns the schedule"? The alternative, leaving Plainspace's time in
+   place, means SP and Plainspace show different schedules.
 3. **#3969.** Comment with the concrete scope and a tracking link; reopening
    the broad issue is optional.
 
