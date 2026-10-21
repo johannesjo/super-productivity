@@ -60,6 +60,7 @@ interface CalDavTaskData {
   url: string;
   etag: string;
   update?: () => Promise<void>;
+  delete?: (headers?: Record<string, string>) => Promise<void>;
 }
 
 @Injectable({
@@ -418,6 +419,12 @@ export class CaldavClientService {
     );
   }
 
+  deleteTask$(caldavCfg: CaldavCfg, issueId: string): Observable<void> {
+    return from(this._deleteTask(caldavCfg, issueId)).pipe(
+      catchError((err) => throwError({ [HANDLED_ERROR_PROP_STR]: 'Caldav: ' + err })),
+    );
+  }
+
   protected get isNativePlatform(): boolean {
     return Capacitor.isNativePlatform();
   }
@@ -649,6 +656,46 @@ export class CaldavClientService {
     }
 
     return await CaldavClientService._mapTask(task[0]);
+  }
+
+  private async _deleteTask(cfg: CaldavCfg, uid: string): Promise<void> {
+    const cal = await this._getCalendar(cfg);
+
+    if (cal.readOnly) {
+      this._snackService.open({
+        type: 'ERROR',
+        translateParams: {
+          calendarName: cfg.resourceName as string,
+        },
+        msg: T.F.CALDAV.S.CALENDAR_READ_ONLY,
+      });
+      throw new Error('CALENDAR READ ONLY: ' + cfg.resourceName);
+    }
+
+    const tasks = await CaldavClientService._findTaskByUid(cal, uid).catch((err) =>
+      this._handleNetErr(err),
+    );
+    // The UID text-match is a substring match (RFC 4791 §9.7.5), so it can also
+    // return VTODOs whose UID merely contains this one; delete only the exact one.
+    const ICAL = await loadIcalModule();
+    const task = tasks.find(
+      (t) =>
+        new ICAL.Component(ICAL.parse(t.data))
+          .getFirstSubcomponent('vtodo')
+          ?.getFirstPropertyValue('uid') === uid,
+    );
+    // Already gone on the server (deleted there, or by another device) — the
+    // goal state is reached, so stay silent.
+    if (!task) {
+      return;
+    }
+    if (task.delete) {
+      // If-Match on the ETag just fetched: a write that lands between this
+      // lookup and the DELETE fails it instead of being deleted unseen.
+      // eslint-disable-next-line @typescript-eslint/naming-convention
+      const headers: Record<string, string> = task.etag ? { 'If-Match': task.etag } : {};
+      await task.delete(headers).catch((err) => this._handleNetErr(err));
+    }
   }
 
   private async _updateTask(
