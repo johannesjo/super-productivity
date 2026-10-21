@@ -87,7 +87,9 @@ export interface FileBasedSyncData<
    * #10973: true when recentOps provably holds every operation of the batch
    * `oldestOpSyncVersion` (writers since #10973 trim only at batch boundaries).
    * Optional: older writers omit it and may have cut inside that batch, so
-   * readers treat absence as unproven. Older readers ignore it.
+   * readers treat absence as unproven. Older readers ignore it. A writer that
+   * changes recentOps must recompute it (appendRecentOpsAtBatchBoundary), never
+   * copy it forward: a stale `true` would suppress the #10973 gap.
    */
   oldestBatchComplete?: boolean;
 }
