@@ -4964,6 +4964,36 @@ describe('FileBasedSyncAdapterService', () => {
       ).toBe(true);
     });
 
+    // #10973: migration copies recentOps unchanged, so it must carry the v2
+    // certification; dropping it would flag every migrated reader at oldest-1.
+    it('#10973 carries oldestBatchComplete from legacy v2 into the migrated ops file', async () => {
+      const recentOps = [makeCompactOp({ id: 'op-6', sv: 6 })];
+      const legacy = createMockSyncData({
+        syncVersion: 7,
+        vectorClock: { client1: 7 },
+        recentOps,
+        oldestOpSyncVersion: 6,
+        oldestBatchComplete: true,
+        state: { tasks: ['legacy'] },
+      });
+      routeDownloads({ [C.SYNC_FILE]: addPrefix(legacy, 2) });
+
+      await expectAsync(
+        adapter.uploadOps([createMockSyncOp()], 'client1'),
+      ).toBeRejectedWithError(UploadRevToMatchMismatchAPIError);
+
+      const opsWrites = mockProvider.uploadFile.calls
+        .allArgs()
+        .filter(([path]) => path === C.OPS_FILE)
+        .map(([, encoded]) => parseWithPrefix(encoded as string));
+      // Pending marker and finalized commit point both carry it.
+      expect(opsWrites.length).toBe(2);
+      for (const ops of opsWrites) {
+        expect(ops.recentOps).toEqual(recentOps);
+        expect(ops.oldestBatchComplete).toBe(true);
+      }
+    });
+
     it('(e2) resumes a pending migration marker after restart before appending ops', async () => {
       const legacy = createMockSyncData({
         syncVersion: 7,

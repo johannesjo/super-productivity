@@ -1,4 +1,5 @@
 import type { BrowserContext, Page } from '@playwright/test';
+import { FILE_BASED_SYNC_CONSTANTS } from '@sp/sync-providers/file-based';
 import { test, expect } from '../../fixtures/webdav.fixture';
 import { SyncPage } from '../../pages/sync.page';
 import { WorkViewPage } from '../../pages/work-view.page';
@@ -33,9 +34,9 @@ interface RemoteOpsFile {
 const AUTHORIZATION = `Basic ${Buffer.from(
   `${WEBDAV_CONFIG_TEMPLATE.username}:${WEBDAV_CONFIG_TEMPLATE.password}`,
 ).toString('base64')}`;
-// Mirrors FILE_BASED_SYNC_CONSTANTS (MAX_RECENT_OPS / SPLIT_COMPACTION_THRESHOLD).
-const MAX_RECENT_OPS = 2000;
-const SPLIT_COMPACTION_THRESHOLD = 1000;
+// Imported, not mirrored: the churn below is sized from these, so a changed cap
+// must move the cut with it or the test would stop cutting inside the batch.
+const { MAX_RECENT_OPS, SPLIT_COMPACTION_THRESHOLD } = FILE_BASED_SYNC_CONSTANTS;
 const HEAD_TASK_COUNT = 10;
 
 const pendingOpCount = (page: Page): Promise<number> =>
@@ -177,7 +178,12 @@ test.describe('@webdav partial trim inside the batch after a lagging cursor #109
           // The split format compacts only above MAX_RECENT_OPS and then keeps
           // SPLIT_COMPACTION_THRESHOLD ops, so the buffer must already hold more
           // than that before the head batch for the compaction to cut into it.
-          await dispatchTaskUpdates(a.page, 'Churn task', 1100, 0);
+          await dispatchTaskUpdates(
+            a.page,
+            'Churn task',
+            SPLIT_COMPACTION_THRESHOLD + 100,
+            0,
+          );
           await syncOnce(a);
         }
 
