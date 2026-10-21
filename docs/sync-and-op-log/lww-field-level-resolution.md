@@ -661,8 +661,18 @@ client already receives for this type, so it recreates the config whole
   it, as it lost to the whole-entity snapshot before.
 - Like every local-win snapshot, it is read before the batch's other ops
   apply (#10385 class), so a same-batch undeclared write to the config, such
-  as a tag delete's `tagIds` cleanup, is overwritten.
+  as a tag delete's `tagIds` cleanup, is overwritten. The only such writers
+  are `deleteTag(s)` and `deleteProject`: the config keeps the deleted id or
+  comes back, the same on every device. A task it generates then fails
+  validation and data repair drops the id from that task; repair clears a
+  stale `projectId` on the config but not stale `tagIds`. No data is lost.
+  On master only the local-win direction had this.
 - A released device that resolves the crossing still uses whole-entity LWW.
+- A device that receives the snapshot while it holds its own pending edit of
+  the config meets a row, so it resolves whole-entity (decision 5). If its
+  edit is newer, e.g. a third device's own generation on the same morning,
+  its snapshot of its pre-batch config carries the old values again, as on
+  master. Reading the row's values would need a new decision.
 
 Admitting another type needs a reported loss (fix intake), an adapter
 entity, and no derived upkeep on LWW apply (NOTE stays out, decision 4).
