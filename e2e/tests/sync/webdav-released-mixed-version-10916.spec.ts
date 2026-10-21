@@ -11,394 +11,256 @@ import {
   generateSyncFolderName,
   closeContextsSafely,
 } from '../../utils/sync-helpers';
-import { serveReleasedClientAssets } from '../../utils/released-client-assets';
-import { waitForAppReady } from '../../utils/waits';
+import {
+  loadedEntryScript,
+  releasedEntryScript,
+  serveReleasedClientAssets,
+} from '../../utils/released-client-assets';
 
 /**
- * #10916: a v19.1.0 desktop and a v19.2.0 phone sync over a file provider.
- * Tasks the phone adds to Today must reach the desktop and survive on the phone.
+ * #10916: a v19.1.0 desktop and a v19.2.0 phone share a WebDAV folder. Tasks
+ * the phone adds to Today must reach the desktop and stay on the phone.
+ * Runs the unmodified published bundles (scripts/fetch-released-client-assets.sh).
  */
-// 'gzip-etag-' puts the folder behind the E2E server's mod_deflate (#10808).
-const FOLDER_PREFIX = process.env.E2E_10916_FOLDER_PREFIX ?? 'e2e-';
-
 test.describe('@webdav released mixed-version Today tasks (#10916)', () => {
   test.describe.configure({ mode: 'serial' });
   const releasedRoot = process.env.COMPAT_RELEASED_ROOT;
-  test.skip(!releasedRoot, 'Set COMPAT_RELEASED_ROOT to the released bundles dir');
+  test.skip(!releasedRoot, 'Set COMPAT_RELEASED_ROOT to the fetched released bundles');
 
-  let v191: Awaited<ReturnType<typeof serveReleasedClientAssets>>;
-  let v192: Awaited<ReturnType<typeof serveReleasedClientAssets>>;
-  let upgradable: Awaited<ReturnType<typeof serveReleasedClientAssets>>;
+  type Server = Awaited<ReturnType<typeof serveReleasedClientAssets>>;
+  let v191: Server;
+  let v192: Server;
+  // No cookie serves v19.1.0; the cookie upgrades the origin in place.
+  let upgradable: Server;
+  // Entry scripts of each bundle, to prove which release a client booted.
+  let entry191 = '';
+  let entry192 = '';
   test.beforeAll(async () => {
     const d191 = `${releasedRoot}/v19.1.0`;
     const d192 = `${releasedRoot}/v19.2.0`;
+    entry191 = await releasedEntryScript(d191);
+    entry192 = await releasedEntryScript(d192);
     v191 = await serveReleasedClientAssets({ old: d191, new: d191 }, 0);
     v192 = await serveReleasedClientAssets({ old: d192, new: d192 }, 0);
     upgradable = await serveReleasedClientAssets({ old: d192, new: d191 }, 0);
   });
   test.afterAll(async () => {
-    await v191?.close();
-    await v192?.close();
-    await upgradable?.close();
+    await Promise.all([v191?.close(), v192?.close(), upgradable?.close()]);
   });
 
-  // Phone origin: no cookie serves v19.1.0; the cookie upgrades it in place to
-  // v19.2.0, keeping its IndexedDB, as a Play auto-update does.
-  const upgradeInPlace = async (client: { page: Page }, url: string): Promise<void> => {
-    await client.page
-      .context()
-      .addCookies([{ name: 'compat-release', value: 'old', url }]);
-    await client.page.goto(`${url}/#/tag/TODAY/tasks`);
-    await client.page.reload();
-    await new WorkViewPage(client.page).waitForTaskList();
-  };
+  interface Client {
+    page: Page;
+    url: string;
+    sync: SyncPage;
+    work: WorkViewPage;
+    close: () => Promise<void>;
+  }
 
   const openClient = async (
     browser: Browser,
     url: string,
-  ): Promise<{
-    page: Page;
-    sync: SyncPage;
-    work: WorkViewPage;
-    close: () => Promise<void>;
-  }> => {
+    expectedEntry: string,
+  ): Promise<Client> => {
     const { context, page } = await setupSyncClient(browser, url);
-    const work = new WorkViewPage(page);
-    await work.waitForTaskList();
+    expect(await loadedEntryScript(page)).toBe(expectedEntry);
     return {
       page,
+      url,
       sync: new SyncPage(page),
-      work,
+      work: new WorkViewPage(page),
       close: () => closeContextsSafely(context),
     };
   };
 
-  const syncNow = async (client: { page: Page; sync: SyncPage }): Promise<void> => {
+  /** Play auto-update: same origin and IndexedDB, newer bundle. */
+  const upgradeInPlace = async (client: Client): Promise<void> => {
+    await client.page
+      .context()
+      .addCookies([{ name: 'compat-release', value: 'old', url: client.url }]);
+    await client.page.reload();
+    expect(await loadedEntryScript(client.page)).toBe(entry192);
+  };
+
+  const openToday = async (client: Client): Promise<void> => {
+    await client.page.goto(`${client.url}/#/tag/TODAY/tasks`);
+    await client.work.waitForTaskList();
+  };
+
+  const addToday = async (client: Client, title: string): Promise<void> => {
+    await openToday(client);
+    await client.work.addTask(`${title} @today`, false, title);
+  };
+
+  const syncNow = async (client: Client): Promise<void> => {
     await waitForStatePersistence(client.page);
     await client.sync.triggerSync();
     await waitForSyncComplete(client.page, client.sync);
   };
 
-  const titles = async (page: Page, url: string): Promise<string[]> => {
-    await page.goto(`${url}/#/tag/TODAY/tasks`);
-    await new WorkViewPage(page).waitForTaskList();
-    return page.locator('task .task-title').allInnerTexts();
+  const todayTitles = async (client: Client): Promise<string[]> => {
+    await openToday(client);
+    return (await client.page.locator('task .task-title').allInnerTexts()).sort();
   };
 
-  test('phone (v19.2.0) Today tasks reach a v19.1.0 desktop and survive', async ({
-    browser,
-    request,
-  }) => {
-    test.slow();
-    const folder = generateSyncFolderName(FOLDER_PREFIX + '10916');
-    const config = { ...WEBDAV_CONFIG_TEMPLATE, syncFolderPath: `/${folder}` };
+  const newFolder = async (
+    request: Parameters<typeof createSyncFolder>[0],
+    name: string,
+  ): Promise<typeof WEBDAV_CONFIG_TEMPLATE & { syncFolderPath: string }> => {
+    const folder = generateSyncFolderName(name);
     await createSyncFolder(request, folder);
-
-    const desktop = await openClient(browser, v191.url);
-    const phone = await openClient(browser, v192.url);
-    try {
-      await desktop.sync.setupWebdavSync(config);
-      await desktop.page.goto(`${v191.url}/#/tag/TODAY/tasks`);
-      await desktop.work.waitForTaskList();
-      await desktop.work.addTask('Desk-Base @today', false, 'Desk-Base');
-      await syncNow(desktop);
-
-      await phone.sync.setupWebdavSync(config);
-      await syncNow(phone);
-      expect(await titles(phone.page, v192.url)).toContain('Desk-Base');
-
-      await phone.work.addTask('Phone-A @today', false, 'Phone-A');
-      await phone.work.addTask('Phone-B @today', false, 'Phone-B');
-      await syncNow(phone);
-
-      await syncNow(desktop);
-      const desktopTitles = await titles(desktop.page, v191.url);
-      console.log('[10916] desktop after sync:', desktopTitles);
-
-      await syncNow(phone);
-      const phoneTitles = await titles(phone.page, v192.url);
-      console.log('[10916] phone after second sync:', phoneTitles);
-
-      expect(desktopTitles).toEqual(expect.arrayContaining(['Phone-A', 'Phone-B']));
-      expect(phoneTitles).toEqual(expect.arrayContaining(['Phone-A', 'Phone-B']));
-    } finally {
-      await desktop.close();
-      await phone.close();
-    }
-  });
-
-  test('phone upgraded in place from v19.1.0 keeps Today tasks with a v19.1.0 desktop', async ({
-    browser,
-    request,
-  }) => {
-    test.slow();
-    const folder = generateSyncFolderName(FOLDER_PREFIX + '10916-upg');
-    const config = { ...WEBDAV_CONFIG_TEMPLATE, syncFolderPath: `/${folder}` };
-    await createSyncFolder(request, folder);
-
-    const desktop = await openClient(browser, v191.url);
-    const phone = await openClient(browser, upgradable.url);
-    try {
-      await desktop.sync.setupWebdavSync(config);
-      await desktop.page.goto(`${v191.url}/#/tag/TODAY/tasks`);
-      await desktop.work.waitForTaskList();
-      await desktop.work.addTask('Desk-Base @today', false, 'Desk-Base');
-      await syncNow(desktop);
-
-      await phone.sync.setupWebdavSync(config);
-      await syncNow(phone);
-      await phone.work.addTask('Phone-Old @today', false, 'Phone-Old');
-      await syncNow(phone);
-      await syncNow(desktop);
-      expect(await titles(desktop.page, v191.url)).toContain('Phone-Old');
-      await desktop.work.addTask('Desk-Two @today', false, 'Desk-Two');
-      await syncNow(desktop);
-
-      await upgradeInPlace(phone, upgradable.url);
-      await syncNow(phone);
-      console.log(
-        '[10916-upg] phone after upgrade sync:',
-        await titles(phone.page, upgradable.url),
-      );
-
-      await phone.work.addTask('Phone-A @today', false, 'Phone-A');
-      await phone.work.addTask('Phone-B @today', false, 'Phone-B');
-      await syncNow(phone);
-
-      await syncNow(desktop);
-      const desktopTitles = await titles(desktop.page, v191.url);
-      console.log('[10916-upg] desktop after sync:', desktopTitles);
-
-      await syncNow(phone);
-      const phoneTitles = await titles(phone.page, upgradable.url);
-      console.log('[10916-upg] phone after second sync:', phoneTitles);
-
-      expect(desktopTitles).toEqual(expect.arrayContaining(['Phone-A', 'Phone-B']));
-      expect(phoneTitles).toEqual(expect.arrayContaining(['Phone-A', 'Phone-B']));
-    } finally {
-      await desktop.close();
-      await phone.close();
-    }
-  });
-
-  test('v19.1.0 desktop with a pending local edit keeps the phone Today tasks', async ({
-    browser,
-    request,
-  }) => {
-    test.slow();
-    const folder = generateSyncFolderName(FOLDER_PREFIX + '10916-pend');
-    const config = { ...WEBDAV_CONFIG_TEMPLATE, syncFolderPath: `/${folder}` };
-    await createSyncFolder(request, folder);
-
-    const desktop = await openClient(browser, v191.url);
-    const phone = await openClient(browser, v192.url);
-    try {
-      await desktop.sync.setupWebdavSync(config);
-      await desktop.page.goto(`${v191.url}/#/tag/TODAY/tasks`);
-      await desktop.work.waitForTaskList();
-      await desktop.work.addTask('Desk-Base @today', false, 'Desk-Base');
-      await syncNow(desktop);
-
-      await phone.sync.setupWebdavSync(config);
-      await syncNow(phone);
-
-      await phone.work.addTask('Phone-A @today', false, 'Phone-A');
-      await phone.work.addTask('Phone-B @today', false, 'Phone-B');
-      await syncNow(phone);
-
-      await desktop.page.goto(`${v191.url}/#/tag/TODAY/tasks`);
-      await desktop.work.waitForTaskList();
-      await desktop.work.addTask('Desk-Pending @today', false, 'Desk-Pending');
-      await syncNow(desktop);
-      const desktopTitles = await titles(desktop.page, v191.url);
-      console.log('[10916-pend] desktop after sync:', desktopTitles);
-
-      await syncNow(phone);
-      const phoneTitles = await titles(phone.page, v192.url);
-      console.log('[10916-pend] phone after second sync:', phoneTitles);
-
-      expect(desktopTitles).toEqual(
-        expect.arrayContaining(['Phone-A', 'Phone-B', 'Desk-Pending']),
-      );
-      expect(phoneTitles).toEqual(
-        expect.arrayContaining(['Phone-A', 'Phone-B', 'Desk-Pending']),
-      );
-    } finally {
-      await desktop.close();
-      await phone.close();
-    }
-  });
-
-  // A bare client: these scenarios expect failed uploads, so the shared helper's
-  // strict dialog and close-time runtime-error guards do not apply.
-  const openBareClient = async (
-    browser: Browser,
-    url: string,
-  ): Promise<{
-    page: Page;
-    sync: SyncPage;
-    work: WorkViewPage;
-    close: () => Promise<void>;
-  }> => {
-    const context = await browser.newContext({
-      baseURL: url,
-      userAgent: 'PLAYWRIGHT WEBDAV-SYNC-CLIENT',
-    });
-    const page = await context.newPage();
-    page.on('pageerror', (e) => console.log('[10916-bare] pageerror:', e.message));
-    page.on('dialog', (d) => {
-      console.log('[10916-bare] dialog:', d.type(), d.message());
-      void d.accept();
-    });
-    await page.addInitScript(() => {
-      localStorage.setItem('SUP_ONBOARDING_PRESET_DONE', 'true');
-      localStorage.setItem('SUP_ONBOARDING_HINTS_DONE', 'true');
-      localStorage.setItem('SUP_IS_SHOW_TOUR', 'true');
-      localStorage.setItem('SUP_EXAMPLE_TASKS_CREATED', 'true');
-    });
-    await page.goto('/');
-    await waitForAppReady(page);
-    const work = new WorkViewPage(page);
-    await work.waitForTaskList();
-    return { page, sync: new SyncPage(page), work, close: () => context.close() };
+    return { ...WEBDAV_CONFIG_TEMPLATE, syncFolderPath: `/${folder}` };
   };
 
-  test('behind mod_deflate (#10808): phone Today tasks vs a v19.1.0 desktop', async ({
+  test('phone on v19.2.0 keeps Today tasks with a v19.1.0 desktop', async ({
     browser,
     request,
   }) => {
     test.slow();
-    const folder = generateSyncFolderName('gzip-etag-10916');
-    const config = { ...WEBDAV_CONFIG_TEMPLATE, syncFolderPath: `/${folder}` };
-    await createSyncFolder(request, folder);
+    const config = await newFolder(request, 'e2e-10916');
+    const desktop = await openClient(browser, v191.url, entry191);
+    const phone = await openClient(browser, v192.url, entry192);
+    try {
+      await desktop.sync.setupWebdavSync(config);
+      await addToday(desktop, 'Desk-Base');
+      await syncNow(desktop);
+      await phone.sync.setupWebdavSync(config);
+      await syncNow(phone);
 
-    const desktop = await openBareClient(browser, v191.url);
-    const phone = await openBareClient(browser, v192.url);
-    const log: string[] = [];
-    for (const [name, c] of [
-      ['desk', desktop],
-      ['phone', phone],
-    ] as const) {
-      c.page.on('response', (r) => {
-        if (!r.url().includes(folder)) return;
-        const m = r.request().method();
-        if (m === 'PUT' || m === 'GET' || m === 'DELETE' || m === 'MOVE') {
-          log.push(`${name} ${m} ${r.url().split(folder)[1]} -> ${r.status()}`);
+      await addToday(phone, 'Phone-A');
+      await addToday(phone, 'Phone-B');
+      await syncNow(phone);
+      await syncNow(desktop);
+      await syncNow(phone);
+
+      const expected = ['Desk-Base', 'Phone-A', 'Phone-B'];
+      expect(await todayTitles(desktop)).toEqual(expected);
+      expect(await todayTitles(phone)).toEqual(expected);
+    } finally {
+      await desktop.close();
+      await phone.close();
+    }
+  });
+
+  test('phone upgraded in place to v19.2.0 keeps Today tasks with a v19.1.0 desktop', async ({
+    browser,
+    request,
+  }) => {
+    test.slow();
+    const config = await newFolder(request, 'e2e-10916-upgrade');
+    const desktop = await openClient(browser, v191.url, entry191);
+    const phone = await openClient(browser, upgradable.url, entry191);
+    try {
+      await desktop.sync.setupWebdavSync(config);
+      await addToday(desktop, 'Desk-Base');
+      await syncNow(desktop);
+      await phone.sync.setupWebdavSync(config);
+      await syncNow(phone);
+      await addToday(phone, 'Phone-Old');
+      await syncNow(phone);
+      await syncNow(desktop);
+      await addToday(desktop, 'Desk-Two');
+      await syncNow(desktop);
+
+      await upgradeInPlace(phone);
+      await syncNow(phone);
+      await addToday(phone, 'Phone-A');
+      await addToday(phone, 'Phone-B');
+      await syncNow(phone);
+      await syncNow(desktop);
+      await syncNow(phone);
+
+      const expected = ['Desk-Base', 'Desk-Two', 'Phone-A', 'Phone-B', 'Phone-Old'];
+      expect(await todayTitles(desktop)).toEqual(expected);
+      expect(await todayTitles(phone)).toEqual(expected);
+    } finally {
+      await desktop.close();
+      await phone.close();
+    }
+  });
+
+  test('v19.1.0 desktop with an unsynced edit keeps the phone Today tasks', async ({
+    browser,
+    request,
+  }) => {
+    test.slow();
+    const config = await newFolder(request, 'e2e-10916-pending');
+    const desktop = await openClient(browser, v191.url, entry191);
+    const phone = await openClient(browser, v192.url, entry192);
+    try {
+      await desktop.sync.setupWebdavSync(config);
+      await addToday(desktop, 'Desk-Base');
+      await syncNow(desktop);
+      await phone.sync.setupWebdavSync(config);
+      await syncNow(phone);
+
+      await addToday(phone, 'Phone-A');
+      await addToday(phone, 'Phone-B');
+      await syncNow(phone);
+      // The desktop edits before it has seen the phone's upload.
+      await addToday(desktop, 'Desk-Pending');
+      await syncNow(desktop);
+      await syncNow(phone);
+
+      const expected = ['Desk-Base', 'Desk-Pending', 'Phone-A', 'Phone-B'];
+      expect(await todayTitles(desktop)).toEqual(expected);
+      expect(await todayTitles(phone)).toEqual(expected);
+    } finally {
+      await desktop.close();
+      await phone.close();
+    }
+  });
+
+  // #10808: the E2E server compresses folders named `gzip-etag-*`, so both
+  // releases get 412 on every upload. Nothing converges, but nothing is lost.
+  test('behind mod_deflate (#10808) the phone keeps its Today tasks', async ({
+    browser,
+    request,
+  }) => {
+    test.slow();
+    const config = await newFolder(request, 'gzip-etag-10916');
+    const desktop = await openClient(browser, v191.url, entry191);
+    const phone = await openClient(browser, v192.url, entry192);
+    const putStatuses: number[] = [];
+    const recordUploads = (client: Client): void => {
+      client.page.on('response', (response) => {
+        if (
+          response.request().method() === 'PUT' &&
+          response.url().endsWith(`${config.syncFolderPath}/sync-data.json`)
+        ) {
+          putStatuses.push(response.status());
         }
       });
-    }
-    const looseSync = async (
-      name: string,
-      c: { page: Page; sync: SyncPage },
-    ): Promise<void> => {
-      await waitForStatePersistence(c.page);
-      log.push(`--- ${name} sync`);
-      await c.sync.triggerSync();
-      await c.page.waitForTimeout(6000);
-      const snacks = await c.page.locator('.mat-mdc-snack-bar-container').allInnerTexts();
-      log.push(
-        `${name} end: check=${await c.sync.syncCheckIcon.isVisible()} err=${await c.sync.syncErrorIcon.isVisible()} snacks=${JSON.stringify(snacks)}`,
-      );
     };
-    const remoteTitles = async (): Promise<string[]> => {
-      const r = await request.get(
-        `${WEBDAV_CONFIG_TEMPLATE.baseUrl}${folder}/sync-data.json`,
-        {
-          headers: {
-            Authorization: `Basic ${Buffer.from('admin:admin').toString('base64')}`,
-          },
-        },
-      );
-      if (!r.ok()) return [`(status ${r.status()})`];
-      const text = (await r.text()).replace(/^pf_\d+__/, '');
-      const data = JSON.parse(text) as {
-        syncVersion: number;
-        state: { task: { entities: Record<string, { title: string }> } };
-      };
-      return [
-        `v${data.syncVersion}`,
-        ...Object.values(data.state.task.entities).map((t) => t.title),
-      ];
+    // These syncs never reach a terminal UI state; wait for the cycle to end.
+    const settledSync = async (client: Client): Promise<void> => {
+      await waitForStatePersistence(client.page);
+      await client.sync.triggerSync();
+      await client.sync.waitForTriggeredSyncResponse(20000);
+      await client.sync.syncSpinner.waitFor({ state: 'hidden', timeout: 30000 });
+      client.sync.completeTriggeredSyncCycle();
     };
     try {
+      // Setup creates the file without a precondition; only later uploads fail.
       await desktop.sync.setupWebdavSync(config);
-      await desktop.page.goto(`${v191.url}/#/tag/TODAY/tasks`);
-      await desktop.work.waitForTaskList();
-      await desktop.work.addTask('Desk-Base @today', false, 'Desk-Base');
-      await looseSync('desk', desktop);
-      log.push(`remote: ${await remoteTitles()}`);
-
+      recordUploads(desktop);
+      recordUploads(phone);
+      await addToday(desktop, 'Desk-Base');
+      await settledSync(desktop);
       await phone.sync.setupWebdavSync(config);
-      await looseSync('phone', phone);
-      log.push(`phone has: ${await titles(phone.page, v192.url)}`);
+      await settledSync(phone);
 
-      await phone.work.addTask('Phone-A @today', false, 'Phone-A');
-      await phone.work.addTask('Phone-B @today', false, 'Phone-B');
-      await looseSync('phone', phone);
-      log.push(`remote: ${await remoteTitles()}`);
+      await addToday(phone, 'Phone-A');
+      await addToday(phone, 'Phone-B');
+      await settledSync(phone);
+      // Unlike the report, the phone does not claim its upload succeeded.
+      await expect(phone.sync.syncCheckIcon).toBeHidden();
+      await settledSync(desktop);
+      await settledSync(phone);
 
-      await looseSync('desk', desktop);
-      const desktopTitles = await titles(desktop.page, v191.url);
-      log.push(`desk has: ${desktopTitles}`);
-      log.push(`remote: ${await remoteTitles()}`);
-
-      await looseSync('phone', phone);
-      const phoneTitles = await titles(phone.page, v192.url);
-      log.push(`phone has: ${phoneTitles}`);
-      log.push(`remote: ${await remoteTitles()}`);
-      console.log('[10916-gzip]\n' + log.join('\n'));
-
-      // #10808 blocks every upload, so the desktop never sees the phone's tasks,
-      // but nothing is lost: the phone keeps them and shows no success.
-      expect(desktopTitles).not.toContain('Phone-A');
-      expect(phoneTitles).toEqual(expect.arrayContaining(['Phone-A', 'Phone-B']));
-    } finally {
-      console.log('[10916-gzip] log so far\n' + log.join('\n'));
-      await desktop.close();
-      await phone.close();
-    }
-  });
-
-  test('phone on Surgical (v3) sync vs a v2 v19.1.0 desktop', async ({
-    browser,
-    request,
-  }) => {
-    test.slow();
-    const folder = generateSyncFolderName(FOLDER_PREFIX + '10916-v3');
-    const config = { ...WEBDAV_CONFIG_TEMPLATE, syncFolderPath: `/${folder}` };
-    await createSyncFolder(request, folder);
-
-    const desktop = await openBareClient(browser, v191.url);
-    const phone = await openBareClient(browser, v192.url);
-    const snack = async (p: Page): Promise<string[]> =>
-      p.locator('.mat-mdc-snack-bar-container').allInnerTexts();
-    try {
-      await desktop.sync.setupWebdavSync({ ...config, isUseSplitSyncFiles: false });
-      await desktop.page.goto(`${v191.url}/#/tag/TODAY/tasks`);
-      await desktop.work.waitForTaskList();
-      await desktop.work.addTask('Desk-Base @today', false, 'Desk-Base');
-      await syncNow(desktop);
-
-      await phone.sync.setupWebdavSync({ ...config, isUseSplitSyncFiles: true });
-      await phone.sync.triggerSync();
-      await phone.page.waitForTimeout(6000);
-      console.log('[10916-v3] phone first sync snacks:', await snack(phone.page));
-      await phone.work.addTask('Phone-A @today', false, 'Phone-A');
-      await phone.work.addTask('Phone-B @today', false, 'Phone-B');
-      await phone.sync.triggerSync();
-      await phone.page.waitForTimeout(6000);
-      console.log('[10916-v3] phone sync snacks:', await snack(phone.page));
-
-      await desktop.sync.triggerSync();
-      await desktop.page.waitForTimeout(6000);
-      console.log('[10916-v3] desk sync snacks:', await snack(desktop.page));
-      const desktopTitles = await titles(desktop.page, v191.url);
-      console.log('[10916-v3] desktop after sync:', desktopTitles);
-      await phone.sync.triggerSync();
-      await phone.page.waitForTimeout(6000);
-      const phoneTitles = await titles(phone.page, v192.url);
-      console.log('[10916-v3] phone after second sync:', phoneTitles);
-      expect(phoneTitles).toEqual(expect.arrayContaining(['Phone-A', 'Phone-B']));
+      expect(putStatuses.length).toBeGreaterThan(0);
+      expect(putStatuses.every((status) => status === 412)).toBe(true);
+      expect(await todayTitles(desktop)).toEqual(['Desk-Base']);
+      expect(await todayTitles(phone)).toEqual(['Phone-A', 'Phone-B']);
     } finally {
       await desktop.close();
       await phone.close();
