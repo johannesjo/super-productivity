@@ -12,6 +12,8 @@ owners are:
 - `src/app/op-log/sync/superseded-operation-resolver.service.ts`
 - `src/app/op-log/sync/superseded-operation-resolver.service.spec.ts`
 - `e2e/tests/sync/supersync-section-convergence.spec.ts`
+- `e2e/tests/sync/supersync-section-move-vs-section-edit.spec.ts`
+- `src/app/op-log/testing/integration/section-move-conflict-stop.integration.spec.ts`
 - `src/app/op-log/testing/integration/reorder-conflict-wedge.integration.spec.ts`
 - `e2e/tests/sync/supersync-reorder-conflict-wedge.spec.ts`
 - `e2e/tests/sync/supersync-issue-provider-reorder-conflict.spec.ts`
@@ -66,7 +68,13 @@ The recognized crossings are:
 - a section-order update crossing a placement/removal that touches one of the
   ordered sections;
 - a content reorder crossing a single-entity patch of an entity it lists, under
-  the structural rule below; and
+  the structural rule below;
+- a section placement or removal crossing a `SECTION_UPDATE` patch of a section
+  it declares, under the same rule: the placement writes only the declared
+  sections' `taskIds`, so a collapse or rename of either section of a
+  cross-section move commutes with it (#10969). Another task's placement or
+  removal in the same lists, and a section delete, still stop: two placements
+  of different tasks in one list do not commute by order; and
 - two note orders or two habit orders, or a note order and the delete of a
   note it lists (#10377, below).
 
