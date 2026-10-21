@@ -36,6 +36,7 @@ import { performHapticFeedback } from '../../util/haptic-feedback';
 import {
   BottomNavSlotOption,
   getAvailableBottomNavSlotOptions,
+  isBottomNavSlotActive,
   readStoredBottomNavSlot,
   resolveBottomNavSlot,
   writeStoredBottomNavSlot,
@@ -123,15 +124,7 @@ export class MobileBottomNavComponent {
     ),
     { initialValue: this._router.url },
   );
-  readonly isSlotActive = computed(() => {
-    const slot = this.slot();
-    if (!slot) {
-      return false;
-    }
-    // A plugin entry is an action; its page, when it opens one, lives here.
-    const prefix = slot.kind === 'route' ? slot.route : `/plugins/${slot.pluginId}/`;
-    return this._url().startsWith(prefix);
-  });
+  readonly isSlotActive = computed(() => isBottomNavSlotActive(this.slot(), this._url()));
   private readonly _slotMenuTrigger = viewChild('slotMenuTrigger', {
     read: MatMenuTrigger,
   });

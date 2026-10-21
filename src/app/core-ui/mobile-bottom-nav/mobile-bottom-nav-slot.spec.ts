@@ -4,7 +4,9 @@ import { LS } from '../../core/persistence/storage-keys.const';
 import { PluginMenuEntryCfg } from '../../plugins/plugin-api.model';
 import {
   BOTTOM_NAV_SLOT_OPTIONS,
+  BottomNavSlotOption,
   getAvailableBottomNavSlotOptions,
+  isBottomNavSlotActive,
   readStoredBottomNavSlot,
   resolveBottomNavSlot,
   writeStoredBottomNavSlot,
@@ -125,6 +127,34 @@ describe('mobile bottom nav slot', () => {
       expect(resolveBottomNavSlot('plugin:p1:Doc Mode', features(), [])?.id).toBe(
         'planner',
       );
+    });
+  });
+
+  describe('isBottomNavSlotActive', () => {
+    const route = (id: string): BottomNavSlotOption =>
+      BOTTOM_NAV_SLOT_OPTIONS.find((o) => o.id === id)!;
+    const plugin: BottomNavSlotOption = {
+      kind: 'plugin',
+      id: 'plugin:p1:Doc Mode',
+      pluginId: 'p1',
+      label: 'Doc Mode',
+      icon: 'extension',
+      onClick: () => undefined,
+    };
+
+    it('is active on the slot route and below it', () => {
+      expect(isBottomNavSlotActive(route('schedule'), '/schedule')).toBe(true);
+      expect(isBottomNavSlotActive(route('planner'), '/planner?x=1')).toBe(true);
+      expect(isBottomNavSlotActive(plugin, '/plugins/p1/index')).toBe(true);
+    });
+
+    it('is not active on a sibling route that shares the prefix', () => {
+      expect(isBottomNavSlotActive(route('schedule'), '/scheduled-list')).toBe(false);
+      expect(isBottomNavSlotActive(plugin, '/plugins/p12/index')).toBe(false);
+    });
+
+    it('is not active without a slot', () => {
+      expect(isBottomNavSlotActive(null, '/planner')).toBe(false);
     });
   });
 

@@ -120,6 +120,27 @@ export const resolveBottomNavSlot = (
   );
 };
 
+/**
+ * Whether `url` is the slot's page or below it. A bare `startsWith` would
+ * also match a sibling route sharing the prefix (`/schedule` and
+ * `/scheduled-list`).
+ */
+export const isBottomNavSlotActive = (
+  slot: BottomNavSlotOption | null,
+  url: string,
+): boolean => {
+  if (!slot) {
+    return false;
+  }
+  // A plugin entry is an action; its page, when it opens one, lives here.
+  const base = slot.kind === 'route' ? slot.route : `/plugins/${slot.pluginId}`;
+  if (!url.startsWith(base)) {
+    return false;
+  }
+  const rest = url.slice(base.length);
+  return rest === '' || /^[/?#]/.test(rest);
+};
+
 // Device-local on purpose: the bar only exists on narrow screens, so the
 // choice belongs to the device and is never synced.
 export const readStoredBottomNavSlot = (): string | null => {
