@@ -121,10 +121,7 @@ test.describe('Recurring task - After I complete it (#5388)', () => {
     await setRecurQuickSetting(page, /After I complete it/i);
     await expect(page.locator('mat-option')).toHaveCount(0, { timeout: 5000 });
 
-    // The schedule type radio follows the preset; weekdays don't apply here.
-    await expect(
-      dialog.getByRole('radio', { name: /After I complete it/i }),
-    ).toBeChecked();
+    // Weekdays don't apply after completion.
     await expect(dialog.locator('.weekdays')).toBeHidden();
 
     const cycleSelect = dialog.locator('.repeat-cycle mat-select').first();
@@ -195,16 +192,15 @@ test.describe('Recurring task - After I complete it (#5388)', () => {
       })
       .toEqual(['2026-07-14']);
   });
-  // The preset select and the schedule type radio stay in step in both
-  // directions, the dependent fields follow, and switching the radio with the
-  // keyboard keeps focus on it (the dialog rebuilds the form on such changes).
-  test('keeps preset, schedule type and focus in step', async ({
+  // The preset is the one switch: the custom fields follow it, and switching it
+  // with the arrow keys keeps focus on it (the dialog rebuilds the form then).
+  test('switches between fixed and after completion with the preset alone', async ({
     page,
     workViewPage,
     taskPage,
     testPrefix,
   }) => {
-    const taskTitle = `${testPrefix}-ScheduleTypeSync5388`;
+    const taskTitle = `${testPrefix}-PresetSwitch5388`;
     await workViewPage.waitForTaskList();
     await workViewPage.addTask(taskTitle);
     const task = taskPage.getTaskByText(taskTitle).first();
@@ -212,36 +208,31 @@ test.describe('Recurring task - After I complete it (#5388)', () => {
     await taskPage.openTaskDetail(task);
     const dialog = await openRecurDialog(page);
     const preset = dialog.locator('mat-select').first();
-    const fixedRadio = dialog.getByRole('radio', { name: /Fixed schedule/i });
-    const afterRadio = dialog.getByRole('radio', { name: /After I complete it/i });
     const weekdays = dialog.locator('.weekdays');
 
-    await setRecurQuickSetting(page, /Custom recurring config/i);
-    await expect(fixedRadio).toBeChecked();
-    await expect(weekdays).toBeVisible();
+    await expect(dialog.getByRole('radio')).toHaveCount(0);
 
-    await afterRadio.click();
-    await expect(preset).toContainText(/After I complete it/i);
-    await expect(weekdays).toBeHidden();
-
-    await fixedRadio.click();
-    await expect(preset).toContainText(/Custom recurring config/i);
+    await setRecurQuickSetting(page, /Custom/i);
     await expect(weekdays).toBeVisible();
-    await expect(dialog.locator('.rule-summary')).not.toContainText(/only the latest/i);
+    await expect(dialog.locator('.rule-summary')).not.toContainText(/after completion/i);
 
     await setRecurQuickSetting(page, /After I complete it/i);
-    await expect(afterRadio).toBeChecked();
     await expect(weekdays).toBeHidden();
+    await expect(dialog.locator('.rule-summary')).toContainText(/after completion/i);
 
     await setRecurQuickSetting(page, /Every Monday through Friday/i);
     await expect(dialog.locator('.rule-summary')).toHaveCount(0);
 
-    // Keyboard: arrow from Fixed to After keeps focus on the radio group.
-    await setRecurQuickSetting(page, /Custom recurring config/i);
-    await fixedRadio.focus();
+    // Keyboard: "After I complete it…" sits just above Custom in the list.
+    await setRecurQuickSetting(page, /After I complete it/i);
+    await page.waitForFunction(() =>
+      document.getAnimations().every((a) => a.playState !== 'running'),
+    );
+    await preset.focus();
+    await expect(preset).toBeFocused();
     await page.keyboard.press('ArrowDown');
-    await expect(afterRadio).toBeChecked();
-    await expect(afterRadio).toBeFocused();
-    await expect(preset).toContainText(/After I complete it/i);
+    await expect(preset).toContainText(/Custom/i);
+    await expect(weekdays).toBeVisible();
+    await expect(preset).toBeFocused();
   });
 });

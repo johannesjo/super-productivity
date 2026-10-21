@@ -311,7 +311,7 @@ export class DialogEditTaskRepeatCfgComponent {
 
   repeatCfgInitial = signal<TaskRepeatCfgCopy | undefined>(undefined);
   repeatCfg = signal<RepeatCfgModel>(this._initializeRepeatCfg());
-  // Preset and schedule type before the latest form change. Formly writes into
+  // Preset and after-completion flag before the latest form change. Formly writes into
   // the model object it was given, so the previous signal value can't be used.
   private _modeSnapshot: AfterCompletionModeState = this._toModeState(this.repeatCfg());
   private _fallBehindSnapshot = this.repeatCfg().fallBehind;
@@ -605,7 +605,7 @@ export class DialogEditTaskRepeatCfgComponent {
   /**
    * A model the dialog adjusted is a new object, so formly (extras.immutable)
    * rebuilds the fields and keyboard focus drops to <body>, e.g. after
-   * switching the schedule type with the arrow keys. The new object is still
+   * switching the preset with the arrow keys. The new object is still
    * needed: fields that are no form control (waitForCompletion, skipOverdue)
    * only reach formly's own model copy that way. Formly keeps field ids across
    * rebuilds, so focus goes back to the element with the same id.

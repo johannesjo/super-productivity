@@ -257,24 +257,6 @@ describe('after-completion form mapping (#5388)', () => {
       expect((next as { waitForCompletion?: boolean }).waitForCompletion).toBe(true);
     });
 
-    it('switches the preset when the radio is set to after completion', () => {
-      const next = syncAfterCompletionMode(
-        custom,
-        { ...custom, repeatFromCompletionDate: true },
-        false,
-      );
-      expect(next.quickSetting).toBe(AFTER_COMPLETION_PRESET);
-    });
-
-    it('switches back to Custom when the radio is set to a fixed schedule', () => {
-      const next = syncAfterCompletionMode(
-        after,
-        { ...after, repeatFromCompletionDate: false },
-        false,
-      );
-      expect(next.quickSetting).toBe('CUSTOM');
-    });
-
     it('restores the fixed waiting behaviour when leaving the mode', () => {
       const leaveViaPreset = syncAfterCompletionMode(
         after,
@@ -283,16 +265,9 @@ describe('after-completion form mapping (#5388)', () => {
       );
       expect(leaveViaPreset.repeatFromCompletionDate).toBe(false);
       expect(leaveViaPreset.waitForCompletion).toBe(true);
-
-      const leaveViaRadio = syncAfterCompletionMode(
-        after,
-        { ...after, repeatFromCompletionDate: false, waitForCompletion: true },
-        false,
-      );
-      expect(leaveViaRadio.waitForCompletion).toBe(false);
     });
 
-    it('returns the same object when neither control changed', () => {
+    it('returns the same object when the preset did not change', () => {
       const next = { ...custom, title: 'x' };
       expect(syncAfterCompletionMode(custom, next, false)).toBe(next);
     });

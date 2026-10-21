@@ -54,22 +54,8 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
     fieldGroupClassName: 'repeat-config-container',
     resetOnHide: false,
     hideExpression: (model: any) => !isCustomOrAfterCompletionPreset(model.quickSetting),
+    // Fixed schedule or after completion is picked with the preset alone (#5388).
     fieldGroup: [
-      // At the top so it is visible for every interval, including 1 (#5388).
-      // The component keeps it in step with the "After I complete it…" preset.
-      {
-        key: 'repeatFromCompletionDate',
-        type: 'radio',
-        defaultValue: false,
-        resetOnHide: false,
-        templateOptions: {
-          label: T.F.TASK_REPEAT.F.SCHEDULE_TYPE_LABEL,
-          options: [
-            { value: false, label: T.F.TASK_REPEAT.F.SCHEDULE_TYPE_FIXED },
-            { value: true, label: T.F.TASK_REPEAT.F.SCHEDULE_TYPE_AFTER_COMPLETION },
-          ],
-        },
-      },
       {
         fieldGroupClassName: 'repeat-cycle',
         fieldGroup: [

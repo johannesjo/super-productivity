@@ -1391,20 +1391,6 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       expect(savedCfg().repeatEvery).toBe(14);
     });
 
-    it('switches the preset when the schedule type radio is set', async () => {
-      const fixture = await setupTestBed({ task: mockTask });
-      const component = fixture.componentInstance;
-
-      component.onModelChange({ ...component.repeatCfg(), quickSetting: 'CUSTOM' });
-      component.onModelChange({
-        ...component.repeatCfg(),
-        repeatFromCompletionDate: true,
-      });
-
-      expect(component.repeatCfg().quickSetting).toBe(AFTER_COMPLETION_PRESET);
-      expect(component.isAfterCompletion()).toBe(true);
-    });
-
     it('opens a stored 14-day after-completion config as 2 weeks and saves no changes', async () => {
       const afterCfg: TaskRepeatCfg = {
         ...mockRepeatCfg,
@@ -1474,18 +1460,15 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
         ...component.repeatCfg(),
         quickSetting: AFTER_COMPLETION_PRESET,
       });
-      component.onModelChange({
-        ...component.repeatCfg(),
-        repeatFromCompletionDate: false,
-      });
+      component.onModelChange({ ...component.repeatCfg(), quickSetting: 'CUSTOM' });
 
-      expect(component.repeatCfg().quickSetting).toBe('CUSTOM');
+      expect(component.repeatCfg().repeatFromCompletionDate).toBe(false);
       expect(component.repeatCfg().waitForCompletion).toBe(true);
       component.save();
       expect(updateChanges()).toEqual({});
     });
 
-    it('keeps a picked "Wait" when the schedule type is switched there and back', async () => {
+    it('keeps a picked "Wait" when switching to after completion and back', async () => {
       const fixture = await setupTestBed({
         repeatCfg: { ...mockRepeatCfg, quickSetting: 'CUSTOM' },
       });
@@ -1494,12 +1477,9 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       component.onModelChange({ ...component.repeatCfg(), fallBehind: 'WAIT' }, true);
       component.onModelChange({
         ...component.repeatCfg(),
-        repeatFromCompletionDate: true,
+        quickSetting: AFTER_COMPLETION_PRESET,
       });
-      component.onModelChange({
-        ...component.repeatCfg(),
-        repeatFromCompletionDate: false,
-      });
+      component.onModelChange({ ...component.repeatCfg(), quickSetting: 'CUSTOM' });
 
       expect(component.repeatCfg().fallBehind).toBe('WAIT');
       component.save();

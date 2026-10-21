@@ -109,23 +109,18 @@ describe('TaskRepeatCfgFormConfig', () => {
       expect(hide(repeatContainer, { quickSetting: 'DAILY' })).toBe(true);
     });
 
-    it('puts the schedule type first in the custom block, as translated radios', () => {
-      const scheduleType = repeatContainer?.fieldGroup?.[0];
-      expect(scheduleType?.key).toBe('repeatFromCompletionDate');
-      expect(scheduleType?.type).toBe('radio');
-      expect(scheduleType?.hideExpression).toBeUndefined();
-      expect(scheduleType?.templateOptions?.options).toEqual([
-        { value: false, label: T.F.TASK_REPEAT.F.SCHEDULE_TYPE_FIXED },
-        { value: true, label: T.F.TASK_REPEAT.F.SCHEDULE_TYPE_AFTER_COMPLETION },
-      ]);
-    });
-
-    it('no longer offers the schedule type in the advanced form', () => {
+    // The preset is the one switch; a second control for it only invited
+    // "which one wins?".
+    it('offers no separate schedule type control', () => {
+      const keys = (cfg: FormlyFieldConfig[]): unknown[] =>
+        cfg.flatMap((f) => [f.key, ...keys(f.fieldGroup ?? [])]);
       expect(
-        TASK_REPEAT_CFG_ADVANCED_FORM_CFG.some(
-          (f) => f.key === 'repeatFromCompletionDate',
-        ),
-      ).toBe(false);
+        [
+          ...TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG,
+          ...TASK_REPEAT_CFG_BEHAVIOUR_FORM_CFG,
+          ...TASK_REPEAT_CFG_ADVANCED_FORM_CFG,
+        ].flatMap((f) => keys([f])),
+      ).not.toContain('repeatFromCompletionDate');
     });
 
     it('hides the monthly pattern after completion', () => {

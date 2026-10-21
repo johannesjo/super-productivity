@@ -136,9 +136,9 @@ export type AfterCompletionModeState = Pick<
 >;
 
 /**
- * Keeps the preset select and the "Schedule type" radio in step. Picking
- * "After I complete it…" in either control switches the other one; leaving the
- * mode restores the waiting behaviour the config had as a fixed schedule.
+ * The preset is the one switch for after completion: picking "After I complete
+ * it…" turns the mode on with waiting; leaving it restores the waiting
+ * behaviour the config had as a fixed schedule.
  *
  * `prev` must be a snapshot taken before the change: formly writes into the
  * model object it was given, so the previous signal value is already mutated.
@@ -148,27 +148,18 @@ export const syncAfterCompletionMode = <TModel extends AfterCompletionModeState>
   next: TModel,
   fixedWaitForCompletion: boolean,
 ): TModel => {
-  const wasAfter = prev.quickSetting === AFTER_COMPLETION_PRESET;
-  const isPresetChange = prev.quickSetting !== next.quickSetting;
-  if (isPresetChange) {
-    if (next.quickSetting === AFTER_COMPLETION_PRESET) {
-      return { ...next, repeatFromCompletionDate: true, waitForCompletion: true };
-    }
-    if (wasAfter) {
-      return {
-        ...next,
-        repeatFromCompletionDate: false,
-        waitForCompletion: fixedWaitForCompletion,
-      };
-    }
+  if (prev.quickSetting === next.quickSetting) {
     return next;
   }
-  const isModeChange =
-    !!prev.repeatFromCompletionDate !== !!next.repeatFromCompletionDate;
-  if (isModeChange) {
-    return next.repeatFromCompletionDate
-      ? { ...next, quickSetting: AFTER_COMPLETION_PRESET, waitForCompletion: true }
-      : { ...next, quickSetting: 'CUSTOM', waitForCompletion: fixedWaitForCompletion };
+  if (next.quickSetting === AFTER_COMPLETION_PRESET) {
+    return { ...next, repeatFromCompletionDate: true, waitForCompletion: true };
+  }
+  if (prev.quickSetting === AFTER_COMPLETION_PRESET) {
+    return {
+      ...next,
+      repeatFromCompletionDate: false,
+      waitForCompletion: fixedWaitForCompletion,
+    };
   }
   return next;
 };
