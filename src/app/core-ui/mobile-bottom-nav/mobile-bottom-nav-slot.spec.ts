@@ -1,6 +1,7 @@
 import { DEFAULT_GLOBAL_CONFIG } from '../../features/config/default-global-config.const';
 import { AppFeaturesConfig } from '../../features/config/global-config.model';
 import { LS } from '../../core/persistence/storage-keys.const';
+import { PluginMenuEntryCfg } from '../../plugins/plugin-api.model';
 import {
   BOTTOM_NAV_SLOT_OPTIONS,
   getAvailableBottomNavSlotOptions,
@@ -80,6 +81,50 @@ describe('mobile bottom nav slot', () => {
         }),
       ).map((o) => o.id);
       expect(ids).toEqual(['inbox']);
+    });
+  });
+
+  describe('plugin entries', () => {
+    const entry = (pluginId: string, label: string): PluginMenuEntryCfg => ({
+      pluginId,
+      label,
+      onClick: () => undefined,
+    });
+    const entries = [
+      entry('p1', 'Doc Mode'),
+      entry('p1', 'Other'),
+      entry('p2', 'Kanban'),
+    ];
+
+    it('offers every registered entry after the built-in options', () => {
+      const ids = getAvailableBottomNavSlotOptions(features(), entries).map((o) => o.id);
+      expect(ids.slice(5)).toEqual([
+        'plugin:p1:Doc Mode',
+        'plugin:p1:Other',
+        'plugin:p2:Kanban',
+      ]);
+    });
+
+    it('resolves a stored entry, with a fallback icon', () => {
+      const slot = resolveBottomNavSlot('plugin:p2:Kanban', features(), entries);
+      expect(slot?.kind).toBe('plugin');
+      expect(slot?.icon).toBe('extension');
+      expect(slot?.kind === 'plugin' && slot.pluginId).toBe('p2');
+    });
+
+    it("falls back to the plugin's first entry when the label changed", () => {
+      expect(resolveBottomNavSlot('plugin:p1:Renamed', features(), entries)?.id).toBe(
+        'plugin:p1:Doc Mode',
+      );
+    });
+
+    it('falls back to Planner while the plugin is not (yet) registered', () => {
+      expect(resolveBottomNavSlot('plugin:p3:Gone', features(), entries)?.id).toBe(
+        'planner',
+      );
+      expect(resolveBottomNavSlot('plugin:p1:Doc Mode', features(), [])?.id).toBe(
+        'planner',
+      );
     });
   });
 

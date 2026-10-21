@@ -1,6 +1,12 @@
 import { type Locator, type Page } from '@playwright/test';
 import { expect, test } from '../../fixtures/test.fixture';
 import { waitForMenuSettled } from '../../utils/waits';
+import {
+  enablePluginWithVerification,
+  waitForPluginAssets,
+  waitForPluginInMenu,
+  waitForPluginManagementInit,
+} from '../../helpers/plugin-test.helpers';
 
 /**
  * #7637: the phone bottom nav's second slot (Planner by default) can be pointed
@@ -58,6 +64,36 @@ test.describe('Bottom nav configurable slot #7637', () => {
     await page.reload();
     await workViewPage.waitForTaskList();
     await expect(slot).toHaveAttribute('aria-label', 'Inbox');
+    await expect(slot).toHaveClass(/active/);
+  });
+});
+
+test.describe('Bottom nav slot with a plugin page #7637', () => {
+  // Plugins are enabled through the desktop settings page; the phone width
+  // is applied afterwards.
+  test.use({ viewport: { width: 1024, height: 900 }, hasTouch: true, isMobile: true });
+
+  test('a plugin side-nav entry can be picked and opens its page', async ({
+    page,
+    workViewPage,
+  }) => {
+    expect(await waitForPluginAssets(page)).toBe(true);
+    await workViewPage.waitForTaskList();
+    expect(await waitForPluginManagementInit(page)).toBe(true);
+    expect(await enablePluginWithVerification(page, 'API Test Plugin', 10000)).toBe(true);
+    expect(await waitForPluginInMenu(page, 'API Test Plugin')).toBe(true);
+    await page.setViewportSize({ width: 390, height: 844 });
+
+    const slot = page.locator('mobile-bottom-nav .e2e-bottom-nav-slot');
+    await longPress(page, slot);
+    await waitForMenuSettled(page);
+    const menu = page.locator('.mobile-bottom-nav-slot-menu');
+    await menu.getByRole('menuitemradio', { name: 'API Test Plugin' }).tap();
+    await expect(menu).toBeHidden();
+    await expect(slot).toHaveAttribute('aria-label', 'API Test Plugin');
+
+    await slot.tap();
+    await expect(page).toHaveURL(/\/plugins\/api-test-plugin\/index/);
     await expect(slot).toHaveClass(/active/);
   });
 });

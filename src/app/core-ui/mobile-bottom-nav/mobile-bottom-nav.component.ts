@@ -34,7 +34,6 @@ import { GlobalConfigService } from '../../features/config/global-config.service
 import { LongPressDirective } from '../../ui/longpress/longpress.directive';
 import { performHapticFeedback } from '../../util/haptic-feedback';
 import {
-  BottomNavSlotId,
   BottomNavSlotOption,
   getAvailableBottomNavSlotOptions,
   readStoredBottomNavSlot,
@@ -105,10 +104,17 @@ export class MobileBottomNavComponent {
   // Second slot: configurable destination, Planner by default (#7637).
   private readonly _storedSlotId = signal(readStoredBottomNavSlot());
   readonly slotOptions = computed(() =>
-    getAvailableBottomNavSlotOptions(this._globalConfigService.appFeatures()),
+    getAvailableBottomNavSlotOptions(
+      this._globalConfigService.appFeatures(),
+      this._pluginBridge.menuEntries(),
+    ),
   );
   readonly slot = computed(() =>
-    resolveBottomNavSlot(this._storedSlotId(), this._globalConfigService.appFeatures()),
+    resolveBottomNavSlot(
+      this._storedSlotId(),
+      this._globalConfigService.appFeatures(),
+      this._pluginBridge.menuEntries(),
+    ),
   );
   private readonly _url = toSignal(
     this._router.events.pipe(
@@ -118,8 +124,13 @@ export class MobileBottomNavComponent {
     { initialValue: this._router.url },
   );
   readonly isSlotActive = computed(() => {
-    const route = this.slot()?.route;
-    return !!route && this._url().startsWith(route);
+    const slot = this.slot();
+    if (!slot) {
+      return false;
+    }
+    // A plugin entry is an action; its page, when it opens one, lives here.
+    const prefix = slot.kind === 'route' ? slot.route : `/plugins/${slot.pluginId}/`;
+    return this._url().startsWith(prefix);
   });
   private readonly _slotMenuTrigger = viewChild('slotMenuTrigger', {
     read: MatMenuTrigger,
@@ -184,7 +195,11 @@ export class MobileBottomNavComponent {
       this._isSlotMenuGesture = false;
       return;
     }
-    this._router.navigateByUrl(slot.route);
+    if (slot.kind === 'route') {
+      this._router.navigateByUrl(slot.route);
+    } else {
+      slot.onClick();
+    }
   }
 
   onSlotMenuClosed(): void {
@@ -193,7 +208,7 @@ export class MobileBottomNavComponent {
     this._slotButton()?.nativeElement.focus();
   }
 
-  selectSlot(id: BottomNavSlotId): void {
+  selectSlot(id: string): void {
     this._storedSlotId.set(id);
     writeStoredBottomNavSlot(id);
   }

@@ -22,6 +22,7 @@ import { AppFeaturesConfig } from '../../features/config/global-config.model';
 import { LS } from '../../core/persistence/storage-keys.const';
 import { INBOX_PROJECT } from '../../features/project/project.const';
 import { T } from '../../t.const';
+import { PluginMenuEntryCfg } from '../../plugins/plugin-api.model';
 
 /**
  * Below 600px this nav's panels menu is the ONLY route to every right-panel
@@ -88,6 +89,7 @@ describe('MobileBottomNavComponent', () => {
   const render = async (
     over: Partial<AppFeaturesConfig>,
     sidePanelButtons: SidePanelBtn[] = [],
+    menuEntries: PluginMenuEntryCfg[] = [],
   ): Promise<MobileBottomNavComponent> => {
     const appFeatures = signal<AppFeaturesConfig>({
       ...DEFAULT_GLOBAL_CONFIG.appFeatures,
@@ -125,7 +127,10 @@ describe('MobileBottomNavComponent', () => {
         { provide: LayoutService, useValue: layout },
         {
           provide: PluginBridgeService,
-          useValue: { sidePanelButtons: signal(sidePanelButtons) },
+          useValue: {
+            sidePanelButtons: signal(sidePanelButtons),
+            menuEntries: signal(menuEntries),
+          },
         },
         { provide: Store, useValue: { select, dispatch } },
         {
@@ -271,8 +276,9 @@ describe('MobileBottomNavComponent', () => {
 
     const renderSlot = async (
       over: Partial<AppFeaturesConfig> = {},
+      menuEntries: PluginMenuEntryCfg[] = [],
     ): Promise<MobileBottomNavComponent> => {
-      const cmp = await render(over);
+      const cmp = await render(over, [], menuEntries);
       navigateByUrl = spyOn(TestBed.inject(Router), 'navigateByUrl').and.resolveTo(true);
       return cmp;
     };
@@ -286,6 +292,20 @@ describe('MobileBottomNavComponent', () => {
       expect(slotBtn()?.classList).toContain('tour-planner');
       slotBtn()?.click();
       expect(navigateByUrl).toHaveBeenCalledOnceWith('/planner');
+    });
+
+    it('runs a stored plugin entry on tap', async () => {
+      const onClick = jasmine.createSpy('onClick');
+      localStorage.setItem(LS.BOTTOM_NAV_SLOT, 'plugin:p1:Doc Mode');
+      await renderSlot({}, [
+        { pluginId: 'p1', label: 'Doc Mode', icon: 'description', onClick },
+      ]);
+
+      expect(slotBtn()?.getAttribute('aria-label')).toBe('Doc Mode');
+      expect(slotBtn()?.querySelector('plugin-icon')).toBeTruthy();
+      slotBtn()?.click();
+      expect(onClick).toHaveBeenCalledTimes(1);
+      expect(navigateByUrl).not.toHaveBeenCalled();
     });
 
     it('uses the stored choice', async () => {

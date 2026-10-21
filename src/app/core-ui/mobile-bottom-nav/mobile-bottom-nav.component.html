@@ -23,7 +23,7 @@
       class="nav-button e2e-bottom-nav-slot"
       [class.tour-planner]="slot.id === 'planner'"
       [class.active]="isSlotActive()"
-      [attr.aria-label]="slot.labelKey | translate"
+      [attr.aria-label]="slot.kind === 'route' ? (slot.labelKey | translate) : slot.label"
       [attr.aria-description]="T.BN.SLOT_CHANGE_HINT | translate"
       (pointerdown)="onSlotPointerDown()"
       (longPress)="onSlotLongPress()"
@@ -31,7 +31,14 @@
       (contextmenu)="$event.preventDefault(); openSlotMenu()"
       (click)="onSlotClick(slot)"
     >
-      <mat-icon>{{ slot.icon }}</mat-icon>
+      @if (slot.kind === 'route') {
+        <mat-icon>{{ slot.icon }}</mat-icon>
+      } @else {
+        <plugin-icon
+          [pluginId]="slot.pluginId"
+          [fallbackIcon]="slot.icon"
+        ></plugin-icon>
+      }
       <span
         class="slot-menu-anchor"
         matButtonIcon
@@ -195,8 +202,17 @@
       [attr.aria-checked]="option.id === slot()?.id"
       (click)="selectSlot(option.id)"
     >
-      <mat-icon>{{ option.icon }}</mat-icon>
-      <span>{{ option.labelKey | translate }}</span>
+      @if (option.kind === 'route') {
+        <mat-icon>{{ option.icon }}</mat-icon>
+        <span>{{ option.labelKey | translate }}</span>
+      } @else {
+        <plugin-icon
+          matMenuItemIcon
+          [pluginId]="option.pluginId"
+          [fallbackIcon]="option.icon"
+        ></plugin-icon>
+        <span>{{ option.label }}</span>
+      }
       @if (option.id === slot()?.id) {
         <div><mat-icon>check</mat-icon></div>
       }
