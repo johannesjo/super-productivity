@@ -921,6 +921,7 @@ export class LocalRestApiHandlerService {
           delete changes[field];
         }
 
+        let isMoveOnly = false;
         if (hasOwn(changes, 'projectId')) {
           const targetProjectId = changes.projectId;
           if (typeof targetProjectId !== 'string' || !targetProjectId.trim()) {
@@ -958,10 +959,15 @@ export class LocalRestApiHandlerService {
                 'Destination project not found or archived',
               );
             }
+            // Move it like the UI does, so a recurring task's config and other
+            // instances follow (#10675). A combined update below keeps projectId,
+            // now unchanged, so its change set and short syntax stay as sent.
+            await this._featureBridge.moveTaskToProject(taskId, targetProjectId);
+            isMoveOnly = Object.keys(changes).length === 1;
           }
         }
 
-        if (Object.keys(changes).length > 0) {
+        if (!isMoveOnly && Object.keys(changes).length > 0) {
           // Short syntax only parses a title-only change set, so that is the
           // only shape the flag changes; everything else keeps going through
           // update() and whatever bookkeeping it does.

@@ -228,7 +228,7 @@ describe('LocalRestApiHandlerService', () => {
 
     featureBridgeMock = jasmine.createSpyObj<LocalRestApiFeatureBridge>(
       'LocalRestApiFeatureBridge',
-      ['issueLink', 'addLiteralSubTask', 'addTimeSpentOnDay'],
+      ['issueLink', 'addLiteralSubTask', 'addTimeSpentOnDay', 'moveTaskToProject'],
     );
     featureBridgeMock.issueLink.and.returnValue(Promise.resolve(''));
 
@@ -2195,7 +2195,7 @@ describe('LocalRestApiHandlerService', () => {
         });
       });
 
-      it('should update projectId together with other fields in one dispatch', async () => {
+      it('should move the task and then apply the other fields', async () => {
         let mockTask = createMockTask('task-1', { projectId: 'project-1' });
         Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
           get: () => (_id: string) => of(mockTask),
@@ -2214,6 +2214,13 @@ describe('LocalRestApiHandlerService', () => {
         );
 
         expect(response.body.ok).toBe(true);
+        expect(featureBridgeMock.moveTaskToProject).toHaveBeenCalledOnceWith(
+          'task-1',
+          'project-2',
+        );
+        expect(featureBridgeMock.moveTaskToProject).toHaveBeenCalledBefore(
+          taskServiceMock.update,
+        );
         expect(taskServiceMock.update).toHaveBeenCalledOnceWith('task-1', {
           projectId: 'project-2',
           title: 'Moved task',
@@ -2226,6 +2233,37 @@ describe('LocalRestApiHandlerService', () => {
             projectId: 'project-2',
             title: 'Moved task',
           }),
+        );
+      });
+
+      it('should only move the task when projectId is the only change', async () => {
+        let mockTask = createMockTask('task-1', { projectId: 'project-1' });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+        featureBridgeMock.moveTaskToProject.and.callFake(async (_id, projectId) => {
+          mockTask = { ...mockTask, projectId };
+        });
+        activeProjects = [{ id: 'project-2' } as Project];
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { projectId: 'project-2' },
+          }),
+        );
+
+        expect(response.body.ok).toBe(true);
+        expect(featureBridgeMock.moveTaskToProject).toHaveBeenCalledOnceWith(
+          'task-1',
+          'project-2',
+        );
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+        expect(dispatchSpy).not.toHaveBeenCalled();
+        if (!response.body.ok) {
+          throw new Error('Expected a success response');
+        }
+        expect(response.body.data).toEqual(
+          jasmine.objectContaining({ projectId: 'project-2' }),
         );
       });
 
@@ -2251,6 +2289,7 @@ describe('LocalRestApiHandlerService', () => {
         }
         expect(response.body.error.code).toBe('UNSUPPORTED_FIELD');
         expect(taskServiceMock.update).not.toHaveBeenCalled();
+        expect(featureBridgeMock.moveTaskToProject).not.toHaveBeenCalled();
       });
 
       it('should allow an unchanged inherited projectId on subtasks', async () => {
@@ -2275,6 +2314,7 @@ describe('LocalRestApiHandlerService', () => {
         );
 
         expect(response.body.ok).toBe(true);
+        expect(featureBridgeMock.moveTaskToProject).not.toHaveBeenCalled();
         expect(taskServiceMock.update).toHaveBeenCalledOnceWith('subtask-1', {
           projectId: 'project-1',
           title: 'Round-tripped subtask',
@@ -2299,6 +2339,7 @@ describe('LocalRestApiHandlerService', () => {
         );
 
         expect(response.body.ok).toBe(true);
+        expect(featureBridgeMock.moveTaskToProject).not.toHaveBeenCalled();
         expect(taskServiceMock.update).toHaveBeenCalledOnceWith('task-1', {
           projectId: 'archived-project',
           title: 'Round-tripped task',
@@ -2323,6 +2364,7 @@ describe('LocalRestApiHandlerService', () => {
         }
         expect(response.body.error.code).toBe('PROJECT_NOT_FOUND');
         expect(taskServiceMock.update).not.toHaveBeenCalled();
+        expect(featureBridgeMock.moveTaskToProject).not.toHaveBeenCalled();
       });
 
       it('should reject an archived destination project', async () => {
