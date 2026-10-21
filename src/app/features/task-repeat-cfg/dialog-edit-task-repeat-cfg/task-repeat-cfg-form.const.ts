@@ -369,3 +369,43 @@ export const withWeekdayShortLabels = (
       ? { ...field, fieldGroup: withWeekdayShortLabels(field.fieldGroup, locale) }
       : field;
   });
+
+const CYCLE_UNIT_KEYS = {
+  DAILY: [T.F.TASK_REPEAT.F.C_DAY, T.F.TASK_REPEAT.F.C_DAYS],
+  WEEKLY: [T.F.TASK_REPEAT.F.C_WEEK, T.F.TASK_REPEAT.F.C_WEEKS],
+  MONTHLY: [T.F.TASK_REPEAT.F.C_MONTH, T.F.TASK_REPEAT.F.C_MONTHS],
+  YEARLY: [T.F.TASK_REPEAT.F.C_YEAR, T.F.TASK_REPEAT.F.C_YEARS],
+} as const;
+
+/**
+ * "Repeat every 2 Weeks": the unit options read plural for any number but 1.
+ * Options are set translated here, since the translate extension only covers
+ * the static ones. Returns a copy.
+ */
+export const withRepeatCycleUnits = (
+  fields: FormlyFieldConfig[],
+  translate: (key: string) => string,
+): FormlyFieldConfig[] => {
+  const optionsFor = (isPlural: boolean): { value: string; label: string }[] =>
+    Object.entries(CYCLE_UNIT_KEYS).map(([value, keys]) => ({
+      value,
+      label: translate(keys[isPlural ? 1 : 0]),
+    }));
+  const singular = optionsFor(false);
+  const plural = optionsFor(true);
+  return fields.map((field) => {
+    if (field.key === 'repeatCycle') {
+      return {
+        ...field,
+        expressionProperties: {
+          ...field.expressionProperties,
+          ['templateOptions.options']: (model: { repeatEvery?: unknown }) =>
+            Number(model.repeatEvery) === 1 ? singular : plural,
+        },
+      };
+    }
+    return field.fieldGroup
+      ? { ...field, fieldGroup: withRepeatCycleUnits(field.fieldGroup, translate) }
+      : field;
+  });
+};

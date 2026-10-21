@@ -104,7 +104,7 @@ test.describe('Recurring task - repeat dialog start date and fall-behind default
     await taskPage.openTaskDetail(task);
     const dialog = await openRecurDialog(page);
 
-    await setRecurQuickSetting(page, /Custom recurring config/i);
+    await setRecurQuickSetting(page, /Custom…/i);
     // "If you fall behind" is rendered (and can emit) once Options is open.
     await dialog
       .locator('collapsible')
@@ -116,14 +116,14 @@ test.describe('Recurring task - repeat dialog start date and fall-behind default
       .filter({ hasText: /If you fall behind/i });
     await expect(fallBehind).toBeVisible();
 
-    await pickInField(page, dialog, /Recur cycle/i, /^\s*Day\s*$/);
+    await pickInField(page, dialog, /Unit/i, /^\s*Day\s*$/);
     await expect(fallBehind).toContainText(/Only keep the latest/i);
 
-    await pickInField(page, dialog, /Recur cycle/i, /^\s*Month\s*$/);
+    await pickInField(page, dialog, /Unit/i, /^\s*Month\s*$/);
     await expect(fallBehind).toContainText(/Keep every copy/i);
     await pickInField(page, dialog, /Monthly pattern/i, /^\s*last\s*$/);
 
-    await pickInField(page, dialog, /Recur cycle/i, /^\s*Day\s*$/);
+    await pickInField(page, dialog, /Unit/i, /^\s*Day\s*$/);
     await expect(fallBehind).toContainText(/Only keep the latest/i);
     await expect(dialog.locator('.rule-summary')).not.toContainText(/keeps every copy/i);
 

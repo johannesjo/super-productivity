@@ -3,6 +3,7 @@ import {
   TASK_REPEAT_CFG_BEHAVIOUR_FORM_CFG,
   TASK_REPEAT_CFG_END_FORM_CFG,
   TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG,
+  withRepeatCycleUnits,
   withWeekdayShortLabels,
 } from './task-repeat-cfg-form.const';
 import { T } from '../../../t.const';
@@ -156,6 +157,33 @@ describe('TaskRepeatCfgFormConfig', () => {
       expect(hide(fallBehind, { quickSetting: 'CUSTOM' })).toBe(false);
       expect(hide(fallBehind, { quickSetting: AFTER_COMPLETION_PRESET })).toBe(true);
     });
+  });
+
+  it('reads the unit options plural for any number but 1, translated', () => {
+    const fields = withRepeatCycleUnits(
+      TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG,
+      (key) => key.split('.').pop()!,
+    );
+    const cycle = fields
+      .find((f) => f.fieldGroupClassName === 'repeat-config-container')
+      ?.fieldGroup?.find((f) => f.fieldGroupClassName === 'repeat-cycle')
+      ?.fieldGroup?.find((f) => f.key === 'repeatCycle');
+    const options = cycle?.expressionProperties?.['templateOptions.options'] as (m: {
+      repeatEvery: unknown;
+    }) => { label: string }[];
+
+    expect(options({ repeatEvery: 1 }).map((o) => o.label)).toEqual([
+      'C_DAY',
+      'C_WEEK',
+      'C_MONTH',
+      'C_YEAR',
+    ]);
+    expect(options({ repeatEvery: '3' }).map((o) => o.label)).toEqual([
+      'C_DAYS',
+      'C_WEEKS',
+      'C_MONTHS',
+      'C_YEARS',
+    ]);
   });
 
   describe('weekdays group visibility (issue #8025)', () => {
