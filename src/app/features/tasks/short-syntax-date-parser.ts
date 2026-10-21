@@ -38,8 +38,19 @@ export interface ShortSyntaxDateParser {
 const loadEn = (): Promise<ChronoLocale & { Chrono: typeof Chrono }> =>
   import('chrono-node/en').then((m) => ({
     Chrono: m.Chrono,
-    createCasualConfiguration: (littleEndian) =>
-      m.configuration.createCasualConfiguration(littleEndian),
+    createCasualConfiguration: (littleEndian) => {
+      const configuration = m.configuration.createCasualConfiguration(littleEndian);
+      // chrono's day-first flag also stops "dec 20" to "dec 25" without a year
+      // from reading as a day (en-GB's guess that "Dec 25" means 2025), so
+      // "@dec 24" became 2024-12-01. The date order is only about numeric
+      // dates; month names keep reading the number as the day.
+      configuration.parsers.forEach((parser) => {
+        if ('shouldSkipYearLikeDate' in parser) {
+          parser.shouldSkipYearLikeDate = false;
+        }
+      });
+      return configuration;
+    },
   }));
 
 // UI language (LanguageCode) → chrono-node locale shipped in the installed
@@ -121,13 +132,22 @@ const isBetterMatch = (a: ParsedResult, b: ParsedResult, isTieWinner: boolean): 
   (a.index === b.index &&
     (a.text.length > b.text.length || (a.text.length === b.text.length && isTieWinner)));
 
+// A UI-language result counts only at the start of the token, after the
+// trigger char: its short words are ordinary words elsewhere (German "so" and
+// "do", Dutch "zo"), and a match further in would consume the title text up to
+// it ("max@firma.de so bald" → due Sunday).
+const isAtTokenStart = (text: string, result: ParsedResult): boolean =>
+  /^[@!]?\s*$/.test(text.slice(0, result.index));
+
 const combine = (
   uiParser: Chrono,
   enParser: Chrono,
   isUiTieWinner: boolean,
 ): ShortSyntaxDateParser => ({
   parse: (text, ref, option) => {
-    const uiResults = uiParser.parse(text, ref, option);
+    const uiResults = uiParser
+      .parse(text, ref, option)
+      .filter((result) => isAtTokenStart(text, result));
     const enResults = enParser.parse(text, ref, option);
     if (!uiResults.length) {
       return enResults;

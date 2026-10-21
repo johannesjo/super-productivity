@@ -4162,5 +4162,72 @@ describe('shortSyntax localized dates', () => {
       expect(due.getDate()).toBe(25);
       expect(due.getMonth()).toBe(3);
     });
+
+    // chrono's day-first flag also read the 20 to 25 after a month name as the
+    // year ("@dec 24" → 2024-12-01); the date order is only for numeric dates
+    it('should read the 20th to 25th after a month name as the day for a day-first format', async () => {
+      for (const language of ['en', 'de']) {
+        const locale = { language, isDayFirst: true };
+        const dec24 = await parseIn(locale, 'Task @dec 24');
+        expect(dec24?.taskChanges.title).withContext(language).toBe('Task');
+        expect(formatDateToISO(dueOf(dec24)))
+          .withContext(language)
+          .toBe('2026-12-24');
+        const march22 = await parseIn(locale, 'Task @march 22');
+        expect(formatDateToISO(dueOf(march22)))
+          .withContext(language)
+          .toBe('2027-03-22');
+      }
+    });
+
+    it('should keep the date of a month name with a time for a day-first format', async () => {
+      const r = await parseIn({ language: 'en', isDayFirst: true }, 'Task @nov 21 3pm');
+      expect(r?.taskChanges.title).toBe('Task');
+      const due = dueOf(r);
+      expect(formatDateToISO(due)).toBe('2026-11-21');
+      expect(due.getHours()).toBe(15);
+    });
+
+    it('should read a month-name deadline the same for a day-first format', async () => {
+      const r = await parseIn({ language: 'en', isDayFirst: true }, 'Task !dec 24', {
+        ...CONFIG,
+        isEnableDeadline: true,
+      });
+      expect(r?.taskChanges.title).toBe('Task');
+      expect(formatDateToISO(new Date(r?.taskChanges.deadlineWithTime as number))).toBe(
+        '2026-12-24',
+      );
+    });
+  });
+
+  // A UI-language word is a date only right after the trigger: its short words
+  // are ordinary text further in, and a match there would eat the title up to it
+  describe('UI-language words inside a token', () => {
+    it('should not read a German short word after an email address as a date', async () => {
+      const title = 'Mail an max@firma.de so bald wie möglich';
+      const r = await parseIn({ language: 'de', isDayFirst: true }, title);
+      expect(r?.taskChanges.title ?? title).toBe(title);
+      expect(r?.taskChanges.dueWithTime).toBeUndefined();
+    });
+
+    it('should not read a German short word after a mention as a date', async () => {
+      const title = 'Ask @john what to do';
+      const r = await parseIn({ language: 'de', isDayFirst: true }, title);
+      expect(r?.taskChanges.title ?? title).toBe(title);
+      expect(r?.taskChanges.dueWithTime).toBeUndefined();
+    });
+
+    it('should not read a Dutch short word after a mention as a date', async () => {
+      const title = 'Mail @team zo snel mogelijk';
+      const r = await parseIn({ language: 'nl', isDayFirst: true }, title);
+      expect(r?.taskChanges.title ?? title).toBe(title);
+      expect(r?.taskChanges.dueWithTime).toBeUndefined();
+    });
+
+    it('should still read a UI-language short word directly after the trigger', async () => {
+      const r = await parseIn({ language: 'de', isDayFirst: true }, 'Task @so');
+      expect(r?.taskChanges.title).toBe('Task');
+      expect(dueOf(r).getDay()).toBe(0);
+    });
   });
 });
