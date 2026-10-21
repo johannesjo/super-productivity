@@ -1,8 +1,9 @@
 # Multi-user collaboration: close the Plainspace seam
 
 Oct 21, 2026 · status: direction proposed; implementation contracts in
-review · rev. 3: the scheduled time syncs directly (no separate shared time)
-and deletion has one path · rev. 2 after a review by Astra (schedule
+review · rev. 3: the scheduled time syncs directly (no separate shared time),
+a plan without a time clears it in Plainspace (decided), and deletion has one
+path · rev. 2 after a review by Astra (schedule
 contract, write protocol, deletion contract, token scoping, smaller first
 release)
 
@@ -190,6 +191,25 @@ Plainspace has them; inventing a clock time is a new setting (declined in
 #9833). Dropped in rev. 3: rev. 2's separate shared time on the deadline
 fields with "plan follows until I replan" seeding. It kept planning private but needed a
 transitions table, a backfill and a second schedule in the UI.
+
+**Decided (Oct 21): a plan without a time clears the Plainspace time.**
+Planning a shared task day-only, adding it to Today without a time, or
+unscheduling it sends "no time". Rejected: leaving Plainspace's time in place.
+
+- **One rule, no exception.** Keeping the old time would need a special case
+  ("a day-only plan counts as unchanged") in the per-field decision table.
+- **No stale reminders.** Plainspace's time is the assignee's reminder, i.e.
+  mine. A kept "Fri 18:00" would remind me about a task I planned for Thursday
+  or already did.
+- **Both apps always agree.** No "SP says Thursday, the Space says Friday".
+- **Only the owner loses it.** It happens only on tasks assigned to me;
+  repeating tasks are pull only and unaffected.
+
+Cost: "Add to Today" on a task someone gave a time removes that time for
+everyone. A hard time ("campsite closes Fri 18:00") belongs in the title for
+now; Plainspace has no deadline field. Revisit trigger: users report losing
+times others set. The fix then is a confirm on that action, not a second sync
+rule.
 
 ## Sync protocol
 
@@ -399,10 +419,7 @@ per-list visibility settings.
 
 1. **Direction.** Close the seam rather than build native multi-user (the
    review agrees).
-2. **Day-only plans clear the Plainspace time.** Accepted as part of "the
-   assignee owns the schedule"? The alternative, leaving Plainspace's time in
-   place, means SP and Plainspace show different schedules.
-3. **#3969.** Comment with the concrete scope and a tracking link; reopening
+2. **#3969.** Comment with the concrete scope and a tracking link; reopening
    the broad issue is optional.
 
 ## Sources
