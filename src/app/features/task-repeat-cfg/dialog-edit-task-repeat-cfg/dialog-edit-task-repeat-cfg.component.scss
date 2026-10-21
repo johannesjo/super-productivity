@@ -43,9 +43,15 @@ mat-dialog-actions {
   max-width: 100%;
 }
 
+// The field or line above already ends in a 16px gap; a top margin here would
+// double it whenever nothing collapses it (e.g. after the start/end row).
 :host collapsible {
-  margin-top: var(--s2);
   margin-bottom: var(--s2);
+}
+
+// Space between the Options header and its first field, as below "Repeat on".
+.options-body {
+  padding-top: var(--s);
 }
 
 :host ::ng-deep .collapsible-title {
@@ -54,11 +60,10 @@ mat-dialog-actions {
   font-size: 17px;
 }
 
+// Flush with the fields above and below; the last field or chip row inside
+// brings the gap to what follows.
 :host::ng-deep .repeat-config-container {
   display: block;
-  border-radius: var(--card-border-radius);
-  margin-inline-start: var(--s2);
-  margin-bottom: var(--s2);
 }
 
 // One row of seven day chips, also on a phone.
@@ -85,7 +90,6 @@ mat-dialog-actions {
   color: var(--c-warn);
   font-size: var(--font-size-sm);
   margin: 0 0 var(--s2);
-  margin-inline-start: var(--s2);
 }
 :host::ng-deep .repeat-cycle {
   display: flex;
@@ -125,14 +129,6 @@ mat-dialog-actions {
   align-items: center;
 }
 
-.next-occurrence {
-  display: flex;
-  align-items: center;
-  gap: var(--s);
-  margin-bottom: var(--s2);
-  color: var(--text-color-muted);
-}
-
 .inherited-subtasks {
   margin-bottom: var(--s2);
   color: var(--text-color-muted);
@@ -154,18 +150,19 @@ mat-dialog-actions {
   flex: 1 1 auto;
 }
 
-// The rule in one sentence, below the schedule controls.
-.rule-summary {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--s);
-  margin-bottom: var(--s2);
-}
-
-.rule-summary-text {
-  font-weight: var(--font-weight-medium);
-}
-
-.rule-summary-dates {
+// The result of the rule and dates, as quiet caption lines below them.
+// The live region may hold only screen-reader text, so spacing keys off the
+// visible lines rather than a flex gap.
+.rule-result {
+  font-size: var(--font-size-sm);
+  line-height: var(--line-height-snug);
   color: var(--text-color-muted);
+
+  &:has(.rule-summary div, .next-occurrence) {
+    margin-bottom: var(--s2);
+  }
+
+  &:has(.rule-summary div) .next-occurrence {
+    margin-top: var(--s-half);
+  }
 }

@@ -159,6 +159,14 @@ const NEXT_OCCURRENCE_FIELDS: (keyof TaskRepeatCfgCopy)[] = [
   'repeatUntilDay',
 ];
 
+interface RuleSummary {
+  /** The rule as a sentence, read to screen readers when `line` lacks it. */
+  rule: string;
+  fallsOn: string | null;
+  /** The visible line, or null when the fields above say it all. */
+  line: string | null;
+}
+
 // TASK_REPEAT_CFG_FORM_CFG
 @Component({
   selector: 'dialog-edit-task-repeat-cfg',
@@ -400,9 +408,11 @@ export class DialogEditTaskRepeatCfgComponent {
     return this._translateService.instant(key, { date });
   });
 
-  // The rule in one sentence plus the dates it falls on, below the schedule
-  // controls. Only shown when it says more than the preset label does.
-  ruleSummary = computed<{ text: string; fallsOn: string | null } | null>(() => {
+  // What the rule means, below the start and end dates. Only shown when it says
+  // more than the preset label does. `rule` is the sentence; `line` is what is
+  // shown: the dates and any non-default policy, or the sentence itself when
+  // there are no dates (the fields above already say it otherwise).
+  ruleSummary = computed<RuleSummary | null>(() => {
     const model = this.repeatCfg();
     const cfg = this._getPreviewRepeatCfg();
     const isAfterCompletion = model.quickSetting === AFTER_COMPLETION_PRESET;
@@ -439,14 +449,15 @@ export class DialogEditTaskRepeatCfgComponent {
       : isNonDefaultPolicy
         ? FALL_BEHIND_SUMMARY[choice]
         : null;
-    const text = policyKey
-      ? translate.instant(T.F.TASK_REPEAT.D_EDIT.RULE_WITH_POLICY, {
-          ruleStr,
-          policyStr: translate.instant(policyKey),
-        })
-      : ruleStr;
+    const withPolicy = (str: string): string =>
+      policyKey
+        ? translate.instant(T.F.TASK_REPEAT.D_EDIT.RULE_WITH_POLICY, {
+            ruleStr: str,
+            policyStr: translate.instant(policyKey),
+          })
+        : str;
     if (cfg.isPaused) {
-      return { text, fallsOn: null };
+      return { rule: ruleStr, fallsOn: null, line: withPolicy(ruleStr) };
     }
 
     // After completion has no fixed dates; every single day needs no list.
@@ -473,7 +484,10 @@ export class DialogEditTaskRepeatCfgComponent {
             .join(' · '),
         })
       : null;
-    return { text, fallsOn };
+    // Without dates the sentence only repeats the fields, unless a policy
+    // from the collapsed Options needs saying.
+    const line = fallsOn ? withPolicy(fallsOn) : policyKey ? withPolicy(ruleStr) : null;
+    return { rule: ruleStr, fallsOn, line };
   });
 
   hasUnsavedScheduleChanges = computed(() => {
