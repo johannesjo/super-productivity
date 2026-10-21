@@ -57,7 +57,7 @@ mat-dialog-actions {
 :host::ng-deep .repeat-config-container {
   display: block;
   border-radius: var(--card-border-radius);
-  margin-left: var(--s2);
+  margin-inline-start: var(--s2);
   margin-bottom: var(--s2);
 }
 
@@ -93,10 +93,10 @@ mat-dialog-actions {
   > * {
     width: 100%;
     min-width: 0;
-    margin-left: var(--s2);
+    margin-inline-start: var(--s2);
 
     &:first-child {
-      margin-left: 0;
+      margin-inline-start: 0;
       width: auto;
     }
   }
