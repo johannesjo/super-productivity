@@ -1750,12 +1750,14 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       });
 
       const summary = component.ruleSummary();
-      expect(summary?.text).toContain(T.F.TASK_REPEAT.ADD_INFO_PANEL.EVERY_X_WEEKLY);
+      expect(summary?.rule).toContain(T.F.TASK_REPEAT.ADD_INFO_PANEL.EVERY_X_WEEKLY);
       // MOCK_TODAY Tue 2026-06-09 starts the 2-week blocks
       expect(summary?.fallsOn).toContain(T.F.TASK_REPEAT.D_EDIT.RULE_FALLS_ON);
       expect(summary?.fallsOn).toContain('Jun 10');
       expect(summary?.fallsOn).toContain('Jun 15');
       expect(summary?.fallsOn).toContain('Jun 24');
+      // The fields above already say the rule; only the dates are shown.
+      expect(summary?.line).toBe(summary?.fallsOn as string);
     });
 
     it('describes after completion without dates', async () => {
@@ -1773,8 +1775,9 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       });
 
       expect(component.ruleSummary()).toEqual({
-        text: T.F.TASK_REPEAT.ADD_INFO_PANEL.AFTER_COMPLETION_X_WEEKS,
+        rule: T.F.TASK_REPEAT.ADD_INFO_PANEL.AFTER_COMPLETION_X_WEEKS,
         fallsOn: null,
+        line: null,
       });
     });
 
@@ -1784,9 +1787,9 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       });
       spyTranslate();
       const summary = fixture.componentInstance.ruleSummary();
-      expect(summary?.text).toContain(T.F.TASK_REPEAT.D_EDIT.RULE_WITH_POLICY);
-      expect(summary?.text).toContain(T.F.TASK_REPEAT.D_EDIT.RULE_PAUSED);
-      expect(summary?.text).toContain(T.F.TASK_REPEAT.ADD_INFO_PANEL.DAILY);
+      expect(summary?.line).toContain(T.F.TASK_REPEAT.D_EDIT.RULE_WITH_POLICY);
+      expect(summary?.line).toContain(T.F.TASK_REPEAT.D_EDIT.RULE_PAUSED);
+      expect(summary?.line).toContain(T.F.TASK_REPEAT.ADD_INFO_PANEL.DAILY);
       expect(summary?.fallsOn).toBeNull();
     });
 
@@ -1821,8 +1824,28 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       spyTranslate();
 
       const summary = fixture.componentInstance.ruleSummary();
-      expect(summary?.text).toContain(T.F.TASK_REPEAT.D_EDIT.RULE_WITH_POLICY);
-      expect(summary?.text).toContain(T.F.TASK_REPEAT.D_EDIT.RULE_ONLY_LATEST);
+      // After the dates, which the line shows instead of the rule.
+      expect(summary?.line).toContain(T.F.TASK_REPEAT.D_EDIT.RULE_WITH_POLICY);
+      expect(summary?.line).toContain(T.F.TASK_REPEAT.D_EDIT.RULE_FALLS_ON);
+      expect(summary?.line).toContain(T.F.TASK_REPEAT.D_EDIT.RULE_ONLY_LATEST);
+    });
+
+    it('shows the rule with a non-default policy when there are no dates', async () => {
+      const fixture = await setupTestBed({
+        repeatCfg: {
+          ...mockRepeatCfg,
+          quickSetting: 'DAILY',
+          repeatCycle: 'DAILY',
+          repeatEvery: 1,
+          skipOverdue: false,
+        },
+      });
+      spyTranslate();
+
+      const summary = fixture.componentInstance.ruleSummary();
+      expect(summary?.fallsOn).toBeNull();
+      expect(summary?.line).toContain(T.F.TASK_REPEAT.ADD_INFO_PANEL.DAILY);
+      expect(summary?.line).toContain(T.F.TASK_REPEAT.D_EDIT.RULE_KEEPS_EVERY_COPY);
     });
 
     it('shows the year once a "Falls on" date leaves this year', async () => {

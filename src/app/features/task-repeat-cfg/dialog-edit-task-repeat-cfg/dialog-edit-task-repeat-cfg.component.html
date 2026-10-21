@@ -31,29 +31,6 @@
         </div>
       }
 
-      <!-- What the rule means: summary, dates, next copy. The live region stays
-           mounted, so the summary is announced when it first appears. -->
-      <div aria-live="polite">
-        @if (ruleSummary(); as summary) {
-          <div class="rule-summary">
-            <mat-icon>repeat</mat-icon>
-            <div>
-              <div class="rule-summary-text">{{ summary.text }}</div>
-              @if (summary.fallsOn) {
-                <div class="rule-summary-dates">{{ summary.fallsOn }}</div>
-              }
-            </div>
-          </div>
-        }
-      </div>
-
-      @if (nextOccurrenceText(); as nextOccurrenceText) {
-        <div class="next-occurrence">
-          <mat-icon>event_repeat</mat-icon>
-          <span>{{ nextOccurrenceText }}</span>
-        </div>
-      }
-
       <!-- When: start and end side by side -->
       <div class="start-end-row">
         <!-- A field like "Ends on" beside it; date, time and reminder are picked
@@ -113,48 +90,72 @@
         ></formly-form>
       </div>
 
-      <collapsible [title]="T.F.TASK_REPEAT.D_EDIT.ADVANCED_CFG | translate">
-        <!-- How the series behaves -->
-        <formly-form
-          (modelChange)="onModelChange($event, true)"
-          [form]="formGroupBehaviour()"
-          [fields]="behaviourFormFields()"
-          [model]="repeatCfg()"
-        ></formly-form>
-
-        <!-- What new copies get -->
-        <chip-list-input
-          (addItem)="addTag($event)"
-          (addNewItem)="addNewTag($event)"
-          (removeItem)="removeTag($event)"
-          [label]="T.F.TASK_REPEAT.D_EDIT.TAG_LABEL | translate"
-          [model]="repeatCfg().tagIds"
-          [suggestions]="tagSuggestions()"
-        ></chip-list-input>
-
-        <formly-form
-          (modelChange)="onModelChange($event)"
-          [form]="formGroup2()"
-          [fields]="advancedFormFields()"
-          [model]="repeatCfg()"
-        ></formly-form>
-
-        @if (inheritedSubtaskTitles().length) {
-          <div class="inherited-subtasks">
-            {{ T.F.TASK_REPEAT.D_EDIT.INHERITED_SUBTASKS | translate }}
-            <ul>
-              @for (title of inheritedSubtaskTitles(); track $index) {
-                <li>{{ title }}</li>
+      <!-- What the rule means, as the result of everything above, and when the
+           next copy comes. The sentence is for screen readers only where the
+           fields above say it. -->
+      <div class="rule-result">
+        <!-- The live region stays mounted, so the rule is announced when it first
+             appears. -->
+        <div aria-live="polite">
+          @if (ruleSummary(); as summary) {
+            <div class="rule-summary">
+              @if (summary.fallsOn || !summary.line) {
+                <span class="cdk-visually-hidden">{{ summary.rule }}</span>
               }
-            </ul>
-          </div>
+              @if (summary.line) {
+                <div>{{ summary.line }}</div>
+              }
+            </div>
+          }
+        </div>
+        @if (nextOccurrenceText(); as nextOccurrenceText) {
+          <div class="next-occurrence">{{ nextOccurrenceText }}</div>
         }
+      </div>
+
+      <collapsible [title]="T.F.TASK_REPEAT.D_EDIT.ADVANCED_CFG | translate">
+        <div class="options-body">
+          <!-- How the series behaves -->
+          <formly-form
+            (modelChange)="onModelChange($event, true)"
+            [form]="formGroupBehaviour()"
+            [fields]="behaviourFormFields()"
+            [model]="repeatCfg()"
+          ></formly-form>
+
+          <!-- What new copies get -->
+          <chip-list-input
+            (addItem)="addTag($event)"
+            (addNewItem)="addNewTag($event)"
+            (removeItem)="removeTag($event)"
+            [label]="T.F.TASK_REPEAT.D_EDIT.TAG_LABEL | translate"
+            [model]="repeatCfg().tagIds"
+            [suggestions]="tagSuggestions()"
+          ></chip-list-input>
+
+          <formly-form
+            (modelChange)="onModelChange($event)"
+            [form]="formGroup2()"
+            [fields]="advancedFormFields()"
+            [model]="repeatCfg()"
+          ></formly-form>
+
+          @if (inheritedSubtaskTitles().length) {
+            <div class="inherited-subtasks">
+              {{ T.F.TASK_REPEAT.D_EDIT.INHERITED_SUBTASKS | translate }}
+              <ul>
+                @for (title of inheritedSubtaskTitles(); track $index) {
+                  <li>{{ title }}</li>
+                }
+              </ul>
+            </div>
+          }
+        </div>
       </collapsible>
 
       @if (repeatCfgId(); as cfgId) {
         <collapsible
           [title]="T.F.TASK_REPEAT.D_EDIT.HEATMAP_LABEL | translate"
-          icon="bar_chart"
           (isExpandedChange)="isHeatmapExpanded = $event"
         >
           @if (isHeatmapExpanded) {
