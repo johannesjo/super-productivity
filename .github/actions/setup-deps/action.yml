@@ -1,5 +1,5 @@
 name: 'Setup Node Dependencies'
-description: 'Shared setup for jobs that need the root workspace installed: Node 22, npm cache, retried npm install'
+description: 'Shared setup for jobs that need the root workspace installed: Node from .nvmrc, npm cache, retried npm install'
 
 # Callers must check out the repository first (the action lives in it).
 runs:
@@ -7,7 +7,7 @@ runs:
   steps:
     - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v6
       with:
-        node-version: 22
+        node-version-file: .nvmrc
         cache: npm
         cache-dependency-path: package-lock.json
 

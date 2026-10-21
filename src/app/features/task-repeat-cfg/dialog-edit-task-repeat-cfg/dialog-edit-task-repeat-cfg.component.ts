@@ -273,7 +273,7 @@ export class DialogEditTaskRepeatCfgComponent {
     return this._data.repeatCfg?.id || this._data.task?.repeatCfgId || null;
   });
 
-  // Computed from the saved config, like the Upcoming list's "Next" tooltip.
+  // Computed from the saved config, like the recurring overview's "Next" tooltip.
   // Unsaved schedule edits are applied by the reschedule effect on save, which
   // can also relocate the live instance, so no date is shown for them.
   nextOccurrenceText = computed<string | null>(() => {

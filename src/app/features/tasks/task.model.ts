@@ -152,6 +152,18 @@ export interface TaskCopy
   // Ensure type compatibility for internal fields
   modified?: number;
   doneOn?: number;
+
+  /**
+   * When a task was finished as "won't do" rather than completed: the
+   * `doneOn` of that finish. It only counts while it equals `doneOn` and the
+   * task is done, so read it through `isWontDoTask()`. Reopening clears
+   * `doneOn` and every completion stamps a new one, on clients predating the
+   * field too, so a value left behind does not count again; those clients show
+   * a plain done task. Exception: the plugin batch update writes `isDone`
+   * without touching `doneOn`, so a won't-do task it unchecks and re-checks is
+   * won't do again.
+   */
+  wontDoOn?: number;
   parentId?: string;
   remindAt?: number;
   repeatCfgId?: string;

@@ -2171,6 +2171,30 @@ describe('LocalRestApiHandlerService', () => {
         });
       });
 
+      // A GET→PATCH round trip echoes `isDone: true`; a new `doneOn` stamp would
+      // move the completion date and turn a won't-do task into a completed one.
+      it('should drop an echoed isDone on a task that is already done', async () => {
+        const mockTask = createMockTask('task-1', {
+          isDone: true,
+          doneOn: 5,
+          wontDoOn: 5,
+        });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { title: 'Renamed', isDone: true },
+          }),
+        );
+
+        expect(response.body.ok).toBe(true);
+        expect(taskServiceMock.update).toHaveBeenCalledOnceWith('task-1', {
+          title: 'Renamed',
+        });
+      });
+
       it('should move the task and then apply the other fields', async () => {
         let mockTask = createMockTask('task-1', { projectId: 'project-1' });
         Object.defineProperty(taskServiceMock, 'getByIdOnce$', {

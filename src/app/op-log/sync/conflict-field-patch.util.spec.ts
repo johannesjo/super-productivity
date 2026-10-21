@@ -526,6 +526,36 @@ describe('conflict-field-patch.util', () => {
         )[0].changes['doneOn'],
       ).toBe(7);
     });
+
+    // Won't do is a `wontDoOn` equal to `doneOn` (`isWontDoTask`), written by
+    // one op, so the newer edit's `doneOn` decides: a `wontDoOn` left beside
+    // another `doneOn` no longer counts.
+    describe("won't do against a concurrent completion", () => {
+      const wontDoAt = (t: number): Operation =>
+        edit({ isDone: true, doneOn: t, wontDoOn: t }, { id: 'w', timestamp: t });
+      const completionAt = (t: number): Operation =>
+        edit({ isDone: true, doneOn: t }, { id: 'c', timestamp: t, clientId: 'B' });
+
+      it('gives a newer completion its doneOn on both sides', () => {
+        expect(localWinningFieldGroups(sides([wontDoAt(1000)], [completionAt(2000)])))
+          .withContext("won't-do side")
+          .toEqual([{ timestamp: 1000, changes: { wontDoOn: 1000 } }]);
+        expect(localWinningFieldGroups(sides([completionAt(2000)], [wontDoAt(1000)])))
+          .withContext('completion side')
+          .toEqual([{ timestamp: 2000, changes: { isDone: true, doneOn: 2000 } }]);
+      });
+
+      it("gives a newer won't do its matching pair on both sides", () => {
+        expect(localWinningFieldGroups(sides([wontDoAt(2000)], [completionAt(1000)])))
+          .withContext("won't-do side")
+          .toEqual([
+            { timestamp: 2000, changes: { isDone: true, doneOn: 2000, wontDoOn: 2000 } },
+          ]);
+        expect(localWinningFieldGroups(sides([completionAt(1000)], [wontDoAt(2000)])))
+          .withContext('completion side')
+          .toEqual([]);
+      });
+    });
   });
 
   describe('survivingLocalFields / buildSurvivingFieldPatches', () => {

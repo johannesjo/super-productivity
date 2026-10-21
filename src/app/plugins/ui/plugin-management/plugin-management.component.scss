@@ -175,16 +175,22 @@ mat-error {
     }
   }
 
-  .plugin-stars {
+  // Pinned to the bottom so buttons line up across cards of different heights.
+  .community-plugin-action {
+    margin: auto 0 0;
+  }
+
+  .community-plugin-status {
     display: inline-flex;
     align-items: center;
-    gap: 2px;
+    gap: var(--s-half);
+    font-size: var(--font-size-md);
+    color: var(--text-color-muted);
 
     mat-icon {
-      font-size: 14px;
-      width: 14px;
-      height: 14px;
-      color: #f5b301;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
     }
   }
 

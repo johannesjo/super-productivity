@@ -7,6 +7,7 @@ import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { REMOTE_ISSUE_DELETE_DEFER_MS } from '../../../app.constants';
 import { TaskService } from '../../tasks/task.service';
 import { Task } from '../../tasks/task.model';
+import { isWontDoTask } from '../../tasks/util/is-wont-do-task';
 import { selectAllTasks } from '../../tasks/store/task.selectors';
 import { IssueProviderService } from '../issue-provider.service';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
@@ -20,6 +21,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { CaldavSyncAdapterService } from '../providers/caldav/caldav-sync-adapter.service';
 import { PlainspaceSyncAdapterService } from '../providers/plainspace/plainspace-sync-adapter.service';
 import { SnackService } from '../../../core/snack/snack.service';
+import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 import {
   DeletedTaskIssueSidecarService,
   DeletedTaskIssueInfo,
@@ -119,6 +121,12 @@ const ACTION_EXTRACTORS: Record<
   },
 };
 
+const omitIsDone = (changes: Partial<Task>): Partial<Task> => {
+  const rest = { ...changes };
+  delete rest.isDone;
+  return rest;
+};
+
 @Injectable()
 export class IssueTwoWaySyncEffects {
   private readonly _actions$ = inject(LOCAL_ACTIONS);
@@ -127,6 +135,7 @@ export class IssueTwoWaySyncEffects {
   private readonly _issueProviderService = inject(IssueProviderService);
   private readonly _adapterRegistry = inject(IssueSyncAdapterRegistryService);
   private readonly _snackService = inject(SnackService);
+  private readonly _dateTimeFormatService = inject(DateTimeFormatService);
   private readonly _deletedTaskIssueSidecar = inject(DeletedTaskIssueSidecarService);
   private readonly _deletedTagTitlesSidecar = inject(DeletedTagTitlesSidecarService);
   private readonly _adapterResolver = inject(IssueSyncAdapterResolverService);
@@ -427,6 +436,10 @@ export class IssueTwoWaySyncEffects {
       cfg || DEFAULT_GLOBAL_CONFIG.shortSyntax,
       tags,
       projects,
+      undefined,
+      'combine',
+      false,
+      this._dateTimeFormatService.dateInputLocale(),
     );
     return r?.taskChanges.title ?? task.title;
   }
@@ -591,10 +604,12 @@ export class IssueTwoWaySyncEffects {
       );
   }
 
-  private _pushChanges$(task: Task, changes: Partial<Task>): Observable<unknown> {
+  private _pushChanges$(task: Task, changesIn: Partial<Task>): Observable<unknown> {
     if (!task.issueType || !task.issueProviderId || !task.issueId) {
       return EMPTY;
     }
+    // A won't-do task was not completed, so its `isDone` is never pushed.
+    const changes = isWontDoTask(task) ? omitIsDone(changesIn) : changesIn;
     const issueType = task.issueType as IssueProviderKey;
     const issueProviderId = task.issueProviderId;
     const issueId = task.issueId;

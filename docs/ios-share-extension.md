@@ -13,6 +13,51 @@ ID-only receipts cover acknowledgement retries after a user archives/deletes
 an imported task. Pending captures are not part of the app's normal exports or
 sync until imported. Uninstalling the app removes them.
 
+## Native capture inbox and shared importer
+
+iOS and Android share one importer, `NativeCaptureImporter`
+(`src/app/features/tasks/native-capture/`). Each platform supplies a
+`NativeCaptureSource`: a durable on-device inbox plus `getPending`, `isValid`,
+`createTask` and `acknowledge`. iOS is `ShareInbox.swift` (App Group, exposed
+by `ShareInboxPlugin.swift`, consumed by `IosShareService`); Android is
+`CaptureInbox.kt` (`noBackupFilesDir/capture-inbox/`, consumed by
+`AndroidCaptureImportService`).
+
+Why it is built this way:
+
+- One immutable JSON file per capture, written atomically (iOS `.atomic`;
+  Android temp file, fsync, rename). Writers and acknowledgements never
+  rewrite a shared file, so a suspended or killed process cannot corrupt the
+  queue, and no database or extra dependency is needed.
+- Reads never delete. An entry is acknowledged only after its task is in the
+  store, `flushPendingWrites()` completed and no unrecovered persist failure
+  is flagged. Never acknowledge a task that exists only in memory.
+- The capture id is the task id. Replay after a crash finds the task and just
+  acknowledges. Never deduplicate by title; two captures are two tasks.
+- Id-only receipts in localStorage (`sp-ios-share-receipts`,
+  `sp-android-capture-receipts`; never rename, installs keep them) cover a
+  failed acknowledgement after the user deleted the imported task. They are
+  pruned once the native entry is gone, since nothing can be redelivered then.
+- The importer waits for initial data load, the initial sync and the end of the
+  sync window before dispatching, which keeps imports out of the way of sync
+  imports and restores. A pending capture lands in whichever dataset is active
+  when the app is next ready.
+- An invalid entry is skipped but left on disk so it cannot block later
+  entries (known limitation: it is reported on every resume until removed).
+- iOS shares become Inbox tasks, bottom of list, not backlog, with short syntax
+  ignored; title is clamped to 300 characters and text over 100 000 is
+  invalid. Android entries behave like the in-app add bar (active work
+  context, short syntax) with only the id fixed. Android only drains captures
+  left by older versions: the startup quick-add overlay that wrote them was
+  removed.
+- Android keeps the inbox in `noBackupFilesDir` so a device restore cannot
+  replay old captures. Ids cross the JS bridge and become file names, so both
+  platforms accept canonical UUIDs only.
+- Privacy: logs carry capture ids and fixed error strings only, never titles
+  or notes (`CAPTURE_IMPORT_ERR`).
+- Known gap: if the app dies after the user deletes a freshly imported task but
+  before its receipt is written, that capture can reappear once.
+
 ## Signing setup
 
 Before release, register `com.super-productivity.app.ShareExtension` in Apple

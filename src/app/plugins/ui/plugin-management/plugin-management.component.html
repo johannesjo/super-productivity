@@ -154,6 +154,35 @@
               {{ T.PLUGINS.SETUP_ISSUE_PROVIDER | translate }}
             </button>
           }
+          @if (communityUpdates().get(plugin.manifest.id); as update) {
+            @if (isInAppInstall) {
+              <button
+                mat-button
+                color="primary"
+                (click)="installCommunityPlugin(update.plugin)"
+                [disabled]="isUploading()"
+              >
+                <mat-icon>update</mat-icon>
+                {{
+                  T.PLUGINS.COMMUNITY_UPDATE
+                    | translate: { version: update.release.version }
+                }}
+              </button>
+            } @else {
+              <a
+                mat-button
+                color="primary"
+                [href]="update.release.downloadUrl"
+                target="_blank"
+              >
+                <mat-icon>download</mat-icon>
+                {{
+                  T.PLUGINS.COMMUNITY_DOWNLOAD
+                    | translate: { version: update.release.version }
+                }}
+              </a>
+            }
+          }
           @if (isUploadedPlugin(plugin)) {
             <button
               mat-button
@@ -184,7 +213,8 @@
     <p class="community-warning">{{ T.PLUGINS.COMMUNITY_WARNING | translate }}</p>
 
     <div class="community-plugins-list">
-      @for (plugin of communityPlugins(); track plugin.name) {
+      @for (row of communityPluginRows(); track row.plugin.name) {
+        @let plugin = row.plugin;
         <div class="community-plugin-item">
           <h4 class="plugin-name">
             <a
@@ -205,26 +235,55 @@
                 T.PLUGINS.AUTHORED_BY | translate: { author: plugin.author }
               }}</span>
             }
-            @if (plugin.stars !== undefined) {
-              <span
-                class="plugin-stars"
-                [attr.aria-label]="
-                  T.PLUGINS.COMMUNITY_STARS | translate: { count: plugin.stars }
-                "
-              >
-                <mat-icon>star</mat-icon>
-                {{ plugin.stars }}
-              </span>
-            }
           </p>
           <p class="plugin-desc">{{ plugin.shortDescription }}</p>
+          @if (row.status === 'installed') {
+            <p class="community-plugin-action community-plugin-status">
+              <mat-icon>check</mat-icon>
+              {{ T.PLUGINS.COMMUNITY_INSTALLED | translate }}
+            </p>
+          } @else if (plugin.release && !isInAppInstall) {
+            <div class="community-plugin-action">
+              <a
+                mat-stroked-button
+                color="primary"
+                [href]="plugin.release.downloadUrl"
+                target="_blank"
+              >
+                <mat-icon>download</mat-icon>
+                {{
+                  T.PLUGINS.COMMUNITY_DOWNLOAD
+                    | translate: { version: plugin.release.version }
+                }}
+              </a>
+            </div>
+          } @else if (plugin.release) {
+            <div class="community-plugin-action">
+              <button
+                mat-stroked-button
+                color="primary"
+                (click)="installCommunityPlugin(plugin)"
+                [disabled]="isUploading()"
+              >
+                <mat-icon>{{
+                  row.status === 'updateAvailable' ? 'update' : 'download'
+                }}</mat-icon>
+                {{
+                  (row.status === 'updateAvailable'
+                    ? T.PLUGINS.COMMUNITY_UPDATE
+                    : T.PLUGINS.COMMUNITY_INSTALL
+                  ) | translate: { version: plugin.release.version }
+                }}
+              </button>
+            </div>
+          }
         </div>
       }
     </div>
 
     <div style="margin-top: 16px; text-align: center">
       <a
-        href="https://github.com/super-productivity/super-productivity/blob/master/src/assets/community-plugins.json"
+        href="https://github.com/super-productivity/super-productivity/blob/master/docs/plugin-development.md#get-listed-in-the-app"
         target="_blank"
         mat-button
         color="primary"

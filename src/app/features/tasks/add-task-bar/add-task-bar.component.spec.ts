@@ -1,4 +1,5 @@
 import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
+import { DEFAULT_DATE_INPUT_LOCALE } from 'src/app/core/date-time-format/date-input-locale';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
@@ -20,7 +21,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { signal, Signal } from '@angular/core';
 import { AddTaskSuggestion } from './add-task-suggestions.model';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { TaskCopy, TaskReminderOptionId, TaskWithSubTasks } from '../task.model';
+import { TaskCopy, TaskReminderOptionId } from '../task.model';
 import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-format.service';
 import { DEFAULT_LOCALE } from 'src/app/core/locale.constants';
 import { DateService } from '../../../core/date/date.service';
@@ -168,8 +169,10 @@ describe('AddTaskBarComponent', () => {
     'textLocale',
     // Reached by the actions bar's date chip as soon as a state has a time on it
     'formatTime',
+    'dateInputLocale',
   ]);
   mockDateTimeFormatService.currentLocale.and.returnValue('en-US');
+  mockDateTimeFormatService.dateInputLocale.and.returnValue(DEFAULT_DATE_INPUT_LOCALE);
   mockDateTimeFormatService.textLocale.and.returnValue('en-US');
   mockDateTimeFormatService.formatTime.and.callFake((timestamp: number) =>
     new Date(timestamp).toLocaleTimeString('en-US', {
@@ -189,7 +192,6 @@ describe('AddTaskBarComponent', () => {
     mockTaskService = jasmine.createSpyObj('TaskService', [
       'add',
       'getByIdOnce$',
-      'getByIdWithSubTaskData$',
       'scheduleTask',
       'moveToCurrentWorkContext',
     ]);
@@ -198,7 +200,7 @@ describe('AddTaskBarComponent', () => {
     });
     mockProjectService = jasmine.createSpyObj(
       'ProjectService',
-      [],
+      ['moveTaskToTodayList'],
       createProjectSignals(mockProjects),
     );
     mockTagService = jasmine.createSpyObj(
@@ -493,28 +495,20 @@ describe('AddTaskBarComponent', () => {
       expect(mockTaskService.moveToCurrentWorkContext).not.toHaveBeenCalled();
     });
 
-    it('moves an existing task to the current context with its sub task data (#10838)', async () => {
-      const task = {
-        id: 'task-1',
-        title: 'Existing task',
-        subTaskIds: [],
-      } as Partial<TaskCopy> as TaskCopy;
-      const taskWithSubTasks = { ...task, subTasks: [] } as TaskWithSubTasks;
-      // Unused by the fix: if the code goes back to getByIdOnce$, the test
-      // fails on the assertion below instead of a TypeError.
-      mockTaskService.getByIdOnce$.and.returnValue(of(task));
-      mockTaskService.getByIdWithSubTaskData$.and.returnValue(of(taskWithSubTasks));
+    it('moves a backlog task picked in a project to its regular list (#10838)', async () => {
       const suggestion = {
-        title: task.title,
-        taskId: task.id,
+        title: 'Existing task',
+        taskId: 'task-1',
         projectId: 'project-2',
       } as AddTaskSuggestion;
 
       await component.onTaskSuggestionSelected(suggestion);
 
-      expect(mockTaskService.moveToCurrentWorkContext).toHaveBeenCalledOnceWith(
-        taskWithSubTasks,
+      expect(mockProjectService.moveTaskToTodayList).toHaveBeenCalledOnceWith(
+        'task-1',
+        'project-2',
       );
+      expect(mockTaskService.moveToCurrentWorkContext).not.toHaveBeenCalled();
     });
   });
 

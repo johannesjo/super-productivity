@@ -47,7 +47,9 @@
   "BN": {
     "SHOW_ISSUE_PANEL": "Issue Provider Panel",
     "SHOW_NOTES": "Project Notes",
-    "SHOW_SCHEDULE": "Schedule"
+    "SHOW_SCHEDULE": "Schedule",
+    "SLOT_CHANGE_HINT": "Long-press to change this button",
+    "SLOT_MENU_LABEL": "Choose this button's destination"
   },
   "CONFIRM": {
     "DELETE_SECTION": "Are you sure you want to delete this section? Tasks in it will be moved to the task list.",
@@ -94,7 +96,7 @@
   "EXAMPLE_TASKS": {
     "GETTING_STARTED": {
       "TITLE": "Optional: getting started tips",
-      "NOTES": "Nothing here is required. Delete this task whenever you like.\n\n- **Projects**: group tasks by topic with the **+** next to **Projects** in the sidebar.\n- **Sync**: keep your data on several devices under **Settings → Sync & Backup**.\n- **Keyboard**: open **Help → How to: Keyboard Navigation** in the sidebar menu.\n- **Make it yours**: pick a theme or dark mode, and switch features like boards, schedule, habits, focus mode or integrations on or off under **Settings → General**. Plugins add even more."
+      "NOTES": "Nothing here is required. Delete this task whenever you like.\n\n- **Today and Inbox**: Today shows what is planned for today. Tasks without a project of your own stay in Inbox. A task can appear in both lists.\n- **Projects**: group tasks by topic with the **+** next to **Projects** in the sidebar.\n- **Sync**: keep your data on several devices under **Settings → Sync & Backup**.\n- **Coming from Todoist or TickTick?** Import your tasks under **Settings → Sync & Backup → Import/Export**.\n- **Tours**: **Help → Quick tour** in the sidebar menu walks you through the basics on your own task, and **Help → How to** shows short syntax and keyboard navigation step by step. Close a tour whenever you like.\n- **Make it yours**: pick a theme or dark mode, and switch features like boards, schedule, habits, focus mode or integrations on or off under **Settings → General**. Plugins add even more."
     }
   },
   "F": {
@@ -314,8 +316,8 @@
         "QUIT": "Quit",
         "TITLE": "Finish your day before quitting?",
         "UNARCHIVED_TASKS": {
-          "ONE": "1 completed task in your Today list hasn't been moved to the archive yet.",
-          "OTHER": "{{nr}} completed tasks in your Today list haven't been moved to the archive yet."
+          "ONE": "1 done task in your Today list hasn't been moved to the archive yet.",
+          "OTHER": "{{nr}} done tasks in your Today list haven't been moved to the archive yet."
         }
       }
     },
@@ -743,6 +745,7 @@
         "AVG_TIME_SPENT_PER_TASK": "Avg. time spent per task",
         "COUNTING_SUBTASKS": "(counting subtasks)",
         "DAYS_WORKED": "Days worked",
+        "EVALUATION_OVER_TIME": "Impact & energy over time",
         "FOCUS_SESSION_TRENDS": "Focus sessions over time",
         "GLOBAL_METRICS": "Global Metrics",
         "HEATMAP_SHARE_FAILED": "Failed to share heatmap",
@@ -750,7 +753,6 @@
         "HEATMAP_SHARED_TO_DEVICE": "Heatmap saved to device storage",
         "HEATMAP_SHARED_TO_PATH": "Heatmap saved to {{path}}",
         "NO_ADDITIONAL_DATA_YET": "No additional data collected yet. Use the form on the daily summary \"Evaluation\" panel to do so.",
-        "PRODUCTIVITY_BREAKDOWN_OVER_TIME": "Productivity & Sustainability over time",
         "SHARE_HEATMAP": "Share heatmap",
         "SHARE_STATS": "Share your productivity stats",
         "SIMPLE_CLICK_COUNTERS_OVER_TIME": "Click Counters over time",
@@ -766,32 +768,10 @@
         "YEAR": "Year"
       },
       "EVAL_FORM": {
-        "DAILY_STATE": "Daily State",
-        "DAILY_STATE_TOOLTIP": "Quadrant system based on both scores (≥50 is high): Deep Flow (high/high), Overdrive (high/low), Recovery (low/high), Drift (low/low)",
         "ENERGY_LEVEL": "How's your energy?",
         "ENERGY_LEVEL_HINT": "😫 Exhausted – 😐 OK – 😊 Good",
-        "FOCUS_WORK_TIME": "Focused work time",
         "IMPACT_OF_WORK": "How do you rate the impact of your work today?",
-        "IMPACT_OF_WORK_HINT": "1: No meaningful progress – 4: Significant impact",
-        "PRODUCTIVITY_SCORE": "Productivity Score",
-        "PRODUCTIVITY_SCORE_TOOLTIP": "65% Impact (1-4 scale) • 30% Focus toward 4h target • 5% total work (capped at 10h)",
-        "SCORE_BREAKDOWN_TITLE_PRODUCTIVITY": "7-Day Productivity Breakdown",
-        "SCORE_BREAKDOWN_TITLE_SUSTAINABILITY": "7-Day Sustainability Breakdown",
-        "STATE_DEEP_FLOW_HEADLINE": "Deep Flow: Excellent focus and sustainable pace.",
-        "STATE_DEEP_FLOW_HINT": "You’re in the sweet spot — reflect on what made this combination possible.",
-        "STATE_DRIFT_HEADLINE": "Drift: Low focus and low energy.",
-        "STATE_DRIFT_HINT": "That’s okay. Reflect on what distracted you and adjust gently — every reset is a chance to learn.",
-        "STATE_IMPACT_MISMATCH_HEADLINE": "Low Impact: Plenty of focus, little payoff.",
-        "STATE_IMPACT_MISMATCH_HINT": "You invested solid focus — now direct it toward higher-impact work to feel the difference.",
-        "STATE_OVERDRIVE_HEADLINE": "Overdrive: Productive, but at a cost.",
-        "STATE_OVERDRIVE_HINT": "You got a lot done — now make sure to recharge before burnout sneaks in.",
-        "STATE_RECOVERY_HEADLINE": "Recovery: Resting and recharging.",
-        "STATE_RECOVERY_HINT": "You’re giving your mind space to recover. Tomorrow you’ll have the energy to dive deeper again.",
-        "STATE_STEADY_HEADLINE": "Steady Rhythm: Consistent, sustainable progress.",
-        "STATE_STEADY_HINT": "Nice balance. You’re keeping momentum without overextending — keep nourishing what makes this pace work.",
-        "SUSTAINABILITY_SCORE": "Sustainability Score",
-        "SUSTAINABILITY_SCORE_TOOLTIP": "45% Energy level • 40% Reasonable work hours (0 at 10h) • 15% Focus balance (optimal at 4h)",
-        "TOTAL_WORK_TIME": "Total work time today"
+        "IMPACT_OF_WORK_HINT": "1: No meaningful progress – 4: Significant impact"
       },
       "FOCUS_SESSION_DIALOG": {
         "ADD_BTN": "Add",
@@ -1138,6 +1118,7 @@
       "TOGGLE_TIME_SCHEDULING_HINT": "Ctrl+1 to toggle time scheduling"
     },
     "SEARCH_BAR": {
+      "DELETED": "Deleted",
       "INCLUDE_COMPLETED": "Include completed and archived tasks",
       "INFO": "Start typing to search for tasks, notes, projects or tags",
       "NO_RESULTS": "No tasks, notes, projects or tags found matching your search",
@@ -1850,6 +1831,7 @@
         "FOCUS_SESSION": "Start focus session",
         "MARK_DONE": "Mark as completed",
         "MARK_UNDONE": "Mark as not completed",
+        "MARK_WONT_DO": "Won't do",
         "MOVE_TO_BACKLOG": "Move to backlog",
         "MOVE_TO_BOTTOM": "Move to bottom",
         "MOVE_TO_OTHER_PROJECT": "Move to project",
@@ -1867,13 +1849,14 @@
         "REMOVE_FROM_MY_DAY": "Remove from Today",
         "SCHEDULE": "Schedule task",
         "SET_DEADLINE": "Set deadline",
-        "SHOW_HIDDEN_DONE_SUB_TASKS": "+ {{nr}} completed subtasks",
+        "SHOW_HIDDEN_DONE_SUB_TASKS": "+ {{nr}} done subtasks",
         "SHOW_HIDDEN_SUB_TASKS": "+ {{nr}} subtasks",
         "SUB_TASK_PROGRESS": "Subtasks: {{done}} of {{total}} done",
         "TIME_CONFLICT": "Overlaps with another scheduled task",
         "TOGGLE_ATTACHMENTS": "Show/hide attachments",
         "TOGGLE_DETAIL_PANEL": "Show/hide task panel",
         "TOGGLE_DONE": "Toggle completion status",
+        "TOGGLE_DONE_WONT_DO": "Finished as won't do. Toggle completion status",
         "TOGGLE_SUB_TASK_VISIBILITY": "Toggle subtask visibility",
         "TOGGLE_TAGS": "Toggle tags",
         "TRACK_TIME": "Start tracking time",
@@ -1909,6 +1892,22 @@
         "RO_AT_DEADLINE": "At deadline",
         "RO_NEVER": "Never",
         "SET_DEADLINE": "Set deadline"
+      },
+      "D_RECENTLY_DELETED": {
+        "CONFIRM_EMPTY": "Permanently remove everything in Recently deleted on this device?",
+        "DELETED_ON": "Deleted {{date}}",
+        "EMPTY": "Empty",
+        "INTRO": "Deleted tasks stay here on this device for {{days}} days.",
+        "LINK": "Recently deleted",
+        "NONE": "Nothing deleted in the last {{days}} days.",
+        "RESTORE": "Restore",
+        "RESTORE_ARIA": "Restore \"{{title}}\"",
+        "RESTORED": "Restored \"{{title}}\"",
+        "SUB_TASKS": {
+          "ONE": "+{{nr}} subtask",
+          "OTHER": "+{{nr}} subtasks"
+        },
+        "TITLE": "Recently deleted"
       },
       "D_REMINDER_VIEW": {
         "ADD_TO_TODAY": "Add to Today",
@@ -2072,6 +2071,8 @@
         "DEADLINE_REMOVED": "Deadline removed",
         "DEADLINE_SET": "Deadline set for {{date}}",
         "DELETED": "Deleted task \"{{title}}\"",
+        "DELETED_FIND_IN_HISTORY": "Deleted task \"{{title}}\". For {{days}} days, you can restore it from History → Recently deleted.",
+        "DELETED_FIND_IN_SEARCH": "Deleted task \"{{title}}\". Search still finds it for {{days}} days.",
         "EMPTY_TITLE_VIA_APP_URI": "Task title was empty, no task was added",
         "FOUND_MOVE_FROM_BACKLOG": "Moved task <strong>\"{{title}}\"</strong> from backlog to the Today task list",
         "FOUND_MOVE_FROM_OTHER_LIST": "Added task <strong>\"{{title}}\"</strong> from <strong>{{contextTitle}}</strong> to current list",
@@ -2508,20 +2509,31 @@
   "GCF": {
     "APP_FEATURES": {
       "BOARDS": "Boards",
+      "BOARDS_HINT": "Kanban-style boards with columns that group your tasks by tag, project or done state.",
       "DONATE_PAGE": "Donate page",
+      "DONATE_PAGE_HINT": "Shows a menu entry with ways to support the development of the app.",
       "EXTEND_WITH_PLUGINS": "Find more features in Plugins",
       "FINISH_DAY": "Finish day",
+      "FINISH_DAY_HINT": "A button below today's tasks that opens a summary of your day and moves done tasks to the archive.",
       "FOCUS_MODE": "Focus mode",
+      "FOCUS_MODE_HINT": "A full-screen view for working on one task at a time, with a Pomodoro, Flowtime or countdown timer.",
       "HABITS": "Habits",
-      "HELP": "Enable or disable specific app features across the UI.",
+      "HABITS_HINT": "Track recurring habits like exercise or reading with simple daily check-ins.",
+      "HELP": "Turn off what you don't use to keep the app simple. Turning a feature off hides it and stops what it does; your data stays.",
       "ISSUES_PANEL": "Issues panel",
+      "ISSUES_PANEL_HINT": "A side panel to search and import issues from connected integrations like GitHub, Jira or GitLab.",
       "PLANNER": "Planner",
+      "PLANNER_HINT": "Plan your tasks across the coming days by dragging them onto specific dates.",
       "PROJECT_NOTES": "Project notes",
+      "PROJECT_NOTES_HINT": "A side panel for free-form notes that belong to the current project or tag.",
       "SCHEDULE": "Schedule",
-      "SCHEDULE_DAY_PANEL": "Schedule day panel",
+      "SCHEDULE_HINT": "A calendar view of your days and weeks with tasks and events by time, plus a side panel to time-block today's tasks next to your list.",
       "SEARCH": "Search",
+      "SEARCH_HINT": "Find any task, including archived ones, and your notes. Opens from the side menu or a keyboard shortcut.",
       "SYNC_BUTTON": "Sync button",
+      "SYNC_BUTTON_HINT": "Shows a button in the header to start syncing manually and see the sync status.",
       "TIME_TRACKING": "Stopwatch time tracking",
+      "TIME_TRACKING_HINT": "The play button for starting and stopping a timer on the current task to track how long you work on it.",
       "TITLE": "App Features"
     },
     "AUTO_BACKUPS": {
@@ -3003,7 +3015,6 @@
   "MH": {
     "ADD_NEW_TASK": "Add new Task",
     "ADD_SECTION": "Add Section",
-    "ALL_PLANNED_LIST": "Upcoming",
     "BOARDS": "Boards",
     "COPY_TASK_LIST_MARKDOWN": "Copy to clipboard",
     "CREATE_PROJECT": "Create project",
@@ -3029,6 +3040,7 @@
       "CREATE_TASK": "How to: Create a task",
       "GET_HELP_ONLINE": "Get help online",
       "KEYBOARD": "How to: Keyboard Navigation",
+      "QUICK_TOUR": "Quick tour",
       "REDDIT_COMMUNITY": "Reddit community",
       "REPORT_A_PROBLEM": "Report a problem",
       "SEND_FEEDBACK": "Send feedback",
@@ -3097,13 +3109,46 @@
     "HINTS": {
       "CREATE_TASK": "Click + to add your first task",
       "CREATE_TASK_TOUCH": "Tap + to add your first task",
-      "DONE_TITLE": "You're all set",
-      "EXPLORE_INBOX": "Some optional tips are waiting in your Inbox. Try them or delete them, whenever you like.",
-      "GOT_IT": "Got it",
+      "DECLINED": "No problem. It's under Help → Quick tour whenever you like.",
+      "MORE_FALLBACK": "There's more already switched on: projects, time tracking, Planner…",
+      "NO_THANKS": "No thanks",
+      "SHOW_ME_MORE": "Show me more ›",
       "TASK_SWIPE_LEFT_TOUCH": "Swipe task left for more actions",
-      "TASK_SWIPE_RIGHT_TOUCH": "When you've finished a task, swipe it right to mark it done",
+      "TODAY_AND_INBOX": "This task is planned for today, so it shows in {{todayIcon}} <b>Today</b>. Tasks without a project of your own stay in {{inboxIcon}} <b>Inbox</b>.",
+      "TODAY_AND_INBOX_PHONE": "This task is planned for today, so it shows in {{todayIcon}} <b>Today</b>. Tasks without a project of your own stay in {{inboxIcon}} <b>Inbox</b>, under ☰.",
       "OR_PRESS": "or press",
       "SKIP_ARIA": "Close tip"
+    },
+    "TOUR": {
+      "ADD_SUBTASK": "Break it down: right-click the task and pick {{subtaskIcon}} <b>Add subtask</b>",
+      "COUNTER": "{{nr}} of {{total}}",
+      "NEXT": "Next ›",
+      "ORGANIZE": "Make a <b>project</b> of your own to group tasks, or a <b>tag</b> to label them. Create one with +",
+      "ORGANIZE_COLLAPSED": "Make a <b>project</b> of your own to group tasks, or a <b>tag</b> to label them. Expand the side nav with {{expandIcon}} to create one",
+      "ORGANIZE_PHONE": "Projects and tags live under ☰. Make a <b>project</b> of your own to group tasks, or a <b>tag</b> to label them",
+      "PLANNER": "Plan the next days in {{plannerIcon}} <b>Planner</b>",
+      "TASK_MENU_TOUCH": "Swipe a task left for its menu: {{playIcon}} <b>Start tracking time</b>, {{subtaskIcon}} <b>Add subtask</b>",
+      "TASK_MENU_TOUCH_NO_TRACKING": "Swipe a task left for its menu, e.g. {{subtaskIcon}} <b>Add subtask</b>",
+      "TIMER_RUNNING": "Timer's running. Press {{playIcon}} again or <kbd>{{key}}</kbd> to pause.",
+      "TIMER_RUNNING_TOUCH": "Timer's running. Tap {{playIcon}} at the top to pause.",
+      "TRACK_TIME": "Hover over the task and press {{playIcon}} to track time"
+    },
+    "WANT_MORE": {
+      "BOARDS": "<b>Boards</b> · Kanban-style columns for your tasks",
+      "DONE": "Done",
+      "FINISH_DAY": "<b>Finish day</b> · Review and wrap up your day",
+      "FOCUS_MODE": "<b>Focus mode</b> · Pomodoro and distraction-free work",
+      "FOOTER": "Find this again under Help → Quick tour.",
+      "HABITS": "<b>Habits</b> · Track routines day by day",
+      "INTRO": "Super Productivity starts calm. More is there when you need it:",
+      "OPEN_SETTINGS": "Open settings ›",
+      "PLUGINS": "<b>Plugins & integrations</b> · Jira, GitHub, CalDAV and more",
+      "SCHEDULE": "<b>Schedule</b> · Your day on a timeline",
+      "SEARCH": "Search everything with <kbd>{{key}}</kbd>.",
+      "SEARCH_PHONE": "Search everything from ☰.",
+      "SHORT_SYNTAX": "Type <code>#tag</code>, <code>+project</code> or <code>@tomorrow</code> while adding a task. Help → How to shows more.",
+      "SYNC": "Your data stays on this device. Sync and backups are in Settings.",
+      "TITLE": "Want more?"
     }
   },
   "PDS": {
@@ -3227,6 +3272,7 @@
     "FAILED_TO_LOAD_CONFIG": "Failed to load plugin configuration",
     "FAILED_TO_REMOVE": "Failed to remove plugin",
     "FAILED_TO_SAVE_CONFIG": "Failed to save plugin configuration",
+    "FIELD_NOT_IN_PLUGIN_API": "\"{{field}}\" is not part of the plugin API",
     "FIELD_NOT_UPDATABLE": "\"{{field}}\" cannot be set via updateTask — re-parenting is not supported. Create subtasks with addTask({ parentId }), or restructure via batchUpdateForProject",
     "FILE_TOO_LARGE": "File too large ({{fileSize}}MB). Maximum size is {{maxSize}}MB",
     "GO_BACK": "Go Back",
@@ -3298,8 +3344,15 @@
     "DETAILS": "Details",
     "COMMUNITY_PLUGINS": "Community Plugins",
     "COMMUNITY_WARNING": "Community plugins are not reviewed by the Super Productivity team. Install them at your own risk.",
-    "COMMUNITY_STARS": "{{count}} stars",
     "COMMUNITY_GET_LISTED": "Get your plugin to show up here",
+    "COMMUNITY_INSTALL": "Install v{{version}}",
+    "COMMUNITY_UPDATE": "Update to v{{version}}",
+    "COMMUNITY_INSTALLED": "Installed",
+    "COMMUNITY_DOWNLOAD": "Download v{{version}}",
+    "COMMUNITY_DOWNLOAD_FAILED": "Could not download \"{{name}}\". Download its ZIP from the plugin page and install it below.",
+    "COMMUNITY_DOWNLOAD_TOO_LARGE": "The download of \"{{name}}\" is larger than {{maxSize}} MB and was not installed.",
+    "COMMUNITY_HASH_MISMATCH": "The download of \"{{name}}\" does not match the listed version and was not installed.",
+    "COMMUNITY_MANIFEST_MISMATCH": "The download of \"{{name}}\" is not the listed plugin version and was not installed.",
     "GROUP_UPLOADED": "Uploaded plugins",
     "GROUP_INTEGRATIONS": "Integrations",
     "GROUP_OTHER": "Other plugins",
@@ -3356,14 +3409,8 @@
     "NO_DEADLINES": "There are currently no tasks with deadlines. You can set a deadline via the task's context menu or detail panel.",
     "NO_REPEATABLE_TASKS": "No recurring tasks yet. To create one, open a task's side panel and choose \"Recur\".",
     "NO_SCHEDULED": "There are currently no scheduled tasks of this type. You can schedule a task by choosing \"Schedule Task\" in the task's context menu. To open it, right-click (long press on mobile) on a task.",
-    "NO_SCHEDULED_FOR_DAY": "No tasks planned for specific days yet. Right-click a task and choose \"Schedule\" to plan it for a day.",
-    "NO_SCHEDULED_WITH_TIME": "No tasks scheduled with a start time yet. Right-click a task and choose \"Schedule\" to set a specific time.",
-    "NO_SCHEDULED_TITLE": "Tasks Planned for Specific Days",
-    "REPEATED_TASKS": "Recurring Tasks",
     "SCHEDULED_TASKS": "Scheduled Tasks",
-    "SCHEDULED_TASKS_WITH_TIME": "Scheduled Tasks with Start Time",
-    "START_TASK": "Start task and remove reminder",
-    "TASKS_WITH_DEADLINES": "Tasks with Deadlines"
+    "START_TASK": "Start task and remove reminder"
   },
   "THEMES": {
     "amber": "amber",
@@ -3411,6 +3458,7 @@
     "NO_TASKS_IN_MAIN_LIST": "All tasks are organized into sections",
     "RECURRING_TASKS": "Recurring Tasks",
     "RESET_BREAK_TIMER": "Reset without break timer",
+    "SHOW_ALL_RECURRING_TASKS": "All recurring tasks",
     "TIME_ESTIMATED": "Time estimated:",
     "TODAY_REMAINING": "Today remaining:",
     "WITHOUT_BREAK": "Without break:",

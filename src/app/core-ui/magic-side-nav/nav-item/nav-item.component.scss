@@ -366,7 +366,7 @@ button[mat-menu-item].nav-link.active {
     // the label and moves the icon instead — while `display: none` takes the
     // label's transition with it, since a subtree that is not rendered cannot
     // animate. See the label choreography above.
-    mat-icon.nav-icon ~ ::ng-deep .mat-mdc-menu-item-text {
+    .nav-icon ~ ::ng-deep .mat-mdc-menu-item-text {
       overflow: hidden;
     }
 
