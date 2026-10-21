@@ -1174,6 +1174,9 @@
         "PREV_WEEK": "上周",
         "TODAY": "今天"
       },
+      "N": {
+        "COUNTDOWN_COMPLETE": "倒计时已结束！"
+      },
       "S": {
         "GOAL_REACHED_1": "您今天达到了目标！",
         "GOAL_REACHED_2": "当前连续持续时间："
