@@ -537,6 +537,10 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
         taskData.timeSpentOnDay = state.spent;
       }
 
+      if (state.priority) {
+        taskData.priority = state.priority;
+      }
+
       if (state.deadlineDate) {
         if (state.deadlineTime && isValidSplitTime(state.deadlineTime)) {
           const deadlineDateObj = dateStrToUtcDate(state.deadlineDate);
@@ -664,6 +668,9 @@ export class AddTaskBarComponent implements AfterViewInit, OnInit, OnDestroy {
             ...repeatUpdates,
             title,
             notes: taskData.notes,
+            // Later occurrences take their priority from the config, so a
+            // "p1 @daily" must land here too, not only on the first instance
+            priority: taskData.priority,
             tagIds: taskData.tagIds ?? [],
             defaultEstimate: state.estimate || 0,
             startTime: state.time || undefined,

@@ -15,6 +15,7 @@ import { DEFAULT_TAG } from '../tag/tag.const';
 import { Project } from '../project/project.model';
 import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
 import { INBOX_PROJECT } from '../project/project.const';
+import { ShortSyntaxConfig } from '../config/global-config.model';
 import { RepeatQuickSetting } from '../task-repeat-cfg/task-repeat-cfg.model';
 import { findSpringForwardSunday } from './dst.test-helper';
 import {
@@ -2600,6 +2601,173 @@ describe('parseTimeSpentChanges', () => {
     const result = parseTimeSpentChanges({ title: 'Task 15m/' });
     expect(result.timeSpentOnDay?.[getDbDateStr()]).toBe(15 * 60 * 1000);
     expect(result.title).toBe('Task');
+  });
+});
+
+describe('shortSyntax priority (p1-p3)', () => {
+  const PRIORITY_CONFIG: ShortSyntaxConfig = CONFIG;
+  const OFF_CONFIG: ShortSyntaxConfig = { ...CONFIG, isEnablePriority: false };
+  const parse = (
+    title: string,
+    taskOverrides: Partial<TaskCopy> = {},
+    config: ShortSyntaxConfig = PRIORITY_CONFIG,
+    mode: 'combine' | 'replace' = 'combine',
+  ): ReturnType<typeof shortSyntax> =>
+    shortSyntax(
+      { ...TASK, title, ...taskOverrides },
+      config,
+      ALL_TAGS,
+      undefined,
+      undefined,
+      mode,
+    );
+
+  it('should be enabled by default', async () => {
+    expect(CONFIG.isEnablePriority).toBe(true);
+    expect((await parse('Fix login bug p1', {}, CONFIG))?.taskChanges.priority).toBe(3);
+  });
+
+  it('should be enabled for a config that predates the flag', async () => {
+    const { isEnablePriority, ...legacyConfig } = CONFIG;
+    expect(isEnablePriority).toBe(true);
+    const r = await parse('Fix login bug p1', {}, legacyConfig);
+    expect(r?.taskChanges.priority).toBe(3);
+  });
+
+  it('should be disabled when switched off', async () => {
+    expect(await parse('Fix login bug p1', {}, OFF_CONFIG)).toBeUndefined();
+  });
+
+  [
+    { token: 'p1', priority: 3 },
+    { token: 'p2', priority: 2 },
+    { token: 'p3', priority: 1 },
+  ].forEach(({ token, priority }) => {
+    it(`should map ${token} to priority ${priority} and strip it`, async () => {
+      const title = `Fix login bug ${token}`;
+      const r = await parse(title);
+      expect(r?.taskChanges).toEqual({ priority, title: 'Fix login bug' } as any);
+      expect(r?.parsedRanges).toEqual(expectedRanges(title, [['priority', token]]));
+    });
+  });
+
+  it('should only match lowercase tokens', async () => {
+    expect(await parse('Fix login bug P1')).toBeUndefined();
+    expect(await parse('P2 Fix P3 incident')).toBeUndefined();
+    const r = await parse('Fix P1 incident p2');
+    expect(r?.taskChanges.priority).toBe(2);
+    expect(r?.taskChanges.title).toBe('Fix P1 incident');
+  });
+
+  it('should match at the start and mid-title without leaving a double space', async () => {
+    expect((await parse('p2 Fix login bug'))?.taskChanges.title).toBe('Fix login bug');
+    const mid = await parse('Fix p2 login bug');
+    expect(mid?.taskChanges.title).toBe('Fix login bug');
+    expect(mid?.parsedRanges).toEqual(
+      expectedRanges('Fix p2 login bug', [['priority', 'p2']]),
+    );
+  });
+
+  [
+    'Convert mp3 files',
+    'Read chapter p10',
+    'Check p0 alerts',
+    'Ask about p4',
+    'Order p1x adapter',
+    'Fix bug p1.',
+    'Fix bug (p1)',
+    'Fix bug p1-ish',
+    'pp1 thing',
+  ].forEach((title) => {
+    it(`should leave "${title}" alone`, async () => {
+      expect(await parse(title)).toBeUndefined();
+    });
+  });
+
+  it('should not treat a tag named p1 as priority', async () => {
+    const r = await parse('Fix login bug #p1');
+    expect(r?.taskChanges.priority).toBeUndefined();
+    expect(r?.newTagTitles).toEqual(['p1']);
+  });
+
+  it('should consume every token and let the last one win', async () => {
+    const title = 'Fix p3 login bug p1';
+    const r = await parse(title);
+    expect(r?.taskChanges.priority).toBe(3);
+    expect(r?.taskChanges.title).toBe('Fix login bug');
+    expect(r?.parsedRanges).toEqual(
+      expectedRanges(title, [
+        ['priority', 'p3'],
+        ['priority', 'p1'],
+      ]),
+    );
+    // Nothing is left for the add-task effect's re-parse of the clean title
+    expect(await parse(r?.taskChanges.title as string)).toBeUndefined();
+  });
+
+  it('should strip adjacent tokens without leaving a double space', async () => {
+    const r = await parse('Fix p2 p1 login');
+    expect(r?.taskChanges.priority).toBe(3);
+    expect(r?.taskChanges.title).toBe('Fix login');
+  });
+
+  it('should combine with tag, due date, estimate and project tokens', async () => {
+    const projects = [{ id: 'work_id', title: 'Work' }] as Project[];
+    const title = 'Fix login bug #blu p1 @tomorrow 30m +Work';
+    const r = await shortSyntax({ ...TASK, title }, PRIORITY_CONFIG, ALL_TAGS, projects);
+    expect(r?.taskChanges.priority).toBe(3);
+    expect(r?.taskChanges.tagIds).toEqual(['blu_id']);
+    expect(r?.taskChanges.timeEstimate).toBe(30 * 60 * 1000);
+    expect(r?.taskChanges.dueWithTime).toBeDefined();
+    expect(r?.projectId).toBe('work_id');
+    expect(r?.taskChanges.title).toBe('Fix login bug');
+    expect(r?.parsedRanges.find((pr) => pr.type === 'priority')).toEqual({
+      type: 'priority',
+      start: title.indexOf('p1'),
+      end: title.indexOf('p1') + 2,
+    });
+  });
+
+  it('should not hand the token digit to an unparseable due date', async () => {
+    // Without the priority stage running first, the numeric-hour fallback
+    // would read the "1" of "p1" as 01:00
+    const r = await parse('Fix login bug @someday p1');
+    expect(r?.taskChanges.priority).toBe(3);
+    expect(r?.taskChanges.dueWithTime).toBeUndefined();
+  });
+
+  it('should not parse priority for issue tasks', async () => {
+    expect(await parse('p1 crash on save', { issueId: 'ISSUE-1' })).toBeUndefined();
+  });
+
+  describe('title edits (replace mode)', () => {
+    it('should set priority from an edited title, overwriting the old one', async () => {
+      const r = await parse(
+        'Fix login bug p1',
+        { priority: 1 },
+        PRIORITY_CONFIG,
+        'replace',
+      );
+      expect(r?.taskChanges.priority).toBe(3);
+      expect(r?.taskChanges.title).toBe('Fix login bug');
+    });
+
+    it('should leave the priority alone when the edited title has no token', async () => {
+      const r = await parse(
+        'Fix login bug #blu',
+        { priority: 3 },
+        PRIORITY_CONFIG,
+        'replace',
+      );
+      expect(r?.taskChanges.tagIds).toEqual(['blu_id']);
+      expect('priority' in (r?.taskChanges ?? {})).toBe(false);
+    });
+
+    it('should not parse when the flag is off', async () => {
+      expect(
+        await parse('Fix login bug p1', { priority: 1 }, OFF_CONFIG, 'replace'),
+      ).toBeUndefined();
+    });
   });
 });
 
