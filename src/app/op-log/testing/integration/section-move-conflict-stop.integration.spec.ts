@@ -319,6 +319,67 @@ describe('cross-section task move vs concurrent section edit (#10969)', () => {
     });
   });
 
+  describe('stops beside a pending edit of the same section', () => {
+    // Device A expanded S1 (by hand, or work-view.component.ts's auto-expand
+    // when a task inside it is focused), then dragged TASK S1 → S2; neither is
+    // uploaded. Device B's concurrent collapse of S1 conflicts with A's expand
+    // (two patches of one field), and `nonCommutingPendingOps` keeps every
+    // pending op of S1 in that conflict, the commuting move included. Pins a
+    // remaining stop (#10969): section ops beside a conflict keep the stop.
+    it("A's pending expand + move vs B's remote collapse of S1", async () => {
+      store.dispatch(
+        updateSection({
+          section: { id: S1, changes: { isExpanded: true } },
+        }) as PersistentAction,
+      );
+      store.dispatch(moveTaskS1toS2());
+      await writeFlush.flushPendingWrites();
+      const pending = (await opLogStore.getUnsynced()).map(({ op }) => op);
+      expect(pending.map((op) => op.actionType)).toEqual([
+        ActionType.SECTION_UPDATE,
+        ActionType.SECTION_ADD_TASK,
+      ]);
+      const remote = toRemoteOperation(
+        updateSection({
+          section: { id: S1, changes: { isExpanded: false } },
+        }) as PersistentAction,
+        pending[1].timestamp + 1,
+      );
+
+      const conflicts = await detect(remote);
+      expect(conflicts.map((c) => c.localOps.map((op) => op.actionType))).toEqual([
+        [ActionType.SECTION_UPDATE, ActionType.SECTION_ADD_TASK],
+      ]);
+
+      expectStop(await resolve(conflicts), 'local', ActionType.SECTION_ADD_TASK, 2);
+      expect((await opLogStore.getUnsynced()).map(({ op }) => op.id)).toEqual(
+        pending.map((op) => op.id),
+      );
+    });
+
+    // The same pending pair against an edit of the other section commutes.
+    it("A's pending expand of S1 + move vs B's remote collapse of S2", async () => {
+      store.dispatch(
+        updateSection({
+          section: { id: S1, changes: { isExpanded: true } },
+        }) as PersistentAction,
+      );
+      store.dispatch(moveTaskS1toS2());
+      await writeFlush.flushPendingWrites();
+      const pending = (await opLogStore.getUnsynced()).map(({ op }) => op);
+      expect(
+        await detect(
+          toRemoteOperation(
+            updateSection({
+              section: { id: S2, changes: { isExpanded: false } },
+            }) as PersistentAction,
+            pending[1].timestamp + 1,
+          ),
+        ),
+      ).toEqual([]);
+    });
+  });
+
   describe('admitted crossings (no conflict raised)', () => {
     const ADMITTED: { name: string; action: () => PersistentAction }[] = [
       {

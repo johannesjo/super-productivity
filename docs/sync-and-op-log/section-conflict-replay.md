@@ -75,7 +75,10 @@ The recognized crossings are:
   section patch writes), so a collapse or rename of either section of a
   cross-section move commutes with it (#10969). Another task's placement or
   removal in the same lists, and a section delete, still stop: two placements
-  of different tasks in one list do not commute by order; and
+  of different tasks in one list do not commute by order. So does a move
+  beside a pending edit of the same section that the remote edit conflicts
+  with (an expand, also the work view's auto-expand on focus, crossing a
+  collapse): section ops beside a conflict keep the stop; and
 - two note orders or two habit orders, or a note order and the delete of a
   note it lists (#10377, below).
 
