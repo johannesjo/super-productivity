@@ -15,7 +15,7 @@ import { IssueSyncAdapterRegistryService } from './issue-sync-adapter-registry.s
 import { computePushDecisions, issueValuesEqual } from './compute-push-decisions';
 import { FieldMapping, FieldSyncConfig } from './issue-sync.model';
 import { IssueSyncAdapter } from './issue-sync-adapter.interface';
-import { IssueProvider, IssueProviderKey } from '../issue.model';
+import { IssueProvider, IssueProviderCaldav, IssueProviderKey } from '../issue.model';
 import { IssueLog } from '../../../core/log';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CaldavSyncAdapterService } from '../providers/caldav/caldav-sync-adapter.service';
@@ -336,7 +336,8 @@ export class IssueTwoWaySyncEffects {
             map((providers) =>
               providers.find(
                 (p) =>
-                  p.defaultProjectId === task.projectId && this._hasAutoCreateEnabled(p),
+                  p.defaultProjectId === task.projectId &&
+                  this._hasAutoCreateEnabled(p, task),
               ),
             ),
             filter((provider): provider is IssueProvider => !!provider),
@@ -349,11 +350,15 @@ export class IssueTwoWaySyncEffects {
                 .getCfgOnce$(provider.id, provider.issueProviderKey)
                 .pipe(
                   concatMap((cfg) =>
-                    from(
-                      this._getTitleWithoutShortSyntax(task, isIgnoreShortSyntax),
-                    ).pipe(
-                      concatMap((title) =>
-                        from(adapter.createIssue!(title, cfg)).pipe(
+                    from(this._parseShortSyntax(task, isIgnoreShortSyntax)).pipe(
+                      // `+OtherProject` moves the task out of the bound project
+                      // right after this add; its issue would land in the wrong
+                      // tracker.
+                      filter(
+                        ({ projectId }) => !projectId || projectId === task.projectId,
+                      ),
+                      concatMap(({ title }) =>
+                        from(adapter.createIssue!(title, cfg, { taskId: task.id })).pipe(
                           map((created) => ({ ...created, title })),
                         ),
                       ),
@@ -377,7 +382,11 @@ export class IssueTwoWaySyncEffects {
                             issueId,
                             issueType: provider.issueProviderKey,
                             issueProviderId: provider.id,
-                            issueLastUpdated: Date.now(),
+                            // The provider's own freshness marker (CalDAV: an ETag
+                            // hash), or the first poll reads the new issue as
+                            // remotely updated.
+                            issueLastUpdated:
+                              adapter.getIssueLastUpdated?.(issueData) ?? Date.now(),
                             issueWasUpdated: false,
                             issueLastSyncedValues: syncValues,
                             title: titlePrefix
@@ -424,12 +433,12 @@ export class IssueTwoWaySyncEffects {
    * effect. Parse here with the same inputs so the remote issue is never
    * created with the raw tokens (#10024).
    */
-  private async _getTitleWithoutShortSyntax(
+  private async _parseShortSyntax(
     task: Task,
     isIgnoreShortSyntax?: boolean,
-  ): Promise<string> {
+  ): Promise<{ title: string; projectId?: string }> {
     if (isIgnoreShortSyntax) {
-      return task.title;
+      return { title: task.title };
     }
     const [cfg, tags, projects] = await Promise.all([
       firstValueFrom(this._store.select(selectShortSyntaxConfig)),
@@ -446,7 +455,7 @@ export class IssueTwoWaySyncEffects {
       false,
       this._dateTimeFormatService.dateInputLocale(),
     );
-    return r?.taskChanges.title ?? task.title;
+    return { title: r?.taskChanges.title ?? task.title, projectId: r?.projectId };
   }
 
   private async _pushInitialValues(
@@ -460,6 +469,8 @@ export class IssueTwoWaySyncEffects {
         changes: Record<string, unknown>,
         cfg: unknown,
       ): Promise<void>;
+      fetchIssue(issueId: string, cfg: unknown): Promise<Record<string, unknown>>;
+      getIssueLastUpdated?(issue: Record<string, unknown>): number;
     },
     cfg: IssueProvider,
     syncValues: Record<string, unknown>,
@@ -496,15 +507,28 @@ export class IssueTwoWaySyncEffects {
       // Update sync baseline and issueLastUpdated to prevent poll from
       // treating our own push as an external update
       const updatedSyncValues = { ...syncValues, ...toPush };
+      // The push changed the provider's marker (CalDAV: a new ETag); read it
+      // back so the next poll compares against our own write.
+      // A failed read-back must not turn a done create into a failed one; the
+      // poll then sees a changed marker and only pulls fields that changed.
+      const issueLastUpdated = adapter.getIssueLastUpdated
+        ? await adapter
+            .fetchIssue(issueId, cfg)
+            .then((issue) => adapter.getIssueLastUpdated!(issue))
+            .catch((err) => {
+              IssueLog.err('Reading the issue back after the initial push failed', err);
+              return Date.now();
+            })
+        : Date.now();
       this._trackSyncOriginatedTask(task.id);
       this._taskService.update(task.id, {
         issueLastSyncedValues: updatedSyncValues,
-        issueLastUpdated: Date.now(),
+        issueLastUpdated,
       });
     }
   }
 
-  private _hasAutoCreateEnabled(provider: IssueProvider): boolean {
+  private _hasAutoCreateEnabled(provider: IssueProvider, task: Task): boolean {
     // Agenda-view providers (e.g. Google Calendar) should never auto-create issues
     if (this._pluginRegistry.getUseAgendaView(provider.issueProviderKey)) {
       return false;
@@ -518,6 +542,14 @@ export class IssueTwoWaySyncEffects {
     if (provider.issueProviderKey === 'PLAINSPACE') {
       const ps = provider as { spaceId?: string | null; token?: string | null };
       return !!ps.spaceId && !!ps.token;
+    }
+    // CalDAV writes to the user's real calendar, so it needs its own opt-in.
+    // Repeat instances stay local: each one would otherwise add a VTODO.
+    if (provider.issueProviderKey === 'CALDAV') {
+      return (
+        !!(provider as IssueProviderCaldav).twoWaySync?.createOnServer &&
+        !task.repeatCfgId
+      );
     }
     // Check for plugin providers (both plugin:* and migrated keys like GITHUB)
     const pluginCfg = (provider as { pluginConfig?: Record<string, unknown> })

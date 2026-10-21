@@ -1,5 +1,6 @@
 import { OperationLogEntry, VectorClock } from '../../core/operation.types';
 import { compareVectorClocks } from '../../../core/util/vector-clock';
+import { FILE_BASED_SYNC_CONSTANTS } from './file-based-sync.types';
 
 /** The fields of a downloaded sync/ops file that gap detection reads. */
 export interface GapDetectionRemote {
@@ -9,6 +10,12 @@ export interface GapDetectionRemote {
   clientId: string;
   recentOps: readonly unknown[];
   oldestOpSyncVersion?: number;
+  /**
+   * #10973: the writer certifies that recentOps holds every op of batch
+   * oldestOpSyncVersion. Written only by clients that trim at batch boundaries;
+   * older writers drop it, so absence proves nothing.
+   */
+  oldestBatchComplete?: boolean;
 }
 
 export interface GapDetectionInput {
@@ -30,6 +37,12 @@ export interface GapDetectionInput {
    * single-file format requires `state`; a split ops file always references one.
    */
   hasSnapshot: boolean;
+  /**
+   * #10973: whether recentOps may have been trimmed, so an uncertified oldest
+   * batch can be missing its head. See {@link isSingleFileBufferPossiblyTrimmed}
+   * and {@link isSplitBufferPossiblyTrimmed}.
+   */
+  isPossiblyTrimmed: boolean;
 }
 
 export interface GapDetectionResult {
@@ -96,6 +109,7 @@ export const detectDownloadGap = ({
   lastSeenClock,
   localClock,
   hasSnapshot,
+  isPossiblyTrimmed,
 }: GapDetectionInput): GapDetectionResult => {
   // Detect syncVersion reset (e.g., another client uploaded a snapshot).
   // When syncVersion resets to a lower value, we need to signal this to trigger
@@ -166,6 +180,22 @@ export const detectDownloadGap = ({
     remote.oldestOpSyncVersion !== undefined &&
     remote.oldestOpSyncVersion > sinceSeq + 1;
 
+  // #10973: one upload is one batch under one syncVersion, but writers before
+  // #10973 trimmed per op, so a cut could land INSIDE batch sinceSeq+1. Its
+  // tail then still reads as contiguous (oldestOpSyncVersion === sinceSeq + 1)
+  // while the head this client needs is gone, and the client's clock still
+  // advances past it, so nothing repairs it later. Writers since #10973 cut only
+  // at batch boundaries and certify that with `oldestBatchComplete`; without
+  // that marker, a buffer that may have been trimmed cannot prove the batch is
+  // whole, so fall back to the snapshot. Unlike the clause SPAP-33 removed, this
+  // only ADDS a gap at the one boundary version and never suppresses one.
+  const uncertifiedBoundaryBatch =
+    sinceSeq > 0 &&
+    remote.oldestOpSyncVersion !== undefined &&
+    remote.oldestOpSyncVersion === sinceSeq + 1 &&
+    remote.oldestBatchComplete !== true &&
+    isPossiblyTrimmed;
+
   // #9170: a tail op uploaded after a USE_LOCAL replacement can walk syncVersion
   // back up to (or past) our expected value and repopulate recentOps, masking
   // all three checks above. Every normal writer merges the file's clock before
@@ -196,11 +226,96 @@ export const detectDownloadGap = ({
       : partialTrimGap
         ? `partial trimming (oldestOpSyncVersion=${remote.oldestOpSyncVersion}, ` +
           `sinceSeq=${sinceSeq}, recentOps=${remote.recentOps.length})`
-        : lineageBroken
-          ? `lineage break (remote vector clock ${clockVsLastSeen} last-seen)`
-          : unseenSnapshotBase
-            ? 'snapshot replacement with an unseen causal base'
-            : undefined;
+        : uncertifiedBoundaryBatch
+          ? `possibly partial oldest batch (oldestOpSyncVersion=${remote.oldestOpSyncVersion}, ` +
+            `sinceSeq=${sinceSeq}, recentOps=${remote.recentOps.length}, uncertified)`
+          : lineageBroken
+            ? `lineage break (remote vector clock ${clockVsLastSeen} last-seen)`
+            : unseenSnapshotBase
+              ? 'snapshot replacement with an unseen causal base'
+              : undefined;
 
   return { needsGapDetection: reason !== undefined, reason, isCosmeticReset };
+};
+
+/**
+ * #10973: single-file writers trim to exactly MAX_RECENT_OPS, so a shorter
+ * buffer was never trimmed by a writer at the current cap.
+ */
+export const isSingleFileBufferPossiblyTrimmed = (remote: {
+  recentOps: readonly unknown[];
+}): boolean => remote.recentOps.length >= FILE_BASED_SYNC_CONSTANTS.MAX_RECENT_OPS;
+
+/**
+ * #10973: split writers trim only while compacting, and the snapshot written by
+ * that compaction carries its syncVersion. Batches newer than the snapshot were
+ * appended afterwards and never cut, so only an oldest batch at or below the
+ * snapshot can be partial.
+ */
+export const isSplitBufferPossiblyTrimmed = (remote: {
+  oldestOpSyncVersion?: number;
+  snapshotRef: { syncVersion: number };
+}): boolean =>
+  remote.oldestOpSyncVersion !== undefined &&
+  remote.oldestOpSyncVersion <= remote.snapshotRef.syncVersion;
+
+/** The retained-ops fields of a sync/ops file envelope. */
+export interface RecentOpsFields<T extends { sv?: number }> {
+  recentOps: T[];
+  /** Ops without sv (old sync files) yield undefined: gap checks stay off. */
+  oldestOpSyncVersion?: number;
+  oldestBatchComplete?: true;
+}
+
+/**
+ * #10973: appends a batch to the previous file's retained ops and trims the
+ * buffer to at most `maxOps`, cutting only at a batch (`sv`) boundary. A cut
+ * inside a batch would leave its tail looking contiguous to a client whose
+ * cursor sits right before it (see detectDownloadGap). Dropping the rest of
+ * that batch instead makes such a client see
+ * `oldestOpSyncVersion > sinceSeq + 1`, which every released reader already
+ * treats as a gap. A newest batch larger than `maxOps` is kept whole (the buffer
+ * then exceeds the cap until the next upload drops it): an empty buffer would
+ * read as a snapshot replacement on every later download, and released readers
+ * already return an over-cap buffer whole.
+ *
+ * `oldestBatchComplete` is set when the result provably starts at the start of
+ * its oldest batch: this write cut at a boundary, the buffer was empty before,
+ * or the previous writer already certified it.
+ */
+export const appendRecentOpsAtBatchBoundary = <T extends { sv?: number }>(
+  previous:
+    | { recentOps?: readonly T[]; oldestBatchComplete?: boolean }
+    | null
+    | undefined,
+  newOps: readonly T[],
+  maxOps: number,
+): { fields: RecentOpsFields<T>; trimmedCount: number } => {
+  const existingOps = previous?.recentOps ?? [];
+  const combinedOps = [...existingOps, ...newOps];
+  let start = Math.max(0, combinedOps.length - maxOps);
+  if (start > 0) {
+    const cutSyncVersion = combinedOps[start - 1].sv;
+    while (start < combinedOps.length && combinedOps[start].sv === cutSyncVersion) {
+      start++;
+    }
+    // The cut fell inside the newest batch: keep that batch whole instead.
+    if (start === combinedOps.length) {
+      start--;
+      while (start > 0 && combinedOps[start - 1].sv === combinedOps[start].sv) {
+        start--;
+      }
+    }
+  }
+  const recentOps = combinedOps.slice(start);
+  const isComplete =
+    start > 0 || existingOps.length === 0 || previous?.oldestBatchComplete === true;
+  return {
+    fields: {
+      recentOps,
+      oldestOpSyncVersion: recentOps[0]?.sv,
+      ...(isComplete ? { oldestBatchComplete: true as const } : {}),
+    },
+    trimmedCount: start,
+  };
 };

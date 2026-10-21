@@ -18,7 +18,7 @@ describe('CaldavSyncAdapterService.deleteIssue', () => {
   let client: jasmine.SpyObj<CaldavClientService>;
 
   beforeEach(() => {
-    client = jasmine.createSpyObj('CaldavClientService', ['deleteTask$']);
+    client = jasmine.createSpyObj('CaldavClientService', ['deleteTask$', 'createTask$']);
     client.deleteTask$.and.returnValue(of(undefined));
     TestBed.configureTestingModule({
       providers: [
@@ -53,5 +53,47 @@ describe('CaldavSyncAdapterService.deleteIssue', () => {
     await adapter.deleteIssue('uid-1', cfg);
 
     expect(client.deleteTask$).toHaveBeenCalledOnceWith(cfg, 'uid-1');
+  });
+});
+
+describe('CaldavSyncAdapterService.createIssue', () => {
+  let adapter: CaldavSyncAdapterService;
+  let client: jasmine.SpyObj<CaldavClientService>;
+
+  beforeEach(() => {
+    client = jasmine.createSpyObj('CaldavClientService', ['createTask$']);
+    client.createTask$.and.returnValue(
+      of({
+        id: 'sp-todo-task-1@super-productivity',
+        completed: false,
+        item_url: '',
+        summary: 'Buy milk',
+        labels: [],
+        etag_hash: 5,
+      }),
+    );
+    TestBed.configureTestingModule({
+      providers: [
+        CaldavSyncAdapterService,
+        { provide: CaldavClientService, useValue: client },
+      ],
+    });
+    adapter = TestBed.inject(CaldavSyncAdapterService);
+  });
+
+  it('derives the UID from the task id so a repeated create finds the same VTODO', async () => {
+    const created = await adapter.createIssue('Buy milk', BASE_CFG, { taskId: 'task-1' });
+
+    expect(client.createTask$).toHaveBeenCalledOnceWith(BASE_CFG, {
+      uid: 'sp-todo-task-1@super-productivity',
+      summary: 'Buy milk',
+    });
+    expect(created.issueId).toBe('sp-todo-task-1@super-productivity');
+    expect(created.issueData['etag_hash']).toBe(5);
+  });
+
+  it('refuses to create without a task id', async () => {
+    await expectAsync(adapter.createIssue('Buy milk', BASE_CFG)).toBeRejected();
+    expect(client.createTask$).not.toHaveBeenCalled();
   });
 });

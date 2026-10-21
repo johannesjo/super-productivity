@@ -884,6 +884,19 @@ IDs deduplicate ops still in the local log, while vector clocks carry causality.
 3. **Gap:** a version reset, snapshot replacement, or trimmed operation needed by
    this client signals a gap. The caller retries from seq 0 and installs the
    causal baseline instead of pretending the remaining buffer is complete.
+   One upload is one batch under one `syncVersion`, so trimming cuts only at a
+   batch boundary: a partial oldest batch at `sinceSeq + 1` would look
+   contiguous to a client whose cursor sits just before it, and that client
+   would never receive the batch's head (#10973). Writers since #10973 drop the
+   rest of a batch the cap would cut into (a newest batch larger than the cap
+   stays whole until the next upload drops it) and set the optional
+   envelope field `oldestBatchComplete`. Released writers trimmed per op and
+   omit the field, so a reader treats an uncertified oldest batch at
+   `sinceSeq + 1` as a gap when the buffer may have been trimmed: a v2 buffer
+   at `MAX_RECENT_OPS`, or a v3 batch at or below the compaction snapshot's
+   `syncVersion`. Released readers need no change for fixed writers' files: a
+   dropped batch shows as `oldestOpSyncVersion > sinceSeq + 1`. Buffers trimmed
+   by pre-v18.14 writers (cap 500) are not detected.
    A replacement's tail ops can advance the watermark back past this client's
    and refill the buffer, hiding all three. So the file's vector clock must
    also equal or dominate the last-seen one, which is persisted and also

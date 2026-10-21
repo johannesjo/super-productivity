@@ -137,6 +137,28 @@ export const setRecurQuickSetting = async (
   await option.click();
 };
 
+/**
+ * Set the "Don't let overdue instances pile up" (skipOverdue) checkbox in the
+ * open recurring-config dialog's Advanced panel.
+ */
+export const setRecurSkipOverdue = async (
+  page: Page,
+  isChecked: boolean,
+): Promise<void> => {
+  const dialog = page.locator(DIALOG_CONTAINER);
+  const checkbox = dialog.getByRole('checkbox', {
+    name: /overdue instances pile up/i,
+  });
+  if (!(await checkbox.isVisible())) {
+    await dialog
+      .locator('.collapsible-header', { hasText: 'Advanced configuration' })
+      .click();
+  }
+  await expect(checkbox).toBeVisible({ timeout: 5000 });
+  await checkbox.setChecked(isChecked);
+  await expect(checkbox).toBeChecked({ checked: isChecked });
+};
+
 /** Click Save in the recurring-config dialog and wait for it to close. */
 export const saveRecurDialog = async (page: Page): Promise<void> => {
   const dialog = page.locator(DIALOG_CONTAINER);

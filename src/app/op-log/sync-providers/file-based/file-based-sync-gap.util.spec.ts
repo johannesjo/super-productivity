@@ -1,9 +1,12 @@
 import { OperationLogEntry } from '../../core/operation.types';
 import {
+  appendRecentOpsAtBatchBoundary,
   detectDownloadGap,
   GapDetectionInput,
   GapDetectionRemote,
   getOpLogBaselineClock,
+  isSingleFileBufferPossiblyTrimmed,
+  isSplitBufferPossiblyTrimmed,
   OpLogClockSource,
 } from './file-based-sync-gap.util';
 
@@ -30,6 +33,7 @@ describe('detectDownloadGap', () => {
     previousExpectedVersion: 3,
     lastSeenClock: LAST_SEEN,
     hasSnapshot: true,
+    isPossiblyTrimmed: false,
     ...overrides,
   });
 
@@ -99,6 +103,206 @@ describe('detectDownloadGap', () => {
 
       expect(result.needsGapDetection).toBeFalse();
     });
+  });
+});
+
+describe('detectDownloadGap: oldest batch at sinceSeq+1 (#10973)', () => {
+  // Reader B is at cursor 3; the oldest retained op belongs to batch 4.
+  const input = (
+    remote: Partial<GapDetectionRemote>,
+    overrides: Partial<GapDetectionInput> = {},
+  ): GapDetectionInput => ({
+    remote: {
+      syncVersion: 9,
+      vectorClock: { clientA: 9 },
+      clientId: 'client-a',
+      recentOps: [{}, {}],
+      oldestOpSyncVersion: 4,
+      ...remote,
+    },
+    sinceSeq: 3,
+    excludeClient: 'client-b',
+    previousExpectedVersion: 3,
+    lastSeenClock: { clientA: 3 },
+    hasSnapshot: true,
+    isPossiblyTrimmed: true,
+    ...overrides,
+  });
+
+  it('flags an uncertified oldest batch in a possibly trimmed buffer', () => {
+    // An older writer cut per op: batch 4 may have lost its head.
+    const result = detectDownloadGap(input({}));
+
+    expect(result.needsGapDetection).toBeTrue();
+    expect(result.reason).toContain('possibly partial oldest batch');
+  });
+
+  it('trusts a writer that certified the oldest batch complete', () => {
+    const result = detectDownloadGap(input({ oldestBatchComplete: true }));
+
+    expect(result.needsGapDetection).toBeFalse();
+  });
+
+  it('does not flag a buffer that was never trimmed', () => {
+    const result = detectDownloadGap(input({}, { isPossiblyTrimmed: false }));
+
+    expect(result.needsGapDetection).toBeFalse();
+  });
+
+  it('does not flag a reader that already holds the oldest batch', () => {
+    const result = detectDownloadGap(
+      input(
+        {},
+        { sinceSeq: 4, previousExpectedVersion: 4, lastSeenClock: { clientA: 4 } },
+      ),
+    );
+
+    expect(result.needsGapDetection).toBeFalse();
+  });
+
+  it('does not flag a seq-0 download', () => {
+    const result = detectDownloadGap(
+      input({}, { sinceSeq: 0, previousExpectedVersion: 0, lastSeenClock: undefined }),
+    );
+
+    expect(result.needsGapDetection).toBeFalse();
+  });
+
+  it('never suppresses the proven trim gap, certified or not (SPAP-33)', () => {
+    for (const oldestBatchComplete of [true, undefined]) {
+      for (const isPossiblyTrimmed of [true, false]) {
+        const result = detectDownloadGap(
+          input({ oldestOpSyncVersion: 6, oldestBatchComplete }, { isPossiblyTrimmed }),
+        );
+        expect(result.needsGapDetection).toBeTrue();
+        expect(result.reason).toContain('partial trimming');
+      }
+    }
+  });
+});
+
+describe('possibly trimmed buffer heuristics (#10973)', () => {
+  it('single file: only a buffer at the cap can have been trimmed', () => {
+    const ops = (n: number): { recentOps: unknown[] } => ({
+      recentOps: new Array(n).fill({}),
+    });
+    expect(isSingleFileBufferPossiblyTrimmed(ops(2000))).toBeTrue();
+    expect(isSingleFileBufferPossiblyTrimmed(ops(1999))).toBeFalse();
+  });
+
+  it('split: only a batch at or below the compaction snapshot can have been cut', () => {
+    const file = (
+      oldestOpSyncVersion: number | undefined,
+    ): Parameters<typeof isSplitBufferPossiblyTrimmed>[0] => ({
+      oldestOpSyncVersion,
+      snapshotRef: { syncVersion: 7 },
+    });
+    expect(isSplitBufferPossiblyTrimmed(file(5))).toBeTrue();
+    expect(isSplitBufferPossiblyTrimmed(file(7))).toBeTrue();
+    expect(isSplitBufferPossiblyTrimmed(file(8))).toBeFalse();
+    expect(isSplitBufferPossiblyTrimmed(file(undefined))).toBeFalse();
+  });
+});
+
+describe('appendRecentOpsAtBatchBoundary (#10973)', () => {
+  type Op = { sv?: number };
+  const batch = (sv: number | undefined, count: number): Op[] =>
+    Array.from({ length: count }, () => ({ sv }));
+  const svs = (ops: Op[]): (number | undefined)[] => ops.map((op) => op.sv);
+  const prev = (
+    recentOps: Op[],
+    oldestBatchComplete?: boolean,
+  ): { recentOps: Op[]; oldestBatchComplete?: boolean } => ({
+    recentOps,
+    oldestBatchComplete,
+  });
+
+  it('keeps everything under the cap and inherits the certification', () => {
+    const existing = [...batch(1, 2), ...batch(2, 2)];
+    for (const was of [true, false, undefined]) {
+      const { fields, trimmedCount } = appendRecentOpsAtBatchBoundary(
+        prev(existing, was),
+        batch(3, 1),
+        10,
+      );
+      expect(svs(fields.recentOps)).toEqual([1, 1, 2, 2, 3]);
+      expect(fields.oldestOpSyncVersion).toBe(1);
+      expect(fields.oldestBatchComplete).toBe(was === true ? true : undefined);
+      expect(trimmedCount).toBe(0);
+    }
+  });
+
+  it('certifies a buffer that starts with this batch', () => {
+    for (const previous of [null, undefined, prev([])]) {
+      const { fields } = appendRecentOpsAtBatchBoundary(previous, batch(5, 3), 10);
+      expect(fields.recentOps.length).toBe(3);
+      expect(fields.oldestOpSyncVersion).toBe(5);
+      expect(fields.oldestBatchComplete).toBeTrue();
+    }
+  });
+
+  it('drops the rest of a batch the cap would cut into', () => {
+    // A per-op slice(-5) would keep [2, 2, 3, 3, 3]: half of batch 2.
+    const existing = [...batch(1, 1), ...batch(2, 4)];
+    const { fields, trimmedCount } = appendRecentOpsAtBatchBoundary(
+      prev(existing),
+      batch(3, 3),
+      5,
+    );
+
+    expect(svs(fields.recentOps)).toEqual([3, 3, 3]);
+    expect(fields.oldestOpSyncVersion).toBe(3);
+    expect(fields.oldestBatchComplete).toBeTrue();
+    expect(trimmedCount).toBe(5);
+  });
+
+  it('keeps the oldest batch when the cap falls exactly on its start', () => {
+    const existing = [...batch(1, 2), ...batch(2, 2)];
+    const { fields } = appendRecentOpsAtBatchBoundary(prev(existing), batch(3, 3), 5);
+
+    expect(svs(fields.recentOps)).toEqual([2, 2, 3, 3, 3]);
+    expect(fields.oldestBatchComplete).toBeTrue();
+  });
+
+  it('keeps a new batch larger than the cap whole', () => {
+    const { fields, trimmedCount } = appendRecentOpsAtBatchBoundary(
+      prev(batch(1, 2), true),
+      batch(2, 6),
+      5,
+    );
+
+    expect(svs(fields.recentOps)).toEqual([2, 2, 2, 2, 2, 2]);
+    expect(fields.oldestOpSyncVersion).toBe(2);
+    expect(fields.oldestBatchComplete).toBeTrue();
+    expect(trimmedCount).toBe(2);
+  });
+
+  it('drops an over-cap batch once a newer batch arrives', () => {
+    const { fields } = appendRecentOpsAtBatchBoundary(
+      prev([...batch(1, 1), ...batch(2, 6)], true),
+      batch(3, 2),
+      5,
+    );
+
+    expect(svs(fields.recentOps)).toEqual([3, 3]);
+    expect(fields.oldestBatchComplete).toBeTrue();
+  });
+
+  it('treats legacy ops without sv as one batch', () => {
+    const existing = [...batch(undefined, 3), ...batch(4, 1)];
+    const { fields } = appendRecentOpsAtBatchBoundary(prev(existing), batch(5, 2), 4);
+
+    expect(svs(fields.recentOps)).toEqual([4, 5, 5]);
+  });
+
+  it('does not mutate its inputs', () => {
+    const existing = batch(1, 3);
+    const added = batch(2, 3);
+
+    appendRecentOpsAtBatchBoundary(prev(existing), added, 4);
+
+    expect(existing.length).toBe(3);
+    expect(added.length).toBe(3);
   });
 });
 
