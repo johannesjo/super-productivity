@@ -36,9 +36,11 @@ mat-dialog-actions {
   }
 }
 
+// One width for every preset and with Options open, so nothing reflows.
 .form-wrapper {
+  width: 620px;
   min-width: 280px;
-  max-width: 620px;
+  max-width: 100%;
 }
 
 :host collapsible {
@@ -55,18 +57,18 @@ mat-dialog-actions {
 :host::ng-deep .repeat-config-container {
   display: block;
   border-radius: var(--card-border-radius);
-  margin-left: var(--s2);
-  margin-bottom: var(--s5);
+  margin-inline-start: var(--s2);
+  margin-bottom: var(--s2);
 }
 
+// One row of seven day chips, also on a phone.
 :host::ng-deep .weekdays {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0 var(--s);
+  gap: var(--s-half);
+  margin-bottom: var(--s2);
 
   > * {
-    width: auto;
-    max-width: 48%;
+    flex: 1 1 0;
     min-width: 0;
   }
 }
@@ -91,18 +93,36 @@ mat-dialog-actions {
   > * {
     width: 100%;
     min-width: 0;
-    margin-left: var(--s2);
+    margin-inline-start: var(--s2);
 
     &:first-child {
-      margin-left: 0;
+      margin-inline-start: 0;
       width: auto;
     }
   }
 }
 
-.planned-start-date-field-wrapper {
-  margin-bottom: var(--s2);
-  width: 100%;
+// Start and end side by side; they stack on narrow screens.
+.start-end-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0 var(--s2);
+
+  > * {
+    flex: 1 1 240px;
+    min-width: 0;
+  }
+}
+
+.planned-date-val {
+  cursor: pointer;
+}
+
+// Reminder badge and button side by side in one suffix slot.
+.start-date-suffix {
+  display: inline-flex;
+  align-items: center;
 }
 
 .next-occurrence {
@@ -123,33 +143,29 @@ mat-dialog-actions {
   }
 }
 
-.planned-start-date-btn {
-  width: 100%;
-  text-align: start !important;
-  justify-content: start !important;
-  height: 48px !important;
-  padding: 0 var(--s2) !important;
-}
-
-.planned-start-date-btn-content {
-  display: flex;
-  align-items: center;
-  gap: var(--s);
-  width: 100%;
-  text-align: start;
-}
-
-.planned-date-label {
-  font-weight: bold;
-}
-
-.planned-date-val {
-  flex-grow: 1;
-}
-
 .reminder-badge {
   color: var(--color-warning);
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+// The rule in one sentence, below the schedule controls.
+.rule-summary {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--s);
+  margin-bottom: var(--s2);
+}
+
+.rule-summary-text {
+  font-weight: var(--font-weight-medium);
+}
+
+.rule-summary-dates {
+  color: var(--text-color-muted);
 }

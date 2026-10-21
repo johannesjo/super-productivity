@@ -136,6 +136,28 @@ describe('CollapsibleComponent', () => {
     expect(ev.defaultPrevented).toBe(false);
   });
 
+  it('makes every header a keyboard button, groups or not', () => {
+    headerElements.forEach((header) => {
+      expect(header.getAttribute('tabindex')).toBe('0');
+      expect(header.getAttribute('role')).toBe('button');
+      expect(header.getAttribute('aria-expanded')).toBe('false');
+    });
+  });
+
+  it('should toggle a non-group collapsible with Enter and Space', () => {
+    const header = headerElements[2];
+    const collapsible = collapsibleInstances[2];
+
+    header.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    fixture.detectChanges();
+    expect(collapsible.isExpanded).toBe(true);
+    expect(header.getAttribute('aria-expanded')).toBe('true');
+
+    header.dispatchEvent(new KeyboardEvent('keydown', { key: ' ', bubbles: true }));
+    fixture.detectChanges();
+    expect(collapsible.isExpanded).toBe(false);
+  });
+
   it('should not toggle a non-group collapsible with Arrow keys', () => {
     const nonGroupHeader = headerElements[2];
     const nonGroupCollapsible = collapsibleInstances[2];

@@ -138,25 +138,27 @@ export const setRecurQuickSetting = async (
 };
 
 /**
- * Set the "Don't let overdue instances pile up" (skipOverdue) checkbox in the
- * open recurring-config dialog's Advanced panel.
+ * Set `skipOverdue` through "If you fall behind" in the dialog's Options:
+ * "Only keep the latest" turns it on, "Keep every copy" off (neither waits).
+ * Opens Options first when it is collapsed.
  */
 export const setRecurSkipOverdue = async (
   page: Page,
   isChecked: boolean,
 ): Promise<void> => {
   const dialog = page.locator(DIALOG_CONTAINER);
-  const checkbox = dialog.getByRole('checkbox', {
-    name: /overdue instances pile up/i,
-  });
-  if (!(await checkbox.isVisible())) {
-    await dialog
-      .locator('.collapsible-header', { hasText: 'Advanced configuration' })
-      .click();
+  const fallBehind = dialog
+    .locator('mat-form-field')
+    .filter({ hasText: /If you fall behind/i });
+  if (!(await fallBehind.isVisible())) {
+    await dialog.locator('.collapsible-header', { hasText: 'Options' }).click();
   }
-  await expect(checkbox).toBeVisible({ timeout: 5000 });
-  await checkbox.setChecked(isChecked);
-  await expect(checkbox).toBeChecked({ checked: isChecked });
+  await expect(fallBehind).toBeVisible({ timeout: 5000 });
+  const choice = isChecked ? /Only keep the latest/i : /Keep every copy/i;
+  await fallBehind.locator('mat-select').click();
+  await page.locator('mat-option').filter({ hasText: choice }).click();
+  await expect(page.locator('mat-option')).toHaveCount(0, { timeout: 5000 });
+  await expect(fallBehind).toContainText(choice);
 };
 
 /** Click Save in the recurring-config dialog and wait for it to close. */
