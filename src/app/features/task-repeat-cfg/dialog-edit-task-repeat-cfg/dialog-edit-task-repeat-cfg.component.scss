@@ -56,17 +56,16 @@ mat-dialog-actions {
   display: block;
   border-radius: var(--card-border-radius);
   margin-left: var(--s2);
-  margin-bottom: var(--s5);
+  margin-bottom: var(--s2);
 }
 
+// Four to a row on desktop, two on a phone, instead of two big tiles a row.
 :host::ng-deep .weekdays {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   gap: 0 var(--s);
 
   > * {
-    width: auto;
-    max-width: 48%;
     min-width: 0;
   }
 }

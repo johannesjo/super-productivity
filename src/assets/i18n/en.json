@@ -2239,7 +2239,7 @@
         "Q_EVERY_X_WEEKS": "Every {{count}} weeks on {{weekdayStr}}",
         "Q_EVERY_X_YEARS": "Every {{count}} years",
         "Q_MONDAY_TO_FRIDAY": "Every Monday through Friday",
-        "Q_MONTHLY_CURRENT_DATE": "Every month on the day {{dateDayStr}}",
+        "Q_MONTHLY_CURRENT_DATE": "Every month on day {{dateDayStr}}",
         "Q_MONTHLY_FIRST_DAY": "Every month on the first day",
         "Q_MONTHLY_LAST_DAY": "Every month on the last day",
         "Q_MONTHLY_NTH_WEEKDAY": "Every month on the {{ordinalStr}} {{weekdayStr}}",
