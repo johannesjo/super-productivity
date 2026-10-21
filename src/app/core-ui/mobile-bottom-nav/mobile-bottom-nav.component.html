@@ -1,7 +1,6 @@
 <nav
   class="mobile-bottom-nav"
   [class.entrance]="isEntrance()"
-  (animationend)="onEntranceAnimationEnd($event)"
 >
   <button
     mat-button
@@ -16,7 +15,7 @@
   @if (isPlannerEnabled()) {
     <button
       mat-button
-      class="nav-button"
+      class="nav-button tour-planner"
       routerLink="/planner"
       routerLinkActive="active"
       [attr.aria-label]="T.MH.PLANNER | translate"
@@ -28,7 +27,6 @@
     mat-fab
     class="add-task-button"
     [class.smaller]="hasProjectBacklog()"
-    [class.hide-for-native]="isEntranceAnimating()"
     color="primary"
     (click)="showAddTaskBar()"
     [attr.aria-label]="T.GCF.KEYBOARD.GLOBAL_ADD_TASK | translate"
@@ -99,7 +97,7 @@
 
   <button
     mat-button
-    class="nav-button"
+    class="nav-button tour-navMenuBtn"
     (click)="toggleMobileNav()"
     [attr.aria-label]="T.MH.PROJECT_MENU | translate"
   >
@@ -118,6 +116,7 @@
       [class.active]="activePluginId() === button.pluginId && isShowPluginPanel()"
     >
       <plugin-icon
+        matMenuItemIcon
         [pluginId]="button.pluginId"
         [fallbackIcon]="button.icon || 'extension'"
       ></plugin-icon>

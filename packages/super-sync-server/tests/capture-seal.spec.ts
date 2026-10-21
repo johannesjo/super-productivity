@@ -158,4 +158,85 @@ describe('validateCreateTaskArgs', () => {
       typeof validateCreateTaskArgs({ title: 'a', notes: 'x'.repeat(8 * 1024) }),
     ).toBe('object');
   });
+
+  it('keeps a due day and an optional time', () => {
+    expect(validateCreateTaskArgs({ title: 'a', dueDate: '2026-10-16' })).toEqual({
+      title: 'a',
+      dueDate: '2026-10-16',
+    });
+    expect(
+      validateCreateTaskArgs({
+        title: 'a',
+        notes: '',
+        dueDate: '2028-02-29',
+        dueTime: '09:30',
+      }),
+    ).toEqual({ title: 'a', dueDate: '2028-02-29', dueTime: '09:30' });
+  });
+
+  it('keeps a repeat in canonical form', () => {
+    expect(
+      validateCreateTaskArgs({
+        title: 'a',
+        repeat: { cycle: 'weekly', every: 2, weekdays: ['fri', 'mon'] },
+      }),
+    ).toEqual({
+      title: 'a',
+      repeat: { cycle: 'weekly', every: 2, weekdays: ['mon', 'fri'] },
+    });
+    expect(
+      validateCreateTaskArgs({
+        title: 'a',
+        dueDate: '2026-10-16',
+        dueTime: '09:30',
+        repeat: { cycle: 'monthly', every: 1 },
+      }),
+    ).toEqual({
+      title: 'a',
+      dueDate: '2026-10-16',
+      dueTime: '09:30',
+      repeat: { cycle: 'monthly' },
+    });
+  });
+
+  it('refuses a bad repeat', () => {
+    for (const repeat of [
+      'daily',
+      null,
+      [],
+      {},
+      { cycle: 'hourly' },
+      { cycle: 'daily', every: 0 },
+      { cycle: 'daily', every: 100 },
+      { cycle: 'daily', every: 1.5 },
+      { cycle: 'daily', every: '2' },
+      { cycle: 'daily', weekdays: ['mon'] },
+      { cycle: 'weekly', weekdays: [] },
+      { cycle: 'weekly', weekdays: ['monday'] },
+      { cycle: 'weekly', weekdays: ['mon', 'mon'] },
+      { cycle: 'weekly', interval: 2 },
+    ]) {
+      expect(typeof validateCreateTaskArgs({ title: 'a', repeat })).toBe('string');
+    }
+  });
+
+  it('refuses a bad due day or time', () => {
+    for (const due of [
+      { dueTime: '09:30' },
+      { dueDate: '2026-02-30' },
+      { dueDate: '2026-13-01' },
+      { dueDate: '0099-12-31' },
+      { dueDate: '0500-06-15' },
+      { dueDate: '0999-12-31' },
+      { dueDate: '26-10-16' },
+      { dueDate: '2026-10-16T09:30' },
+      { dueDate: 20261016 },
+      { dueDate: '2026-10-16', dueTime: '24:00' },
+      { dueDate: '2026-10-16', dueTime: '9:30' },
+      { dueDate: '2026-10-16', dueTime: '09:30:00' },
+      { dueDate: '2026-10-16', dueTime: 930 },
+    ]) {
+      expect(typeof validateCreateTaskArgs({ title: 'a', ...due })).toBe('string');
+    }
+  });
 });

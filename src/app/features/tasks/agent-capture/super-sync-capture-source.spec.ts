@@ -10,7 +10,10 @@ import {
   CaptureUnsupportedError,
   createSuperSyncCaptureSource,
   neutralizeAutoloadMedia,
+  toCaptureTask,
 } from './super-sync-capture-source';
+import { TaskReminderOptionId } from '../task.model';
+import { addTaskRepeatCfgToTask } from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
 
 /**
  * The key and item are the vector pinned in sync-core's capture-open.spec.ts
@@ -52,6 +55,8 @@ describe('createSuperSyncCaptureSource', () => {
       key: KEY,
       deviceId: 'dev-1',
       defaultEstimate: 0,
+      defaultRemindOption: TaskReminderOptionId.AtStart,
+      todayStr: '2026-10-15',
       assertUnchanged: (context) => {
         if (!isCurrent) throw new Error(`changed at ${context}`);
       },
@@ -101,6 +106,130 @@ describe('createSuperSyncCaptureSource', () => {
       typeof TaskSharedActions.addTask
     >;
     expect(action.task.timeEstimate).toBe(1500);
+  });
+
+  it('schedules a day without a time as dueDay, in the addTask itself', async () => {
+    provider.claimCaptures.and.resolveTo(ok());
+    const src = source();
+    await src.getPending();
+    src.createTask({
+      id: 'task-1',
+      task: { title: 'Dentist', createdAt: 1, dueDay: '2026-10-16' },
+    });
+    const action = dispatch.calls.mostRecent().args[0] as ReturnType<
+      typeof TaskSharedActions.addTask
+    >;
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(action.task.dueDay).toBe('2026-10-16');
+    expect(action.task.dueWithTime).toBeUndefined();
+    expect(action.task.remindAt).toBeUndefined();
+  });
+
+  it('schedules a day and time in local time with the default reminder', async () => {
+    provider.claimCaptures.and.resolveTo(ok());
+    run = {
+      ...(run as AgentCaptureRun),
+      defaultRemindOption: TaskReminderOptionId.m10,
+    };
+    const src = source();
+    await src.getPending();
+    src.createTask({
+      id: 'task-1',
+      task: { title: 'Dentist', createdAt: 1, dueDay: '2026-10-16', dueTime: [9, 30] },
+    });
+    const action = dispatch.calls.mostRecent().args[0] as ReturnType<
+      typeof TaskSharedActions.addTask
+    >;
+    const due = new Date(2026, 9, 16, 9, 30).getTime();
+    const tenMinutes = 10 * 60 * 1000;
+    expect(action.task).toEqual(
+      jasmine.objectContaining({
+        dueDay: undefined,
+        dueWithTime: due,
+        hasPlannedTime: true,
+        remindAt: due - tenMinutes,
+      }),
+    );
+  });
+
+  it('dispatches no repeat config for a one-off capture', async () => {
+    provider.claimCaptures.and.resolveTo(ok());
+    const src = source();
+    const [capture] = await src.getPending();
+    src.createTask(capture);
+    expect(dispatch).toHaveBeenCalledTimes(1);
+  });
+
+  it('makes a recurring capture repeatable right after its addTask', async () => {
+    provider.claimCaptures.and.resolveTo(ok());
+    const src = source();
+    await src.getPending();
+    src.createTask({
+      id: 'task-1',
+      task: {
+        title: 'Standup',
+        createdAt: 1,
+        dueDay: '2026-10-19',
+        dueTime: [9, 5],
+        repeat: { cycle: 'WEEKLY', every: 1, weekdays: [1, 2, 3, 4, 5] },
+      },
+    });
+    expect(dispatch).toHaveBeenCalledTimes(2);
+    const [[addTask], [addRepeat]] = dispatch.calls.allArgs() as [
+      [ReturnType<typeof TaskSharedActions.addTask>],
+      [ReturnType<typeof addTaskRepeatCfgToTask>],
+    ];
+    expect(addTask.type).toBe(TaskSharedActions.addTask.type);
+    expect(addRepeat.type).toBe(addTaskRepeatCfgToTask.type);
+    expect(addRepeat.taskId).toBe('task-1');
+    expect(addRepeat.startTime).toBe('09:05');
+    expect(addRepeat.remindAt).toBe(TaskReminderOptionId.AtStart);
+    expect(addRepeat.taskRepeatCfg).toEqual(
+      jasmine.objectContaining({
+        title: 'Standup',
+        projectId: INBOX_PROJECT.id,
+        repeatCycle: 'WEEKLY',
+        startDate: '2026-10-19',
+        monday: true,
+        friday: true,
+        saturday: false,
+      }),
+    );
+  });
+
+  it("starts an undated series on this device's today", async () => {
+    provider.claimCaptures.and.resolveTo(ok());
+    const src = source();
+    await src.getPending();
+    src.createTask({
+      id: 'task-1',
+      task: { title: 'Stretch', createdAt: 1, repeat: { cycle: 'DAILY', every: 1 } },
+    });
+    const addRepeat = dispatch.calls.mostRecent().args[0] as ReturnType<
+      typeof addTaskRepeatCfgToTask
+    >;
+    expect(addRepeat.taskRepeatCfg.startDate).toBe('2026-10-15');
+    expect(addRepeat.startTime).toBeUndefined();
+    expect(addRepeat.remindAt).toBeUndefined();
+  });
+
+  it('adds no reminder when the default is to not remind', async () => {
+    provider.claimCaptures.and.resolveTo(ok());
+    run = {
+      ...(run as AgentCaptureRun),
+      defaultRemindOption: TaskReminderOptionId.DoNotRemind,
+    };
+    const src = source();
+    await src.getPending();
+    src.createTask({
+      id: 'task-1',
+      task: { title: 'Dentist', createdAt: 1, dueDay: '2026-10-16', dueTime: [9, 30] },
+    });
+    const action = dispatch.calls.mostRecent().args[0] as ReturnType<
+      typeof TaskSharedActions.addTask
+    >;
+    expect(action.task.dueWithTime).toBe(new Date(2026, 9, 16, 9, 30).getTime());
+    expect('remindAt' in action.task).toBeFalse();
   });
 
   it('registers the synced key when the server has none, then claims again', async () => {
@@ -168,6 +297,58 @@ describe('createSuperSyncCaptureSource', () => {
     run = null;
     expect(await source().getPending()).toEqual([]);
     expect(provider.claimCaptures).not.toHaveBeenCalled();
+  });
+});
+
+describe('toCaptureTask', () => {
+  const base = { v: 1, title: 'Dentist', createdAt: 1, client: 'Claude' };
+
+  it('reads an optional due day and time', () => {
+    expect(toCaptureTask({ ...base, dueDate: '2026-10-16' })).toEqual({
+      title: 'Dentist',
+      createdAt: 1,
+      dueDay: '2026-10-16',
+    });
+    expect(toCaptureTask({ ...base, dueDate: '2026-10-16', dueTime: '18:05' })).toEqual({
+      title: 'Dentist',
+      createdAt: 1,
+      dueDay: '2026-10-16',
+      dueTime: [18, 5],
+    });
+  });
+
+  it('reads an optional repeat', () => {
+    expect(toCaptureTask({ ...base, repeat: { cycle: 'monthly', every: 3 } })).toEqual({
+      title: 'Dentist',
+      createdAt: 1,
+      repeat: { cycle: 'MONTHLY', every: 3 },
+    });
+    expect(toCaptureTask({ ...base, repeat: { cycle: 'hourly' } })).toEqual({
+      title: 'Dentist',
+      createdAt: 1,
+    });
+  });
+
+  it('drops an invalid due day or time but keeps the task', () => {
+    for (const due of [
+      { dueDate: '2026-02-30' },
+      { dueDate: '0001-01-01' },
+      { dueDate: '0500-06-15' },
+      { dueDate: '0999-12-31' },
+      { dueDate: '2026-10-16T09:30' },
+      { dueDate: 1 },
+      { dueTime: '09:30' },
+    ]) {
+      expect(toCaptureTask({ ...base, ...due })).toEqual({
+        title: 'Dentist',
+        createdAt: 1,
+      });
+    }
+    expect(toCaptureTask({ ...base, dueDate: '2026-10-16', dueTime: '25:00' })).toEqual({
+      title: 'Dentist',
+      createdAt: 1,
+      dueDay: '2026-10-16',
+    });
   });
 });
 

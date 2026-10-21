@@ -19,6 +19,7 @@ import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.
 import { WorkContextType } from '../../work-context/work-context.model';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { Task } from '../task.model';
+import { Section } from '../../section/section.model';
 
 describe('TaskListComponent', () => {
   let component: TaskListComponent;
@@ -146,6 +147,35 @@ describe('TaskListComponent', () => {
   });
 
   describe('enterPredicate', () => {
+    describe('a dragged section', () => {
+      // Sections are dragged by their header from the sections wrapper, whose
+      // drop list carries no list data; letting one into a task list made
+      // drop() read `groupTagId` of undefined (#10866).
+      const section: Section = {
+        id: 'section1',
+        contextId: 'project1',
+        contextType: WorkContextType.PROJECT,
+        title: 'Section',
+        taskIds: [],
+      };
+      const sectionDrag = { data: section } as unknown as CdkDrag;
+
+      for (const [listModelId, listId] of [
+        ['DONE', 'PARENT'],
+        ['UNDONE', 'PARENT'],
+        ['BACKLOG', 'PARENT'],
+        ['ADD_TASK_PANEL', 'PARENT'],
+        ['other-section', 'PARENT'],
+        ['parent-task', 'SUB'],
+      ] as const) {
+        it(`is rejected by the ${listModelId} ${listId} list`, () => {
+          expect(
+            component.enterPredicate(sectionDrag, createMockDrop(listModelId, listId)),
+          ).toBe(false);
+        });
+      }
+    });
+
     describe('subtasks in parent-level DONE/UNDONE lists', () => {
       it('should allow subtask to reorder within UNDONE', () => {
         const subtask = { id: 'sub1', parentId: 'parent1' };
@@ -612,6 +642,7 @@ describe('TaskListComponent', () => {
       srcListId: 'PARENT' | 'SUB',
       targetListId: 'PARENT' | 'SUB',
       newOrderedIds: string[] = [taskId],
+      taskOverrides: Partial<TaskWithSubTasks> = {},
     ): void => {
       (
         component as unknown as {
@@ -628,6 +659,7 @@ describe('TaskListComponent', () => {
       )._move(taskId, src, target, srcListId, targetListId, newOrderedIds, {
         id: taskId,
         parentId: srcListId === 'SUB' ? src : undefined,
+        ...taskOverrides,
       } as TaskWithSubTasks);
     };
 
@@ -667,6 +699,32 @@ describe('TaskListComponent', () => {
       expect(dispatchedAction.task.parentId).toBe('parentA');
       expect(dispatchedAction.afterTaskId).toBe('before');
       expect(dispatchedAction.isDone).toBe(false);
+    });
+
+    // A won't-do task is one whose `wontDoOn` equals its `doneOn`: a new stamp
+    // would turn it into a completion.
+    it("keeps the done stamp of a won't-do subtask dropped on DONE", () => {
+      callMove('sub1', 'parentA', 'DONE', 'SUB', 'PARENT', ['sub1'], {
+        isDone: true,
+        doneOn: 5,
+        wontDoOn: 5,
+      });
+
+      const dispatchedAction = (store.dispatch as jasmine.Spy).calls.mostRecent()
+        .args[0] as ReturnType<typeof TaskSharedActions.convertToMainTask>;
+      expect(dispatchedAction.isDone).toBe(true);
+      expect(dispatchedAction.doneOn).toBe(5);
+    });
+
+    it('stamps a completed subtask dropped on DONE as done now', () => {
+      callMove('sub1', 'parentA', 'DONE', 'SUB', 'PARENT', ['sub1'], {
+        isDone: true,
+        doneOn: 5,
+      });
+
+      const dispatchedAction = (store.dispatch as jasmine.Spy).calls.mostRecent()
+        .args[0] as ReturnType<typeof TaskSharedActions.convertToMainTask>;
+      expect(dispatchedAction.doneOn).toBeGreaterThan(5);
     });
 
     it('routes a parent drop into a section drop-list (PARENT + non-reserved id) to addTaskToSection', () => {

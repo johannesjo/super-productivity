@@ -22,6 +22,7 @@ import { isValidSplitTime } from '../../../util/is-valid-split-time';
 import { getRepeatDueWithTime } from './get-repeat-due-with-time.util';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { TaskTimeSyncService } from '../../tasks/task-time-sync.service';
+import { getTaskPriority } from '../../tasks/task-priority.const';
 
 const _sameStringSet = (a: readonly string[], b: readonly string[]): boolean => {
   if (a.length !== b.length) {
@@ -111,6 +112,7 @@ const _isUnmodifiedSkipOverdueInstance = (
 ): boolean =>
   task.title === (cfg.title ?? '') &&
   (task.timeEstimate ?? 0) === (cfg.defaultEstimate ?? 0) &&
+  getTaskPriority(task.priority) === getTaskPriority(cfg.priority) &&
   _sameStringSet(
     task.tagIds ?? [],
     (cfg.tagIds ?? []).filter((tagId) => tagId !== TODAY_TAG.id),

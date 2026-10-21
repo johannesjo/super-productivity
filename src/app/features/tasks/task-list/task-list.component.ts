@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 import { DropListModelSource, Task, TaskCopy, TaskWithSubTasks } from '../task.model';
 import { TaskService } from '../task.service';
+import { isWontDoTask } from '../util/is-wont-do-task';
 import { expandFadeFastAnimation } from '../../../ui/animations/expand.ani';
 import { filterDoneTasks } from '../filter-done-tasks.pipe';
 import { T } from '../../../t.const';
@@ -92,9 +93,10 @@ export interface DropModelDataForList {
   listId: TaskListId;
   listModelId: ListModelId;
   filteredTasks: TaskWithSubTasks[];
-  // Set only for lists rendered inside the grouped-by-tag work view: the tagId
-  // of this group, `null` for a no-single-tag bucket, `undefined` everywhere
-  // else. A drop across two defined-but-different values reassigns tags.
+  // Set only for lists rendered inside the grouped work view: the tagId of a
+  // tag group, `null` for a no-single-tag bucket and for every non-tag group,
+  // `undefined` everywhere else (multi-drag `canDrop` relies on that split). A
+  // drop across two different tag ids reassigns tags.
   groupTagId?: string | null;
 }
 
@@ -144,10 +146,10 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
   listId = input.required<TaskListId>();
   listModelId = input.required<ListModelId>();
   parentId = input<string | undefined>(undefined);
-  // Tag id of the group this list renders in the grouped-by-tag work view.
-  // `undefined` (default) = not a tag group; `null` = a no-single-tag bucket
-  // ('No tag' / 'Unknown tag' / a title shared by multiple tags). A real id
-  // enables drag-to-retag across groups.
+  // Tag id of the group this list renders in the grouped work view.
+  // `undefined` (default) = not inside the grouped view; `null` = a non-tag
+  // group or a no-single-tag bucket ('Unknown tag' / a title shared by multiple
+  // tags). A real id enables drag-to-retag across groups.
   groupTagId = input<string | null | undefined>(undefined);
 
   noTasksMsg = input<string | undefined>(undefined);
@@ -259,6 +261,9 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
 
   enterPredicate = (drag: CdkDrag, drop: CdkDropList): boolean => {
     // TODO this gets called very often for nested lists. Maybe there are possibilities to optimize
+    // A section dragged by its header (see the work view's acceptSectionDragOnly)
+    // is not a task: no task list takes it, so it snaps back (#10866).
+    if (drag.data && 'contextType' in drag.data) return false;
     if (this.multiDrag.isListGroupDrag())
       return this.multiDrag.canDrop(
         drop.data.listId,
@@ -654,6 +659,8 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
       const afterTaskId = getAnchorFromDragDrop(taskId, newOrderedIds);
       const now = Date.now();
       const isDone = target === 'DONE';
+      // A won't-do subtask keeps the stamp that marks it, so it stays won't do.
+      const doneOn = draggedTask && isWontDoTask(draggedTask) ? draggedTask.doneOn : now;
       this._store.dispatch(
         TaskSharedActions.convertToMainTask({
           task: draggedTask ?? ({ id: taskId, parentId: src } as TaskWithSubTasks),
@@ -662,7 +669,7 @@ export class TaskListComponent implements OnDestroy, AfterViewInit {
           isDone,
           today: this._dateService.todayStr(),
           modified: now,
-          ...(isDone ? { doneOn: now } : {}),
+          ...(isDone ? { doneOn } : {}),
         }),
       );
       return;

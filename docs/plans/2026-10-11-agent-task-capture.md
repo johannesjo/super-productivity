@@ -1,6 +1,6 @@
 # Agent task capture
 
-Oct 11, 2026 · status: decided, nothing built · rev. 3; rev. 2 after an adversarial
+Oct 11, 2026 · status: M1+M2 shipped in #10759 (scheduling: #10829, #10899); M3–M4 open · rev. 3; rev. 2 after an adversarial
 review and a Codex review
 
 Let any AI agent add a task to Super Productivity: Claude (web, desktop,
@@ -65,6 +65,25 @@ the app syncs." It never claims the task exists.
 
 Public once shipped: adding optional fields is compatible, removing or
 renaming is not. If #10251 lands, it uses the same limits.
+
+Added Oct 15 2026: optional `dueDate` (`YYYY-MM-DD`) and `dueTime` (`HH:MM`,
+needs `dueDate`). They travel as optional fields of the v1 payload, so
+released apps ignore them and add the task unscheduled. The importing device
+resolves them in its own time zone into `dueDay`, or `dueWithTime` plus the
+default reminder, inside the one `addTask`; an invalid value is dropped, not
+the task. The retry window keys on them too.
+
+Also added: optional `repeat: { cycle, every?, weekdays? }` (cycle
+`daily | weekly | monthly | yearly`, `every` 1–99, `weekdays` weekly only).
+The importing device makes the new task repeatable with the add-task bar's
+own `addTaskRepeatCfgToTask` right after the `addTask` (no new action), so
+the existing effects pick the first occurrence. An invalid `repeat` is
+dropped, leaving a one-off task. The tool stays write-only: its only answer
+is "Saved", so no task or setting data reaches the assistant.
+
+The local `create_task` of #10251 takes the same optional fields with the
+same validation (#10833); invalid input is rejected, not dropped, and a timed
+one-off is likewise scheduled in its one `addTask`.
 
 ## Flow
 
@@ -283,22 +302,26 @@ user key`; AES-256-GCM, 12-byte random IV, 16-byte tag, AAD = version byte
 
 ## Failure modes
 
-| Case                                                                                               | Outcome                                                                                                                                                               | Mechanism                                                                        |
-| -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------- |
-| Assistant retries after a timeout                                                                  | One task, best effort (restart drops the window)                                                                                                                      | Retry window                                                                     |
-| Two devices claim at once                                                                          | One task                                                                                                                                                              | Row lock, `FOR UPDATE SKIP LOCKED`                                               |
-| App killed after claim, or claim response lost                                                     | Same device picks it up on its next run                                                                                                                               | Own leases always returned                                                       |
-| Ack lost, user deletes the task, same device                                                       | Not recreated                                                                                                                                                         | Item stays in `getPending()`, receipt survives                                   |
-| Device creates a task, then goes offline more than 24 h without acking; another device takes over  | Possibly a duplicate, or a deleted task reappears, once the first device returns. Never same-id divergence                                                            | New `taskId` on takeover. **Accepted** (see decisions)                           |
-| Account switch or password change mid-import                                                       | Nothing created or acked; retried later                                                                                                                               | Epoch fence; `deviceId` survives the new client id                               |
-| Concurrent `SYNC_IMPORT` elsewhere drops the `addTask`                                             | Task lost, like any local edit                                                                                                                                        | By design (sync rule 7)                                                          |
-| Two devices enable at once                                                                         | Synced key converges by LWW; the first claim fixes the server key; items sealed to the losing key dropped                                                             | `key_mismatch` → replace                                                         |
-| Backup import restores a config without the key                                                    | Feature reads off on all devices                                                                                                                                      | Synced state                                                                     |
-| Full database restore                                                                              | Pending items, grants and codes from the snapshot dropped; devices re-register their key; assistants reconnect                                                        | Runbook                                                                          |
-| Leaked capture token                                                                               | At most 200 junk items per day; revoke can discard them                                                                                                               | Per-grant cap, revoke with discard                                               |
-| No device syncs within `RETENTION_DAYS` (45)                                                       | Items expire                                                                                                                                                          | Documented                                                                       |
-| An item this device cannot open or validate                                                        | Stays leased to this device, renewed on each claim, until it expires; 50 such items fill its batch                                                                    | **Gap**: needs a lease-release endpoint                                          |
-| Turn off while the server has no capture (flag off, rollback, other server); capture returns later | Key cleared locally, but server tokens were never revoked and work again: captures go to a key no device holds and expire, or reach the Inbox after a later switch-on | 404 counts as off. **Accepted**: needs an operator flip; revoke server-side then |
+| Case                                                                                               | Outcome                                                                                                                                                               | Mechanism                                                                                                                                                       |
+| -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Assistant retries after a timeout                                                                  | One task, best effort (restart drops the window)                                                                                                                      | Retry window                                                                                                                                                    |
+| Two devices claim at once                                                                          | One task                                                                                                                                                              | Row lock, `FOR UPDATE SKIP LOCKED`                                                                                                                              |
+| App killed after claim, or claim response lost                                                     | Same device picks it up on its next run                                                                                                                               | Own leases always returned                                                                                                                                      |
+| Ack lost, user deletes the task, same device                                                       | Not recreated                                                                                                                                                         | Item stays in `getPending()`, receipt survives                                                                                                                  |
+| Device creates a task, then goes offline more than 24 h without acking; another device takes over  | Possibly a duplicate, or a deleted task reappears, once the first device returns. Never same-id divergence                                                            | New `taskId` on takeover. **Accepted** (see decisions)                                                                                                          |
+| Same takeover, for a recurring capture                                                             | Possibly two repeat series that both keep creating tasks, until the user deletes one                                                                                  | New `taskId` and repeat config id on takeover. **Accepted** with the row above                                                                                  |
+| `addTask` persists, `addTaskRepeatCfgToTask` fails                                                 | The task stays a one-off; the retry skips it because the task exists                                                                                                  | Persist failure stops the run. **Accepted**: rare; a fix needs the shared importer to re-run follow-ups                                                         |
+| Local `create_task`: `addTask` persists, `addTaskRepeatCfgToTask` fails                            | `OUTCOME_UNKNOWN` with the task id; the task may be a one-off; a retry creates a duplicate                                                                            | Sticky persist-failure flag after the flush. **Accepted**: rare; the tool tells the assistant to check the Inbox first                                          |
+| Timed one-off capture with calendar auto time-blocking on                                          | No time-block event, no plugin `taskUpdate`; reminder and Today work                                                                                                  | Added in one `addTask`, no `scheduleTaskWithTime` (avoids a second op and a snack per import). **Accepted** (Oct 15 2026); timed recurring captures do get both |
+| Account switch or password change mid-import                                                       | Nothing created or acked; retried later                                                                                                                               | Epoch fence; `deviceId` survives the new client id                                                                                                              |
+| Concurrent `SYNC_IMPORT` elsewhere drops the `addTask`                                             | Task lost, like any local edit                                                                                                                                        | By design (sync rule 7)                                                                                                                                         |
+| Two devices enable at once                                                                         | Synced key converges by LWW; the first claim fixes the server key; items sealed to the losing key dropped                                                             | `key_mismatch` → replace                                                                                                                                        |
+| Backup import restores a config without the key                                                    | Feature reads off on all devices                                                                                                                                      | Synced state                                                                                                                                                    |
+| Full database restore                                                                              | Pending items, grants and codes from the snapshot dropped; devices re-register their key; assistants reconnect                                                        | Runbook                                                                                                                                                         |
+| Leaked capture token                                                                               | At most 200 junk items per day; revoke can discard them                                                                                                               | Per-grant cap, revoke with discard                                                                                                                              |
+| No device syncs within `RETENTION_DAYS` (45)                                                       | Items expire                                                                                                                                                          | Documented                                                                                                                                                      |
+| An item this device cannot open or validate                                                        | Stays leased to this device, renewed on each claim, until it expires; 50 such items fill its batch                                                                    | **Gap**: needs a lease-release endpoint                                                                                                                         |
+| Turn off while the server has no capture (flag off, rollback, other server); capture returns later | Key cleared locally, but server tokens were never revoked and work again: captures go to a key no device holds and expire, or reach the Inbox after a later switch-on | 404 counts as off. **Accepted**: needs an operator flip; revoke server-side then                                                                                |
 
 ## Milestones
 
@@ -347,7 +370,7 @@ Each step has its check; the next starts only after it passes.
 
 ## Out of scope
 
-Reading tasks remotely, editing, project/tag/due date, DCR, generic CIMD
+Reading tasks remotely, editing, project/tag, DCR, generic CIMD
 fetching, WebSocket push for captures, server-created ops, non-SuperSync
 providers.
 

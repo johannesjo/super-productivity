@@ -60,7 +60,7 @@ A maintainer who wants outside testers to try a feature branch — e.g. one that
 touches native iOS code and so cannot be exercised in the web preview — applies
 the `ios-test-flight` label to a same-repo PR.
 `.github/workflows/build-ios-testflight.yml` builds an **unsigned** archive with
-no Apple credentials. After it completes,
+no Apple credentials (ad-hoc signed only, to carry the entitlements). After it completes,
 `.github/workflows/publish-ios-testflight.yml` runs trusted code from `master`,
 validates and repacks the archive without credentials, waits for approval through
 the protected `ios-testflight` environment, then signs and runs the
@@ -105,6 +105,11 @@ has its own bundle ID and profile. In
    contain the App Group entitlement.
 5. Create an App Store distribution provisioning profile for
    `com.super-productivity.app.ShareExtension` using the same certificate.
+
+Step 4 replaces the profile the App Store release path also uses. The
+regenerated profile is a superset, so releases keep working; keep the old file
+until a release build has succeeded. Verify a downloaded profile carries the
+group with `security cms -D -i X.mobileprovision | grep -A2 application-groups`.
 
 Encode each downloaded profile as a single base64 line before adding it to
 GitHub:
@@ -224,14 +229,16 @@ They do not need a Mac, Xcode, or an Apple Developer account.
 - Source build failures, validation failures, and normal publish failures are
   reported on the PR and remove the label. A hard cancellation of the publisher
   can prevent reporting; remove the label manually in that case.
+- `workflow_run` re-runs load the publisher from the original run's `master` SHA,
+  so a publisher fix on `master` cannot be verified by re-running an old run;
+  re-apply the label instead.
 - To stop distributing a bad build, use **Expire Build** in App Store Connect.
 - To disable public PR builds, remove the `ios-test-flight` label and disable or
   remove `.github/workflows/build-ios-testflight.yml`. Installed builds are not
   remotely removed; expiring a build prevents new installs.
 
-The internal-`master` beta path proposed in
-[`docs/plans/2026-07-14-ios-testflight-master-builds.md`](plans/2026-07-14-ios-testflight-master-builds.md)
-is separate and not implemented here.
+There is no automatic TestFlight build from `master`; TestFlight builds come
+only from the label workflow above.
 
 ## Required secrets
 

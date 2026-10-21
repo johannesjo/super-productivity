@@ -17,6 +17,10 @@ import { DEFAULT_GLOBAL_CONFIG } from '../config/default-global-config.const';
 import { INBOX_PROJECT } from '../project/project.const';
 import { RepeatQuickSetting } from '../task-repeat-cfg/task-repeat-cfg.model';
 import { findSpringForwardSunday } from './dst.test-helper';
+import {
+  DEFAULT_DATE_INPUT_LOCALE,
+  DateInputLocale,
+} from '../../core/date-time-format/date-input-locale';
 
 const TASK: TaskCopy = {
   id: 'id',
@@ -3148,5 +3152,847 @@ describe('shortSyntax recurrence', () => {
     const due = new Date(r?.taskChanges.dueWithTime as number);
     expect(due.getDate()).toBe(18);
     expect(due.getHours()).toBe(6);
+  });
+});
+
+describe('shortSyntax nth weekday (@2monday)', () => {
+  // Wed Jan 17 2024, 10:00 local time
+  const NOW = new Date(2024, 0, 17, 10, 0, 0, 0);
+
+  const parse = async (
+    title: string,
+    now: Date = NOW,
+    mode: 'combine' | 'replace' = 'combine',
+  ): ReturnType<typeof shortSyntax> =>
+    shortSyntax({ ...TASK, title }, CONFIG, [], [], now, mode);
+
+  const dueOf = (r: Awaited<ReturnType<typeof shortSyntax>>): Date =>
+    new Date(r?.taskChanges.dueWithTime as number);
+
+  // The nth occurrence of a weekday counting from today, n=1 being the next one
+  const nthWeekdayFrom = (from: Date, weekday: number, nth: number): Date => {
+    const diff = (weekday - from.getDay() + 7) % 7;
+    const extraWeeks = (nth - 1) * 7;
+    return new Date(
+      from.getFullYear(),
+      from.getMonth(),
+      from.getDate() + diff + extraWeeks,
+      12,
+      0,
+    );
+  };
+
+  const expectNthWeekday = (
+    r: Awaited<ReturnType<typeof shortSyntax>>,
+    weekday: number,
+    nth: number,
+    now: Date = NOW,
+  ): void => {
+    const expected = nthWeekdayFrom(now, weekday, nth);
+    expect(formatDateToISO(dueOf(r))).toBe(formatDateToISO(expected));
+    expect(dueOf(r).getDay()).toBe(weekday);
+  };
+
+  it('should parse "@2monday" as the Monday after next', async () => {
+    const r = await parse('Water plants @2monday');
+    expect(r?.taskChanges.title).toBe('Water plants');
+    expectNthWeekday(r, 1, 2); // Mon Jan 22 + 7 = Mon Jan 29
+    expect(dueOf(r).getDate()).toBe(29);
+    expect(r?.taskChanges.hasPlannedTime).toBe(false);
+    expect(r?.repeat ?? null).toBeNull();
+  });
+
+  it('should parse "@4tuesday" as the fourth Tuesday', async () => {
+    const r = await parse('Review @4tuesday');
+    expect(r?.taskChanges.title).toBe('Review');
+    expectNthWeekday(r, 2, 4); // Tue Jan 23 + 3 weeks = Tue Feb 13
+    expect(dueOf(r).getDate()).toBe(13);
+    expect(dueOf(r).getMonth()).toBe(1);
+  });
+
+  it('should treat "@1monday" exactly like "@monday"', async () => {
+    const nth = await parse('Standup @1monday');
+    const plain = await parse('Standup @monday');
+    expect(nth?.taskChanges.title).toBe('Standup');
+    expect(nth?.taskChanges.dueWithTime).toBe(plain?.taskChanges.dueWithTime);
+    expect(nth?.taskChanges.hasPlannedTime).toBe(false);
+  });
+
+  for (const trigger of ['@', '!']) {
+    for (const hour of [10, 12, 17]) {
+      it(`should match plain ${trigger}monday without a time at ${hour}:00 on Monday`, async () => {
+        const now = new Date(2024, 0, 22, hour, 0, 0, 0);
+        const nth = await shortSyntax(
+          { ...TASK, title: `Task ${trigger}1monday` },
+          DEADLINE_CONFIG,
+          [],
+          [],
+          now,
+        );
+        const plain = await shortSyntax(
+          { ...TASK, title: `Task ${trigger}monday` },
+          DEADLINE_CONFIG,
+          [],
+          [],
+          now,
+        );
+        const expected = new Date(2024, 0, hour > 12 ? 29 : 22, 12);
+
+        expect(nth?.taskChanges.title).toBe('Task');
+        if (trigger === '@') {
+          expect(nth?.taskChanges.dueWithTime).toBe(expected.getTime());
+          expect(nth?.taskChanges.dueWithTime).toBe(plain?.taskChanges.dueWithTime);
+          expect(nth?.taskChanges.hasPlannedTime).toBe(false);
+        } else {
+          expect(nth?.taskChanges.deadlineWithTime).toBe(expected.getTime());
+          expect(nth?.taskChanges.deadlineWithTime).toBe(
+            plain?.taskChanges.deadlineWithTime,
+          );
+          expect(nth?.taskChanges.hasDeadlineTime).toBe(false);
+        }
+      });
+    }
+
+    for (const [hour, expectedDay] of [
+      [10, 29],
+      [17, 5],
+    ]) {
+      it(`should count ${trigger}2monday on from ${trigger}1monday at ${hour}:00 on Monday`, async () => {
+        // Before noon the first Monday is today, after noon it is Jan 29; the
+        // second Monday is always the one after it, never the same day.
+        const r = await shortSyntax(
+          { ...TASK, title: `Task ${trigger}2monday` },
+          DEADLINE_CONFIG,
+          [],
+          [],
+          new Date(2024, 0, 22, hour),
+        );
+        const expected = new Date(2024, hour > 12 ? 1 : 0, expectedDay, 12);
+        expect(
+          trigger === '@' ? r?.taskChanges.dueWithTime : r?.taskChanges.deadlineWithTime,
+        ).toBe(expected.getTime());
+      });
+    }
+
+    it(`should keep ${trigger}1monday's explicitly timed occurrence exactly at now`, async () => {
+      const now = new Date(2024, 0, 22, 15, 0, 0, 0);
+      const nth = await shortSyntax(
+        { ...TASK, title: `Task ${trigger}1monday 3pm` },
+        DEADLINE_CONFIG,
+        [],
+        [],
+        now,
+      );
+      const plain = await shortSyntax(
+        { ...TASK, title: `Task ${trigger}monday 3pm` },
+        DEADLINE_CONFIG,
+        [],
+        [],
+        now,
+      );
+      const timestamp =
+        trigger === '@'
+          ? nth?.taskChanges.dueWithTime
+          : nth?.taskChanges.deadlineWithTime;
+      expect(timestamp).toBe(now.getTime());
+      expect(timestamp).toBe(
+        trigger === '@'
+          ? plain?.taskChanges.dueWithTime
+          : plain?.taskChanges.deadlineWithTime,
+      );
+    });
+  }
+
+  it('should support weekday abbreviations, plurals and casing', async () => {
+    for (const title of ['Task @2mon', 'Task @2mondays', 'Task @2MON', 'Task @2Mon']) {
+      const r = await parse(title);
+      expect(r?.taskChanges.title).withContext(title).toBe('Task');
+      expectNthWeekday(r, 1, 2);
+    }
+    for (const title of ['Task @4TUE', 'Task @4tues', 'Task @4tuesdays']) {
+      const r = await parse(title);
+      expect(r?.taskChanges.title).withContext(title).toBe('Task');
+      expectNthWeekday(r, 2, 4);
+    }
+  });
+
+  it('should accept whitespace between the number and the weekday', async () => {
+    const r = await parse('Task @2 monday');
+    expect(r?.taskChanges.title).toBe('Task');
+    expectNthWeekday(r, 1, 2);
+  });
+
+  it('should support the full range of n (1..5)', async () => {
+    for (const nth of [1, 2, 3, 4, 5]) {
+      const r = await parse(`Task @${nth}monday`);
+      expect(r?.taskChanges.title).withContext(`n=${nth}`).toBe('Task');
+      expectNthWeekday(r, 1, nth);
+    }
+  });
+
+  it('should anchor the date no matter what time of day it is typed', async () => {
+    // 23:00 is past the 12:00 anchor; the result must still be the plain nth
+    // weekday at noon, not rolled forward a week the way a passed *time* is.
+    const late = new Date(2024, 0, 17, 23, 0, 0, 0);
+    const r = await parse('Task @2monday', late);
+    expectNthWeekday(r, 1, 2, late);
+  });
+
+  it('should parse a trailing time ("@2monday 3pm")', async () => {
+    const r = await parse('Team call @2monday 3pm');
+    expect(r?.taskChanges.title).toBe('Team call');
+    expectNthWeekday(r, 1, 2);
+    expect(dueOf(r).getHours()).toBe(15);
+    expect(dueOf(r).getMinutes()).toBe(0);
+    expect(r?.taskChanges.hasPlannedTime).toBeUndefined();
+  });
+
+  it('should DST-safely carry the typed time', async () => {
+    const gap = findSpringForwardSunday(2026);
+    if (!gap) {
+      // Timezone without a spring-forward transition (UTC, Tokyo).
+      return;
+    }
+    // The typed time is on a normal day, but the resolved day is the transition
+    // Sunday: the timestamp cannot hold the wall-clock time, so it travels as
+    // dueTimeStr, exactly like "@every friday 3pm".
+    const wednesday = new Date(gap.sunday);
+    wednesday.setDate(wednesday.getDate() - 4);
+    wednesday.setHours(10, 0);
+    const r = await parse(`Backup @1sunday ${gap.missingHour}:30am`, wednesday);
+    expect(formatDateToISO(dueOf(r))).toBe(formatDateToISO(gap.sunday));
+    expect(dueOf(r).getDay()).toBe(0);
+    expect(r?.taskChanges.dueTimeStr).toBe(`0${gap.missingHour}:30`);
+  });
+
+  for (const trigger of ['@', '!']) {
+    for (const suffix of ['', 'am']) {
+      it(`should retain ${trigger}1monday's valid time when today has a DST gap (${suffix || '24-hour'})`, async () => {
+        const gap = findSpringForwardSunday(2026);
+        if (!gap) {
+          return;
+        }
+        const now = new Date(gap.sunday);
+        now.setHours(0, 30);
+        const token = `${trigger}1monday ${gap.missingHour}:30${suffix}`;
+        const title = `Task ${token}`;
+        const r = await shortSyntax({ ...TASK, title }, DEADLINE_CONFIG, [], [], now);
+        const expected = new Date(gap.sunday);
+        expected.setDate(expected.getDate() + 1);
+        expected.setHours(gap.missingHour, 30, 0, 0);
+
+        expect(r?.taskChanges.title).toBe('Task');
+        expect(r?.parsedRanges).toEqual(
+          expectedRanges(title, [[trigger === '@' ? 'due' : 'deadline', token]]),
+        );
+        if (trigger === '@') {
+          expect(r?.taskChanges.dueWithTime).toBe(expected.getTime());
+          expect(r?.taskChanges.hasPlannedTime).toBeUndefined();
+          expect(r?.taskChanges.dueTimeStr).toBe(`0${gap.missingHour}:30`);
+        } else {
+          expect(r?.taskChanges.deadlineWithTime).toBe(expected.getTime());
+          expect(r?.taskChanges.hasDeadlineTime).toBe(true);
+        }
+      });
+    }
+
+    it(`should normalize ${trigger}1sunday's missing time on the target DST day`, async () => {
+      const gap = findSpringForwardSunday(2026);
+      if (!gap) {
+        return;
+      }
+      const now = new Date(gap.sunday);
+      now.setHours(0, 30);
+      const r = await shortSyntax(
+        { ...TASK, title: `Task ${trigger}1sunday ${gap.missingHour}:30am` },
+        DEADLINE_CONFIG,
+        [],
+        [],
+        now,
+      );
+      const expected = new Date(gap.sunday);
+      expected.setHours(gap.missingHour, 30, 0, 0);
+
+      expect(r?.taskChanges.title).toBe('Task');
+      if (trigger === '@') {
+        expect(r?.taskChanges.dueWithTime).toBe(expected.getTime());
+        expect(r?.taskChanges.hasPlannedTime).toBeUndefined();
+        expect(r?.taskChanges.dueTimeStr).toBe(`0${gap.missingHour}:30`);
+      } else {
+        expect(r?.taskChanges.deadlineWithTime).toBe(expected.getTime());
+        expect(r?.taskChanges.hasDeadlineTime).toBe(true);
+      }
+    });
+
+    it(`should restore ${trigger}1sunday's typed time after advancing past a DST gap`, async () => {
+      const gap = findSpringForwardSunday(2026);
+      if (!gap) {
+        return;
+      }
+      const now = new Date(gap.sunday);
+      now.setHours(gap.missingHour + 2, 0);
+      const r = await shortSyntax(
+        { ...TASK, title: `Task ${trigger}1sunday ${gap.missingHour}:30am` },
+        DEADLINE_CONFIG,
+        [],
+        [],
+        now,
+      );
+      const expected = new Date(gap.sunday);
+      expected.setDate(expected.getDate() + 7);
+      expected.setHours(gap.missingHour, 30, 0, 0);
+
+      expect(r?.taskChanges.title).toBe('Task');
+      expect(
+        trigger === '@' ? r?.taskChanges.dueWithTime : r?.taskChanges.deadlineWithTime,
+      ).toBe(expected.getTime());
+    });
+  }
+
+  it('should retain the clock time on the second Sunday when today has a DST gap', async () => {
+    const gap = findSpringForwardSunday(2026);
+    if (!gap) {
+      return;
+    }
+    const now = new Date(gap.sunday);
+    now.setHours(0, 30);
+    const r = await parse(`Task @2sunday ${gap.missingHour}:30am`, now);
+    const expected = new Date(gap.sunday);
+    expected.setDate(expected.getDate() + 7);
+    expected.setHours(gap.missingHour, 30, 0, 0);
+
+    expect(r?.taskChanges.title).toBe('Task');
+    expect(r?.taskChanges.dueWithTime).toBe(expected.getTime());
+    expect(r?.taskChanges.dueTimeStr).toBe(`0${gap.missingHour}:30`);
+  });
+
+  it('should not reinterpret a rejected relative date during the clock-time retry', async () => {
+    const gap = findSpringForwardSunday(2026);
+    if (!gap) {
+      return;
+    }
+    const saturday = new Date(gap.sunday);
+    saturday.setDate(saturday.getDate() - 1);
+    saturday.setHours(0, 30);
+    const remainder = `tomorrow ${gap.missingHour}:30am`;
+    const r = await parse(`Task @1monday ${remainder}`, saturday);
+    const expected = new Date(gap.sunday);
+    expected.setDate(expected.getDate() + 1);
+    expected.setHours(12, 0, 0, 0);
+
+    expect(r?.taskChanges.title).toBe(`Task ${remainder}`);
+    expect(r?.taskChanges.dueWithTime).toBe(expected.getTime());
+    expect(r?.taskChanges.hasPlannedTime).toBe(false);
+  });
+
+  it('should not leave the weekday in the title (regression for #10285)', async () => {
+    for (const title of ['Task @2monday', 'Task @9monday', 'Task @0monday']) {
+      const r = await parse(title);
+      expect(r?.taskChanges.title).withContext(title).toBe('Task');
+    }
+  });
+
+  it('should not silently turn an out-of-range n into a time', async () => {
+    // "@9monday" is not a valid nth weekday. Before this feature the numeric
+    // fallback scheduled 09:00 and left "monday" behind. The weekday must be
+    // consumed and no time invented.
+    for (const title of ['Task @9monday', 'Task @0monday']) {
+      const r = await parse(title);
+      expect(r?.taskChanges.title).withContext(title).toBe('Task');
+      expect(r?.taskChanges.dueWithTime).withContext(title).toBeUndefined();
+      expect(r?.taskChanges.hasPlannedTime).withContext(title).toBeUndefined();
+    }
+  });
+
+  it('should not mis-parse "@2m" as an nth weekday', async () => {
+    // "@2m" stays a 2-minute estimate; the bare "@" is a 2-minute due time
+    const r = await parse('Task @2m');
+    expect(r?.taskChanges.title).toBe('Task');
+    const due = dueOf(r);
+    expect(due.getHours()).toBe(10);
+    expect(due.getMinutes()).toBe(2);
+  });
+
+  it('should not mis-parse "@2" as an nth weekday', async () => {
+    const r = await parse('Task @2');
+    expect(r?.taskChanges.title).toBe('Task');
+    expect(r?.taskChanges.dueWithTime).toBeDefined();
+  });
+
+  it('should not shadow the "@every 2 fridays" recurrence', async () => {
+    const r = await shortSyntax(
+      { ...TASK, title: 'Water plants @every 2 fridays' },
+      CONFIG,
+      [],
+      [],
+      NOW,
+      'combine',
+      true,
+    );
+    expect(r?.repeat).toEqual({
+      type: 'INTERVAL',
+      repeatCycle: 'WEEKLY',
+      repeatEvery: 2,
+    } as never);
+    expect(r?.taskChanges.title).toBe('Water plants');
+  });
+
+  it('should highlight the whole token and support the clear path (replace mode)', async () => {
+    const title = 'Water plants @2monday';
+    const r = await parse(title);
+    expect(r?.parsedRanges).toEqual(expectedRanges(title, [['due', '@2monday']]));
+
+    const cleared = await parse(title, NOW, 'replace');
+    expect(cleared?.taskChanges.title).toBe('Water plants');
+  });
+
+  it('should work in a title edit (isParseRepeat false, the default)', async () => {
+    // Nothing in the nth-weekday parser may depend on isParseRepeat
+    const r = await parse('Standup @2friday');
+    expect(r?.taskChanges.title).toBe('Standup');
+    expectNthWeekday(r, 5, 2);
+  });
+
+  it('should coexist with a following time estimate', async () => {
+    const r = await parse('Call @2monday 25m');
+    expect(r?.taskChanges.title).toBe('Call');
+    expectNthWeekday(r, 1, 2);
+    expect(r?.taskChanges.timeEstimate).toBe(25 * 60 * 1000);
+  });
+
+  it('should strip trailing punctuation with the token', async () => {
+    const r = await parse('Dinner @2mondays.');
+    expect(r?.taskChanges.title).toBe('Dinner.');
+    expectNthWeekday(r, 1, 2);
+  });
+
+  it('should leave a trailing date in the title instead of swallowing it', async () => {
+    // The date comes from the phrase; only a trailing clock time is absorbed
+    const r = await parse('Task @2friday tomorrow');
+    expect(r?.taskChanges.title).toBe('Task tomorrow');
+    expectNthWeekday(r, 5, 2);
+    expect(r?.taskChanges.hasPlannedTime).toBe(false);
+  });
+
+  it('should read a spaced hour and weekday as a time, not an nth weekday', async () => {
+    // Only "@<1..5> <weekday>" is the spaced nth form; "@10 fri" is Friday 10:00
+    for (const [title, hour] of [
+      ['Call @10 fri', 10],
+      ['Call @15 friday', 15],
+    ] as const) {
+      const r = await parse(title);
+      expect(r?.taskChanges.title).withContext(title).toBe('Call');
+      const due = dueOf(r);
+      expect(due.getDay()).withContext(title).toBe(5);
+      expect(formatDateToISO(due)).withContext(title).toBe('2024-01-19');
+      expect(due.getHours()).withContext(title).toBe(hour);
+    }
+  });
+
+  it('should not claim a spaced count with a leading zero ("@05 fri")', async () => {
+    const r = await parse('Call @05 fri');
+    expect(dueOf(r).getDay()).toBe(5);
+    expect(formatDateToISO(dueOf(r))).toBe('2024-01-19');
+  });
+
+  it('should not absorb a chrono match further into the remainder', async () => {
+    // "tomorrow" belongs to the title; only the token itself is the due date
+    const r = await parse('Standup @2monday and friday');
+    expect(r?.taskChanges.title).toBe('Standup and friday');
+    expectNthWeekday(r, 1, 2);
+  });
+
+  it('should still parse "@every monday" as a recurrence', async () => {
+    const r = await shortSyntax(
+      { ...TASK, title: 'Standup @every monday' },
+      CONFIG,
+      [],
+      [],
+      NOW,
+      'combine',
+      true,
+    );
+    expect(r?.repeat?.type).toBe('PRESET');
+    expect(r?.taskChanges.title).toBe('Standup');
+  });
+
+  it('should not consume a word the weekday only prefixes ("@2monx")', async () => {
+    const r = await parse('Task @2monx');
+    // Not an nth weekday; the numeric fallback still handles it as before
+    expect(r?.taskChanges.title).toBe('Task monx');
+  });
+
+  it('should also support the deadline form ("!2monday")', async () => {
+    const r = await shortSyntax(
+      { ...TASK, title: 'Taxes !2monday' },
+      DEADLINE_CONFIG,
+      [],
+      [],
+      NOW,
+    );
+    expect(r?.taskChanges.title).toBe('Taxes');
+    const deadline = new Date(r?.taskChanges.deadlineWithTime as number);
+    expect(deadline.getDay()).toBe(1);
+    expect(deadline.getDate()).toBe(29);
+    expect(r?.taskChanges.hasDeadlineTime).toBe(false);
+  });
+
+  it('should support a trailing time on the deadline form ("!2monday 3pm")', async () => {
+    const r = await shortSyntax(
+      { ...TASK, title: 'Taxes !2monday 3pm' },
+      DEADLINE_CONFIG,
+      [],
+      [],
+      NOW,
+    );
+    expect(r?.taskChanges.title).toBe('Taxes');
+    const deadline = new Date(r?.taskChanges.deadlineWithTime as number);
+    expect(deadline.getDate()).toBe(29);
+    expect(deadline.getHours()).toBe(15);
+    expect(r?.taskChanges.hasDeadlineTime).toBe(true);
+  });
+
+  it('should advance one week when the explicitly typed time today is already past', async () => {
+    // Mon Jan 22 2024, 17:00 local: the typed 15:00 is two hours in the past,
+    // so today no longer counts as the first occurrence.
+    const mondayEvening = new Date(2024, 0, 22, 17, 0, 0, 0);
+    const r = await parse('Team call @1monday 3pm', mondayEvening);
+    expect(r?.taskChanges.title).toBe('Team call');
+    const due = dueOf(r);
+    expect(due.getDay()).toBe(1);
+    expect(formatDateToISO(due)).toBe('2024-01-29');
+    expect(due.getHours()).toBe(15);
+    expect(due.getMinutes()).toBe(0);
+    expect(r?.taskChanges.hasPlannedTime).toBeUndefined();
+  });
+
+  it('should keep "@1monday 3pm" equivalent to "@monday 3pm" when the same-day time is past', async () => {
+    const mondayEvening = new Date(2024, 0, 22, 17, 0, 0, 0);
+    const nth = await parse('Team call @1monday 3pm', mondayEvening);
+    const plain = await parse('Team call @monday 3pm', mondayEvening);
+    expect(nth?.taskChanges.dueWithTime).toBe(plain?.taskChanges.dueWithTime);
+  });
+
+  it('should count a timed nth>1 on from the advanced first occurrence', async () => {
+    // Mon Jan 22 2024, 17:00: today's 15:00 has passed, so "@1monday 3pm" is
+    // Jan 29 and "@2monday 3pm" the Monday after it.
+    const mondayEvening = new Date(2024, 0, 22, 17, 0, 0, 0);
+    const r = await parse('Team call @2monday 3pm', mondayEvening);
+    expect(formatDateToISO(dueOf(r))).toBe('2024-02-05');
+    expect(dueOf(r).getHours()).toBe(15);
+  });
+
+  it('should keep a timed nth>1 one week after a first occurrence still ahead today', async () => {
+    const mondayAfternoon = new Date(2024, 0, 22, 14, 0, 0, 0);
+    const r = await parse('Team call @2monday 3pm', mondayAfternoon);
+    expect(formatDateToISO(dueOf(r))).toBe('2024-01-29');
+    expect(dueOf(r).getHours()).toBe(15);
+  });
+
+  it('should keep today when the typed time is still ahead of now', async () => {
+    const mondayAfternoon = new Date(2024, 0, 22, 14, 0, 0, 0);
+    const r = await parse('Team call @1monday 3pm', mondayAfternoon);
+    expect(formatDateToISO(dueOf(r))).toBe('2024-01-22');
+    expect(dueOf(r).getHours()).toBe(15);
+    expect(r?.taskChanges.hasPlannedTime).toBeUndefined();
+  });
+
+  it('should advance a deadline one week when the explicitly typed time is already past', async () => {
+    const mondayEvening = new Date(2024, 0, 22, 17, 0, 0, 0);
+    const r = await shortSyntax(
+      { ...TASK, title: 'Taxes !1monday 3pm' },
+      DEADLINE_CONFIG,
+      [],
+      [],
+      mondayEvening,
+    );
+    expect(r?.taskChanges.title).toBe('Taxes');
+    const deadline = new Date(r?.taskChanges.deadlineWithTime as number);
+    expect(deadline.getDay()).toBe(1);
+    expect(formatDateToISO(deadline)).toBe('2024-01-29');
+    expect(deadline.getHours()).toBe(15);
+    expect(r?.taskChanges.hasDeadlineTime).toBe(true);
+  });
+
+  it('should keep a deadline today when its typed time is still ahead', async () => {
+    const mondayAfternoon = new Date(2024, 0, 22, 14, 0, 0, 0);
+    const r = await shortSyntax(
+      { ...TASK, title: 'Taxes !1monday 3pm' },
+      DEADLINE_CONFIG,
+      [],
+      [],
+      mondayAfternoon,
+    );
+    const deadline = new Date(r?.taskChanges.deadlineWithTime as number);
+    expect(formatDateToISO(deadline)).toBe('2024-01-22');
+    expect(deadline.getHours()).toBe(15);
+    expect(r?.taskChanges.hasDeadlineTime).toBe(true);
+  });
+
+  it('should remove the selected deadline token, not an earlier duplicate', async () => {
+    // Regression: the deadline scanner skips the "!" glued to "wow" and
+    // selects the second token. Removal and highlighting must target that
+    // exact span — an unanchored text search would consume the first copy
+    // and leave the title as "wow !2monday".
+    const r = await shortSyntax(
+      { ...TASK, title: 'wow!2monday !2monday' },
+      DEADLINE_CONFIG,
+      [],
+      [],
+      NOW,
+    );
+    expect(r?.taskChanges.title).toBe('wow!2monday');
+    const deadline = new Date(r?.taskChanges.deadlineWithTime as number);
+    expect(deadline.getDay()).toBe(1);
+    expect(deadline.getDate()).toBe(29);
+    // Literal positions: expectedRanges() would find the first copy of the
+    // token text, which is exactly the ambiguity under test.
+    expect(r?.parsedRanges).toEqual([{ type: 'deadline', start: 12, end: 20 }]);
+  });
+});
+
+describe('shortSyntax localized dates', () => {
+  // Tuesday, before the times used below
+  const NOW = new Date(2026, 9, 20, 10, 0, 0, 0);
+
+  const parseIn = async (
+    locale: DateInputLocale,
+    title: string,
+    cfg = CONFIG,
+    isParseRepeat = false,
+  ): ReturnType<typeof shortSyntax> =>
+    shortSyntax({ ...TASK, title }, cfg, [], [], NOW, 'combine', isParseRepeat, locale);
+
+  const dueOf = (r: Awaited<ReturnType<typeof shortSyntax>>): Date =>
+    new Date(r?.taskChanges.dueWithTime as number);
+
+  // language → [tomorrow, friday, today at 18:00]. Each locale's date order is
+  // its own convention here; the date-order block below varies it.
+  const CASES: [
+    language: string,
+    isDayFirst: boolean,
+    words: [string, string, string],
+  ][] = [
+    ['de', true, ['morgen', 'Freitag', 'heute 18:00']],
+    ['es', true, ['mañana', 'viernes', 'hoy 18:00']],
+    ['fi', true, ['huomenna', 'perjantai', 'tänään klo 18']],
+    // "18h" would be a time estimate, see below
+    ['fr', true, ['demain', 'vendredi', "aujourd'hui 18:00"]],
+    ['it', true, ['domani', 'venerdì', 'oggi 18:00']],
+    ['ja', false, ['明日', '金曜日', '今日18時']],
+    ['nl', true, ['morgen', 'vrijdag', 'vandaag 18:00']],
+    ['pt', true, ['amanhã', 'sexta-feira', 'hoje 18:00']],
+    ['pt-br', true, ['amanhã', 'sexta-feira', 'hoje 18:00']],
+    ['ru', true, ['завтра', 'пятница', 'сегодня 18:00']],
+    // chrono's Swedish locale does not join a day word and a clock time
+    ['sv', false, ['imorgon', 'fredag', '18:00']],
+    ['uk', true, ['завтра', "п'ятниця", 'сьогодні 18:00']],
+    ['vi', true, ['ngày mai', 'thứ sáu', 'hôm nay 18:00']],
+    ['zh', false, ['明天', '星期五', '今天下午6点']],
+    ['zh-tw', false, ['明天', '星期五', '今天下午6點']],
+  ];
+
+  CASES.forEach(([language, isDayFirst, [tomorrow, friday, todayAt18]]) => {
+    describe(language, () => {
+      const locale = { language, isDayFirst };
+
+      it(`should parse "${tomorrow}" as tomorrow`, async () => {
+        const r = await parseIn(locale, `Task @${tomorrow}`);
+        expect(r?.taskChanges.title).toBe('Task');
+        expect(formatDateToISO(dueOf(r))).toBe('2026-10-21');
+        expect(r?.taskChanges.hasPlannedTime).toBe(false);
+      });
+
+      it(`should parse "${friday}" as the next Friday`, async () => {
+        const r = await parseIn(locale, `Task @${friday}`);
+        expect(r?.taskChanges.title).toBe('Task');
+        expect(formatDateToISO(dueOf(r))).toBe('2026-10-23');
+      });
+
+      it(`should parse "${todayAt18}" as today at 18:00`, async () => {
+        const r = await parseIn(locale, `Task @${todayAt18}`);
+        expect(r?.taskChanges.title).toBe('Task');
+        const due = dueOf(r);
+        expect(formatDateToISO(due)).toBe('2026-10-20');
+        expect(due.getHours()).toBe(18);
+        expect(due.getMinutes()).toBe(0);
+      });
+
+      it('should still parse English dates', async () => {
+        const r = await parseIn(locale, 'Task @tomorrow 3pm');
+        expect(r?.taskChanges.title).toBe('Task');
+        const due = dueOf(r);
+        expect(formatDateToISO(due)).toBe('2026-10-21');
+        expect(due.getHours()).toBe(15);
+      });
+
+      it('should parse localized deadlines', async () => {
+        const r = await parseIn(locale, `Task !${tomorrow}`, {
+          ...CONFIG,
+          isEnableDeadline: true,
+        });
+        expect(r?.taskChanges.title).toBe('Task');
+        expect(formatDateToISO(new Date(r?.taskChanges.deadlineWithTime as number))).toBe(
+          '2026-10-21',
+        );
+      });
+    });
+  });
+
+  it('should keep the time in a localized time-only remainder of a recurrence', async () => {
+    const r = await parseIn(
+      { language: 'de', isDayFirst: true },
+      'Standup @every friday 15 Uhr',
+      CONFIG,
+      true,
+    );
+    expect(r?.repeat).toEqual({ type: 'PRESET', quickSetting: 'WEEKLY_CURRENT_WEEKDAY' });
+    expect(r?.taskChanges.title).toBe('Standup');
+    const due = dueOf(r);
+    expect(formatDateToISO(due)).toBe('2026-10-23');
+    expect(due.getHours()).toBe(15);
+  });
+
+  it('should keep a localized time after an nth weekday', async () => {
+    const r = await parseIn({ language: 'de', isDayFirst: true }, 'Task @2monday 15 Uhr');
+    expect(r?.taskChanges.title).toBe('Task');
+    const due = dueOf(r);
+    expect(formatDateToISO(due)).toBe('2026-11-02');
+    expect(due.getHours()).toBe(15);
+  });
+
+  it('should read an hour written with "h" as a time estimate, not a time', async () => {
+    // The estimate syntax runs before the date parsers, so the French "18h"
+    // stays an estimate; "18:00" is the unambiguous way to write the time
+    const r = await parseIn({ language: 'fr', isDayFirst: true }, 'Task @demain 18h');
+    expect(r?.taskChanges.title).toBe('Task');
+    expect(r?.taskChanges.timeEstimate).toBe(18 * 60 * 60 * 1000);
+    expect(formatDateToISO(dueOf(r))).toBe('2026-10-21');
+    expect(r?.taskChanges.hasPlannedTime).toBe(false);
+  });
+
+  it('should leave a time the locale cannot join to its day word in the title', async () => {
+    // chrono's Swedish locale reads only "idag"; the earlier match wins over
+    // the English "18:00" further in
+    const r = await parseIn({ language: 'sv', isDayFirst: false }, 'Task @idag 18:00');
+    // removing a token mid-title keeps both neighbouring spaces
+    expect(r?.taskChanges.title).toMatch(/^Task\s+18:00$/);
+    expect(formatDateToISO(dueOf(r))).toBe('2026-10-20');
+    expect(r?.taskChanges.hasPlannedTime).toBe(false);
+  });
+
+  it('should prefer the English reading when it starts earlier', async () => {
+    // German alone reads only the "3pm" further in, which would leave
+    // "tomorrow" in the title and schedule today
+    const r = await parseIn({ language: 'de', isDayFirst: true }, 'Call @tomorrow 3pm');
+    expect(r?.taskChanges.title).toBe('Call');
+    expect(formatDateToISO(dueOf(r))).toBe('2026-10-21');
+  });
+
+  describe('languages beyond English and the UI language', () => {
+    it('should not parse date words of other languages for English users', async () => {
+      const r = await parseIn(DEFAULT_DATE_INPUT_LOCALE, 'Task @morgen');
+      expect(r?.taskChanges.dueWithTime).toBeUndefined();
+    });
+
+    it('should not parse another language than the UI language', async () => {
+      // "demain" is French; a German UI only adds German
+      const r = await parseIn({ language: 'de', isDayFirst: true }, 'Task @demain');
+      expect(r?.taskChanges.dueWithTime).toBeUndefined();
+    });
+
+    it('should read a word as a date only in the language that has it', async () => {
+      // "mar" is a Spanish abbreviation of martes (Tuesday), ordinary text in English
+      const es = await parseIn({ language: 'es', isDayFirst: true }, 'Task @mar');
+      expect(es?.taskChanges.title).toBe('Task');
+      expect(new Date(es?.taskChanges.dueWithTime as number).getDay()).toBe(2);
+
+      const en = await parseIn(DEFAULT_DATE_INPUT_LOCALE, 'Task @mar');
+      expect(en?.taskChanges.dueWithTime).toBeUndefined();
+    });
+
+    it('should parse English only for a UI language without a chrono locale', async () => {
+      const ko = { language: 'ko', isDayFirst: false };
+      const tomorrow = await parseIn(ko, 'Task @tomorrow');
+      expect(formatDateToISO(dueOf(tomorrow))).toBe('2026-10-21');
+      const morgen = await parseIn(ko, 'Task @morgen');
+      expect(morgen?.taskChanges.dueWithTime).toBeUndefined();
+    });
+
+    it('should match the UI language case-insensitively', async () => {
+      const r = await parseIn({ language: 'PT-BR', isDayFirst: true }, 'Task @amanhã');
+      expect(formatDateToISO(dueOf(r))).toBe('2026-10-21');
+    });
+  });
+
+  // #9340: an ambiguous numeric date follows the user's date format, in English
+  // and in the locale parsers alike
+  describe('date order', () => {
+    it('should read 3/1 as March 1 for a month-first date format', async () => {
+      const r = await parseIn({ language: 'en', isDayFirst: false }, 'Task @3/1');
+      expect(formatDateToISO(dueOf(r))).toBe('2027-03-01');
+    });
+
+    it('should read 3/1 as 3 January for a day-first date format', async () => {
+      const r = await parseIn({ language: 'en', isDayFirst: true }, 'Task @3/1');
+      expect(formatDateToISO(dueOf(r))).toBe('2027-01-03');
+    });
+
+    it('should read a full numeric date day-first for a day-first date format', async () => {
+      const r = await parseIn({ language: 'en', isDayFirst: true }, 'Task @03-01-2027');
+      expect(formatDateToISO(dueOf(r))).toBe('2027-01-03');
+    });
+
+    it('should still read an impossible month as the day for a month-first format', async () => {
+      const r = await parseIn({ language: 'en', isDayFirst: false }, 'Task @25/4');
+      expect(formatDateToISO(dueOf(r))).toBe('2027-04-25');
+    });
+
+    it('should read ISO dates the same in either order', async () => {
+      for (const isDayFirst of [true, false]) {
+        const r = await parseIn({ language: 'en', isDayFirst }, 'Task @2027-03-01');
+        expect(formatDateToISO(dueOf(r))).toBe('2027-03-01');
+      }
+    });
+
+    it('should follow the date format, not the locale default, for German', async () => {
+      // A German UI with a US date format picked in the settings
+      const r = await parseIn({ language: 'de', isDayFirst: false }, 'Task @3/1');
+      expect(formatDateToISO(dueOf(r))).toBe('2027-03-01');
+    });
+
+    it('should follow the date format, not the locale default, for Italian', async () => {
+      // chrono's Italian parser defaults to month-first
+      const r = await parseIn({ language: 'it', isDayFirst: true }, 'Task @3/1');
+      expect(formatDateToISO(dueOf(r))).toBe('2027-01-03');
+    });
+
+    it('should follow the date format for locales with a fixed date order', async () => {
+      // chrono's Russian parser is always day-first and its Japanese one always
+      // month-first; English reads the same text in the user's order
+      const ru = await parseIn({ language: 'ru', isDayFirst: false }, 'Task @3/1');
+      expect(formatDateToISO(dueOf(ru))).toBe('2027-03-01');
+      const ja = await parseIn({ language: 'ja', isDayFirst: true }, 'Task @3/1');
+      expect(formatDateToISO(dueOf(ja))).toBe('2027-01-03');
+    });
+
+    it('should let the UI language win a tie in a locale that follows the date order', async () => {
+      // French reads "mar 3" as Tuesday at 3:00, English as March 3
+      const r = await parseIn({ language: 'fr', isDayFirst: true }, 'Task @mar 3');
+      expect(r?.taskChanges.title).toBe('Task');
+      const due = dueOf(r);
+      expect(due.getDay()).toBe(2);
+      expect(due.getHours()).toBe(3);
+    });
+
+    it('should keep the two-digit-year fix in locale parsers', async () => {
+      // "90" would otherwise be read as the year 1990. Only the German parser
+      // reads this whole phrase, so the fix must run on it, not just English.
+      const r = await parseIn({ language: 'de', isDayFirst: true }, 'Task @25. April 90');
+      const due = dueOf(r);
+      expect(due.getFullYear()).toBeGreaterThanOrEqual(2026);
+      expect(due.getDate()).toBe(25);
+      expect(due.getMonth()).toBe(3);
+    });
   });
 });

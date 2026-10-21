@@ -76,6 +76,9 @@ export enum LS {
   // added, so a reload after that does not start onboarding over.
   ONBOARDING_PRESET_DONE = 'SUP_ONBOARDING_PRESET_DONE',
   ONBOARDING_HINTS_DONE = 'SUP_ONBOARDING_HINTS_DONE',
+  // Quick tour (device-local, never synced): the running step and its task, so
+  // a reload resumes it. Removed once the tour ends.
+  QUICK_TOUR_STATE = 'SUP_QUICK_TOUR_STATE',
 
   LAST_FULLSCREEN_EDIT_VIEW_MODE = 'SUP_LAST_FULLSCREEN_EDIT_VIEW_MODE',
 
@@ -96,14 +99,14 @@ export enum LS {
   SELECTED_BOARD = 'SELECTED_BOARD',
   DONE_TASKS_HIDDEN = 'DONE_TASKS_HIDDEN',
   EXAMPLE_TASKS_CREATED = 'SUP_EXAMPLE_TASKS_CREATED',
-  // IDs of the seeded example tasks, so onboarding points at them only while they exist
-  EXAMPLE_TASK_IDS = 'SUP_EXAMPLE_TASK_IDS',
   LATER_TODAY_TASKS_HIDDEN = 'LATER_TODAY_TASKS_HIDDEN',
   OVERDUE_TASKS_HIDDEN = 'OVERDUE_TASKS_HIDDEN',
   REPEAT_CFGS_HIDDEN = 'REPEAT_CFGS_HIDDEN',
   PLAINSPACE_CLAIM_POOL_HIDDEN = 'PLAINSPACE_CLAIM_POOL_HIDDEN',
   // Plainspace account/identity — local-only, never synced (device identity).
   PLAINSPACE_ACCOUNT = 'SUP_PLAINSPACE_ACCOUNT',
+  // Recently deleted trash — device-local, never synced.
+  RECENTLY_DELETED_EMPTIED_AT = 'SUP_RECENTLY_DELETED_EMPTIED_AT',
 
   // Magic side nav
   NAV_SIDEBAR_EXPANDED = 'SUP_NAV_SIDEBAR_EXPANDED',

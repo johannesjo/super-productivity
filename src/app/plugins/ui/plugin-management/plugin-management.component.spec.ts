@@ -1,10 +1,10 @@
 import { signal, WritableSignal } from '@angular/core';
-import { TestBed } from '@angular/core/testing';
+import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { Router } from '@angular/router';
 import { Store } from '@ngrx/store';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { of } from 'rxjs';
 import { GlobalConfigService } from '../../../features/config/global-config.service';
 import { SnackService } from '../../../core/snack/snack.service';
@@ -19,10 +19,13 @@ import { PluginState } from '../../plugin-state.model';
 import { isPluginListed, PluginManagementComponent } from './plugin-management.component';
 import { T } from '../../../t.const';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
+import { CommunityPlugin } from '../../util/community-plugin.util';
+import { strToU8, zipSync } from 'fflate';
 
 type PluginManifestWithAuthor = PluginManifest & { author?: string };
 
 describe('PluginManagementComponent', () => {
+  let fixture: ComponentFixture<PluginManagementComponent>;
   let component: PluginManagementComponent;
   let routerNavigateSpy: jasmine.Spy;
   let layoutToggleSpy: jasmine.Spy;
@@ -92,7 +95,8 @@ describe('PluginManagementComponent', () => {
       ],
     });
 
-    component = TestBed.createComponent(PluginManagementComponent).componentInstance;
+    fixture = TestBed.createComponent(PluginManagementComponent);
+    component = fixture.componentInstance;
   });
 
   it('returns trimmed plugin author from the manifest', () => {
@@ -300,6 +304,92 @@ describe('PluginManagementComponent', () => {
     ).toEqual(['http']);
   });
 
+  describe('community plugins card', () => {
+    const normalize = (text: string | null | undefined): string =>
+      (text ?? '').replace(/\s+/g, ' ').trim();
+    const plugin = {
+      name: 'X',
+      shortDescription: '',
+      url: 'https://example.com',
+      author: 'someone',
+      authorUrl: 'https://example.com/someone',
+      id: 'x',
+      release: { version: '2.0.0', downloadUrl: 'https://example.com/x.zip', sha256: '' },
+    };
+
+    beforeEach(() => {
+      // A non-English language, so the test fails if a string stays hardcoded.
+      const translateService = TestBed.inject(TranslateService);
+      translateService.setTranslation('tr', {
+        PLUGINS: {
+          AUTHORED_BY: '{{author}} tarafından',
+          COMMUNITY_GET_LISTED: 'Eklentinizi burada listeleyin',
+          COMMUNITY_DOWNLOAD: 'v{{version}} indir',
+          COMMUNITY_INSTALL: 'v{{version}} yükle',
+          COMMUNITY_PLUGINS: 'Topluluk eklentileri',
+          COMMUNITY_WARNING: 'Topluluk eklentileri incelenmez.',
+        },
+      });
+      translateService.use('tr');
+      // A fixture instead of the real community-plugins.json, whose first entry
+      // may lack the optional authorUrl or release.
+      (component as { isInAppInstall: boolean }).isInAppInstall = true;
+      component.communityPlugins.set([plugin]);
+      fixture.detectChanges();
+    });
+
+    const card = (): HTMLElement =>
+      fixture.nativeElement.querySelector('.community-plugins-card');
+
+    it('translates the title, warning and add-your-plugin link', () => {
+      expect(normalize(card().querySelector('mat-card-title')?.textContent)).toBe(
+        'Topluluk eklentileri',
+      );
+      expect(normalize(card().querySelector('.community-warning')?.textContent)).toBe(
+        'Topluluk eklentileri incelenmez.',
+      );
+      const addYoursLink = card().querySelector<HTMLAnchorElement>(
+        'a[href$="#get-listed-in-the-app"]',
+      );
+      expect(normalize(addYoursLink?.textContent)).toBe(
+        'add Eklentinizi burada listeleyin',
+      );
+    });
+
+    it('links the translated author line to the author', () => {
+      const authorLink = card().querySelector('.community-plugin-item .plugin-author a');
+
+      expect(normalize(authorLink?.textContent)).toBe(`${plugin.author} tarafından`);
+      expect(authorLink?.getAttribute('href')).toBe(plugin.authorUrl);
+    });
+
+    it('offers a translated install button for an entry with a release', () => {
+      const button = card().querySelector('.community-plugin-item button');
+
+      expect(normalize(button?.textContent)).toBe('download v2.0.0 yükle');
+    });
+
+    it('links to the ZIP instead on web, where release hosts block the download', () => {
+      (component as { isInAppInstall: boolean }).isInAppInstall = false;
+      // A new list, so the OnPush view re-renders with the flag.
+      component.communityPlugins.set([{ ...plugin }]);
+      fixture.detectChanges();
+      const item = card().querySelector('.community-plugin-item');
+      const link = item?.querySelector<HTMLAnchorElement>('.community-plugin-action a');
+
+      expect(item?.querySelector('button')).toBeNull();
+      expect(link?.getAttribute('href')).toBe(plugin.release.downloadUrl);
+      expect(normalize(link?.textContent)).toBe('download v2.0.0 indir');
+    });
+
+    it('offers no install button for a link-only entry', () => {
+      component.communityPlugins.set([{ ...plugin, id: undefined, release: undefined }]);
+      fixture.detectChanges();
+
+      expect(card().querySelector('.community-plugin-item button')).toBeNull();
+    });
+  });
+
   it('navigates to the work view and opens the issue panel', async () => {
     await component.goToIssuePanel();
 
@@ -314,6 +404,64 @@ describe('PluginManagementComponent', () => {
 
     expect(routerNavigateSpy).toHaveBeenCalledWith(['/active/tasks']);
     expect(layoutToggleSpy).not.toHaveBeenCalled();
+  });
+
+  describe('getPluginLanguages', () => {
+    const pluginWithLanguages = (languages?: string[]): PluginInstance => ({
+      manifest: {
+        ...baseManifest,
+        ...(languages ? { i18n: { languages } } : {}),
+      },
+      loaded: true,
+      isEnabled: true,
+    });
+
+    it('names the languages in the UI language', () => {
+      TestBed.inject(TranslateService).use('de');
+
+      expect(component.getPluginLanguages(pluginWithLanguages(['de', 'fr']))).toBe(
+        'Deutsch, Französisch',
+      );
+    });
+
+    it('names English in the UI language for plugins without languages', () => {
+      TestBed.inject(TranslateService).use('de');
+
+      expect(component.getPluginLanguages(pluginWithLanguages())).toBe('Englisch');
+      expect(component.getPluginLanguages(pluginWithLanguages([]))).toBe('Englisch');
+      expect(component.getPluginLanguages(pluginWithLanguages(['en']))).toBe('Englisch');
+    });
+
+    it('names app locale codes with a region or script', () => {
+      TestBed.inject(TranslateService).use('en');
+
+      expect(
+        component.getPluginLanguages(
+          pluginWithLanguages(['pt-br', 'ro-md', 'zh', 'zh-tw']),
+        ),
+      ).toBe(
+        'Portuguese (Brazil), Romanian (Moldova), Chinese (Simplified), Chinese (Traditional)',
+      );
+    });
+
+    it('follows a UI language switch without recreating the component', () => {
+      const translateService = TestBed.inject(TranslateService);
+      const plugin = pluginWithLanguages(['fr']);
+
+      translateService.use('en');
+      expect(component.getPluginLanguages(plugin)).toBe('French');
+
+      translateService.use('de');
+      expect(component.getPluginLanguages(plugin)).toBe('Französisch');
+    });
+
+    it('falls back to the raw code for an invalid language code', () => {
+      TestBed.inject(TranslateService).use('de');
+
+      expect(
+        component.getPluginLanguages(pluginWithLanguages(['de', 'not a code!'])),
+      ).toBe('Deutsch, not a code!');
+    });
   });
 
   // Stubs MatDialog.open so the confirm dialog closes with `result`:
@@ -362,6 +510,160 @@ describe('PluginManagementComponent', () => {
     // Empty again so the template (rendered on teardown) needs no further stubs.
     pluginStates.set(new Map());
     expect(component.pluginGroups()).toEqual([]);
+  });
+
+  describe('listed community plugins', () => {
+    const zipBytes = new Uint8Array(
+      zipSync({
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        'manifest.json': strToU8(JSON.stringify({ id: 'listed', version: '1.2.0' })),
+      }),
+    );
+    let listed: CommunityPlugin;
+    let pluginStates: WritableSignal<Map<string, PluginState>>;
+    let fetchSpy: jasmine.Spy;
+
+    const uploaded = (id: string, version: string): PluginState => ({
+      manifest: { ...baseManifest, id, version },
+      status: 'not-loaded',
+      path: `uploaded://${id}`,
+      type: 'uploaded',
+      isEnabled: false,
+    });
+
+    beforeEach(async () => {
+      const digest = await crypto.subtle.digest('SHA-256', zipBytes);
+      listed = {
+        name: 'Listed',
+        shortDescription: '',
+        url: 'https://example.com',
+        author: 'someone',
+        id: 'listed',
+        release: {
+          version: '1.2.0',
+          downloadUrl: 'https://example.com/listed.zip',
+          sha256: Array.from(new Uint8Array(digest), (b) =>
+            b.toString(16).padStart(2, '0'),
+          ).join(''),
+        },
+      };
+      component.communityPlugins.set([listed]);
+      pluginStates = TestBed.inject(PluginService).pluginStates as WritableSignal<
+        Map<string, PluginState>
+      >;
+      fetchSpy = spyOn(window, 'fetch').and.callFake(() =>
+        Promise.resolve(new Response(zipBytes)),
+      );
+    });
+
+    afterEach(() => {
+      // Empty again so the template (rendered on teardown) needs no further stubs.
+      pluginStates.set(new Map());
+    });
+
+    it('marks the entry by the installed uploaded plugin with the same id', () => {
+      expect(component.communityPluginRows()[0].status).toBe('notInstalled');
+
+      pluginStates.set(new Map([['listed', uploaded('listed', '1.2.0')]]));
+      expect(component.communityPluginRows()[0].status).toBe('installed');
+      expect(component.communityUpdates().size).toBe(0);
+
+      pluginStates.set(new Map([['listed', uploaded('listed', '1.1.0')]]));
+      expect(component.communityPluginRows()[0].status).toBe('updateAvailable');
+      expect(component.communityUpdates().get('listed')).toEqual({
+        plugin: listed,
+        release: listed.release!,
+      });
+    });
+
+    it('ignores a built-in plugin with the same id', () => {
+      pluginStates.set(
+        new Map([['listed', { ...uploaded('listed', '1.0.0'), type: 'built-in' }]]),
+      );
+
+      expect(component.communityPluginRows()[0].status).toBe('notInstalled');
+    });
+
+    it('downloads, verifies and installs the release after the risk warning', async () => {
+      const openSpy = stubConfirmDialog(true);
+      loadPluginFromZipSpy.and.returnValue(
+        Promise.resolve({ manifest: { id: 'listed', name: 'Listed' } }),
+      );
+
+      await component.installCommunityPlugin(listed);
+
+      expect(openSpy).toHaveBeenCalledOnceWith(DialogConfirmComponent, {
+        restoreFocus: true,
+        data: {
+          message: jasmine.stringContaining(T.PLUGINS.RISK_DATA_ACCESS),
+          okTxt: T.PLUGINS.INSTALL_PLUGIN,
+        },
+      });
+      expect(fetchSpy).toHaveBeenCalledWith(listed.release!.downloadUrl, {
+        credentials: 'omit',
+      });
+      const file: File = loadPluginFromZipSpy.calls.mostRecent().args[0];
+      expect(new Uint8Array(await file.arrayBuffer())).toEqual(zipBytes);
+      expect(snackOpenSpy).toHaveBeenCalledWith({
+        type: 'SUCCESS',
+        msg: T.PLUGINS.PLUGIN_INSTALLED,
+        translateParams: { name: 'Listed' },
+      });
+      expect(component.isUploading()).toBe(false);
+    });
+
+    it('downloads nothing when the risk warning is cancelled', async () => {
+      stubConfirmDialog(undefined);
+
+      await component.installCommunityPlugin(listed);
+
+      expect(fetchSpy).not.toHaveBeenCalled();
+      expect(loadPluginFromZipSpy).not.toHaveBeenCalled();
+    });
+
+    it('installs nothing and says so when the download does not match the hash', async () => {
+      stubConfirmDialog(true);
+      fetchSpy.and.callFake(() =>
+        Promise.resolve(new Response(new TextEncoder().encode('swapped'))),
+      );
+
+      await component.installCommunityPlugin(listed);
+
+      expect(loadPluginFromZipSpy).not.toHaveBeenCalled();
+      expect(snackOpenSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          type: 'ERROR',
+          msg: T.PLUGINS.COMMUNITY_HASH_MISMATCH,
+          translateParams: jasmine.objectContaining({ name: 'Listed' }),
+        }),
+      );
+      expect(component.isUploading()).toBe(false);
+    });
+
+    it('shows the install error, as for a ZIP upload, when the plugin is rejected', async () => {
+      stubConfirmDialog(true);
+      loadPluginFromZipSpy.and.returnValue(Promise.reject(new Error('Manifest invalid')));
+
+      await component.installCommunityPlugin(listed);
+
+      expect(snackOpenSpy).toHaveBeenCalledWith({
+        type: 'ERROR',
+        msg: 'Manifest invalid',
+        isSkipTranslate: true,
+      });
+      expect(component.isUploading()).toBe(false);
+    });
+
+    it('points to the manual install when the download fails', async () => {
+      stubConfirmDialog(true);
+      fetchSpy.and.callFake(() => Promise.reject(new TypeError('Failed to fetch')));
+
+      await component.installCommunityPlugin(listed);
+
+      expect(snackOpenSpy).toHaveBeenCalledWith(
+        jasmine.objectContaining({ msg: T.PLUGINS.COMMUNITY_DOWNLOAD_FAILED }),
+      );
+    });
   });
 
   it('titles the details section with the permission summary when there is one', () => {

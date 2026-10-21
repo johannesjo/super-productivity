@@ -8,7 +8,15 @@ import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions'
 import { CaptureKeyConfig } from '../../config/global-config.model';
 import { INBOX_PROJECT } from '../../project/project.const';
 import { WorkContextType } from '../../work-context/work-context.model';
-import { DEFAULT_TASK } from '../task.model';
+import { DEFAULT_TASK, TaskReminderOptionId } from '../task.model';
+import { addTaskRepeatCfgToTask } from '../../task-repeat-cfg/store/task-repeat-cfg.actions';
+import { nanoid } from 'nanoid';
+import {
+  CaptureRepeat,
+  parseCaptureRepeat,
+  toCaptureRepeatCfg,
+} from './capture-repeat-cfg';
+import { parseDueDay, parseDueTime, toSchedule, toStartTime } from './capture-schedule';
 import { NativeCaptureSource } from '../native-capture/native-capture-importer.service';
 
 /** Never rename: installs keep their receipts under it. */
@@ -27,7 +35,16 @@ export interface AgentCapture {
   /** The server-issued task id; also the importer's dedupe and receipt id. */
   id: string;
   /** Null when the item could not be opened or its payload is invalid. */
-  task: { title: string; notes?: string; createdAt: number } | null;
+  task: {
+    title: string;
+    notes?: string;
+    createdAt: number;
+    /** `YYYY-MM-DD`; a calendar day. */
+    dueDay?: string;
+    /** `[hours, minutes]` on `dueDay`, in this device's time zone. */
+    dueTime?: [number, number];
+    repeat?: CaptureRepeat;
+  } | null;
 }
 
 /** What one import run captured synchronously when it claimed. */
@@ -37,6 +54,10 @@ export interface AgentCaptureRun {
   deviceId: string;
   /** Set in the addTask itself, so setDefaultEstimateIfNonGiven$ adds no second op. */
   defaultEstimate: number;
+  /** Applied to a capture with a time, as when scheduling in the app. */
+  defaultRemindOption: TaskReminderOptionId;
+  /** This device's logical today, `YYYY-MM-DD`: where an undated series starts. */
+  todayStr: string;
   /** Throws SyncEpochChangedError once the account, provider or password changed. */
   assertUnchanged: (context: string) => void;
 }
@@ -44,7 +65,11 @@ export interface AgentCaptureRun {
 export interface SuperSyncCaptureSourceDeps {
   /** Called once per claim, in one synchronous block; null skips the run. */
   startRun: () => AgentCaptureRun | null;
-  dispatch: (action: ReturnType<typeof TaskSharedActions.addTask>) => void;
+  dispatch: (
+    action:
+      | ReturnType<typeof TaskSharedActions.addTask>
+      | ReturnType<typeof addTaskRepeatCfgToTask>,
+  ) => void;
 }
 
 /**
@@ -77,8 +102,12 @@ export const createSuperSyncCaptureSource = (
     },
     isValid: (capture) => capture.task !== null,
     createTask: (capture) => {
-      const { defaultEstimate } = currentRun('createTask');
-      deps.dispatch(addInboxTaskAction(capture, defaultEstimate));
+      const active = currentRun('createTask');
+      deps.dispatch(
+        addInboxTaskAction(capture, active.defaultEstimate, active.defaultRemindOption),
+      );
+      const repeatAction = addRepeatCfgAction(capture, active);
+      if (repeatAction) deps.dispatch(repeatAction);
     },
     acknowledge: async (id) => {
       const { provider, deviceId } = currentRun('acknowledge');
@@ -116,7 +145,7 @@ const openItem = async (
 ): Promise<AgentCapture> => {
   try {
     const payload = await openCapture(run.key, item.itemId, item.ciphertext);
-    return { id: item.taskId, task: toTask(payload) };
+    return { id: item.taskId, task: toCaptureTask(payload) };
   } catch (e) {
     if (!(e instanceof CaptureOpenError)) throw e;
     // Kept un-acked: it expires server-side. Id and code only, never content.
@@ -140,7 +169,21 @@ export const neutralizeAutoloadMedia = (notes: string): string =>
   // `!+`: dropping one `!` of `!![` would leave a working `![`.
   notes.replace(/!+\[/g, '[').replace(AUTOLOAD_TAG, '&lt;');
 
-const toTask = (payload: unknown): AgentCapture['task'] => {
+/**
+ * Optional v1 fields. An invalid day or time is dropped rather than failing
+ * the capture: the task still lands, unscheduled, as on apps before them.
+ */
+const toDue = (
+  p: Record<string, unknown>,
+): Pick<NonNullable<AgentCapture['task']>, 'dueDay' | 'dueTime'> => {
+  const dueDay = parseDueDay(p.dueDate);
+  if (!dueDay) return {};
+  const dueTime = parseDueTime(p.dueTime);
+  return dueTime ? { dueDay, dueTime } : { dueDay };
+};
+
+/** Validates an opened payload; null when it cannot become a task. */
+export const toCaptureTask = (payload: unknown): AgentCapture['task'] => {
   const p = payload as Record<string, unknown> | null;
   if (!p || p.v !== 1 || typeof p.title !== 'string') return null;
   const title = p.title.trim();
@@ -153,12 +196,20 @@ const toTask = (payload: unknown): AgentCapture['task'] => {
       ? neutralizeAutoloadMedia([...p.notes].slice(0, NOTES_MAX_CHARS).join(''))
       : '';
   const createdAt = typeof p.createdAt === 'number' ? p.createdAt : Date.now();
-  return { title, ...(notes ? { notes } : {}), createdAt };
+  const repeat = parseCaptureRepeat(p.repeat);
+  return {
+    title,
+    ...(notes ? { notes } : {}),
+    createdAt,
+    ...toDue(p),
+    ...(repeat ? { repeat } : {}),
+  };
 };
 
 const addInboxTaskAction = (
   capture: AgentCapture,
   defaultEstimate: number,
+  defaultRemindOption: TaskReminderOptionId,
 ): ReturnType<typeof TaskSharedActions.addTask> => {
   const task = capture.task as NonNullable<AgentCapture['task']>;
   return TaskSharedActions.addTask({
@@ -170,11 +221,40 @@ const addInboxTaskAction = (
       projectId: INBOX_PROJECT.id,
       created: task.createdAt,
       timeEstimate: defaultEstimate,
+      ...toSchedule(task, defaultRemindOption),
     },
     workContextId: INBOX_PROJECT.id,
     workContextType: WorkContextType.PROJECT,
     isAddToBacklog: false,
     isAddToBottom: true,
     isIgnoreShortSyntax: true,
+  });
+};
+
+/**
+ * Makes a recurring capture's task repeatable, as the add-task bar does after
+ * its addTask: the same action, so the same effects pick the first occurrence.
+ */
+const addRepeatCfgAction = (
+  capture: AgentCapture,
+  run: AgentCaptureRun,
+): ReturnType<typeof addTaskRepeatCfgToTask> | null => {
+  const task = capture.task as NonNullable<AgentCapture['task']>;
+  if (!task.repeat) return null;
+  const startTime = toStartTime(task.dueTime);
+  const cfg = toCaptureRepeatCfg(task.repeat, {
+    title: task.title,
+    notes: task.notes,
+    projectId: INBOX_PROJECT.id,
+    startDay: task.dueDay ?? run.todayStr,
+    startTime,
+    defaultEstimate: run.defaultEstimate,
+    remindOption: run.defaultRemindOption,
+  });
+  return addTaskRepeatCfgToTask({
+    taskId: capture.id,
+    taskRepeatCfg: { ...cfg, id: nanoid() },
+    startTime: cfg.startTime,
+    remindAt: cfg.remindAt,
   });
 };
