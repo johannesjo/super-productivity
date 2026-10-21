@@ -22,45 +22,57 @@ const SPACE = {
   role: 'owner',
 };
 
+const SPACE_B = {
+  id: 'space-beta-id',
+  name: 'Beta',
+  slug: 'beta',
+  memberDisplayName: 'Me',
+  role: 'member',
+};
+
+interface TaskRequest {
+  host: string;
+  token: string;
+  status: number;
+}
+
 interface FakePlainspace {
+  /** `${host} ${token}` → account email; a token is only valid on its host. */
   tokens: Map<string, string>;
   isTasksOffline: boolean;
   abortedTaskRequests: number;
-  rejectedTaskRequests: number;
-  taskRequestTokens: string[];
+  taskRequests: TaskRequest[];
 }
 
 const installFakePlainspace = async (page: Page): Promise<FakePlainspace> => {
   const server: FakePlainspace = {
-    // token → account email
     tokens: new Map([
-      ['pat_old', 'me@e2e.test'],
-      ['pat_other_account', 'other@e2e.test'],
+      [`${HOST} pat_old`, 'me@e2e.test'],
+      [`${OTHER_HOST} pat_other_account`, 'other@e2e.test'],
     ]),
     isTasksOffline: false,
     abortedTaskRequests: 0,
-    rejectedTaskRequests: 0,
-    taskRequestTokens: [],
+    taskRequests: [],
   };
   const cors = {
     ['access-control-allow-origin']: '*',
     ['access-control-allow-headers']: 'authorization, content-type',
     ['access-control-allow-methods']: 'GET, POST, PATCH, DELETE, OPTIONS',
   };
-  const spTask = {
-    id: 'task-1',
-    title: 'Shared task',
+  const spTask = (host: string, space: typeof SPACE): Record<string, unknown> => ({
+    id: `task-${space.slug}`,
+    title: `${space.name} task`,
     done: false,
-    projectId: SPACE.id,
-    projectName: SPACE.name,
-    projectSlug: SPACE.slug,
+    projectId: space.id,
+    projectName: space.name,
+    projectSlug: space.slug,
     listId: 'list-1',
-    url: `${HOST}/${SPACE.slug}/item/task-1`,
+    url: `${host}/${space.slug}/item/task-${space.slug}`,
     createdAt: '2026-10-20T08:00:00.000Z',
     updatedAt: '2026-10-20T08:00:00.000Z',
     scheduledAt: null,
     isRecurring: false,
-  };
+  });
 
   await page.route(
     /^https:\/\/(plainspace\.org|other-plainspace\.e2e)\/api\/integration\//,
@@ -70,18 +82,21 @@ const installFakePlainspace = async (page: Page): Promise<FakePlainspace> => {
         await route.fulfill({ status: 204, headers: cors });
         return;
       }
-      const path = new URL(req.url()).pathname.replace('/api/integration', '');
+      const url = new URL(req.url());
+      const host = url.origin;
+      const space = host === HOST ? SPACE : SPACE_B;
+      const path = url.pathname.replace('/api/integration', '');
       if (path === '/tasks' && server.isTasksOffline) {
         server.abortedTaskRequests++;
         await route.abort('internetdisconnected');
         return;
       }
       const token = (req.headers()['authorization'] ?? '').replace(/^Bearer /, '');
-      const email = server.tokens.get(token);
+      const email = server.tokens.get(`${host} ${token}`);
+      if (path === '/tasks') {
+        server.taskRequests.push({ host, token, status: email ? 200 : 401 });
+      }
       if (!email) {
-        if (path === '/tasks') {
-          server.rejectedTaskRequests++;
-        }
         await route.fulfill({
           status: 401,
           headers: cors,
@@ -90,10 +105,9 @@ const installFakePlainspace = async (page: Page): Promise<FakePlainspace> => {
         return;
       }
       if (path === '/me') {
-        await route.fulfill({ headers: cors, json: { email, projects: [SPACE] } });
+        await route.fulfill({ headers: cors, json: { email, projects: [space] } });
       } else if (path === '/tasks') {
-        server.taskRequestTokens.push(token);
-        await route.fulfill({ headers: cors, json: { tasks: [spTask] } });
+        await route.fulfill({ headers: cors, json: { tasks: [spTask(host, space)] } });
       } else if (path === '/claimable-tasks') {
         await route.fulfill({ headers: cors, json: { tasks: [] } });
       } else {
@@ -103,6 +117,9 @@ const installFakePlainspace = async (page: Page): Promise<FakePlainspace> => {
   );
   return server;
 };
+
+const lastTaskRequest = (server: FakePlainspace, host: string): TaskRequest | undefined =>
+  server.taskRequests.filter((r) => r.host === host).pop();
 
 const readClipboard = (page: Page): Promise<string> =>
   page.evaluate(() => navigator.clipboard.readText());
@@ -151,6 +168,7 @@ test.describe('Plainspace Release 0', () => {
       .poll(() => server.abortedTaskRequests, { timeout: 30000 })
       .toBeGreaterThan(0);
     await page.locator('.e2e-toggle-issue-provider-panel').click();
+    await expect(page.locator('issue-panel')).toBeVisible();
     const reconnectNotice = activeTab(page).locator(
       'plainspace-reconnect-notice .callout',
     );
@@ -161,24 +179,34 @@ test.describe('Plainspace Release 0', () => {
     ).toHaveCount(0);
 
     // Plainspace revokes the old token (a new one was minted elsewhere) and is
-    // reachable again. Adding a second provider (another host and account)
-    // restarts the poll timer.
-    server.tokens.delete('pat_old');
-    server.tokens.set('pat_new', 'me@e2e.test');
+    // reachable again. Adding a second provider (another host and account,
+    // bound to the Inbox so it polls too) restarts the poll timer.
+    server.tokens.delete(`${HOST} pat_old`);
+    server.tokens.set(`${HOST} pat_new`, 'me@e2e.test');
     server.isTasksOffline = false;
     await page.locator('issue-panel .mat-mdc-tab').last().click();
     await page.getByRole('button', { name: 'Plainspace', exact: true }).click();
     const editDialog = page.locator('dialog-edit-issue-provider');
     await editDialog.locator('input[id*="host"]').fill(OTHER_HOST);
-    await editDialog.locator('input[id*="spaceId"]').fill('space-beta-id');
+    await editDialog.locator('input[id*="spaceId"]').fill(SPACE_B.id);
     await editDialog.locator('input[id*="token"]').fill('pat_other_account');
+    await editDialog.getByRole('button', { name: /Advanced Config/i }).click();
+    await editDialog.locator('mat-select[id*="defaultProjectId"]').click();
+    await page.getByRole('option', { name: 'Inbox' }).click();
     await editDialog.getByRole('button', { name: 'Save', exact: true }).click();
     await expect(editDialog).toBeHidden();
 
-    // Item 2: the 401 shows "reconnect" on the shared project's provider only.
+    // Item 2: the 401 shows "reconnect" on the shared project's provider only;
+    // the other host's provider polls fine and shows nothing.
     await expect
-      .poll(() => server.rejectedTaskRequests, { timeout: 30000 })
-      .toBeGreaterThan(0);
+      .poll(() => lastTaskRequest(server, HOST)?.status, { timeout: 30000 })
+      .toBe(401);
+    await expect
+      .poll(() => lastTaskRequest(server, OTHER_HOST)?.status, { timeout: 30000 })
+      .toBe(200);
+    await openProviderTab(page, SPACE_B.id);
+    await expect(activeTab(page).locator('header .title')).toHaveText(SPACE_B.id);
+    await expect(reconnectNotice).toHaveCount(0);
     await openProviderTab(page, SPACE.id);
     await expect(reconnectNotice).toBeVisible();
     await expect(reconnectNotice).toContainText('Plainspace rejected the connection');
@@ -192,14 +220,32 @@ test.describe('Plainspace Release 0', () => {
     await connectDialog.getByRole('button', { name: 'Connect', exact: true }).click();
     await expect(connectDialog).toBeHidden();
     await expect(reconnectNotice).toHaveCount(0);
-    // The token change restarts polling; the next poll uses the new token.
+    // The token change restarts polling: the shared project's provider now
+    // polls with the new token, and the other host's provider still polls with
+    // its own (the stub rejects a token on the wrong host, so a misrouted
+    // replacement would show up as a 401 and a reconnect notice there).
+    const requestsBeforeRestart = server.taskRequests.length;
     await expect
-      .poll(() => server.taskRequestTokens.includes('pat_new'), { timeout: 30000 })
-      .toBe(true);
-    expect(server.taskRequestTokens).not.toContain('pat_other_account');
+      .poll(
+        () =>
+          server.taskRequests
+            .slice(requestsBeforeRestart)
+            .filter((r) => r.status === 200)
+            .map((r) => `${r.host} ${r.token}`)
+            .sort(),
+        { timeout: 30000 },
+      )
+      .toEqual(
+        expect.arrayContaining([`${HOST} pat_new`, `${OTHER_HOST} pat_other_account`]),
+      );
+    expect(
+      server.taskRequests.slice(requestsBeforeRestart).filter((r) => r.status !== 200),
+    ).toEqual([]);
+    await openProviderTab(page, SPACE_B.id);
+    await expect(reconnectNotice).toHaveCount(0);
 
     expect(await providerToken(page, SPACE.id)).toBe('pat_new');
-    expect(await providerToken(page, 'space-beta-id')).toBe('pat_other_account');
+    expect(await providerToken(page, SPACE_B.id)).toBe('pat_other_account');
 
     // Item 3: the shared project's menu copies the invite link too.
     await page.evaluate(() => navigator.clipboard.writeText(''));
@@ -209,29 +255,122 @@ test.describe('Plainspace Release 0', () => {
       .poll(() => readClipboard(page), { timeout: 5000 })
       .toBe(`${HOST}/${SPACE.slug}`);
   });
+
+  // #8616 state: an integration still holds an older, revoked token while this
+  // device's saved account (and the project it shared) holds the current one.
+  // Minting a new token revokes the current one too, so one reconnect has to
+  // move both groups; otherwise reconnecting either would break the other.
+  test('one reconnect moves every revoked token of the account', async ({
+    page,
+    workViewPage,
+    projectPage,
+  }) => {
+    test.setTimeout(120000);
+    await workViewPage.waitForTaskList();
+    const server = await installFakePlainspace(page);
+    // pat_old was revoked when pat_mid was minted.
+    server.tokens.delete(`${HOST} pat_old`);
+    server.tokens.set(`${HOST} pat_mid`, 'me@e2e.test');
+
+    // An integration still on the revoked token, bound to the Inbox so it polls
+    // (addressed by the space slug, so its tab reads "alpha").
+    await page.locator('.e2e-toggle-issue-provider-panel').click();
+    await expect(page.locator('issue-panel')).toBeVisible();
+    await page.locator('issue-panel .mat-mdc-tab').last().click();
+    await page.getByRole('button', { name: 'Plainspace', exact: true }).click();
+    const editDialog = page.locator('dialog-edit-issue-provider');
+    await editDialog.locator('input[id*="host"]').fill(HOST);
+    await editDialog.locator('input[id*="spaceId"]').fill(SPACE.slug);
+    await editDialog.locator('input[id*="token"]').fill('pat_old');
+    await editDialog.getByRole('button', { name: /Advanced Config/i }).click();
+    await editDialog.locator('mat-select[id*="defaultProjectId"]').click();
+    await page.getByRole('option', { name: 'Inbox' }).click();
+    await editDialog.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(editDialog).toBeHidden();
+    await page.locator('.e2e-toggle-issue-provider-panel').click();
+
+    // Share a project with the current token: saved account and provider hold it.
+    await projectPage.createProject('Shared');
+    await projectPage.openProjectContextMenu('Shared');
+    await page.getByRole('menuitem', { name: /Collaborate on Plainspace/ }).click();
+    const connectDialog = page.locator('plainspace-connect-dialog');
+    await connectDialog.locator('input[type="password"]').fill('pat_mid');
+    await connectDialog.getByRole('button', { name: 'Connect', exact: true }).click();
+    const picker = page.locator('plainspace-space-picker-dialog');
+    await picker.getByRole('button', { name: 'Link space' }).click();
+    await expect(picker).toBeHidden();
+
+    // The old integration's poll is rejected.
+    await expect
+      .poll(
+        () => server.taskRequests.some((r) => r.token === 'pat_old' && r.status === 401),
+        { timeout: 30000 },
+      )
+      .toBe(true);
+    await page.locator('.e2e-toggle-issue-provider-panel').click();
+    await expect(page.locator('issue-panel')).toBeVisible();
+    const reconnectNotice = activeTab(page).locator(
+      'plainspace-reconnect-notice .callout',
+    );
+    await openProviderTab(page, SPACE.slug);
+    await expect(reconnectNotice).toBeVisible();
+
+    // Reconnecting mints pat_new, which revokes pat_mid as well.
+    server.tokens.delete(`${HOST} pat_mid`);
+    server.tokens.set(`${HOST} pat_new`, 'me@e2e.test');
+    await reconnectNotice.getByRole('button', { name: 'Reconnect' }).click();
+    await connectDialog.locator('input[type="password"]').fill('pat_new');
+    await connectDialog.getByRole('button', { name: 'Connect', exact: true }).click();
+    await expect(connectDialog).toBeHidden();
+
+    // Both integrations now poll with the new token and nothing is rejected.
+    const requestsBeforeRestart = server.taskRequests.length;
+    await expect
+      .poll(
+        () =>
+          server.taskRequests
+            .slice(requestsBeforeRestart)
+            .filter((r) => r.token === 'pat_new' && r.status === 200).length,
+        { timeout: 30000 },
+      )
+      .toBeGreaterThan(0);
+    expect(await providerToken(page, SPACE.slug)).toBe('pat_new');
+    expect(await providerToken(page, SPACE.id)).toBe('pat_new');
+    expect(
+      server.taskRequests.slice(requestsBeforeRestart).filter((r) => r.status !== 200),
+    ).toEqual([]);
+    await openProviderTab(page, SPACE.id);
+    await expect(reconnectNotice).toHaveCount(0);
+  });
 });
 
 const activeTab = (page: Page): ReturnType<Page['locator']> =>
   page.locator('issue-panel .mat-mdc-tab-body-active issue-provider-tab');
 
-/** Selects the issue panel tab whose header names the given space id. */
+/**
+ * Selects the issue panel tab whose header names the given space id. Retried as
+ * a whole: right after the panel opens its provider tabs may not be rendered
+ * yet (`count()` doesn't wait) and a click during the open animation can be
+ * lost, which made a single pass fail on slower CI runners.
+ */
 const openProviderTab = async (page: Page, spaceId: string): Promise<void> => {
   const tabs = page.locator('issue-panel .mat-mdc-tab');
-  const count = await tabs.count();
-  // The last tab is the setup overview. Tab bodies animate, so give each tab a
-  // moment to become the active one before moving on.
-  for (let i = 0; i < count - 1; i++) {
-    await tabs.nth(i).click();
-    try {
-      await expect(activeTab(page).locator('header .title')).toHaveText(spaceId, {
-        timeout: 3000,
-      });
-      return;
-    } catch {
-      // not this tab
+  const header = activeTab(page).locator('header .title');
+  await expect(async () => {
+    // The last tab is the setup overview; at least one provider tab precedes it.
+    const count = await tabs.count();
+    expect(count).toBeGreaterThan(1);
+    for (let i = 0; i < count - 1; i++) {
+      await tabs.nth(i).click();
+      try {
+        await expect(header).toHaveText(spaceId, { timeout: 2000 });
+        return;
+      } catch {
+        // not this tab
+      }
     }
-  }
-  throw new Error(`No issue panel tab for ${spaceId}`);
+    throw new Error(`No issue panel tab for ${spaceId}`);
+  }).toPass({ timeout: 30000 });
 };
 
 /** Reads a provider's stored token from its settings dialog, then closes it. */

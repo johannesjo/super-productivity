@@ -10,8 +10,7 @@ import { PlainspaceApiService } from './plainspace-api.service';
 import { PlainspaceSyncAdapterService } from './plainspace-sync-adapter.service';
 import { PlainspaceIssue } from './plainspace-issue.model';
 import {
-  isPlainspaceAuthError,
-  isPlainspaceUnreachableError,
+  isPlainspaceQuietPollError,
   PlainspaceConnectionStateService,
 } from './plainspace-connection-state.service';
 
@@ -178,21 +177,37 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
       // few minutes; a rejected token shows "reconnect" in the issue panel
       // instead. The caller only adds what it gets, so an empty answer here
       // imports nothing and removes nothing. Anything else keeps the snack.
-      if (isPlainspaceUnreachableError(err) || isPlainspaceAuthError(err)) {
+      if (isPlainspaceQuietPollError(err)) {
         return [];
       }
       throw err;
     }
   }
 
-  override searchIssues(
+  /**
+   * Records whether the token works, then answers the failures a poll also
+   * keeps quiet (offline, 5xx, 401, a 403 proxy) with no results, as search did
+   * before: the add-task bar searches every provider together (`forkJoin`), so
+   * a throw would snack on each search and drop the other providers' results.
+   * A rejected token shows "reconnect" in the issue panel. An unexpected error
+   * still throws. A search result only lists tasks to add; nothing is removed
+   * or marked missing from it.
+   */
+  override async searchIssues(
     searchTerm: string,
     issueProviderId: string,
   ): Promise<SearchResultItem[]> {
-    return this._tracked(
-      issueProviderId,
-      super.searchIssues(searchTerm, issueProviderId),
-    );
+    try {
+      return await this._tracked(
+        issueProviderId,
+        super.searchIssues(searchTerm, issueProviderId),
+      );
+    } catch (err) {
+      if (isPlainspaceQuietPollError(err)) {
+        return [];
+      }
+      throw err;
+    }
   }
 
   /** Records whether the provider's token still works; never swallows errors. */

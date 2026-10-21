@@ -66,9 +66,9 @@
   </button>
 }
 
-@if (isForProject && (isSharedOnPlainspace$ | async)) {
+@if (isForProject && (inviteUrl$ | async); as inviteUrl) {
   <button
-    (click)="copyPlainspaceInviteLink()"
+    (click)="copyPlainspaceInviteUrl(inviteUrl)"
     mat-menu-item
   >
     <mat-icon>link</mat-icon>

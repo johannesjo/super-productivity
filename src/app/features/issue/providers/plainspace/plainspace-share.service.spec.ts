@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
-import { of, throwError } from 'rxjs';
+import { firstValueFrom, of, throwError } from 'rxjs';
 import { PlainspaceShareService } from './plainspace-share.service';
 import { PlainspaceApiService } from './plainspace-api.service';
 import { SnackService } from '../../../../core/snack/snack.service';
@@ -249,7 +249,7 @@ describe('PlainspaceShareService', () => {
     });
   });
 
-  describe('copyInviteLink', () => {
+  describe('invite link', () => {
     const provider = {
       id: 'ip1',
       issueProviderKey: 'PLAINSPACE',
@@ -258,40 +258,40 @@ describe('PlainspaceShareService', () => {
       token: 'pat_x',
     } as unknown;
 
-    it('copies the space URL, which Plainspace turns into its join page', async () => {
+    it('resolves the space URL, which Plainspace turns into its join page', async () => {
       store.select.and.returnValue(of(provider));
       api.getSpaceUrl$.and.returnValue(of('https://plainspace.org/my-slug'));
+
+      expect(await firstValueFrom(service.inviteUrl$('p1'))).toBe(
+        'https://plainspace.org/my-slug',
+      );
+      expect(api.getSpaceUrl$).toHaveBeenCalledWith(provider as never);
+    });
+
+    it('resolves null without a request when the project is not shared', async () => {
+      store.select.and.returnValue(of(undefined));
+
+      expect(await firstValueFrom(service.inviteUrl$('p1'))).toBeNull();
+      expect(api.getSpaceUrl$).not.toHaveBeenCalled();
+    });
+
+    it('copies the URL synchronously from the call (inside the click)', async () => {
       const writeText = spyOn(navigator.clipboard, 'writeText').and.resolveTo();
 
-      await service.copyInviteLink('p1');
-
+      const copying = service.copyInviteUrl('https://plainspace.org/my-slug');
+      // WebKit needs the write inside the click: no await before it.
       expect(writeText).toHaveBeenCalledWith('https://plainspace.org/my-slug');
+      await copying;
       expect(snack.open).toHaveBeenCalledWith({
         type: 'SUCCESS',
         msg: T.PLAINSPACE.INVITE_LINK_COPIED,
       });
     });
 
-    it('reports a failure when the URL cannot be resolved (offline)', async () => {
-      store.select.and.returnValue(of(provider));
-      api.getSpaceUrl$.and.returnValue(of(null));
-      const writeText = spyOn(navigator.clipboard, 'writeText');
-
-      await service.copyInviteLink('p1');
-
-      expect(writeText).not.toHaveBeenCalled();
-      expect(snack.open).toHaveBeenCalledWith({
-        type: 'ERROR',
-        msg: T.PLAINSPACE.COPY_INVITE_LINK_FAILED,
-      });
-    });
-
     it('reports a failure when the clipboard refuses the write', async () => {
-      store.select.and.returnValue(of(provider));
-      api.getSpaceUrl$.and.returnValue(of('https://plainspace.org/my-slug'));
       spyOn(navigator.clipboard, 'writeText').and.rejectWith(new Error('denied'));
 
-      await service.copyInviteLink('p1');
+      await service.copyInviteUrl('https://plainspace.org/my-slug');
 
       expect(snack.open).toHaveBeenCalledWith({
         type: 'ERROR',

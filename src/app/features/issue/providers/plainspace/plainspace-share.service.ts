@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Observable, of } from 'rxjs';
+import { first, switchMap } from 'rxjs/operators';
 import { nanoid } from 'nanoid';
 import { IssueProviderActions } from '../../store/issue-provider.actions';
 import { IssueProviderPlainspace } from '../../issue.model';
@@ -29,7 +30,7 @@ import {
  * backlog). Used by the project context menu's "Collaborate on Plainspace"
  * action and the create-project dialog's share toggle. Also hosts
  * `openProjectOnPlainspace` (the header "Open in Plainspace" button) and
- * `copyInviteLink` (project menu, share success snack), which reuse this
+ * the invite link (project menu, share success snack), which reuse this
  * service's store/api/snack wiring.
  */
 @Injectable({ providedIn: 'root' })
@@ -111,7 +112,7 @@ export class PlainspaceShareService {
         ...(inviteUrl
           ? {
               actionStr: T.PLAINSPACE.COPY_INVITE_LINK,
-              actionFn: () => this._copyInviteUrl(inviteUrl),
+              actionFn: () => this.copyInviteUrl(inviteUrl),
             }
           : {}),
       });
@@ -158,29 +159,24 @@ export class PlainspaceShareService {
   }
 
   /**
-   * Copies the bound space's web URL. It doubles as the invite link: Plainspace
-   * sends a visitor who isn't a member to the space's join page (or shows a
-   * private space's notice), so no separate invite exists.
+   * The bound space's web URL, or null when there is none or it can't be
+   * resolved (offline, rejected token). It doubles as the invite link:
+   * Plainspace sends a visitor who isn't a member to the space's join page (or
+   * shows a private space's notice), so no separate invite exists. Resolved
+   * when the project menu opens so the click can copy synchronously — WebKit
+   * only allows a clipboard write inside the click's user activation.
    */
-  async copyInviteLink(projectId: string): Promise<void> {
-    const provider = await firstValueFrom(
-      this._store.select(selectPlainspaceProviderForProject(projectId)),
+  inviteUrl$(projectId: string): Observable<string | null> {
+    return this._store.select(selectPlainspaceProviderForProject(projectId)).pipe(
+      first(),
+      switchMap((provider) =>
+        provider ? this._plainspaceApiService.getSpaceUrl$(provider) : of(null),
+      ),
     );
-    if (!provider) {
-      return;
-    }
-    const url = await firstValueFrom(this._plainspaceApiService.getSpaceUrl$(provider));
-    if (!url) {
-      this._snackService.open({
-        type: 'ERROR',
-        msg: T.PLAINSPACE.COPY_INVITE_LINK_FAILED,
-      });
-      return;
-    }
-    await this._copyInviteUrl(url);
   }
 
-  private async _copyInviteUrl(url: string): Promise<void> {
+  /** Copies an already resolved invite URL; call it straight from the click. */
+  async copyInviteUrl(url: string): Promise<void> {
     try {
       await navigator.clipboard.writeText(url);
       this._snackService.open({ type: 'SUCCESS', msg: T.PLAINSPACE.INVITE_LINK_COPIED });

@@ -229,7 +229,7 @@ describe('PlainspaceCommonInterfacesService', () => {
       await expectAsync(service.getFreshDataForIssueTask(tasks[0])).toBeRejected();
     });
 
-    [0, 503, 401].forEach((status) => {
+    [0, 503, 401, 403].forEach((status) => {
       it(`backlog import adds nothing and stays quiet on a ${status}`, async () => {
         failMyTasks(status);
         expect(await service.getNewIssuesToAddToBacklog('p1', [])).toEqual([]);
@@ -240,6 +240,43 @@ describe('PlainspaceCommonInterfacesService', () => {
     it('backlog import keeps the failure snack for an unexpected error', async () => {
       failMyTasks(400);
       await expectAsync(service.getNewIssuesToAddToBacklog('p1', [])).toBeRejected();
+    });
+
+    // The add-task bar searches all providers in one forkJoin: a throw here
+    // would snack on every search and drop the other providers' results.
+    it('search answers a rejected token with no results and marks reconnect', async () => {
+      (service as unknown as { _getCfgOnce$: jasmine.Spy })._getCfgOnce$.and.returnValue(
+        of({ isEnabled: true, host: 'https://plainspace.org', spaceId: 's', token: 't' }),
+      );
+      (api as unknown as { searchIssues$: unknown }).searchIssues$ = () =>
+        throwError(() => httpError(401));
+      expect(await service.searchIssues('milk', 'p1')).toEqual([]);
+      expect(state.rejectedProviderIds().has('p1')).toBe(true);
+    });
+
+    // Offline, a server outage or a proxy answer quietly (no reconnect mark);
+    // an unexpected error still reaches the caller.
+    [0, 403, 503, 400].forEach((status) => {
+      it(`search on a ${status}: ${status === 400 ? 'rejects' : 'no results'}`, async () => {
+        (
+          service as unknown as { _getCfgOnce$: jasmine.Spy }
+        )._getCfgOnce$.and.returnValue(
+          of({
+            isEnabled: true,
+            host: 'https://plainspace.org',
+            spaceId: 's',
+            token: 't',
+          }),
+        );
+        (api as unknown as { searchIssues$: unknown }).searchIssues$ = () =>
+          throwError(() => httpError(status));
+        if (status === 400) {
+          await expectAsync(service.searchIssues('milk', 'p1')).toBeRejected();
+        } else {
+          expect(await service.searchIssues('milk', 'p1')).toEqual([]);
+        }
+        expect(state.rejectedProviderIds().has('p1')).toBe(false);
+      });
     });
 
     it('issueLink falls back to the host when the task cannot be fetched', async () => {

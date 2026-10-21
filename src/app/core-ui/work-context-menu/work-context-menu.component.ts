@@ -82,6 +82,7 @@ export class WorkContextMenuComponent implements OnInit {
   isArchived$: Observable<boolean> = of(false);
   isDone$: Observable<boolean> = of(false);
   isSharedOnPlainspace$: Observable<boolean> = of(false);
+  inviteUrl$: Observable<string | null> = of(null);
   base: string = 'project';
   shareSupport: ShareSupport = 'none';
 
@@ -103,6 +104,7 @@ export class WorkContextMenuComponent implements OnInit {
       this.isSharedOnPlainspace$ = this._store.select(
         selectIsProjectSharedOnPlainspace(this.contextId),
       );
+      this.inviteUrl$ = this._plainspaceShareService.inviteUrl$(this.contextId);
     }
     const support = await this._shareService.getShareSupport();
     this._setShareSupport(support);
@@ -366,9 +368,10 @@ export class WorkContextMenuComponent implements OnInit {
     );
   }
 
-  async copyPlainspaceInviteLink(): Promise<void> {
-    // Self-contained: surfaces its own copied/failed snack.
-    await this._plainspaceShareService.copyInviteLink(this.contextId);
+  copyPlainspaceInviteUrl(url: string): void {
+    // Synchronous from the click (the URL was resolved when the menu opened);
+    // surfaces its own copied/failed snack.
+    void this._plainspaceShareService.copyInviteUrl(url);
   }
 
   async duplicateProject(): Promise<void> {

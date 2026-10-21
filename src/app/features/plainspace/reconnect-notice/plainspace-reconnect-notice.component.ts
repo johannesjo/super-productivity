@@ -19,7 +19,7 @@ import {
 
 /**
  * Shown in a Plainspace provider's issue panel tab while Plainspace rejects its
- * token (401/403). Reconnecting hands the new token to every provider that held
+ * token (401). Reconnecting hands the new token to every provider that held
  * the rejected one. Offline and server errors never show it.
  */
 @Component({

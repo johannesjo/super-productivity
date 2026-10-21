@@ -11,15 +11,15 @@ describe('PlainspaceConnectionStateService', () => {
     state = TestBed.inject(PlainspaceConnectionStateService);
   });
 
-  [401, 403].forEach((status) => {
-    it(`marks a provider as rejected on ${status}`, () => {
-      state.reportError('p1', httpError(status));
-      expect(state.rejectedProviderIds().has('p1')).toBe(true);
-    });
+  it('marks a provider as rejected on 401', () => {
+    state.reportError('p1', httpError(401));
+    expect(state.rejectedProviderIds().has('p1')).toBe(true);
   });
 
-  it('ignores offline, server and non-HTTP errors', () => {
+  // A 403 comes from a proxy or firewall, not from Plainspace judging the token.
+  it('ignores offline, proxy (403), server and non-HTTP errors', () => {
     state.reportError('p1', httpError(0));
+    state.reportError('p1', httpError(403));
     state.reportError('p1', httpError(500));
     state.reportError('p1', new Error('boom'));
     expect(state.rejectedProviderIds().size).toBe(0);

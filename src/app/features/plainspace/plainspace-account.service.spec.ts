@@ -23,6 +23,9 @@ describe('PlainspaceAccountService', () => {
     { id: 'ps-a', issueProviderKey: 'PLAINSPACE', token: 'pat_old' },
     { id: 'ps-b', issueProviderKey: 'PLAINSPACE', token: 'pat_old', isEnabled: false },
     { id: 'ps-other', issueProviderKey: 'PLAINSPACE', token: 'pat_other_account' },
+    // Shared later, after a token was minted on another device: holds the
+    // account token this device currently has saved.
+    { id: 'ps-current', issueProviderKey: 'PLAINSPACE', token: 'pat_current' },
     { id: 'gh', issueProviderKey: 'GITHUB', token: 'pat_old' },
   ] as unknown as IssueProvider[];
 
@@ -228,6 +231,50 @@ describe('PlainspaceAccountService', () => {
         tokenUpdate('ps-other', 'pat_fresh') as never,
       );
       expect(state.rejectedProviderIds().has('ps-other')).toBe(false);
+    });
+
+    // #8616 state: P1 holds an older revoked token, P2 the saved account token.
+    // Minting the new token revokes the saved one too, so one reconnect must
+    // move both groups, or reconnecting each would break the other forever.
+    it('moves every revoked token group of the account in one reconnect', async () => {
+      await connect('pat_current');
+      await connect('pat_fresh', 'me@example.com', 'pat_old');
+      expect(store.dispatch).toHaveBeenCalledTimes(3);
+      for (const id of ['ps-a', 'ps-b', 'ps-current']) {
+        expect(store.dispatch).toHaveBeenCalledWith(
+          tokenUpdate(id, 'pat_fresh') as never,
+        );
+      }
+    });
+
+    it('reconnecting a provider on another host keeps the saved account', async () => {
+      await connect('pat_current');
+      const p = service.connect('pat_fresh', 'https://self.example', 'pat_other_account');
+      httpMock
+        .expectOne('https://self.example/api/integration/me')
+        .flush({ email: 'me@example.com', projects: [] });
+      expect(await p).toBe('ok');
+      expect(service.account()).toEqual({
+        host: 'https://plainspace.org',
+        token: 'pat_current',
+        email: 'me@example.com',
+      });
+      expect(store.dispatch).toHaveBeenCalledOnceWith(
+        tokenUpdate('ps-other', 'pat_fresh') as never,
+      );
+    });
+
+    it('reconnecting a provider of another account on the same host keeps the saved account', async () => {
+      await connect('pat_current');
+      await connect('pat_fresh', 'other@example.com', 'pat_other_account');
+      expect(service.account()).toEqual({
+        host: 'https://plainspace.org',
+        token: 'pat_current',
+        email: 'me@example.com',
+      });
+      expect(store.dispatch).toHaveBeenCalledOnceWith(
+        tokenUpdate('ps-other', 'pat_fresh') as never,
+      );
     });
 
     it('writes nothing when reconnecting with the same token', async () => {
