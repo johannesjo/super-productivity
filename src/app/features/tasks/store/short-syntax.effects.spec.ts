@@ -301,6 +301,30 @@ describe('ShortSyntaxEffects', () => {
       expect(taskTimeSyncServiceSpy.flushOne).toHaveBeenCalledOnceWith('task-1');
     }));
 
+    it('should set priority from a title edit with the default config', fakeAsync(() => {
+      globalConfigServiceMock.cfg.and.returnValue(DEFAULT_GLOBAL_CONFIG);
+      const task = createTask('task-1', { title: 'Fix login bug p1', priority: 1 });
+      taskServiceMock.getByIdOnce$.and.returnValue(of(task));
+
+      let emittedAction: any = null;
+      effects.shortSyntax$.subscribe((action) => {
+        emittedAction = action;
+      });
+
+      actions$.next(
+        TaskSharedActions.updateTask({
+          task: { id: 'task-1', changes: { title: task.title } },
+        }),
+      );
+      tick(100);
+
+      expect(emittedAction.type).toBe(TaskSharedActions.applyShortSyntax.type);
+      expect(emittedAction.taskChanges).toEqual({
+        priority: 3,
+        title: 'Fix login bug',
+      });
+    }));
+
     it('should add URL as attachment when updating task title with a URL', fakeAsync(() => {
       const task = createTask('task-1', {
         title: 'Check out www.example.com for more info',

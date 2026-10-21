@@ -1,5 +1,5 @@
 import { INBOX_PROJECT } from '../../project/project.const';
-import { TimeSpentOnDay, TaskReminderOptionId } from '../task.model';
+import { TimeSpentOnDay, TaskPriority, TaskReminderOptionId } from '../task.model';
 import { TaskAttachment } from '../task-attachment/task-attachment.model';
 import { ShortSyntaxRepeat } from '../short-syntax';
 
@@ -27,6 +27,8 @@ export interface AddTaskBarState {
   deadlineDate?: string | null;
   deadlineTime?: string | null;
   deadlineRemindOption?: TaskReminderOptionId | null;
+  // Only ever set from "p1"-"p3" syntax; the bar has no priority control
+  priority?: TaskPriority | null;
 }
 const M = 60 * 1000;
 const H = 60 * M;
@@ -59,6 +61,7 @@ export const INITIAL_ADD_TASK_BAR_STATE: AddTaskBarState = {
   deadlineDate: null,
   deadlineTime: null,
   deadlineRemindOption: null,
+  priority: null,
 };
 
 // Every entry must be a phrase shortSyntax() parses to a date that is not in
