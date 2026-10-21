@@ -72,8 +72,10 @@ export class PlainspaceAccountService {
     this._account.set(account);
     this._save(account);
     // The previous account's token only stands for this one if it is the same
-    // person; "Use a different token" may switch accounts.
-    const isSameAccount = previous?.email === account.email;
+    // person on the same host; "Use a different token" may switch accounts,
+    // and the same email on another host is a different account.
+    const isSameAccount =
+      previous?.email === account.email && previous?.host === account.host;
     await this._replaceProviderTokens(
       replacedToken ?? (isSameAccount ? previous?.token : null),
       token,

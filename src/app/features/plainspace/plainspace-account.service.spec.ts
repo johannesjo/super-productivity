@@ -210,6 +210,16 @@ describe('PlainspaceAccountService', () => {
       expect(store.dispatch).not.toHaveBeenCalled();
     });
 
+    it('leaves providers alone when the same email connects on another host', async () => {
+      await connect('pat_old');
+      const p = service.connect('pat_self_hosted', 'https://self.example');
+      httpMock
+        .expectOne('https://self.example/api/integration/me')
+        .flush({ email: 'me@example.com', projects: [] });
+      expect(await p).toBe('ok');
+      expect(store.dispatch).not.toHaveBeenCalled();
+    });
+
     it('replaces an explicitly given token (provider reconnect) and clears its state', async () => {
       const state = TestBed.inject(PlainspaceConnectionStateService);
       state.reportError('ps-other', new HttpErrorResponse({ status: 401 }));
