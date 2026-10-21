@@ -48,6 +48,7 @@ describe('PlainspaceShareService', () => {
 
     api = jasmine.createSpyObj('PlainspaceApiService', ['createSpace$', 'getSpaceUrl$']);
     api.createSpace$.and.returnValue(of({ id: 'space-1' }));
+    api.getSpaceUrl$.and.returnValue(of(null));
     snack = jasmine.createSpyObj('SnackService', ['open']);
     store = jasmine.createSpyObj('Store', ['dispatch', 'select']);
     store.select.and.returnValue(of(undefined));
@@ -150,6 +151,29 @@ describe('PlainspaceShareService', () => {
     });
   });
 
+  it('offers to copy the invite link on the share success snack', async () => {
+    spaceResult = { action: 'create' };
+    api.getSpaceUrl$.and.returnValue(of('https://plainspace.org/proj'));
+    const writeText = spyOn(navigator.clipboard, 'writeText').and.resolveTo();
+
+    await service.shareProjectOnPlainspace('p1', 'Proj');
+
+    expect(api.getSpaceUrl$).toHaveBeenCalledWith(
+      jasmine.objectContaining({ spaceId: 'space-1', token: 'pat_x' }),
+    );
+    const params = snack.open.calls.mostRecent().args[0] as {
+      actionStr?: string;
+      actionFn?: () => Promise<void>;
+    };
+    expect(params.actionStr).toBe(T.PLAINSPACE.COPY_INVITE_LINK);
+    await params.actionFn!();
+    expect(writeText).toHaveBeenCalledWith('https://plainspace.org/proj');
+    expect(snack.open).toHaveBeenCalledWith({
+      type: 'SUCCESS',
+      msg: T.PLAINSPACE.INVITE_LINK_COPIED,
+    });
+  });
+
   it('binds the selected existing space without creating another one', async () => {
     spaceResult = { action: 'link', spaceId: 'selected-space' };
 
@@ -221,6 +245,57 @@ describe('PlainspaceShareService', () => {
       expect(snack.open).toHaveBeenCalledWith({
         type: 'ERROR',
         msg: T.PLAINSPACE.OPEN_FAILED,
+      });
+    });
+  });
+
+  describe('copyInviteLink', () => {
+    const provider = {
+      id: 'ip1',
+      issueProviderKey: 'PLAINSPACE',
+      host: 'https://plainspace.org',
+      spaceId: 'space-1',
+      token: 'pat_x',
+    } as unknown;
+
+    it('copies the space URL, which Plainspace turns into its join page', async () => {
+      store.select.and.returnValue(of(provider));
+      api.getSpaceUrl$.and.returnValue(of('https://plainspace.org/my-slug'));
+      const writeText = spyOn(navigator.clipboard, 'writeText').and.resolveTo();
+
+      await service.copyInviteLink('p1');
+
+      expect(writeText).toHaveBeenCalledWith('https://plainspace.org/my-slug');
+      expect(snack.open).toHaveBeenCalledWith({
+        type: 'SUCCESS',
+        msg: T.PLAINSPACE.INVITE_LINK_COPIED,
+      });
+    });
+
+    it('reports a failure when the URL cannot be resolved (offline)', async () => {
+      store.select.and.returnValue(of(provider));
+      api.getSpaceUrl$.and.returnValue(of(null));
+      const writeText = spyOn(navigator.clipboard, 'writeText');
+
+      await service.copyInviteLink('p1');
+
+      expect(writeText).not.toHaveBeenCalled();
+      expect(snack.open).toHaveBeenCalledWith({
+        type: 'ERROR',
+        msg: T.PLAINSPACE.COPY_INVITE_LINK_FAILED,
+      });
+    });
+
+    it('reports a failure when the clipboard refuses the write', async () => {
+      store.select.and.returnValue(of(provider));
+      api.getSpaceUrl$.and.returnValue(of('https://plainspace.org/my-slug'));
+      spyOn(navigator.clipboard, 'writeText').and.rejectWith(new Error('denied'));
+
+      await service.copyInviteLink('p1');
+
+      expect(snack.open).toHaveBeenCalledWith({
+        type: 'ERROR',
+        msg: T.PLAINSPACE.COPY_INVITE_LINK_FAILED,
       });
     });
   });

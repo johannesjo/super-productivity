@@ -3,22 +3,44 @@ import {
   HttpTestingController,
 } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { PlainspaceAccountService } from './plainspace-account.service';
 import { LS } from '../../core/persistence/storage-keys.const';
+import { IssueProvider } from '../issue/issue.model';
+import { IssueProviderActions } from '../issue/store/issue-provider.actions';
+import { selectAll as selectAllIssueProviders } from '../issue/store/issue-provider.selectors';
+import { PlainspaceConnectionStateService } from '../issue/providers/plainspace/plainspace-connection-state.service';
+import { HttpErrorResponse } from '@angular/common/http';
 
 describe('PlainspaceAccountService', () => {
   let service: PlainspaceAccountService;
   let httpMock: HttpTestingController;
+  let store: MockStore;
   const ME_URL = 'https://plainspace.org/api/integration/me';
+  // Two providers share the old token (same account, two shared projects); a
+  // third points at a different account/host and must keep its own token.
+  const providers = [
+    { id: 'ps-a', issueProviderKey: 'PLAINSPACE', token: 'pat_old' },
+    { id: 'ps-b', issueProviderKey: 'PLAINSPACE', token: 'pat_old', isEnabled: false },
+    { id: 'ps-other', issueProviderKey: 'PLAINSPACE', token: 'pat_other_account' },
+    { id: 'gh', issueProviderKey: 'GITHUB', token: 'pat_old' },
+  ] as unknown as IssueProvider[];
 
   beforeEach(() => {
     localStorage.removeItem(LS.PLAINSPACE_ACCOUNT);
     TestBed.configureTestingModule({
       imports: [HttpClientTestingModule],
-      providers: [PlainspaceAccountService],
+      providers: [
+        PlainspaceAccountService,
+        provideMockStore({
+          selectors: [{ selector: selectAllIssueProviders, value: providers }],
+        }),
+      ],
     });
     service = TestBed.inject(PlainspaceAccountService);
     httpMock = TestBed.inject(HttpTestingController);
+    store = TestBed.inject(MockStore);
+    spyOn(store, 'dispatch');
   });
 
   afterEach(() => {
@@ -147,5 +169,61 @@ describe('PlainspaceAccountService', () => {
     expect(service.account()?.email).toBe('new@example.com');
     const restarted = TestBed.runInInjectionContext(() => new PlainspaceAccountService());
     expect(restarted.account()).toEqual(service.account());
+  });
+
+  // #8616: one PAT per account, minting a new one revokes the old one.
+  describe('scoped token replacement on reconnect', () => {
+    const connect = async (
+      token: string,
+      email = 'me@example.com',
+      replacedToken?: string | null,
+    ): Promise<void> => {
+      const p = service.connect(token, undefined, replacedToken);
+      httpMock.expectOne(ME_URL).flush({ email, projects: [] });
+      expect(await p).toBe('ok');
+    };
+    const tokenUpdate = (id: string, token: string): unknown =>
+      IssueProviderActions.updateIssueProvider({
+        issueProvider: { id, changes: { token } },
+      });
+
+    it('writes nothing on a first connect', async () => {
+      await connect('pat_old');
+      expect(store.dispatch).not.toHaveBeenCalled();
+    });
+
+    it('writes the new token only to Plainspace providers that held the old one', async () => {
+      await connect('pat_old');
+      await connect('pat_new');
+      expect(store.dispatch).toHaveBeenCalledTimes(2);
+      expect(store.dispatch).toHaveBeenCalledWith(
+        tokenUpdate('ps-a', 'pat_new') as never,
+      );
+      expect(store.dispatch).toHaveBeenCalledWith(
+        tokenUpdate('ps-b', 'pat_new') as never,
+      );
+    });
+
+    it('leaves providers alone when the new token is for a different account', async () => {
+      await connect('pat_old');
+      await connect('pat_new', 'someone-else@example.com');
+      expect(store.dispatch).not.toHaveBeenCalled();
+    });
+
+    it('replaces an explicitly given token (provider reconnect) and clears its state', async () => {
+      const state = TestBed.inject(PlainspaceConnectionStateService);
+      state.reportError('ps-other', new HttpErrorResponse({ status: 401 }));
+      await connect('pat_fresh', 'other@example.com', 'pat_other_account');
+      expect(store.dispatch).toHaveBeenCalledOnceWith(
+        tokenUpdate('ps-other', 'pat_fresh') as never,
+      );
+      expect(state.rejectedProviderIds().has('ps-other')).toBe(false);
+    });
+
+    it('writes nothing when reconnecting with the same token', async () => {
+      await connect('pat_old');
+      await connect('pat_old');
+      expect(store.dispatch).not.toHaveBeenCalled();
+    });
   });
 });

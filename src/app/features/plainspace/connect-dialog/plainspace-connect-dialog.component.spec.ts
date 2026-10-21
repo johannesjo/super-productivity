@@ -53,6 +53,7 @@ describe('PlainspaceConnectDialogComponent', () => {
     expect(accountService.connect).toHaveBeenCalledWith(
       'pat_abc',
       'https://plainspace.org',
+      undefined,
     );
     expect(dialogRef.close).toHaveBeenCalledWith(true);
     expect(component.errorMsg()).toBeNull();

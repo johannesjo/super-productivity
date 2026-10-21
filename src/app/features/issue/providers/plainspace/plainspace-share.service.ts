@@ -28,8 +28,9 @@ import {
  * instance (so tasks assigned to me / unassigned auto-import to the project
  * backlog). Used by the project context menu's "Collaborate on Plainspace"
  * action and the create-project dialog's share toggle. Also hosts
- * `openProjectOnPlainspace` (the header "Open in Plainspace" button), which
- * reuses this service's store/api/snack/electron-open wiring.
+ * `openProjectOnPlainspace` (the header "Open in Plainspace" button) and
+ * `copyInviteLink` (project menu, share success snack), which reuse this
+ * service's store/api/snack wiring.
  */
 @Injectable({ providedIn: 'root' })
 export class PlainspaceShareService {
@@ -99,7 +100,21 @@ export class PlainspaceShareService {
         spaceId,
       };
       this._store.dispatch(IssueProviderActions.addIssueProvider({ issueProvider }));
-      this._snackService.open({ type: 'SUCCESS', msg: T.PLAINSPACE.SHARE_SUCCESS });
+      // Resolve the link before showing the snack so its action copies
+      // synchronously, inside the click's user activation.
+      const inviteUrl = await firstValueFrom(
+        this._plainspaceApiService.getSpaceUrl$({ ...cfg, spaceId }),
+      );
+      this._snackService.open({
+        type: 'SUCCESS',
+        msg: T.PLAINSPACE.SHARE_SUCCESS,
+        ...(inviteUrl
+          ? {
+              actionStr: T.PLAINSPACE.COPY_INVITE_LINK,
+              actionFn: () => this._copyInviteUrl(inviteUrl),
+            }
+          : {}),
+      });
       return spaceId;
     } catch {
       // Log ids only — never user content (project title).
@@ -139,6 +154,42 @@ export class PlainspaceShareService {
       // that also forfeits `noopener`, or a background /me fetch per shared view
       // to pre-resolve the slug). Electron (the primary target) is unaffected.
       window.open(url, '_blank', 'noopener,noreferrer');
+    }
+  }
+
+  /**
+   * Copies the bound space's web URL. It doubles as the invite link: Plainspace
+   * sends a visitor who isn't a member to the space's join page (or shows a
+   * private space's notice), so no separate invite exists.
+   */
+  async copyInviteLink(projectId: string): Promise<void> {
+    const provider = await firstValueFrom(
+      this._store.select(selectPlainspaceProviderForProject(projectId)),
+    );
+    if (!provider) {
+      return;
+    }
+    const url = await firstValueFrom(this._plainspaceApiService.getSpaceUrl$(provider));
+    if (!url) {
+      this._snackService.open({
+        type: 'ERROR',
+        msg: T.PLAINSPACE.COPY_INVITE_LINK_FAILED,
+      });
+      return;
+    }
+    await this._copyInviteUrl(url);
+  }
+
+  private async _copyInviteUrl(url: string): Promise<void> {
+    try {
+      await navigator.clipboard.writeText(url);
+      this._snackService.open({ type: 'SUCCESS', msg: T.PLAINSPACE.INVITE_LINK_COPIED });
+    } catch {
+      Log.err('Plainspace: failed to copy invite link');
+      this._snackService.open({
+        type: 'ERROR',
+        msg: T.PLAINSPACE.COPY_INVITE_LINK_FAILED,
+      });
     }
   }
 

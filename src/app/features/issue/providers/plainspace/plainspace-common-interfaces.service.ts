@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { firstValueFrom, Observable } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { firstValueFrom, Observable, of } from 'rxjs';
+import { catchError, map, switchMap } from 'rxjs/operators';
 import { Task, TaskCopy } from '../../../tasks/task.model';
 import { BaseIssueProviderService } from '../../base/base-issue-provider.service';
 import { IssueData, IssueDataReduced, SearchResultItem } from '../../issue.model';
@@ -9,6 +9,11 @@ import { PlainspaceCfg } from './plainspace.model';
 import { PlainspaceApiService } from './plainspace-api.service';
 import { PlainspaceSyncAdapterService } from './plainspace-sync-adapter.service';
 import { PlainspaceIssue } from './plainspace-issue.model';
+import {
+  isPlainspaceAuthError,
+  isPlainspaceUnreachableError,
+  PlainspaceConnectionStateService,
+} from './plainspace-connection-state.service';
 
 @Injectable({
   providedIn: 'root',
@@ -16,6 +21,7 @@ import { PlainspaceIssue } from './plainspace-issue.model';
 export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<PlainspaceCfg> {
   private readonly _plainspaceApiService = inject(PlainspaceApiService);
   private readonly _syncAdapter = inject(PlainspaceSyncAdapterService);
+  private readonly _connectionState = inject(PlainspaceConnectionStateService);
 
   readonly providerKey = 'PLAINSPACE' as const;
   readonly pollInterval: number = PLAINSPACE_POLL_INTERVAL;
@@ -36,9 +42,10 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
     return firstValueFrom(
       this._getCfgOnce$(issueProviderId).pipe(
         switchMap((cfg) =>
-          this._plainspaceApiService
-            .getById$(String(issueId), cfg)
-            .pipe(map((issue) => issue?.url || `${cfg.host}`)),
+          this._plainspaceApiService.getById$(String(issueId), cfg).pipe(
+            catchError(() => of(null)),
+            map((issue) => issue?.url || `${cfg.host}`),
+          ),
         ),
       ),
     ).then((result) => result ?? '');
@@ -85,8 +92,9 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
       return null;
     }
     const cfg = await firstValueFrom(this._getCfgOnce$(task.issueProviderId));
-    const issue = await firstValueFrom(
-      this._plainspaceApiService.getById$(task.issueId, cfg),
+    const issue = await this._tracked(
+      task.issueProviderId,
+      firstValueFrom(this._plainspaceApiService.getById$(task.issueId, cfg)),
     );
     return this._toFreshData(task, issue);
   }
@@ -97,6 +105,8 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
    * diff locally — instead of the base's one `getById` HTTP request per task
    * (which is N redundant calls of the same data). A task that is no longer
    * assigned to me simply isn't in the response and is left untouched this cycle.
+   * A failed request throws (the poll effect logs it quietly) instead of
+   * yielding an empty list, so nothing here is ever computed from a failed poll.
    */
   override async getFreshDataForIssueTasks(
     tasks: Task[],
@@ -114,11 +124,11 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
     const updates: { task: Task; taskChanges: Partial<Task>; issue: IssueData }[] = [];
     for (const [providerId, providerTasks] of tasksByProviderId) {
       const cfg = await firstValueFrom(this._getCfgOnce$(providerId));
-      const issuesById = new Map(
-        (await firstValueFrom(this._plainspaceApiService.getMyTasks$(cfg))).map(
-          (issue) => [issue.id, issue] as const,
-        ),
+      const myTasks = await this._tracked(
+        providerId,
+        firstValueFrom(this._plainspaceApiService.getMyTasks$(cfg)),
       );
+      const issuesById = new Map(myTasks.map((issue) => [issue.id, issue] as const));
       for (const task of providerTasks) {
         const fresh = this._toFreshData(task, issuesById.get(task.issueId!) ?? null);
         if (fresh) {
@@ -157,7 +167,44 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
     const cfg = await firstValueFrom(this._getCfgOnce$(issueProviderId));
     // Only tasks assigned to me become SP tasks; unclaimed tasks are claimed
     // explicitly via the claim pool, never auto-imported.
-    return await firstValueFrom(this._plainspaceApiService.getMyTasks$(cfg));
+    try {
+      return await this._tracked(
+        issueProviderId,
+        firstValueFrom(this._plainspaceApiService.getMyTasks$(cfg)),
+      );
+    } catch (err) {
+      // Offline, a server outage or a rejected token: nothing to import this
+      // tick. Kept quiet — the backlog poll would otherwise snack an error every
+      // few minutes; a rejected token shows "reconnect" in the issue panel
+      // instead. The caller only adds what it gets, so an empty answer here
+      // imports nothing and removes nothing. Anything else keeps the snack.
+      if (isPlainspaceUnreachableError(err) || isPlainspaceAuthError(err)) {
+        return [];
+      }
+      throw err;
+    }
+  }
+
+  override searchIssues(
+    searchTerm: string,
+    issueProviderId: string,
+  ): Promise<SearchResultItem[]> {
+    return this._tracked(
+      issueProviderId,
+      super.searchIssues(searchTerm, issueProviderId),
+    );
+  }
+
+  /** Records whether the provider's token still works; never swallows errors. */
+  private async _tracked<R>(providerId: string, request: Promise<R>): Promise<R> {
+    try {
+      const result = await request;
+      this._connectionState.reportSuccess(providerId);
+      return result;
+    } catch (err) {
+      this._connectionState.reportError(providerId, err);
+      throw err;
+    }
   }
 
   protected _apiGetById$(

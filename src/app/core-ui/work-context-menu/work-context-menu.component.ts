@@ -366,6 +366,11 @@ export class WorkContextMenuComponent implements OnInit {
     );
   }
 
+  async copyPlainspaceInviteLink(): Promise<void> {
+    // Self-contained: surfaces its own copied/failed snack.
+    await this._plainspaceShareService.copyInviteLink(this.contextId);
+  }
+
   async duplicateProject(): Promise<void> {
     try {
       await this._projectService.duplicateProject(this.contextId);
