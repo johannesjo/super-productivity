@@ -33,7 +33,6 @@ interface CaldavStub {
   todos: StoredTodo[];
   puts: { path: string; ifNoneMatch?: string; body: string }[];
   deletes: { path: string; ifMatch?: string }[];
-  reports: number;
 }
 
 const escapeXml = (value: string): string =>
@@ -63,7 +62,7 @@ const todoResponse = (todo: StoredTodo): string =>
  * If-None-Match, PROPFIND of a single object, and DELETE.
  */
 const stubCaldav = async (page: Page): Promise<CaldavStub> => {
-  const stub: CaldavStub = { todos: [], puts: [], deletes: [], reports: 0 };
+  const stub: CaldavStub = { todos: [], puts: [], deletes: [] };
   await page.route(`**${DAV_ROOT}**`, async (route: Route) => {
     const req = route.request();
     const method = req.method();
@@ -100,7 +99,6 @@ const stubCaldav = async (page: Page): Promise<CaldavStub> => {
       return route.fulfill({ status: 204, body: '' });
     }
     if (method === 'REPORT' && path === CALENDAR_PATH) {
-      stub.reports++;
       const query = req.postData() ?? '';
       const uidMatch = /<[^>]*text-match[^>]*>([^<]+)</.exec(query)?.[1];
       const todos = uidMatch
@@ -154,6 +152,25 @@ const stubCaldav = async (page: Page): Promise<CaldavStub> => {
   });
   return stub;
 };
+
+const foreignTodo = (uid: string, summary: string): StoredTodo => ({
+  path: `${CALENDAR_PATH}${uid}.ics`,
+  etag: `"${uid}"`,
+  body: [
+    'BEGIN:VCALENDAR',
+    'VERSION:2.0',
+    'PRODID:-//E2E//EN',
+    'BEGIN:VTODO',
+    `UID:${uid}`,
+    'DTSTAMP:20260101T000000Z',
+    `SUMMARY:${summary}`,
+    `CATEGORIES:${CATEGORY}`,
+    'STATUS:NEEDS-ACTION',
+    'END:VTODO',
+    'END:VCALENDAR',
+    '',
+  ].join('\r\n'),
+});
 
 const dispatch = (page: Page, action: Record<string, unknown>): Promise<void> =>
   page.evaluate((a) => {
@@ -275,12 +292,14 @@ test.describe('CalDAV VTODO create/delete on server (#10098, #10096)', () => {
     expect(stub.puts[0].body).toContain(`CATEGORIES:${CATEGORY}`);
 
     // --- A later import poll, after the link landed, keeps it single ---
-    const reportsBefore = stub.reports;
+    // The foreign VTODO is imported in the same pass, so once it shows up that
+    // pass has finished and a duplicate would already be there.
+    stub.todos.push(foreignTodo('e2e-marker-1', `${testPrefix}-Marker`));
     await page.reload();
     await workViewPage.waitForTaskList();
-    await expect
-      .poll(() => stub.reports, { timeout: 30000 })
-      .toBeGreaterThan(reportsBefore);
+    await expect(
+      page.locator('task').filter({ hasText: `${testPrefix}-Marker` }),
+    ).toHaveCount(1, { timeout: 30000 });
     await expect(page.locator('task').filter({ hasText: title })).toHaveCount(1);
     expect(await tasksTitled(page, title)).toHaveLength(1);
 
@@ -289,7 +308,7 @@ test.describe('CalDAV VTODO create/delete on server (#10098, #10096)', () => {
     await expect
       .poll(() => stub.deletes, { timeout: UNDO_WINDOW_PLUS_MARGIN_MS + 10000 })
       .toEqual([{ path: `${CALENDAR_PATH}${uid}.ics`, ifMatch: '"e2e-1"' }]);
-    expect(stub.todos).toHaveLength(0);
+    expect(stub.todos.map((t) => t.path)).toEqual([`${CALENDAR_PATH}e2e-marker-1.ics`]);
   });
 
   test('writes nothing to the server with the settings at their defaults', async ({
@@ -304,25 +323,7 @@ test.describe('CalDAV VTODO create/delete on server (#10098, #10096)', () => {
     const projectId = await currentProjectId(page);
     await addProvider(page, projectId, undefined);
     // An existing VTODO, imported and linked by the poll.
-    const foreignUid = 'e2e-foreign-1';
-    stub.todos.push({
-      path: `${CALENDAR_PATH}${foreignUid}.ics`,
-      etag: '"foreign-1"',
-      body: [
-        'BEGIN:VCALENDAR',
-        'VERSION:2.0',
-        'PRODID:-//E2E//EN',
-        'BEGIN:VTODO',
-        `UID:${foreignUid}`,
-        'DTSTAMP:20260101T000000Z',
-        `SUMMARY:${testPrefix}-Foreign`,
-        `CATEGORIES:${CATEGORY}`,
-        'STATUS:NEEDS-ACTION',
-        'END:VTODO',
-        'END:VCALENDAR',
-        '',
-      ].join('\r\n'),
-    });
+    stub.todos.push(foreignTodo('e2e-foreign-1', `${testPrefix}-Foreign`));
 
     await workViewPage.addTask(`${testPrefix}-Local only`);
     await expect(
