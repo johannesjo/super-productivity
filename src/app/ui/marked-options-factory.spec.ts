@@ -385,6 +385,7 @@ describe('markedOptionsFactory', () => {
         const linkRenderer = options.renderer!.link.bind({ parser: mockParser });
         [
           'mailto:a@b.com',
+          'mid:message-id',
           'file:///tmp/x',
           'https://example.com',
           // #8429: app deep-links must stay clickable
@@ -781,6 +782,12 @@ describe('preprocessMarkdown', () => {
     const input = '# Header\n\n![img](url.png =50x50)\n\nParagraph';
     const result = preprocessMarkdown(input);
     expect(result).toBe('# Header\n\n![img](url.png "50|50")\n\nParagraph');
+  });
+
+  it('should handle a leading space before the url, like the live editor does (#10153)', () => {
+    const input = '![alt]( url.png =10x20)';
+    const result = preprocessMarkdown(input);
+    expect(result).toBe('![alt](url.png "10|20")');
   });
 });
 

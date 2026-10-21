@@ -1,11 +1,35 @@
-import { Injectable, inject } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
+import { Injectable, InjectionToken, inject } from '@angular/core';
+import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
+import { Capacitor, CapacitorHttp, HttpOptions, HttpResponse } from '@capacitor/core';
+import { Observable, defer, of } from 'rxjs';
+import { catchError, map, retry } from 'rxjs/operators';
 import { SearchResultItem } from '../../issue.model';
 import { PlainspaceCfg } from './plainspace.model';
 import { PlainspaceIssue } from './plainspace-issue.model';
 import { mapPlainspaceIssueToSearchResult } from './plainspace-issue-map.util';
+import { Log } from '../../../../core/log';
+import { IS_ANDROID_NATIVE } from '../../../../util/is-native-platform';
+
+export type PlainspaceNativeHttp = (opts: HttpOptions) => Promise<HttpResponse>;
+
+/**
+ * Native HTTP for the token check on Android, null elsewhere (web, Electron and
+ * iOS keep HttpClient). Capacitor's patched XHR already runs requests natively,
+ * but on failure it drops the native exception and reports a bare status 0;
+ * calling CapacitorHttp directly keeps the exception so it can be logged (#9988).
+ */
+export const PLAINSPACE_NATIVE_HTTP = new InjectionToken<PlainspaceNativeHttp | null>(
+  'PLAINSPACE_NATIVE_HTTP',
+  {
+    providedIn: 'root',
+    // `IS_ANDROID_NATIVE` alone also matches the legacy online WebView, where no
+    // native bridge exists and CapacitorHttp would fall back to fetch.
+    factory: () =>
+      IS_ANDROID_NATIVE && Capacitor.isNativePlatform()
+        ? (opts) => CapacitorHttp.request(opts)
+        : null,
+  },
+);
 
 /**
  * HTTP access to the real Plainspace integration API (plainspace.org /
@@ -24,12 +48,41 @@ import { mapPlainspaceIssueToSearchResult } from './plainspace-issue-map.util';
 @Injectable({ providedIn: 'root' })
 export class PlainspaceApiService {
   private _http = inject(HttpClient);
+  private _nativeHttp = inject(PLAINSPACE_NATIVE_HTTP);
+
+  /**
+   * Verifies a token against the host, keeping "the server rejected this token"
+   * (401/403) apart from "we never got an answer" (offline, DNS, TLS, 5xx). The
+   * connect dialog needs that distinction: reporting a bad token for a request
+   * that never arrived sends users into an endless re-copy loop (#9988).
+   */
+  verifyToken$(cfg: PlainspaceCfg): Observable<PlainspaceTokenCheck> {
+    if (this._nativeHttp) {
+      return this._verifyTokenNative$(cfg, this._nativeHttp);
+    }
+    // The body is typed `| null` on purpose: HttpClient declares it as the
+    // generic but emits null for an empty body (a 204, or a 200 with no content
+    // — a proxy or captive portal answering for the host). An empty body is no
+    // verdict on the token and must never pass for a verified account (#9988).
+    return this._http
+      .get<SPMeResponse | null>(`${this._base(cfg)}/me`, { headers: this._headers(cfg) })
+      .pipe(
+        map((me): PlainspaceTokenCheck => {
+          if (me) {
+            return { status: 'ok', me };
+          }
+          Log.err('Plainspace: token check got an empty body');
+          return { status: 'unreachable' };
+        }),
+        catchError((err: unknown) => of(toTokenCheck(err))),
+      );
+  }
 
   /** Verifies the token and returns the account's email + spaces, or null. */
   getMe$(cfg: PlainspaceCfg): Observable<SPMeResponse | null> {
-    return this._http
-      .get<SPMeResponse>(`${this._base(cfg)}/me`, { headers: this._headers(cfg) })
-      .pipe(catchError(() => of(null)));
+    return this.verifyToken$(cfg).pipe(
+      map((res) => (res.status === 'ok' ? res.me : null)),
+    );
   }
 
   /**
@@ -172,6 +225,17 @@ export class PlainspaceApiService {
       .pipe(map((res) => mapSPTaskToIssue(res.task)));
   }
 
+  /**
+   * Deletes a task assigned to me for everyone in its space (server soft
+   * delete). Errors propagate (like `createTask$`): the delete effect treats a
+   * 404 as already gone and reports any other failure.
+   */
+  deleteTask$(id: string, cfg: PlainspaceCfg): Observable<void> {
+    return this._http.delete<void>(`${this._base(cfg)}/tasks/${encodeURIComponent(id)}`, {
+      headers: this._headers(cfg),
+    });
+  }
+
   /** Creates a remote space and returns its id (used by the share flow). */
   createSpace$(title: string, cfg: PlainspaceCfg): Observable<{ id: string }> {
     return this._http
@@ -194,6 +258,24 @@ export class PlainspaceApiService {
     );
   }
 
+  private _verifyTokenNative$(
+    cfg: PlainspaceCfg,
+    nativeHttp: PlainspaceNativeHttp,
+  ): Observable<PlainspaceTokenCheck> {
+    const opts: HttpOptions = {
+      url: `${this._base(cfg)}/me`,
+      method: 'GET',
+      headers: { Authorization: `Bearer ${cfg.token ?? ''}` },
+    };
+    // `defer` so the retry re-sends; one retry after a short delay mirrors
+    // NetworkRetryInterceptorService, which a direct native call bypasses.
+    return defer(() => nativeHttp(opts)).pipe(
+      retry({ count: 1, delay: NATIVE_RETRY_DELAY_MS }),
+      map(toNativeTokenCheck),
+      catchError((err: unknown) => of(toNativeErrorTokenCheck(err, cfg))),
+    );
+  }
+
   private _base(cfg: PlainspaceCfg): string {
     return `${cfg.host}/api/integration`;
   }
@@ -202,6 +284,85 @@ export class PlainspaceApiService {
     return new HttpHeaders({ Authorization: `Bearer ${cfg.token ?? ''}` });
   }
 }
+
+/**
+ * Outcome of a `/me` token check. A rejected token and an unanswered request
+ * are different user problems and must not collapse into one message (#9988).
+ */
+export type PlainspaceTokenCheck =
+  | { status: 'ok'; me: SPMeResponse }
+  | { status: 'invalid-token' }
+  | { status: 'unreachable' };
+
+// 401/403 is the server giving a verdict on the token; everything else (status
+// 0 = no response at all, 5xx, a non-HTTP throw) means we never got one. Only
+// the status is logged — never the token or the host (sync rule #9).
+const toTokenCheck = (err: unknown): PlainspaceTokenCheck => {
+  const status = err instanceof HttpErrorResponse ? err.status : 0;
+  Log.err('Plainspace: token check failed', { status });
+  return status === 401 || status === 403
+    ? { status: 'invalid-token' }
+    : { status: 'unreachable' };
+};
+
+const NATIVE_RETRY_DELAY_MS = 500;
+
+// CapacitorHttp resolves for every HTTP status, so the verdict comes from the
+// status code; same rules as `toTokenCheck`.
+const toNativeTokenCheck = (res: HttpResponse): PlainspaceTokenCheck => {
+  if (res.status >= 200 && res.status < 300) {
+    if (isRecord(res.data)) {
+      return { status: 'ok', me: res.data as unknown as SPMeResponse };
+    }
+    Log.err('Plainspace: token check got an empty body');
+    return { status: 'unreachable' };
+  }
+  Log.err('Plainspace: token check failed', { status: res.status });
+  return res.status === 401 || res.status === 403
+    ? { status: 'invalid-token' }
+    : { status: 'unreachable' };
+};
+
+// A native rejection means no HTTP response at all (DNS, TLS, timeout). The
+// Java exception class name arrives as `code` and its message as `message` — the
+// cause #9988 needs and the patched XHR hides. Exception messages can name the
+// host (e.g. UnknownHostException), resolved and local IP addresses
+// (ConnectException) or a whole header value (a token with a stray invisible
+// character fails header validation), so all of those are redacted.
+const toNativeErrorTokenCheck = (
+  err: unknown,
+  cfg: Pick<PlainspaceCfg, 'host' | 'token'>,
+): PlainspaceTokenCheck => {
+  const errorName = isRecord(err) && typeof err['code'] === 'string' ? err['code'] : null;
+  const errorMessage = redactNativeErrorMessage(
+    err instanceof Error ? err.message : String(err),
+    cfg,
+  );
+  Log.err('Plainspace: token check failed natively', { errorName, errorMessage });
+  return { status: 'unreachable' };
+};
+
+const escapeRegExp = (value: string): string =>
+  value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const redactNativeErrorMessage = (
+  message: string,
+  { host, token }: Pick<PlainspaceCfg, 'host' | 'token'>,
+): string => {
+  let redacted = message;
+  if (token) {
+    redacted = redacted.split(token).join('<token>');
+  }
+  // A header-validation failure prints the whole value after "value:".
+  redacted = redacted.replace(/\bBearer\s+\S+/gi, 'Bearer <token>');
+  const hostname = host ? host.replace(/^[a-z]+:\/\//i, '').split(/[/:]/)[0] : '';
+  if (hostname) {
+    redacted = redacted.replace(new RegExp(escapeRegExp(hostname), 'gi'), '<host>');
+  }
+  return redacted
+    .replace(/\b\d{1,3}(?:\.\d{1,3}){3}\b/g, '<ip>')
+    .replace(/\b[0-9a-f]{0,4}(?::[0-9a-f]{0,4}){2,7}\b/gi, '<ip>');
+};
 
 /** A Plainspace space (project) the connected account can bind a provider to. */
 export interface PlainspaceSpace {
@@ -243,7 +404,7 @@ interface SPCreateSpaceResponse {
   project: { id: string };
 }
 
-interface SPMeResponse {
+export interface SPMeResponse {
   email: string;
   projects: {
     id: string;

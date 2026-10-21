@@ -13,6 +13,7 @@ describe('isExternalUrlSchemeAllowed', () => {
       'https://example.com/path?q=1#frag',
       'HTTPS://EXAMPLE.COM', // scheme is case-insensitive
       'mailto:someone@example.com',
+      'mid:message-id',
       'file:///home/user/notes.txt',
       '  https://example.com  ', // surrounding whitespace tolerated
       'tel:+123456789',
@@ -35,6 +36,8 @@ describe('isExternalUrlSchemeAllowed', () => {
       'webexteams://im?space=ff135070-68f8-11f1-9229-c7e6cca7a7cd&message=f4f13440-6b50-11f1-8868-03e71232fa87',
       // DEVONthink item link — same app-deep-link class as obsidian:/zotero:.
       'x-devonthink-item://23082026-1234-5678-9ABC-DEF012345678',
+      // Parallel Code: opaque task id, only pre-fills its New Task form.
+      'parallelcode://new-task?spTaskId=abc123',
     ];
     allowed.forEach((url) => {
       it(`allows "${url}"`, () => {
@@ -47,6 +50,7 @@ describe('isExternalUrlSchemeAllowed', () => {
         'http:',
         'https:',
         'mailto:',
+        'mid:',
         'file:',
         'tel:',
         'sms:',
@@ -64,6 +68,7 @@ describe('isExternalUrlSchemeAllowed', () => {
         'outlook:',
         'webexteams:',
         'x-devonthink-item:',
+        'parallelcode:',
       ]);
     });
   });

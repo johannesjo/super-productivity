@@ -8,6 +8,7 @@ import { TranslateModule, TranslateService, TranslateStore } from '@ngx-translat
 import { signal } from '@angular/core';
 import { TaskReminderOptionId } from '../../features/tasks/task.model';
 import { IS_ELECTRON_TOKEN } from '../../app.constants';
+import { IS_ANDROID_WEB_VIEW_TOKEN } from '../../util/is-android-web-view';
 
 describe('DateTimePickerComponent', () => {
   let component: DateTimePickerComponent;
@@ -33,6 +34,7 @@ describe('DateTimePickerComponent', () => {
         { provide: DateService, useValue: dateServiceSpy },
         { provide: GlobalConfigService, useValue: globalConfigServiceMock },
         { provide: IS_ELECTRON_TOKEN, useValue: true },
+        { provide: IS_ANDROID_WEB_VIEW_TOKEN, useValue: false },
         TranslateService,
         TranslateStore,
       ],
@@ -150,8 +152,26 @@ describe('DateTimePickerComponent', () => {
     expect(showPickerSpy).not.toHaveBeenCalled();
   });
 
-  it('should preserve native touch handling outside Electron', () => {
+  // #9956: the Android WebView focuses the time input but opens neither a picker
+  // nor the IME, so without this the value cannot be changed on Android at all.
+  it('should open the native time picker when the time input is tapped in the Android WebView', () => {
     Object.defineProperty(component, '_isElectron', { value: false });
+    Object.defineProperty(component, '_isAndroidWebView', { value: true });
+    const timeInput = fixture.nativeElement.querySelector(
+      'input[type="time"]',
+    ) as HTMLInputElement;
+    const showPickerSpy = spyOn(timeInput, 'showPicker');
+
+    timeInput.dispatchEvent(
+      new PointerEvent('click', { bubbles: true, pointerType: 'touch' }),
+    );
+
+    expect(showPickerSpy).toHaveBeenCalledOnceWith();
+  });
+
+  it('should preserve native touch handling in mobile browsers', () => {
+    Object.defineProperty(component, '_isElectron', { value: false });
+    Object.defineProperty(component, '_isAndroidWebView', { value: false });
     const timeInput = fixture.nativeElement.querySelector(
       'input[type="time"]',
     ) as HTMLInputElement;
@@ -274,6 +294,24 @@ describe('DateTimePickerComponent', () => {
     expect(calendar.activeDate).toEqual(differentDate);
   });
 
+  it('should keep the browsed month when time focus defaults the date to today (#10528)', () => {
+    const calendar = component.calendar()!;
+    const browsedDate = new Date();
+    browsedDate.setMonth(browsedDate.getMonth() + 2, 1);
+    browsedDate.setHours(0, 0, 0, 0);
+    calendar.activeDate = browsedDate;
+
+    let emittedDate: Date | undefined;
+    component.dateSelected.subscribe((d) => (emittedDate = d));
+    component.onTimeFocus();
+
+    // parent dialog feeds the defaulted date back in
+    fixture.componentRef.setInput('selectedDate', new Date(emittedDate!));
+    fixture.detectChanges();
+
+    expect(calendar.activeDate).toEqual(browsedDate);
+  });
+
   it('should not update activeDate when calendar is focused', () => {
     const calendar = component.calendar()!;
     const initialDate = new Date(2026, 4, 6);
@@ -356,5 +394,38 @@ describe('DateTimePickerComponent', () => {
     fixture.nativeElement.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
     fixture.detectChanges();
     expect(component.isKeyboardNavigating).toBeTrue();
+  });
+  describe('quick access', () => {
+    const getQuickAccessBtns = (): HTMLButtonElement[] =>
+      Array.from(fixture.nativeElement.querySelectorAll('.quick-access button'));
+
+    // No translations are loaded in the test bed, so the pipe echoes the key —
+    // which makes these assertions pin the exact keys, not just "some text".
+    it('should render each shortcut with its label as the visible text', () => {
+      fixture.detectChanges();
+      const labels = getQuickAccessBtns().map((btn) =>
+        btn.querySelector('.quick-access-label')?.textContent?.trim(),
+      );
+
+      expect(labels).toEqual(['G.TODAY', 'G.TOMORROW', 'G.NEXT_WEEK', 'G.NEXT_MONTH']);
+    });
+
+    it('should not set an aria-label that could diverge from the visible label', () => {
+      fixture.detectChanges();
+
+      getQuickAccessBtns().forEach((btn) => {
+        expect(btn.getAttribute('aria-label')).toBeNull();
+      });
+    });
+
+    it('should emit the shortcut id on click', () => {
+      fixture.detectChanges();
+      const emitted: string[] = [];
+      component.quickAccessClick.subscribe((v) => emitted.push(v));
+
+      getQuickAccessBtns().forEach((btn) => btn.click());
+
+      expect(emitted).toEqual(['today', 'tomorrow', 'nextWeek', 'nextMonth']);
+    });
   });
 });

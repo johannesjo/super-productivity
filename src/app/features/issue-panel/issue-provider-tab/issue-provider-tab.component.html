@@ -121,7 +121,7 @@
   } @else {
     <div
       class="item-list"
-      [@standardList]="issueItems()?.length"
+      [@standardList]="$safeNavigationMigration(issueItems()?.length)"
     >
       <!--  (cdkDropListDropped)="drop($event)"-->
 

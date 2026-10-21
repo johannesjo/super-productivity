@@ -37,6 +37,9 @@ let storeError;
 let renameError;
 let renamedFiles;
 let statErrors;
+let storedFiles;
+let readPaths;
+let writeFileSyncImpl;
 
 const resetModule = () => {
   delete require.cache[backupModulePath];
@@ -85,7 +88,7 @@ const installMocks = () => {
       };
     }
 
-    if (request === 'fs' && parent?.filename.endsWith('file-path-guard.ts')) {
+    if (request === 'fs' && /file-path-guard\.[jt]s$/.test(parent?.filename || '')) {
       const realFs = originalModuleLoad.call(this, request, parent, isMain);
       return {
         ...realFs,
@@ -118,7 +121,7 @@ const installMocks = () => {
             e.code = 'EACCES';
             throw e;
           }
-          writtenFiles.set(p, data);
+          writeFileSyncImpl(p, data);
         },
         renameSync: (from, to) => {
           if (renameError) {
@@ -128,10 +131,14 @@ const installMocks = () => {
           assert.equal(path.dirname(from), path.dirname(to));
           renamedFiles.push([from, to]);
           writtenFiles.set(to, writtenFiles.get(from));
+          fileMtimes[to] = new Date();
           writtenFiles.delete(from);
         },
-        readdirSync: (p) => [...(dirFiles[p] ?? [])],
-        readFileSync: (p) => writtenFiles.get(p),
+        readdirSync: (p) => [...new Set([...(dirFiles[p] ?? []), ...[...writtenFiles.keys()].filter((f) => path.dirname(f) === p).map((f) => path.basename(f))])],
+        readFileSync: (p) => {
+          readPaths.push(p);
+          return writtenFiles.get(p) ?? writtenFiles.get(path.resolve(p)) ?? [...writtenFiles].find(([key]) => path.resolve(key) === path.resolve(p))?.[1];
+        },
         // No test below depends on the order backup files are listed in,
         // except where fileMtimes gives a file an explicit mtime.
         statSync: (p) => {
@@ -178,6 +185,9 @@ test.beforeEach(() => {
   renameError = undefined;
   renamedFiles = [];
   statErrors = new Map();
+  storedFiles = writtenFiles;
+  readPaths = [];
+  writeFileSyncImpl = (p, data) => writtenFiles.set(p, data);
   installMocks();
 });
 
@@ -382,7 +392,8 @@ test('cleanup never deletes non-backup-shaped files, even when they are the olde
 
   await handleHandlers.get('BACKUP')(null, { data: {}, maxBackupFiles: 1 });
 
-  assert.deepEqual(deletedFiles, [path.join(PICKED_DIR, olderBackup)]);
+  assert.deepEqual(deletedFiles, [path.join(PICKED_DIR, newerBackup), path.join(PICKED_DIR, olderBackup)]);
+  assert.equal(writtenFiles.has(renamedFiles.at(-1)[1]), true);
 });
 
 // Regression for #7054: BACKUP_IS_AVAILABLE returned the newest file of any
@@ -669,7 +680,8 @@ for (const folder of [BACKUP_DIR, PICKED_DIR]) {
     await handleHandlers.get('BACKUP')(null, { data: {}, maxBackupFiles: 1 });
 
     assert.equal(deletedFiles.includes(path.join(folder, '2025-03-14.json')), false);
-    assert.equal(deletedFiles.length, 1);
+    assert.equal(deletedFiles.length, 2);
+    assert.equal(writtenFiles.has(renamedFiles.at(-1)[1]), true);
   });
 }
 
@@ -745,4 +757,69 @@ test('sanitizes errors when persisting the picked folder fails', async () => {
     },
   );
   assert.equal(simpleStore.backupFolderPath, undefined);
+});
+
+// GHSA-x937-wf3j-88q3: the path comes from the renderer, which runs plugin code.
+test('BACKUP_LOAD_DATA refuses paths outside the backup dirs without reading them', async () => {
+  const { initBackupAdapter } = loadBackupModule();
+  initBackupAdapter();
+  const loadData = handleHandlers.get('BACKUP_LOAD_DATA');
+
+  for (const outside of [
+    path.join(USER_DATA, 'simpleSettings'),
+    `${BACKUP_DIR}${path.sep}..${path.sep}simpleSettings`,
+    `${BACKUP_DIR}-evil${path.sep}sp-backup.json`,
+  ]) {
+    await assert.rejects(
+      async () => loadData({}, outside),
+      /refused path outside backup directory/,
+      outside,
+    );
+  }
+  assert.deepEqual(readPaths, []);
+});
+
+test('BACKUP_LOAD_DATA reads a backup from the Windows Store dir', async () => {
+  const { initBackupAdapter } = loadBackupModule();
+  initBackupAdapter();
+  const storePath = path.join(BACKUP_DIR_WINSTORE, 'sp-backup.json');
+  storedFiles.set(path.resolve(storePath), '{"from":"store"}');
+
+  assert.equal(await handleHandlers.get('BACKUP_LOAD_DATA')({}, storePath), '{"from":"store"}');
+});
+
+test('a backup written by BACKUP restores through BACKUP_LOAD_DATA', async () => {
+  const { initBackupAdapter } = loadBackupModule();
+  initBackupAdapter();
+  const data = { task: { ids: ['t1'], entities: { t1: { id: 't1', title: 'Report' } } } };
+
+  await handleHandlers.get('BACKUP')({}, { data });
+  const newest = await handleHandlers.get('BACKUP_IS_AVAILABLE')();
+
+  assert.deepEqual(
+    JSON.parse(await handleHandlers.get('BACKUP_LOAD_DATA')({}, newest.path)),
+    data,
+  );
+});
+
+test('BACKUP rejects with a path-free error when the write fails (#10022)', async () => {
+  existingPaths.add(BACKUP_DIR);
+  writeFileSyncImpl = (p) => {
+    const e = new Error(`ENOSPC: no space left on device, open '${p}'`);
+    e.code = 'ENOSPC';
+    throw e;
+  };
+  const { initBackupAdapter } = loadBackupModule();
+  initBackupAdapter();
+
+  // async wrapper: ipcMain.handle rejects the invoke for a sync throw and an
+  // async rejection alike, so the test holds either way.
+  await assert.rejects(
+    async () => handleHandlers.get('BACKUP')({}, { data: {}, maxBackupFiles: 3 }),
+    (e) => {
+      assert.match(e.message, /^BACKUP failed: Error \(code: ENOSPC\)$/);
+      assert.equal(e.code, 'ENOSPC');
+      return true;
+    },
+  );
 });

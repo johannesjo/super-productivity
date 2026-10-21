@@ -1,3 +1,4 @@
+import { getTaskPriority } from '../tasks/task-priority.const';
 import { computed, effect, Injectable, inject, signal } from '@angular/core';
 import { Observable, animationFrameScheduler, combineLatest, of } from 'rxjs';
 import { map, observeOn, switchMap, take } from 'rxjs/operators';
@@ -36,6 +37,7 @@ import { LS } from '../../core/persistence/storage-keys.const';
 import { LanguageService } from 'src/app/core/language/language.service';
 import { TranslateService } from '@ngx-translate/core';
 import { T } from '../../t.const';
+import { parseDbDateStr } from '../../util/parse-db-date-str';
 
 const GROUP_OPTIONS_NO_PROJECT = OPTIONS.group.list.filter(
   (opt) => opt.type !== GROUP_OPTION_TYPE.project,
@@ -46,10 +48,27 @@ const GROUP_OPTIONS_NO_PROJECT = OPTIONS.group.list.filter(
 const NO_TAG_GROUP_KEY = 'No tag';
 const UNKNOWN_TAG_GROUP_KEY = 'Unknown tag';
 
+/** One group header of a grouped work view, in display order. */
+export interface CustomizedTaskGroup {
+  key: string;
+  tasks: TaskWithSubTasks[];
+  /**
+   * Drag-to-retag target for tag groups, see `groupTagIdByKey`. `null` for every
+   * other grouping: `task-list` treats only `undefined` as "not a group list",
+   * so `TaskMultiDragService.canDrop` must keep rejecting group drops here.
+   */
+  tagId: string | null;
+}
+
 /** Result of {@link TaskViewCustomizerService.customizeUndoneTasks}. */
 export interface CustomizedUndoneTasks {
   list: TaskWithSubTasks[];
   grouped?: Record<string, TaskWithSubTasks[]>;
+  /**
+   * `grouped` in display order, computed once per emission so the template
+   * doesn't re-sort the group keys on every change-detection pass.
+   */
+  groups?: CustomizedTaskGroup[];
   /**
    * Tag grouping only: group-header title → its tagId, or `null` for buckets
    * with no single tag ('No tag', 'Unknown tag', or a title shared by several
@@ -102,7 +121,6 @@ export class TaskViewCustomizerService {
 
   constructor() {
     this._initProjects();
-    this._initTags();
 
     // Load stored customizations for the active work context, and reset to
     // defaults when switching contexts so filters don't leak across them.
@@ -142,8 +160,23 @@ export class TaskViewCustomizerService {
 
   private _allProjects: Project[] = [];
   private _projectsLoaded = false;
-  private _allTags: Tag[] = [];
-  private _tagsLoaded = false;
+
+  /**
+   * Changes only when the tags' sidebar order or titles change — not on every
+   * tag update (e.g. its `taskIds` when tasks are reordered), so it can drive
+   * re-customization without re-running it for unrelated tag writes.
+   */
+  private _tagOrderKey = computed(() =>
+    this._tagService
+      .tagsInTreeOrder()
+      .map((tag) => `${tag.id}\u0000${tag.title}`)
+      .join('\u0001'),
+  );
+
+  /** Read straight from the signal so it's always current inside the stream. */
+  private _allTags(): Tag[] {
+    return this._tagService.tagsInTreeOrder();
+  }
 
   private _initProjects(): void {
     if (!this._projectsLoaded) {
@@ -154,17 +187,6 @@ export class TaskViewCustomizerService {
           this._allProjects = projects;
         });
       this._projectsLoaded = true;
-    }
-  }
-
-  private _initTags(): void {
-    if (!this._tagsLoaded) {
-      toObservable(this._tagService.tagsInTreeOrder)
-        .pipe(takeUntilDestroyed())
-        .subscribe((tags) => {
-          this._allTags = tags;
-        });
-      this._tagsLoaded = true;
     }
   }
 
@@ -193,9 +215,16 @@ export class TaskViewCustomizerService {
     const currentFilter = OPTIONS.filter.list.find(
       (option) => option.type === stored.type,
     );
-    return currentFilter
-      ? { ...currentFilter, preset: stored.preset ?? null }
-      : DEFAULT_OPTIONS.filter;
+    let preset = stored.preset ?? null;
+    // Historical local presets used the same string encoding as task priorities.
+    // Adopt the current menu value without rewriting the tasks themselves.
+    if (
+      stored.type === FILTER_OPTION_TYPE.priority &&
+      (preset === 'high' || preset === 'medium' || preset === 'low')
+    ) {
+      preset = String(getTaskPriority(preset));
+    }
+    return currentFilter ? { ...currentFilter, preset } : DEFAULT_OPTIONS.filter;
   }
 
   customizeUndoneTasks(
@@ -206,6 +235,9 @@ export class TaskViewCustomizerService {
       toObservable(this.selectedSort),
       toObservable(this.selectedGroup),
       toObservable(this.selectedFilter),
+      // Tag filtering, tag grouping and group order all read the tags; re-run
+      // when their sidebar order or titles change, not only when tasks do.
+      toObservable(this._tagOrderKey),
     ]).pipe(
       map(([tasks, sort, group, filter]) => {
         const normalizedFilterVal = filter.preset?.trim();
@@ -232,8 +264,18 @@ export class TaskViewCustomizerService {
           grouped && group.type === GROUP_OPTION_TYPE.tag
             ? this._buildGroupTagIdByKey(grouped)
             : undefined;
+        const groups = grouped
+          ? this._orderGroupKeys(grouped, group.type).map((key) => ({
+              key,
+              tasks: grouped[key],
+              tagId: groupTagIdByKey?.[key] ?? null,
+            }))
+          : undefined;
 
-        return { result: { list: sorted, grouped, groupTagIdByKey }, isDefault: false };
+        return {
+          result: { list: sorted, grouped, groups, groupTagIdByKey },
+          isDefault: false,
+        };
       }),
       // Emit the default (uncustomized) list synchronously, but keep the
       // customized path on the animation-frame scheduler. The customized branch
@@ -263,7 +305,7 @@ export class TaskViewCustomizerService {
           return tasks.filter((t) => !t.tagIds.length);
         }
 
-        const tag = this._allTags.find((t) =>
+        const tag = this._allTags().find((t) =>
           t.title.toLowerCase().includes(value.toLowerCase().trim()),
         );
         if (!tag) return [];
@@ -298,6 +340,12 @@ export class TaskViewCustomizerService {
             : 0;
           return spent >= +value;
         });
+      case FILTER_OPTION_TYPE.priority:
+        if (value === FILTER_COMMON.NOT_SPECIFIED) {
+          return tasks.filter((t) => !getTaskPriority(t.priority));
+        }
+
+        return tasks.filter((t) => getTaskPriority(t.priority) === +value);
       default:
         return tasks;
     }
@@ -361,6 +409,14 @@ export class TaskViewCustomizerService {
 
       case SORT_OPTION_TYPE.tag: {
         return tasksCopy.sort(sortByTagRank);
+      }
+
+      case SORT_OPTION_TYPE.priority: {
+        return tasksCopy.sort(
+          (a, b) =>
+            ((getTaskPriority(b.priority) ?? 0) - (getTaskPriority(a.priority) ?? 0)) *
+            factor,
+        );
       }
 
       case SORT_OPTION_TYPE.creationDate:
@@ -443,11 +499,14 @@ export class TaskViewCustomizerService {
    * natural ascending order the keyvalue pipe used previously. Special tag
    * buckets ('No tag', 'Unknown tag') sort after the real tags.
    */
-  getOrderedGroupKeys(grouped: Record<string, TaskWithSubTasks[]>): string[] {
+  private _orderGroupKeys(
+    grouped: Record<string, TaskWithSubTasks[]>,
+    groupType: GroupOption['type'],
+  ): string[] {
     const keys = Object.keys(grouped);
     const ascending = (a: string, b: string): number => (a < b ? -1 : a > b ? 1 : 0);
 
-    if (this.selectedGroup().type !== GROUP_OPTION_TYPE.tag) {
+    if (groupType !== GROUP_OPTION_TYPE.tag) {
       return keys.sort(ascending);
     }
 
@@ -469,7 +528,7 @@ export class TaskViewCustomizerService {
    */
   private _tagsInSidebarOrder(): Tag[] {
     return this._menuTreeService.buildTagListInTreeOrder(
-      this._allTags.filter((t) => t.id !== TODAY_TAG.id),
+      this._allTags().filter((t) => t.id !== TODAY_TAG.id),
     );
   }
 
@@ -533,7 +592,7 @@ export class TaskViewCustomizerService {
   }
 
   private _groupByTag(tasks: TaskWithSubTasks[]): Record<string, TaskWithSubTasks[]> {
-    const tagById = new Map(this._allTags.map((tag) => [tag.id, tag]));
+    const tagById = new Map(this._allTags().map((tag) => [tag.id, tag]));
     const groupedByTagId = new Map<string, TaskWithSubTasks[]>();
     const unknownTagTasks: TaskWithSubTasks[] = [];
     const noTagTasks: TaskWithSubTasks[] = [];
@@ -556,7 +615,7 @@ export class TaskViewCustomizerService {
     });
 
     const grouped: Record<string, TaskWithSubTasks[]> = {};
-    this._allTags.forEach((tag) => {
+    this._allTags().forEach((tag) => {
       const tagTasks = groupedByTagId.get(tag.id);
       if (tagTasks?.length) {
         // Distinct tags can share a title; merge their tasks into the same
@@ -642,11 +701,24 @@ export class TaskViewCustomizerService {
       t: TaskWithSubTasks,
     ) => [string | undefined | null, number | undefined | null],
   ): TaskWithSubTasks[] {
+    const toDate = (
+      day: string | undefined | null,
+      withTime: number | undefined | null,
+    ): Date | null => {
+      if (day) {
+        // A date-only value means "by the end of that day" for sorting (#9828).
+        const date = parseDbDateStr(day);
+        date.setHours(23, 59, 59, 999);
+        return date;
+      }
+      return withTime ? new Date(withTime) : null;
+    };
+
     return tasks.sort((a, b) => {
       const [dayA, withTimeA] = getFields(a);
       const [dayB, withTimeB] = getFields(b);
-      const dateA = dayA ? new Date(dayA) : withTimeA ? new Date(withTimeA) : null;
-      const dateB = dayB ? new Date(dayB) : withTimeB ? new Date(withTimeB) : null;
+      const dateA = toDate(dayA, withTimeA);
+      const dateB = toDate(dayB, withTimeB);
 
       if (dateA === null && dateB === null) return 0;
       if (dateA === null) return 1 * factor;
@@ -657,12 +729,15 @@ export class TaskViewCustomizerService {
   }
 
   setSort(val: SortOption): void {
-    const isSame = val.type === this.selectedSort().type;
-    if (isSame) {
-      // reverse sorting
-      val.order = val.order === SORT_ORDER.ASC ? SORT_ORDER.DESC : SORT_ORDER.ASC;
-    }
-    this.selectedSort.set({ ...val });
+    const current = this.selectedSort();
+    const isSame = val.type === current.type;
+    const next = {
+      ...val,
+      ...(isSame && {
+        order: current.order === SORT_ORDER.ASC ? SORT_ORDER.DESC : SORT_ORDER.ASC,
+      }),
+    };
+    this.selectedSort.set(next);
   }
 
   setGroup(val: GroupOption): void {

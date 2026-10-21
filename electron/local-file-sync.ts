@@ -1,4 +1,3 @@
-import { createSafeIpcError, getSafeErrorMeta } from './safe-ipc-error';
 import { IPC } from './shared-with-frontend/ipc-events.const';
 import { SimpleStoreKey } from './shared-with-frontend/simple-store.const';
 import { randomBytes } from 'crypto';
@@ -19,6 +18,7 @@ import { resolveSyncPath, type ResolvedSyncPath } from './sync-path-resolver';
 import { loadSimpleStoreAll, saveSimpleStore } from './simple-store';
 import { assertPathOutside } from './file-path-guard';
 import { getImageDataUrl, importImage } from './image-cache';
+import { createSafeIpcError, getSafeErrorMeta } from './safe-ipc-error';
 
 // SECURITY: file-sync must never read/write/list inside the app's private dir,
 // which holds settings/grants/db — touching it is a privilege-escalation
@@ -292,31 +292,6 @@ export const initLocalFileSyncAdapter = (): void => {
           );
         }
         return createSafeIpcError(IPC.CHECK_DIR_EXISTS, e);
-      }
-    },
-  );
-
-  ipcMain.handle(
-    IPC.FILE_SYNC_LIST_FILES,
-    async (
-      ev,
-      {
-        relativePath,
-      }: {
-        relativePath?: string;
-      },
-    ): Promise<string[] | Error> => {
-      try {
-        const dirPath = (await _resolveRelative(relativePath)).absolutePath;
-        return readdirSync(dirPath);
-      } catch (e) {
-        error('Local file sync list files failed', getSafeErrorMeta(e));
-        if ((e as NodeJS.ErrnoException).code === 'EACCES') {
-          log(
-            'ERR: Permission denied. If running as a snap, ensure the "home" or "removable-media" interface is connected.',
-          );
-        }
-        return createSafeIpcError(IPC.FILE_SYNC_LIST_FILES, e);
       }
     },
   );

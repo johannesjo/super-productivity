@@ -192,12 +192,19 @@
 
   &.isInPanel {
     //border: 0;
-    justify-content: center;
+    // Day navigation buttons are projected in left and right of the date.
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
     border-top: 0;
     box-shadow: none;
-    background: transparent;
+    // Opaque, so the sticky date stays readable over the scrolled grid.
+    background: var(--schedule-panel-header-bg, transparent);
     border: none;
     --over-budget-badge-bg: var(--schedule-event-bg-in-side-panel);
+
+    .week-header-dates {
+      grid-template-columns: 1fr;
+    }
 
     .day {
       border: none !important;
@@ -292,7 +299,7 @@
   background: var(--over-budget-badge-bg);
   color: var(--c-warn);
   font: inherit;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   line-height: 1;
   white-space: nowrap;
 
@@ -303,7 +310,6 @@
 
   @include mq(xs, max) {
     right: var(--s-quarter);
-    font-size: 10px;
   }
 }
 
@@ -414,7 +420,7 @@
   > div {
     left: 0;
     font-weight: bold;
-    font-size: 10px;
+    font-size: var(--font-size-xs);
     position: absolute;
     bottom: 100%;
     line-height: 1;

@@ -6,7 +6,8 @@
       [value]="task().title || ''"
       class="task-title"
     ></task-title>
-    @if (layoutService.isXs() && !isDialogMode()) {
+    <!-- Touch devices have no right-click/hover menu at any width (#10835) -->
+    @if ((layoutService.isXs() || IS_TOUCH_PRIMARY) && !isDialogMode()) {
       <button
         mat-icon-button
         class="task-detail-more-btn"
@@ -29,7 +30,7 @@
       (collapseParent)="collapseParent()"
       (keyPress)="onItemKeyPress($event)"
       [expanded]="isSubTasksExpanded()"
-      (expandedChange)="isSubTasksExpanded.set($event)"
+      (expandedChange)="onSubTasksExpandedChange($event)"
       (afterExpand)="onSubTasksAfterExpand()"
       [type]="'panel'"
     >
@@ -38,7 +39,7 @@
         @if (task().subTasks?.length) {
           <span>{{
             T.F.TASK.ADDITIONAL_INFO.SUB_TASKS
-              | translate: { nr: task().subTasks?.length }
+              | translate: { nr: $safeNavigationMigration(task().subTasks?.length) }
           }}</span>
         } @else {
           <span>{{ T.F.TASK.ADDITIONAL_INFO.SUB_TASKS_EMPTY | translate }}</span>

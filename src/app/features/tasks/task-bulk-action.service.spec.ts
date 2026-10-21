@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 import { computed, Signal, signal } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
-import { of } from 'rxjs';
+import { defer, Observable, of } from 'rxjs';
 import { TaskBulkActionService } from './task-bulk-action.service';
 import { TaskService } from './task.service';
 import { TaskMultiSelectService } from './task-multi-select.service';
@@ -15,6 +15,7 @@ import { WorkContextService } from '../work-context/work-context.service';
 import { DEFAULT_TASK, Task, TaskReminderOptionId } from './task.model';
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 import { T } from '../../t.const';
+import { PLAINSPACE_TYPE } from '../issue/issue.const';
 import { TranslateService, TranslateStore } from '@ngx-translate/core';
 import { LocaleDatePipe } from '../../ui/pipes/locale-date.pipe';
 import { PlannerActions } from '../planner/store/planner.actions';
@@ -27,6 +28,11 @@ describe('TaskBulkActionService', () => {
   let matDialog: { open: jasmine.Spy };
   let snackService: { open: jasmine.Spy };
   let moveToProjectService: { moveToProject: jasmine.Spy };
+  let projectService: {
+    getByIdOnce$: () => Observable<{ id: string; title: string }>;
+    moveTaskToBacklog: jasmine.Spy;
+    moveTaskToTodayList: jasmine.Spy;
+  };
   let entities: ReturnType<typeof signal<Record<string, Task>>>;
   let selectedIds: ReturnType<typeof signal<ReadonlySet<string>>>;
   let multiSelect: {
@@ -35,12 +41,14 @@ describe('TaskBulkActionService', () => {
     clear: jasmine.Spy;
     isBulkFeedbackSuppressed: Signal<boolean>;
     setBulkFeedbackSuppressed: (v: boolean) => void;
-    isDestroyedHost: () => boolean;
+    isDestroyedHost: (el: Element) => boolean;
     findLiveRowEl: () => HTMLElement | null;
+    selectionScope: () => HTMLElement | null;
     isTouchSelectionMode: ReturnType<typeof signal<boolean>>;
   };
   let dialogResult: unknown;
   let isConfirmBeforeDelete: boolean;
+  let isEnableBacklog: boolean;
 
   const t = (id: string, overrides: Partial<Task> = {}): Task => ({
     ...DEFAULT_TASK,
@@ -66,6 +74,7 @@ describe('TaskBulkActionService', () => {
     selectedIds = signal<ReadonlySet<string>>(new Set());
     dialogResult = true;
     isConfirmBeforeDelete = true;
+    isEnableBacklog = true;
 
     taskService = jasmine.createSpyObj<TaskService>('TaskService', [
       'setDone',
@@ -94,6 +103,11 @@ describe('TaskBulkActionService', () => {
         .and.callFake(() => ({ afterClosed: () => of(dialogResult) })),
     };
     snackService = { open: jasmine.createSpy('open') };
+    projectService = {
+      getByIdOnce$: () => of({ id: 'p2', title: 'Project 2' }),
+      moveTaskToBacklog: jasmine.createSpy('moveTaskToBacklog'),
+      moveTaskToTodayList: jasmine.createSpy('moveTaskToTodayList'),
+    };
     moveToProjectService = {
       moveToProject: jasmine.createSpy('moveToProject').and.resolveTo(true),
     };
@@ -110,8 +124,9 @@ describe('TaskBulkActionService', () => {
       isBulkFeedbackSuppressed: suppressed,
       setBulkFeedbackSuppressed: (v: boolean) =>
         suppressionDepth.update((depth) => (v ? depth + 1 : Math.max(0, depth - 1))),
-      isDestroyedHost: () => false,
+      isDestroyedHost: (_el: Element) => false,
       findLiveRowEl: () => null,
+      selectionScope: () => null,
       isTouchSelectionMode: signal(false),
     };
 
@@ -124,11 +139,7 @@ describe('TaskBulkActionService', () => {
         { provide: TaskMoveToProjectService, useValue: moveToProjectService },
         {
           provide: ProjectService,
-          useValue: {
-            getByIdOnce$: () => of({ id: 'p2', title: 'Project 2' }),
-            moveTaskToBacklog: jasmine.createSpy('moveTaskToBacklog'),
-            moveTaskToTodayList: jasmine.createSpy('moveTaskToTodayList'),
-          },
+          useValue: projectService,
         },
         { provide: MatDialog, useValue: matDialog },
         { provide: SnackService, useValue: snackService },
@@ -150,8 +161,21 @@ describe('TaskBulkActionService', () => {
             }),
           },
         },
-        { provide: WorkContextService, useValue: { flatDoneTodayNr$: of(0) } },
-        { provide: TranslateService, useValue: { currentLang: 'en', defaultLang: 'en' } },
+        {
+          provide: WorkContextService,
+          useValue: {
+            flatDoneTodayNr$: of(0),
+            activeWorkContext$: defer(() => of({ isEnableBacklog })),
+          },
+        },
+        {
+          provide: TranslateService,
+          useValue: {
+            currentLang: 'en',
+            defaultLang: 'en',
+            instant: (key: string) => key,
+          },
+        },
         { provide: TranslateStore, useValue: { getTranslations: () => ({}) } },
         { provide: LocaleDatePipe, useValue: { transform: () => 'DATE' } },
       ],
@@ -217,6 +241,109 @@ describe('TaskBulkActionService', () => {
   });
 
   describe('deleteSelected', () => {
+    it('focuses the Planner add button when every selected card is removed', async () => {
+      isConfirmBeforeDelete = false;
+      select([t('only')]);
+      const otherDay = document.createElement('planner-day');
+      otherDay.setAttribute('data-planner-selection-scope', '2026-09-11');
+      const otherAddTask = document.createElement('add-task-inline');
+      const otherAdd = document.createElement('button');
+      // Mirrors the real template's marker on the collapsed add button.
+      otherAdd.setAttribute('data-add-task-btn', '');
+      otherAddTask.appendChild(otherAdd);
+      otherDay.appendChild(otherAddTask);
+      const day = document.createElement('planner-day');
+      day.setAttribute('data-planner-selection-scope', '2026-09-12');
+      const row = document.createElement('planner-task');
+      row.setAttribute('data-task-id', 'only');
+      row.setAttribute('data-task-selectable', 'true');
+      row.tabIndex = 0;
+      const addTask = document.createElement('add-task-inline');
+      const add = document.createElement('button');
+      add.setAttribute('data-add-task-btn', '');
+      addTask.appendChild(add);
+      day.append(row, addTask);
+      const unrelatedTask = document.createElement('task');
+      unrelatedTask.setAttribute('data-task-id', 'unrelated');
+      document.body.append(otherDay, day, unrelatedTask);
+      row.focus();
+      spyOnProperty(document, 'activeElement', 'get').and.returnValue(row);
+      let isDestroyed = false;
+      multiSelect.isDestroyedHost = (el: Element) => isDestroyed && el === row;
+      taskService.remove.and.callFake(() => {
+        isDestroyed = true;
+      });
+      spyOn(add, 'focus');
+
+      await service.deleteSelected();
+
+      expect(add.focus).toHaveBeenCalled();
+      otherDay.remove();
+      day.remove();
+      unrelatedTask.remove();
+    });
+
+    it('falls through to the next Planner section when overdue empties', async () => {
+      isConfirmBeforeDelete = false;
+      select([t('late')]);
+      const root = document.createElement('div');
+      // The overdue section is a plain div, not a planner-day, and has no add
+      // button of its own — it disappears once its last task leaves.
+      root.innerHTML = `
+        <div data-planner-selection-scope="overdue">
+          <planner-task data-task-selectable="true" data-task-id="late" tabindex="0"></planner-task>
+        </div>
+        <planner-day data-planner-selection-scope="2026-09-12">
+          <add-task-inline><button data-add-task-btn></button></add-task-inline>
+        </planner-day>`;
+      document.body.appendChild(root);
+      try {
+        const row = root.querySelector<HTMLElement>('[data-task-id="late"]')!;
+        const nextAdd = root.querySelector<HTMLElement>('[data-add-task-btn]')!;
+        spyOnProperty(document, 'activeElement', 'get').and.returnValue(row);
+        let isDestroyed = false;
+        multiSelect.isDestroyedHost = (el: Element) => isDestroyed && el === row;
+        taskService.remove.and.callFake(() => {
+          isDestroyed = true;
+        });
+        spyOn(nextAdd, 'focus');
+
+        await service.deleteSelected();
+
+        expect(nextAdd.focus).toHaveBeenCalled();
+      } finally {
+        root.remove();
+      }
+    });
+
+    it('restores focus in the originating board panel when the bulk menu had focus', async () => {
+      isConfirmBeforeDelete = false;
+      select([t('selected')]);
+      const root = document.createElement('div');
+      root.innerHTML = `
+        <board-panel data-board-selection-scope="first">
+          <planner-task data-task-selectable="true" data-task-id="remaining" tabindex="0"></planner-task>
+        </board-panel>
+        <board-panel data-board-selection-scope="second">
+          <planner-task data-task-selectable="true" data-task-id="selected" tabindex="0"></planner-task>
+          <planner-task data-task-selectable="true" data-task-id="remaining" tabindex="0"></planner-task>
+        </board-panel>`;
+      document.body.appendChild(root);
+      try {
+        const panel = root.querySelector<HTMLElement>(
+          '[data-board-selection-scope="second"]',
+        )!;
+        const remaining = panel.querySelector<HTMLElement>('[data-task-id="remaining"]')!;
+        multiSelect.selectionScope = () => panel;
+        spyOnProperty(document, 'activeElement', 'get').and.returnValue(document.body);
+        spyOn(remaining, 'focus');
+        await service.deleteSelected();
+        expect(remaining.focus).toHaveBeenCalled();
+      } finally {
+        root.remove();
+      }
+    });
+
     it('confirms, dedupes subtasks of selected parents, and splits lone subtasks off', async () => {
       select([
         t('parent', { subTaskIds: ['sub'] }),
@@ -235,6 +362,10 @@ describe('TaskBulkActionService', () => {
           }),
         }),
       );
+      // No undo for a bulk delete: Enter must not confirm it.
+      expect(
+        matDialog.open.calls.mostRecent().args[1]?.data.isFocusConfirm,
+      ).toBeUndefined();
       // top-level ids in one op; the lone subtask via the singular path so
       // older clients keep a consistent parent (rule 10)
       expect(taskService.removeMultipleTasks).toHaveBeenCalledWith(['parent']);
@@ -263,6 +394,57 @@ describe('TaskBulkActionService', () => {
       expect(taskService.removeMultipleTasks).not.toHaveBeenCalled();
     });
 
+    it('always confirms a single Plainspace task, warning it is deleted for the Space', async () => {
+      isConfirmBeforeDelete = false;
+      select([t('shared', { issueType: PLAINSPACE_TYPE })]);
+      await service.deleteSelected();
+      expect(matDialog.open).toHaveBeenCalledWith(
+        jasmine.anything(),
+        jasmine.objectContaining({
+          data: jasmine.objectContaining({
+            message: T.F.TASK.D_CONFIRM_DELETE.MSG_PLAINSPACE,
+          }),
+        }),
+      );
+      expect(taskService.remove).toHaveBeenCalledWith(
+        jasmine.objectContaining({ id: 'shared' }),
+      );
+    });
+
+    it('warns in the bulk confirm when the selection includes a Plainspace task', async () => {
+      select([t('a'), t('shared', { issueType: PLAINSPACE_TYPE })]);
+      await service.deleteSelected();
+      expect(matDialog.open).toHaveBeenCalledWith(
+        jasmine.anything(),
+        jasmine.objectContaining({
+          data: jasmine.objectContaining({
+            message: 'F.TASK.MULTI_SELECT.D_CONFIRM_DELETE.MSG_PLAINSPACE.OTHER',
+          }),
+        }),
+      );
+    });
+
+    it('warns with the singular Plainspace message for a Plainspace parent selected with its subtask', async () => {
+      spyOn(TestBed.inject(TranslateStore), 'getTranslations').and.returnValue({
+        F: {
+          TASK: { MULTI_SELECT: { D_CONFIRM_DELETE: { MSG_PLAINSPACE: { ONE: 'x' } } } },
+        },
+      });
+      select([
+        t('shared', { issueType: PLAINSPACE_TYPE, subTaskIds: ['s1'] }),
+        t('s1', { parentId: 'shared' }),
+      ]);
+      await service.deleteSelected();
+      expect(matDialog.open).toHaveBeenCalledWith(
+        jasmine.anything(),
+        jasmine.objectContaining({
+          data: jasmine.objectContaining({
+            message: 'F.TASK.MULTI_SELECT.D_CONFIRM_DELETE.MSG_PLAINSPACE.ONE',
+          }),
+        }),
+      );
+    });
+
     it('confirms as a bulk delete when a parent and its subtasks are selected', async () => {
       isConfirmBeforeDelete = false;
       select([
@@ -289,7 +471,10 @@ describe('TaskBulkActionService', () => {
       expect(matDialog.open).toHaveBeenCalledWith(
         jasmine.anything(),
         jasmine.objectContaining({
-          data: jasmine.objectContaining({ message: T.F.TASK.D_CONFIRM_DELETE.MSG }),
+          data: jasmine.objectContaining({
+            message: T.F.TASK.D_CONFIRM_DELETE.MSG,
+            isFocusConfirm: true,
+          }),
         }),
       );
       expect(taskService.remove).toHaveBeenCalled();
@@ -297,6 +482,14 @@ describe('TaskBulkActionService', () => {
   });
 
   describe('moveToProject', () => {
+    it('uses the drag snapshot even if selection has cleared after drag end', async () => {
+      select([t('first'), t('second')]);
+      selectedIds.set(new Set());
+      await service.moveToProject('p2', ['second', 'deleted', 'first']);
+      expect(
+        moveToProjectService.moveToProject.calls.allArgs().map(([task]) => task.id),
+      ).toEqual(['second', 'first']);
+    });
     it('moves parents once per repeat config, skips subtasks and reports partial', async () => {
       select([
         t('r1', { repeatCfgId: 'cfg' }),
@@ -438,6 +631,53 @@ describe('TaskBulkActionService', () => {
     });
   });
 
+  describe('setPriority', () => {
+    it('updates only the tasks whose priority differs', async () => {
+      select([t('a'), t('same', { priority: 'high' }), t('low', { priority: 1 })]);
+
+      await service.setPriority(3);
+
+      expect(taskService.update).toHaveBeenCalledTimes(2);
+      expect(taskService.update).toHaveBeenCalledWith('a', { priority: 3 });
+      expect(taskService.update).toHaveBeenCalledWith('low', { priority: 3 });
+      expect(snackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          msg: 'F.TASK.MULTI_SELECT.S.PRIORITY_SET.OTHER',
+          translateParams: jasmine.objectContaining({
+            count: 2,
+            priority: T.F.TASK.CMP.PRIORITY_HIGH,
+          }),
+        }),
+      );
+    });
+
+    it('does nothing when every task already has that priority', async () => {
+      select([t('a', { priority: 2 }), t('b', { priority: 'medium' })]);
+
+      await service.setPriority(2);
+
+      expect(taskService.update).not.toHaveBeenCalled();
+      expect(snackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({ msg: T.F.TASK.MULTI_SELECT.S.NOTHING_TO_DO }),
+      );
+    });
+
+    it('clears the priority and says so', async () => {
+      select([t('a', { priority: 3 }), t('none')]);
+
+      await service.setPriority(null);
+
+      expect(taskService.update).toHaveBeenCalledTimes(1);
+      expect(taskService.update).toHaveBeenCalledWith('a', { priority: null });
+      expect(snackService.open).toHaveBeenCalledWith(
+        jasmine.objectContaining({
+          msg: 'F.TASK.MULTI_SELECT.S.PRIORITY_CLEARED.OTHER',
+          translateParams: jasmine.objectContaining({ count: 1 }),
+        }),
+      );
+    });
+  });
+
   describe('moveToBacklog', () => {
     it('reports the move, and skipped lone subtasks', async () => {
       select([t('a'), t('sub', { parentId: 'other' })]);
@@ -448,6 +688,23 @@ describe('TaskBulkActionService', () => {
           translateParams: { count: 1, total: 2 },
         }),
       );
+    });
+  });
+
+  describe('moveToBacklog in a context without a backlog', () => {
+    it('does nothing, like the single-task shortcut (#9374)', async () => {
+      // Today and tag views have no backlog of their own: the bar hides the
+      // button (isShowBacklogBtns) and the single-task shortcut bails on
+      // isEnableBacklog, but the bulk KEYBOARD path reached this unguarded and
+      // emitted one op per task against each task's own project - invisible in
+      // the view the user was looking at, and replicated to every device.
+      isEnableBacklog = false;
+      select([t('a'), t('b')]);
+
+      await service.moveToBacklog();
+
+      expect(projectService.moveTaskToBacklog).not.toHaveBeenCalled();
+      expect(snackService.open).not.toHaveBeenCalled();
     });
   });
 
@@ -505,6 +762,28 @@ describe('TaskBulkActionService', () => {
         remindOption: null,
       });
       expect(taskService.scheduleTask).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('openDeadlineDialog', () => {
+    it("reports a removal when the dialog's Remove button closes with a null date", async () => {
+      // DialogDeadlineComponent.remove() closes with {date: null, ...}, which is
+      // a removal, not a set. Reporting DEADLINE_SET renders "Set the deadline
+      // of N tasks to " with an empty date, and counts tasks that had none.
+      select([t('a', { deadlineDay: '2026-09-10' }), t('b')]);
+      dialogResult = { date: null, time: null, remindOption: null };
+
+      await service.openDeadlineDialog();
+
+      expect(dispatchedTypes()).toEqual([TaskSharedActions.removeDeadline.type]);
+      const snackArg = snackService.open.calls.mostRecent().args[0] as {
+        msg: string;
+        translateParams: { count: number; date?: string };
+      };
+      expect(snackArg.msg).toContain('DEADLINE_REMOVED');
+      expect(snackArg.msg).not.toContain('DEADLINE_SET');
+      // Only the task that actually had a deadline is counted.
+      expect(snackArg.translateParams.count).toBe(1);
     });
   });
 

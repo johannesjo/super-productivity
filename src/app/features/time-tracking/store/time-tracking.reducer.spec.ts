@@ -40,6 +40,26 @@ describe('TimeTracking Reducer', () => {
   });
 
   describe('addTimeSpent', () => {
+    it('should leave work start/end untouched for back-filled time', () => {
+      const task = { projectId: '1', tagIds: ['2'] } as Partial<TaskCopy> as TaskCopy;
+      const date = '2023-01-01';
+      const state = {
+        ...initialTimeTrackingState,
+        project: { ['1']: { [date]: { s: 1000, e: 2000 } } },
+      };
+      const action = TimeTrackingActions.addTimeSpent({
+        task,
+        date,
+        duration: 223,
+        isFromTrackingReminder: false,
+        isBackfill: true,
+      });
+      const result = timeTrackingReducer(state, action);
+      expect(result).toBe(state);
+      expect(result.project['1'][date]).toEqual({ s: 1000, e: 2000 });
+      expect(result.tag['2']).toBeUndefined();
+    });
+
     it('should add time spent for project and single tag', () => {
       const task = { projectId: '1', tagIds: ['2'] } as Partial<TaskCopy> as TaskCopy;
       const date = '2023-01-01';

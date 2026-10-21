@@ -79,7 +79,7 @@
           [matTooltip]="T.F.TASK.ADD_TASK_BAR.TOOLTIP_ADD_TASK | translate"
           matTooltipPosition="above"
         >
-          <mat-icon>add</mat-icon>
+          <mat-icon>send</mat-icon>
         </button>
       </div>
 
@@ -222,7 +222,9 @@
 <mat-autocomplete
   #taskAutoCompleteEl="matAutocomplete"
   class="add-task-bar-panel"
-  (optionActivated)="onTaskSuggestionActivated($event?.option?.value)"
+  (optionActivated)="
+    onTaskSuggestionActivated($safeNavigationMigration($event?.option?.value))
+  "
   (optionSelected)="onTaskSuggestionSelected($event.option.value)"
   [autoActiveFirstOption]="true"
 >

@@ -1,3 +1,4 @@
+import { TaskMultiDragService } from '../../features/tasks/task-multi-drag.service';
 import { signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -14,12 +15,20 @@ import { LayoutService } from '../layout/layout.service';
 import { TaskService } from '../../features/tasks/task.service';
 import { DataInitStateService } from '../../core/data-init/data-init-state.service';
 import { ScheduleExternalDragService } from '../../features/schedule/schedule-week/schedule-external-drag.service';
-import { NavConfig } from './magic-side-nav.model';
+import { NavActionItem, NavConfig, NavPluginItem } from './magic-side-nav.model';
 
-describe('MagicSideNavComponent mobile behavior', () => {
+describe('MagicSideNavComponent', () => {
   let fixture: ComponentFixture<MagicSideNavComponent>;
   let isXs: ReturnType<typeof signal<boolean>>;
+  let isMobileSideNavOpen: ReturnType<typeof signal<boolean>>;
   let browserMatches: boolean;
+  let navConfigServiceMock: {
+    navConfig: ReturnType<typeof signal<NavConfig>>;
+    areInitialTreesReady: ReturnType<typeof signal<boolean>>;
+    isProjectsExpanded: ReturnType<typeof signal<boolean>>;
+    isTagsExpanded: ReturnType<typeof signal<boolean>>;
+    onNavItemClick: jasmine.Spy;
+  };
 
   const navConfig: NavConfig = {
     items: [],
@@ -35,7 +44,15 @@ describe('MagicSideNavComponent mobile behavior', () => {
 
   beforeEach(async () => {
     isXs = signal(false);
+    isMobileSideNavOpen = signal(false);
     browserMatches = false;
+    navConfigServiceMock = {
+      navConfig: signal(navConfig),
+      areInitialTreesReady: signal(false),
+      isProjectsExpanded: signal(false),
+      isTagsExpanded: signal(false),
+      onNavItemClick: jasmine.createSpy('onNavItemClick'),
+    };
     spyOn(window, 'matchMedia').and.callFake(
       () =>
         ({
@@ -49,13 +66,19 @@ describe('MagicSideNavComponent mobile behavior', () => {
       imports: [MagicSideNavComponent, NoopAnimationsModule, TranslateModule.forRoot()],
       providers: [
         {
-          provide: MagicNavConfigService,
+          provide: TaskMultiDragService,
           useValue: {
-            navConfig: signal(navConfig),
-            areInitialTreesReady: signal(false),
-            isProjectsExpanded: signal(false),
-            isTagsExpanded: signal(false),
+            ids: () => [],
+            selectedIds: () => new Set(),
+            selectionSize: () => 0,
+            start: () => {},
+            clear: () => {},
+            canDrop: () => false,
           },
+        },
+        {
+          provide: MagicNavConfigService,
+          useValue: navConfigServiceMock,
         },
         {
           provide: LayoutService,
@@ -63,6 +86,7 @@ describe('MagicSideNavComponent mobile behavior', () => {
             isXs,
             focusSideNavTrigger: signal(0),
             toggleSideNavModeTrigger: signal(0),
+            isMobileSideNavOpen,
           },
         },
         {
@@ -101,6 +125,22 @@ describe('MagicSideNavComponent mobile behavior', () => {
     fixture = TestBed.createComponent(MagicSideNavComponent);
 
     expect(fixture.componentInstance.isMobile()).toBe(true);
+  });
+
+  it('reports the open mobile drawer to the layout service', () => {
+    isXs.set(true);
+    browserMatches = true;
+    fixture = TestBed.createComponent(MagicSideNavComponent);
+    fixture.detectChanges();
+    expect(isMobileSideNavOpen()).toBe(false);
+
+    fixture.componentInstance.toggleMobileNav();
+    fixture.detectChanges();
+    expect(isMobileSideNavOpen()).toBe(true);
+
+    fixture.componentInstance.toggleMobileNav();
+    fixture.detectChanges();
+    expect(isMobileSideNavOpen()).toBe(false);
   });
 
   it('exposes the open mobile drawer as labelled navigation with a focus trap', () => {
@@ -201,5 +241,42 @@ describe('MagicSideNavComponent mobile behavior', () => {
     );
 
     expect(fixture.componentInstance.showMobileMenuOverlay()).toBe(false);
+  });
+
+  describe('onItemClick', () => {
+    it('dispatches action items to the service without executing them directly', () => {
+      fixture = TestBed.createComponent(MagicSideNavComponent);
+      const action = jasmine.createSpy('action');
+      const item: NavActionItem = {
+        id: 'test-action',
+        label: 'Test action',
+        icon: 'bug_report',
+        type: 'action',
+        action,
+      };
+
+      fixture.componentInstance.onItemClick(item);
+
+      expect(action).not.toHaveBeenCalled();
+      expect(navConfigServiceMock.onNavItemClick).toHaveBeenCalledOnceWith(item);
+    });
+
+    it('dispatches plugin items to the service without executing them directly', () => {
+      fixture = TestBed.createComponent(MagicSideNavComponent);
+      const action = jasmine.createSpy('pluginAction');
+      const item: NavPluginItem = {
+        id: 'test-plugin',
+        label: 'Test plugin',
+        icon: 'extension',
+        type: 'plugin',
+        pluginId: 'test-plugin',
+        action,
+      };
+
+      fixture.componentInstance.onItemClick(item);
+
+      expect(action).not.toHaveBeenCalled();
+      expect(navConfigServiceMock.onNavItemClick).toHaveBeenCalledOnceWith(item);
+    });
   });
 });

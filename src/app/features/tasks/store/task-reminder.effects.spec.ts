@@ -2,7 +2,8 @@ import { TestBed } from '@angular/core/testing';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { Observable, of } from 'rxjs';
 import { Action, Store } from '@ngrx/store';
-import { TaskReminderEffects } from './task-reminder.effects';
+import { nativeReminderIdToCancel, TaskReminderEffects } from './task-reminder.effects';
+import { generateNotificationId } from '../../android/android-notification-id.util';
 import { SnackService } from '../../../core/snack/snack.service';
 import { TaskService } from '../task.service';
 import { LocaleDatePipe } from '../../../ui/pipes/locale-date.pipe';
@@ -377,6 +378,66 @@ describe('TaskReminderEffects', () => {
     });
   });
 
+  describe('deadline snacks', () => {
+    it('should show a snack when setting a deadline', () => {
+      actions$ = of(
+        TaskSharedActions.setDeadline({
+          taskId: 'task-1',
+          deadlineDay: '2026-05-12',
+        }),
+      );
+      datePipe.transform.and.returnValue('5/12/2026');
+
+      effects.setDeadlineSnack$.subscribe();
+
+      expect(snackService.open).toHaveBeenCalledWith({
+        type: 'SUCCESS',
+        translateParams: { date: '5/12/2026' },
+        msg: T.F.TASK.S.DEADLINE_SET,
+        ico: 'flag',
+      });
+    });
+
+    it('should not show a snack when setting a deadline with isSkipSnack', () => {
+      actions$ = of(
+        TaskSharedActions.setDeadline({
+          taskId: 'task-1',
+          deadlineDay: '2026-05-12',
+          isSkipSnack: true,
+        }),
+      );
+
+      effects.setDeadlineSnack$.subscribe();
+
+      expect(snackService.open).not.toHaveBeenCalled();
+    });
+
+    it('should show a snack when removing a deadline', () => {
+      actions$ = of(TaskSharedActions.removeDeadline({ taskId: 'task-1' }));
+
+      effects.removeDeadlineSnack$.subscribe();
+
+      expect(snackService.open).toHaveBeenCalledWith({
+        type: 'SUCCESS',
+        msg: T.F.TASK.S.DEADLINE_REMOVED,
+        ico: 'flag',
+      });
+    });
+
+    it('should not show a snack when removing a deadline with isSkipSnack', () => {
+      actions$ = of(
+        TaskSharedActions.removeDeadline({
+          taskId: 'task-1',
+          isSkipSnack: true,
+        }),
+      );
+
+      effects.removeDeadlineSnack$.subscribe();
+
+      expect(snackService.open).not.toHaveBeenCalled();
+    });
+  });
+
   describe('dismissReminderSnack$', () => {
     it('should show snack when reminder is dismissed', () => {
       const action = TaskSharedActions.dismissReminderOnly({ id: 'task-1' });
@@ -390,6 +451,16 @@ describe('TaskReminderEffects', () => {
         msg: T.F.TASK.S.REMINDER_DELETED,
         ico: 'schedule',
       });
+    });
+
+    it('should not show a snack when dismissing with isSkipSnack', () => {
+      actions$ = of(
+        TaskSharedActions.dismissReminderOnly({ id: 'task-1', isSkipSnack: true }),
+      );
+
+      effects.dismissReminderSnack$.subscribe();
+
+      expect(snackService.open).not.toHaveBeenCalled();
     });
   });
 
@@ -501,6 +572,30 @@ describe('TaskReminderEffects - cancelNativeReminderOnUnschedule$ filter', () =>
         },
       });
     });
+  });
+});
+
+describe('nativeReminderIdToCancel', () => {
+  it('cancels only the deadline slot for deadline actions', () => {
+    const deadlineId = generateNotificationId('task-1_deadline');
+    expect(
+      nativeReminderIdToCancel(TaskSharedActions.removeDeadline({ taskId: 'task-1' })),
+    ).toBe(deadlineId);
+    expect(
+      nativeReminderIdToCancel(
+        TaskSharedActions.clearDeadlineReminder({ taskId: 'task-1' }),
+      ),
+    ).toBe(deadlineId);
+  });
+
+  it('cancels the task slot for unschedule and dismiss', () => {
+    const taskSlotId = generateNotificationId('task-1');
+    expect(
+      nativeReminderIdToCancel(TaskSharedActions.unscheduleTask({ id: 'task-1' })),
+    ).toBe(taskSlotId);
+    expect(
+      nativeReminderIdToCancel(TaskSharedActions.dismissReminderOnly({ id: 'task-1' })),
+    ).toBe(taskSlotId);
   });
 });
 

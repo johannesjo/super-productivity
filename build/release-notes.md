@@ -2,35 +2,40 @@ For all current downloads, package links, and platform-specific notes: [check th
 
 ### New features
 
-- Select multiple tasks and apply bulk actions using desktop, keyboard, or touch controls.
-- Copy the focused task and its subtasks as a Markdown checklist.
-- Duplicate tasks with a keyboard shortcut and trigger automations with shortcuts.
-- Added the Auto-Fill Time Spent community plugin.
-- Identify desktop devices by operating system and device name in tracking presence.
+- Set numeric task priorities with icon presets.
+- Drag selected tasks between sections and projects, and select multiple tasks in the mobile planner.
+- Find projects and tags in search.
+- Undo task unscheduling and preview the next recurring task and inherited subtasks.
+- Added App Auto Track and TickTick CSV import plugins, plus Caffeine Tracker to the community plugin list.
+- Moved Redmine and Nextcloud Deck integrations to plugins.
+- Simplified first-run setup with an offer to track your first task.
+- Custom styles.css changes now reload automatically.
 
-### Sync, recovery, and privacy
+### Mobile and reminders
 
-- Added local recovery points for full-state data loss, preserved through restores.
-- Prevent empty devices from overwriting server data and protect archive-only legacy data when joining sync.
-- Show sync conflicts on devices that have never synced and skip duplicate changes during forced downloads.
-- Improved WebDAV handling of stale server responses after saving.
-- Reject truncated legacy backups with a repair message.
-- Fixed user content leaking into exported logs and disabled spellchecking at the session level.
-- Preserve plugin sign-ins through temporary token refresh failures.
+- Android: receive native deadline reminders up to one week ahead; reminders are rescheduled as exact alarms when permission is granted.
+- Android: fixed double-counted time, lost time after app termination or restart, background Pomodoro tracking, and missing focus notifications.
+- iOS: share links and text to your inbox, and recover focus sessions after a web view restart.
+- Session endings no longer steal focus; Windows reminders bring the window forward without taking focus.
 
-### Fixes and improvements
+### Sync and backups
 
-- Prevent a missing task ID from clearing the task list; correctly sync completed tasks reopened by starting them.
-- Allow completed habits to be unchecked.
-- Open task notes directly from the notes icon; fix DEVONthink links and Markdown links without a URL scheme.
-- Keep the note toolbar overflow menu accessible on phones and prevent the right-panel close handle from covering content.
-- Keep Android’s add-task bar above the keyboard on older WebViews and fix iOS keyboard layout handling.
-- Show the schedule day panel in the mobile bottom sheet and keep it tied to the displayed day.
-- Keep started or tracked appointments in the main task list.
-- Restore the Linux tray icon, fix the tray’s Show App action, and stop the macOS tray icon from jumping when tracking starts.
-- Fixed Snap packaging and unwanted scrolling during navigation and with background images.
-- Improved Korean translations.
+- Fixed sync issues that could lose tracked time or overwrite concurrent task edits.
+- Fixed conflicts involving task restores and bulk archiving, note deletions, habit edits, and list reordering.
+- Improved concurrent OneDrive writes, WebDAV upload handling, and recovery from interrupted mobile sync downloads.
+- Failed desktop backups are no longer recorded as successful; backups still invalid after repair are rejected.
+- Kept HTTP error URLs and bodies out of exported logs.
 
-### Removed
+### Fixes and polish
 
-- Removed the User Profiles feature.
+- Fixed calendar month navigation, unwanted jumps to the current time, and all-day events spanning multiple dates.
+- Preserved subtask due dates when duplicating tasks and corrected recurring times before a custom day start.
+- Saved pending note edits before switching tasks, fixed repeated checklist insertion, and kept hover controls clear of note text.
+- Improved CalDAV/iCloud discovery, mobile OneDrive sign-in, and GitLab, Gitea, and Azure DevOps integrations.
+- Improved dialog keyboard focus, mobile onboarding hints, and settings search.
+- Updated Romanian, Brazilian Portuguese, Polish, and Vietnamese translations, plus localized planner labels and heatmap dates.
+- Reduced planner processing during time tracking and removed looping Flowtime animations.
+
+### Self-hosting
+
+- Added ARM64 SuperSync server images, versioned release images, configurable trusted proxy ranges and daily cleanup time, and fixes for fresh deployments.

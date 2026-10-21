@@ -10,6 +10,29 @@ const BAR = 'task-multi-select-bar .bar';
 const DONE_TASKS = '.task-list-inner[data-id="DONE"] > task.isDone';
 
 test.describe('Task multi-select (desktop)', () => {
+  // The checkbox is its own click target, so it needs its own opt-in
+  // (`done-toggle [isMultiSelectAware]`). Without it a modifier click there
+  // completes the task instead of selecting it, and nothing else notices:
+  // every other case in this file clicks the row's title area.
+  test('Ctrl+click on the done toggle selects the task instead of completing it', async ({
+    page,
+    workViewPage,
+    taskPage,
+    testPrefix,
+  }) => {
+    await workViewPage.waitForTaskList();
+    const title = `${testPrefix}-Toggle Select`;
+    await workViewPage.addTask(title);
+    const task = taskPage.getTaskByText(title);
+    const bar = page.locator(BAR);
+
+    await task.locator('done-toggle').click({ modifiers: ['Control'] });
+
+    await expect(bar).toContainText('1 selected');
+    await expect(task).toHaveClass(/isMultiSelected/);
+    await expect(task).not.toHaveClass(/isDone/);
+  });
+
   test('Ctrl+click and Shift+click build a selection that D completes at once', async ({
     page,
     workViewPage,
@@ -52,6 +75,36 @@ test.describe('Task multi-select (desktop)', () => {
     await expect(page.locator(`${DONE_TASKS}.isMultiSelected`)).toHaveCount(2);
     await bar.getByRole('button', { name: 'Clear selection' }).click();
     await expect(bar).toBeHidden();
+  });
+
+  // #10143: a plain click only focuses a row, so the first Shift+click has no
+  // anchor yet. It must start the range at the focused row (as Shift+Arrow
+  // does) instead of dropping it.
+  test('Shift+click after a plain click keeps the clicked row in the range', async ({
+    page,
+    workViewPage,
+    taskPage,
+    testPrefix,
+  }) => {
+    await workViewPage.waitForTaskList();
+    const titles = ['Range A', 'Range B', 'Range C'].map((t) => `${testPrefix}-${t}`);
+    for (const title of titles) {
+      await workViewPage.addTask(title);
+    }
+    const [a, b, c] = titles.map((t) => taskPage.getTaskByText(t));
+    const bar = page.locator(BAR);
+
+    // A plain click on the row only focuses it; focusing directly gives the
+    // same state without landing on the title (which starts inline editing).
+    await a.focus();
+    await expect(a).toBeFocused();
+    await expect(bar).toBeHidden();
+
+    await c.click({ modifiers: ['Shift'] });
+    await expect(bar).toContainText('3 selected');
+    for (const task of [a, b, c]) {
+      await expect(task).toHaveClass(/isMultiSelected/);
+    }
   });
 
   test('X toggles the focused task, Ctrl+A selects its list and Escape clears', async ({

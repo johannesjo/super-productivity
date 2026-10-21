@@ -1,3 +1,4 @@
+import { TaskMultiDragService } from '../task-multi-drag.service';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { TaskListComponent } from './task-list.component';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
@@ -18,6 +19,7 @@ import { moveTaskInTodayList } from '../../work-context/store/work-context-meta.
 import { WorkContextType } from '../../work-context/work-context.model';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { Task } from '../task.model';
+import { Section } from '../../section/section.model';
 
 describe('TaskListComponent', () => {
   let component: TaskListComponent;
@@ -81,6 +83,23 @@ describe('TaskListComponent', () => {
     await TestBed.configureTestingModule({
       imports: [TaskListComponent, NoopAnimationsModule],
       providers: [
+        {
+          provide: TaskMultiDragService,
+          useValue: {
+            ids: () => [],
+            selectedIds: () => new Set(),
+            draggedIds: () => new Set(),
+            previewTasks: () => [],
+            selectionSize: () => 0,
+            isListGroupDrag: () => false,
+            start: () => {},
+            clear: () => {},
+            finish: () => {},
+            canDrop: () => false,
+            isPlacementUnchanged: () => false,
+            drop: () => Promise.resolve(),
+          },
+        },
         provideMockStore({ initialState: {} }),
         {
           provide: TaskService,
@@ -128,6 +147,35 @@ describe('TaskListComponent', () => {
   });
 
   describe('enterPredicate', () => {
+    describe('a dragged section', () => {
+      // Sections are dragged by their header from the sections wrapper, whose
+      // drop list carries no list data; letting one into a task list made
+      // drop() read `groupTagId` of undefined (#10866).
+      const section: Section = {
+        id: 'section1',
+        contextId: 'project1',
+        contextType: WorkContextType.PROJECT,
+        title: 'Section',
+        taskIds: [],
+      };
+      const sectionDrag = { data: section } as unknown as CdkDrag;
+
+      for (const [listModelId, listId] of [
+        ['DONE', 'PARENT'],
+        ['UNDONE', 'PARENT'],
+        ['BACKLOG', 'PARENT'],
+        ['ADD_TASK_PANEL', 'PARENT'],
+        ['other-section', 'PARENT'],
+        ['parent-task', 'SUB'],
+      ] as const) {
+        it(`is rejected by the ${listModelId} ${listId} list`, () => {
+          expect(
+            component.enterPredicate(sectionDrag, createMockDrop(listModelId, listId)),
+          ).toBe(false);
+        });
+      }
+    });
+
     describe('subtasks in parent-level DONE/UNDONE lists', () => {
       it('should allow subtask to reorder within UNDONE', () => {
         const subtask = { id: 'sub1', parentId: 'parent1' };
@@ -594,6 +642,7 @@ describe('TaskListComponent', () => {
       srcListId: 'PARENT' | 'SUB',
       targetListId: 'PARENT' | 'SUB',
       newOrderedIds: string[] = [taskId],
+      taskOverrides: Partial<TaskWithSubTasks> = {},
     ): void => {
       (
         component as unknown as {
@@ -610,6 +659,7 @@ describe('TaskListComponent', () => {
       )._move(taskId, src, target, srcListId, targetListId, newOrderedIds, {
         id: taskId,
         parentId: srcListId === 'SUB' ? src : undefined,
+        ...taskOverrides,
       } as TaskWithSubTasks);
     };
 
@@ -649,6 +699,32 @@ describe('TaskListComponent', () => {
       expect(dispatchedAction.task.parentId).toBe('parentA');
       expect(dispatchedAction.afterTaskId).toBe('before');
       expect(dispatchedAction.isDone).toBe(false);
+    });
+
+    // A won't-do task is one whose `wontDoOn` equals its `doneOn`: a new stamp
+    // would turn it into a completion.
+    it("keeps the done stamp of a won't-do subtask dropped on DONE", () => {
+      callMove('sub1', 'parentA', 'DONE', 'SUB', 'PARENT', ['sub1'], {
+        isDone: true,
+        doneOn: 5,
+        wontDoOn: 5,
+      });
+
+      const dispatchedAction = (store.dispatch as jasmine.Spy).calls.mostRecent()
+        .args[0] as ReturnType<typeof TaskSharedActions.convertToMainTask>;
+      expect(dispatchedAction.isDone).toBe(true);
+      expect(dispatchedAction.doneOn).toBe(5);
+    });
+
+    it('stamps a completed subtask dropped on DONE as done now', () => {
+      callMove('sub1', 'parentA', 'DONE', 'SUB', 'PARENT', ['sub1'], {
+        isDone: true,
+        doneOn: 5,
+      });
+
+      const dispatchedAction = (store.dispatch as jasmine.Spy).calls.mostRecent()
+        .args[0] as ReturnType<typeof TaskSharedActions.convertToMainTask>;
+      expect(dispatchedAction.doneOn).toBeGreaterThan(5);
     });
 
     it('routes a parent drop into a section drop-list (PARENT + non-reserved id) to addTaskToSection', () => {
@@ -739,6 +815,135 @@ describe('TaskListComponent', () => {
   // The public drop() handler turns a CdkDragDrop event into the right action,
   // including the placement math (newIds order -> anchor). Covers the
   // event->action translation the reducer specs assume.
+  describe('group drop bounds', () => {
+    let moveGroup: jasmine.Spy;
+    const groupEvent = (point: {
+      x: number;
+      y: number;
+    }): Parameters<TaskListComponent['drop']>[0] =>
+      ({
+        previousContainer: { data: { listId: 'PARENT', listModelId: 'UNDONE' } },
+        container: {
+          data: { listId: 'PARENT', listModelId: 'section', filteredTasks: [] },
+          element: {
+            nativeElement: {
+              getBoundingClientRect: () => ({
+                left: 100,
+                right: 500,
+                top: 300,
+                bottom: 350,
+              }),
+            },
+          },
+        },
+        item: { data: { id: 't1' } },
+        previousIndex: 0,
+        currentIndex: 0,
+        isPointerOverContainer: false,
+        dropPoint: point,
+      }) as unknown as Parameters<TaskListComponent['drop']>[0];
+
+    beforeEach(() => {
+      spyOn(component.multiDrag, 'ids').and.returnValue(['t1', 't2', 't3']);
+      spyOn(component.multiDrag, 'isListGroupDrag').and.returnValue(true);
+      spyOn(component.multiDrag, 'canDrop').and.returnValue(true);
+      spyOn(component.multiDrag, 'isPlacementUnchanged').and.returnValue(false);
+      moveGroup = spyOn(component.multiDrag, 'drop').and.resolveTo();
+    });
+
+    it('moves the group when the pointer is inside the live section but outside cached bounds', async () => {
+      await component.drop(groupEvent({ x: 300, y: 325 }));
+      expect(moveGroup).toHaveBeenCalledOnceWith('section', 't1', ['t1']);
+      expect(store.dispatch).not.toHaveBeenCalled();
+    });
+
+    it('keeps the actual destination order when the group leader stays at the same index', async () => {
+      const data = {
+        listId: 'PARENT',
+        listModelId: 'section',
+        filteredTasks: [{ id: 'before' }, { id: 't1' }, { id: 'after' }],
+      };
+      const container = {
+        data,
+        element: {
+          nativeElement: {
+            getBoundingClientRect: () => ({
+              left: 100,
+              right: 500,
+              top: 300,
+              bottom: 350,
+            }),
+          },
+        },
+      };
+      await component.drop({
+        previousContainer: container,
+        container,
+        item: { data: { id: 't1' } },
+        previousIndex: 1,
+        currentIndex: 1,
+        isPointerOverContainer: true,
+        dropPoint: { x: 300, y: 325 },
+      } as unknown as Parameters<TaskListComponent['drop']>[0]);
+
+      expect(component.multiDrag.isPlacementUnchanged).toHaveBeenCalledOnceWith('t1', [
+        'before',
+        't1',
+        'after',
+      ]);
+      expect(moveGroup).toHaveBeenCalledOnceWith('section', 't1', [
+        'before',
+        't1',
+        'after',
+      ]);
+    });
+
+    it('skips a same-index group drop only when the complete placement is unchanged', async () => {
+      (component.multiDrag.isPlacementUnchanged as jasmine.Spy).and.returnValue(true);
+      const data = {
+        listId: 'PARENT',
+        listModelId: 'section',
+        filteredTasks: [{ id: 't1' }],
+      };
+      const container = {
+        data,
+        element: {
+          nativeElement: {
+            getBoundingClientRect: () => ({
+              left: 100,
+              right: 500,
+              top: 300,
+              bottom: 350,
+            }),
+          },
+        },
+      };
+      await component.drop({
+        previousContainer: container,
+        container,
+        item: { data: { id: 't1' } },
+        previousIndex: 0,
+        currentIndex: 0,
+        isPointerOverContainer: true,
+        dropPoint: { x: 300, y: 325 },
+      } as unknown as Parameters<TaskListComponent['drop']>[0]);
+
+      expect(moveGroup).not.toHaveBeenCalled();
+    });
+
+    it('cancels the group move when released outside cached and live bounds', async () => {
+      await component.drop(groupEvent({ x: 300, y: 400 }));
+      expect(moveGroup).not.toHaveBeenCalled();
+      expect(store.dispatch).not.toHaveBeenCalled();
+    });
+
+    it('still rejects an unsupported target inside its live bounds', async () => {
+      (component.multiDrag.canDrop as jasmine.Spy).and.returnValue(false);
+      await component.drop(groupEvent({ x: 300, y: 325 }));
+      expect(moveGroup).not.toHaveBeenCalled();
+    });
+  });
+
   describe('drop() conversion dispatch', () => {
     type ListData = {
       listId: 'PARENT' | 'SUB';

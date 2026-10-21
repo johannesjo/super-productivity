@@ -350,6 +350,9 @@ async function backupData(
     cleanupOldBackups(backupDir, maxBackupFiles);
   } catch (e) {
     error('Error while backing up', getSafeErrorMeta(e));
+
+    // Rejects the renderer's invoke so it doesn't record a backup that never
+    // landed (#10022); the safe error keeps the file path out of renderer logs.
     throw createSafeIpcError(IPC.BACKUP, e);
   }
 }

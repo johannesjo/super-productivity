@@ -21,6 +21,11 @@ const mockSyncService = {
     affectedUserIds: [],
   }),
   deleteStaleDevices: vi.fn().mockResolvedValue(0),
+  summarizeCheckpointGate: vi.fn().mockResolvedValue({
+    safeAccounts: 0,
+    totalAccounts: 0,
+    unversionedDevices: 0,
+  }),
   cleanupExpiredRateLimitCounters: vi.fn().mockReturnValue(0),
   cleanupExpiredRequestDedupEntries: vi.fn().mockReturnValue(0),
   deleteExpiredPendingPasskeyRegistrations: vi.fn().mockResolvedValue(0),
@@ -183,6 +188,55 @@ describe('Cleanup Jobs', () => {
     });
   });
 
+  describe('OLD_OPS_CLEANUP_HOUR_UTC', () => {
+    afterEach(() => {
+      delete process.env.OLD_OPS_CLEANUP_HOUR_UTC;
+    });
+
+    it('should run at the configured UTC hour instead of after startup', async () => {
+      process.env.OLD_OPS_CLEANUP_HOUR_UTC = '0';
+      vi.setSystemTime(new Date('2026-09-26T20:00:00Z'));
+
+      startCleanupJobs();
+      await vi.advanceTimersByTimeAsync(10_000);
+      expect(mockSyncService.deleteOldSyncedOpsForAllUsers).not.toHaveBeenCalled();
+
+      // 1 ms before 00:00Z
+      await vi.advanceTimersByTimeAsync(4 * 60 * 60 * 1000 - 10_000 - 1);
+      expect(mockSyncService.deleteOldSyncedOpsForAllUsers).not.toHaveBeenCalled();
+
+      await vi.advanceTimersByTimeAsync(1);
+      expect(mockSyncService.deleteOldSyncedOpsForAllUsers).toHaveBeenCalledTimes(1);
+
+      await vi.advanceTimersByTimeAsync(MS_PER_DAY);
+      expect(mockSyncService.deleteOldSyncedOpsForAllUsers).toHaveBeenCalledTimes(2);
+    });
+
+    it('should run later the same day when the hour is still ahead', async () => {
+      process.env.OLD_OPS_CLEANUP_HOUR_UTC = '3';
+      vi.setSystemTime(new Date('2026-09-26T01:00:00Z'));
+
+      startCleanupJobs();
+      await vi.advanceTimersByTimeAsync(2 * 60 * 60 * 1000 - 1);
+      expect(mockSyncService.deleteOldSyncedOpsForAllUsers).not.toHaveBeenCalled();
+
+      await vi.advanceTimersByTimeAsync(1);
+      expect(mockSyncService.deleteOldSyncedOpsForAllUsers).toHaveBeenCalledTimes(1);
+    });
+
+    it('should warn and run after startup when the hour is invalid', async () => {
+      process.env.OLD_OPS_CLEANUP_HOUR_UTC = '24';
+
+      startCleanupJobs();
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      expect(Logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('OLD_OPS_CLEANUP_HOUR_UTC'),
+      );
+      expect(mockSyncService.deleteOldSyncedOpsForAllUsers).toHaveBeenCalledTimes(1);
+    });
+  });
+
   describe('stopCleanupJobs', () => {
     it('should stop scheduled cleanup', async () => {
       startCleanupJobs();
@@ -214,6 +268,37 @@ describe('Cleanup Jobs', () => {
       expect(mockSyncService.deleteStaleDevices).toHaveBeenCalled();
       expect(mockSyncService.cleanupExpiredRateLimitCounters).toHaveBeenCalled();
       expect(mockSyncService.cleanupExpiredRequestDedupEntries).toHaveBeenCalled();
+    });
+
+    it('logs the checkpoint-gate roll-up unconditionally (#9962)', async () => {
+      mockSyncService.summarizeCheckpointGate.mockResolvedValueOnce({
+        safeAccounts: 3,
+        totalAccounts: 10,
+        unversionedDevices: 7,
+      });
+
+      startCleanupJobs();
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      const cutoffCall = mockSyncService.deleteStaleDevices.mock.calls[0][0];
+      expect(mockSyncService.summarizeCheckpointGate).toHaveBeenCalledWith(cutoffCall);
+      expect(Logger.info).toHaveBeenCalledWith(
+        expect.stringMatching(
+          /Cleanup \[checkpoint-gate\]: 3 of 10 account\(s\) .* report only versions >= 18\.21\.2; 7 device\(s\) report no version; diagnostic only\./,
+        ),
+      );
+    });
+
+    it('should continue cleanup even if the checkpoint-gate roll-up fails', async () => {
+      mockSyncService.summarizeCheckpointGate.mockRejectedValueOnce(
+        new Error('DB error'),
+      );
+
+      startCleanupJobs();
+      await vi.advanceTimersByTimeAsync(10_000);
+
+      expect(mockSyncService.cleanupExpiredRateLimitCounters).toHaveBeenCalled();
+      expect(mockSyncService.deleteAbandonedUnverifiedUsers).toHaveBeenCalled();
     });
 
     it('should continue cleanup even if device cleanup fails', async () => {

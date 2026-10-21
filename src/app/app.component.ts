@@ -37,9 +37,8 @@ import { LanguageService } from './core/language/language.service';
 import { WorkContextService } from './features/work-context/work-context.service';
 import { SyncTriggerService } from './imex/sync/sync-trigger.service';
 import { ActivatedRoute, RouterOutlet } from '@angular/router';
-import { concatMap, first, take } from 'rxjs/operators';
+import { first, take } from 'rxjs/operators';
 
-import { IS_MOBILE } from './util/is-mobile';
 import { recordSearchNavDebug } from './util/search-nav-debug';
 import { warpAnimation, warpInAnimation } from './ui/animations/warp.ani';
 import {
@@ -81,19 +80,19 @@ import { MobileBottomNavComponent } from './core-ui/mobile-bottom-nav/mobile-bot
 import { StartupService } from './core/startup/startup.service';
 import { DataInitStateService } from './core/data-init/data-init-state.service';
 import { AppUriTaskActionsService } from './features/tasks/app-uri-actions/app-uri-task-actions.service';
+import { IosShareService } from './features/tasks/ios-share/ios-share.service';
+import { AgentCaptureService } from './features/tasks/agent-capture/agent-capture.service';
 import { ExampleTasksService } from './core/example-tasks/example-tasks.service';
 import { KeyboardLayoutService } from './core/keyboard-layout/keyboard-layout.service';
 import { setKeyboardLayoutService } from './util/check-key-combo';
-import { OnboardingPresetSelectionComponent } from './features/onboarding/onboarding-preset-selection.component';
 import { TaskMultiSelectBarComponent } from './features/tasks/task-multi-select-bar/task-multi-select-bar.component';
 import { TaskMultiSelectService } from './features/tasks/task-multi-select.service';
 import { OnboardingHintComponent } from './features/onboarding/onboarding-hint.component';
 import { OnboardingHintService } from './features/onboarding/onboarding-hint.service';
+import { QuickTourService } from './features/onboarding/quick-tour.service';
 import { MaterialIconsLoaderService } from './ui/material-icons-loader.service';
 import { BrowserTitleService } from './core/browser-title/browser-title.service';
 
-const ONBOARDING_PRESET_EXIT_DELAY = 1000;
-const ONBOARDING_ENTRANCE_COMPLETE_DELAY = 2000;
 const ENTRANCE_ANIMATION_DURATION = 1500;
 
 interface BeforeInstallPromptEvent extends Event {
@@ -128,7 +127,6 @@ interface BeforeInstallPromptEvent extends Event {
     TranslatePipe,
     ContextMenuComponent,
     MobileBottomNavComponent,
-    OnboardingPresetSelectionComponent,
     OnboardingHintComponent,
     TaskMultiSelectBarComponent,
   ],
@@ -172,7 +170,10 @@ export class AppComponent implements OnDestroy, AfterViewInit {
   // Injected only to trigger its constructor eagerly at app start, so a
   // cold-launch add-task/complete-task URL action is never missed.
   private _appUriTaskActionsService = inject(AppUriTaskActionsService);
+  private _iosShareService = inject(IosShareService);
+  private _agentCaptureService = inject(AgentCaptureService);
   readonly onboardingHintService = inject(OnboardingHintService);
+  readonly quickTourService = inject(QuickTourService);
 
   private _syncTriggerService = inject(SyncTriggerService);
   readonly workContextService = inject(WorkContextService);
@@ -230,31 +231,13 @@ export class AppComponent implements OnDestroy, AfterViewInit {
 
   readonly resolvedBgImage = signal<string | null>(null);
 
-  isShowOnboardingPresets = signal(
-    !localStorage.getItem(LS.ONBOARDING_PRESET_DONE) &&
-      !localStorage.getItem(LS.IS_SKIP_TOUR),
-  );
-
   private _subs: Subscription = new Subscription();
 
   constructor() {
     this._startupService.init();
+    this._iosShareService.start();
+    this._agentCaptureService.start();
     void this._materialIconsLoaderService.ensureFontReady();
-
-    // Skip onboarding for existing users with data
-    if (this.isShowOnboardingPresets()) {
-      this._dataInitStateService.isAllDataLoadedInitially$
-        .pipe(
-          concatMap(() => this._projectService.list$),
-          first(),
-        )
-        .subscribe((projectList) => {
-          if (projectList.length > 2) {
-            localStorage.setItem(LS.ONBOARDING_PRESET_DONE, 'true');
-            this.isShowOnboardingPresets.set(false);
-          }
-        });
-    }
 
     // Clear app entrance animation after it completes
     if (this.isAppEntrance()) {
@@ -277,7 +260,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
             focusItem: params.focusItem,
             url: window.location.pathname + window.location.search,
           });
-          this._focusElement(params.focusItem);
+          this._focusElement(params.focusItem, params.isFromSearch === 'true');
         }
       }),
     );
@@ -497,24 +480,7 @@ export class AppComponent implements OnDestroy, AfterViewInit {
     }
   }
 
-  isAppEntrance = signal(!this.isShowOnboardingPresets());
-
-  onPresetSelected(): void {
-    this.isAppEntrance.set(true);
-    setTimeout(() => {
-      this.isShowOnboardingPresets.set(false);
-    }, ONBOARDING_PRESET_EXIT_DELAY);
-    setTimeout(() => {
-      this.isAppEntrance.set(false);
-      this.onboardingHintService.startAfterPresetSelection();
-    }, ONBOARDING_ENTRANCE_COMPLETE_DELAY);
-  }
-
-  // Returning user set up sync from onboarding: just reveal the app with their
-  // synced data — no preset applied, no new-user hint tour.
-  onOnboardingDismissed(): void {
-    this.isShowOnboardingPresets.set(false);
-  }
+  isAppEntrance = signal(true);
 
   ngAfterViewInit(): void {
     this._ngZone.runOutsideAngular(() => {
@@ -595,23 +561,24 @@ export class AppComponent implements OnDestroy, AfterViewInit {
    * since page load and animation time are not always equal
    * retrying until the rendered task row is available avoids missing focus targets
    */
-  private _focusElement(id: string): void {
+  private _focusElement(id: string, isFromSearch: boolean = false): void {
     recordSearchNavDebug('appComponent:focusElement', {
       taskId: id,
       url: window.location.pathname + window.location.search,
+      isFromSearch,
     });
     this.layoutService.focusTaskInViewWhenReady(id, (el) => {
+      // Only a search jump earns the attention highlight: `focusItem` is also set
+      // by reminder snacks, the tracked-task pill, issue creation and the calendar
+      // banner, where the user never asked "where is it". (#5476)
+      if (isFromSearch) {
+        this.layoutService.highlightTaskBriefly(el);
+      }
       recordSearchNavDebug('appComponent:focusElement:success', {
         taskId: id,
         url: window.location.pathname + window.location.search,
         matchedElementId: el.id,
       });
-      if (el && IS_MOBILE) {
-        el.classList.add('mobile-highlight-searched-item');
-        el.addEventListener('blur', () =>
-          el.classList.remove('mobile-highlight-searched-item'),
-        );
-      }
     });
   }
 }

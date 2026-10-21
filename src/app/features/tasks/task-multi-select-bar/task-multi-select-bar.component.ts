@@ -1,3 +1,5 @@
+import { TaskPriorityIndicatorComponent } from '../task-priority-indicator/task-priority-indicator.component';
+import { TASK_PRIORITY_LABEL_KEY, TASK_PRIORITY_LEVELS } from '../task-priority.const';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -68,6 +70,7 @@ const EMPTY_KB = {} as KeyboardConfig;
     TranslatePipe,
     SelectOptionRowComponent,
     MenuTouchFixDirective,
+    TaskPriorityIndicatorComponent,
   ],
 })
 export class TaskMultiSelectBarComponent {
@@ -89,6 +92,8 @@ export class TaskMultiSelectBarComponent {
   };
 
   readonly T = T;
+  readonly PRIORITY_LEVELS = TASK_PRIORITY_LEVELS;
+  readonly PRIORITY_LABEL_KEY = TASK_PRIORITY_LABEL_KEY;
   readonly ESTIMATE_OPTIONS = ESTIMATE_OPTIONS;
   readonly DEFAULT_PROJECT_ICON = DEFAULT_PROJECT_ICON;
 
@@ -187,10 +192,7 @@ export class TaskMultiSelectBarComponent {
     if (!anchorId || isTouchActive() || this._matDialog.openDialogs.length > 0) {
       return;
     }
-    const rowEl = Array.from(document.querySelectorAll<HTMLElement>('task')).find(
-      (el) =>
-        el.getAttribute('data-task-id') === anchorId && !el.closest('task-detail-panel'),
-    );
+    const rowEl = this.multiSelect.findLiveRowEl(anchorId);
     rowEl?.focus({ preventScroll: true });
   }
 }

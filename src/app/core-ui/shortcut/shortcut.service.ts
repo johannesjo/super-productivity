@@ -7,20 +7,23 @@ import { GlobalConfigService } from '../../features/config/global-config.service
 import { ActivatedRoute, Router } from '@angular/router';
 import { LayoutService } from '../layout/layout.service';
 import { TaskService } from '../../features/tasks/task.service';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogRef, MatDialogState } from '@angular/material/dialog';
 import { DialogAddNoteComponent } from '../../features/note/dialog-add-note/dialog-add-note.component';
+import { DialogFullscreenMarkdownComponent } from '../../ui/dialog-fullscreen-markdown/dialog-fullscreen-markdown.component';
 import { IPC } from '../../../../electron/shared-with-frontend/ipc-events.const';
 import { UiHelperService } from '../../features/ui-helper/ui-helper.service';
 import { WorkContextService } from '../../features/work-context/work-context.service';
 import { WorkContextType } from '../../features/work-context/work-context.model';
+import { T } from '../../t.const';
 import { Store } from '@ngrx/store';
 import { showFocusOverlay } from '../../features/focus-mode/store/focus-mode.actions';
 import { SyncWrapperService } from '../../imex/sync/sync-wrapper.service';
 import { first, mapTo, switchMap } from 'rxjs/operators';
-import { fromEvent, merge, Observable, of } from 'rxjs';
+import { firstValueFrom, fromEvent, merge, Observable, of } from 'rxjs';
 import { PluginBridgeService } from '../../plugins/plugin-bridge.service';
 import { TaskShortcutService } from '../../features/tasks/task-shortcut.service';
 import { TODAY_TAG } from '../../features/tag/tag.const';
+import { DialogConfirmComponent } from '../../ui/dialog-confirm/dialog-confirm.component';
 
 // NOTE: Relying on Angular CDK overlay CSS class names keeps shortcut suppression simple.
 // If CDK changes these class names we only need to adjust the helpers below.
@@ -67,6 +70,7 @@ export class ShortcutService {
   private _pluginBridgeService = inject(PluginBridgeService);
   private _taskShortcutService = inject(TaskShortcutService);
   private _overlayContainer = inject(OverlayContainer);
+  private _isNoteTaskHandoffPending = false;
 
   isCtrlPressed$: Observable<boolean> = fromEvent(document, 'keydown').pipe(
     switchMap((ev: Event) => {
@@ -97,7 +101,7 @@ export class ShortcutService {
         this._taskService.toggleStartTask();
       });
       window.ea.on(IPC.SHOW_ADD_TASK_BAR, () => {
-        this._layoutService.showAddTaskBar();
+        void this._showAddTaskBarFromDesktopCommand();
       });
       window.ea.on(IPC.ADD_NOTE, () => {
         if (this._matDialog.openDialogs.length === 0) {
@@ -110,6 +114,85 @@ export class ShortcutService {
         }
       });
     }
+  }
+
+  private async _showAddTaskBarFromDesktopCommand(): Promise<void> {
+    if (this._isNoteTaskHandoffPending) {
+      return;
+    }
+
+    const noteDialogRef = this._getFullscreenNoteDialogRef();
+    if (!noteDialogRef) {
+      this._layoutService.showAddTaskBar();
+      return;
+    }
+
+    const noteDialog = noteDialogRef.componentInstance;
+    if (
+      noteDialogRef.getState() !== MatDialogState.OPEN ||
+      noteDialog.isDiscardConfirmOpen
+    ) {
+      return;
+    }
+
+    this._isNoteTaskHandoffPending = true;
+    try {
+      const needsConfirmation =
+        noteDialog instanceof DialogAddNoteComponent
+          ? noteDialog.data.content.trim().length > 0
+          : noteDialog.hasUnsavedChanges;
+      let shouldSave =
+        !(noteDialog instanceof DialogAddNoteComponent) && !needsConfirmation;
+      if (needsConfirmation) {
+        // Navigation must not save the editor behind the save/discard prompt.
+        noteDialog.isDiscardConfirmOpen = true;
+        const result = await firstValueFrom(
+          this._matDialog
+            .open(DialogConfirmComponent, {
+              data: {
+                message: T.F.NOTE.D_FULLSCREEN.CONFIRM_SAVE_BEFORE_OPENING_NEW_TASK,
+                okTxt: T.G.SAVE,
+                cancelTxt: T.G.DISCARD,
+                // Discard sits in the cancel slot, which gets initial focus by
+                // default; Enter must keep the edit, not throw it away.
+                isFocusConfirm: true,
+              },
+            })
+            .afterClosed(),
+        );
+        noteDialog.isDiscardConfirmOpen = false;
+
+        if (typeof result !== 'boolean') {
+          return;
+        }
+        shouldSave = result;
+      }
+      if (noteDialogRef.getState() !== MatDialogState.OPEN) {
+        return;
+      }
+
+      const closed = firstValueFrom(noteDialogRef.afterClosed());
+      if (shouldSave) {
+        noteDialog.close();
+      } else {
+        noteDialog.closeAfterConfirmedDiscard();
+      }
+
+      await closed;
+      this._layoutService.showAddTaskBar();
+    } finally {
+      noteDialog.isDiscardConfirmOpen = false;
+      this._isNoteTaskHandoffPending = false;
+    }
+  }
+
+  private _getFullscreenNoteDialogRef(): MatDialogRef<DialogFullscreenMarkdownComponent> | null {
+    return (
+      (this._matDialog.openDialogs.find(
+        (dialogRef) =>
+          dialogRef.componentInstance instanceof DialogFullscreenMarkdownComponent,
+      ) as MatDialogRef<DialogFullscreenMarkdownComponent> | undefined) || null
+    );
   }
 
   async handleKeyDown(ev: KeyboardEvent): Promise<void> {
@@ -167,7 +250,10 @@ export class ShortcutService {
       this._router.navigate(['/tag/' + TODAY_TAG.id + '/tasks']);
     } else if (checkKeyCombo(ev, keys.goToSettings)) {
       this._router.navigate(['/config']);
-    } else if (checkKeyCombo(ev, keys.goToScheduledView)) {
+    } else if (
+      checkKeyCombo(ev, keys.goToScheduledView) &&
+      this._configService.appFeatures().isSchedulerEnabled
+    ) {
       this._router.navigate(['/schedule']);
 
       // } else if (checkKeyCombo(ev, keys.goToDailyAgenda)) {
@@ -175,7 +261,10 @@ export class ShortcutService {
       //
       // } else if (checkKeyCombo(ev, keys.goToFocusMode)) {
       //   this._router.navigate(['/focus-view']);
-    } else if (checkKeyCombo(ev, keys.showSearchBar)) {
+    } else if (
+      checkKeyCombo(ev, keys.showSearchBar) &&
+      this._configService.appFeatures().isSearchEnabled
+    ) {
       this._router.navigate(['/search']);
       ev.preventDefault();
     } else if (checkKeyCombo(ev, keys.focusSideNav)) {

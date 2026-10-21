@@ -3,6 +3,7 @@ import { TranslateService } from '@ngx-translate/core';
 import { SyncLocalStateService } from './sync-local-state.service';
 import { OperationLogStoreService } from '../persistence/operation-log-store.service';
 import { StateSnapshotService } from '../backup/state-snapshot.service';
+import { OperationLogDownloadService } from './operation-log-download.service';
 import {
   ActionType,
   EntityType,
@@ -18,6 +19,8 @@ describe('SyncLocalStateService', () => {
   let service: SyncLocalStateService;
   let opLogStoreSpy: jasmine.SpyObj<OperationLogStoreService>;
   let stateSnapshotSpy: jasmine.SpyObj<StateSnapshotService>;
+  let downloadServiceSpy: jasmine.SpyObj<OperationLogDownloadService>;
+  let translateSpy: jasmine.SpyObj<TranslateService>;
 
   const entry = (
     entityType: EntityType,
@@ -77,15 +80,18 @@ describe('SyncLocalStateService', () => {
     opLogStoreSpy.getFirstOpEntry.and.resolveTo(migrationGenesis);
     opLogStoreSpy.getUnsynced.and.resolveTo([]);
 
+    downloadServiceSpy = jasmine.createSpyObj('OperationLogDownloadService', [
+      'getUndecryptableRemoteOps',
+    ]);
+    downloadServiceSpy.getUndecryptableRemoteOps.and.returnValue(null);
+    translateSpy = jasmine.createSpyObj('TranslateService', ['instant']);
     TestBed.configureTestingModule({
       providers: [
         SyncLocalStateService,
         { provide: OperationLogStoreService, useValue: opLogStoreSpy },
         { provide: StateSnapshotService, useValue: stateSnapshotSpy },
-        {
-          provide: TranslateService,
-          useValue: jasmine.createSpyObj('TranslateService', ['instant']),
-        },
+        { provide: TranslateService, useValue: translateSpy },
+        { provide: OperationLogDownloadService, useValue: downloadServiceSpy },
       ],
     });
     service = TestBed.inject(SyncLocalStateService);
@@ -154,6 +160,24 @@ describe('SyncLocalStateService', () => {
         await service.isFreshOrNeverSyncedGenesisClient([regularOp.op, syncImport.op]),
       ).toBe(false);
       expect(opLogStoreSpy.getFirstOpEntry).not.toHaveBeenCalled();
+    });
+
+    it('ignores a full-state op the processing loop will never reach (#8764)', async () => {
+      // The gate this defers to only inspects `takeInterpretableOpPrefix`, so a
+      // full-state op sitting BEHIND an uninterpretable op is invisible to it.
+      // Seeing it here too would leave neither side prompting, and a
+      // never-synced genesis client silently merges remote data over its own.
+      const futureVocabularyOp = {
+        ...regularOp.op,
+        id: 'future-vocabulary',
+        opType: 'FUTURE_OP' as unknown as OpType,
+      };
+      expect(
+        await service.isFreshOrNeverSyncedGenesisClient([
+          futureVocabularyOp,
+          syncImport.op,
+        ]),
+      ).toBe(true);
     });
 
     it('is false for a client with ordinary history', async () => {
@@ -342,6 +366,39 @@ describe('SyncLocalStateService', () => {
 
       expect(await service.hasMeaningfulStoreData(new Set(['example-1']))).toBe(false);
       expect(stateSnapshotSpy.getStateSnapshotAsync).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('confirmOverwriteOfUndecryptableRemoteOps (#9256)', () => {
+    // The global spy outlives this spec; leave it as src/test.ts set it.
+    afterEach(() => {
+      (window.confirm as jasmine.Spy).and.returnValue(true);
+    });
+
+    it('passes without a prompt when no undecryptable remote ops are pending', () => {
+      // src/test.ts installs window.confirm as a global spy.
+      const confirmSpy = window.confirm as jasmine.Spy;
+      confirmSpy.calls.reset();
+
+      expect(service.confirmOverwriteOfUndecryptableRemoteOps()).toBe(true);
+      expect(confirmSpy).not.toHaveBeenCalled();
+    });
+
+    it('asks, naming the op count, and returns the answer', () => {
+      downloadServiceSpy.getUndecryptableRemoteOps.and.returnValue({ opCount: 458 });
+      translateSpy.instant.and.callFake(
+        (key: string | string[], params?: { count?: number }) =>
+          params?.count !== undefined ? `${key}:${params.count}` : `${key}`,
+      );
+      const confirmSpy = (window.confirm as jasmine.Spy).and.returnValue(false);
+
+      expect(service.confirmOverwriteOfUndecryptableRemoteOps()).toBe(false);
+      expect(confirmSpy).toHaveBeenCalledWith(
+        jasmine.stringContaining('F.SYNC.D_UNDECRYPTABLE_REMOTE.MESSAGE:458'),
+      );
+
+      confirmSpy.and.returnValue(true);
+      expect(service.confirmOverwriteOfUndecryptableRemoteOps()).toBe(true);
     });
   });
 });

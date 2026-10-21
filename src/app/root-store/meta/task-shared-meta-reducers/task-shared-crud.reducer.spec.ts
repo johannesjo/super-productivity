@@ -27,6 +27,11 @@ import {
   expectTaskUpdate,
   expectTaskUpdates,
 } from './test-utils';
+import {
+  getWontDoChanges,
+  isCompletedTask,
+  isWontDoTask,
+} from '../../../features/tasks/util/is-wont-do-task';
 
 describe('taskSharedCrudMetaReducer', () => {
   let mockReducer: jasmine.Spy;
@@ -1315,6 +1320,125 @@ describe('taskSharedCrudMetaReducer', () => {
       expect(resultParent?.timeEstimate).toBe(30);
     });
 
+    it('should match the singular delete path when a parent loses every subtask', () => {
+      const makeState = (): RootState => {
+        const s = createStateWithExistingTasks(['parent1'], [], [], []);
+        s[TASK_FEATURE_NAME] = {
+          ...s[TASK_FEATURE_NAME],
+          ids: ['parent1', 'sub1', 'sub2'],
+          entities: {
+            parent1: createMockTask({
+              id: 'parent1',
+              projectId: 'project1',
+              subTaskIds: ['sub1', 'sub2'],
+              timeSpentOnDay: { '2026-09-08': 150 },
+              timeSpent: 150,
+              timeEstimate: 140,
+            }),
+            sub1: createMockTask({
+              id: 'sub1',
+              projectId: 'project1',
+              parentId: 'parent1',
+              timeSpentOnDay: { '2026-09-08': 100 },
+              timeSpent: 100,
+              timeEstimate: 60,
+            }),
+            sub2: createMockTask({
+              id: 'sub2',
+              projectId: 'project1',
+              parentId: 'parent1',
+              timeSpentOnDay: { '2026-09-08': 50 },
+              timeSpent: 50,
+              timeEstimate: 80,
+            }),
+          },
+        };
+        return s;
+      };
+      const parentAfter = (): Task | undefined =>
+        (mockReducer.calls.mostRecent().args[0] as RootState)[TASK_FEATURE_NAME].entities[
+          'parent1'
+        ] as Task | undefined;
+
+      metaReducer(
+        makeState(),
+        TaskSharedActions.deleteTasks({ taskIds: ['sub1', 'sub2'] }),
+      );
+      const bulkParent = parentAfter();
+
+      // Two subtasks on purpose: with only one there is no intermediate
+      // recalculation, so both orderings agree and the test cannot discriminate.
+      // Deleting them one at a time is the behaviour the bulk path must match.
+      let sequentialState = makeState();
+      for (const id of ['sub1', 'sub2']) {
+        const subTask = sequentialState[TASK_FEATURE_NAME].entities[id] as Task;
+        metaReducer(
+          sequentialState,
+          TaskSharedActions.deleteTask({
+            task: { ...subTask, subTasks: [] } as unknown as TaskWithSubTasks,
+          }),
+        );
+        sequentialState = mockReducer.calls.mostRecent().args[0] as RootState;
+      }
+      const sequentialParent = sequentialState[TASK_FEATURE_NAME].entities['parent1'] as
+        | Task
+        | undefined;
+
+      expect(bulkParent?.subTaskIds).toEqual([]);
+      // Recalculating from the emptied subTaskIds instead would zero all three.
+      expect(bulkParent?.timeSpent).toBe(50);
+      expect(bulkParent?.timeSpentOnDay).toEqual({ '2026-09-08': 50 });
+      expect(bulkParent?.timeEstimate).toBe(80);
+      expect(bulkParent).toEqual(sequentialParent);
+    });
+
+    it('should inherit the last-listed subtask times when all subtasks go at once', () => {
+      const testState = createStateWithExistingTasks(['parent1'], [], [], []);
+      const parent = createMockTask({
+        id: 'parent1',
+        projectId: 'project1',
+        subTaskIds: ['sub1', 'sub2'],
+        timeSpentOnDay: { '2026-09-08': 150 },
+        timeSpent: 150,
+        timeEstimate: 140,
+      });
+      const sub1 = createMockTask({
+        id: 'sub1',
+        projectId: 'project1',
+        parentId: 'parent1',
+        timeSpentOnDay: { '2026-09-08': 100 },
+        timeSpent: 100,
+        timeEstimate: 60,
+      });
+      const sub2 = createMockTask({
+        id: 'sub2',
+        projectId: 'project1',
+        parentId: 'parent1',
+        timeSpentOnDay: { '2026-09-08': 50 },
+        timeSpent: 50,
+        timeEstimate: 80,
+      });
+      testState[TASK_FEATURE_NAME] = {
+        ...testState[TASK_FEATURE_NAME],
+        ids: ['parent1', 'sub1', 'sub2'],
+        entities: { parent1: parent, sub1, sub2 },
+      };
+
+      // Deliberately reversed against subTaskIds order: the outcome must follow
+      // the parent's list order, not the payload order, so every client replays
+      // the same state.
+      const action = TaskSharedActions.deleteTasks({ taskIds: ['sub2', 'sub1'] });
+      metaReducer(testState, action);
+
+      const resultParent = (mockReducer.calls.mostRecent().args[0] as RootState)[
+        TASK_FEATURE_NAME
+      ].entities['parent1'];
+      expect(resultParent?.subTaskIds).toEqual([]);
+      expect(resultParent?.timeSpentOnDay).toEqual({ '2026-09-08': 50 });
+      expect(resultParent?.timeSpent).toBe(50);
+      expect(resultParent?.timeEstimate).toBe(80);
+    });
+
     it('should not touch a parent that is deleted in the same action', () => {
       const testState = createStateWithExistingTasks(['parent1'], [], [], []);
       const parent = createMockTask({
@@ -2203,6 +2327,22 @@ describe('taskSharedCrudMetaReducer', () => {
       expect(
         (resultState[TAG_FEATURE_NAME].entities['TODAY'] as Tag).taskIds,
       ).not.toContain('task1');
+    });
+
+    // Won't do is a `wontDoOn` equal to `doneOn`: reopening clears `doneOn`
+    // and completing stamps a new one, so the old `wontDoOn` stops counting.
+    it("leaves a completed task after won't do, reopen and complete", () => {
+      let state: RootState = createStateWithExistingTasks(['task1'], [], ['task1']);
+      const taskAfter = (changes: Partial<Task>): Task => {
+        state = metaReducer(state, createUpdateTaskAction('task1', changes));
+        return state[TASK_FEATURE_NAME].entities['task1'] as Task;
+      };
+
+      expect(isWontDoTask(taskAfter(getWontDoChanges(1000)))).toBe(true);
+      const reopened = taskAfter({ isDone: false });
+      expect(reopened.doneOn).toBeUndefined();
+      expect(reopened.wontDoOn).toBe(1000);
+      expect(isCompletedTask(taskAfter({ isDone: true }))).toBe(true);
     });
 
     it('should add completed task to TODAY_TAG.taskIds', () => {

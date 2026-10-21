@@ -46,6 +46,7 @@ import {
   isPluginIssueProvider,
 } from '../issue/issue.model';
 import { CalendarProviderCfg } from '../issue/providers/calendar/calendar.model';
+import { getCalendarProviderColor } from '../issue/mapping-helper/get-calendar-provider-color';
 import { CORS_SKIP_EXTRA_HEADERS, IS_WEB_BROWSER } from '../../app.constants';
 import { Log } from '../../core/log';
 import { getErrorTxt } from '../../util/get-error-text';
@@ -64,6 +65,7 @@ import { passesCalendarEventRegexFilter } from './calendar-event-regex-filter';
 import { NotIcalResponseError } from '../schedule/ical/is-likely-ical';
 import { sanitizeIcalUrlForDisplay } from '../issue/mapping-helper/get-issue-provider-tooltip';
 import { isCalendarProviderDisabledOnCurrentPlatform } from '../issue/providers/calendar/is-calendar-provider-disabled-on-current-platform.util';
+import { withPluginOAuthTokenKey } from '../../plugins/oauth/plugin-oauth-token-key.util';
 
 const ONE_MONTHS = 60 * 60 * 1000 * 24 * 31;
 const ONE_WEEK = 60 * 60 * 1000 * 24 * 7;
@@ -326,13 +328,19 @@ export class CalendarIntegrationService {
       return [];
     }
 
+    const pluginConfig = withPluginOAuthTokenKey(
+      provider.pluginId,
+      pluginProvider.pluginConfig,
+      pluginProvider.id,
+    );
     const http = this._pluginHttp.createHttpHelper(
-      () => Promise.resolve(provider.definition.getHeaders(pluginProvider.pluginConfig)),
+      () => Promise.resolve(provider.definition.getHeaders(pluginConfig)),
       { allowPrivateNetwork: provider.allowPrivateNetwork },
     );
     const results: PluginSearchResult[] =
-      await provider.definition.getNewIssuesForBacklog(pluginProvider.pluginConfig, http);
+      await provider.definition.getNewIssuesForBacklog(pluginConfig, http);
 
+    const color = getCalendarProviderColor(pluginProvider);
     return results
       .filter((r) => r.start != null)
       .map((r) => ({
@@ -345,6 +353,7 @@ export class CalendarIntegrationService {
         isAllDay: r.isAllDay,
         issueProviderKey: pluginProvider.issueProviderKey,
         dueWithTime: r.dueWithTime,
+        color,
       }));
   }
 
@@ -448,7 +457,7 @@ export class CalendarIntegrationService {
           events.map((ev) => ({
             ...ev,
             isReferenceCalendar: !!calProvider.isReferenceCalendar,
-            color: calProvider.color,
+            color: getCalendarProviderColor(calProvider),
           })),
         ),
         catchError((err) => {

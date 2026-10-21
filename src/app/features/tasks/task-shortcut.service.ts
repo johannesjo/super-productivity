@@ -13,6 +13,8 @@ import { getDomFocusedTaskId } from './get-dom-focused-task-id';
 import { TaskMultiSelectService } from './task-multi-select.service';
 import { TaskBulkActionService } from './task-bulk-action.service';
 import { taskToMarkdownChecklist } from './task-to-markdown-checklist';
+import { GROUP_NAV_SELECTOR } from '../../ui/collapsible/collapsible.component';
+import { findAdjacentFocusable } from '../../util/find-adjacent-focusable';
 
 type TaskId = string;
 
@@ -58,7 +60,7 @@ export class TaskShortcutService {
   );
 
   /**
-   * Handles task-specific keyboard shortcuts if a task is currently focused.
+   * Handles task actions and navigation from focused task rows or group headers.
    *
    * @param ev - The keyboard event
    * @returns True if the shortcut was handled, false otherwise
@@ -69,14 +71,35 @@ export class TaskShortcutService {
 
     const keys = cfg.keyboard;
     const focusedTaskId: TaskId | null = getDomFocusedTaskId();
+    const plannerRow = document.activeElement?.closest<HTMLElement>(
+      'planner-task[data-task-selectable="true"]',
+    );
+    const shortcutTargetId =
+      focusedTaskId ?? plannerRow?.getAttribute('data-task-id') ?? null;
+    if (plannerRow && ev.target instanceof HTMLElement && isInputElement(ev.target)) {
+      return false;
+    }
 
     // Multi-selection: Esc clears; Shift+Arrow extends from the focused row;
     // the bulk-capable task shortcuts act on the whole selection. These run
     // before the focused-task gate so they also work when focus sits on the
     // selection bar or a dialog just closed. (ShortcutService already bails
     // out for inputs and open overlays, so Esc/typing there are untouched.)
-    if (this._handleMultiSelectShortcuts(ev, keys, focusedTaskId)) {
+    if (this._handleMultiSelectShortcuts(ev, keys, shortcutTargetId)) {
       return true;
+    }
+
+    if (plannerRow) {
+      const plannerEvent = new CustomEvent('planner-task-shortcut', {
+        cancelable: true,
+        detail: { keyboardEvent: ev },
+      });
+      plannerRow.dispatchEvent(plannerEvent);
+      if (plannerEvent.defaultPrevented) {
+        ev.preventDefault();
+        ev.stopPropagation();
+        return true;
+      }
     }
 
     // Schedule for today (Shift+T). This is the one task shortcut wired to work
@@ -113,6 +136,24 @@ export class TaskShortcutService {
       }
       // If no focused task, return false to let ShortcutService handle global fallback
       return false;
+    }
+
+    // Group headers are part of task navigation but have no focused task id.
+    const focusedElement = document.activeElement;
+    if (
+      focusedElement instanceof HTMLElement &&
+      focusedElement.matches('collapsible.is-group > .collapsible-header')
+    ) {
+      const direction = checkKeyCombo(ev, keys.selectPreviousTask)
+        ? 'prev'
+        : checkKeyCombo(ev, keys.selectNextTask)
+          ? 'next'
+          : null;
+      if (direction) {
+        findAdjacentFocusable(focusedElement, direction, GROUP_NAV_SELECTOR)?.focus();
+        ev.preventDefault();
+        return true;
+      }
     }
 
     // All other shortcuts require a focused task
@@ -338,6 +379,17 @@ export class TaskShortcutService {
       return true;
     }
 
+    // Escape releases the task row: keyboard focus goes back to the page, so the
+    // focus border disappears and arrow keys stop navigating the list. Runs last
+    // so every configured task shortcut wins over it. Deliberately no
+    // preventDefault: returning true already stops ShortcutService, while other
+    // document-level Escape handlers (the onboarding hint skips on Escape, but
+    // only when the event was not defaultPrevented) must still get their turn.
+    if (ev.key === 'Escape' && !ev.ctrlKey && !ev.metaKey && !ev.altKey && !ev.shiftKey) {
+      (document.activeElement as HTMLElement | null)?.blur();
+      return true;
+    }
+
     return false;
   }
 
@@ -483,7 +535,9 @@ export class TaskShortcutService {
   /** Opens the bulk actions menu next to the focused row (or the bar). */
   private _requestBulkMenu(focusedTaskId: TaskId | null): void {
     const rowEl = focusedTaskId
-      ? (document.activeElement?.closest('task') as HTMLElement | null)
+      ? (document.activeElement?.closest(
+          'task, planner-task[data-task-selectable="true"]',
+        ) as HTMLElement | null)
       : null;
     const rect = rowEl?.getBoundingClientRect();
     this._multiSelect.requestMenuOpen(

@@ -10,6 +10,8 @@ import {
   hasMeaningfulStateData,
 } from '../validation/has-meaningful-state-data.util';
 import { isExampleTaskCreateOp } from '../validation/is-example-task-op.util';
+import { takeInterpretableOpPrefix } from './remote-op-block.util';
+import { OperationLogDownloadService } from './operation-log-download.service';
 import {
   isFullStateOpType,
   isGenesisEntityType,
@@ -46,6 +48,7 @@ export class SyncLocalStateService {
   private opLogStore = inject(OperationLogStoreService);
   private stateSnapshotService = inject(StateSnapshotService);
   private translateService = inject(TranslateService);
+  private downloadService = inject(OperationLogDownloadService);
 
   async isWhollyFreshClient(): Promise<boolean> {
     const snapshot = await this.opLogStore.loadStateCache();
@@ -96,7 +99,14 @@ export class SyncLocalStateService {
     if (await this.isWhollyFreshClient()) {
       return true;
     }
-    if (incomingOps.some((op) => isFullStateOpType(op.opType))) {
+    // Must read the SAME prefix as the gate it defers to
+    // (`SyncImportConflictGateService.checkIncomingFullStateConflict`): a
+    // full-state op behind an uninterpretable one is never reached by
+    // `processRemoteOps`, so the gate does not prompt for it. Scanning the full
+    // batch here would leave neither side prompting (#8764).
+    if (
+      takeInterpretableOpPrefix(incomingOps).some((op) => isFullStateOpType(op.opType))
+    ) {
       return false;
     }
     return this.isNeverSyncedGenesisClient();
@@ -219,6 +229,34 @@ export class SyncLocalStateService {
         '\n\n' +
         this.translateService.instant(messageKey),
     );
+  }
+
+  /**
+   * Second confirmation before a destructive server overwrite while the server
+   * holds ops this device could not decrypt (#9256). The clean slate deletes
+   * them for good, and a device that applied a decrypted prefix counts as
+   * synced, so `hasNothingWorthUploading` no longer protects them. Not a
+   * refusal: after a lost password, starting over is the user's only way out.
+   *
+   * Returns true when nothing is at stake or the user explicitly confirms.
+   */
+  confirmOverwriteOfUndecryptableRemoteOps(): boolean {
+    const undecryptable = this.downloadService.getUndecryptableRemoteOps();
+    if (!undecryptable) {
+      return true;
+    }
+    const isConfirmed = confirmDialog(
+      this.translateService.instant(T.F.SYNC.D_UNDECRYPTABLE_REMOTE.TITLE) +
+        '\n\n' +
+        this.translateService.instant(T.F.SYNC.D_UNDECRYPTABLE_REMOTE.MESSAGE, {
+          count: undecryptable.opCount,
+        }),
+    );
+    OpLog.warn(
+      'SyncLocalStateService: destructive overwrite with undecryptable remote ops pending',
+      { opCount: undecryptable.opCount, isConfirmed },
+    );
+    return isConfirmed;
   }
 
   confirmFreshClientSync(opCount: number): boolean {

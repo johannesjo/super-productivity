@@ -20,6 +20,14 @@
   --mat-tab-header-inactive-label-text-color: var(--text-color-muted);
 }
 
+// Material's default tab tracking is wider than anything else in the app;
+// match the body text so tabs stop reading as a different typeface. The M2
+// typography mixin emits this token on .mat-mdc-tab-header itself, so a
+// body-level value would lose to it — it has to be set on the same element.
+body .mat-mdc-tab-header {
+  --mat-tab-label-text-tracking: var(--letter-spacing-normal);
+}
+
 body.isDarkTheme {
   --calendar-hover-bg: color-mix(in srgb, var(--c-primary) 20%, transparent);
 }
@@ -49,6 +57,25 @@ body.isDarkTheme {
   //--mat-chip-outline-color: var(--mat-chip-outline-color, var(--mat-sys-outline)) !important;
   --mat-chip-outline-color: var(--chip-outline-color) !important;
   --mat-chip-outline-width: 1px !important;
+}
+
+// The chip remove icon is the whole tap target and only 18px tall. On touch,
+// pad it to the chip's height without moving the layout (negative margin).
+.isTouchOnly .mat-mdc-chip-remove.mat-icon {
+  padding-block: var(--s);
+  margin-block: calc(var(--s) * -1);
+
+  // Keep the focus ring and state layer on the glyph, not the padded box
+  // (Material insets them at 0 and -3px from the unpadded icon).
+  &::before {
+    top: var(--s);
+    bottom: var(--s);
+  }
+
+  &::after {
+    top: calc(var(--s) - 3px);
+    bottom: calc(var(--s) - 3px);
+  }
 }
 
 .mat-drawer.mat-drawer-side {
@@ -306,10 +333,6 @@ mat-option.isDone {
   justify-content: space-between;
   align-items: center;
 
-  plugin-icon {
-    margin-right: 14px;
-  }
-
   span {
     margin-right: auto;
   }
@@ -321,6 +344,17 @@ mat-option.isDone {
 
 .mat-mdc-mini-fab.mat-mdc-mini-fab.mat-mdc-mini-fab {
   --mat-fab-small-state-layer-size: 48px;
+}
+
+// Icon appearance for mini FABs that change emphasis without replacing the
+// focused button. Keep Material's disabled foreground and interaction states.
+// Match the specificity of angular-material-css-vars' primary/accent overrides.
+:root .mat-mdc-mini-fab.mat-mini-fab-icon {
+  --mat-fab-small-foreground-color: var(--text-color);
+  --mat-fab-small-state-layer-color: var(--text-color);
+  // Themes such as Rainbow set FAB shadows with !important.
+  background: transparent !important;
+  box-shadow: none !important;
 }
 
 .mat-mdc-icon-button.mat-mdc-icon-button.mat-mdc-icon-button {

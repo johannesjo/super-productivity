@@ -17,6 +17,7 @@ import {
   PluginHooks,
   PluginManifest,
   PluginMenuEntryCfg,
+  PluginTaskContextMenuEntryCfg,
   PluginNodeScriptRequest,
   PluginNodeScriptResult,
   PluginRequestOptions,
@@ -128,6 +129,10 @@ export class PluginAPI implements PluginAPIInterface {
     this.#boundMethods.registerMenuEntry(menuEntryCfg);
   }
 
+  registerTaskContextMenuEntry(cfg: PluginTaskContextMenuEntryCfg): void {
+    this.#boundMethods.registerTaskContextMenuEntry(cfg);
+  }
+
   registerConfigHandler(handler: () => void): void {
     PluginLog.log(`Plugin ${this.#pluginId} registered config handler`);
     this.#boundMethods.registerConfigHandler(handler);
@@ -167,6 +172,7 @@ export class PluginAPI implements PluginAPIInterface {
   registerWorkContextHeaderButton(
     cfg: Omit<PluginWorkContextHeaderBtnCfg, 'pluginId'>,
   ): void {
+    // eslint-disable-next-line local-rules/no-user-content-in-logs -- grandfathered log baseline (2026-09), not yet triaged
     PluginLog.log(`Plugin ${this.#pluginId} registered work-context header button`, cfg);
     this.#boundMethods.registerWorkContextHeaderButton(cfg);
   }
@@ -520,6 +526,7 @@ export class PluginAPI implements PluginAPIInterface {
   async updateSimpleCounter(id: string, updates: Partial<any>): Promise<void> {
     PluginLog.log(
       `Plugin ${this.#pluginId} requested to update simple counter ${id}`,
+      // eslint-disable-next-line local-rules/no-user-content-in-logs -- grandfathered log baseline (2026-09), not yet triaged
       updates,
     );
     return this.#pluginBridge.updateSimpleCounter(id, updates);
@@ -607,18 +614,23 @@ export class PluginAPI implements PluginAPIInterface {
     return this.#pluginI18nService.getCurrentLanguage();
   }
 
-  async startOAuthFlow(config: OAuthFlowConfig): Promise<OAuthTokenResult> {
+  // tokenKey is an internal host ↔ bundled Google Calendar contract.
+  // Third-party plugins use the published, unscoped OAuth API.
+  async startOAuthFlow(
+    config: OAuthFlowConfig,
+    tokenKey?: string,
+  ): Promise<OAuthTokenResult> {
     PluginLog.log(`Plugin ${this.#pluginId} requested OAuth flow`);
-    return this.#boundMethods.startOAuthFlow(config);
+    return this.#boundMethods.startOAuthFlow(config, tokenKey);
   }
 
-  async getOAuthToken(): Promise<string | null> {
-    return this.#boundMethods.getOAuthToken();
+  async getOAuthToken(tokenKey?: string): Promise<string | null> {
+    return this.#boundMethods.getOAuthToken(tokenKey);
   }
 
-  async clearOAuthToken(): Promise<void> {
+  async clearOAuthToken(tokenKey?: string): Promise<void> {
     PluginLog.log(`Plugin ${this.#pluginId} requested OAuth token clear`);
-    return this.#boundMethods.clearOAuthToken();
+    return this.#boundMethods.clearOAuthToken(tokenKey);
   }
 
   async setSecret(key: string, value: string): Promise<void> {

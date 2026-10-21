@@ -31,6 +31,7 @@ export const ALLOWED_EXTERNAL_URL_SCHEMES = [
   'http:',
   'https:',
   'mailto:',
+  'mid:', // RFC 2392 message-id links (mid:<id>@host) — Thunderbird registers this scheme
   'file:',
   'tel:',
   'sms:',
@@ -48,6 +49,10 @@ export const ALLOWED_EXTERNAL_URL_SCHEMES = [
   'outlook:', // #8859 — Outlook desktop deep-links (outlook:<EntryID>)
   'webexteams:',
   'x-devonthink-item:', // DEVONthink item links (x-devonthink-item://<uuid>)
+  // Parallel Code (bundled `parallel-code` plugin). Admitted because its
+  // handler accepts only `new-task?spTaskId=<opaque id>` and merely pre-fills a
+  // form; remove it if that handler ever takes a path, URL or command.
+  'parallelcode:',
 ];
 
 const LOCAL_FILE_URL_PREFIX = 'file:///';
