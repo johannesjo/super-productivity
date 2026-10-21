@@ -56,30 +56,49 @@
 
       <!-- When: start and end side by side -->
       <div class="start-end-row">
-        <div class="planned-start-date-field-wrapper">
+        <!-- A field like "Ends on" beside it; date, time and reminder are picked
+             together in the schedule dialog, so it opens that instead of typing. -->
+        <mat-form-field class="planned-start-date-field">
+          <mat-label>
+            {{
+              (isAfterCompletion()
+                ? T.F.TASK_REPEAT.F.FIRST_OCCURRENCE
+                : T.F.TASK_REPEAT.F.START_DATE
+              ) | translate
+            }}
+          </mat-label>
+          <input
+            matInput
+            readonly
+            class="planned-date-val"
+            aria-haspopup="dialog"
+            [value]="plannedStartDateStr()"
+            (click)="openScheduleDialog()"
+            (keydown.enter)="openScheduleDialog()"
+          />
+          @if (repeatCfg().remindAt && repeatCfg().remindAt !== 'DoNotRemind') {
+            <mat-icon
+              matSuffix
+              class="reminder-badge"
+              >alarm</mat-icon
+            >
+          }
           <button
+            matSuffix
+            mat-icon-button
             type="button"
-            mat-stroked-button
             class="planned-start-date-btn"
+            [attr.aria-label]="
+              (isAfterCompletion()
+                ? T.F.TASK_REPEAT.F.FIRST_OCCURRENCE
+                : T.F.TASK_REPEAT.F.START_DATE
+              ) | translate
+            "
             (click)="openScheduleDialog()"
           >
-            <span class="planned-start-date-btn-content">
-              <mat-icon>today</mat-icon>
-              <span class="planned-date-label">
-                {{
-                  (isAfterCompletion()
-                    ? T.F.TASK_REPEAT.F.FIRST_OCCURRENCE
-                    : T.F.TASK_REPEAT.F.START_DATE
-                  ) | translate
-                }}:
-              </span>
-              <span class="planned-date-val">{{ plannedStartDateStr() }}</span>
-              @if (repeatCfg().remindAt && repeatCfg().remindAt !== 'DoNotRemind') {
-                <mat-icon class="reminder-badge">alarm</mat-icon>
-              }
-            </span>
+            <mat-icon>today</mat-icon>
           </button>
-        </div>
+        </mat-form-field>
 
         <formly-form
           class="end-date"

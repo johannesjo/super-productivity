@@ -49,7 +49,9 @@ import { getDefaultSkipOverdue } from './get-default-skip-overdue';
 import { getTaskRepeatCfgChanges } from './get-task-repeat-cfg-changes';
 import { clockStringFromDate } from '../../../ui/duration/clock-string-from-date';
 import { ChipListInputComponent } from '../../../ui/chip-list-input/chip-list-input.component';
-import { MatButton } from '@angular/material/button';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatFormField, MatLabel, MatSuffix } from '@angular/material/form-field';
+import { MatInput } from '@angular/material/input';
 import { MatIcon } from '@angular/material/icon';
 import { Log } from '../../../core/log';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -172,6 +174,11 @@ const NEXT_OCCURRENCE_FIELDS: (keyof TaskRepeatCfgCopy)[] = [
     ChipListInputComponent,
     MatDialogActions,
     MatButton,
+    MatIconButton,
+    MatFormField,
+    MatLabel,
+    MatSuffix,
+    MatInput,
     MatIcon,
     RepeatTaskHeatmapComponent,
     CollapsibleComponent,
@@ -187,7 +194,8 @@ export class DialogEditTaskRepeatCfgComponent {
 
   plannedStartDateStr = computed(() => {
     const d = this.repeatCfg().startDate;
-    if (!d) return this._translateService.instant(T.F.TASK_REPEAT.F.START_DATE);
+    // The field's label already names it.
+    if (!d) return '';
     const date = dateStrToUtcDate(d);
     // Spelled-out weekday/month names follow the UI language under the ISO 8601
     // option (the `sv` sentinel would otherwise leak Swedish, e.g. "ons 15 juli
