@@ -1,4 +1,6 @@
 import { TestBed, fakeAsync, flushMicrotasks, tick } from '@angular/core/testing';
+import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
+import { DEFAULT_DATE_INPUT_LOCALE } from '../../../core/date-time-format/date-input-locale';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { of, Subject, throwError } from 'rxjs';
@@ -167,6 +169,10 @@ describe('IssueTwoWaySyncEffects', () => {
           ],
         }),
         { provide: LOCAL_ACTIONS, useValue: actions$ },
+        {
+          provide: DateTimeFormatService,
+          useValue: { dateInputLocale: () => DEFAULT_DATE_INPUT_LOCALE },
+        },
         { provide: TaskService, useValue: taskServiceSpy },
         { provide: IssueProviderService, useValue: issueProviderServiceSpy },
         { provide: CaldavSyncAdapterService, useValue: caldavSpy },

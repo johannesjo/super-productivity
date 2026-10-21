@@ -33,6 +33,7 @@ import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const'
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { WorkContextService } from '../../work-context/work-context.service';
 import { DateService } from '../../../core/date/date.service';
+import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
 
 import { INBOX_PROJECT } from '../../project/project.const';
 import { devError } from '../../../util/dev-error';
@@ -51,6 +52,7 @@ export class ShortSyntaxEffects {
   private _layoutService = inject(LayoutService);
   private _workContextService = inject(WorkContextService);
   private _dateService = inject(DateService);
+  private _dateTimeFormatService = inject(DateTimeFormatService);
   private _taskTimeSyncService = inject(TaskTimeSyncService);
 
   shortSyntax$ = createEffect(() =>
@@ -126,6 +128,8 @@ export class ShortSyntaxEffects {
             projects,
             undefined,
             isReplaceTagIds ? 'replace' : 'combine',
+            false,
+            this._dateTimeFormatService.dateInputLocale(),
           ).then((r) => {
             if (environment.production) {
               TaskLog.log('shortSyntax', {
