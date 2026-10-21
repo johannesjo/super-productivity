@@ -4,6 +4,7 @@ import {
   TASK_REMINDER_OPTIONS_WITHOUT_LONG_LEAD,
   toPersistableRemindOption,
 } from './task-reminder-options.const';
+import { REMINDER_FORM_CFG } from '../../config/form-cfgs/reminder-form.const';
 
 describe('task reminder options', () => {
   const LONG_LEAD = [
@@ -31,5 +32,12 @@ describe('task reminder options', () => {
     TASK_REMINDER_OPTIONS_WITHOUT_LONG_LEAD.forEach((opt) =>
       expect(toPersistableRemindOption(opt.value)).toBe(opt.value),
     );
+  });
+
+  it('should keep the long lead times out of the synced default reminder setting', () => {
+    const field = REMINDER_FORM_CFG.items?.find(
+      (item) => item.key === 'defaultTaskRemindOption',
+    );
+    expect(field?.templateOptions?.options).toBe(TASK_REMINDER_OPTIONS_WITHOUT_LONG_LEAD);
   });
 });
