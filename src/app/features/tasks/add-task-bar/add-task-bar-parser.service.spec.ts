@@ -1227,6 +1227,42 @@ describe('AddTaskBarParserService', () => {
       expect(mockStateService.updateDate).toHaveBeenCalledWith(dateStr, null);
     });
 
+    it('should parse dates in the given date input locale', async () => {
+      mockStateService.state.and.returnValue({
+        projectId: mockDefaultProject.id,
+        tagIds: [],
+        tagIdsFromTxt: [],
+        newTagTitles: [],
+        date: null,
+        time: null,
+        spent: null,
+        estimate: null,
+        cleanText: null,
+        remindOption: null,
+        attachments: [],
+        repeat: null,
+      });
+
+      await service.parseAndUpdateText(
+        'Task @morgen 15 Uhr',
+        mockConfig,
+        mockProjects,
+        mockTags,
+        mockDefaultProject,
+        undefined,
+        undefined,
+        { language: 'de', isDayFirst: true },
+      );
+
+      const tomorrow = new Date();
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      expect(mockStateService.updateDate).toHaveBeenCalledWith(
+        getDbDateStr(tomorrow),
+        '15:00',
+      );
+      expect(mockStateService.updateCleanText).toHaveBeenCalledWith('Task');
+    });
+
     it('should handle midnight time correctly', async () => {
       const dateStr = '2025-01-15';
       const midnightTime = '00:00';
