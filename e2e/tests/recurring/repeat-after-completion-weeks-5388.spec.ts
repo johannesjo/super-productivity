@@ -195,4 +195,53 @@ test.describe('Recurring task - After I complete it (#5388)', () => {
       })
       .toEqual(['2026-07-14']);
   });
+  // The preset select and the schedule type radio stay in step in both
+  // directions, the dependent fields follow, and switching the radio with the
+  // keyboard keeps focus on it (the dialog rebuilds the form on such changes).
+  test('keeps preset, schedule type and focus in step', async ({
+    page,
+    workViewPage,
+    taskPage,
+    testPrefix,
+  }) => {
+    const taskTitle = `${testPrefix}-ScheduleTypeSync5388`;
+    await workViewPage.waitForTaskList();
+    await workViewPage.addTask(taskTitle);
+    const task = taskPage.getTaskByText(taskTitle).first();
+    await expect(task).toBeVisible({ timeout: 10000 });
+    await taskPage.openTaskDetail(task);
+    const dialog = await openRecurDialog(page);
+    const preset = dialog.locator('mat-select').first();
+    const fixedRadio = dialog.getByRole('radio', { name: /Fixed schedule/i });
+    const afterRadio = dialog.getByRole('radio', { name: /After I complete it/i });
+    const weekdays = dialog.locator('.weekdays');
+
+    await setRecurQuickSetting(page, /Custom recurring config/i);
+    await expect(fixedRadio).toBeChecked();
+    await expect(weekdays).toBeVisible();
+
+    await afterRadio.click();
+    await expect(preset).toContainText(/After I complete it/i);
+    await expect(weekdays).toBeHidden();
+
+    await fixedRadio.click();
+    await expect(preset).toContainText(/Custom recurring config/i);
+    await expect(weekdays).toBeVisible();
+    await expect(dialog.locator('.rule-summary')).not.toContainText(/only the latest/i);
+
+    await setRecurQuickSetting(page, /After I complete it/i);
+    await expect(afterRadio).toBeChecked();
+    await expect(weekdays).toBeHidden();
+
+    await setRecurQuickSetting(page, /Every Monday through Friday/i);
+    await expect(dialog.locator('.rule-summary')).toHaveCount(0);
+
+    // Keyboard: arrow from Fixed to After keeps focus on the radio group.
+    await setRecurQuickSetting(page, /Custom recurring config/i);
+    await fixedRadio.focus();
+    await page.keyboard.press('ArrowDown');
+    await expect(afterRadio).toBeChecked();
+    await expect(afterRadio).toBeFocused();
+    await expect(preset).toContainText(/After I complete it/i);
+  });
 });

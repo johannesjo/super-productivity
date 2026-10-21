@@ -12,62 +12,8 @@
   </h1>
 
   <mat-dialog-content>
-    @if (repeatCfgId(); as cfgId) {
-      <collapsible
-        [title]="T.F.TASK_REPEAT.D_EDIT.HEATMAP_LABEL | translate"
-        icon="bar_chart"
-        (isExpandedChange)="isHeatmapExpanded = $event"
-      >
-        @if (isHeatmapExpanded) {
-          <repeat-task-heatmap [repeatCfgId]="cfgId" />
-        }
-      </collapsible>
-    }
-
     <div class="form-wrapper">
-      <div class="planned-start-date-field-wrapper">
-        <button
-          type="button"
-          mat-stroked-button
-          class="planned-start-date-btn"
-          (click)="openScheduleDialog()"
-        >
-          <span class="planned-start-date-btn-content">
-            <mat-icon>today</mat-icon>
-            <span class="planned-date-label">
-              {{
-                (isAfterCompletion()
-                  ? T.F.TASK_REPEAT.F.FIRST_OCCURRENCE
-                  : T.F.TASK_REPEAT.F.START_DATE
-                ) | translate
-              }}:
-            </span>
-            <span class="planned-date-val">{{ plannedStartDateStr() }}</span>
-            @if (repeatCfg().remindAt && repeatCfg().remindAt !== 'DoNotRemind') {
-              <mat-icon class="reminder-badge">alarm</mat-icon>
-            }
-          </span>
-        </button>
-      </div>
-
-      @if (nextOccurrenceText(); as nextOccurrenceText) {
-        <div class="next-occurrence">
-          <mat-icon>event_repeat</mat-icon>
-          <span>{{ nextOccurrenceText }}</span>
-        </div>
-      }
-
-      @if (inheritedSubtaskTitles().length) {
-        <div class="inherited-subtasks">
-          {{ T.F.TASK_REPEAT.D_EDIT.INHERITED_SUBTASKS | translate }}
-          <ul>
-            @for (title of inheritedSubtaskTitles(); track $index) {
-              <li>{{ title }}</li>
-            }
-          </ul>
-        </div>
-      }
-
+      <!-- What repeats and how: title, preset, custom rule -->
       <formly-form
         (modelChange)="onModelChange($event)"
         [form]="formGroup1()"
@@ -85,6 +31,7 @@
         </div>
       }
 
+      <!-- What the rule means: summary, dates, next copy -->
       @if (ruleSummary(); as summary) {
         <div
           class="rule-summary"
@@ -100,7 +47,59 @@
         </div>
       }
 
+      @if (nextOccurrenceText(); as nextOccurrenceText) {
+        <div class="next-occurrence">
+          <mat-icon>event_repeat</mat-icon>
+          <span>{{ nextOccurrenceText }}</span>
+        </div>
+      }
+
+      <!-- When: start and end side by side -->
+      <div class="start-end-row">
+        <div class="planned-start-date-field-wrapper">
+          <button
+            type="button"
+            mat-stroked-button
+            class="planned-start-date-btn"
+            (click)="openScheduleDialog()"
+          >
+            <span class="planned-start-date-btn-content">
+              <mat-icon>today</mat-icon>
+              <span class="planned-date-label">
+                {{
+                  (isAfterCompletion()
+                    ? T.F.TASK_REPEAT.F.FIRST_OCCURRENCE
+                    : T.F.TASK_REPEAT.F.START_DATE
+                  ) | translate
+                }}:
+              </span>
+              <span class="planned-date-val">{{ plannedStartDateStr() }}</span>
+              @if (repeatCfg().remindAt && repeatCfg().remindAt !== 'DoNotRemind') {
+                <mat-icon class="reminder-badge">alarm</mat-icon>
+              }
+            </span>
+          </button>
+        </div>
+
+        <formly-form
+          class="end-date"
+          (modelChange)="onModelChange($event)"
+          [form]="formGroupEnd()"
+          [fields]="endFormFields()"
+          [model]="repeatCfg()"
+        ></formly-form>
+      </div>
+
       <collapsible [title]="T.F.TASK_REPEAT.D_EDIT.ADVANCED_CFG | translate">
+        <!-- How the series behaves -->
+        <formly-form
+          (modelChange)="onModelChange($event)"
+          [form]="formGroupBehaviour()"
+          [fields]="behaviourFormFields()"
+          [model]="repeatCfg()"
+        ></formly-form>
+
+        <!-- What new copies get -->
         <chip-list-input
           (addItem)="addTag($event)"
           (addNewItem)="addNewTag($event)"
@@ -116,12 +115,36 @@
           [fields]="advancedFormFields()"
           [model]="repeatCfg()"
         ></formly-form>
+
+        @if (inheritedSubtaskTitles().length) {
+          <div class="inherited-subtasks">
+            {{ T.F.TASK_REPEAT.D_EDIT.INHERITED_SUBTASKS | translate }}
+            <ul>
+              @for (title of inheritedSubtaskTitles(); track $index) {
+                <li>{{ title }}</li>
+              }
+            </ul>
+          </div>
+        }
       </collapsible>
+
+      @if (repeatCfgId(); as cfgId) {
+        <collapsible
+          [title]="T.F.TASK_REPEAT.D_EDIT.HEATMAP_LABEL | translate"
+          icon="bar_chart"
+          (isExpandedChange)="isHeatmapExpanded = $event"
+        >
+          @if (isHeatmapExpanded) {
+            <repeat-task-heatmap [repeatCfgId]="cfgId" />
+          }
+        </collapsible>
+      }
     </div>
   </mat-dialog-content>
 
   <mat-dialog-actions align="end">
     @if (isEdit()) {
+      <!-- Actions that drop something, apart from the dialog's own buttons -->
       <button
         (click)="remove()"
         [attr.aria-label]="T.G.REMOVE | translate"
@@ -133,7 +156,19 @@
         <mat-icon>delete_forever</mat-icon>
         <span class="hide-on-small">{{ T.G.REMOVE | translate }}</span>
       </button>
-      <!-- Destructive action apart from Save -->
+      @if (canRemoveInstance()) {
+        <button
+          (click)="deleteInstance()"
+          [attr.aria-label]="skipInstanceButtonText()"
+          class="icon-on-small"
+          color="primary"
+          mat-stroked-button
+          type="button"
+        >
+          <mat-icon>event_busy</mat-icon>
+          <span class="hide-on-small">{{ skipInstanceButtonText() }}</span>
+        </button>
+      }
       <span class="spacer"></span>
     }
 
@@ -148,27 +183,8 @@
       <span class="hide-on-small">{{ T.G.CANCEL | translate }}</span>
     </button>
 
-    @if (isEdit() && canRemoveInstance()) {
-      <button
-        (click)="deleteInstance()"
-        [attr.aria-label]="skipInstanceButtonText()"
-        class="icon-on-small"
-        color="primary"
-        mat-stroked-button
-        type="button"
-      >
-        <mat-icon>event_busy</mat-icon>
-        <span class="hide-on-small">{{ skipInstanceButtonText() }}</span>
-      </button>
-    }
-
     <button
-      [disabled]="
-        !formGroup1().valid ||
-        !formGroup2().valid ||
-        isLoading() ||
-        isWeekdaySelectionInvalid()
-      "
+      [disabled]="!areFormsValid() || isLoading() || isWeekdaySelectionInvalid()"
       [attr.aria-label]="T.G.SAVE | translate"
       [attr.aria-describedby]="isWeekdaySelectionInvalid() ? 'weekday-error' : null"
       class="icon-on-small"

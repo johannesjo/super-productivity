@@ -1,11 +1,15 @@
 import {
+  afterNextRender,
   ChangeDetectionStrategy,
   Component,
   computed,
   effect,
+  ElementRef,
   inject,
+  Injector,
   signal,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { Task, TaskCopy, TaskReminderOptionId } from '../../tasks/task.model';
 import {
   MAT_DIALOG_DATA,
@@ -26,6 +30,8 @@ import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
 import { UntypedFormGroup } from '@angular/forms';
 import {
   TASK_REPEAT_CFG_ADVANCED_FORM_CFG,
+  TASK_REPEAT_CFG_BEHAVIOUR_FORM_CFG,
+  TASK_REPEAT_CFG_END_FORM_CFG,
   TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG,
 } from './task-repeat-cfg-form.const';
 import { buildRepeatQuickSettingOptions } from './build-repeat-quick-setting-options';
@@ -175,6 +181,9 @@ export class DialogEditTaskRepeatCfgComponent {
   private _globalConfigService = inject(GlobalConfigService);
   private _tagService = inject(TagService);
   private _dateService = inject(DateService);
+  private _elementRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private _injector = inject(Injector);
+  private _document = inject(DOCUMENT);
 
   plannedStartDateStr = computed(() => {
     const d = this.repeatCfg().startDate;
@@ -460,11 +469,17 @@ export class DialogEditTaskRepeatCfgComponent {
       : [];
   });
 
+  // The fields in dialog order: the rule, the end date beside the start date,
+  // then in Options how the series behaves and what new copies get.
   essentialFormFields = signal<FormlyFieldConfig[]>([]);
-  advancedFormFields = signal<FormlyFieldConfig[]>([]);
+  endFormFields = signal<FormlyFieldConfig[]>(TASK_REPEAT_CFG_END_FORM_CFG);
+  behaviourFormFields = signal<FormlyFieldConfig[]>([]);
+  advancedFormFields = signal<FormlyFieldConfig[]>(TASK_REPEAT_CFG_ADVANCED_FORM_CFG);
 
   formGroup1 = signal(new UntypedFormGroup({}));
   formGroup2 = signal(new UntypedFormGroup({}));
+  formGroupEnd = signal(new UntypedFormGroup({}));
+  formGroupBehaviour = signal(new UntypedFormGroup({}));
   tagSuggestions = toSignal(this._tagService.tagsNoMyDayAndNoList$, { initialValue: [] });
   canRemoveInstance = signal<boolean>(false);
   skipInstanceButtonText = computed(() => {
@@ -540,12 +555,41 @@ export class DialogEditTaskRepeatCfgComponent {
     if (synced.fallBehind !== toFallBehindChoice(synced)) {
       synced = withFallBehind(synced);
     }
+    if (synced !== model) {
+      this._keepFocusAcrossRebuild();
+    }
     this._modeSnapshot = this._toModeState(synced);
     this._fallBehindSnapshot = synced.fallBehind;
     if (synced.quickSetting !== AFTER_COMPLETION_PRESET) {
       this._fixedWaitForCompletion = !!synced.waitForCompletion;
     }
     this.repeatCfg.set(synced);
+  }
+
+  /**
+   * A model the dialog adjusted is a new object, so formly (extras.immutable)
+   * rebuilds the fields and keyboard focus drops to <body>, e.g. after
+   * switching the schedule type with the arrow keys. The new object is still
+   * needed: fields that are no form control (waitForCompletion, skipOverdue)
+   * only reach formly's own model copy that way. Formly keeps field ids across
+   * rebuilds, so focus goes back to the element with the same id.
+   */
+  private _keepFocusAcrossRebuild(): void {
+    const host = this._elementRef.nativeElement;
+    const active = this._document.activeElement as HTMLElement | null;
+    if (!active?.id || !host.contains(active)) {
+      return;
+    }
+    const id = active.id;
+    afterNextRender(
+      () => {
+        const el = host.querySelector<HTMLElement>(`#${CSS.escape(id)}`);
+        if (el && el !== this._document.activeElement) {
+          el.focus();
+        }
+      },
+      { injector: this._injector },
+    );
   }
 
   private _initializeRepeatCfg(): RepeatCfgModel {
@@ -682,8 +726,8 @@ export class DialogEditTaskRepeatCfgComponent {
     this.essentialFormFields.set(formConfig);
 
     // The hint follows the picked "If you fall behind" option.
-    this.advancedFormFields.set(
-      TASK_REPEAT_CFG_ADVANCED_FORM_CFG.map((field) =>
+    this.behaviourFormFields.set(
+      TASK_REPEAT_CFG_BEHAVIOUR_FORM_CFG.map((field) =>
         field.key === 'fallBehind'
           ? {
               ...field,
@@ -700,18 +744,16 @@ export class DialogEditTaskRepeatCfgComponent {
     );
   }
 
-  save(): void {
-    const formGroup1 = this.formGroup1();
-    const formGroup2 = this.formGroup2();
+  areFormsValid(): boolean {
+    return this._getFormGroups().every((formGroup) => formGroup.valid);
+  }
 
-    // Check if both forms are valid
-    if (!formGroup1.valid || !formGroup2.valid) {
+  save(): void {
+    if (!this.areFormsValid()) {
       // Mark all fields as touched to show validation errors
-      formGroup1.markAllAsTouched();
-      formGroup2.markAllAsTouched();
+      this._getFormGroups().forEach((formGroup) => formGroup.markAllAsTouched());
       Log.err('Form validation failed', {
-        form1Errors: formGroup1.errors,
-        form2Errors: formGroup2.errors,
+        formErrors: this._getFormGroups().map((formGroup) => formGroup.errors),
       });
       return;
     }
@@ -821,6 +863,15 @@ export class DialogEditTaskRepeatCfgComponent {
           cfg.startDate ? dateStrToUtcDate(cfg.startDate) : undefined,
         );
     return { ...cfg, ...presetUpdates } as TaskRepeatCfg;
+  }
+
+  private _getFormGroups(): UntypedFormGroup[] {
+    return [
+      this.formGroup1(),
+      this.formGroupEnd(),
+      this.formGroupBehaviour(),
+      this.formGroup2(),
+    ];
   }
 
   private _toModeState(model: RepeatCfgModel): AfterCompletionModeState {

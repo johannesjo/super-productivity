@@ -100,6 +100,19 @@ mat-dialog-actions {
   }
 }
 
+// Start and end side by side; they stack on narrow screens.
+.start-end-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 0 var(--s2);
+
+  > * {
+    flex: 1 1 240px;
+    min-width: 0;
+  }
+}
+
 .planned-start-date-field-wrapper {
   margin-bottom: var(--s2);
   width: 100%;

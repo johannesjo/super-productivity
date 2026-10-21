@@ -272,8 +272,14 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       );
       fixture.detectChanges();
       await fixture.whenStable();
-      const headers = fixture.nativeElement.querySelectorAll('.collapsible-header');
-      headers[headers.length - 1].click();
+      const optionsHeader = (
+        Array.from(
+          fixture.nativeElement.querySelectorAll('.collapsible-header'),
+        ) as HTMLElement[]
+      ).find((header) =>
+        header.textContent?.includes(T.F.TASK_REPEAT.D_EDIT.ADVANCED_CFG),
+      );
+      optionsHeader!.click();
       fixture.detectChanges();
       await fixture.whenStable();
 
@@ -869,7 +875,7 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
       // Attempting to save while loading would have thrown the error before the fix
       // After the fix, the button should be disabled so save() won't be called
       // We verify the condition that disables the button
-      const formValid = component.formGroup1().valid && component.formGroup2().valid;
+      const formValid = component.areFormsValid();
       const saveButtonShouldBeDisabled = !formValid || component.isLoading();
       expect(saveButtonShouldBeDisabled).toBe(true);
 
@@ -1600,7 +1606,7 @@ describe('DialogEditTaskRepeatCfgComponent', () => {
     it('describes the picked choice', async () => {
       const fixture = await setupTestBed({ task: mockTask });
       const field = fixture.componentInstance
-        .advancedFormFields()
+        .behaviourFormFields()
         .find((f) => f.key === 'fallBehind');
       const describe = field?.expressionProperties?.['templateOptions.description'] as (
         model: object,

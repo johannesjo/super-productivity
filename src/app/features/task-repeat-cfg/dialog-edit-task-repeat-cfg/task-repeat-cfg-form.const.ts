@@ -234,7 +234,31 @@ export const TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG: FormlyFieldConfig[] = [
   // REPEAT CFG END
 ];
 
-export const TASK_REPEAT_CFG_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
+// Shown next to the start date.
+export const TASK_REPEAT_CFG_END_FORM_CFG: FormlyFieldConfig[] = [
+  // Optional inclusive end day (#10091). The picker emits Date | null; persist
+  // a YYYY-MM-DD string and `undefined` when cleared, so the clear syncs via
+  // `clearedFields` instead of storing a null.
+  {
+    key: 'repeatUntilDay',
+    type: 'date',
+    templateOptions: {
+      label: T.F.TASK_REPEAT.F.REPEAT_UNTIL_DAY,
+      description: T.F.TASK_REPEAT.F.REPEAT_UNTIL_DAY_DESCRIPTION,
+    },
+    parsers: [
+      (value: Date | string | null | undefined) =>
+        value instanceof Date ? getDbDateStr(value) : value || undefined,
+    ],
+    expressionProperties: {
+      ['templateOptions.min']: (model: Partial<TaskRepeatCfg>) =>
+        model.startDate || undefined,
+    },
+  },
+];
+
+// How the series behaves, first in Options.
+export const TASK_REPEAT_CFG_BEHAVIOUR_FORM_CFG: FormlyFieldConfig[] = [
   // "If you fall behind": one choice for waitForCompletion + skipOverdue. The
   // `fallBehind` key is dialog-only; the component maps it to those fields and
   // sets the hint for the picked option. Hidden after completion, which waits.
@@ -261,25 +285,10 @@ export const TASK_REPEAT_CFG_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
       description: T.F.TASK_REPEAT.F.IS_PAUSED_DESCRIPTION,
     },
   },
-  // Optional inclusive end day (#10091). The picker emits Date | null; persist
-  // a YYYY-MM-DD string and `undefined` when cleared, so the clear syncs via
-  // `clearedFields` instead of storing a null.
-  {
-    key: 'repeatUntilDay',
-    type: 'date',
-    templateOptions: {
-      label: T.F.TASK_REPEAT.F.REPEAT_UNTIL_DAY,
-      description: T.F.TASK_REPEAT.F.REPEAT_UNTIL_DAY_DESCRIPTION,
-    },
-    parsers: [
-      (value: Date | string | null | undefined) =>
-        value instanceof Date ? getDbDateStr(value) : value || undefined,
-    ],
-    expressionProperties: {
-      ['templateOptions.min']: (model: Partial<TaskRepeatCfg>) =>
-        model.startDate || undefined,
-    },
-  },
+];
+
+// What new copies get, after the tags in Options.
+export const TASK_REPEAT_CFG_ADVANCED_FORM_CFG: FormlyFieldConfig[] = [
   {
     key: 'priority',
     type: 'select',

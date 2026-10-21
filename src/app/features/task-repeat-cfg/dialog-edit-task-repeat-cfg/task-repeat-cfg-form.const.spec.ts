@@ -1,5 +1,7 @@
 import {
   TASK_REPEAT_CFG_ADVANCED_FORM_CFG,
+  TASK_REPEAT_CFG_BEHAVIOUR_FORM_CFG,
+  TASK_REPEAT_CFG_END_FORM_CFG,
   TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG,
 } from './task-repeat-cfg-form.const';
 import { T } from '../../../t.const';
@@ -26,10 +28,27 @@ describe('TaskRepeatCfgFormConfig', () => {
     expect(remindAtField).toBeUndefined();
   });
 
+  // The dialog reads top to bottom: what repeats, when it starts and ends, then
+  // in Options how the series behaves and what new copies get.
+  it('groups the fields in dialog order', () => {
+    const keys = (cfg: FormlyFieldConfig[]): unknown[] => cfg.map((f) => f.key);
+    expect(keys(TASK_REPEAT_CFG_ESSENTIAL_FORM_CFG).slice(0, 2)).toEqual([
+      'title',
+      'quickSetting',
+    ]);
+    expect(keys(TASK_REPEAT_CFG_END_FORM_CFG)).toEqual(['repeatUntilDay']);
+    expect(keys(TASK_REPEAT_CFG_BEHAVIOUR_FORM_CFG)).toEqual(['fallBehind', 'isPaused']);
+    expect(keys(TASK_REPEAT_CFG_ADVANCED_FORM_CFG)).toEqual([
+      'priority',
+      'defaultEstimate',
+      'notes',
+      'shouldInheritSubtasks',
+      'disableAutoUpdateSubtasks',
+    ]);
+  });
+
   describe('repeatUntilDay field (#10091)', () => {
-    const field = TASK_REPEAT_CFG_ADVANCED_FORM_CFG.find(
-      (f) => f.key === 'repeatUntilDay',
-    );
+    const field = TASK_REPEAT_CFG_END_FORM_CFG.find((f) => f.key === 'repeatUntilDay');
     const parse = (value: unknown): unknown => (field!.parsers![0] as any)(value);
 
     it('is an optional date field', () => {
@@ -125,10 +144,13 @@ describe('TaskRepeatCfgFormConfig', () => {
     });
 
     it('replaces the two pile-up checkboxes with one "If you fall behind" choice', () => {
-      const keys = TASK_REPEAT_CFG_ADVANCED_FORM_CFG.map((f) => f.key);
+      const keys = [
+        ...TASK_REPEAT_CFG_BEHAVIOUR_FORM_CFG,
+        ...TASK_REPEAT_CFG_ADVANCED_FORM_CFG,
+      ].map((f) => f.key);
       expect(keys).not.toContain('waitForCompletion');
       expect(keys).not.toContain('skipOverdue');
-      const fallBehind = TASK_REPEAT_CFG_ADVANCED_FORM_CFG.find(
+      const fallBehind = TASK_REPEAT_CFG_BEHAVIOUR_FORM_CFG.find(
         (f) => f.key === 'fallBehind',
       );
       expect(
