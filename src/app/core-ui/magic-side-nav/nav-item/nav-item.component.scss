@@ -95,16 +95,18 @@
 // On touch the row's menu opens on long-press (`isTouchLongPress` on its
 // context-menu), so the "more" button is taken out of the layout: a kebab on
 // every row doubled the drawer's weight. It stays in the accessibility tree and
-// the tab order, and shows again while it has keyboard focus.
+// the tab order, and shows again while focused. `:focus`, not `:focus-visible`:
+// a finger cannot focus it, so only a keyboard or screen reader does, and a
+// VoiceOver double-tap must then land on the button, not the row beneath.
 :host-context(.isTouchPrimary) {
-  .additional-btn:not(:focus-visible) {
+  .additional-btn:not(:focus) {
     position: absolute;
-    right: 0;
+    inset-inline-end: 0;
     opacity: 0;
     pointer-events: none;
   }
 
-  &:has(.additional-btn:focus-visible) .task-count {
+  &:has(.additional-btn:focus) .task-count {
     display: none;
   }
 }

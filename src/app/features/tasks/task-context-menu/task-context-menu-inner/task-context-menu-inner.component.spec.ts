@@ -433,9 +433,9 @@ describe('TaskContextMenuInnerComponent', () => {
         ),
       ).map((btn) => btn.querySelector('.quick-access-label')?.textContent?.trim());
       expect(labels).toEqual([
-        T.F.TASK.D_SCHEDULE_TASK.QA_LABEL_TODAY,
-        T.F.TASK.D_SCHEDULE_TASK.QA_LABEL_TOMORROW,
-        T.F.TASK.D_SCHEDULE_TASK.QA_LABEL_NEXT_WEEK,
+        T.G.TODAY,
+        T.G.TOMORROW,
+        T.G.NEXT_WEEK,
         T.F.TASK.D_SCHEDULE_TASK.QA_LABEL_PICK_DATE,
       ]);
       closeMenus();

@@ -117,7 +117,7 @@ describe('NavItemComponent row menu', () => {
   });
 
   // On touch the "more" button is hidden, so the row itself must open the menu.
-  it('opens its menu on a touch long-press of the row', () => {
+  it('opts its row menu into touch long-press', () => {
     const contextMenu = fixture.debugElement
       .query(By.directive(ContextMenuComponent))
       .injector.get(ContextMenuComponent);

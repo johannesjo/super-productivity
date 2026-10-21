@@ -31,9 +31,7 @@
       [matTooltip]="T.F.TASK.D_SCHEDULE_TASK.QA_TODAY | translate"
     >
       <mat-icon aria-hidden="true">wb_sunny</mat-icon>
-      <span class="quick-access-label">{{
-        T.F.TASK.D_SCHEDULE_TASK.QA_LABEL_TODAY | translate
-      }}</span>
+      <span class="quick-access-label">{{ T.G.TODAY | translate }}</span>
     </button>
     <button
       type="button"
@@ -41,9 +39,7 @@
       [matTooltip]="T.F.TASK.D_SCHEDULE_TASK.QA_TOMORROW | translate"
     >
       <mat-icon aria-hidden="true">wb_twilight</mat-icon>
-      <span class="quick-access-label">{{
-        T.F.TASK.D_SCHEDULE_TASK.QA_LABEL_TOMORROW | translate
-      }}</span>
+      <span class="quick-access-label">{{ T.G.TOMORROW | translate }}</span>
     </button>
     <button
       type="button"
@@ -51,9 +47,7 @@
       [matTooltip]="T.F.TASK.D_SCHEDULE_TASK.QA_NEXT_WEEK | translate"
     >
       <mat-icon aria-hidden="true">next_week</mat-icon>
-      <span class="quick-access-label">{{
-        T.F.TASK.D_SCHEDULE_TASK.QA_LABEL_NEXT_WEEK | translate
-      }}</span>
+      <span class="quick-access-label">{{ T.G.NEXT_WEEK | translate }}</span>
     </button>
     <button
       type="button"
@@ -78,9 +72,7 @@
         [matTooltip]="T.F.TASK.CMP.UNSCHEDULE_TASK | translate"
       >
         <mat-icon aria-hidden="true">event_busy</mat-icon>
-        <span class="quick-access-label">{{
-          T.F.TASK.D_SCHEDULE_TASK.QA_LABEL_CLEAR | translate
-        }}</span>
+        <span class="quick-access-label">{{ T.G.CLEAR | translate }}</span>
       </button>
     }
   </div>
