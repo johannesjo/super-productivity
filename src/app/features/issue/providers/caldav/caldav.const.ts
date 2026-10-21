@@ -14,6 +14,7 @@ export const DEFAULT_CALDAV_CFG: CaldavCfg = {
     title: 'pullOnly',
     notes: 'off',
     deleteOnServer: false,
+    createOnServer: false,
   },
 };
 

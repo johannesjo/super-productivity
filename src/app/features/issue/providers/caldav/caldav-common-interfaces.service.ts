@@ -13,6 +13,10 @@ import { getDbDateStr } from '../../../../util/get-db-date-str';
 import { isCaldavEnabled } from './is-caldav-enabled.util';
 import { CALDAV_POLL_INTERVAL } from './caldav.const';
 import { issueValuesEqual } from '../../two-way-sync/compute-push-decisions';
+import { Store } from '@ngrx/store';
+import { GlobalConfigService } from '../../../config/global-config.service';
+import { selectTaskEntities } from '../../../tasks/store/task.selectors';
+import { caldavUidToTaskId } from './caldav-uid.util';
 
 @Injectable({
   providedIn: 'root',
@@ -20,6 +24,8 @@ import { issueValuesEqual } from '../../two-way-sync/compute-push-decisions';
 export class CaldavCommonInterfacesService extends BaseIssueProviderService<CaldavCfg> {
   private readonly _caldavClientService = inject(CaldavClientService);
   private readonly _caldavSyncAdapter = inject(CaldavSyncAdapterService);
+  private readonly _store = inject(Store);
+  private readonly _globalConfigService = inject(GlobalConfigService);
 
   // Short-lived cache so that getNewIssuesToAddToBacklog and all getSubTasks
   // calls within the same poll cycle share a single REPORT request instead of
@@ -191,7 +197,9 @@ export class CaldavCommonInterfacesService extends BaseIssueProviderService<Cald
     allExistingIssueIds: number[] | string[],
   ): Promise<CaldavIssueReduced[]> {
     const cfg = await firstValueFrom(this._getCfgOnce$(issueProviderId));
-    const tasks = await this._getOpenTasksCached(issueProviderId, cfg);
+    const tasks = await this._withoutVtodosAwaitingLink(
+      await this._getOpenTasksCached(issueProviderId, cfg),
+    );
 
     if (cfg.isAddSubTasks) {
       const existingIds = new Set(allExistingIssueIds as string[]);
@@ -220,6 +228,23 @@ export class CaldavCommonInterfacesService extends BaseIssueProviderService<Cald
     // Guard against self-referential VTODOs (RELATED-TO:<own-uid>) which would
     // cause a task to be added as its own sub-task and corrupt the store.
     return allTasks.filter((t) => t.related_to === parentId && t.id !== parentId);
+  }
+
+  /**
+   * A VTODO SP created (`createOnServer`) is linked by the task that created it
+   * — but only once the create round-trip finishes, and on other devices only
+   * once that link op syncs in. Importing it in between adds a second task for
+   * the same VTODO (#10098). Skip it while that task exists here, and always
+   * when SP sync is on, since sync delivers the task already linked. Without SP
+   * sync a VTODO created on another device is imported like any other.
+   */
+  private async _withoutVtodosAwaitingLink(tasks: CaldavIssue[]): Promise<CaldavIssue[]> {
+    const isSyncEnabled = !!this._globalConfigService.sync()?.isEnabled;
+    const taskEntities = await firstValueFrom(this._store.select(selectTaskEntities));
+    return tasks.filter((t) => {
+      const taskId = caldavUidToTaskId(t.id);
+      return !taskId || (!isSyncEnabled && !taskEntities[taskId]);
+    });
   }
 
   // Non-async: Map.set runs synchronously so concurrent callers share the
