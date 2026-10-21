@@ -85,6 +85,7 @@ import {
 } from './after-completion-form-mapping';
 import { getResumeCursorChanges } from './get-resume-cursor-changes';
 import { getRulePreviewDates } from './get-rule-preview-dates';
+import { getRuleSentence } from './get-rule-sentence';
 import { getTaskRepeatInfoText } from '../../tasks/task-detail-panel/get-task-repeat-info-text.util';
 import {
   FallBehindChoice,
@@ -416,13 +417,17 @@ export class DialogEditTaskRepeatCfgComponent {
       return null;
     }
     const translate = this._translateService;
-    const [key, params] = getTaskRepeatInfoText(
-      cfg,
-      this._dateTimeFormatService.currentLocale(),
-      this._dateTimeFormatService,
-      translate,
-    );
-    const ruleStr = translate.instant(key, params);
+    // A full sentence where the shared chip text is shorthand ("Mo, We").
+    const ruleStr =
+      getRuleSentence(cfg, this._dateTimeFormatService, translate) ??
+      translate.instant(
+        ...getTaskRepeatInfoText(
+          cfg,
+          this._dateTimeFormatService.currentLocale(),
+          this._dateTimeFormatService,
+          translate,
+        ),
+      );
     // Paused keeps the rule in view, so resuming needs no guessing.
     const policyKey = cfg.isPaused
       ? T.F.TASK_REPEAT.D_EDIT.RULE_PAUSED
