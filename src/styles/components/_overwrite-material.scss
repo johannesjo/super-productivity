@@ -65,11 +65,16 @@ body.isDarkTheme {
   padding-block: var(--s);
   margin-block: calc(var(--s) * -1);
 
-  // Keep the focus ring and state layer on the glyph, not the padded box.
-  &::before,
-  &::after {
+  // Keep the focus ring and state layer on the glyph, not the padded box
+  // (Material insets them at 0 and -3px from the unpadded icon).
+  &::before {
     top: var(--s);
     bottom: var(--s);
+  }
+
+  &::after {
+    top: calc(var(--s) - 3px);
+    bottom: calc(var(--s) - 3px);
   }
 }
 

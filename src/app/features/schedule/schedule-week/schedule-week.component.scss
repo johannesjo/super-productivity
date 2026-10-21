@@ -299,7 +299,7 @@
   background: var(--over-budget-badge-bg);
   color: var(--c-warn);
   font: inherit;
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   line-height: 1;
   white-space: nowrap;
 
