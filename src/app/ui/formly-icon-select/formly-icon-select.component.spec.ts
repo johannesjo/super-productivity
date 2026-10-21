@@ -7,6 +7,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { FormlyFieldConfig, FormlyModule } from '@ngx-formly/core';
 import { FormlyMaterialModule } from '@ngx-formly/material';
 import { FormlyIconSelectComponent } from './formly-icon-select.component';
+import { of } from 'rxjs';
 
 const change = jasmine.createSpy('change');
 
@@ -81,6 +82,27 @@ describe('FormlyIconSelectComponent', () => {
       'Custom',
       'No icon',
     ]);
+  });
+
+  // The app's translate extension turns static option arrays into one.
+  it('also takes options as an Observable', () => {
+    fixture.componentInstance.fields = [
+      {
+        ...fixture.componentInstance.fields[0],
+        props: {
+          ...fixture.componentInstance.fields[0].props,
+          options: of([
+            { value: 'DAILY', label: 'Every day', icon: 'today' },
+            { value: 'CUSTOM', label: 'Custom', icon: 'tune' },
+          ]),
+        },
+      },
+    ];
+    fixture.detectChanges();
+    fixture.detectChanges();
+    select = fixture.debugElement.query(By.directive(MatSelect)).componentInstance;
+
+    expect(select.options.map((o) => o.viewValue)).toEqual(['Every day', 'Custom']);
   });
 
   it('updates the model and calls the change hook on selection', () => {
