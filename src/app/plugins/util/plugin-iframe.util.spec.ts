@@ -13,6 +13,40 @@ import {
 } from './plugin-iframe.util';
 
 describe('handlePluginMessage()', () => {
+  it('routes iframe key listing to the owning plugin API', async () => {
+    const listSyncedDataKeys = jasmine
+      .createSpy('listSyncedDataKeys')
+      .and.resolveTo(['attachment:task:file']);
+    const source = jasmine.createSpyObj<{ postMessage: jasmine.Spy }>('iframe', [
+      'postMessage',
+    ]);
+    const bridge = {
+      createBoundMethods: () => ({ listSyncedDataKeys }),
+    } as unknown as PluginBridgeService;
+    await handlePluginMessage(
+      {
+        source,
+        data: {
+          type: PluginIframeMessageType.API_CALL,
+          bridgeToken: 'test-bridge-token',
+          bridgeGeneration: 4,
+          method: 'listSyncedDataKeys',
+          callId: 45,
+          args: ['attachment:task:'],
+        },
+      } as unknown as MessageEvent,
+      createConfig(bridge),
+    );
+    expect(listSyncedDataKeys).toHaveBeenCalledOnceWith('attachment:task:');
+    expect(source.postMessage).toHaveBeenCalledWith(
+      {
+        type: PluginIframeMessageType.API_RESPONSE,
+        callId: 45,
+        result: ['attachment:task:file'],
+      },
+      '*',
+    );
+  });
   const createConfig = (
     pluginBridge: PluginBridgeService,
     boundMethods?: PluginIframeConfig['boundMethods'],
@@ -460,6 +494,9 @@ describe('handlePluginMessage()', () => {
 
     expect(script).toContain('Promise.resolve()');
     expect(script).toContain('.then(() => handler())');
+    expect(script).toContain(
+      "listSyncedDataKeys: (prefix) => callApi('listSyncedDataKeys', [prefix])",
+    );
     expect(script).toContain('Unknown dialog button error');
     expect(script).toContain('const bridgeToken = "test-bridge-token"');
     expect(script).toContain('const bridgeGeneration = 4');

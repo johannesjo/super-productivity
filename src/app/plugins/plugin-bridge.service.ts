@@ -66,6 +66,7 @@ import { selectNoteFeatureState } from '../features/note/store/note.reducer';
 import { selectTagFeatureState } from '../features/tag/store/tag.reducer';
 import { selectTaskByIdWithSubTaskData } from '../features/tasks/store/task.selectors';
 import { PluginUserPersistenceService } from './plugin-user-persistence.service';
+import { listPluginDataKeys, loadPluginPersistedData } from './plugin-data-reader';
 import { PluginConfigService } from './plugin-config.service';
 import { TaskArchiveService } from '../features/archive/task-archive.service';
 import { Router } from '@angular/router';
@@ -241,6 +242,7 @@ export class PluginBridgeService implements OnDestroy {
   ): {
     persistDataSynced: (dataStr: string, key?: string) => Promise<void>;
     loadPersistedData: (key?: string) => Promise<string | null>;
+    listSyncedDataKeys: (prefix?: string) => Promise<string[]>;
     getConfig: () => Promise<unknown>;
     downloadFile: (filename: string, data: string) => Promise<void>;
     registerHeaderButton: (cfg: PluginHeaderBtnCfg) => void;
@@ -300,7 +302,10 @@ export class PluginBridgeService implements OnDestroy {
       // Data persistence
       persistDataSynced: (dataStr: string, key?: string) =>
         this._persistDataSynced(pluginId, dataStr, key),
-      loadPersistedData: (key?: string) => this._loadPersistedData(pluginId, key),
+      loadPersistedData: (key?: string) =>
+        loadPluginPersistedData(this._pluginUserPersistenceService, pluginId, key),
+      listSyncedDataKeys: (prefix?: string) =>
+        listPluginDataKeys(this._store, pluginId, prefix),
       getConfig: () => this._getConfig(pluginId),
       downloadFile: (filename: string, data: string) =>
         this._downloadFile(filename, data),
@@ -1394,28 +1399,6 @@ export class PluginBridgeService implements OnDestroy {
         throw error;
       }
       throw new Error(this._translateService.instant(T.PLUGINS.UNABLE_TO_PERSIST_DATA));
-    }
-  }
-
-  /**
-   * Internal method to load persisted plugin data.
-   *
-   * `composeId` runs outside the try/catch so a bad pluginId throws to the
-   * caller symmetrically with the persist path — silently returning `null`
-   * for "your pluginId is malformed" would look indistinguishable from "no
-   * data yet" and could mask a misconfiguration.
-   */
-  private async _loadPersistedData(
-    pluginId: string,
-    key?: string,
-  ): Promise<string | null> {
-    assertPluginPersistenceKey(key);
-    const entityId = composeId(pluginId, key);
-    try {
-      return await this._pluginUserPersistenceService.loadPluginUserData(entityId);
-    } catch (error) {
-      PluginLog.err('PluginBridge: Failed to get persisted plugin data:', error);
-      return null;
     }
   }
 
