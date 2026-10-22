@@ -1,7 +1,15 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { createEffect, ofType } from '@ngrx/effects';
-import { EMPTY, Observable, first, firstValueFrom, from, timer } from 'rxjs';
+import {
+  EMPTY,
+  Observable,
+  first,
+  firstValueFrom,
+  from,
+  lastValueFrom,
+  timer,
+} from 'rxjs';
 import { catchError, concatMap, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { REMOTE_ISSUE_DELETE_DEFER_MS } from '../../../app.constants';
@@ -384,25 +392,54 @@ export class IssueTwoWaySyncEffects {
                             ({ projectId }) => !projectId || projectId === task.projectId,
                           ),
                           concatMap(({ title }) =>
-                            from(
-                              adapter.createIssue!(title, cfg, { taskId: task.id }),
-                            ).pipe(map((created) => ({ ...created, title }))),
+                            // Check the task as it is now, not the add's snapshot:
+                            // the add-task bar attaches a repeat right after the
+                            // add, and the task can be deleted or linked while the
+                            // title parses.
+                            this._taskService.getByIdOnce$(task.id).pipe(
+                              filter(
+                                (current) =>
+                                  !!current &&
+                                  !current.issueId &&
+                                  this._hasAutoCreateEnabled(provider, current),
+                              ),
+                              concatMap(() =>
+                                from(
+                                  adapter.createIssue!(title, cfg, { taskId: task.id }),
+                                ),
+                              ),
+                              map((created) => ({ ...created, title })),
+                            ),
                           ),
                           concatMap(
                             async ({ issueId, issueNumber, issueData, title }) => {
+                              // Keep a title that changed since the add (short syntax
+                              // landed, or the user renamed it during the round-trip);
+                              // never write the action's raw snapshot back.
+                              const currentTask = await firstValueFrom(
+                                this._taskService.getByIdOnce$(task.id),
+                              );
+                              if (!currentTask) {
+                                // Deleted while the issue was created: nothing is
+                                // left to link, so treat the new issue like the
+                                // task's own (the provider's delete setting decides).
+                                await lastValueFrom(
+                                  this._deleteRemoteIssue$({
+                                    issueId,
+                                    issueType: provider.issueProviderKey,
+                                    issueProviderId: provider.id,
+                                  }),
+                                  { defaultValue: undefined },
+                                );
+                                return;
+                              }
                               this._trackSyncOriginatedTask(task.id);
                               try {
                                 const titlePrefix =
                                   issueNumber != null ? `#${issueNumber} ` : '';
                                 const syncValues = adapter.extractSyncValues(issueData);
-                                // Keep a title that changed since the add (short syntax
-                                // landed, or the user renamed it during the round-trip);
-                                // never write the action's raw snapshot back.
-                                const currentTask = await firstValueFrom(
-                                  this._taskService.getByIdOnce$(task.id),
-                                );
                                 const localTitle =
-                                  currentTask && currentTask.title !== task.title
+                                  currentTask.title !== task.title
                                     ? currentTask.title
                                     : title;
                                 this._taskService.update(task.id, {
@@ -489,8 +526,8 @@ export class IssueTwoWaySyncEffects {
 
   /**
    * The task to create an issue for: the added task as dispatched, or for a
-   * move-in the task as it is now, if it still sits in the target project and
-   * is not linked yet.
+   * move-in the task as it is now, if it still sits in the target project.
+   * Linked or deleted tasks are skipped by the re-read right before the create.
    */
   private _resolveAutoCreateTask$(
     task: Task,
@@ -503,9 +540,7 @@ export class IssueTwoWaySyncEffects {
       .getByIdOnce$(task.id)
       .pipe(
         map((current) =>
-          current && current.projectId === moveInProjectId && !current.issueId
-            ? current
-            : undefined,
+          current && current.projectId === moveInProjectId ? current : undefined,
         ),
       );
   }
