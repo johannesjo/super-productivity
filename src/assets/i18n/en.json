@@ -3297,7 +3297,7 @@
     "SHARE_SUCCESS": "Project shared on Plainspace. Tasks assigned to you will import automatically.",
     "SPACE_PICKER": {
       "CREATE_NEW": "Create new space",
-      "DATA_NOTICE": "Task titles and done state of shared tasks are stored on {{host}}, along with times set there. Notes, subtasks and tracked time stay in Super Productivity.",
+      "DATA_NOTICE": "Task titles, done state and scheduled times of shared tasks are stored on {{host}}. Notes, subtasks and tracked time stay in Super Productivity.",
       "DISCONNECT": "Disconnect account",
       "DISCONNECT_HINT": "Disconnecting removes the saved account from this device. Existing project integrations keep syncing. To stop them, open each relevant Plainspace integration in the issue provider panel and choose its gear icon → Delete.",
       "ERROR": "Couldn't reach Plainspace. Check your connection and that your token is still valid, then try again.",

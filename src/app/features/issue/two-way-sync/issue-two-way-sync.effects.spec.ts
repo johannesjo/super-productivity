@@ -2341,6 +2341,45 @@ describe('IssueTwoWaySyncEffects', () => {
       adapterRegistry.unregister('TEST_PROVIDER');
     }));
 
+    it('keeps handling bulk deletes after a provider removed mid-sequence', fakeAsync(() => {
+      const deleteIssueSpy = jasmine.createSpy('deleteIssue').and.resolveTo(undefined);
+      adapterRegistry.register(
+        'TEST_PROVIDER',
+        createMockAdapter({ deleteIssue: deleteIssueSpy }),
+      );
+      const cfg = createMockIssueProvider();
+      issueProviderServiceSpy.getCfgOnce$.and.callFake(((issueProviderId: string) =>
+        issueProviderId === 'removed-provider'
+          ? throwError(() => new Error('No issueProvider found'))
+          : of(cfg)) as any);
+      const pending = TestBed.inject(PendingRemoteIssueDeleteService);
+      effects.deleteIssueOnBulkTaskDelete$.subscribe();
+
+      deletedTaskIssueSidecar.set([
+        {
+          issueId: 'issue-1',
+          issueType: 'TEST_PROVIDER',
+          issueProviderId: 'removed-provider',
+        },
+        { issueId: 'issue-2', issueType: 'TEST_PROVIDER', issueProviderId: 'provider-1' },
+      ]);
+      actions$.next(TaskSharedActions.deleteTasks({ taskIds: ['task-1', 'task-2'] }));
+      tick();
+      // The rest of the sequence still runs.
+      expect(deleteIssueSpy).toHaveBeenCalledOnceWith('issue-2', cfg);
+      expect(pending.issueIds('provider-1').size).toBe(0);
+      expect(pending.issueIds('removed-provider').size).toBe(0);
+
+      deletedTaskIssueSidecar.set([
+        { issueId: 'issue-3', issueType: 'TEST_PROVIDER', issueProviderId: 'provider-1' },
+      ]);
+      actions$.next(TaskSharedActions.deleteTasks({ taskIds: ['task-3'] }));
+      tick();
+      expect(deleteIssueSpy).toHaveBeenCalledWith('issue-3', cfg);
+
+      adapterRegistry.unregister('TEST_PROVIDER');
+    }));
+
     it('should skip tasks without issue linkage in bulk delete', fakeAsync(() => {
       const deleteIssueSpy = jasmine.createSpy('deleteIssue').and.resolveTo(undefined);
       const adapter = createMockAdapter({ deleteIssue: deleteIssueSpy });

@@ -160,7 +160,7 @@ test.describe('Plainspace Release 0', () => {
     const picker = page.locator('plainspace-space-picker-dialog');
     // Item 4: the share dialog says what is stored on the Plainspace host.
     await expect(picker).toContainText(
-      'Task titles and done state of shared tasks are stored on plainspace.org, along with times set there.',
+      'Task titles, done state and scheduled times of shared tasks are stored on plainspace.org',
     );
     await picker.getByRole('button', { name: 'Link space' }).click();
     await expect(picker).toBeHidden();

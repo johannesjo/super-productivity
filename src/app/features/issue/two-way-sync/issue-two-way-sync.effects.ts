@@ -419,18 +419,18 @@ export class IssueTwoWaySyncEffects {
           return from(issueInfos).pipe(
             concatMap((info) =>
               this._deleteRemoteIssue$(info).pipe(
+                // The provider can be removed meanwhile (getCfgOnce$ throws): an
+                // escaped error would skip the rest and end this effect.
+                catchError((err) => {
+                  IssueLog.err('Bulk remote issue delete failed', err);
+                  return EMPTY;
+                }),
                 finalize(() =>
                   this._pendingRemoteIssueDelete.remove(
                     info.issueProviderId,
                     info.issueId,
                   ),
                 ),
-              ),
-            ),
-            // An error ends the sequence: release the ones not reached.
-            finalize(() =>
-              issueInfos.forEach((info) =>
-                this._pendingRemoteIssueDelete.remove(info.issueProviderId, info.issueId),
               ),
             ),
           );
