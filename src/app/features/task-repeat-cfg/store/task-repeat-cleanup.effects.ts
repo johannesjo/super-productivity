@@ -110,6 +110,9 @@ const _isUnmodifiedSkipOverdueInstance = (
   dueStr: string,
   startOfNextDayDiffMs: number,
 ): boolean =>
+  // A copy linked to an issue stands for an item outside the app (e.g. a CalDAV
+  // VTODO); removing it would delete or orphan that item.
+  !task.issueId &&
   task.title === (cfg.title ?? '') &&
   (task.timeEstimate ?? 0) === (cfg.defaultEstimate ?? 0) &&
   getTaskPriority(task.priority) === getTaskPriority(cfg.priority) &&
@@ -253,7 +256,8 @@ export class TaskRepeatCleanupEffects {
                   // the user actually edited. _isUnmodifiedSkipOverdueInstance
                   // compares: title, timeEstimate, tagIds (excluding TODAY_TAG),
                   // notes, attachments (must be empty), projectId, and the
-                  // subtask templates (title/timeEstimate/notes).
+                  // subtask templates (title/timeEstimate/notes); an
+                  // issue-linked copy always counts as edited.
                   // Subtask *progress* (completion / timeSpent) is caught
                   // upstream by hasSubtaskProgress before this gate runs.
                   if (isSkipOverdueGroup) {
