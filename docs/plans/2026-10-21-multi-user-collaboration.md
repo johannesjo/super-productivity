@@ -267,7 +267,7 @@ and bulk sharing raise the blast radius of today's delete-for-everyone.
 
 | Event                                                   | Plainspace                                                                | Local                                                                                                |
 | ------------------------------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| Delete a linked task assigned to me                     | Deleted for everyone after the undo window (exists; confirm text says so) | Deleted; in Recently deleted                                                                         |
+| Delete a linked task assigned to me                     | Deleted for everyone after the undo window (exists; confirm text says so) | Deleted locally; not kept in Recently deleted                                                        |
 | Delete a task no longer assigned to me                  | Untouched (server refuses: not assigned to me)                            | Deleted; normal confirm, no "for everyone" warning                                                   |
 | Delete the project                                      | Untouched (not a delete trigger, verified)                                | Tasks deleted locally                                                                                |
 | Remove the provider                                     | Untouched                                                                 | Tasks unlinked, notes and time kept (exists)                                                         |
