@@ -152,6 +152,11 @@ export const computePendingLocalChanges = (
       continue;
     }
     const direction = syncConfig[mapping.taskField] ?? mapping.defaultDirection;
+    // Unlike `computePushDecisions`, a key missing from the baseline (an
+    // `undefined` JSON dropped on its way here) is not pending. Read as
+    // undefined, CalDAV's empty note ('' locally, undefined remotely) would
+    // count as pending and a Retry would write an empty description. So an
+    // offline edit of such a field isn't queued; its next direct edit pushes it.
     if (
       !canPush(direction) ||
       !Object.prototype.hasOwnProperty.call(lastSyncedValues, mapping.issueField)
