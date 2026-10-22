@@ -196,6 +196,13 @@ const getSectionOrder = (operation: Operation): SectionOrder | undefined => {
   return { contextId, sectionIds: ids };
 };
 
+/**
+ * A placement or removal: it writes the `taskIds` of the sections it declares
+ * (and a removal the work context's undeclared task order), nothing else.
+ */
+export const isSectionTaskListWrite = (operation: Operation): boolean =>
+  !!getSectionPlacement(operation) || !!getSectionRemoval(operation);
+
 const isSectionOrderAndPlacementPair = (
   orderOperation: Operation,
   placementOperation: Operation,
