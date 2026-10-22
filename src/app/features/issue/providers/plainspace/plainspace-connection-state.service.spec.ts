@@ -53,6 +53,14 @@ describe('PlainspaceConnectionStateService', () => {
     expect(state.rejectedProviderIds().has('p1')).toBe(true);
   });
 
+  // A reconnect leaves a provider of a space the account left on the old
+  // token: its rejection must still show.
+  it('still shows a rejection of a provider the reconnect skipped', () => {
+    state.replaceTokens(['p1'], ['pat_old']);
+    state.reportError('p2', httpError(401), 'pat_old');
+    expect(state.rejectedProviderIds().has('p2')).toBe(true);
+  });
+
   it('remembers a server too old for titles per provider, and a success keeps it', () => {
     state.reportTitleUnsupported('p1');
     state.reportSuccess('p1');

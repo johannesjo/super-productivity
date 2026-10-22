@@ -24,6 +24,7 @@ import { IssueProvider } from '../issue.model';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { DeletedTaskIssueSidecarService } from './deleted-task-issue-sidecar.service';
 import { DeletedTagTitlesSidecarService } from './deleted-tag-titles-sidecar.service';
+import { PendingRemoteIssueDeleteService } from './pending-remote-issue-delete.service';
 import { deleteTag } from '../../tag/store/tag.actions';
 import { selectAllTasks } from '../../tasks/store/task.selectors';
 import { selectShortSyntaxConfig } from '../../config/store/global-config.reducer';
@@ -2068,6 +2069,54 @@ describe('IssueTwoWaySyncEffects', () => {
 
       expect(isErrored).toBe(false);
       expect(deleteIssueSpy).toHaveBeenCalledOnceWith('issue-task-2', cfg);
+
+      adapterRegistry.unregister('TEST_PROVIDER');
+    }));
+
+    // A backlog poll inside the window skips these; each path out of the
+    // window must release its issue, or it is never imported again.
+    it('marks the issue pending until its deferred delete ends, however it ends', fakeAsync(() => {
+      const deleteIssueSpy = jasmine.createSpy('deleteIssue').and.resolveTo(undefined);
+      adapterRegistry.register(
+        'TEST_PROVIDER',
+        createMockAdapter({ deleteIssue: deleteIssueSpy }),
+      );
+      const cfg = createMockIssueProvider();
+      issueProviderServiceSpy.getCfgOnce$.and.callFake(((issueProviderId: string) =>
+        issueProviderId === 'removed-provider'
+          ? throwError(() => new Error('No issueProvider found'))
+          : of(cfg)) as any);
+      const pending = TestBed.inject(PendingRemoteIssueDeleteService);
+      const mk = (id: string, issueProviderId = 'provider-1'): TaskWithSubTasks => {
+        const t = createMockTask({
+          id,
+          issueType: 'TEST_PROVIDER' as any,
+          issueId: `issue-${id}`,
+          issueProviderId,
+        }) as TaskWithSubTasks;
+        (t as any).subTasks = [];
+        return t;
+      };
+      const deleted = mk('deleted');
+      const undone = mk('undone');
+      const failed = mk('failed', 'removed-provider');
+      effects.deleteIssueOnTaskDelete$.subscribe();
+
+      [deleted, undone, failed].forEach((task) =>
+        actions$.next(TaskSharedActions.deleteTask({ task })),
+      );
+      expect(pending.has('provider-1', 'issue-deleted')).toBe(true);
+      expect(pending.has('provider-1', 'issue-undone')).toBe(true);
+      expect(pending.has('removed-provider', 'issue-failed')).toBe(true);
+
+      actions$.next(TaskSharedActions.restoreTask({ task: undone, subTasks: [] }));
+      expect(pending.has('provider-1', 'issue-undone')).toBe(false);
+      expect(pending.has('provider-1', 'issue-deleted')).toBe(true);
+
+      tick(REMOTE_ISSUE_DELETE_DEFER_MS);
+      expect(deleteIssueSpy).toHaveBeenCalledOnceWith('issue-deleted', cfg);
+      expect(pending.has('provider-1', 'issue-deleted')).toBe(false);
+      expect(pending.has('removed-provider', 'issue-failed')).toBe(false);
 
       adapterRegistry.unregister('TEST_PROVIDER');
     }));
