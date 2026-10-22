@@ -26,11 +26,15 @@ import { REMOTE_ISSUE_DELETE_DEFER_MS } from '../../../app.constants';
 import { TaskService } from '../../tasks/task.service';
 import { Task } from '../../tasks/task.model';
 import { isWontDoTask } from '../../tasks/util/is-wont-do-task';
-import { selectAllTasks } from '../../tasks/store/task.selectors';
+import { selectAllTasks, selectTaskEntities } from '../../tasks/store/task.selectors';
 import { IssueProviderService } from '../issue-provider.service';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { IssueSyncAdapterRegistryService } from './issue-sync-adapter-registry.service';
-import { computePushDecisions, issueValuesEqual } from './compute-push-decisions';
+import {
+  computePushDecisions,
+  issueValuesEqual,
+  pushedValuesToCarry,
+} from './compute-push-decisions';
 import { FieldMapping, FieldSyncConfig, IssueSyncPushError } from './issue-sync.model';
 import { computePendingLocalChanges } from './compute-field-pull';
 import { IssueSyncFailure, IssueSyncStateService } from './issue-sync-state.service';
@@ -171,6 +175,7 @@ export class IssueTwoWaySyncEffects {
   private readonly _adapterResolver = inject(IssueSyncAdapterResolverService);
   private readonly _pluginRegistry = inject(PluginIssueProviderRegistryService);
   private readonly _syncState = inject(IssueSyncStateService);
+  private readonly _taskEntities = this._store.selectSignal(selectTaskEntities);
   private _syncOriginatedTaskIds = new Set<string>();
   private static readonly _MAX_SYNC_ORIGINATED_IDS = 1000;
 
@@ -764,6 +769,7 @@ export class IssueTwoWaySyncEffects {
               });
       this._trackSyncOriginatedTask(task.id);
       this._taskService.update(task.id, {
+        ...pushedValuesToCarry(this._taskEntities()[task.id], toPush, fieldMappings, ctx),
         issueLastSyncedValues: updatedSyncValues,
         issueLastUpdated,
       });
@@ -1030,6 +1036,13 @@ export class IssueTwoWaySyncEffects {
         this._trackSyncOriginatedTask(task.id);
         try {
           this._taskService.update(task.id, {
+            // Read at dispatch: an edit made during the push is not overwritten.
+            ...pushedValuesToCarry(
+              this._taskEntities()[task.id],
+              toPush,
+              fieldMappings,
+              ctx,
+            ),
             issueLastSyncedValues: updatedSyncValues,
             ...(keepIssueLastUpdatedStale ? {} : { issueLastUpdated }),
           });

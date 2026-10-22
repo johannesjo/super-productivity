@@ -20,19 +20,18 @@ import {
  * #11034 — the issue-provider update poll has no skipDuringSyncWindow(), and
  * Plainspace also polls on focus. Two SP devices on SuperSync share one
  * Plainspace space (one stateful fake, real `SPTask` shapes) and one linked
- * task. Measured 2026-10 on master:
+ * task.
  *
  * - "gap 2": B's focus poll is in flight while B syncs A's newer ops; its
- *   stale answer lands in the post-sync cooldown. B (and, after sync, A) show
- *   the old title until the next poll restores the rename. Nothing wrong is
- *   pushed and both devices converge: passes.
+ *   stale answer lands in the post-sync cooldown. Both devices show the old
+ *   title until the next poll restores the rename; nothing wrong is pushed.
+ *   A regression guard: no lasting harm from the sync window.
  * - "stale title": B pulls a collaborator's title before it has A's ops,
- *   between A's offline rename and A's later push. Field-level LWW then keeps
- *   B's title but A's baseline (`issueLastSyncedValues`), so the next poll
- *   PATCHes the stale title to Plainspace and the rename is lost everywhere.
- *   Fails on master the same way whether B polls at startup, before its
- *   initial sync finished, or on focus, outside any sync window: the missing
- *   skipDuringSyncWindow() is not its cause.
+ *   between A's offline rename and A's later push. The push used to write
+ *   only the baseline, so field-level LWW kept B's title with A's baseline and
+ *   the next poll pushed the stale title back: the rename was lost everywhere.
+ *   The window is not the cause (the focus case polls outside any sync
+ *   window); the baseline write now carries the pushed title.
  */
 
 const TASK_ID = 'task-1';
@@ -375,8 +374,15 @@ test.describe('@supersync Plainspace poll vs the sync window (#11034)', () => {
     }
   });
 
-  for (const bPoll of ['startup', 'focus'] as const) {
-    test(`B pulls a stale title between A's offline rename and its push (B poll: ${bPoll})`, async ({
+  // `firstToSync`: whose concurrent ops reach the server first, so the other
+  // device resolves the conflict. 'A': B resolves; 'B': A resolves.
+  const staleTitleCases = [
+    { bPoll: 'startup', firstToSync: 'A' },
+    { bPoll: 'focus', firstToSync: 'A' },
+    { bPoll: 'focus', firstToSync: 'B' },
+  ] as const;
+  for (const { bPoll, firstToSync } of staleTitleCases) {
+    test(`B pulls a stale title between A's offline rename and its push (B poll: ${bPoll}, first to sync: ${firstToSync})`, async ({
       browser,
       baseURL,
       testRunId,
@@ -439,6 +445,9 @@ test.describe('@supersync Plainspace poll vs the sync window (#11034)', () => {
             timeout: 15000,
           })
           .toBe(MINE);
+        if (firstToSync === 'B') {
+          await b.c.sync.syncAndWait();
+        }
         await a.c.sync.syncAndWait();
 
         if (releaseDownload) {

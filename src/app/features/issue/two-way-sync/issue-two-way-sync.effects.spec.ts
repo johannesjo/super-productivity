@@ -26,7 +26,7 @@ import { DeletedTaskIssueSidecarService } from './deleted-task-issue-sidecar.ser
 import { DeletedTagTitlesSidecarService } from './deleted-tag-titles-sidecar.service';
 import { PendingRemoteIssueDeleteService } from './pending-remote-issue-delete.service';
 import { deleteTag } from '../../tag/store/tag.actions';
-import { selectAllTasks } from '../../tasks/store/task.selectors';
+import { selectAllTasks, selectTaskEntities } from '../../tasks/store/task.selectors';
 import { selectShortSyntaxConfig } from '../../config/store/global-config.reducer';
 import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
 import { selectAllTagsWithoutMyDay } from '../../tag/store/tag.reducer';
@@ -168,6 +168,7 @@ describe('IssueTwoWaySyncEffects', () => {
             },
             { selector: selectAllTagsWithoutMyDay, value: [] },
             { selector: selectUnarchivedProjects, value: [] },
+            { selector: selectTaskEntities, value: {} },
           ],
         }),
         { provide: LOCAL_ACTIONS, useValue: actions$ },
@@ -962,6 +963,71 @@ describe('IssueTwoWaySyncEffects', () => {
 
       adapterRegistry.unregister('TEST_PROVIDER');
     }));
+
+    describe('the baseline write after a push (#11034)', () => {
+      const pushTitle = (taskInStoreAtDispatch: Partial<Task>): Partial<Task> => {
+        const adapter = createMockAdapter({
+          getFieldMappings: jasmine
+            .createSpy('getFieldMappings')
+            .and.returnValue([titleFieldMapping, isDoneFieldMapping]),
+          getSyncConfig: jasmine.createSpy('getSyncConfig').and.returnValue({}),
+          fetchIssue: jasmine
+            .createSpy('fetchIssue')
+            .and.resolveTo({ summary: 'Old title', status: 'NEEDS-ACTION' }),
+          extractSyncValues: jasmine
+            .createSpy('extractSyncValues')
+            .and.callFake((issue: { summary: unknown; status: unknown }) => ({
+              summary: issue.summary,
+              status: issue.status,
+            })),
+        });
+        adapterRegistry.register('TEST_PROVIDER', adapter);
+        const task = createMockTask({
+          id: 'task-1',
+          issueType: 'TEST_PROVIDER' as any,
+          issueId: 'issue-1',
+          issueProviderId: 'provider-1',
+          title: 'New title',
+          isDone: false,
+          issueLastSyncedValues: { summary: 'Old title', status: 'NEEDS-ACTION' },
+          issueLastUpdated: 123,
+        });
+        taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+        issueProviderServiceSpy.getCfgOnce$.and.returnValue(
+          of(createMockIssueProvider()),
+        );
+        store.overrideSelector(selectTaskEntities, {
+          ['task-1']: { ...task, ...taskInStoreAtDispatch },
+        });
+        store.refreshState();
+
+        effects.pushFieldsOnTaskUpdate$.subscribe();
+        actions$.next(
+          TaskSharedActions.updateTask({
+            task: { id: 'task-1', changes: { title: 'New title' } },
+          }),
+        );
+        tick();
+        adapterRegistry.unregister('TEST_PROVIDER');
+        return taskServiceSpy.update.calls.mostRecent().args[1] as Partial<Task>;
+      };
+
+      it('carries the pushed title, so title and baseline resolve together', fakeAsync(() => {
+        const changes = pushTitle({});
+        expect(changes.title).toBe('New title');
+        expect(changes.issueLastSyncedValues).toEqual({
+          summary: 'New title',
+          status: 'NEEDS-ACTION',
+        });
+        expect('isDone' in changes).toBe(false);
+      }));
+
+      it('does not carry a title edited again during the push', fakeAsync(() => {
+        const changes = pushTitle({ title: 'Edited again' });
+        expect('title' in changes).toBe(false);
+        expect(changes.issueLastSyncedValues!['summary']).toBe('New title');
+      }));
+    });
 
     it('should skip push when no issueType on task', fakeAsync(() => {
       const adapter = createMockAdapter({
