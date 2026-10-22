@@ -95,10 +95,11 @@ export const computeFieldPullChanges = ({
 
 /**
  * Whether any pullable field's remote value differs from its baseline (or a
- * field has none while the task has a baseline). For a provider whose marker can be advanced past changes that were
- * never pulled: a marker taken from our own write's answer counts that
- * answer's other changes as seen (server side effects such as a recurring
- * item's next occurrence, or a collaborator's edit that landed just before).
+ * field has none while the task has a baseline). For a provider whose marker
+ * can be advanced past changes that were never pulled: a marker taken from our
+ * own write's answer counts that answer's other changes as seen (server side
+ * effects such as a recurring item's next occurrence, or a collaborator's edit
+ * that landed just before).
  */
 export const hasRemoteFieldChange = (
   task: Task,

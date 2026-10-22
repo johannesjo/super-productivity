@@ -190,7 +190,12 @@ export class TaskBulkActionService {
           data: {
             okTxt: T.F.TASK.MULTI_SELECT.D_CONFIRM_DELETE.OK,
             message: this._plural(
-              tasks.some((t) => t.issueType === PLAINSPACE_TYPE)
+              // A task Plainspace no longer lists for me is only deleted here.
+              tasks.some(
+                (t) =>
+                  t.issueType === PLAINSPACE_TYPE &&
+                  !this._issueSyncState.isMissing(t.id),
+              )
                 ? 'F.TASK.MULTI_SELECT.D_CONFIRM_DELETE.MSG_PLAINSPACE'
                 : 'F.TASK.MULTI_SELECT.D_CONFIRM_DELETE.MSG',
               tasks.length,
