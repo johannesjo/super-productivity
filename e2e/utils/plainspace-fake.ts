@@ -43,8 +43,10 @@ export interface FakePlainspace {
   assignedIds: Set<string>;
   /** `/tasks` (the poll) gets no answer. */
   isTasksOffline: boolean;
-  /** PATCH gets no answer. */
-  isPatchOffline: boolean;
+  /** No request gets an answer: the device is offline. */
+  isOffline: boolean;
+  /** Requests that got no answer while offline, as `METHOD /path`. */
+  offlineRequests: string[];
   /** PATCH answers 500. */
   isPatchServerError: boolean;
   /** POST /tasks (create) answers 500. */
@@ -101,7 +103,8 @@ export const installFakePlainspace = async (page: Page): Promise<FakePlainspace>
     tasks: new Map(),
     assignedIds: new Set(),
     isTasksOffline: false,
-    isPatchOffline: false,
+    isOffline: false,
+    offlineRequests: [],
     isPatchServerError: false,
     isCreateServerError: false,
     isOldServer: false,
@@ -136,6 +139,11 @@ export const installFakePlainspace = async (page: Page): Promise<FakePlainspace>
     const assignedTask = (id: string): FakeSpTask | undefined =>
       server.assignedIds.has(id) ? server.tasks.get(id) : undefined;
 
+    if (server.isOffline) {
+      server.offlineRequests.push(`${req.method()} ${path}`);
+      await route.abort('internetdisconnected');
+      return;
+    }
     if (path === '/me') {
       await json(200, { email: 'me@e2e.test', projects: [PLAINSPACE_SPACE] });
     } else if (path === '/tasks' && req.method() === 'GET') {
@@ -149,8 +157,15 @@ export const installFakePlainspace = async (page: Page): Promise<FakePlainspace>
         tasks: [...server.assignedIds].map((id) => server.tasks.get(id)),
       });
     } else if (path === '/tasks' && req.method() === 'POST') {
-      const body = req.postDataJSON() as { title: string };
+      const body = req.postDataJSON() as { spaceId: string; title: string };
       server.creates.push(body.title);
+      if (
+        body.spaceId !== PLAINSPACE_SPACE.id &&
+        body.spaceId !== PLAINSPACE_SPACE.slug
+      ) {
+        await json(404, { error: 'Space not found' });
+        return;
+      }
       if (server.isCreateServerError) {
         await json(500, { error: 'Internal error' });
         return;
@@ -173,11 +188,6 @@ export const installFakePlainspace = async (page: Page): Promise<FakePlainspace>
         }
       };
       server.beforePatch?.();
-      if (server.isPatchOffline) {
-        server.patches.push({ id, body, status: 0 });
-        await route.abort('internetdisconnected');
-        return;
-      }
       if (server.isPatchServerError) {
         await answer(500, { error: 'Internal error' });
         return;

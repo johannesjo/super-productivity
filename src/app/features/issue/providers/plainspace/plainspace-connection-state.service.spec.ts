@@ -40,6 +40,19 @@ describe('PlainspaceConnectionStateService', () => {
     expect([...state.rejectedProviderIds()]).toEqual(['p2']);
   });
 
+  // Review finding: a request made with the old token could answer 401 after
+  // a successful reconnect and ask to reconnect again.
+  it('ignores a rejection of a token a reconnect replaced', () => {
+    state.reportError('p1', httpError(401), 'pat_old');
+    state.replaceTokens(['p1'], ['pat_old']);
+    expect(state.rejectedProviderIds().has('p1')).toBe(false);
+
+    state.reportError('p1', httpError(401), 'pat_old');
+    expect(state.rejectedProviderIds().has('p1')).toBe(false);
+    state.reportError('p1', httpError(401), 'pat_new');
+    expect(state.rejectedProviderIds().has('p1')).toBe(true);
+  });
+
   it('remembers a server too old for titles per provider, and a success keeps it', () => {
     state.reportTitleUnsupported('p1');
     state.reportSuccess('p1');

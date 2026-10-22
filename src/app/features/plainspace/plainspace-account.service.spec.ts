@@ -26,6 +26,13 @@ describe('PlainspaceAccountService', () => {
     // Shared later, after a token was minted on another device: holds the
     // account token this device currently has saved.
     { id: 'ps-current', issueProviderKey: 'PLAINSPACE', token: 'pat_current' },
+    // Bound to a space (the providers above leave it open).
+    {
+      id: 'ps-space-b',
+      issueProviderKey: 'PLAINSPACE',
+      token: 'pat_b',
+      spaceId: 'space-b',
+    },
     { id: 'gh', issueProviderKey: 'GITHUB', token: 'pat_old' },
   ] as unknown as IssueProvider[];
 
@@ -275,6 +282,39 @@ describe('PlainspaceAccountService', () => {
       expect(store.dispatch).toHaveBeenCalledOnceWith(
         tokenUpdate('ps-other', 'pat_fresh') as never,
       );
+    });
+
+    // Review finding: another account's token, pasted on a provider's
+    // reconnect, was written to it, and every task of that space then read as
+    // no longer assigned to me.
+    describe('membership of the provider space', () => {
+      const reconnectSpaceB = async (projects: unknown[]): Promise<string> => {
+        const p = service.connect('pat_fresh', undefined, 'pat_b');
+        httpMock.expectOne(ME_URL).flush({ email: 'other@example.com', projects });
+        return p;
+      };
+
+      it("refuses a token whose account isn't a member of the space", async () => {
+        await connect('pat_current');
+        expect(await reconnectSpaceB([{ id: 'space-c', slug: 'c' }])).toBe(
+          'other-account',
+        );
+        expect(store.dispatch).not.toHaveBeenCalled();
+        expect(service.token()).toBe('pat_current');
+      });
+
+      it('accepts a member; the space may be bound by its slug', async () => {
+        expect(await reconnectSpaceB([{ id: 'uuid-b', slug: 'space-b' }])).toBe('ok');
+        expect(store.dispatch).toHaveBeenCalledOnceWith(
+          tokenUpdate('ps-space-b', 'pat_fresh') as never,
+        );
+      });
+
+      it('leaves a provider of a space the account left on its token', async () => {
+        await connect('pat_b');
+        await connect('pat_new');
+        expect(store.dispatch).not.toHaveBeenCalled();
+      });
     });
 
     it('writes nothing when reconnecting with the same token', async () => {

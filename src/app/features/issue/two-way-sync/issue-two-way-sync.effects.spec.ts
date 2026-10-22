@@ -2747,6 +2747,52 @@ describe('IssueTwoWaySyncEffects', () => {
         );
       }));
 
+      describe('a task already finished', () => {
+        let pushSpy: jasmine.Spy;
+        beforeEach(() => {
+          pushSpy = jasmine.createSpy('pushChanges').and.resolveTo();
+          adapterRegistry.register(
+            'PLAINSPACE',
+            createMockAdapter({
+              createIssue: createIssueSpy,
+              getFieldMappings: jasmine
+                .createSpy('getFieldMappings')
+                .and.returnValue([isDoneFieldMapping]),
+              pushChanges: pushSpy,
+            }),
+          );
+        });
+
+        it('pushes a completed task as done', fakeAsync(() => {
+          const task = movedTask({ isDone: true, doneOn: 5 });
+          taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+          effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+          move(task);
+          tick();
+
+          expect(pushSpy).toHaveBeenCalledOnceWith(
+            'ps-issue-1',
+            { status: 'COMPLETED' },
+            jasmine.anything(),
+          );
+        }));
+
+        // Review finding: the move-in pushed `isDone`, so a task I won't do
+        // was marked done for everyone.
+        it("does not push a won't-do task as done", fakeAsync(() => {
+          const task = movedTask({ isDone: true, doneOn: 5, wontDoOn: 5 });
+          taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+          effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+          move(task);
+          tick();
+
+          expect(createIssueSpy).toHaveBeenCalled();
+          expect(pushSpy).not.toHaveBeenCalled();
+        }));
+      });
+
       it('ignores a move to the project the task is already in', fakeAsync(() => {
         const task = movedTask();
         taskServiceSpy.getByIdOnce$.and.returnValue(of(task));

@@ -111,8 +111,13 @@ export class PlainspaceSyncAdapterService implements IssueSyncAdapter<Plainspace
     issueId: string,
     cfg: PlainspaceCfg,
   ): Promise<Record<string, unknown>> {
-    const issue = await firstValueFrom(this._api.getById$(issueId, cfg));
-    return (issue ?? {}) as unknown as Record<string, unknown>;
+    try {
+      const issue = await firstValueFrom(this._api.getById$(issueId, cfg));
+      return (issue ?? {}) as unknown as Record<string, unknown>;
+    } catch (err) {
+      this._reportError(cfg, err);
+      throw err;
+    }
   }
 
   /**
@@ -152,6 +157,7 @@ export class PlainspaceSyncAdapterService implements IssueSyncAdapter<Plainspace
       if (patch.title !== undefined && httpStatus(err) === 422) {
         return this._onTitleUnsupported(issueId, patch, cfg);
       }
+      this._reportError(cfg, err);
       throw err;
     }
     assertEchoed(issueId, patch.done, updated);
@@ -166,6 +172,14 @@ export class PlainspaceSyncAdapterService implements IssueSyncAdapter<Plainspace
     // The row as written: its updatedAt is the marker of our own write. A
     // re-fetch could already carry a later change by someone else.
     return updated?.updatedAt ? { updatedAt: updated.updatedAt } : undefined;
+  }
+
+  /** A rejected token shows "reconnect" now, not only after the next poll. */
+  private _reportError(cfg: PlainspaceCfg, err: unknown): void {
+    const providerId = getProviderId(cfg);
+    if (providerId) {
+      this._connectionState.reportError(providerId, err, cfg.token);
+    }
   }
 
   private async _onTitleUnsupported(
