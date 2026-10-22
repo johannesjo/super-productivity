@@ -184,5 +184,18 @@
     "author": "owarimono",
     "authorUrl": "https://github.com/owarimono",
     "id": "auto-tag-manager"
+  },
+  {
+    "name": "YouGile Integration (SuperGile)",
+    "shortDescription": "Two-way sync of YouGile tasks assigned to you: done state, title, deadline, time estimate and time spent.",
+    "url": "https://github.com/SileboxUnderfined/SuperGile",
+    "author": "SileboxUnderfined",
+    "authorUrl": "https://github.com/SileboxUnderfined",
+    "id": "supergile-yougile-issue-provider",
+    "release": {
+      "version": "0.1.1",
+      "downloadUrl": "https://github.com/SileboxUnderfined/SuperGile/releases/download/v0.1.1/supergile-0.1.1.zip",
+      "sha256": "67ebf31649f745950f38da4f58f6bf43ed73e89fb43d5b1537ff626f78fbca76"
+    }
   }
 ]
