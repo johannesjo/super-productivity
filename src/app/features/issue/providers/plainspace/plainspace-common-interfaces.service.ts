@@ -170,9 +170,15 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
           this._syncState.clearFailure(task.id);
         }
       }
-      // The push re-reads the task and fetches the item before deciding, so it
-      // works on the state after the pulls above are applied.
-      toPush.forEach((taskId) => this._syncState.requestPush(taskId, true));
+      // The caller applies the pulls above right after this resolves; queue the
+      // pushes after that, so their pending fields are read from the pulled
+      // task (a field pulled this time is no longer pending and is not
+      // re-sent).
+      if (toPush.length) {
+        setTimeout(() =>
+          toPush.forEach((taskId) => this._syncState.requestPush(taskId, true)),
+        );
+      }
     }
     return updates;
   }

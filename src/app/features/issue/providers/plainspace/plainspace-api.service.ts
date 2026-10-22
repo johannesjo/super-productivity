@@ -412,9 +412,13 @@ export interface PlainspaceTaskPatch {
   title?: string;
 }
 
-/** What a PATCH answer echoes; `title` is absent when the answer omits it. */
+/**
+ * What a PATCH answer echoes; `title` and `updatedAt` are absent when the
+ * answer omits them.
+ */
 export type PlainspacePatchConfirmation = Pick<PlainspaceIssue, 'id' | 'isDone'> & {
   title?: string;
+  updatedAt?: string;
 };
 
 interface SPTasksResponse {
@@ -462,6 +466,7 @@ const parsePlainspacePatchConfirmation = (
     id: task['id'],
     isDone: task['done'],
     ...(typeof task['title'] === 'string' ? { title: task['title'] } : {}),
+    ...(typeof task['updatedAt'] === 'string' ? { updatedAt: task['updatedAt'] } : {}),
   };
 };
 

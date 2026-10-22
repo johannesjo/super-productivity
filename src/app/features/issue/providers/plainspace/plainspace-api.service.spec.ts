@@ -124,7 +124,9 @@ describe('PlainspaceApiService', () => {
     const req = httpMock.expectOne(`${BASE}/tasks/a`);
     expect(req.request.body).toEqual({ done: true, title: '  Exact title ' });
     req.flush({ task: { ...spTask('a', 'space-1', true), title: '  Exact title ' } });
-    expect((await p)?.title).toBe('  Exact title ');
+    const confirmation = await p;
+    expect(confirmation?.title).toBe('  Exact title ');
+    expect(confirmation?.updatedAt).toBe(spTask('a', 'space-1', true).updatedAt);
   });
 
   it('patchTask$ lets HTTP errors through so the adapter can read the status', async () => {

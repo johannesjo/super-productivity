@@ -103,6 +103,18 @@ describe('PlainspaceSyncAdapterService', () => {
     );
   });
 
+  it('pushChanges resolves to the written updatedAt, the marker of its own write', async () => {
+    api.patchTask$.and.returnValue(
+      of({ ...patchedIssue, updatedAt: '2026-01-02T00:00:00.000Z' }),
+    );
+    expect(await adapter.pushChanges('t1', { isDone: true }, cfg)).toEqual({
+      updatedAt: '2026-01-02T00:00:00.000Z',
+    });
+
+    api.patchTask$.and.returnValue(of(patchedIssue));
+    expect(await adapter.pushChanges('t1', { isDone: true }, cfg)).toBeUndefined();
+  });
+
   it('pushChanges rejects an echoed title that differs even by whitespace', async () => {
     api.patchTask$.and.returnValue(of({ ...patchedIssue, title: 'New name' }));
     await expectAsync(
@@ -122,6 +134,15 @@ describe('PlainspaceSyncAdapterService', () => {
     api.patchTask$.and.returnValue(of({ ...patchedIssue, title: 'x'.repeat(500) }));
     await adapter.pushChanges('t1', { title: 'x'.repeat(500) }, cfg);
     expect(api.patchTask$).toHaveBeenCalledTimes(1);
+  });
+
+  it('pushChanges still sends done next to a title it refuses, then reports the title', async () => {
+    api.patchTask$.and.returnValue(of(patchedIssue));
+    await expectAsync(
+      adapter.pushChanges('t1', { isDone: true, title: 'x'.repeat(501) }, cfg),
+    ).toBeRejectedWith(new IssueSyncPushError(T.PLAINSPACE.SYNC.ERR_TITLE_TOO_LONG));
+    expect(api.patchTask$).toHaveBeenCalledOnceWith('t1', { done: true }, cfg);
+    expect(connectionState.isTitleUnsupported('provider-1')).toBe(false);
   });
 
   it('a 422 on a title marks the server too old, sends done alone and skips quietly', async () => {

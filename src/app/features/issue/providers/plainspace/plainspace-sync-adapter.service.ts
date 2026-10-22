@@ -127,15 +127,21 @@ export class PlainspaceSyncAdapterService implements IssueSyncAdapter<Plainspace
     issueId: string,
     changes: Record<string, unknown>,
     cfg: PlainspaceCfg,
-  ): Promise<void> {
+  ): Promise<void | Record<string, unknown>> {
     const patch: PlainspaceTaskPatch = {};
     if ('isDone' in changes) {
       patch.done = !!changes['isDone'];
     }
-    if ('title' in changes) {
-      patch.title = validTitle(changes['title']);
+    // A title Plainspace can't take is not sent; done still is, then the task
+    // shows why its title didn't sync.
+    const titleErrorKey = 'title' in changes ? invalidTitleKey(changes['title']) : null;
+    if ('title' in changes && !titleErrorKey) {
+      patch.title = changes['title'] as string;
     }
     if (patch.done === undefined && patch.title === undefined) {
+      if (titleErrorKey) {
+        throw new IssueSyncPushError(titleErrorKey);
+      }
       return;
     }
 
@@ -159,6 +165,14 @@ export class PlainspaceSyncAdapterService implements IssueSyncAdapter<Plainspace
     if (patch.title !== undefined && updated?.title !== patch.title) {
       return this._onTitleUnsupported(issueId, { done: patch.done }, cfg, true);
     }
+    if (titleErrorKey) {
+      // Done was written, but its baseline only moves with a full success:
+      // the next poll sees the remote change and pulls the same value.
+      throw new IssueSyncPushError(titleErrorKey);
+    }
+    // The row as written: its updatedAt is the marker of our own write. A
+    // re-fetch could already carry a later change by someone else.
+    return updated?.updatedAt ? { updatedAt: updated.updatedAt } : undefined;
   }
 
   private async _onTitleUnsupported(
@@ -207,15 +221,18 @@ const httpErrorCode = (err: unknown): unknown =>
     ? (err.error as { error?: unknown })?.error
     : undefined;
 
-/** Plainspace takes 1–500 characters and refuses a blank title. */
-const validTitle = (title: unknown): string => {
+/**
+ * Why Plainspace would refuse this title, or null: it takes 1–500 characters
+ * and refuses a blank title.
+ */
+const invalidTitleKey = (title: unknown): string | null => {
   if (typeof title !== 'string' || !title.trim()) {
-    throw new IssueSyncPushError(T.PLAINSPACE.SYNC.ERR_TITLE_EMPTY);
+    return T.PLAINSPACE.SYNC.ERR_TITLE_EMPTY;
   }
   if (title.length > PLAINSPACE_MAX_TITLE_LENGTH) {
-    throw new IssueSyncPushError(T.PLAINSPACE.SYNC.ERR_TITLE_TOO_LONG);
+    return T.PLAINSPACE.SYNC.ERR_TITLE_TOO_LONG;
   }
-  return title;
+  return null;
 };
 
 const assertEchoed = (

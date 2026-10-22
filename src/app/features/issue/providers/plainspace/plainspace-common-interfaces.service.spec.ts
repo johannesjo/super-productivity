@@ -228,6 +228,9 @@ describe('PlainspaceCommonInterfacesService', () => {
         ...baseline,
         isDone: true,
       });
+      // Queued after the caller applied the pulls.
+      expect(syncState.requestPush).not.toHaveBeenCalled();
+      await new Promise((resolve) => setTimeout(resolve));
       expect(syncState.requestPush).toHaveBeenCalledOnceWith('sp-1', true);
     });
 
@@ -235,6 +238,7 @@ describe('PlainspaceCommonInterfacesService', () => {
       remote({ title: 'Buy almond milk', updatedAt: '2026-01-03T00:00:00.000Z' });
       const updates = await service.getFreshDataForIssueTasks([localTask()]);
       expect(updates[0].taskChanges.title).toBe('Buy almond milk');
+      await new Promise((resolve) => setTimeout(resolve));
       expect(syncState.requestPush).not.toHaveBeenCalled();
     });
 
@@ -244,6 +248,7 @@ describe('PlainspaceCommonInterfacesService', () => {
         localTask({ title: 'Local name' }),
       ]);
       expect(updates[0].taskChanges.title).toBe('Remote name');
+      await new Promise((resolve) => setTimeout(resolve));
       expect(syncState.requestPush).not.toHaveBeenCalled();
     });
 
@@ -255,6 +260,7 @@ describe('PlainspaceCommonInterfacesService', () => {
       ]);
       expect('dueWithTime' in updates[0].taskChanges).toBeFalse();
       // The schedule is pull-only: never queued for a push.
+      await new Promise((resolve) => setTimeout(resolve));
       expect(syncState.requestPush).not.toHaveBeenCalled();
     });
 
@@ -264,6 +270,7 @@ describe('PlainspaceCommonInterfacesService', () => {
         localTask({ isDone: true }),
       ]);
       expect(updates).toEqual([]);
+      await new Promise((resolve) => setTimeout(resolve));
       expect(syncState.requestPush).toHaveBeenCalledOnceWith('sp-1', true);
     });
 
@@ -271,6 +278,7 @@ describe('PlainspaceCommonInterfacesService', () => {
       remote({ id: 'other' });
       await service.getFreshDataForIssueTasks([localTask({ isDone: true })]);
       expect(syncState.isMissing('sp-1')).toBeTrue();
+      await new Promise((resolve) => setTimeout(resolve));
       expect(syncState.requestPush).not.toHaveBeenCalled();
 
       remote({});

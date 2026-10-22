@@ -55,6 +55,8 @@ export interface FakePlainspace {
    */
   isOldServer: boolean;
   patches: FakePatch[];
+  /** Runs right after a PATCH was answered, e.g. a collaborator's edit. */
+  afterPatch: (() => void) | null;
   /** Titles of every create request, failed ones included. */
   creates: string[];
   taskListRequests: { status: number }[];
@@ -99,6 +101,7 @@ export const installFakePlainspace = async (page: Page): Promise<FakePlainspace>
     isCreateServerError: false,
     isOldServer: false,
     patches: [],
+    afterPatch: null,
     creates: [],
     taskListRequests: [],
     remoteEdit: (id, changes) => {
@@ -159,6 +162,9 @@ export const installFakePlainspace = async (page: Page): Promise<FakePlainspace>
       const answer = async (status: number, resBody: unknown): Promise<void> => {
         server.patches.push({ id, body, status });
         await json(status, resBody);
+        if (status === 200) {
+          server.afterPatch?.();
+        }
       };
       if (server.isPatchOffline) {
         server.patches.push({ id, body, status: 0 });

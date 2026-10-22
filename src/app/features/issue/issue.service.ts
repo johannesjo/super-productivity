@@ -667,9 +667,25 @@ export class IssueService {
 
     // add new task (also fallback when parent id of subtask is not found)
     if (!taskId) {
+      // A Plainspace title is shared and syncs both ways: short syntax would
+      // strip "#tag", "1h" or "@tomorrow" from it, and that edit would be
+      // pushed to everyone in the Space. Other providers keep parsing.
+      const isIgnoreShortSyntax = issueProviderKey === PLAINSPACE_TYPE;
       taskId = taskData.dueWithTime
-        ? await this._taskService.addAndSchedule(title, taskData, taskData.dueWithTime)
-        : this._taskService.add(title, isAddToBacklog, taskData);
+        ? await this._taskService.addAndSchedule(
+            title,
+            taskData,
+            taskData.dueWithTime,
+            undefined,
+            isIgnoreShortSyntax,
+          )
+        : this._taskService.add(
+            title,
+            isAddToBacklog,
+            taskData,
+            false,
+            isIgnoreShortSyntax,
+          );
 
       // TODO more elegant solution for skipped calendar events
       if (issueProviderKey === ICAL_TYPE) {

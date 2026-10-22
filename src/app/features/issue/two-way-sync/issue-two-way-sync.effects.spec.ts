@@ -1362,6 +1362,26 @@ describe('IssueTwoWaySyncEffects', () => {
       expect(snackServiceSpy.open).not.toHaveBeenCalled();
     }));
 
+    it("takes the new marker from the write's own answer instead of a re-fetch", fakeAsync(() => {
+      // A re-fetch could already carry a collaborator's later change and mark
+      // it as seen without pulling it.
+      (adapter.pushChanges as jasmine.Spy).and.resolveTo({ marker: 42 });
+      (adapter as { getIssueLastUpdated?: unknown }).getIssueLastUpdated = (
+        issue: Record<string, unknown>,
+      ) => (issue['marker'] as number) ?? 7;
+      taskServiceSpy.getByIdOnce$.and.returnValue(of(linkedTask()));
+      effects.pushFieldsOnTaskUpdate$.subscribe();
+
+      syncState.requestPush('task-1', false);
+      tick();
+
+      expect(adapter.fetchIssue).toHaveBeenCalledTimes(1);
+      expect(taskServiceSpy.update).toHaveBeenCalledWith(
+        'task-1',
+        jasmine.objectContaining({ issueLastUpdated: 42 }),
+      );
+    }));
+
     it('never pushes a task its provider no longer lists for me', fakeAsync(() => {
       taskServiceSpy.getByIdOnce$.and.returnValue(of(linkedTask()));
       syncState.setMissing(['task-1'], ['task-1']);

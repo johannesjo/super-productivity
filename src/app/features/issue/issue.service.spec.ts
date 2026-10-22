@@ -736,6 +736,47 @@ describe('IssueService', () => {
     });
   });
 
+  describe('addTaskFromIssue - short syntax', () => {
+    const setupForNewTask = (key: 'JIRA' | 'PLAINSPACE'): void => {
+      taskServiceSpy.checkForTaskWithIssueEverywhere.and.resolveTo(null);
+      taskServiceSpy.add.and.returnValue('new-task-id');
+      (service.ISSUE_SERVICE_MAP[key] as any).getAddTaskData = () => ({
+        title: 'Fix login #bug 1h',
+      });
+      issueProviderServiceSpy.getCfgOnce$.and.returnValue(
+        of({ defaultProjectId: 'proj-1', defaultTagIds: [] } as any),
+      );
+      Object.defineProperty(workContextServiceSpy, 'activeWorkContextType', {
+        get: () => WorkContextType.PROJECT,
+      });
+      Object.defineProperty(workContextServiceSpy, 'activeWorkContextId', {
+        get: () => 'proj-1',
+      });
+    };
+
+    // The title is shared and pushed back: a parsed title would strip
+    // "#bug 1h" for everyone in the Space.
+    it('is not parsed from a Plainspace title', async () => {
+      setupForNewTask('PLAINSPACE');
+      await service.addTaskFromIssue({
+        issueDataReduced: { id: 'ps-1', title: 'Fix login #bug 1h' } as any,
+        issueProviderId: 'ps-provider-1',
+        issueProviderKey: 'PLAINSPACE',
+      });
+      expect(taskServiceSpy.add.calls.mostRecent().args[4]).toBe(true);
+    });
+
+    it("is still parsed from other providers' titles", async () => {
+      setupForNewTask('JIRA');
+      await service.addTaskFromIssue({
+        issueDataReduced: { id: 'JIRA-1', title: 'Fix login #bug 1h' } as any,
+        issueProviderId: 'jira-provider-1',
+        issueProviderKey: 'JIRA',
+      });
+      expect(taskServiceSpy.add.calls.mostRecent().args[4]).toBe(false);
+    });
+  });
+
   describe('addTaskFromIssue - existing task already in project backlog', () => {
     const githubIssue = { id: 'github-issue-123', title: 'GitHub Issue' };
 

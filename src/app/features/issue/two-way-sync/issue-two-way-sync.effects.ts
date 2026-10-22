@@ -518,7 +518,7 @@ export class IssueTwoWaySyncEffects {
         issueId: string,
         changes: Record<string, unknown>,
         cfg: unknown,
-      ): Promise<void>;
+      ): Promise<unknown>;
       fetchIssue(issueId: string, cfg: unknown): Promise<Record<string, unknown>>;
       getIssueLastUpdated?(issue: Record<string, unknown>): number;
     },
@@ -768,11 +768,10 @@ export class IssueTwoWaySyncEffects {
         }
 
         const didPush = Object.keys(toPush).length > 0;
-        if (didPush) {
-          await adapter.pushChanges(issueId, toPush, cfg);
-        } else {
+        if (!didPush) {
           return;
         }
+        const writtenIssue = await adapter.pushChanges(issueId, toPush, cfg);
 
         const pushedDecisions = decisions.filter((d) => d.action === 'push');
         const pushedIssueFields = new Set(pushedDecisions.map((d) => d.field));
@@ -822,12 +821,13 @@ export class IssueTwoWaySyncEffects {
           updatedSyncValues[pushDecision.field] = pushDecision.issueValue;
         }
 
-        // After push, re-fetch the issue to get the provider's updated marker
-        // (e.g. CalDAV etag changes on write). Fall back to Date.now() for
-        // providers that don't implement getIssueLastUpdated.
+        // After push, take the provider's updated marker (e.g. CalDAV etag
+        // changes on write) from the write's own answer when the adapter returns
+        // it, else re-fetch the issue. Fall back to Date.now() for providers
+        // that don't implement getIssueLastUpdated.
         let issueLastUpdated = Date.now();
-        if (didPush && !keepIssueLastUpdatedStale && adapter.getIssueLastUpdated) {
-          const postPushIssue = await adapter.fetchIssue(issueId, cfg);
+        if (!keepIssueLastUpdatedStale && adapter.getIssueLastUpdated) {
+          const postPushIssue = writtenIssue || (await adapter.fetchIssue(issueId, cfg));
           issueLastUpdated = adapter.getIssueLastUpdated(postPushIssue);
         }
 

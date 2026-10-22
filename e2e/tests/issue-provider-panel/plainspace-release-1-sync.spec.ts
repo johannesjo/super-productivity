@@ -124,6 +124,32 @@ test.describe('Plainspace Release 1 sync', () => {
     expect(server.patches.length).toBe(1);
   });
 
+  // Found by the test above on the production build: a collaborator's rename
+  // landing right after our PATCH was marked as seen by the engine's
+  // re-fetch and never pulled. The marker now comes from the PATCH answer.
+  test('a remote rename right after our push is still pulled', async ({
+    page,
+    workViewPage,
+    projectPage,
+  }) => {
+    await workViewPage.waitForTaskList();
+    const server = await setUp(page, projectPage);
+    server.afterPatch = () => {
+      server.afterPatch = null;
+      server.remoteEdit(TASK_ID, { title: 'Buy tent and stakes' });
+    };
+
+    await renameTask(page, 'Buy tent', 'Buy a tent');
+    await expect
+      .poll(() => server.tasks.get(TASK_ID)!.title, { timeout: 15000 })
+      .toBe('Buy tent and stakes');
+    // Let the push finish storing its baseline before the restart.
+    await page.waitForTimeout(2000);
+
+    await restart(page, server);
+    await expect(taskRow(page, 'Buy tent and stakes')).toBeVisible();
+  });
+
   test('two devices pushing the same edit converge without a second write', async ({
     page,
     workViewPage,
