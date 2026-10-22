@@ -11,6 +11,33 @@ export interface AndroidShareData {
   path: string;
 }
 
+/**
+ * A notification tap from native. Deadline taps arrive as an object (native
+ * pushes it as a JS object literal, the pull queue as JSON); all other taps
+ * stay a plain task id so older bundles keep handling them.
+ */
+export type AndroidReminderTap = string | { taskId: string; reminderType?: string };
+
+export interface AndroidReminderSnoozeEvent {
+  taskId: string;
+  newRemindAt: number;
+  // absent in events queued by an APK that predates deadline notifications
+  reminderType?: string;
+}
+
+/**
+ * Whether the native shell reports deadline snooze/tap with their type.
+ * Reads `window` lazily: online-only mode can run this bundle in an older APK.
+ */
+export const hasTypedReminderActions = (): boolean =>
+  !!(
+    window as { SUPAndroid?: { supportsTypedReminderActions?(): boolean } }
+  ).SUPAndroid?.supportsTypedReminderActions?.();
+
+/** Parses the pull-queue form of a tap (plain id or JSON object). */
+export const parseReminderTapQueue = (raw: string): AndroidReminderTap =>
+  raw.startsWith('{') ? (JSON.parse(raw) as AndroidReminderTap) : raw;
+
 export interface AndroidInterface {
   getVersion?(): string;
   getTextZoom?(): number;
@@ -18,6 +45,12 @@ export interface AndroidInterface {
   // Launches the native Play In-App Review card (play flavor). No-op on fdroid.
   // The outcome is intentionally opaque (Play policy) — nothing is returned.
   requestReview?(): void;
+
+  // Absent on APKs whose snooze/tap events don't carry the reminder type.
+  supportsTypedReminderActions?(): boolean;
+
+  // Absent on APKs that predate it; call via util/haptic-feedback.ts.
+  performHapticFeedback?(type: 'confirm' | 'threshold' | 'longPress'): void;
 
   showToast(s: string): void;
 
@@ -112,8 +145,12 @@ export interface AndroidInterface {
   // Reminder done queue - get task IDs marked done from notifications
   getReminderDoneQueue?(): string | null;
 
-  // Widget task queue - get queued tasks from home screen widget
-  getWidgetTaskQueue?(): string | null;
+  // Native capture inbox, holding captures left by the removed startup quick-add
+  // overlay of an older app version. Non-destructive read of a JSON array, or
+  // null if the inbox could not be read; see CaptureInbox.kt.
+  getPendingCaptures?(): string | null;
+  // Delete one capture after its task is persisted. Returns false on failure.
+  acknowledgeCapture?(id: string): boolean;
 
   // Widget done queue - get pending done-state changes from the home screen
   // widget as a JSON object string `{taskId: targetIsDone}` and clear the queue
@@ -121,11 +158,6 @@ export interface AndroidInterface {
 
   // Re-render the home screen widget from the current widget_data snapshot
   updateWidget?(): void;
-
-  // Startup overlay
-  getStartupOverlayPartialText?(): string | null;
-  hideStartupOverlay?(): void;
-  dismissStartupOverlay?(): void;
 
   // added here only
   // ReplaySubject so cold-start onResume emissions arriving before the JS
@@ -154,9 +186,9 @@ export interface AndroidInterface {
   onForegroundServiceStartFailed$: ReplaySubject<ForegroundServiceStartFailure>;
 
   // Reminder notification action callbacks
-  onReminderTap$: ReplaySubject<string>; // emits taskId
+  onReminderTap$: ReplaySubject<AndroidReminderTap>;
   onReminderDone$: ReplaySubject<string>; // emits taskId
-  onReminderSnooze$: ReplaySubject<{ taskId: string; newRemindAt: number }>; // emits snooze events
+  onReminderSnooze$: ReplaySubject<AndroidReminderSnoozeEvent>;
   getReminderSnoozeQueue?(): string | null;
 
   // Contentless "drain now" signal after a widget done-checkbox tap while the app
@@ -170,6 +202,9 @@ export interface AndroidInterface {
   // Mirrors the E2EE password so the background worker can decrypt op payloads;
   // '' clears it. Optional: older APKs don't have it.
   setSuperSyncEncryptionPassword?(password: string): void;
+  // Mirrors the reminder settings the background worker must honor when it
+  // schedules alarms from synced ops. Optional: older APKs don't have it.
+  setBackgroundReminderSettings?(isDisabled: boolean, useAlarmStyle: boolean): void;
 }
 
 export type ForegroundServiceStartFailure = {
@@ -265,6 +300,7 @@ if (IS_ANDROID_WEB_VIEW) {
     delete requestMap[rId];
   };
 
+  // eslint-disable-next-line local-rules/no-user-content-in-logs -- grandfathered log baseline (2026-09), not yet triaged
   DroidLog.log('Android Web View interfaces initialized', androidInterface);
 
   // Pull-based: retrieve share data persisted in SharedPreferences (survives process death)
@@ -284,7 +320,7 @@ if (IS_ANDROID_WEB_VIEW) {
     const tapTaskId = androidInterface.getReminderTapQueue?.();
     if (tapTaskId) {
       DroidLog.log('Pulled reminder tap queue from SharedPreferences', tapTaskId);
-      androidInterface.onReminderTap$.next(tapTaskId);
+      androidInterface.onReminderTap$.next(parseReminderTapQueue(tapTaskId));
     }
   } catch (e) {
     DroidLog.err('Failed to parse reminder tap queue', e);
@@ -308,7 +344,8 @@ if (IS_ANDROID_WEB_VIEW) {
   try {
     const snoozeQueue = androidInterface.getReminderSnoozeQueue?.();
     if (snoozeQueue) {
-      const events: { taskId: string; newRemindAt: number }[] = JSON.parse(snoozeQueue);
+      const events: AndroidReminderSnoozeEvent[] = JSON.parse(snoozeQueue);
+      // eslint-disable-next-line local-rules/no-user-content-in-logs -- grandfathered log baseline (2026-09), not yet triaged
       DroidLog.log('Pulled reminder snooze queue from SharedPreferences', events);
       for (const event of events) {
         androidInterface.onReminderSnooze$.next(event);

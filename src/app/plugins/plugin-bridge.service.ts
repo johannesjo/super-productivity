@@ -13,6 +13,7 @@ import {
   PluginHeaderBtnCfg,
   PluginHookHandler,
   PluginMenuEntryCfg,
+  PluginTaskContextMenuEntryCfg,
   PluginNodeScriptRequest,
   PluginNodeScriptResult,
   PluginShortcutCfg,
@@ -44,6 +45,7 @@ import {
 import { snackCfgToSnackParams } from './plugin-api-mapper';
 import { PluginHooksService } from './plugin-hooks';
 import { TaskService } from '../features/tasks/task.service';
+import { TaskMoveToProjectService } from '../features/tasks/task-move-to-project.service';
 import { getDomFocusedTaskId } from '../features/tasks/get-dom-focused-task-id';
 import { addSubTask } from '../features/tasks/store/task.actions';
 import { selectTaskFeatureState } from '../features/tasks/store/task.selectors';
@@ -57,7 +59,6 @@ import { WorkContextService } from '../features/work-context/work-context.servic
 import { ProjectService } from '../features/project/project.service';
 import { INBOX_PROJECT } from '../features/project/project.const';
 import { TagService } from '../features/tag/tag.service';
-import typia from 'typia';
 import { distinctUntilChanged, first, map, take, timeout } from 'rxjs/operators';
 import { firstValueFrom } from 'rxjs';
 import { selectProjectFeatureState } from '../features/project/store/project.selectors';
@@ -90,14 +91,13 @@ import { PluginSecretService } from './secret/plugin-secret.service';
 import { ISSUE_PROVIDER_TYPES } from '../features/issue/issue.const';
 import { PluginService } from './plugin.service';
 import { PluginI18nService } from './plugin-i18n.service';
+import { pluginAssert } from './plugin-bridge-asserts';
+import { PluginTaskContextMenuRegistryService } from './plugin-task-context-menu-registry.service';
 import { formatDateForPlugin } from './plugin-i18n-date.util';
 
-/**
- * Relational fields `updateTask` refuses: they are applied to the store as
- * plain values, so writing them corrupts the parent<->child links rather than
- * moving a task. Mirrors `REJECTED_TASK_FIELDS` in the local REST API.
- */
-const REJECTED_UPDATE_FIELDS = ['parentId', 'subTaskIds'] as const;
+// Relational fields corrupt parent<->child links when applied as plain values (mirrors
+// `REJECTED_TASK_FIELDS` in the local REST API); `wontDoOn` isn't in the plugin API yet.
+const REJECTED_UPDATE_FIELDS = ['parentId', 'subTaskIds', 'wontDoOn'] as const;
 
 const toPluginTaskCopy = (
   task: (TaskCopy & { subTasks?: unknown }) | null | undefined,
@@ -167,6 +167,7 @@ export class PluginBridgeService implements OnDestroy {
   private _pluginSecretService = inject(PluginSecretService);
   private _dataInitService = inject(DataInitService);
   private _globalConfigService = inject(GlobalConfigService);
+  private _taskContextMenuRegistry = inject(PluginTaskContextMenuRegistryService);
   readonly #nodeExecutionGrantTokens = new Map<string, string>();
   readonly #nodeExecutionApi = this._consumeNodeExecutionApi();
 
@@ -244,6 +245,7 @@ export class PluginBridgeService implements OnDestroy {
     downloadFile: (filename: string, data: string) => Promise<void>;
     registerHeaderButton: (cfg: PluginHeaderBtnCfg) => void;
     registerMenuEntry: (cfg: Omit<PluginMenuEntryCfg, 'pluginId'>) => void;
+    registerTaskContextMenuEntry: (cfg: PluginTaskContextMenuEntryCfg) => void;
     registerSidePanelButton: (cfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>) => void;
     registerWorkContextHeaderButton: (
       cfg: Omit<PluginWorkContextHeaderBtnCfg, 'pluginId'>,
@@ -308,6 +310,8 @@ export class PluginBridgeService implements OnDestroy {
         this._registerHeaderButton(pluginId, cfg),
       registerMenuEntry: (cfg: Omit<PluginMenuEntryCfg, 'pluginId'>) =>
         this._registerMenuEntry(pluginId, cfg),
+      registerTaskContextMenuEntry: (cfg: PluginTaskContextMenuEntryCfg) =>
+        this._taskContextMenuRegistry.register(pluginId, cfg),
       registerSidePanelButton: (cfg: Omit<PluginSidePanelBtnCfg, 'pluginId'>) =>
         this._registerSidePanelButton(pluginId, cfg),
       registerWorkContextHeaderButton: (
@@ -456,9 +460,10 @@ export class PluginBridgeService implements OnDestroy {
     }
 
     const issueProviderCfg = manifest?.issueProvider;
+    const isBundled = this._isPluginBundled(pluginId);
     const customKey = issueProviderCfg?.issueProviderKey;
-    if (customKey && (ISSUE_PROVIDER_TYPES as readonly string[]).includes(customKey)) {
-      throw new Error(`Plugin cannot register under built-in key "${customKey}"`);
+    if (customKey && (!isBundled || ISSUE_PROVIDER_TYPES.some((k) => k === customKey))) {
+      throw new Error(`Plugin cannot register under reserved key "${customKey}"`);
     }
     const name = manifest?.name ?? pluginId;
     const humanReadableName = issueProviderCfg?.humanReadableName ?? name;
@@ -483,8 +488,7 @@ export class PluginBridgeService implements OnDestroy {
       issueProviderKey: customKey,
       useAgendaView: issueProviderCfg?.useAgendaView,
       defaultAutoAddToBacklog: issueProviderCfg?.defaultAutoAddToBacklog,
-      allowPrivateNetwork:
-        issueProviderCfg?.allowPrivateNetwork && this._isPluginBundled(pluginId),
+      allowPrivateNetwork: issueProviderCfg?.allowPrivateNetwork && isBundled,
     });
 
     const registeredKey = this._pluginIssueProviderRegistry.getRegisteredKey(pluginId);
@@ -629,8 +633,8 @@ export class PluginBridgeService implements OnDestroy {
   }
 
   private async _downloadFile(filename: string, data: string): Promise<void> {
-    typia.assert<string>(filename);
-    typia.assert<string>(data);
+    pluginAssert.string(filename);
+    pluginAssert.string(data);
 
     const { download } = await import('../util/download');
     await download(filename, data);
@@ -640,7 +644,7 @@ export class PluginBridgeService implements OnDestroy {
    * Show a snack message to the user
    */
   showSnack(snackCfg: SnackCfg): void {
-    typia.assert<SnackCfg>(snackCfg);
+    pluginAssert.snackCfg(snackCfg);
     const snackParams = snackCfgToSnackParams(snackCfg);
     this._snackService.open(snackParams);
   }
@@ -649,7 +653,7 @@ export class PluginBridgeService implements OnDestroy {
    * Show a notification to the user
    */
   async notify(notifyCfg: NotifyCfg): Promise<void> {
-    typia.assert<NotifyCfg>(notifyCfg);
+    pluginAssert.notifyCfg(notifyCfg);
 
     // Use the app's NotifyService for better integration
     await this._notifyService.notify({
@@ -667,7 +671,7 @@ export class PluginBridgeService implements OnDestroy {
    * Open a dialog using Angular Material
    */
   async openDialog(dialogCfg: DialogCfg): Promise<DialogResult> {
-    typia.assert<DialogCfg>(dialogCfg);
+    pluginAssert.dialogCfg(dialogCfg);
 
     return new Promise<DialogResult>((resolve, reject) => {
       try {
@@ -873,8 +877,8 @@ export class PluginBridgeService implements OnDestroy {
    * Update a task
    */
   async updateTask(taskId: string, updates: Partial<TaskCopy>): Promise<void> {
-    typia.assert<string>(taskId);
-    typia.assert<Partial<TaskCopy>>(updates);
+    pluginAssert.string(taskId);
+    pluginAssert.partialTask(updates);
 
     // Relational fields are rejected rather than applied: they reach the reducer
     // as plain values, so setting `parentId` writes a task that no parent lists
@@ -886,9 +890,12 @@ export class PluginBridgeService implements OnDestroy {
     const rejectedField = REJECTED_UPDATE_FIELDS.find((field) => field in updates);
     if (rejectedField) {
       throw new Error(
-        this._translateService.instant(T.PLUGINS.FIELD_NOT_UPDATABLE, {
-          field: rejectedField,
-        }),
+        this._translateService.instant(
+          rejectedField === 'wontDoOn'
+            ? T.PLUGINS.FIELD_NOT_IN_PLUGIN_API
+            : T.PLUGINS.FIELD_NOT_UPDATABLE,
+          { field: rejectedField },
+        ),
       );
     }
 
@@ -916,19 +923,12 @@ export class PluginBridgeService implements OnDestroy {
         );
       }
 
-      if (taskWithSubTasks.projectId === projectId) {
-        PluginLog.log('PluginBridge: Task already in target project', {
-          taskId,
-          projectId,
-        });
-      } else {
-        this._taskService.moveToProject(taskWithSubTasks, projectId);
-
-        PluginLog.log('PluginBridge: Task moved to project successfully', {
-          taskId,
-          projectId,
-        });
-      }
+      // Same path as a UI move so a recurring task's config and instances follow
+      // it; a plugin has no user to answer the confirm dialog (#10489).
+      const isMoved = await this._injector
+        .get(TaskMoveToProjectService)
+        .moveToProject(taskWithSubTasks, projectId, { isSkipConfirm: true });
+      PluginLog.log('PluginBridge: Task move to project', { taskId, projectId, isMoved });
     }
 
     if (Object.keys(otherUpdates).length > 0) {
@@ -942,7 +942,7 @@ export class PluginBridgeService implements OnDestroy {
    * Add a new task
    */
   async addTask(taskData: PluginCreateTaskData): Promise<string> {
-    typia.assert<PluginCreateTaskData>(taskData);
+    pluginAssert.createTaskData(taskData);
 
     // Validate that referenced project, tags, and parent task exist
     await this._validateTaskReferences(
@@ -1019,7 +1019,7 @@ export class PluginBridgeService implements OnDestroy {
    * Delete a task
    */
   async deleteTask(taskId: string): Promise<void> {
-    typia.assert<string>(taskId);
+    pluginAssert.string(taskId);
 
     try {
       // Get the task with its subtasks
@@ -1059,7 +1059,7 @@ export class PluginBridgeService implements OnDestroy {
    * Add a new project
    */
   async addProject(projectData: Partial<ProjectCopy>): Promise<string> {
-    typia.assert<Partial<ProjectCopy>>(projectData);
+    pluginAssert.partialProject(projectData);
 
     PluginLog.log('PluginBridge: Project add');
     return this._projectService.add(projectData);
@@ -1069,8 +1069,8 @@ export class PluginBridgeService implements OnDestroy {
    * Update a project
    */
   async updateProject(projectId: string, updates: Partial<ProjectCopy>): Promise<void> {
-    typia.assert<string>(projectId);
-    typia.assert<Partial<ProjectCopy>>(updates);
+    pluginAssert.string(projectId);
+    pluginAssert.partialProject(updates);
 
     // Update the project using ProjectService (ProjectCopy is compatible with Project)
     this._projectService.update(projectId, updates);
@@ -1082,7 +1082,7 @@ export class PluginBridgeService implements OnDestroy {
    * Delete a project and the tasks it contains
    */
   async deleteProject(projectId: string, permissions?: string[]): Promise<void> {
-    typia.assert<string>(projectId);
+    pluginAssert.string(projectId);
 
     // Deleting a project is the only irreversible operation in the plugin API — the
     // cascade takes the backlog, subtasks and notes with it, there is no
@@ -1131,7 +1131,7 @@ export class PluginBridgeService implements OnDestroy {
    * Add a new tag
    */
   async addTag(tagData: Partial<TagCopy>): Promise<string> {
-    typia.assert<Partial<TagCopy>>(tagData);
+    pluginAssert.partialTag(tagData);
 
     // Add the tag using TagService (TagCopy is compatible with Tag)
     const tagId = this._tagService.addTag(tagData);
@@ -1143,8 +1143,8 @@ export class PluginBridgeService implements OnDestroy {
    * Update a tag
    */
   async updateTag(tagId: string, updates: Partial<TagCopy>): Promise<void> {
-    typia.assert<string>(tagId);
-    typia.assert<Partial<TagCopy>>(updates);
+    pluginAssert.string(tagId);
+    pluginAssert.partialTag(updates);
 
     // Update the tag using TagService (TagCopy is compatible with Tag)
     this._tagService.updateTag(tagId, updates);
@@ -1162,9 +1162,9 @@ export class PluginBridgeService implements OnDestroy {
     contextId: string,
     contextType: 'project' | 'task',
   ): Promise<void> {
-    typia.assert<string[]>(taskIds);
-    typia.assert<string>(contextId);
-    typia.assert<'project' | 'task'>(contextType);
+    pluginAssert.stringArray(taskIds);
+    pluginAssert.string(contextId);
+    pluginAssert.contextType(contextType);
 
     if (contextType === 'project') {
       // Update project's taskIds to reflect new order
@@ -1194,6 +1194,7 @@ export class PluginBridgeService implements OnDestroy {
       PluginLog.log('PluginBridge: Validating task reorder', {
         requestedTaskIds: taskIds,
         projectTaskIds: allProjectTaskIds,
+        // eslint-disable-next-line local-rules/no-user-content-in-logs -- grandfathered log baseline (2026-09), not yet triaged
         actualTasksInProject: taskIdsInProject,
         projectId: contextId,
       });
@@ -1264,7 +1265,7 @@ export class PluginBridgeService implements OnDestroy {
    * the work-view body.
    */
   async selectTask(taskId: string): Promise<void> {
-    typia.assert<string>(taskId);
+    pluginAssert.string(taskId);
 
     const task = await firstValueFrom(this._taskService.getByIdOnce$(taskId));
     if (!task) {
@@ -1301,7 +1302,7 @@ export class PluginBridgeService implements OnDestroy {
    * Large batches are automatically chunked to prevent oversized operation payloads
    */
   async batchUpdateForProject(request: BatchUpdateRequest): Promise<BatchUpdateResult> {
-    typia.assert<BatchUpdateRequest>(request);
+    pluginAssert.batchUpdateRequest(request);
 
     // Generate IDs for all create operations upfront
     // We need consistent IDs across all chunks
@@ -1371,7 +1372,7 @@ export class PluginBridgeService implements OnDestroy {
     dataStr: string,
     key?: string,
   ): Promise<void> {
-    typia.assert<string>(dataStr);
+    pluginAssert.string(dataStr);
     assertPluginPersistenceKey(key);
 
     try {
@@ -1452,8 +1453,8 @@ export class PluginBridgeService implements OnDestroy {
     hook: T,
     handler: PluginHookHandler<T>,
   ): void {
-    typia.assert<string>(pluginId);
-    typia.assert<Hooks>(hook);
+    pluginAssert.string(pluginId);
+    pluginAssert.hook(hook);
     // Note: Can't assert generic function type with typia
 
     this._pluginHooksService.registerHookHandler(pluginId, hook, handler);
@@ -1463,13 +1464,14 @@ export class PluginBridgeService implements OnDestroy {
    * Unregister all hooks for a plugin
    */
   unregisterPluginHooks(pluginId: string): void {
-    typia.assert<string>(pluginId);
+    pluginAssert.string(pluginId);
 
     this._pluginHooksService.unregisterPluginHooks(pluginId);
     this._removePluginHeaderButtons(pluginId);
     this._removePluginMenuEntries(pluginId);
     this._removePluginSidePanelButtons(pluginId);
     this._removePluginWorkContextHeaderButtons(pluginId);
+    this._taskContextMenuRegistry.unregisterPlugin(pluginId);
     this.unregisterPluginShortcuts(pluginId);
     this._configHandlers.delete(pluginId);
 
@@ -1493,7 +1495,7 @@ export class PluginBridgeService implements OnDestroy {
     pluginId: string,
     headerBtnCfg: PluginHeaderBtnCfg,
   ): void {
-    typia.assert<Omit<PluginHeaderBtnCfg, 'pluginId'>>(headerBtnCfg);
+    pluginAssert.headerBtnCfg(headerBtnCfg);
 
     const newButton: PluginHeaderBtnCfg = {
       ...headerBtnCfg,
@@ -1505,6 +1507,7 @@ export class PluginBridgeService implements OnDestroy {
 
     PluginLog.log('PluginBridge: Header button registered', {
       pluginId,
+      // eslint-disable-next-line local-rules/no-user-content-in-logs -- grandfathered log baseline (2026-09), not yet triaged
       headerBtnCfg,
     });
   }
@@ -1558,6 +1561,7 @@ export class PluginBridgeService implements OnDestroy {
 
     PluginLog.log('PluginBridge: Menu entry registered', {
       pluginId,
+      // eslint-disable-next-line local-rules/no-user-content-in-logs -- grandfathered log baseline (2026-09), not yet triaged
       menuEntryCfg,
     });
   }
@@ -1623,11 +1627,7 @@ export class PluginBridgeService implements OnDestroy {
    * Remove all header buttons for a specific plugin
    */
   private _removePluginHeaderButtons(pluginId: string): void {
-    const currentButtons = this._headerButtons();
-    const filteredButtons = currentButtons.filter(
-      (button) => button.pluginId !== pluginId,
-    );
-    this._headerButtons.set(filteredButtons);
+    this._headerButtons.update((bs) => bs.filter((b) => b.pluginId !== pluginId));
 
     PluginLog.log('PluginBridge: Header buttons removed for plugin', { pluginId });
   }
@@ -1644,9 +1644,7 @@ export class PluginBridgeService implements OnDestroy {
    * Remove all menu entries for a specific plugin
    */
   private _removePluginMenuEntries(pluginId: string): void {
-    const currentEntries = this._menuEntries();
-    const filteredEntries = currentEntries.filter((entry) => entry.pluginId !== pluginId);
-    this._menuEntries.set(filteredEntries);
+    this._menuEntries.update((entries) => entries.filter((e) => e.pluginId !== pluginId));
 
     PluginLog.log('PluginBridge: Menu entries removed for plugin', { pluginId });
   }
@@ -1695,6 +1693,7 @@ export class PluginBridgeService implements OnDestroy {
 
     PluginLog.log('PluginBridge: Side panel button registered', {
       pluginId,
+      // eslint-disable-next-line local-rules/no-user-content-in-logs -- grandfathered log baseline (2026-09), not yet triaged
       sidePanelBtnCfg,
     });
   }
@@ -1703,11 +1702,7 @@ export class PluginBridgeService implements OnDestroy {
    * Remove all side panel buttons for a specific plugin
    */
   private _removePluginSidePanelButtons(pluginId: string): void {
-    const currentButtons = this._sidePanelButtons();
-    const filteredButtons = currentButtons.filter(
-      (button) => button.pluginId !== pluginId,
-    );
-    this._sidePanelButtons.set(filteredButtons);
+    this._sidePanelButtons.update((bs) => bs.filter((b) => b.pluginId !== pluginId));
 
     PluginLog.log('PluginBridge: Side panel buttons removed for plugin', { pluginId });
   }
@@ -1968,7 +1963,7 @@ export class PluginBridgeService implements OnDestroy {
     }
 
     try {
-      typia.assert<PluginNodeScriptRequest>(request);
+      pluginAssert.nodeScriptRequest(request);
 
       if (!manifest) {
         return {
@@ -2070,7 +2065,7 @@ export class PluginBridgeService implements OnDestroy {
   /**
    * Track window focus state
    */
-  private _isWindowFocused = true;
+  private _isWindowFocused = document.hasFocus(); // hidden/tray start: no blur event
   private _windowFocusHandlers = new Map<string, (isFocused: boolean) => void>();
 
   // Named listener methods for proper cleanup
@@ -2085,7 +2080,7 @@ export class PluginBridgeService implements OnDestroy {
   };
 
   private _onVisibilityChange = (): void => {
-    const isFocused = !document.hidden;
+    const isFocused = !document.hidden && document.hasFocus();
     this._isWindowFocused = isFocused;
     this._notifyFocusHandlers(isFocused);
   };
@@ -2165,7 +2160,7 @@ export class PluginBridgeService implements OnDestroy {
    * @param key The counter key (e.g., 'daily-commits').
    */
   async getCounter(id: string): Promise<number | null> {
-    typia.assert<string>(id);
+    pluginAssert.string(id);
     // Allow uppercase, lowercase, numbers, hyphens, underscores
     if (!/^[A-Za-z0-9_-]+$/.test(id)) {
       throw new Error('Invalid counter key: must be alphanumeric with hyphens');
@@ -2175,8 +2170,8 @@ export class PluginBridgeService implements OnDestroy {
   }
 
   async setCounter(id: string, value: number): Promise<void> {
-    typia.assert<string>(id);
-    typia.assert<number>(value);
+    pluginAssert.string(id);
+    pluginAssert.number(value);
     // Allow uppercase, lowercase, numbers, hyphens, underscores
     if (!/^[A-Za-z0-9_-]+$/.test(id)) {
       throw new Error('Invalid counter key: must be alphanumeric with hyphens');
@@ -2222,8 +2217,8 @@ export class PluginBridgeService implements OnDestroy {
   }
 
   async incrementCounter(id: string, incrementBy = 1): Promise<number> {
-    typia.assert<string>(id);
-    typia.assert<number>(incrementBy);
+    pluginAssert.string(id);
+    pluginAssert.number(incrementBy);
     if (typeof incrementBy !== 'number' || !isFinite(incrementBy) || incrementBy <= 0) {
       throw new Error('Invalid increment amount: must be a positive number');
     }
@@ -2234,8 +2229,8 @@ export class PluginBridgeService implements OnDestroy {
   }
 
   async decrementCounter(id: string, decrementBy = 1): Promise<number> {
-    typia.assert<string>(id);
-    typia.assert<number>(decrementBy);
+    pluginAssert.string(id);
+    pluginAssert.number(decrementBy);
     if (typeof decrementBy !== 'number' || !isFinite(decrementBy) || decrementBy <= 0) {
       throw new Error('Invalid decrement amount: must be a positive number');
     }

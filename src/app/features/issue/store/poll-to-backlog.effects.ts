@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { createEffect, ofType } from '@ngrx/effects';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
-import { EMPTY, from, merge, Observable, timer } from 'rxjs';
+import { combineLatest, EMPTY, from, merge, Observable, timer } from 'rxjs';
 import {
   catchError,
   concatMap,
@@ -24,6 +25,7 @@ import { DELAY_BEFORE_ISSUE_POLLING } from '../issue.const';
 import { IssueLog } from '../../../core/log';
 import { PluginIssueProviderRegistryService } from '../../../plugins/issue-provider/plugin-issue-provider-registry.service';
 import { skipDuringSyncWindow } from '../../../util/skip-during-sync-window.operator';
+import { getRefreshOnLook$ } from './refresh-on-look';
 
 @Injectable()
 export class PollToBacklogEffects {
@@ -39,7 +41,7 @@ export class PollToBacklogEffects {
    * Created here because the operator calls inject() -- the timers themselves are
    * built lazily inside switchMap(), outside of any injection context.
    */
-  private readonly _skipDuringSyncWindow = skipDuringSyncWindow<number>();
+  private readonly _skipDuringSyncWindow = skipDuringSyncWindow<unknown>();
 
   pollToBacklogActions$: Observable<unknown> = this._actions$.pipe(
     ofType(setActiveWorkContext),
@@ -63,8 +65,13 @@ export class PollToBacklogEffects {
     () =>
       this.pollToBacklogTriggerToProjectId$.pipe(
         switchMap((pId) =>
-          this._store.select(selectEnabledIssueProviders).pipe(
-            switchMap((enabledProviders: IssueProvider[]) => {
+          // Plugin providers report a poll interval of 0 until they register,
+          // so re-evaluate on registration changes too (#10112).
+          combineLatest([
+            this._store.select(selectEnabledIssueProviders),
+            this._pluginRegistry.registrationChanges$,
+          ]).pipe(
+            switchMap(([enabledProviders]) => {
               const matchingProviders = enabledProviders.filter(
                 (provider) =>
                   provider.defaultProjectId === pId &&
@@ -82,6 +89,10 @@ export class PollToBacklogEffects {
                 ),
               );
             }),
+            // A switch to a tag emits no new project id, so the outer switchMap
+            // keeps this stream for the project just left; end it here, or a
+            // later provider or registration change would restart its polling.
+            takeUntil(this.pollToBacklogActions$),
           ),
         ),
       ),
@@ -90,15 +101,18 @@ export class PollToBacklogEffects {
 
   /**
    * Polls for backlog import for providers with pollingMode 'always'.
-   * Starts once after initial sync and runs continuously, reacting only
-   * to provider configuration changes -- not to context switches.
+   * Starts once after initial sync and runs continuously, reacting to provider
+   * configuration and registration changes -- not to context switches.
    */
   pollNewIssuesToBacklogAlways$: Observable<unknown> = createEffect(
     () =>
       this._syncTriggerService.afterInitialSyncDoneAndDataLoadedInitially$.pipe(
         switchMap(() =>
-          this._store.select(selectEnabledIssueProviders).pipe(
-            switchMap((enabledProviders: IssueProvider[]) => {
+          combineLatest([
+            this._store.select(selectEnabledIssueProviders),
+            this._pluginRegistry.registrationChanges$,
+          ]).pipe(
+            switchMap(([enabledProviders]) => {
               const alwaysProviders = enabledProviders.filter(
                 (provider) =>
                   provider.pollingMode === 'always' &&
@@ -126,9 +140,12 @@ export class PollToBacklogEffects {
     provider: IssueProvider,
     stopOnContextSwitch = true,
   ): Observable<unknown> {
-    const timer$ = timer(
-      DELAY_BEFORE_ISSUE_POLLING,
-      this._issueService.getPollInterval(provider.issueProviderKey),
+    const timer$ = merge(
+      timer(
+        DELAY_BEFORE_ISSUE_POLLING,
+        this._issueService.getPollInterval(provider.issueProviderKey),
+      ),
+      getRefreshOnLook$(provider),
     );
 
     return (
@@ -150,7 +167,11 @@ export class PollToBacklogEffects {
           ),
         ).pipe(
           catchError((e) => {
-            IssueLog.err(e);
+            // The error response carries the provider's URL: log its status only.
+            IssueLog.err(
+              'Backlog import poll failed for ' + provider.id,
+              e instanceof HttpErrorResponse ? { status: e.status } : e,
+            );
             this._snackService.open({
               type: 'ERROR',
               // TODO translate

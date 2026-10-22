@@ -49,7 +49,6 @@
     [class.is-multi-selecting]="isMultiSelecting()"
     [class.has-vertical-action-bar]="isVerticalActionBar()"
     [class.app-entrance]="isAppEntrance()"
-    [class.is-onboarding]="isShowOnboardingPresets()"
     [dir]="isRTL ? 'rtl' : 'ltr'"
   >
     <magic-side-nav
@@ -92,14 +91,8 @@
 }
 <!-- -->
 
-@if (isShowOnboardingPresets()) {
-  <onboarding-preset-selection
-    (presetSelected)="onPresetSelected()"
-    (dismissed)="onOnboardingDismissed()"
-  ></onboarding-preset-selection>
-}
-
-@if (onboardingHintService.currentStep()) {
+<!-- One host for part 1 and the tour, so the chip can slide from one into the other. -->
+@if (onboardingHintService.currentStep() || quickTourService.currentStep()) {
   <onboarding-hint></onboarding-hint>
 }
 

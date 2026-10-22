@@ -93,6 +93,7 @@ export class FinishDayBeforeCloseEffects {
     );
 
   async _handleCloseDecision(todayMainTasks: Task[]): Promise<void> {
+    // Finish Day archives every done task, won't-do ones too.
     const doneCount = todayMainTasks.filter((t) => t.isDone).length;
     if (doneCount === 0) {
       this._execBeforeCloseService.setDone(EXEC_BEFORE_CLOSE_ID);

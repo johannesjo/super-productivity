@@ -1,7 +1,6 @@
 import { TASK_REPEAT_WEEKDAY_MAP, TaskRepeatCfg } from '../task-repeat-cfg.model';
 import { getDiffInDays } from '../../../util/get-diff-in-days';
 import { getDiffInMonth } from '../../../util/get-diff-in-month';
-import { getDiffInYears } from '../../../util/get-diff-in-years';
 import { getDiffInWeeks } from '../../../util/get-diff-in-weeks';
 import { dateStrToUtcDate } from '../../../util/date-str-to-utc-date';
 import { getEffectiveLastTaskCreationDay } from './get-effective-last-task-creation-day.util';
@@ -11,8 +10,18 @@ import {
   hasNthWeekdayAnchor,
 } from './get-nth-weekday-of-month.util';
 import { Log } from '../../../core/log';
+import { isAfterRepeatUntilDay } from './repeat-until-day.util';
 
 export const getNextRepeatOccurrence = (
+  taskRepeatCfg: TaskRepeatCfg,
+  fromDate: Date = new Date(),
+  opts: { inclusive?: boolean } = {},
+): Date | null => {
+  const next = getNextRepeatOccurrenceIgnoringEnd(taskRepeatCfg, fromDate, opts);
+  return next && isAfterRepeatUntilDay(taskRepeatCfg, next) ? null : next;
+};
+
+const getNextRepeatOccurrenceIgnoringEnd = (
   taskRepeatCfg: TaskRepeatCfg,
   fromDate: Date = new Date(),
   // When `inclusive` is true the scan starts from `fromDate` itself instead of
@@ -159,6 +168,8 @@ export const getNextRepeatOccurrence = (
         ) {
           return checkDate;
         }
+        // Step from day 1 so a 29th-31st cannot overflow past a short month (#10902)
+        checkDate.setDate(1);
         checkDate.setMonth(checkDate.getMonth() + 1);
         setDateSafely(checkDate, dayOfMonthRepeat);
       }
@@ -198,7 +209,7 @@ export const getNextRepeatOccurrence = (
       }
 
       for (let i = 0; i < maxYearsToCheck; i++) {
-        const diffInYears = getDiffInYears(startDateDate, checkDate);
+        const diffInYears = checkDate.getFullYear() - startDateDate.getFullYear();
 
         if (
           diffInYears >= 0 &&

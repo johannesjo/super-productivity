@@ -22,6 +22,7 @@ import { PENDING_CAPACITOR_QUICK_ACTION } from '../../core/app-uri-actions/pendi
  * one with Planner off too, so a static Home Screen item pointing at one would
  * be a dead entry for a large share of users. A static item cannot be hidden
  * per user; that would need dynamic shortcut items, i.e. a native plugin.
+ * The Android launcher shortcuts are static for the same reason.
  * Documented in wiki 3.01 §4.
  */
 const NAVIGATE_ROUTES: Record<AppUriQuickActionTarget, string> = {
@@ -31,10 +32,11 @@ const NAVIGATE_ROUTES: Record<AppUriQuickActionTarget, string> = {
 
 /**
  * Handles the UI-only actions on the app's custom URL scheme — `add-task`
- * (open the quick-add bar) and the `today`/`inbox` navigation actions. On iOS these are what the home screen quick actions (long-press the
- * app icon) resolve to: each `UIApplicationShortcutItem` carries one of the
- * URLs, the native side opens it, and it arrives here through the single
- * `appUrlOpen` listener in `main.ts`.
+ * (open the quick-add bar) and the `today`/`inbox` navigation actions. On iOS
+ * and Android these are what the launcher shortcuts (long-press the app icon)
+ * resolve to: each iOS `UIApplicationShortcutItem` and Android
+ * `res/xml/shortcuts.xml` entry carries one of the URLs, the native side opens
+ * it, and it arrives here through the single `appUrlOpen` listener in `main.ts`.
  *
  * Deliberately thinner than its sibling `AppUriTaskActionsService`: these
  * actions never write state, so there is nothing to validate and no snack to

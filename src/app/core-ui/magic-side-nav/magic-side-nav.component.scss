@@ -12,8 +12,12 @@
 :host {
   --sidenav-width-expanded: var(--side-nav-width, 260px);
   --mobile-breakpoint: 768px;
-  --sidenav-transition-duration: var(--transition-duration-m, 0.3s);
-  --sidenav-transition-timing: var(--ani-standard-timing, cubic-bezier(0.4, 0, 0.2, 1));
+  // Collapse/expand choreography: the `-l` step on the repo's enter curve, so
+  // the panel leads and settles instead of moving in lockstep with every other
+  // transition on the symmetric Material ease. `_enableWidthAnimation()` in the
+  // component holds its cleanup window open past the same duration.
+  --sidenav-transition-duration: var(--transition-duration-l);
+  --sidenav-transition-timing: var(--ani-enter-timing);
   --mat-menu-item-spacing: 4px;
   --sidenav-border-color: var(--separator-color);
 
@@ -88,8 +92,7 @@
   transition: var(--transition-standard);
   color: var(--text-color);
 
-  &:focus,
-  &:hover {
+  @include interactiveHighlight {
     background: var(--sidenav-hover-bg);
   }
 
@@ -111,7 +114,7 @@
   cursor: pointer;
   -webkit-app-region: no-drag;
 
-  &:hover {
+  @include interactiveHighlight {
     background: var(--sidenav-hover-bg);
   }
 
@@ -187,8 +190,23 @@
     scrollbar-width: none;
     scrollbar-gutter: stable both-edges;
 
+    // The toggle rides the panel's animated edge into the rail on its own
+    // `right` anchor — what cannot be interpolated is `right: auto` + `left:
+    // 50%`, which is what used to jump the button across the panel the instant a
+    // collapse started. A flat `right: 8px` is interpolatable but not centred:
+    // in the rail it leaves the button a few px off the icon column it sits
+    // above. `50%` plus a half-width translate lands it centred without pinning
+    // either the rail width or the button's own, and both properties still
+    // interpolate.
     .mode-toggle {
-      right: auto;
+      right: 50%;
+      transform: translateX(50%);
+    }
+
+    // `position-right` anchors the toggle from `left` instead. Its `right` is
+    // already `auto` there, so nothing here has to fight the one change that
+    // cannot be interpolated.
+    &.position-right .mode-toggle {
       left: 50%;
       transform: translateX(-50%);
     }
@@ -243,7 +261,18 @@
   border-radius: 6px;
   padding: 6px;
   cursor: pointer;
-  transition: var(--transition-standard);
+  // The tint on the short step. The generic `--transition-standard` is `all`,
+  // which dragged every hover tint out to the panel's collapse pace. Anchor and
+  // transform are the exception: they carry the button into its centred compact
+  // position and have to ride the panel's own timing, or it snaps sideways as
+  // the rail settles.
+  transition:
+    background-color var(--transition-duration-s) var(--ani-standard-timing),
+    border-color var(--transition-duration-s) var(--ani-standard-timing),
+    color var(--transition-duration-s) var(--ani-standard-timing),
+    right var(--sidenav-transition-duration) var(--sidenav-transition-timing),
+    left var(--sidenav-transition-duration) var(--sidenav-transition-timing),
+    transform var(--sidenav-transition-duration) var(--sidenav-transition-timing);
   color: var(--sidenav-text-secondary);
   -webkit-app-region: no-drag;
 
@@ -257,10 +286,14 @@
     justify-content: center;
   }
 
-  &:focus,
-  &:hover {
+  @include interactiveHighlight {
     background: var(--sidenav-hover-bg);
     color: var(--sidenav-text);
+  }
+
+  &:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+    outline-offset: calc(-1 * var(--focus-ring-width));
   }
 }
 
@@ -283,6 +316,12 @@
       var(--safe-area-bottom) + var(--bottom-nav-height) + var(--bottom-nav-extra-offset)
     );
     min-height: calc(100% - var(--s6));
+
+    // .nav-sidenav.mobile already shifts down by --safe-area-top on native,
+    // so applying it again here would double the inset.
+    :host-context(body.isNativeMobile) & {
+      padding-top: 0;
+    }
   }
 
   :host-context(.isMac.isElectron) & {

@@ -1,4 +1,5 @@
 import { environment } from '../../../environments/environment';
+import { DEFAULT_FOCUS_MODE_SOUND_VOLUME } from '../focus-mode/focus-mode.model';
 import {
   HAS_OFFICIAL_ONEDRIVE_CLIENT_ID,
   OFFICIAL_ONEDRIVE_CLIENT_ID,
@@ -47,12 +48,12 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     defaultProjectId: INBOX_PROJECT.id,
     isMarkdownFormattingInNotesEnabled: true,
     notesTemplate: defaultTaskNotesTemplate,
+    priorityIconPreset: 'chevrons',
   },
   misc: {
     isConfirmBeforeExit: false,
     isConfirmBeforeExitWithoutFinishDay: true,
     isMinimizeToTray: false,
-    isLocalRestApiEnabled: false,
     isCheckForUpdates: true,
     isTrayShowCurrentCountdown: true,
     startOfNextDay: 0,
@@ -79,6 +80,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isEnableProject: true,
     isEnableDue: true,
     isEnableDeadline: false,
+    isEnablePriority: true,
     isEnableTag: true,
     urlBehavior: 'keep',
   },
@@ -87,7 +89,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   },
   idle: {
     isOnlyOpenIdleWhenCurrentTask: false,
-    isSuppressIdleDuringFocusMode: false,
+    isSuppressIdleDuringFocusMode: true,
     isEnableIdleTimeTracking: true,
     minIdleTime: 5 * minute,
   },
@@ -116,6 +118,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isShowPreparation: false,
     isPlayTick: false,
     focusModeSound: 'off',
+    focusModeSoundVolume: DEFAULT_FOCUS_MODE_SOUND_VOLUME,
     isPauseTrackingDuringBreak: true,
     autoStartFocusOnPlay: false,
     isManualBreakStart: false,
@@ -240,8 +243,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     // TODO maybe enable later if it works well
     isCompressionEnabled: false,
     isEncryptionEnabled: false,
-    // SPAP-11: opt-in split-file ("Surgical") sync. Default OFF (single-file v2).
-    isUseSplitSyncFiles: false,
+    // Absent: join the remote format; empty folders get EMPTY_FOLDER_SYNC_FORMAT.
     encryptKey: null,
     syncProvider: null,
     syncInterval: minute,

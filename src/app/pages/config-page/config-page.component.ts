@@ -7,9 +7,11 @@ import {
   ElementRef,
   inject,
   OnInit,
+  viewChild,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { GlobalConfigService } from '../../features/config/global-config.service';
+import { getChangedAppFeatures } from '../../features/config/get-changed-app-features.util';
 import { TaskWidgetSettingsService } from '../../features/config/task-widget-settings.service';
 import { FocusModeLocalSettingsService } from '../../features/config/focus-mode-local-settings.service';
 import {
@@ -25,6 +27,7 @@ import {
   GLOBAL_TASKS_FORM_CONFIG,
 } from '../../features/config/global-config-form-config.const';
 import {
+  AppFeaturesConfig,
   ConfigFormConfig,
   GenericConfigFormSection,
   GlobalConfigFormSectionKey,
@@ -75,8 +78,17 @@ import { MatAutocomplete, MatAutocompleteTrigger } from '@angular/material/autoc
 import { MatOption } from '@angular/material/core';
 import {
   searchSettings,
+  SETTINGS_PLUGINS_TAB_INDEX,
+  SETTINGS_SYNC_BACKUP_TAB_INDEX,
   SettingsSearchTarget,
 } from '../../features/config/settings-search.util';
+
+/**
+ * Starts expanded so the feature toggles are visible on opening Settings —
+ * the point of leading the default tab with them. Collapsing it sticks until
+ * the page is left.
+ */
+const OPEN_BY_DEFAULT_SECTION_KEY = 'appFeatures';
 
 /** Kept in sync with `animationDuration` on the settings `mat-tab-group`. */
 const TAB_ANIMATION_DURATION_MS = 200;
@@ -135,6 +147,7 @@ export class ConfigPageComponent implements OnInit {
 
   selectedTabIndex = 0;
   expandedSection: string | null = null;
+  private _isDefaultSectionCollapsed = false;
 
   searchQuery = '';
   /** Flat, cross-tab search hits in tab order. Empty while not searching. */
@@ -190,10 +203,27 @@ export class ConfigPageComponent implements OnInit {
   isUpdateCheckPossible: boolean = isUpdateCheckPossible();
 
   private readonly _destroyRef = inject(DestroyRef);
+  private readonly _tabGroup = viewChild(MatTabGroup);
 
   constructor() {
     // Initialize tab-specific form configurations
-    this.generalFormCfg = GLOBAL_GENERAL_FORM_CONFIG.slice();
+    // The pointer to plugins sits inside App Features, below its switches.
+    this.generalFormCfg = GLOBAL_GENERAL_FORM_CONFIG.map((section) =>
+      section.key === 'appFeatures'
+        ? {
+            ...section,
+            actions: [
+              ...(section.actions ?? []),
+              {
+                label: T.GCF.APP_FEATURES.EXTEND_WITH_PLUGINS,
+                icon: 'extension',
+                isRow: true,
+                onClick: () => this.goToPluginsTab(),
+              },
+            ],
+          }
+        : section,
+    );
     this.timeTrackingFormCfg = GLOBAL_TIME_TRACKING_FORM_CONFIG.slice();
     this.pluginsShortcutsFormCfg = GLOBAL_PLUGINS_FORM_CONFIG.slice();
     // "Browse backups" lives on the Import/Export section so every platform
@@ -250,6 +280,7 @@ export class ConfigPageComponent implements OnInit {
     // Use effect to react to plugin shortcuts changes for live updates
     effect(() => {
       const shortcuts = this._pluginBridgeService.shortcuts();
+      // eslint-disable-next-line local-rules/no-user-content-in-logs -- grandfathered log baseline (2026-09), not yet triaged
       Log.log('Plugin shortcuts changed:', { shortcuts });
       this._updateKeyboardFormWithPluginShortcuts(shortcuts);
     });
@@ -285,7 +316,11 @@ export class ConfigPageComponent implements OnInit {
       .subscribe((params) => {
         if (params['tab'] !== undefined) {
           const tabIndex = parseInt(params['tab'], 10);
-          if (!isNaN(tabIndex) && tabIndex >= 0 && tabIndex < 5) {
+          if (
+            !isNaN(tabIndex) &&
+            tabIndex >= 0 &&
+            tabIndex <= SETTINGS_SYNC_BACKUP_TAB_INDEX
+          ) {
             this.selectedTabIndex = tabIndex;
             this._cd.detectChanges();
           }
@@ -391,6 +426,18 @@ export class ConfigPageComponent implements OnInit {
     // From here on we know it's a real GlobalConfigState section.
     const sectionKey = formSectionKey as GlobalConfigSectionKey;
 
+    if (sectionKey === 'appFeatures') {
+      // Sync only the switches that changed, never this device's untouched defaults.
+      const changed = getChangedAppFeatures(
+        this.configService.appFeatures(),
+        config as Partial<AppFeaturesConfig>,
+      );
+      if (Object.keys(changed).length > 0) {
+        this.configService.updateSection(sectionKey, changed);
+      }
+      return;
+    }
+
     this.configService.updateSection(sectionKey, config);
   }
 
@@ -421,6 +468,15 @@ export class ConfigPageComponent implements OnInit {
     );
   }
 
+  /**
+   * The plugins action inside App Features. Moves focus to the Plugins tab
+   * header, since the button itself is detached with the outgoing tab body.
+   */
+  goToPluginsTab(): void {
+    this.selectedTabIndex = SETTINGS_PLUGINS_TAB_INDEX;
+    this._tabGroup()?.focusTab(SETTINGS_PLUGINS_TAB_INDEX);
+  }
+
   /** Jumps to a hit: right tab, section expanded, scrolled into view. */
   goToSearchResult(target: SettingsSearchTarget): void {
     this.onSearchChange('');
@@ -442,8 +498,28 @@ export class ConfigPageComponent implements OnInit {
   isSectionExpanded(section: GenericConfigFormSection): boolean {
     return (
       section.key === this.expandedSection ||
-      section.customSection === this.expandedSection
+      section.customSection === this.expandedSection ||
+      (section.key === OPEN_BY_DEFAULT_SECTION_KEY && !this._isDefaultSectionCollapsed)
     );
+  }
+
+  /**
+   * Forgets the expanded section once it is collapsed by hand, so selecting its
+   * search result again changes `[isExpanded]` and reopens it (#9643).
+   */
+  onSectionExpandedChange(section: GenericConfigFormSection, isExpanded: boolean): void {
+    if (section.key === OPEN_BY_DEFAULT_SECTION_KEY) {
+      this._isDefaultSectionCollapsed = !isExpanded;
+      // Only drop `expandedSection` if it points here — another section's
+      // search-driven expansion must survive collapsing this one.
+      if (!isExpanded && this.expandedSection === section.key) {
+        this.expandedSection = null;
+      }
+      return;
+    }
+    if (!isExpanded && this.isSectionExpanded(section)) {
+      this.expandedSection = null;
+    }
   }
 
   getGlobalCfgSection(

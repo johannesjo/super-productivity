@@ -26,7 +26,7 @@ import { addSubTask } from '../tasks/store/task.actions';
 import { WorkContextService } from '../work-context/work-context.service';
 import { WorkContextType } from '../work-context/work-context.model';
 import { isValidSplitTime } from '../../util/is-valid-split-time';
-import { getDateTimeFromClockString } from '../../util/get-date-time-from-clock-string';
+import { getRepeatDueWithTime } from './store/get-repeat-due-with-time.util';
 import { remindOptionToMilliseconds } from '../tasks/util/remind-option-to-milliseconds';
 import { getNewestPossibleDueDate } from './store/get-newest-possible-due-date.util';
 import { getDbDateStr } from '../../util/get-db-date-str';
@@ -44,6 +44,7 @@ import {
   getRepeatableTaskId,
 } from './get-repeatable-task-id.util';
 import { getDeadlineAutoPlanFields } from '../tasks/util/get-deadline-auto-plan-fields';
+import { getTaskPriority } from '../tasks/task-priority.const';
 
 @Injectable({
   providedIn: 'root',
@@ -182,6 +183,13 @@ export class TaskRepeatCfgService {
       | ReturnType<typeof addSubTask>
     )[]
   > {
+    // A paused series creates nothing. The day-change selectors already skip
+    // it, but completing a copy of a paused wait-for-completion config calls
+    // this directly (updateStartDateOnComplete$).
+    if (taskRepeatCfg.isPaused) {
+      return [];
+    }
+
     // NOTE: there might be multiple configs in case something went wrong
     // we want to move all of them to the archive
     const existingTaskInstances: Task[] = await this._taskService
@@ -334,9 +342,10 @@ export class TaskRepeatCfgService {
     // Schedule if given
     if (isValidSplitTime(taskRepeatCfg.startTime) && taskRepeatCfg.remindAt) {
       // NOTE: schedule tasks against the computed repeat day to avoid mismatched due dates.
-      const dateTime = getDateTimeFromClockString(
+      const dateTime = getRepeatDueWithTime(
         taskRepeatCfg.startTime as string,
-        targetCreated.getTime(),
+        targetCreated,
+        this._dateService.getStartOfNextDayDiffMs(),
       );
       createNewActions.push(
         TaskSharedActions.scheduleTaskWithTime({
@@ -397,6 +406,7 @@ export class TaskRepeatCfgService {
         additional: {
           repeatCfgId: taskRepeatCfg.id,
           timeEstimate: taskRepeatCfg.defaultEstimate || 0,
+          priority: getTaskPriority(taskRepeatCfg.priority),
           projectId: taskRepeatCfg.projectId || undefined,
           notes: taskRepeatCfg.notes || '',
           dueDay,

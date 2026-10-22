@@ -29,6 +29,7 @@ describe('TaskRepeatCleanupEffects', () => {
   let repeatableTasks$: BehaviorSubject<TaskWithSubTasks[]>;
   let repeatCfgs$: BehaviorSubject<TaskRepeatCfg[]>;
   let taskTimeSync: jasmine.SpyObj<TaskTimeSyncService>;
+  let startOfNextDayDiffMs: number;
 
   const DAY_MS = 24 * 60 * 60 * 1000;
   const todayMs = new Date().setHours(12, 0, 0, 0);
@@ -54,6 +55,7 @@ describe('TaskRepeatCleanupEffects', () => {
   beforeEach(() => {
     repeatableTasks$ = new BehaviorSubject<TaskWithSubTasks[]>([]);
     repeatCfgs$ = new BehaviorSubject<TaskRepeatCfg[]>([]);
+    startOfNextDayDiffMs = 0;
 
     const storeSpy = jasmine.createSpyObj<Store>('Store', ['select', 'dispatch']);
     storeSpy.select.and.callFake((selector: unknown) =>
@@ -97,7 +99,13 @@ describe('TaskRepeatCleanupEffects', () => {
         { provide: HydrationStateService, useValue: hydrationStateSpy },
         { provide: DeletedTaskIssueSidecarService, useValue: sidecarSpy },
         { provide: TaskTimeSyncService, useValue: taskTimeSync },
-        { provide: DateService, useValue: { todayStr: () => getDbDateStr(todayMs) } },
+        {
+          provide: DateService,
+          useValue: {
+            todayStr: () => getDbDateStr(todayMs),
+            getStartOfNextDayDiffMs: () => startOfNextDayDiffMs,
+          },
+        },
       ],
     });
 
@@ -403,6 +411,58 @@ describe('TaskRepeatCleanupEffects', () => {
       sub.unsubscribe();
     }));
 
+    it('deletes late-night overdue instances placed after the day boundary (#3378)', fakeAsync(() => {
+      startOfNextDayDiffMs = 5 * 60 * 60 * 1000;
+      repeatCfgs$.next([
+        skipOverdueCfg('cfg-late-night', '', {
+          title: 'Make the bed',
+          startTime: '02:00',
+          remindAt: TaskReminderOptionId.AtStart,
+        }),
+      ]);
+      const lateNightInstance = (id: string, logicalDayMs: number): Task => {
+        const dueWithTime = getDateTimeFromClockString('02:00', logicalDayMs + DAY_MS);
+        return {
+          ...DEFAULT_TASK,
+          projectId: 'p1',
+          id,
+          title: 'Make the bed',
+          repeatCfgId: 'cfg-late-night',
+          created: logicalDayMs,
+          dueDay: undefined,
+          dueWithTime,
+          remindAt: dueWithTime,
+          isDone: false,
+          timeSpent: 0,
+        };
+      };
+      // created for logical yesterday -> due today 02:00, still logical yesterday
+      const yesterdayInstance = lateNightInstance('late-night-yesterday', yesterdayMs);
+      // written by a client without #3378: due on the calendar day itself
+      const legacyInstance: Task = {
+        ...lateNightInstance('late-night-legacy', yesterdayMs - DAY_MS),
+        dueWithTime: getDateTimeFromClockString('02:00', yesterdayMs),
+        remindAt: getDateTimeFromClockString('02:00', yesterdayMs),
+      };
+      const todayInstance = lateNightInstance('late-night-today', todayMs);
+
+      repeatableTasks$.next([
+        wrapWithSubTasks(legacyInstance),
+        wrapWithSubTasks(yesterdayInstance),
+        wrapWithSubTasks(todayInstance),
+      ]);
+
+      const sub = effects.cleanupDuplicateRepeatInstances$.subscribe();
+      tick(3001);
+
+      expect(getDispatchedDeleteIds().sort()).toEqual([
+        'late-night-legacy',
+        'late-night-yesterday',
+      ]);
+
+      sub.unsubscribe();
+    }));
+
     it('deletes timed overdue instances whose reminder was cleared or snoozed', fakeAsync(() => {
       // remindAt is app-managed: firing + dismissing clears it, snoozing rewrites
       // it to a new time. Neither is a user edit, so both must still be reaped.
@@ -666,6 +726,97 @@ describe('TaskRepeatCleanupEffects', () => {
       tick(3001);
 
       expect(getDispatchedDeleteIds()).toEqual(['today-tag-yesterday']);
+
+      sub.unsubscribe();
+    }));
+
+    for (const [cfgPriority, taskPriority, shouldDelete] of [
+      [3, 3, true],
+      ['high', 3, true],
+      [3, null, false],
+      [undefined, 3, false],
+    ] as const) {
+      it(`compares template priority ${cfgPriority} with occurrence priority ${taskPriority} before cleanup`, fakeAsync(() => {
+        repeatCfgs$.next([
+          skipOverdueCfg('cfg-priority', '', {
+            title: 'Water plants',
+            priority: cfgPriority,
+          }),
+        ]);
+        const task: Task = {
+          ...DEFAULT_TASK,
+          projectId: 'p1',
+          title: 'Water plants',
+          id: 'priority-yesterday',
+          repeatCfgId: 'cfg-priority',
+          created: yesterdayMs,
+          dueDay: getDbDateStr(yesterdayMs),
+          priority: taskPriority,
+        };
+        repeatableTasks$.next([
+          wrapWithSubTasks(task),
+          wrapWithSubTasks({
+            ...task,
+            id: 'priority-today',
+            created: todayMs,
+            dueDay: getDbDateStr(todayMs),
+          }),
+        ]);
+        const sub = effects.cleanupDuplicateRepeatInstances$.subscribe();
+        tick(3001);
+        expect(getDispatchedDeleteIds()).toEqual(
+          shouldDelete ? ['priority-yesterday'] : [],
+        );
+        sub.unsubscribe();
+      }));
+    }
+
+    // Providers that push every new task (Plainspace) link each copy to its own
+    // remote item; keeping those would pile them up locally and remotely
+    it('reaps an overdue issue-linked instance and hands its issue to the remote delete', fakeAsync(() => {
+      repeatCfgs$.next([skipOverdueCfg('cfg-issue', '', { title: 'Water plants' })]);
+      const yesterdayLinked: Task = {
+        ...DEFAULT_TASK,
+        projectId: 'p1',
+        id: 'issue-yesterday',
+        title: 'Water plants',
+        repeatCfgId: 'cfg-issue',
+        created: yesterdayMs,
+        dueDay: getDbDateStr(yesterdayMs),
+        isDone: false,
+        timeSpent: 0,
+        issueId: 'ps-yesterday',
+        issueType: 'PLAINSPACE',
+        issueProviderId: 'plainspace-provider',
+      };
+      const todayInstance: Task = {
+        ...DEFAULT_TASK,
+        projectId: 'p1',
+        id: 'issue-today',
+        title: 'Water plants',
+        repeatCfgId: 'cfg-issue',
+        created: todayMs,
+        dueDay: getDbDateStr(todayMs),
+        isDone: false,
+        timeSpent: 0,
+      };
+
+      repeatableTasks$.next([
+        wrapWithSubTasks(yesterdayLinked),
+        wrapWithSubTasks(todayInstance),
+      ]);
+
+      const sub = effects.cleanupDuplicateRepeatInstances$.subscribe();
+      tick(3001);
+
+      expect(getDispatchedDeleteIds()).toEqual(['issue-yesterday']);
+      expect(TestBed.inject(DeletedTaskIssueSidecarService).set).toHaveBeenCalledWith([
+        {
+          issueId: 'ps-yesterday',
+          issueType: 'PLAINSPACE',
+          issueProviderId: 'plainspace-provider',
+        },
+      ]);
 
       sub.unsubscribe();
     }));

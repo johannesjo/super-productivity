@@ -1,5 +1,5 @@
 import { ConfigFormSection, ReminderConfig } from '../global-config.model';
-import { TASK_REMINDER_OPTIONS } from '../../planner/dialog-schedule-task/task-reminder-options.const';
+import { TASK_REMINDER_OPTIONS_WITHOUT_LONG_LEAD } from '../../planner/dialog-schedule-task/task-reminder-options.const';
 import { T } from '../../../t.const';
 import { IS_ANDROID_WEB_VIEW } from '../../../util/is-android-web-view';
 import { IS_NATIVE_PLATFORM } from '../../../util/is-native-platform';
@@ -32,7 +32,7 @@ export const REMINDER_FORM_CFG: ConfigFormSection<ReminderConfig> = {
       templateOptions: {
         required: true,
         label: T.GCF.REMINDER.DEFAULT_TASK_REMIND_OPTION,
-        options: TASK_REMINDER_OPTIONS,
+        options: TASK_REMINDER_OPTIONS_WITHOUT_LONG_LEAD,
       },
     },
     {

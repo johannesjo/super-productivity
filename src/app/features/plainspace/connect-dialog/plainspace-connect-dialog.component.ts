@@ -27,6 +27,11 @@ import {
 
 export interface PlainspaceConnectDialogData {
   host?: string | null;
+  /**
+   * The token this connect replaces, when reconnecting one provider whose
+   * token was rejected; providers holding it get the new one (#8616).
+   */
+  replacedToken?: string | null;
 }
 
 /**
@@ -81,14 +86,16 @@ export class PlainspaceConnectDialogComponent {
   readonly isConnecting = signal(false);
   // The failure to show, or null for none. `aborted` is deliberately silent:
   // the user disconnected mid-check, so there is nothing to warn them about.
-  readonly error = signal<'invalid-token' | 'unreachable' | null>(null);
+  readonly error = signal<'invalid-token' | 'unreachable' | 'other-account' | null>(null);
   readonly errorMsg = computed(() => {
     const err = this.error();
     return err === 'unreachable'
       ? T.PLAINSPACE.CONNECT.UNREACHABLE
       : err === 'invalid-token'
         ? T.PLAINSPACE.CONNECT.INVALID
-        : null;
+        : err === 'other-account'
+          ? T.PLAINSPACE.CONNECT.OTHER_ACCOUNT
+          : null;
   });
 
   async connect(): Promise<void> {
@@ -101,6 +108,7 @@ export class PlainspaceConnectDialogComponent {
     const res: PlainspaceConnectResult = await this._accountService.connect(
       token,
       this.host,
+      this._data?.replacedToken,
     );
     if (res === 'ok') {
       this._dialogRef.close(true);

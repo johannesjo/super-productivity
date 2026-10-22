@@ -16,6 +16,8 @@ import {
 import { ICAL_TYPE, GITHUB_TYPE, JIRA_TYPE } from '../issue.const';
 import { Task, TaskWithSubTasks } from '../../tasks/task.model';
 import { IssueProvider } from '../issue.model';
+import { HttpErrorResponse } from '@angular/common/http';
+import { IssueLog } from '../../../core/log';
 
 describe('PollIssueUpdatesEffects', () => {
   let effects: PollIssueUpdatesEffects;
@@ -529,6 +531,40 @@ describe('PollIssueUpdatesEffects', () => {
       // Second poll (should succeed)
       tick(600000); // 10 minutes
       expect(issueServiceSpy.refreshIssueTasks).toHaveBeenCalledTimes(2);
+    }));
+
+    // Log history is exportable: an HTTP error carries the provider's URL.
+    it('logs only the status of a failed request', fakeAsync(() => {
+      const calendarProvider = createMockIssueProvider({
+        id: 'cal-provider-1',
+        issueProviderKey: ICAL_TYPE,
+      });
+      store.overrideSelector(selectEnabledIssueProviders, [calendarProvider]);
+      store.overrideSelector(selectAllCalendarIssueTasks, [
+        createMockTask({
+          issueId: 'cal-event-123',
+          issueType: ICAL_TYPE,
+          issueProviderId: 'cal-provider-1',
+        }),
+      ]);
+      store.refreshState();
+      issueServiceSpy.refreshIssueTasks.and.rejectWith(
+        new HttpErrorResponse({ status: 0, url: 'https://private.example/cal.ics' }),
+      );
+      const logSpy = spyOn(IssueLog, 'error');
+      const actionsSubject = new Subject<any>();
+      actions$ = actionsSubject.asObservable();
+      effects.pollIssueChangesForCurrentContext$.subscribe();
+
+      actionsSubject.next(
+        setActiveWorkContext({
+          activeType: WorkContextType.PROJECT,
+          activeId: 'project-1',
+        }),
+      );
+      tick(10001);
+
+      expect(logSpy).toHaveBeenCalledOnceWith(jasmine.any(String), { status: 0 });
     }));
 
     it('should NOT poll providers with pollingMode always (handled by separate effect)', fakeAsync(() => {
