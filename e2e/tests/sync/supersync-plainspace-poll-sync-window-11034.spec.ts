@@ -182,6 +182,32 @@ const holdTaskListReads = async (
   };
 };
 
+/**
+ * Lets only this page's PATCHes go unanswered: the fake is shared, and its
+ * `isOffline` would take the other device offline too.
+ */
+const routePatchOffline = async (
+  page: Page,
+): Promise<{ setOffline: (isOffline: boolean) => void; dropped: () => number }> => {
+  let isOffline = false;
+  let dropped = 0;
+  await page.route(
+    /^https:\/\/plainspace\.org\/api\/integration\/tasks\/[^/?]+(\?|$)/,
+    async (route: Route) => {
+      if (isOffline && route.request().method() === 'PATCH') {
+        dropped++;
+        await route.abort('internetdisconnected');
+        return;
+      }
+      await route.fallback();
+    },
+  );
+  return {
+    setOffline: (value) => (isOffline = value),
+    dropped: () => dropped,
+  };
+};
+
 interface Client {
   c: SimulatedE2EClient;
   /** Update polls started (`refreshIssueTasks`). */
@@ -398,14 +424,10 @@ test.describe('@supersync Plainspace poll vs the sync window (#11034)', () => {
         await expect(a.c.page.locator('task').filter({ hasText: T1 })).toBeVisible();
 
         // The user renames on A while A can't reach Plainspace: the push fails.
-        server.isPatchOffline = true;
-        const attempts = server.patches.length;
+        const patchA = await routePatchOffline(a.c.page);
+        patchA.setOffline(true);
         await renameTask(a.c.page, T1, MINE);
-        await expect
-          .poll(() => server.patches.slice(attempts).map((p) => p.status), {
-            timeout: 15000,
-          })
-          .toEqual([0]);
+        await expect.poll(patchA.dropped, { timeout: 15000 }).toBe(1);
         await a.c.sync.syncAndWait();
 
         // B polls before it has A's ops, and pulls T1.
@@ -435,7 +457,7 @@ test.describe('@supersync Plainspace poll vs the sync window (#11034)', () => {
         expect((await readLinkedTask(b.c.page))?.title).toBe(T1);
 
         // A gets back online; its next poll pushes the rename.
-        server.isPatchOffline = false;
+        patchA.setOffline(false);
         await restart(a);
         await expect
           .poll(() => server.tasks.get(TASK_ID)!.title, { timeout: 15000 })
