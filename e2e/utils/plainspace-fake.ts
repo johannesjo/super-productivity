@@ -76,7 +76,14 @@ const nextUpdatedAt = (): string => {
   return new Date(clock).toISOString();
 };
 
-export const installFakePlainspace = async (page: Page): Promise<FakePlainspace> => {
+/**
+ * `shared`: route this page to an existing fake instead of a new one, so two
+ * clients (two SP devices) talk to the same Plainspace space.
+ */
+export const installFakePlainspace = async (
+  page: Page,
+  shared?: FakePlainspace,
+): Promise<FakePlainspace> => {
   const cors = {
     ['access-control-allow-origin']: '*',
     ['access-control-allow-headers']: 'authorization, content-type',
@@ -97,7 +104,7 @@ export const installFakePlainspace = async (page: Page): Promise<FakePlainspace>
     isRecurring: false,
   });
 
-  const server: FakePlainspace = {
+  const server: FakePlainspace = shared ?? {
     tasks: new Map(),
     assignedIds: new Set(),
     isTasksOffline: false,
