@@ -184,5 +184,18 @@
     "author": "owarimono",
     "authorUrl": "https://github.com/owarimono",
     "id": "auto-tag-manager"
+  },
+  {
+    "name": "Days Until",
+    "shortDescription": "Countdown board for upcoming dates with repeating countdowns, groups, and an archive.",
+    "url": "https://github.com/Ruurdoos/days-until-plugin",
+    "author": "Ruurdoos",
+    "authorUrl": "https://github.com/Ruurdoos",
+    "id": "days-until",
+    "release": {
+      "version": "1.1.0",
+      "downloadUrl": "https://github.com/Ruurdoos/days-until-plugin/releases/download/v1.1.0/output.zip",
+      "sha256": "05cb96eab9a3e52727b34f5fe4ca1c98b624514a4f6c4ee6aa8b2c2aa975da14"
+    }
   }
 ]
