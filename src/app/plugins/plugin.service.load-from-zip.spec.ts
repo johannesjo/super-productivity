@@ -156,6 +156,22 @@ describe('PluginService loadPluginFromZip iframe-only plugins', () => {
     service = TestBed.inject(PluginService);
   });
 
+  it('rejects an incompatible ZIP before caching or executing a plugin', async () => {
+    const files: Record<string, string> = {};
+    files['manifest.json'] = JSON.stringify({
+      ...iframeManifest,
+      minSupVersion: '9999.0.0',
+    });
+    files['index.html'] = '<main>Plugin UI</main>';
+    const file = createZipFile(files);
+
+    await expectAsync(service.loadPluginFromZip(file)).toBeRejectedWithError(
+      T.PLUGINS.VALIDATION_FAILED,
+    );
+    expect(pluginCache.storePlugin).not.toHaveBeenCalled();
+    expect(pluginRunner.loadPlugin).not.toHaveBeenCalled();
+  });
+
   it('loads an iframe plugin zip without plugin.js when index.html exists', async () => {
     const indexHtml = '<!doctype html><html><body>Plugin UI</body></html>';
     const files: Record<string, string> = {};
