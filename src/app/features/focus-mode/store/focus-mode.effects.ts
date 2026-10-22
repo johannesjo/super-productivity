@@ -27,7 +27,7 @@ import {
   startWhiteNoise,
   stopWhiteNoise,
 } from '../../../util/white-noise';
-import { startBreakEndAlarm, stopBreakEndAlarm } from '../../../util/break-end-alarm';
+import { startLoopingAlarm, stopLoopingAlarm } from '../../../util/looping-alarm';
 import { FocusModeLocalSettingsService } from '../../config/focus-mode-local-settings.service';
 import { IS_ELECTRON, IS_ELECTRON_TOKEN } from '../../../app.constants';
 import { setCurrentTask, unsetCurrentTask } from '../../tasks/store/task.actions';
@@ -330,7 +330,7 @@ export class FocusModeEffects {
   // lifecycle, so any leave-break transition (completeBreak / skipBreak /
   // starting the next session — all of which flip timer.purpose away from
   // 'break' or set it running again) naturally stops the loop via
-  // distinctUntilChanged. A hard safety ceiling inside startBreakEndAlarm()
+  // distinctUntilChanged. A hard safety ceiling inside startLoopingAlarm()
   // stops it regardless if the user truly walked away.
   breakEndAlarmSound$ = createEffect(
     () =>
@@ -345,9 +345,9 @@ export class FocusModeEffects {
         tap((shouldAlarm) => {
           if (shouldAlarm) {
             const soundVolume = this.globalConfigService.sound()?.volume || 0;
-            startBreakEndAlarm(SESSION_DONE_SOUND, soundVolume);
+            startLoopingAlarm(SESSION_DONE_SOUND, soundVolume);
           } else {
-            stopBreakEndAlarm();
+            stopLoopingAlarm();
           }
         }),
       ),

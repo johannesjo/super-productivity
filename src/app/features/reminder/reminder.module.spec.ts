@@ -1,4 +1,4 @@
-import { fakeAsync, TestBed, tick } from '@angular/core/testing';
+import { fakeAsync, flushMicrotasks, TestBed, tick } from '@angular/core/testing';
 import { MatDialog } from '@angular/material/dialog';
 import { Store } from '@ngrx/store';
 import { NEVER, Observable, of, ReplaySubject, Subject } from 'rxjs';
@@ -24,6 +24,7 @@ import { DialogViewTaskRemindersComponent } from '../tasks/dialog-view-task-remi
 import { DateService } from '../../core/date/date.service';
 import { IS_ELECTRON_TOKEN } from '../../app.constants';
 import { getRepeatableTaskId } from '../task-repeat-cfg/get-repeatable-task-id.util';
+import { closeAudioContext } from '../../util/audio-context';
 
 describe('ReminderModule dialog opening', () => {
   let matDialogSpy: jasmine.SpyObj<MatDialog>;
@@ -31,6 +32,7 @@ describe('ReminderModule dialog opening', () => {
   let remindersActive$: Subject<TaskWithReminderData[]>;
   let syncDone$: Subject<void>;
   let isFocusWindow: boolean;
+  let useAlarmStyleReminders: boolean;
 
   const reminder = {
     id: 'task-1',
@@ -47,6 +49,7 @@ describe('ReminderModule dialog opening', () => {
       'focusAppAfterNotification',
     ]);
     isFocusWindow = false;
+    useAlarmStyleReminders = false;
 
     const taskServiceSpy = jasmine.createSpyObj('TaskService', ['currentTaskId']);
     taskServiceSpy.currentTaskId.and.returnValue(null);
@@ -89,7 +92,9 @@ describe('ReminderModule dialog opening', () => {
         { provide: Store, useValue: jasmine.createSpyObj('Store', ['dispatch']) },
         {
           provide: GlobalConfigService,
-          useValue: { cfg: () => ({ reminder: { isFocusWindow } }) },
+          useValue: {
+            cfg: () => ({ reminder: { isFocusWindow, useAlarmStyleReminders } }),
+          },
         },
         {
           provide: CapacitorReminderService,
@@ -138,6 +143,49 @@ describe('ReminderModule dialog opening', () => {
         reminders: [reminder],
       },
     });
+  }));
+
+  it('loops the alarm and focuses the app until the dialog closes when alarm-style is on', fakeAsync(() => {
+    useAlarmStyleReminders = true;
+    const afterClosed$ = new Subject<void>();
+    matDialogSpy.open.and.returnValue({ afterClosed: () => afterClosed$ } as never);
+    const source = jasmine.createSpyObj('source', [
+      'connect',
+      'disconnect',
+      'start',
+      'stop',
+    ]);
+    closeAudioContext();
+    spyOn(window as any, 'AudioContext').and.returnValue({
+      state: 'running',
+      destination: {},
+      close: jasmine.createSpy('close'),
+      createBufferSource: () => source,
+      createGain: () => ({
+        gain: {},
+        connect: () => undefined,
+        disconnect: () => undefined,
+      }),
+      decodeAudioData: () => Promise.resolve({}),
+    });
+    spyOn(window, 'fetch').and.resolveTo({
+      ok: true,
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
+    } as Response);
+
+    triggerReminder();
+    flushMicrotasks();
+
+    expect(uiHelperSpy.focusAppAfterNotification).toHaveBeenCalledOnceWith({
+      isReminder: true,
+    });
+    expect(source.loop).toBe(true);
+    expect(source.start).toHaveBeenCalled();
+
+    afterClosed$.next();
+
+    expect(source.stop).toHaveBeenCalled();
+    closeAudioContext();
   }));
 });
 

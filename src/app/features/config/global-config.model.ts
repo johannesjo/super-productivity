@@ -292,7 +292,8 @@ export type ReminderConfig = Readonly<{
   defaultTaskRemindOption?: TaskReminderOptionId;
   disableReminders?: boolean;
   isFocusWindow?: boolean;
-  // Android only: use alarm-style notifications (louder, more intrusive)
+  // Android: alarm-style notifications (louder, more intrusive). Desktop: a bell
+  // loops while the reminder dialog is open, and the window is focused.
   useAlarmStyleReminders?: boolean;
   notifyOnDueDate?: boolean;
   dueDateNotificationHour?: number;
