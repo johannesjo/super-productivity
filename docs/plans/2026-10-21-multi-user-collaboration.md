@@ -389,6 +389,21 @@ SP:
 3. **Not shared yet?** The menu entry offers to share the project first, then
    assign.
 
+**Delivered** (plainspace#42, this repo's Phase 2 PR), with these deviations:
+
+- **Not unscheduled locally.** A remote reassignment keeps the task
+  untouched, so a handoff does too: it is only marked _no longer in your
+  Plainspace list_ (the in-memory Release 1 state), and writes no op. An
+  unschedule would also be a local edit that the poll-time push (Gap 2) sends
+  as "no time" once the task is assigned back, clearing the Space's time.
+- **Not shared yet** (item 3) is not built: the entries appear only on linked
+  tasks still assigned to me. No assignee display, no further endpoints.
+- **Members list leaves out the caller** and takes the Space id or slug, since
+  SP knows neither its member id nor always the Space's UUID.
+- **Older servers:** a 404 on the members list or a 422 on an
+  `assigneeId`-only PATCH shows "Plainspace server too old to assign" once
+  per attempt. No capability negotiation.
+
 ### Phase 3: only on evidence
 
 Device-code connect (needs two endpoints, a code store and a consent screen;

@@ -3279,6 +3279,16 @@
       "HELP": "Connect a Plainspace space with a personal API token to import tasks assigned to you and claim unclaimed tasks.",
       "TITLE": "Plainspace"
     },
+    "HANDOFF": {
+      "ASSIGN_TO": "Assign to…",
+      "ASSIGNED": "Assigned to {{name}} in Plainspace.",
+      "FAILED": "Couldn't hand off this task. Check your connection and try again.",
+      "LOADING": "Loading members…",
+      "NO_MEMBERS": "No one else is in this Space yet.",
+      "RELEASE": "Release to Space",
+      "RELEASED": "Released to the Space in Plainspace.",
+      "SERVER_TOO_OLD": "Plainspace server too old to assign."
+    },
     "INVITE_LINK_COPIED": "Invite link copied. Share it with the people you want in this space.",
     "LOGIN_REQUIRED": "A Plainspace API token is required to share a project.",
     "NO_UNCLAIMED": "No unclaimed tasks right now.",
