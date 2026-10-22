@@ -22,9 +22,8 @@ import { ScheduleDay } from '../schedule.model';
 import { CalendarEventActionsService } from '../../calendar-integration/calendar-event-actions.service';
 import { registerLocaleData } from '@angular/common';
 import localeSv from '@angular/common/locales/sv';
-import { selectMapOfAllTasksInActiveProjects } from '../../tasks/store/task.selectors';
-import { selectStartOfNextDayDiffMs } from '../../../root-store/app-state/app-state.selectors';
-import { DEFAULT_TASK, Task } from '../../tasks/task.model';
+import { selectUndoneDeadlineTasksByDay } from '../../planner/store/planner.selectors';
+import { DEFAULT_TASK } from '../../tasks/task.model';
 import { DateService } from '../../../core/date/date.service';
 import { LS } from '../../../core/persistence/storage-keys.const';
 
@@ -143,8 +142,7 @@ describe('ScheduleComponent', () => {
     }).compileComponents();
 
     const store = TestBed.inject(MockStore);
-    store.overrideSelector(selectMapOfAllTasksInActiveProjects, new Map());
-    store.overrideSelector(selectStartOfNextDayDiffMs, 0);
+    store.overrideSelector(selectUndoneDeadlineTasksByDay, {});
 
     fixture = TestBed.createComponent(ScheduleComponent);
     component = fixture.componentInstance;
@@ -1657,21 +1655,18 @@ describe('ScheduleComponent', () => {
 
     it('passes deadline tasks to the paged day view badge', fakeAsync(() => {
       const store = TestBed.inject(MockStore);
-      store.overrideSelector(
-        selectMapOfAllTasksInActiveProjects,
-        new Map<string, Task>([
-          [
-            'task-1',
-            {
-              ...DEFAULT_TASK,
-              id: 'task-1',
-              projectId: 'project-1',
-              title: 'Day-view deadline',
-              deadlineDay: '2026-01-20',
-            },
-          ],
-        ]),
-      );
+      store.overrideSelector(selectUndoneDeadlineTasksByDay, {
+        // eslint-disable-next-line @typescript-eslint/naming-convention
+        '2026-01-20': [
+          {
+            ...DEFAULT_TASK,
+            id: 'task-1',
+            projectId: 'project-1',
+            title: 'Day-view deadline',
+            deadlineDay: '2026-01-20',
+          },
+        ],
+      });
       store.refreshState();
       mockScheduleService.getDaysToShow.and.returnValue(['2026-01-20']);
       mockLayoutService.selectedTimeView.set('day');
@@ -1752,91 +1747,6 @@ describe('ScheduleComponent', () => {
       // hundreds of pixels. What is left here is sub-pixel rounding.
       expect(Math.abs(scaledWrapper.scrollTop - plainTop)).toBeLessThan(2);
     });
-  });
-
-  describe('deadlineTasksByDay computed', () => {
-    it('groups tasks with deadlines by their deadline day', fakeAsync(() => {
-      const mockTasksMap = new Map<string, Task>([
-        [
-          'task-1',
-          {
-            ...DEFAULT_TASK,
-            id: 'task-1',
-            projectId: 'project-1',
-            title: 'Deadline task 1',
-            deadlineDay: '2026-01-20',
-          },
-        ],
-        [
-          'task-2',
-          {
-            ...DEFAULT_TASK,
-            id: 'task-2',
-            projectId: 'project-1',
-            title: 'Deadline task 2',
-            deadlineDay: '2026-01-21',
-          },
-        ],
-        [
-          'task-3',
-          {
-            ...DEFAULT_TASK,
-            id: 'task-3',
-            projectId: 'project-1',
-            title: 'Task without deadline',
-          },
-        ],
-      ]);
-
-      const store = TestBed.inject(MockStore);
-      store.overrideSelector(selectMapOfAllTasksInActiveProjects, mockTasksMap);
-      store.refreshState();
-
-      fixture.detectChanges();
-      tick();
-
-      const deadlines = component.deadlineTasksByDay();
-      expect(deadlines['2026-01-20']?.length || 0).toBe(1);
-      expect(deadlines['2026-01-21']?.length || 0).toBe(1);
-      expect(deadlines['2026-01-20']?.[0]?.title).toBe('Deadline task 1');
-    }));
-
-    it('skips done tasks when grouping deadlines', fakeAsync(() => {
-      const mockTasksMap = new Map<string, Task>([
-        [
-          'task-1',
-          {
-            ...DEFAULT_TASK,
-            id: 'task-1',
-            projectId: 'project-1',
-            title: 'Pending deadline',
-            deadlineDay: '2026-01-20',
-          },
-        ],
-        [
-          'task-2',
-          {
-            ...DEFAULT_TASK,
-            id: 'task-2',
-            projectId: 'project-1',
-            title: 'Completed deadline',
-            deadlineDay: '2026-01-20',
-            isDone: true,
-          },
-        ],
-      ]);
-
-      const store = TestBed.inject(MockStore);
-      store.overrideSelector(selectMapOfAllTasksInActiveProjects, mockTasksMap);
-      store.refreshState();
-
-      fixture.detectChanges();
-      tick();
-
-      const deadlines = component.deadlineTasksByDay();
-      expect(deadlines['2026-01-20']?.length || 0).toBe(1);
-      expect(deadlines['2026-01-20']?.[0]?.id).toBe('task-1');
-    }));
   });
 
   describe('initial time view', () => {

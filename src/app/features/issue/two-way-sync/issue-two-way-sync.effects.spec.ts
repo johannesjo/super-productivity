@@ -2095,6 +2095,62 @@ describe('IssueTwoWaySyncEffects', () => {
         expect(createIssueSpy).not.toHaveBeenCalled();
       }));
 
+      // The add-task bar adds the task, then attaches its repeat
+      it('keeps a task local whose repeat was attached after the add', fakeAsync(() => {
+        const { createIssueSpy } = setup({ createOnServer: true });
+        const task = createMockTask({ id: 'task-new', title: 'Water plants' });
+        taskServiceSpy.getByIdOnce$.and.returnValue(of({ ...task, repeatCfgId: 'cfg1' }));
+        effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+        actions$.next(addTaskAction(task));
+        tick();
+
+        expect(createIssueSpy).not.toHaveBeenCalled();
+        expect(snackServiceSpy.open).not.toHaveBeenCalled();
+      }));
+
+      it('does not create a VTODO for a task deleted before the create', fakeAsync(() => {
+        const { createIssueSpy } = setup({ createOnServer: true });
+        // a missing task reads as undefined, though the signature says Task
+        taskServiceSpy.getByIdOnce$.and.returnValue(of(undefined as unknown as Task));
+        effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+        actions$.next(addTaskAction(createMockTask({ id: 'task-new' })));
+        tick();
+
+        expect(createIssueSpy).not.toHaveBeenCalled();
+        expect(snackServiceSpy.open).not.toHaveBeenCalled();
+      }));
+
+      it('deletes the VTODO instead of linking a task deleted during the create', fakeAsync(() => {
+        const { caldavAdapter } = setup({ createOnServer: true });
+        const deleteIssueSpy = jasmine.createSpy('deleteIssue').and.resolveTo();
+        caldavAdapter.deleteIssue = deleteIssueSpy;
+        const task = createMockTask({ id: 'task-new', title: 'New Task' });
+        let isDeleted = false;
+        taskServiceSpy.getByIdOnce$.and.callFake(() =>
+          of(isDeleted ? (undefined as unknown as Task) : task),
+        );
+        (caldavAdapter.createIssue as jasmine.Spy).and.callFake(async () => {
+          isDeleted = true;
+          return {
+            issueId: 'sp-todo-task-new@super-productivity',
+            issueData: { summary: 'New Task' },
+          };
+        });
+        effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+        actions$.next(addTaskAction(task));
+        tick();
+
+        expect(taskServiceSpy.update).not.toHaveBeenCalled();
+        expect(deleteIssueSpy).toHaveBeenCalledWith(
+          'sp-todo-task-new@super-productivity',
+          jasmine.anything(),
+        );
+        expect(snackServiceSpy.open).not.toHaveBeenCalled();
+      }));
+
       it('keeps the created link when reading the marker back fails', fakeAsync(() => {
         const { caldavAdapter } = setup({ createOnServer: true });
         (caldavAdapter.getFieldMappings as jasmine.Spy).and.returnValue([
