@@ -3030,6 +3030,34 @@ describe('IssueTwoWaySyncEffects', () => {
           expect(pushSpy).not.toHaveBeenCalled();
         }));
       });
+      // Review finding (R2-2): an older server declines the initial time;
+      // the task was created and linked, so that is no failure.
+      it('does not report an initial value the provider declines as a failed create', fakeAsync(() => {
+        adapterRegistry.register(
+          'PLAINSPACE',
+          createMockAdapter({
+            createIssue: createIssueSpy,
+            getFieldMappings: jasmine
+              .createSpy('getFieldMappings')
+              .and.returnValue([dueWithTimeFieldMapping]),
+            pushChanges: jasmine
+              .createSpy('pushChanges')
+              .and.rejectWith({ isExpectedSyncSkip: true }),
+          }),
+        );
+        const task = movedTask({ dueWithTime: 1743508800000 });
+        taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+        effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+        move(task);
+        tick();
+
+        expect(taskServiceSpy.update).toHaveBeenCalledWith(
+          'task-moved',
+          jasmine.objectContaining({ issueId: 'ps-issue-1' }),
+        );
+        expect(snackServiceSpy.open).not.toHaveBeenCalled();
+      }));
 
       it('ignores a move to the project the task is already in', fakeAsync(() => {
         const task = movedTask();

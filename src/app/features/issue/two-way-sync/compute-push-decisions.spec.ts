@@ -395,6 +395,50 @@ describe('computePushDecisions', () => {
     ]);
   });
 
+  // Review finding (R2-3): a timed event's baseline holds `start_date:
+  // undefined`, which JSON drops on its way to my other devices. There, a
+  // day-only plan skipped the day as "no baseline" and pushed the cleared time
+  // alone, which the calendar plugins read as an all-day event today.
+  it('reads a baseline key JSON dropped as undefined', () => {
+    const baseline = JSON.parse(
+      JSON.stringify({ start_datetime: 1743422400000, start_date: undefined }),
+    );
+    expect('start_date' in baseline).toBeFalse();
+
+    const decisions = computePushDecisions(
+      { dueWithTime: undefined, dueDay: '2026-04-01' },
+      [dueWithTimeMapping, dueDayMapping],
+      { dueDay: 'both', dueWithTime: 'both' },
+      { start_datetime: 1743422400000, start_date: undefined },
+      baseline,
+      ctx,
+    );
+
+    expect(decisions).toEqual([
+      { field: 'start_datetime', action: 'push', issueValue: undefined },
+      { field: 'start_date', action: 'push', issueValue: '2026-04-01' },
+    ]);
+  });
+
+  it('still lets the provider win for a key missing from a baseline', () => {
+    const decisions = computePushDecisions(
+      { dueDay: '2026-04-01' },
+      [dueDayMapping],
+      { dueDay: 'both' },
+      { start_date: '2026-03-20' },
+      { title: 'Fix bug' },
+      ctx,
+    );
+
+    expect(decisions).toEqual([
+      jasmine.objectContaining({
+        field: 'start_date',
+        action: 'skip',
+        reasonCode: 'provider-changed',
+      }),
+    ]);
+  });
+
   it('should skip exclusive field clear when its direction is pullOnly', () => {
     const syncConfig: FieldSyncConfig = { dueWithTime: 'both', dueDay: 'pullOnly' };
     const decisions = computePushDecisions(

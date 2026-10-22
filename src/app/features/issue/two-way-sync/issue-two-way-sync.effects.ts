@@ -579,6 +579,12 @@ export class IssueTwoWaySyncEffects {
                     );
                 }),
                 catchError((err) => {
+                  // The create and link succeeded; the provider declined an
+                  // initial value it can't take (an older Plainspace server and
+                  // a time), and says so itself.
+                  if (isExpectedSyncSkipError(err)) {
+                    return EMPTY;
+                  }
                   IssueLog.err('Auto-create issue failed', err);
                   this._snackService.open({
                     type: 'ERROR',

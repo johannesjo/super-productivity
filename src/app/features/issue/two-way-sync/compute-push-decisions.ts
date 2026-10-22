@@ -42,6 +42,10 @@ export const computePushDecisions = (
 ): PushDecision[] => {
   const decisions: PushDecision[] = [];
   const decidedIssueFields = new Set<string>();
+  // A missing key of a baseline that exists was an `undefined` value: JSON
+  // drops it when the baseline syncs to my other devices (#9776). Only no
+  // baseline at all means a first sync.
+  const hasBaseline = Object.keys(lastSyncedValues).length > 0;
   const mappingByTaskField = new Map(fieldMappings.map((m) => [m.taskField, m]));
 
   for (const mapping of fieldMappings) {
@@ -65,7 +69,7 @@ export const computePushDecisions = (
       continue;
     }
 
-    if (!(mapping.issueField in lastSyncedValues)) {
+    if (!hasBaseline) {
       decisions.push({
         field: mapping.issueField,
         action: 'skip',
