@@ -132,12 +132,15 @@ const isBetterMatch = (a: ParsedResult, b: ParsedResult, isTieWinner: boolean): 
   (a.index === b.index &&
     (a.text.length > b.text.length || (a.text.length === b.text.length && isTieWinner)));
 
-// A UI-language result counts only at the start of the token, after the
-// trigger char: its short words are ordinary words elsewhere (German "so" and
-// "do", Dutch "zo"), and a match further in would consume the title text up to
-// it ("max@firma.de so bald" → due Sunday).
-const isAtTokenStart = (text: string, result: ParsedResult): boolean =>
-  /^[@!]?\s*$/.test(text.slice(0, result.index));
+// A UI-language short word (German "so" and "do", Dutch "zo") counts only at
+// the start of the token, after the trigger char: further in it is an ordinary
+// word, and the match would consume the title text up to it ("max@firma.de so
+// bald" → due Sunday). A longer match may start further in, because chrono
+// leaves a leading article or preposition out of it ("@le 5 mars", "@el
+// lunes", "@um 15 Uhr").
+const isShortWord = (text: string): boolean => /^\p{L}{1,3}\.?$/u.test(text.trim());
+const isTrustedUiResult = (text: string, result: ParsedResult): boolean =>
+  /^[@!]?\s*$/.test(text.slice(0, result.index)) || !isShortWord(result.text);
 
 const combine = (
   uiParser: Chrono,
@@ -147,7 +150,7 @@ const combine = (
   parse: (text, ref, option) => {
     const uiResults = uiParser
       .parse(text, ref, option)
-      .filter((result) => isAtTokenStart(text, result));
+      .filter((result) => isTrustedUiResult(text, result));
     const enResults = enParser.parse(text, ref, option);
     if (!uiResults.length) {
       return enResults;
