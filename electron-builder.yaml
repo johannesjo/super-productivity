@@ -7,6 +7,8 @@ files:
   - '!electron/**/*.ts'
   - '!electron/**/*.test.cjs'
   - '!electron/**/*.js.map'
+  # Installed beside the executable by afterPack for x64 Linux packages only.
+  - '!electron/bin/wayland-idle-helper'
   - .tmp/angular-dist/**/*
   - 'embedded.provisionprofile'
   # Exclude Nx binaries - they're build tools, not runtime dependencies
