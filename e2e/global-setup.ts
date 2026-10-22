@@ -65,13 +65,22 @@ const globalSetup = async (config: FullConfig): Promise<void> => {
   } else {
     console.log('Building bundled plugins...');
     try {
+      // Output is piped and shown only on failure: a passing build adds ~55
+      // lines to every first run in a fresh worktree.
       execSync('npm run plugins:build', {
-        stdio: 'inherit',
+        stdio: 'pipe',
         cwd: process.cwd(),
+        // piped output counts against maxBuffer (1 MB default); exceeding it kills the build
+        maxBuffer: 64 * 1024 * 1024,
       });
       console.log('Bundled plugins built successfully');
     } catch (error) {
-      console.error('Failed to build plugins:', error);
+      const { stdout, stderr, message } = error as Error & {
+        stdout?: Buffer;
+        stderr?: Buffer;
+      };
+      console.error(`${stdout ?? ''}${stderr ?? ''}`);
+      console.error('Failed to build plugins:', message);
       throw error; // Fail fast if plugin build fails
     }
   }
