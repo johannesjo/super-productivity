@@ -3260,6 +3260,8 @@
       "TOKEN_PLACEHOLDER": "pat_…",
       "UNREACHABLE": "Couldn't reach Plainspace. Check your internet connection and the host, then try again."
     },
+    "COPY_INVITE_LINK": "Copy invite link",
+    "COPY_INVITE_LINK_FAILED": "Couldn't get the invite link — check your connection and try again.",
     "FORM": {
       "HOST": "Plainspace host",
       "SPACE_ID": "Space ID",
@@ -3271,11 +3273,16 @@
       "HELP": "Connect a Plainspace space with a personal API token to import tasks assigned to you and claim unclaimed tasks.",
       "TITLE": "Plainspace"
     },
+    "INVITE_LINK_COPIED": "Invite link copied. Share it with the people you want in this space.",
     "LOGIN_REQUIRED": "A Plainspace API token is required to share a project.",
     "NO_UNCLAIMED": "No unclaimed tasks right now.",
     "OFFLINE": "You're offline. Connecting to Plainspace needs an internet connection.",
     "OPEN_FAILED": "Could not open the Plainspace project — check your connection and try again.",
     "OPEN_IN_PLAINSPACE": "Open in Plainspace",
+    "RECONNECT": {
+      "ACTION": "Reconnect",
+      "MSG": "Plainspace rejected the connection — the API token may have been revoked or replaced. Reconnect to keep this project in sync."
+    },
     "RECURRING": "Recurring task",
     "SHARE_DESCRIPTION": "Creates a shared Plainspace space and links it to this project so you can collaborate with others.",
     "SHARE_FAILED": "Could not share this project on Plainspace.",
@@ -3284,6 +3291,7 @@
     "SHARE_SUCCESS": "Project shared on Plainspace. Tasks assigned to you will import automatically.",
     "SPACE_PICKER": {
       "CREATE_NEW": "Create new space",
+      "DATA_NOTICE": "Task titles, done state and scheduled times of shared tasks are stored on {{host}}. Notes, subtasks and tracked time stay in Super Productivity.",
       "DISCONNECT": "Disconnect account",
       "DISCONNECT_HINT": "Disconnecting removes the saved account from this device. Existing project integrations keep syncing. To stop them, open each relevant Plainspace integration in the issue provider panel and choose its gear icon → Delete.",
       "ERROR": "Couldn't reach Plainspace. Check your connection and that your token is still valid, then try again.",

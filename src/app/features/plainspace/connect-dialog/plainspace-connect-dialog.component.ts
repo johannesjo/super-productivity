@@ -27,6 +27,11 @@ import {
 
 export interface PlainspaceConnectDialogData {
   host?: string | null;
+  /**
+   * The token this connect replaces, when reconnecting one provider whose
+   * token was rejected; providers holding it get the new one (#8616).
+   */
+  replacedToken?: string | null;
 }
 
 /**
@@ -101,6 +106,7 @@ export class PlainspaceConnectDialogComponent {
     const res: PlainspaceConnectResult = await this._accountService.connect(
       token,
       this.host,
+      this._data?.replacedToken,
     );
     if (res === 'ok') {
       this._dialogRef.close(true);
