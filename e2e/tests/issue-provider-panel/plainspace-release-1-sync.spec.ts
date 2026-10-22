@@ -61,7 +61,6 @@ const openDetail = async (page: Page, title: string): Promise<void> => {
   await expect(panel).toBeVisible();
 };
 
-/** Restarts the app; the update and import polls run 8 s after load. */
 /**
  * Renames while PATCH is offline and waits until the rename's own push has
  * failed. Going back online earlier lets that push, already past its fetch,
@@ -81,6 +80,7 @@ const renameOffline = async (
     .toEqual([0]);
 };
 
+/** Restarts the app; the update and import polls run 8 s after load. */
 const restart = async (page: Page, server: FakePlainspace): Promise<void> => {
   const before = successfulPolls(server);
   await page.reload();
