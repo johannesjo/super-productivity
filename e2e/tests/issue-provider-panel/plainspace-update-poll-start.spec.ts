@@ -60,13 +60,24 @@ test.describe('Plainspace update poll starts without a context switch', () => {
     page,
     workViewPage,
   }) => {
+    let updatePolls = 0;
+    page.on('console', (msg) => {
+      if (msg.text().includes('POLLING CHANGES FOR PLAINSPACE')) {
+        updatePolls++;
+      }
+    });
     await workViewPage.waitForTaskList();
     const server = await setUpOnToday(page);
+    // Deliberate: let the timer's first poll (8 s after start) pass; the next
+    // one is minutes away, so a pull right after the focus is the focus's own.
+    await page.waitForTimeout(10000);
 
     server.remoteEdit(TASK_ID, { title: 'Buy big tent' });
+    const before = updatePolls;
     await page.evaluate(() => window.dispatchEvent(new Event('focus')));
 
-    await expect.poll(() => linkedTitle(page), { timeout: 15000 }).toBe('Buy big tent');
+    await expect.poll(() => updatePolls, { timeout: 5000 }).toBeGreaterThan(before);
+    await expect.poll(() => linkedTitle(page), { timeout: 5000 }).toBe('Buy big tent');
   });
 
   test('the poll after a restart pulls a collaborator change', async ({
