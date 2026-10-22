@@ -1,4 +1,5 @@
-import { computePushDecisions } from './compute-push-decisions';
+import { computePushDecisions, pushedValuesToCarry } from './compute-push-decisions';
+import { Task } from '../../tasks/task.model';
 import { FieldMapping, FieldMappingContext, FieldSyncConfig } from './issue-sync.model';
 
 describe('computePushDecisions', () => {
@@ -462,5 +463,71 @@ describe('computePushDecisions', () => {
       reasonCode: 'provider-changed',
       reason: 'provider changed (provider wins)',
     });
+  });
+});
+
+describe('pushedValuesToCarry', () => {
+  const ctx: FieldMappingContext = { issueId: '42', issueNumber: 42 };
+  const identity = (v: unknown): unknown => v;
+  const mapping = (taskField: keyof Task, issueField: string): FieldMapping => ({
+    taskField,
+    issueField,
+    defaultDirection: 'both',
+    toIssueValue: identity,
+    toTaskValue: identity,
+  });
+  const mappings = [
+    mapping('title', 'title'),
+    mapping('notes', 'body'),
+    mapping('isDone', 'done'),
+    mapping('dueDay', 'due'),
+  ];
+  const task = {
+    id: 't1',
+    title: 'Mine',
+    notes: 'n',
+    isDone: true,
+    dueDay: '2026-10-22',
+  } as Task;
+
+  it('carries a pushed field whose value still maps to what was pushed', () => {
+    expect(
+      pushedValuesToCarry(task, { title: 'Mine', body: 'n' }, mappings, ctx),
+    ).toEqual({ title: 'Mine', notes: 'n' });
+  });
+
+  it('leaves out a field edited again since the push', () => {
+    expect(pushedValuesToCarry(task, { title: 'Older' }, mappings, ctx)).toEqual({});
+  });
+
+  it('leaves out fields that were not pushed', () => {
+    expect(pushedValuesToCarry(task, { body: 'n' }, mappings, ctx)).toEqual({
+      notes: 'n',
+    });
+  });
+
+  it('never carries fields whose write has side effects', () => {
+    expect(
+      pushedValuesToCarry(task, { done: true, due: '2026-10-22' }, mappings, ctx),
+    ).toEqual({});
+  });
+
+  it('compares through the mapping', () => {
+    const prefixed: FieldMapping = {
+      ...mapping('title', 'title'),
+      toIssueValue: (v: unknown) => (v as string).replace(/^#42 /, ''),
+    };
+    expect(
+      pushedValuesToCarry(
+        { ...task, title: '#42 Mine' },
+        { title: 'Mine' },
+        [prefixed],
+        ctx,
+      ),
+    ).toEqual({ title: '#42 Mine' });
+  });
+
+  it('carries nothing for a task that is gone', () => {
+    expect(pushedValuesToCarry(undefined, { title: 'Mine' }, mappings, ctx)).toEqual({});
   });
 });

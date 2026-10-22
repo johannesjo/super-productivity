@@ -1,3 +1,4 @@
+import { Task } from '../../tasks/task.model';
 import { FieldMapping, FieldMappingContext, FieldSyncConfig } from './issue-sync.model';
 
 /** Why a `skip` decision was emitted. Stable codes that consumers can branch on. */
@@ -117,4 +118,57 @@ export const computePushDecisions = (
   }
 
   return decisions;
+};
+
+/**
+ * Task fields a baseline write may carry at their unchanged value. Writing one
+ * again changes no state; at most, time-block sync re-writes a scheduled task's
+ * calendar event at the same values (it reacts to `title` and `timeEstimate`).
+ * `isDone` (completion effects), `tagIds` (tag lists) and the due fields
+ * (planner, reminders) have real side effects, so they are left out.
+ */
+const VALUE_CARRY_SAFE_FIELDS: ReadonlySet<string> = new Set([
+  'title',
+  'notes',
+  'timeEstimate',
+]);
+
+/**
+ * The task's own values of the fields just pushed, for the write that moves
+ * their baseline to the pushed value (#11034). Field-level LWW resolves a
+ * concurrent edit per field, so a baseline written alone can win over an
+ * older write of its field while that field keeps another device's newer
+ * value: the field then differs from its baseline and the next poll pushes it,
+ * reverting the provider. Written together, field and baseline win or lose
+ * together. A field whose value no longer maps to what was pushed (edited
+ * again meanwhile) is left out, so a newer local edit is never overwritten.
+ */
+export const pushedValuesToCarry = (
+  task: Task | undefined,
+  pushedIssueValues: Record<string, unknown>,
+  fieldMappings: FieldMapping[],
+  ctx: FieldMappingContext,
+): Partial<Task> => {
+  const carried: Record<string, unknown> = {};
+  if (!task) {
+    return carried as Partial<Task>;
+  }
+  for (const mapping of fieldMappings) {
+    if (
+      !VALUE_CARRY_SAFE_FIELDS.has(mapping.taskField) ||
+      !Object.prototype.hasOwnProperty.call(pushedIssueValues, mapping.issueField)
+    ) {
+      continue;
+    }
+    const localValue = task[mapping.taskField];
+    if (
+      valuesEqual(
+        mapping.toIssueValue(localValue, ctx),
+        pushedIssueValues[mapping.issueField],
+      )
+    ) {
+      carried[mapping.taskField] = localValue;
+    }
+  }
+  return carried as Partial<Task>;
 };
