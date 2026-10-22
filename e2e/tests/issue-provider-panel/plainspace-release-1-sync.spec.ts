@@ -62,6 +62,25 @@ const openDetail = async (page: Page, title: string): Promise<void> => {
 };
 
 /** Restarts the app; the update and import polls run 8 s after load. */
+/**
+ * Renames while PATCH is offline and waits until the rename's own push has
+ * failed. Going back online earlier lets that push, already past its fetch,
+ * reach Plainspace after whatever the test sets up next.
+ */
+const renameOffline = async (
+  page: Page,
+  server: FakePlainspace,
+  title: string,
+  newTitle: string,
+): Promise<void> => {
+  server.isPatchOffline = true;
+  const attempts = server.patches.length;
+  await renameTask(page, title, newTitle);
+  await expect
+    .poll(() => server.patches.slice(attempts).map((p) => p.status), { timeout: 15000 })
+    .toEqual([0]);
+};
+
 const restart = async (page: Page, server: FakePlainspace): Promise<void> => {
   const before = successfulPolls(server);
   await page.reload();
@@ -80,8 +99,7 @@ test.describe('Plainspace Release 1 sync', () => {
     const server = await setUp(page, projectPage);
 
     // Renamed while Plainspace can't be reached: the push fails.
-    server.isPatchOffline = true;
-    await renameTask(page, 'Buy tent', 'Buy a bigger tent');
+    await renameOffline(page, server, 'Buy tent', 'Buy a bigger tent');
 
     // Meanwhile someone ticks the task off in Plainspace.
     server.remoteEdit(TASK_ID, { done: true });
@@ -224,8 +242,7 @@ test.describe('Plainspace Release 1 sync', () => {
     const server = await setUp(page, projectPage);
 
     // This device renames offline; another device already sent the same name.
-    server.isPatchOffline = true;
-    await renameTask(page, 'Buy tent', 'Buy two tents');
+    await renameOffline(page, server, 'Buy tent', 'Buy two tents');
     server.isPatchOffline = false;
     server.remoteEdit(TASK_ID, { title: 'Buy two tents' });
     const patchesBefore = server.patches.length;
