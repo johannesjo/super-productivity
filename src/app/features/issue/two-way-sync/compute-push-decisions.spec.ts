@@ -506,10 +506,25 @@ describe('pushedValuesToCarry', () => {
     });
   });
 
-  it('never carries fields whose write has side effects', () => {
+  it('carries a pushed done state with its completion date', () => {
     expect(
-      pushedValuesToCarry(task, { done: true, due: '2026-10-22' }, mappings, ctx),
-    ).toEqual({});
+      pushedValuesToCarry({ ...task, doneOn: 1234 }, { done: true }, mappings, ctx),
+    ).toEqual({ isDone: true, doneOn: 1234 });
+  });
+
+  it('carries a pushed reopen with its cleared completion date', () => {
+    const carried = pushedValuesToCarry(
+      { ...task, isDone: false, doneOn: undefined },
+      { done: false },
+      mappings,
+      ctx,
+    );
+    expect(carried).toEqual({ isDone: false, doneOn: undefined });
+    expect('doneOn' in carried).toBe(true);
+  });
+
+  it('never carries fields whose lists the task meta-reducers keep', () => {
+    expect(pushedValuesToCarry(task, { due: '2026-10-22' }, mappings, ctx)).toEqual({});
   });
 
   it('compares through the mapping', () => {

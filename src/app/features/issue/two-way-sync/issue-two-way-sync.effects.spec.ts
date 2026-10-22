@@ -132,7 +132,11 @@ describe('IssueTwoWaySyncEffects', () => {
   beforeEach(() => {
     actions$ = new Subject<any>();
 
-    taskServiceSpy = jasmine.createSpyObj('TaskService', ['getByIdOnce$', 'update']);
+    taskServiceSpy = jasmine.createSpyObj('TaskService', [
+      'getByIdOnce$',
+      'update',
+      'updateUi',
+    ]);
     issueProviderServiceSpy = jasmine.createSpyObj('IssueProviderService', [
       'getCfgOnce$',
     ]);
@@ -470,7 +474,7 @@ describe('IssueTwoWaySyncEffects', () => {
         'COMPLETED',
       );
 
-      expect(taskServiceSpy.update).toHaveBeenCalledWith('task-1', {
+      expect(taskServiceSpy.updateUi).toHaveBeenCalledWith('task-1', {
         issueLastSyncedValues: { status: 'NEEDS-ACTION' },
       });
     }));
@@ -507,7 +511,7 @@ describe('IssueTwoWaySyncEffects', () => {
       );
       tick();
 
-      expect(taskServiceSpy.update).toHaveBeenCalledWith('task-1', {
+      expect(taskServiceSpy.updateUi).toHaveBeenCalledWith('task-1', {
         issueLastSyncedValues: { status: 'COMPLETED' },
         issueLastUpdated: 3000,
       });
@@ -525,7 +529,7 @@ describe('IssueTwoWaySyncEffects', () => {
       );
       // issueLastUpdated stays stale so the next poll refreshes the task, seeds
       // the full baseline and pulls remote edits made before this push
-      expect(taskServiceSpy.update).toHaveBeenCalledWith('task-1', {
+      expect(taskServiceSpy.updateUi).toHaveBeenCalledWith('task-1', {
         issueLastSyncedValues: { status: 'COMPLETED' },
       });
     }));
@@ -563,7 +567,7 @@ describe('IssueTwoWaySyncEffects', () => {
         isDone: false,
       });
       taskServiceSpy.getByIdOnce$.and.callFake(() => of(task));
-      taskServiceSpy.update.and.callFake((_id: string, changes: Partial<Task>) => {
+      taskServiceSpy.updateUi.and.callFake((_id: string, changes: Partial<Task>) => {
         task = { ...task, ...changes };
       });
       issueProviderServiceSpy.getCfgOnce$.and.returnValue(of(createMockIssueProvider()));
@@ -632,7 +636,7 @@ describe('IssueTwoWaySyncEffects', () => {
         title: 'Old',
       });
       taskServiceSpy.getByIdOnce$.and.callFake(() => of(task));
-      taskServiceSpy.update.and.callFake((_id: string, changes: Partial<Task>) => {
+      taskServiceSpy.updateUi.and.callFake((_id: string, changes: Partial<Task>) => {
         task = { ...task, ...changes };
       });
       issueProviderServiceSpy.getCfgOnce$.and.returnValue(of(createMockIssueProvider()));
@@ -772,7 +776,7 @@ describe('IssueTwoWaySyncEffects', () => {
 
       tick();
 
-      const updateChanges = taskServiceSpy.update.calls.mostRecent()
+      const updateChanges = taskServiceSpy.updateUi.calls.mostRecent()
         .args[1] as Partial<Task>;
       expect(updateChanges.issueLastSyncedValues).toEqual({ status: 'COMPLETED' });
       expect('dtstart' in updateChanges.issueLastSyncedValues!).toBeFalse();
@@ -832,7 +836,7 @@ describe('IssueTwoWaySyncEffects', () => {
         { status: 'COMPLETED' },
         jasmine.any(Object),
       );
-      const updateChanges = taskServiceSpy.update.calls.mostRecent()
+      const updateChanges = taskServiceSpy.updateUi.calls.mostRecent()
         .args[1] as Partial<Task>;
       expect(updateChanges.issueLastSyncedValues).toEqual({
         status: 'COMPLETED',
@@ -899,7 +903,7 @@ describe('IssueTwoWaySyncEffects', () => {
         { summary: 'New title' },
         jasmine.any(Object),
       );
-      const updateChanges = taskServiceSpy.update.calls.mostRecent()
+      const updateChanges = taskServiceSpy.updateUi.calls.mostRecent()
         .args[1] as Partial<Task>;
       // ...the title baseline advances, the remote completion is left untouched...
       expect(updateChanges.issueLastSyncedValues).toEqual({
@@ -957,7 +961,7 @@ describe('IssueTwoWaySyncEffects', () => {
 
       tick();
 
-      const updateChanges = taskServiceSpy.update.calls.mostRecent()
+      const updateChanges = taskServiceSpy.updateUi.calls.mostRecent()
         .args[1] as Partial<Task>;
       expect(updateChanges.issueLastUpdated).toBe(999);
 
@@ -965,7 +969,25 @@ describe('IssueTwoWaySyncEffects', () => {
     }));
 
     describe('the baseline write after a push (#11034)', () => {
-      const pushTitle = (taskInStoreAtDispatch: Partial<Task>): Partial<Task> => {
+      /**
+       * Pushes `changes` for a task that starts as `taskBase`; the store holds
+       * `taskBase` with `inStore` applied when the baseline is written.
+       * The issue starts at the task's baseline. Returns the baseline write.
+       */
+      const push = (
+        taskBase: Partial<Task>,
+        changes: Partial<Task>,
+        inStore: Partial<Task> = {},
+        isSubscribed = false,
+      ): Partial<Task> => {
+        const task = createMockTask({
+          id: 'task-1',
+          issueType: 'TEST_PROVIDER' as any,
+          issueId: 'issue-1',
+          issueProviderId: 'provider-1',
+          issueLastUpdated: 123,
+          ...taskBase,
+        });
         const adapter = createMockAdapter({
           getFieldMappings: jasmine
             .createSpy('getFieldMappings')
@@ -973,7 +995,7 @@ describe('IssueTwoWaySyncEffects', () => {
           getSyncConfig: jasmine.createSpy('getSyncConfig').and.returnValue({}),
           fetchIssue: jasmine
             .createSpy('fetchIssue')
-            .and.resolveTo({ summary: 'Old title', status: 'NEEDS-ACTION' }),
+            .and.resolveTo({ ...task.issueLastSyncedValues }),
           extractSyncValues: jasmine
             .createSpy('extractSyncValues')
             .and.callFake((issue: { summary: unknown; status: unknown }) => ({
@@ -982,38 +1004,32 @@ describe('IssueTwoWaySyncEffects', () => {
             })),
         });
         adapterRegistry.register('TEST_PROVIDER', adapter);
-        const task = createMockTask({
-          id: 'task-1',
-          issueType: 'TEST_PROVIDER' as any,
-          issueId: 'issue-1',
-          issueProviderId: 'provider-1',
-          title: 'New title',
-          isDone: false,
-          issueLastSyncedValues: { summary: 'Old title', status: 'NEEDS-ACTION' },
-          issueLastUpdated: 123,
-        });
         taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
         issueProviderServiceSpy.getCfgOnce$.and.returnValue(
           of(createMockIssueProvider()),
         );
         store.overrideSelector(selectTaskEntities, {
-          ['task-1']: { ...task, ...taskInStoreAtDispatch },
+          ['task-1']: { ...task, ...inStore },
         });
         store.refreshState();
 
-        effects.pushFieldsOnTaskUpdate$.subscribe();
-        actions$.next(
-          TaskSharedActions.updateTask({
-            task: { id: 'task-1', changes: { title: 'New title' } },
-          }),
-        );
+        if (!isSubscribed) {
+          effects.pushFieldsOnTaskUpdate$.subscribe();
+        }
+        actions$.next(TaskSharedActions.updateTask({ task: { id: 'task-1', changes } }));
         tick();
         adapterRegistry.unregister('TEST_PROVIDER');
-        return taskServiceSpy.update.calls.mostRecent().args[1] as Partial<Task>;
+        return taskServiceSpy.updateUi.calls.mostRecent().args[1] as Partial<Task>;
+      };
+
+      const renamed: Partial<Task> = {
+        title: 'New title',
+        isDone: false,
+        issueLastSyncedValues: { summary: 'Old title', status: 'NEEDS-ACTION' },
       };
 
       it('carries the pushed title, so title and baseline resolve together', fakeAsync(() => {
-        const changes = pushTitle({});
+        const changes = push(renamed, { title: 'New title' });
         expect(changes.title).toBe('New title');
         expect(changes.issueLastSyncedValues).toEqual({
           summary: 'New title',
@@ -1023,9 +1039,81 @@ describe('IssueTwoWaySyncEffects', () => {
       }));
 
       it('does not carry a title edited again during the push', fakeAsync(() => {
-        const changes = pushTitle({ title: 'Edited again' });
+        const changes = push(renamed, { title: 'New title' }, { title: 'Edited again' });
         expect('title' in changes).toBe(false);
         expect(changes.issueLastSyncedValues!['summary']).toBe('New title');
+      }));
+
+      it('is one updateTaskUi, never an updateTask', fakeAsync(() => {
+        push(renamed, { title: 'New title' });
+        expect(taskServiceSpy.updateUi).toHaveBeenCalledTimes(1);
+        expect(taskServiceSpy.update).not.toHaveBeenCalled();
+      }));
+
+      it('carries a pushed reopen and clears its completion date', fakeAsync(() => {
+        const changes = push(
+          {
+            title: 'T',
+            isDone: false,
+            doneOn: undefined,
+            issueLastSyncedValues: { summary: 'T', status: 'COMPLETED' },
+          },
+          { isDone: false },
+        );
+        expect(changes.isDone).toBe(false);
+        expect('doneOn' in changes).toBe(true);
+        expect(changes.doneOn).toBeUndefined();
+        expect(changes.issueLastSyncedValues!['status']).toBe('NEEDS-ACTION');
+      }));
+
+      it('carries a pushed completion with its completion date', fakeAsync(() => {
+        const changes = push(
+          {
+            title: 'T',
+            isDone: true,
+            doneOn: 1234,
+            issueLastSyncedValues: { summary: 'T', status: 'NEEDS-ACTION' },
+          },
+          { isDone: true },
+        );
+        expect(changes.isDone).toBe(true);
+        expect(changes.doneOn).toBe(1234);
+      }));
+
+      it('does not carry a done state undone during the push', fakeAsync(() => {
+        const changes = push(
+          {
+            title: 'T',
+            isDone: true,
+            doneOn: 1234,
+            issueLastSyncedValues: { summary: 'T', status: 'NEEDS-ACTION' },
+          },
+          { isDone: true },
+          { isDone: false, doneOn: undefined },
+        );
+        expect('isDone' in changes).toBe(false);
+        expect('doneOn' in changes).toBe(false);
+      }));
+
+      it("still pushes the user's next edit of the task", fakeAsync(() => {
+        push(renamed, { title: 'New title' });
+        const pushes = (): number => taskServiceSpy.updateUi.calls.count();
+        expect(pushes()).toBe(1);
+
+        push(
+          {
+            title: 'Newer title',
+            isDone: false,
+            issueLastSyncedValues: { summary: 'New title', status: 'NEEDS-ACTION' },
+          },
+          { title: 'Newer title' },
+          {},
+          true,
+        );
+        expect(pushes()).toBe(2);
+        expect(taskServiceSpy.updateUi.calls.mostRecent().args[1].title).toBe(
+          'Newer title',
+        );
       }));
     });
 
@@ -1509,7 +1597,7 @@ describe('IssueTwoWaySyncEffects', () => {
       let current = linkedTask();
       let remote: Record<string, unknown> = { ...baseline };
       taskServiceSpy.getByIdOnce$.and.callFake(() => of(current));
-      taskServiceSpy.update.and.callFake((_id: string, changes: Partial<Task>) => {
+      taskServiceSpy.updateUi.and.callFake((_id: string, changes: Partial<Task>) => {
         current = { ...current, ...changes } as Task;
       });
       (adapter.fetchIssue as jasmine.Spy).and.callFake(async () => remote);
@@ -1635,7 +1723,7 @@ describe('IssueTwoWaySyncEffects', () => {
       tick();
 
       expect(adapter.fetchIssue).toHaveBeenCalledTimes(1);
-      expect(taskServiceSpy.update).toHaveBeenCalledWith(
+      expect(taskServiceSpy.updateUi).toHaveBeenCalledWith(
         'task-1',
         jasmine.objectContaining({ issueLastUpdated: 42 }),
       );
@@ -2479,7 +2567,7 @@ describe('IssueTwoWaySyncEffects', () => {
         tick();
 
         expect(caldavAdapter.pushChanges).toHaveBeenCalled();
-        expect(taskServiceSpy.update).toHaveBeenCalledWith(
+        expect(taskServiceSpy.updateUi).toHaveBeenCalledWith(
           'task-new',
           jasmine.objectContaining({ issueLastUpdated: 888 }),
         );
@@ -3362,7 +3450,7 @@ describe('IssueTwoWaySyncEffects', () => {
       );
 
       // Should have updated issueLastSyncedValues AND issueLastUpdated
-      const updateCalls = taskServiceSpy.update.calls.allArgs();
+      const updateCalls = taskServiceSpy.updateUi.calls.allArgs();
       const lastUpdateCall = updateCalls[updateCalls.length - 1];
       expect(lastUpdateCall[0]).toBe('task-new');
       expect(lastUpdateCall[1]).toEqual(
