@@ -343,7 +343,8 @@ SP:
 `dueWithTime: 'both'`, plus the `dueDay` mapping with
 `mutuallyExclusive: ['dueWithTime']`; recurring items pull only. Closes #9833.
 
-**Delivered** as planned, with three deviations:
+**Delivered** as planned, and **ships with Release 1** in the same tag
+(maintainer decision, Oct 22). Three deviations:
 
 - The `dueDay` mapping targets `scheduledAt` itself and always sends "no
   time", instead of clearing it through `mutuallyExclusive`: that hook only
@@ -440,6 +441,13 @@ gets a fix only when it is reported.
   Space. Transitional (needs a v19.x device in the fleet; #11039 pulls `null`
   from then on), and every guard found (e.g. no poll-time push of a time over
   a "no time" baseline) also blocks a legitimate offline time edit for good.
+- **A stale time pushed back after a two-device split.** The two-device
+  stale-pull case #11042/#11046 fix for title and done (another device pulls
+  an old value between an offline edit and its push) can push an old time back
+  for everyone. The time is not carried with its baseline: carrying a due
+  field through `updateTaskUi` would skip the planner and TODAY meta-reducer
+  bookkeeping and needs its own design. The outcome is a visible wrong time,
+  not lost content. Revisit on a user report.
 
 ## Sync and long-term cost
 
