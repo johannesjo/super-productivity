@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { createEffect, ofType } from '@ngrx/effects';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { EMPTY, from, merge, Observable, timer } from 'rxjs';
@@ -112,7 +113,11 @@ export class PollIssueUpdatesEffects {
         }
         return from(this._issueService.refreshIssueTasks(issueTasks, provider)).pipe(
           catchError((err) => {
-            IssueLog.error('Error polling issue updates for ' + provider.id, err);
+            // The error response carries the provider's URL: log its status only.
+            IssueLog.error(
+              'Error polling issue updates for ' + provider.id,
+              err instanceof HttpErrorResponse ? { status: err.status } : err,
+            );
             return EMPTY;
           }),
         );

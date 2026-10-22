@@ -8,6 +8,7 @@ import {
   successfulPolls,
   waitForPollAfter,
 } from '../../utils/plainspace-fake';
+import { deleteTaskViaContextMenu } from '../../utils/recently-deleted-helpers';
 
 // Release 1 of the multi-user collaboration plan
 // (docs/plans/2026-10-21-multi-user-collaboration.md): per-field pull,
@@ -70,9 +71,10 @@ const openDetail = async (page: Page, title: string): Promise<void> => {
 };
 
 /**
- * Renames while PATCH is offline and waits until the rename's own push has
- * failed. Going back online earlier lets that push, already past its fetch,
- * reach Plainspace after whatever the test sets up next.
+ * Renames while offline and waits until the rename's own push has failed: its
+ * read of the task gets no answer, so nothing is written. Going back online
+ * earlier could let that push reach Plainspace after whatever the test sets up
+ * next.
  */
 const renameOffline = async (
   page: Page,
@@ -80,13 +82,38 @@ const renameOffline = async (
   title: string,
   newTitle: string,
 ): Promise<void> => {
-  server.isPatchOffline = true;
-  const attempts = server.patches.length;
+  server.isOffline = true;
   await renameTask(page, title, newTitle);
-  await expect
-    .poll(() => server.patches.slice(attempts).map((p) => p.status), { timeout: 15000 })
-    .toEqual([0]);
+  await waitForFailedPush(server);
 };
+
+/** Waits until a push's read of the task got no answer. */
+const waitForFailedPush = async (server: FakePlainspace): Promise<void> => {
+  const attempts = server.offlineRequests.length;
+  await expect
+    .poll(() => server.offlineRequests.slice(attempts), { timeout: 15000 })
+    .toContain(`GET /tasks/${TASK_ID}`);
+};
+
+/** The title the task last agreed on with Plainspace (its sync baseline). */
+const syncedTitle = (page: Page): Promise<unknown> =>
+  page.evaluate((issueId) => {
+    type TaskLike = { issueId?: string; issueLastSyncedValues?: { title?: unknown } };
+    type StoreLike = {
+      subscribe: (
+        next: (state: { tasks: { entities: Record<string, TaskLike> } }) => void,
+      ) => { unsubscribe: () => void };
+    };
+    const store = (window as unknown as { __e2eTestHelpers: { store: StoreLike } })
+      .__e2eTestHelpers.store;
+    let task: TaskLike | undefined;
+    store
+      .subscribe((state) => {
+        task = Object.values(state.tasks.entities).find((t) => t?.issueId === issueId);
+      })
+      .unsubscribe();
+    return task?.issueLastSyncedValues?.title;
+  }, TASK_ID);
 
 /** Restarts the app; the update and import polls run 8 s after load. */
 const restart = async (page: Page, server: FakePlainspace): Promise<void> => {
@@ -111,7 +138,7 @@ test.describe('Plainspace Release 1 sync', () => {
 
     // Meanwhile someone ticks the task off in Plainspace.
     server.remoteEdit(TASK_ID, { done: true });
-    server.isPatchOffline = false;
+    server.isOffline = false;
 
     // Restart and poll: the remote completion lands, the local title stays,
     // and the title is pushed because Plainspace still has the old one.
@@ -134,13 +161,13 @@ test.describe('Plainspace Release 1 sync', () => {
     const server = await setUp(page, projectPage);
 
     // Offline: the rename's own push fails.
-    server.isPatchOffline = true;
+    server.isOffline = true;
     server.isTasksOffline = true;
     await renameTask(page, 'Buy tent', 'Buy a tent');
-    await expect.poll(() => server.patches.length, { timeout: 15000 }).toBe(1);
-    // A PATCH would now go through, but /tasks still fails: nothing is pushed
+    await waitForFailedPush(server);
+    // A push would now go through, but /tasks still fails: nothing is pushed
     // from a failed poll.
-    server.isPatchOffline = false;
+    server.isOffline = false;
     const failedBefore = server.taskListRequests.length;
     await page.reload();
     await expect
@@ -148,7 +175,7 @@ test.describe('Plainspace Release 1 sync', () => {
       .toBeGreaterThanOrEqual(failedBefore + 2);
     // Deliberate: a push queued by a failed poll would show up meanwhile.
     await page.waitForTimeout(2000);
-    expect(server.patches.length).toBe(1);
+    expect(server.patches).toEqual([]);
 
     // Back online: the next successful poll pushes it, once.
     server.isTasksOffline = false;
@@ -157,7 +184,7 @@ test.describe('Plainspace Release 1 sync', () => {
       .poll(() => server.tasks.get(TASK_ID)!.title, { timeout: 15000 })
       .toBe('Buy a tent');
     await page.waitForTimeout(2000);
-    expect(server.patches.slice(1)).toEqual([
+    expect(server.patches).toEqual([
       { id: TASK_ID, body: { title: 'Buy a tent' }, status: 200 },
     ]);
   });
@@ -183,7 +210,9 @@ test.describe('Plainspace Release 1 sync', () => {
     server.remoteEdit(TASK_ID, { title: 'Buy tent and pegs' });
     await restart(page, server);
     await expect(taskRow(page, 'Buy tent and pegs')).toBeVisible();
-    // Pulling it is not an edit: nothing is pushed back.
+    // Pulling it is not an edit: nothing is pushed back. Deliberate: a push
+    // queued after the pull would show up meanwhile.
+    await page.waitForTimeout(2000);
     expect(server.patches.length).toBe(1);
   });
 
@@ -274,12 +303,14 @@ test.describe('Plainspace Release 1 sync', () => {
 
     // This device renames offline; another device already sent the same name.
     await renameOffline(page, server, 'Buy tent', 'Buy two tents');
-    server.isPatchOffline = false;
+    server.isOffline = false;
     server.remoteEdit(TASK_ID, { title: 'Buy two tents' });
     const patchesBefore = server.patches.length;
 
     await restart(page, server);
     await expect(taskRow(page, 'Buy two tents')).toBeVisible();
+    // Converged: the baseline is the shared title, so nothing stays pending.
+    await expect.poll(() => syncedTitle(page)).toBe('Buy two tents');
     // Give a queued push time to show up if there were one.
     await page.waitForTimeout(2000);
     expect(server.patches.slice(patchesBefore)).toEqual([]);
@@ -299,7 +330,9 @@ test.describe('Plainspace Release 1 sync', () => {
     await expect
       .poll(() => server.patches.map((p) => p.status), { timeout: 15000 })
       .toEqual([422]);
-    // An expected limitation, not an error.
+    // An expected limitation, not an error. Deliberate: an error snack would
+    // show up meanwhile.
+    await page.waitForTimeout(2000);
     await expect(
       page.locator('mat-snack-bar-container', { hasText: /push failed/i }),
     ).toHaveCount(0);
@@ -354,6 +387,34 @@ test.describe('Plainspace Release 1 sync', () => {
     await renameTask(page, 'Buy tent', 'Buy tent (mine)');
     await page.waitForTimeout(2000);
     expect(server.patches).toEqual([]);
+  });
+
+  // Review finding: the remote delete waits out the undo window, and a poll
+  // inside it saw the item still assigned and the task gone, so it imported
+  // it again. Then the delayed delete removed it for everyone and left the
+  // new copy behind.
+  test('a poll inside the undo window does not bring a deleted task back', async ({
+    page,
+    workViewPage,
+    projectPage,
+  }) => {
+    await workViewPage.waitForTaskList();
+    const server = await setUp(page, projectPage);
+
+    await deleteTaskViaContextMenu(page, 'Buy tent');
+    // Coming back to the app polls at once.
+    const before = successfulPolls(server);
+    await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+    await expect
+      .poll(() => successfulPolls(server), { timeout: 15000 })
+      .toBeGreaterThan(before);
+
+    // The undo window ends: deleted for everyone, and here.
+    await expect
+      .poll(() => server.assignedIds.has(TASK_ID), { timeout: 15000 })
+      .toBe(false);
+    await page.waitForTimeout(1000);
+    await expect(taskRow(page, 'Buy tent')).toHaveCount(0);
   });
 
   test('a failed push shows "couldn\'t sync" on the task and Retry pushes it', async ({

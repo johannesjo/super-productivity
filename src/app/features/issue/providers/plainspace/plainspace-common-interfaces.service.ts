@@ -100,6 +100,7 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
     const issue = await this._tracked(
       task.issueProviderId,
       firstValueFrom(this._plainspaceApiService.getById$(task.issueId, cfg)),
+      cfg.token,
     );
     return this._toFreshData(task, issue, cfg);
   }
@@ -137,6 +138,7 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
       const myTasks = await this._tracked(
         providerId,
         firstValueFrom(this._plainspaceApiService.getMyTasks$(cfg)),
+        cfg.token,
       );
       const issuesById = new Map(myTasks.map((issue) => [issue.id, issue] as const));
       this._syncState.setMissing(
@@ -235,6 +237,7 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
       return await this._tracked(
         issueProviderId,
         firstValueFrom(this._plainspaceApiService.getMyTasks$(cfg)),
+        cfg.token,
       );
     } catch (err) {
       // Offline, a server outage or a rejected token: nothing to import this
@@ -276,13 +279,17 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
   }
 
   /** Records whether the provider's token still works; never swallows errors. */
-  private async _tracked<R>(providerId: string, request: Promise<R>): Promise<R> {
+  private async _tracked<R>(
+    providerId: string,
+    request: Promise<R>,
+    usedToken?: string | null,
+  ): Promise<R> {
     try {
       const result = await request;
       this._connectionState.reportSuccess(providerId);
       return result;
     } catch (err) {
-      this._connectionState.reportError(providerId, err);
+      this._connectionState.reportError(providerId, err, usedToken);
       throw err;
     }
   }

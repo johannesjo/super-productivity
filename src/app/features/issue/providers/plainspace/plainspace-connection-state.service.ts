@@ -11,6 +11,12 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class PlainspaceConnectionStateService {
   private readonly _rejectedProviderIds = signal<ReadonlySet<string>>(new Set());
   private readonly _titleUnsupportedProviderIds = signal<ReadonlySet<string>>(new Set());
+  /**
+   * Provider + token pairs a reconnect replaced: requests made with them may
+   * still answer. Per provider, as a provider a reconnect skipped keeps the
+   * old token and must still show its rejection.
+   */
+  private readonly _replacedTokens = new Set<string>();
 
   readonly rejectedProviderIds = this._rejectedProviderIds.asReadonly();
   readonly titleUnsupportedProviderIds = this._titleUnsupportedProviderIds.asReadonly();
@@ -38,12 +44,24 @@ export class PlainspaceConnectionStateService {
 
   /**
    * A request for this provider failed. Only a rejected token changes the
-   * state; offline and server errors say nothing about the token.
+   * state; offline and server errors say nothing about the token, and neither
+   * does a late answer to a request made with a token a reconnect replaced.
    */
-  reportError(providerId: string, err: unknown): void {
+  reportError(providerId: string, err: unknown, usedToken?: string | null): void {
+    if (usedToken && this._replacedTokens.has(`${providerId}\n${usedToken}`)) {
+      return;
+    }
     if (isPlainspaceAuthError(err) && !this._rejectedProviderIds().has(providerId)) {
       this._rejectedProviderIds.update((ids) => new Set(ids).add(providerId));
     }
+  }
+
+  /** A reconnect gave these providers a new token in place of `oldTokens`. */
+  replaceTokens(providerIds: string[], oldTokens: string[]): void {
+    providerIds.forEach((id) =>
+      oldTokens.forEach((t) => this._replacedTokens.add(`${id}\n${t}`)),
+    );
+    this.clear(providerIds);
   }
 
   clear(providerIds: string[]): void {

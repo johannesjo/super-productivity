@@ -24,6 +24,7 @@ import { IssueProvider } from '../issue.model';
 import { WorkContextType } from '../../work-context/work-context.model';
 import { DeletedTaskIssueSidecarService } from './deleted-task-issue-sidecar.service';
 import { DeletedTagTitlesSidecarService } from './deleted-tag-titles-sidecar.service';
+import { PendingRemoteIssueDeleteService } from './pending-remote-issue-delete.service';
 import { deleteTag } from '../../tag/store/tag.actions';
 import { selectAllTasks } from '../../tasks/store/task.selectors';
 import { selectShortSyntaxConfig } from '../../config/store/global-config.reducer';
@@ -2071,6 +2072,54 @@ describe('IssueTwoWaySyncEffects', () => {
 
       adapterRegistry.unregister('TEST_PROVIDER');
     }));
+
+    // A backlog poll inside the window skips these; each path out of the
+    // window must release its issue, or it is never imported again.
+    it('marks the issue pending until its deferred delete ends, however it ends', fakeAsync(() => {
+      const deleteIssueSpy = jasmine.createSpy('deleteIssue').and.resolveTo(undefined);
+      adapterRegistry.register(
+        'TEST_PROVIDER',
+        createMockAdapter({ deleteIssue: deleteIssueSpy }),
+      );
+      const cfg = createMockIssueProvider();
+      issueProviderServiceSpy.getCfgOnce$.and.callFake(((issueProviderId: string) =>
+        issueProviderId === 'removed-provider'
+          ? throwError(() => new Error('No issueProvider found'))
+          : of(cfg)) as any);
+      const pending = TestBed.inject(PendingRemoteIssueDeleteService);
+      const mk = (id: string, issueProviderId = 'provider-1'): TaskWithSubTasks => {
+        const t = createMockTask({
+          id,
+          issueType: 'TEST_PROVIDER' as any,
+          issueId: `issue-${id}`,
+          issueProviderId,
+        }) as TaskWithSubTasks;
+        (t as any).subTasks = [];
+        return t;
+      };
+      const deleted = mk('deleted');
+      const undone = mk('undone');
+      const failed = mk('failed', 'removed-provider');
+      effects.deleteIssueOnTaskDelete$.subscribe();
+
+      [deleted, undone, failed].forEach((task) =>
+        actions$.next(TaskSharedActions.deleteTask({ task })),
+      );
+      expect(pending.has('provider-1', 'issue-deleted')).toBe(true);
+      expect(pending.has('provider-1', 'issue-undone')).toBe(true);
+      expect(pending.has('removed-provider', 'issue-failed')).toBe(true);
+
+      actions$.next(TaskSharedActions.restoreTask({ task: undone, subTasks: [] }));
+      expect(pending.has('provider-1', 'issue-undone')).toBe(false);
+      expect(pending.has('provider-1', 'issue-deleted')).toBe(true);
+
+      tick(REMOTE_ISSUE_DELETE_DEFER_MS);
+      expect(deleteIssueSpy).toHaveBeenCalledOnceWith('issue-deleted', cfg);
+      expect(pending.has('provider-1', 'issue-deleted')).toBe(false);
+      expect(pending.has('removed-provider', 'issue-failed')).toBe(false);
+
+      adapterRegistry.unregister('TEST_PROVIDER');
+    }));
   });
 
   describe('deleteIssueOnBulkTaskDelete$', () => {
@@ -2099,6 +2148,40 @@ describe('IssueTwoWaySyncEffects', () => {
       expect(deleteIssueSpy).toHaveBeenCalledTimes(2);
       expect(deleteIssueSpy).toHaveBeenCalledWith('issue-1', cfg);
       expect(deleteIssueSpy).toHaveBeenCalledWith('issue-2', cfg);
+
+      adapterRegistry.unregister('TEST_PROVIDER');
+    }));
+
+    // Re-review finding: a poll between the bulk's deletes imported the items
+    // still to come, as a delete inside the undo window did.
+    it('keeps the issues still to delete pending, one by one', fakeAsync(() => {
+      const resolvers: (() => void)[] = [];
+      const deleteIssueSpy = jasmine
+        .createSpy('deleteIssue')
+        .and.callFake(() => new Promise<void>((res) => resolvers.push(res)));
+      adapterRegistry.register(
+        'TEST_PROVIDER',
+        createMockAdapter({ deleteIssue: deleteIssueSpy }),
+      );
+      issueProviderServiceSpy.getCfgOnce$.and.returnValue(of(createMockIssueProvider()));
+      const pending = TestBed.inject(PendingRemoteIssueDeleteService);
+      effects.deleteIssueOnBulkTaskDelete$.subscribe();
+
+      deletedTaskIssueSidecar.set([
+        { issueId: 'issue-1', issueType: 'TEST_PROVIDER', issueProviderId: 'provider-1' },
+        { issueId: 'issue-2', issueType: 'TEST_PROVIDER', issueProviderId: 'provider-1' },
+      ]);
+      actions$.next(TaskSharedActions.deleteTasks({ taskIds: ['task-1', 'task-2'] }));
+      tick();
+      expect([...pending.issueIds('provider-1')]).toEqual(['issue-1', 'issue-2']);
+
+      resolvers[0]();
+      tick();
+      expect([...pending.issueIds('provider-1')]).toEqual(['issue-2']);
+
+      resolvers[1]();
+      tick();
+      expect(pending.issueIds('provider-1').size).toBe(0);
 
       adapterRegistry.unregister('TEST_PROVIDER');
     }));
@@ -2746,6 +2829,52 @@ describe('IssueTwoWaySyncEffects', () => {
           },
         );
       }));
+
+      describe('a task already finished', () => {
+        let pushSpy: jasmine.Spy;
+        beforeEach(() => {
+          pushSpy = jasmine.createSpy('pushChanges').and.resolveTo();
+          adapterRegistry.register(
+            'PLAINSPACE',
+            createMockAdapter({
+              createIssue: createIssueSpy,
+              getFieldMappings: jasmine
+                .createSpy('getFieldMappings')
+                .and.returnValue([isDoneFieldMapping]),
+              pushChanges: pushSpy,
+            }),
+          );
+        });
+
+        it('pushes a completed task as done', fakeAsync(() => {
+          const task = movedTask({ isDone: true, doneOn: 5 });
+          taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+          effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+          move(task);
+          tick();
+
+          expect(pushSpy).toHaveBeenCalledOnceWith(
+            'ps-issue-1',
+            { status: 'COMPLETED' },
+            jasmine.anything(),
+          );
+        }));
+
+        // Review finding: the move-in pushed `isDone`, so a task I won't do
+        // was marked done for everyone.
+        it("does not push a won't-do task as done", fakeAsync(() => {
+          const task = movedTask({ isDone: true, doneOn: 5, wontDoOn: 5 });
+          taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+          effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+          move(task);
+          tick();
+
+          expect(createIssueSpy).toHaveBeenCalled();
+          expect(pushSpy).not.toHaveBeenCalled();
+        }));
+      });
 
       it('ignores a move to the project the task is already in', fakeAsync(() => {
         const task = movedTask();

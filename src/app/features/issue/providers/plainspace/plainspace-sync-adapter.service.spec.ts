@@ -181,6 +181,27 @@ describe('PlainspaceSyncAdapterService', () => {
     expect(connectionState.isTitleUnsupported('provider-1')).toBeFalse();
   });
 
+  // Review finding: only the poll reported a rejected token, so "reconnect"
+  // waited for it after a push had already failed.
+  it('a rejected token on a push or fetch shows "reconnect" at once', async () => {
+    api.patchTask$.and.returnValue(throwError(() => httpError(401)));
+    await expectAsync(adapter.pushChanges('t1', { isDone: true }, cfg)).toBeRejected();
+    expect(connectionState.rejectedProviderIds().has('provider-1')).toBeTrue();
+
+    connectionState.clear(['provider-1']);
+    api.getById$.and.returnValue(throwError(() => httpError(401)));
+    await expectAsync(adapter.fetchIssue('t1', cfg)).toBeRejected();
+    expect(connectionState.rejectedProviderIds().has('provider-1')).toBeTrue();
+  });
+
+  it('an offline push or fetch says nothing about the token', async () => {
+    api.patchTask$.and.returnValue(throwError(() => httpError(0)));
+    api.getById$.and.returnValue(throwError(() => httpError(0)));
+    await expectAsync(adapter.pushChanges('t1', { isDone: true }, cfg)).toBeRejected();
+    await expectAsync(adapter.fetchIssue('t1', cfg)).toBeRejected();
+    expect(connectionState.rejectedProviderIds().size).toBe(0);
+  });
+
   it('pushChanges rejects a failed completion PATCH', async () => {
     api.patchTask$.and.returnValue(of(null));
 

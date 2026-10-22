@@ -15,6 +15,7 @@ import {
   catchError,
   concatMap,
   filter,
+  finalize,
   map,
   mergeMap,
   takeUntil,
@@ -47,6 +48,7 @@ import {
   DeletedTaskIssueInfo,
 } from './deleted-task-issue-sidecar.service';
 import { DeletedTagTitlesSidecarService } from './deleted-tag-titles-sidecar.service';
+import { PendingRemoteIssueDeleteService } from './pending-remote-issue-delete.service';
 import { selectEnabledIssueProviders } from '../store/issue-provider.selectors';
 import { getErrorTxt } from '../../../util/get-error-text';
 import { T } from '../../../t.const';
@@ -164,6 +166,7 @@ export class IssueTwoWaySyncEffects {
   private readonly _snackService = inject(SnackService);
   private readonly _dateTimeFormatService = inject(DateTimeFormatService);
   private readonly _deletedTaskIssueSidecar = inject(DeletedTaskIssueSidecarService);
+  private readonly _pendingRemoteIssueDelete = inject(PendingRemoteIssueDeleteService);
   private readonly _deletedTagTitlesSidecar = inject(DeletedTagTitlesSidecarService);
   private readonly _adapterResolver = inject(IssueSyncAdapterResolverService);
   private readonly _pluginRegistry = inject(PluginIssueProviderRegistryService);
@@ -358,6 +361,10 @@ export class IssueTwoWaySyncEffects {
         // shortcut: in-memory timer — quitting inside the window drops the
         // remote delete (orphaned remote item); persist pending deletes if
         // that is reported.
+        // A poll inside the window must not import the item again.
+        tap(({ task }) =>
+          this._pendingRemoteIssueDelete.add(task.issueProviderId!, task.issueId!),
+        ),
         mergeMap(({ task }) =>
           timer(REMOTE_ISSUE_DELETE_DEFER_MS).pipe(
             // Both the snack's UNDO and a restore from "Recently deleted"
@@ -379,6 +386,9 @@ export class IssueTwoWaySyncEffects {
               IssueLog.err('Deferred remote issue delete failed', err);
               return EMPTY;
             }),
+            finalize(() =>
+              this._pendingRemoteIssueDelete.remove(task.issueProviderId!, task.issueId!),
+            ),
           ),
         ),
       ),
@@ -390,13 +400,34 @@ export class IssueTwoWaySyncEffects {
       this._actions$.pipe(
         ofType(TaskSharedActions.deleteTasks),
         concatMap(() => {
-          const issueInfos = this._deletedTaskIssueSidecar.consume();
+          const issueInfos = this._deletedTaskIssueSidecar
+            .consume()
+            .filter((info) => !!this._getAdapter(info.issueType));
           if (!issueInfos.length) {
             return EMPTY;
           }
+          // The items are deleted one by one: a poll meanwhile must not import
+          // the ones still to come.
+          issueInfos.forEach((info) =>
+            this._pendingRemoteIssueDelete.add(info.issueProviderId, info.issueId),
+          );
           return from(issueInfos).pipe(
-            filter((info) => !!this._getAdapter(info.issueType)),
-            concatMap((info) => this._deleteRemoteIssue$(info)),
+            concatMap((info) =>
+              this._deleteRemoteIssue$(info).pipe(
+                finalize(() =>
+                  this._pendingRemoteIssueDelete.remove(
+                    info.issueProviderId,
+                    info.issueId,
+                  ),
+                ),
+              ),
+            ),
+            // An error ends the sequence: release the ones not reached.
+            finalize(() =>
+              issueInfos.forEach((info) =>
+                this._pendingRemoteIssueDelete.remove(info.issueProviderId, info.issueId),
+              ),
+            ),
           );
         }),
       ),
@@ -690,6 +721,10 @@ export class IssueTwoWaySyncEffects {
     for (const mapping of fieldMappings) {
       const dir = syncConfig[mapping.taskField] ?? mapping.defaultDirection;
       if (dir !== 'pushOnly' && dir !== 'both') {
+        continue;
+      }
+      // As in _pushChanges$: a won't-do task was not completed.
+      if (mapping.taskField === 'isDone' && isWontDoTask(currentTask)) {
         continue;
       }
       const taskValue = currentTask[mapping.taskField as keyof Task];

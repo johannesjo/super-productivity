@@ -38,6 +38,7 @@ import { RootState } from '../../root-store/root-state';
 import { TASK_FEATURE_NAME } from '../tasks/store/task.reducer';
 import { selectAllTasksWithReminder } from '../tasks/store/task.selectors';
 import { createCombinedTaskSharedMetaReducer } from '../../root-store/meta/task-shared-meta-reducers/test-helpers';
+import { PendingRemoteIssueDeleteService } from './two-way-sync/pending-remote-issue-delete.service';
 import {
   createBaseState,
   createMockTask as createReducerTask,
@@ -1413,6 +1414,54 @@ describe('IssueService', () => {
 
       expect(taskServiceSpy.checkForTaskWithIssueEverywhere).not.toHaveBeenCalled();
       expect(taskServiceSpy.restoreTask).not.toHaveBeenCalled();
+    });
+
+    // Review finding: a poll inside a delete's undo window found the item
+    // still assigned and its task gone, and imported it again.
+    it('does not import an issue whose remote delete is pending', async () => {
+      const pending = TestBed.inject(PendingRemoteIssueDeleteService);
+      const addSpy = spyOn(service, 'addTaskFromIssue').and.resolveTo(undefined);
+      (plainspaceService.getNewIssuesToAddToBacklog as jasmine.Spy).and.resolveTo([
+        createPlainspaceIssue({ isRecurring: false }),
+      ]);
+      taskServiceSpy.getAllIssueIdsForProviderEverywhere.and.resolveTo([]);
+      const poll = (): Promise<void> =>
+        service.checkAndImportNewIssuesToBacklogForProject(
+          'PLAINSPACE',
+          PROVIDER_ID,
+          true,
+        );
+
+      pending.add(PROVIDER_ID, ISSUE_ID);
+      await poll();
+      expect(addSpy).not.toHaveBeenCalled();
+
+      pending.remove(PROVIDER_ID, ISSUE_ID);
+      await poll();
+      expect(addSpy).toHaveBeenCalledTimes(1);
+    });
+
+    // Re-review finding: the remote delete completed while the list request
+    // was in flight, so the list still had the item and nothing was pending.
+    it('does not import an issue whose remote delete ends during the request', async () => {
+      const pending = TestBed.inject(PendingRemoteIssueDeleteService);
+      const addSpy = spyOn(service, 'addTaskFromIssue').and.resolveTo(undefined);
+      (plainspaceService.getNewIssuesToAddToBacklog as jasmine.Spy).and.callFake(
+        async () => {
+          pending.remove(PROVIDER_ID, ISSUE_ID);
+          return [createPlainspaceIssue({ isRecurring: false })];
+        },
+      );
+      taskServiceSpy.getAllIssueIdsForProviderEverywhere.and.resolveTo([]);
+
+      pending.add(PROVIDER_ID, ISSUE_ID);
+      await service.checkAndImportNewIssuesToBacklogForProject(
+        'PLAINSPACE',
+        PROVIDER_ID,
+        true,
+      );
+
+      expect(addSpy).not.toHaveBeenCalled();
     });
   });
 });

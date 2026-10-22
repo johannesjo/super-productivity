@@ -286,6 +286,7 @@ and bulk sharing raise the blast radius of today's delete-for-everyone.
 | Remove the provider                                     | Untouched                                                                 | Tasks unlinked, notes and time kept (exists)                                                         |
 | Handed off, deleted, unassigned or lost access remotely | —                                                                         | Never deleted. Task, notes and time kept; state _no longer in your Plainspace list_; no further sync |
 | Move the task out of the shared project                 | Untouched, stays linked                                                   | —                                                                                                    |
+| "Only keep the latest" removes an older repeat copy     | Deleted for everyone at once: no confirm, no undo (#11016, chosen)        | Deleted locally                                                                                      |
 
 A missing item is never read as a deletion: the server returns the same 404
 for deleted, reassigned and lost-membership, by design, and "missing" is only
