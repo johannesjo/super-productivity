@@ -1874,7 +1874,7 @@
       },
       "D_CONFIRM_DELETE": {
         "MSG": "Are you sure you want to delete the task \"{{title}}\"?",
-        "MSG_PLAINSPACE": "Delete the task \"{{title}}\"? It is also deleted in Plainspace for everyone in the Space. It can be restored there for 30 days.",
+        "MSG_PLAINSPACE": "Delete the task \"{{title}}\"? It is also deleted in Plainspace for everyone in the Space.",
         "OK": "Delete"
       },
       "D_CONFIRM_SHORT_SYNTAX_NEW_TAG": {

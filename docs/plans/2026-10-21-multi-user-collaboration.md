@@ -104,12 +104,13 @@ privacy-first"), same-device multi-login (#5189 part 1; OS accounts cover it).
 
 The integration API (`packages/server/src/routes/integration.ts`, PAT auth)
 lists my tasks, creates (assigned to the caller, `:305`), patches **only**
-`{done}` and answers 422 to anything else (`:381-383`), deletes (soft,
-restorable in the web app for 30 days: `routes/items.ts:457`,
-`services/retention.ts:16`), lists and claims unassigned tasks, and creates
-Spaces. Items have `text` varchar(500), single `assignedTo`, `remindAt`
-(always an instant), `repeat`, and a row-level `updated_at` only; no notes,
-subtasks or comments. Plainspace's own web app edits items with a plain
+`{done}` and answers 422 to anything else (`:381-383`), deletes (soft, kept
+30 days: `services/retention.ts:16`; the web app restores an item only from
+the Undo toast after its own delete, `routes/items.ts:457`, so an
+integration delete has no restore path for Space members), lists and claims
+unassigned tasks, and creates Spaces. Items have `text` varchar(500), single
+`assignedTo`, `remindAt` (always an instant), `repeat`, and a row-level
+`updated_at` only; no notes, subtasks or comments. Plainspace's own web app edits items with a plain
 read-merge-write `PATCH`, no precondition (`routes/items.ts:273-362`). Spaces
 default to `sharingMode: 'open'`, so anyone with the link can join without an
 account.
@@ -264,14 +265,14 @@ stays. No pending-changes indicator, no header count.
 Needs to be fixed before anything creates links automatically, because move-in
 and bulk sharing raise the blast radius of today's delete-for-everyone.
 
-| Event                                                   | Plainspace                                                                                                                           | Local                                                                                                |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
-| Delete a linked task assigned to me                     | Deleted for everyone after the undo window (exists; confirm text says so and adds that it can be restored in Plainspace for 30 days) | Deleted; in Recently deleted                                                                         |
-| Delete a task no longer assigned to me                  | Untouched (server refuses: not assigned to me)                                                                                       | Deleted; normal confirm, no "for everyone" warning                                                   |
-| Delete the project                                      | Untouched (not a delete trigger, verified)                                                                                           | Tasks deleted locally                                                                                |
-| Remove the provider                                     | Untouched                                                                                                                            | Tasks unlinked, notes and time kept (exists)                                                         |
-| Handed off, deleted, unassigned or lost access remotely | —                                                                                                                                    | Never deleted. Task, notes and time kept; state _no longer in your Plainspace list_; no further sync |
-| Move the task out of the shared project                 | Untouched, stays linked                                                                                                              | —                                                                                                    |
+| Event                                                   | Plainspace                                                                | Local                                                                                                |
+| ------------------------------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Delete a linked task assigned to me                     | Deleted for everyone after the undo window (exists; confirm text says so) | Deleted; in Recently deleted                                                                         |
+| Delete a task no longer assigned to me                  | Untouched (server refuses: not assigned to me)                            | Deleted; normal confirm, no "for everyone" warning                                                   |
+| Delete the project                                      | Untouched (not a delete trigger, verified)                                | Tasks deleted locally                                                                                |
+| Remove the provider                                     | Untouched                                                                 | Tasks unlinked, notes and time kept (exists)                                                         |
+| Handed off, deleted, unassigned or lost access remotely | —                                                                         | Never deleted. Task, notes and time kept; state _no longer in your Plainspace list_; no further sync |
+| Move the task out of the shared project                 | Untouched, stays linked                                                   | —                                                                                                    |
 
 A missing item is never read as a deletion: the server returns the same 404
 for deleted, reassigned and lost-membership, by design, and "missing" is only

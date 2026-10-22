@@ -2431,7 +2431,7 @@ describe('IssueTwoWaySyncEffects', () => {
         move(task);
         actions$.next(
           TaskSharedActions.applyShortSyntax({
-            task: { ...task, title: 'Pack stove +Camping' },
+            task: { ...task, title: 'Pack stove +Camping', projectId: 'inbox' },
             taskChanges: { title: 'Pack stove' },
             targetProjectId: 'project-1',
           }),
