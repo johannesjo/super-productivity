@@ -242,6 +242,93 @@ describe('IssueTwoWaySyncEffects', () => {
       adapterRegistry.unregister('TEST_PROVIDER');
     }));
 
+    describe('a title typed with short syntax', () => {
+      let adapter: ReturnType<typeof createMockAdapter>;
+
+      const rename = (title: string, isIgnoreShortSyntax?: boolean): void => {
+        const task = createMockTask({
+          id: 'task-1',
+          title,
+          issueType: 'TEST_PROVIDER' as any,
+          issueId: 'issue-1',
+          issueProviderId: 'provider-1',
+          issueLastSyncedValues: { summary: 'Old' },
+        });
+        taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+        actions$.next(
+          TaskSharedActions.updateTask({
+            task: { id: 'task-1', changes: { title } },
+            isIgnoreShortSyntax,
+          }),
+        );
+      };
+
+      beforeEach(() => {
+        adapter = createMockAdapter({
+          getFieldMappings: jasmine
+            .createSpy('getFieldMappings')
+            .and.returnValue([titleFieldMapping]),
+          getSyncConfig: jasmine.createSpy('getSyncConfig').and.returnValue({}),
+          fetchIssue: jasmine.createSpy('fetchIssue').and.resolveTo({ summary: 'Old' }),
+          extractSyncValues: jasmine
+            .createSpy('extractSyncValues')
+            .and.returnValue({ summary: 'Old' }),
+        });
+        adapterRegistry.register('TEST_PROVIDER', adapter);
+        issueProviderServiceSpy.getCfgOnce$.and.returnValue(
+          of(createMockIssueProvider()),
+        );
+        effects.pushFieldsOnTaskUpdate$.subscribe();
+      });
+
+      afterEach(() => {
+        adapterRegistry.unregister('TEST_PROVIDER');
+      });
+
+      it('is not pushed raw: the short-syntax update that follows pushes it cleaned', fakeAsync(() => {
+        rename('Write report #work');
+        tick();
+        expect(adapter.pushChanges).not.toHaveBeenCalled();
+      }));
+
+      it('is pushed when short syntax leaves it as it is', fakeAsync(() => {
+        rename('Write report');
+        tick();
+        expect(adapter.pushChanges).toHaveBeenCalledWith(
+          'issue-1',
+          { summary: 'Write report' },
+          jasmine.anything(),
+        );
+      }));
+
+      it('is pushed as typed when short syntax is turned off', fakeAsync(() => {
+        store.overrideSelector(selectShortSyntaxConfig, {
+          ...DEFAULT_GLOBAL_CONFIG.shortSyntax,
+          isEnableTag: false,
+          isEnableProject: false,
+          isEnableDue: false,
+        });
+        store.refreshState();
+        rename('Write report #work');
+        tick();
+        expect(adapter.pushChanges).toHaveBeenCalledWith(
+          'issue-1',
+          { summary: 'Write report #work' },
+          jasmine.anything(),
+        );
+      }));
+
+      it('is pushed as typed when short syntax is ignored', fakeAsync(() => {
+        rename('Write report #work', true);
+        tick();
+        expect(adapter.pushChanges).toHaveBeenCalledWith(
+          'issue-1',
+          { summary: 'Write report #work' },
+          jasmine.anything(),
+        );
+      }));
+    });
+
     it("should not push isDone for a task finished as won't do", fakeAsync(() => {
       const adapter = createMockAdapter({
         getFieldMappings: jasmine
@@ -1288,6 +1375,46 @@ describe('IssueTwoWaySyncEffects', () => {
       expect(adapter.pushChanges).toHaveBeenCalledOnceWith(
         'issue-1',
         { summary: 'New' },
+        jasmine.anything(),
+      );
+    }));
+
+    it('leaves out a title short syntax is still about to clean', fakeAsync(() => {
+      // A poll can come in between the edit and the parse: the short-syntax
+      // update pushes the cleaned title.
+      taskServiceSpy.getByIdOnce$.and.returnValue(
+        of(linkedTask({ title: 'New #work', isDone: true })),
+      );
+      effects.pushFieldsOnTaskUpdate$.subscribe();
+
+      actions$.next(
+        TaskSharedActions.updateTask({
+          task: { id: 'task-1', changes: { title: 'New #work' } },
+        }),
+      );
+      tick();
+      syncState.requestPush('task-1', true);
+      tick();
+
+      expect(adapter.pushChanges).toHaveBeenCalledOnceWith(
+        'issue-1',
+        { status: 'COMPLETED' },
+        jasmine.anything(),
+      );
+    }));
+
+    it('retries a title kept literally even though short syntax would parse it', fakeAsync(() => {
+      // Stored as typed (isIgnoreShortSyntax, e.g. the local REST API) and its
+      // first push failed: no short-syntax update will ever push it.
+      taskServiceSpy.getByIdOnce$.and.returnValue(of(linkedTask({ title: 'New #work' })));
+      effects.pushFieldsOnTaskUpdate$.subscribe();
+
+      syncState.requestPush('task-1', false);
+      tick();
+
+      expect(adapter.pushChanges).toHaveBeenCalledOnceWith(
+        'issue-1',
+        { summary: 'New #work' },
         jasmine.anything(),
       );
     }));

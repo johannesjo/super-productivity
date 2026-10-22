@@ -169,6 +169,8 @@ export class IssueTwoWaySyncEffects {
   private readonly _pluginRegistry = inject(PluginIssueProviderRegistryService);
   private readonly _syncState = inject(IssueSyncStateService);
   private _syncOriginatedTaskIds = new Set<string>();
+  /** Tasks whose raw title push was skipped until short syntax cleans it. */
+  private _titleRewriteTaskIds = new Set<string>();
   private static readonly _MAX_SYNC_ORIGINATED_IDS = 1000;
 
   constructor() {
@@ -198,7 +200,7 @@ export class IssueTwoWaySyncEffects {
             PlannerActions.planTaskForDay,
             PlannerActions.transferTask,
           ),
-          map((action) => ACTION_EXTRACTORS[action.type](action)),
+          map((action) => ({ action, ...ACTION_EXTRACTORS[action.type](action) })),
           filter(({ taskId, changes }) => {
             if (this._syncOriginatedTaskIds.delete(taskId)) {
               return false;
@@ -209,6 +211,17 @@ export class IssueTwoWaySyncEffects {
             }
             return Object.keys(changes).some((key) => SYNCABLE_TASK_FIELDS.has(key));
           }),
+          // Short syntax typed into a title is applied right after this update,
+          // and the applyShortSyntax that follows pushes the cleaned title.
+          // Pushing this raw one first would show the tokens in the provider.
+          // After the filter above: its sync-originated check must stay in step
+          // with dispatch, which an async step ahead of it would break.
+          concatMap((x) =>
+            from(this._isTitleAboutToBeRewritten(x.action, x.taskId)).pipe(
+              filter((isRewritten) => !isRewritten),
+              map(() => x),
+            ),
+          ),
           map(({ taskId, changes }) => ({
             taskId,
             changes: changes as Partial<Task> | null,
@@ -594,6 +607,38 @@ export class IssueTwoWaySyncEffects {
           current && current.projectId === moveInProjectId ? current : undefined,
         ),
       );
+  }
+
+  /**
+   * Whether the short-syntax effect is about to rewrite the title of this
+   * update: it parses an update that changes only the title, like this does.
+   * Marks the task until its next pushed action (the applyShortSyntax), so a
+   * pending push meanwhile leaves the raw title out too.
+   */
+  private async _isTitleAboutToBeRewritten(
+    action: { type: string },
+    taskId: string,
+  ): Promise<boolean> {
+    this._titleRewriteTaskIds.delete(taskId);
+    if (action.type !== TaskSharedActions.updateTask.type) {
+      return false;
+    }
+    const { task, isIgnoreShortSyntax } = action as ReturnType<
+      typeof TaskSharedActions.updateTask
+    >;
+    const changedKeys = Object.keys(task.changes);
+    if (isIgnoreShortSyntax || changedKeys.length !== 1 || changedKeys[0] !== 'title') {
+      return false;
+    }
+    const current = await firstValueFrom(this._taskService.getByIdOnce$(String(task.id)));
+    if (!current?.issueId) {
+      return false;
+    }
+    const isRewritten = (await this._parseShortSyntax(current)).title !== current.title;
+    if (isRewritten) {
+      this._titleRewriteTaskIds.add(taskId);
+    }
+    return isRewritten;
   }
 
   /**
@@ -989,12 +1034,17 @@ export class IssueTwoWaySyncEffects {
               if (!current) {
                 return EMPTY;
               }
-              const pending = computePendingLocalChanges(
+              const all = computePendingLocalChanges(
                 current,
                 adapter.getFieldMappings(),
                 adapter.getSyncConfig(cfg),
                 { issueId: current.issueId! },
               );
+              // A title short syntax is still about to clean (the request came
+              // in between the edit and the parse) is pushed by that update.
+              // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              const { title, ...rest } = all;
+              const pending = this._titleRewriteTaskIds.has(current.id) ? rest : all;
               return Object.keys(pending).length
                 ? this._pushChanges$(current, pending)
                 : EMPTY;
