@@ -226,10 +226,10 @@ export class PlainspaceApiService {
   }
 
   /**
-   * Pushes completion and/or title back to Plainspace, or hands the task off. Resolves to the echoed
-   * task, or null when the answer is not a task. HTTP errors propagate: the
-   * sync adapter tells a server too old for a field (422) apart from offline
-   * and server errors.
+   * Pushes completion and/or title back to Plainspace, or hands the task off.
+   * Resolves to the echoed task, or null when the answer is not a task. HTTP
+   * errors propagate: the sync adapter tells a server too old for a field
+   * (422) apart from offline and server errors.
    */
   patchTask$(
     id: string,
