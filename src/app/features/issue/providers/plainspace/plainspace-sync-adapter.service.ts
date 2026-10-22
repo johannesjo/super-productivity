@@ -50,8 +50,9 @@ const PLAINSPACE_FIELD_MAPPINGS: FieldMapping[] = [
     defaultDirection: 'pullOnly',
     toIssueValue: (taskValue: unknown): string | null =>
       typeof taskValue === 'number' ? new Date(taskValue).toISOString() : null,
-    // "No time" is null, not undefined: JSON keeps a null in the op, so the
-    // clear reaches my other devices, released ones too (#9776).
+    // "No time" is null, not undefined: JSON drops an undefined from the op, so
+    // other devices kept the old time (#9776). `Task.dueWithTime` allows null,
+    // so released clients apply it as a clear.
     toTaskValue: (issueValue: unknown): number | null =>
       typeof issueValue === 'string' ? new Date(issueValue).getTime() : null,
   },
