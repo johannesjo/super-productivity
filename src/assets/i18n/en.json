@@ -3310,10 +3310,12 @@
       "TITLE": "Choose a Plainspace space"
     },
     "SYNC": {
+      "ERR_REFUSED": "Plainspace refused this change.",
+      "ERR_REPEAT_NEEDS_TIME": "A repeating task needs its time in Plainspace.",
       "ERR_TITLE_EMPTY": "Plainspace needs a title.",
       "ERR_TITLE_TOO_LONG": "Plainspace takes titles up to 500 characters.",
       "NOT_IN_LIST": "No longer in your Plainspace list: it was reassigned or deleted, or you lost access to the space. It stays here, but no longer syncs.",
-      "SERVER_TOO_OLD": "This Plainspace server is too old for title sync. Done state keeps syncing; titles sync once the server is updated."
+      "SERVER_TOO_OLD": "This Plainspace server is too old to sync titles and times. Done state keeps syncing; titles and times sync once the server is updated."
     }
   },
   "PLUGINS": {

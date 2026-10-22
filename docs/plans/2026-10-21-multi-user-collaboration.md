@@ -343,6 +343,23 @@ SP:
 `dueWithTime: 'both'`, plus the `dueDay` mapping with
 `mutuallyExclusive: ['dueWithTime']`; recurring items pull only. Closes #9833.
 
+**Delivered** as planned, with three deviations:
+
+- The `dueDay` mapping targets `scheduledAt` itself and always sends "no
+  time", instead of clearing it through `mutuallyExclusive`: that hook only
+  fires after a push of the day field, which Plainspace doesn't have. The time
+  mapping comes first, and the engine decides a remote field once (now also in
+  the poll's pending check), so a change with a time sends the time and a
+  day-only plan sends "no time". Same rule, no separate baseline.
+- "Pull only" for recurring items is decided per item: `getSyncConfig` gets
+  the item as fetched, so a task that became recurring in Plainspace stops
+  pushing its time without a restart.
+- Older servers: titles and times arrived together (plainspace#41), so one
+  "server too old" state covers both: a 422 on, or an ignored, title or
+  `scheduledAt` turns both pull-only for the session. A 409 is per task:
+  `repeat_requires_remind_at` shows "A repeating task needs its time in
+  Plainspace", any other "Plainspace refused this change".
+
 ### Release 3: share existing tasks (S, SP only)
 
 "Share N unshared tasks": a sequential loop over the same create-and-link path

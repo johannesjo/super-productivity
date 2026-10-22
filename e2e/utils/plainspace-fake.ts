@@ -51,6 +51,8 @@ export interface FakePlainspace {
   isPatchServerError: boolean;
   /** POST /tasks (create) answers 500. */
   isCreateServerError: boolean;
+  /** PATCH answers 409 with this error (any conflict other than the repeat rule). */
+  patchConflictError: string | null;
   /**
    * A server from before `title`/`scheduledAt` were accepted: a PATCH without
    * `done` is a 422, and any other field next to `done` is ignored.
@@ -114,6 +116,7 @@ export const installFakePlainspace = async (
     offlineRequests: [],
     isPatchServerError: false,
     isCreateServerError: false,
+    patchConflictError: null,
     isOldServer: false,
     patches: [],
     afterPatch: null,
@@ -199,6 +202,10 @@ export const installFakePlainspace = async (
         await answer(500, { error: 'Internal error' });
         return;
       }
+      if (server.patchConflictError) {
+        await answer(409, { error: server.patchConflictError });
+        return;
+      }
       const task = assignedTask(id);
       if (!task) {
         await answer(404, { error: 'Task not found' });
@@ -218,11 +225,18 @@ export const installFakePlainspace = async (
         await answer(422, { error: 'Validation failed' });
         return;
       }
+      const scheduledAt = body['scheduledAt'] as string | null | undefined;
+      // Unscheduling a repeating task would drop its rule for the whole space.
+      if (scheduledAt === null && task.isRecurring) {
+        await answer(409, { error: 'repeat_requires_remind_at' });
+        return;
+      }
       server.remoteEdit(id, {
         ...(typeof body['done'] === 'boolean' ? { done: body['done'] } : {}),
         ...(typeof title === 'string' ? { title } : {}),
-        ...(body['scheduledAt'] !== undefined
-          ? { scheduledAt: body['scheduledAt'] as string | null }
+        // Stored as a timestamp and answered as UTC ISO, whatever offset came in.
+        ...(scheduledAt !== undefined
+          ? { scheduledAt: scheduledAt && new Date(scheduledAt).toISOString() }
           : {}),
       });
       await answer(200, { task: server.tasks.get(id) });

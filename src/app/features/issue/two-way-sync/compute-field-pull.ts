@@ -144,7 +144,13 @@ export const computePendingLocalChanges = (
   if (!lastSyncedValues) {
     return pending;
   }
+  // Like the push decisions, the first mapping of a remote field decides it
+  // (e.g. a time, before a day-only plan that maps onto the same field).
+  const decidedIssueFields = new Set<string>();
   for (const mapping of fieldMappings) {
+    if (decidedIssueFields.has(mapping.issueField)) {
+      continue;
+    }
     const direction = syncConfig[mapping.taskField] ?? mapping.defaultDirection;
     if (
       !canPush(direction) ||
@@ -152,6 +158,7 @@ export const computePendingLocalChanges = (
     ) {
       continue;
     }
+    decidedIssueFields.add(mapping.issueField);
     const baseline = lastSyncedValues[mapping.issueField];
     if (issueValues && !issueValuesEqual(issueValues[mapping.issueField], baseline)) {
       continue;

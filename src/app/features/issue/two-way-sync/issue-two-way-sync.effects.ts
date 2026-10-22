@@ -922,6 +922,8 @@ export class IssueTwoWaySyncEffects {
 
         const freshIssue = await adapter.fetchIssue(issueId, cfg);
         const freshValues = adapter.extractSyncValues(freshIssue);
+        // Decide on the item as it is now (e.g. it became repeating).
+        const issueSyncConfig = adapter.getSyncConfig(cfg, freshIssue);
         // Re-fetch task to get post-meta-reducer values (e.g. short syntax parsed title)
         const currentTask = await firstValueFrom(this._taskService.getByIdOnce$(task.id));
         // the snapshot predates pushes queued before it; their baseline is newer
@@ -930,10 +932,12 @@ export class IssueTwoWaySyncEffects {
         const taskFieldChanges: Record<string, unknown> = {};
         for (const mapping of fieldMappings) {
           if (mapping.taskField in changes) {
-            // Use current task value (post-parsing) not raw action value
-            taskFieldChanges[mapping.taskField] =
-              currentTask?.[mapping.taskField as keyof Task] ??
-              changes[mapping.taskField];
+            // Use the current task value (post-parsing), not the raw action
+            // value, also when it is cleared: a day-only plan leaves no time,
+            // while its short-syntax action still carries the parser's time.
+            taskFieldChanges[mapping.taskField] = currentTask
+              ? currentTask[mapping.taskField as keyof Task]
+              : changes[mapping.taskField];
           }
         }
 
@@ -944,7 +948,7 @@ export class IssueTwoWaySyncEffects {
         const decisions = computePushDecisions(
           taskFieldChanges,
           fieldMappings,
-          syncConfig,
+          issueSyncConfig,
           freshValues,
           // A task with no baseline at all was linked before two-way sync (e.g.
           // a migrated built-in provider, whose effects always pushed). If the

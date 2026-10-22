@@ -5,7 +5,8 @@ import { FieldMapping, FieldMappingContext, FieldSyncConfig } from './issue-sync
 export type PushDecisionSkipReason =
   | 'direction-skip'
   | 'no-baseline'
-  | 'provider-changed';
+  | 'provider-changed'
+  | 'unchanged';
 
 export interface PushDecision {
   field: string;
@@ -91,17 +92,33 @@ export const computePushDecisions = (
       continue;
     }
 
-    decisions.push({
-      field: mapping.issueField,
-      action: 'push',
-      issueValue: mapping.toIssueValue(changedTaskFields[mapping.taskField], ctx),
-    });
+    const issueValue = mapping.toIssueValue(changedTaskFields[mapping.taskField], ctx);
+    if (valuesEqual(issueValue, freshIssueValues[mapping.issueField])) {
+      // Already the provider's value (e.g. short syntax left the title as it
+      // was): writing it again would only add a no-op edit there.
+      decisions.push({
+        field: mapping.issueField,
+        action: 'skip',
+        reasonCode: 'unchanged',
+        reason: 'provider already has this value',
+      });
+      decidedIssueFields.add(mapping.issueField);
+      continue;
+    }
+
+    decisions.push({ field: mapping.issueField, action: 'push', issueValue });
     decidedIssueFields.add(mapping.issueField);
 
     // Clear mutually exclusive fields on the remote
     for (const exclTaskField of mapping.mutuallyExclusive ?? []) {
       const exclMapping = mappingByTaskField.get(exclTaskField);
-      if (!exclMapping || decidedIssueFields.has(exclMapping.issueField)) {
+      // A field this change also reports is decided by its own mapping (a
+      // day-only short syntax reports the cleared time and the new day).
+      if (
+        !exclMapping ||
+        decidedIssueFields.has(exclMapping.issueField) ||
+        exclMapping.taskField in changedTaskFields
+      ) {
         continue;
       }
       const exclDir = syncConfig[exclMapping.taskField] ?? exclMapping.defaultDirection;

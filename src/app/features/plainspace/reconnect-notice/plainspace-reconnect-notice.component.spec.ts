@@ -47,8 +47,8 @@ describe('PlainspaceReconnectNoticeComponent', () => {
   });
 
   it('says once that the server is too old for titles', () => {
-    state.reportTitleUnsupported('ps-1');
-    state.reportTitleUnsupported('ps-1');
+    state.reportServerTooOld('ps-1');
+    state.reportServerTooOld('ps-1');
     fixture.detectChanges();
     const callouts = fixture.nativeElement.querySelectorAll('.callout');
     expect(callouts.length).toBe(1);

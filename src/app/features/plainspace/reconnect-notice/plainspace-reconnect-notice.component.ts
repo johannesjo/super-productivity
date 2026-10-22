@@ -39,8 +39,8 @@ export class PlainspaceReconnectNoticeComponent {
   readonly isRejected = computed(() =>
     this._connectionState.rejectedProviderIds().has(this.issueProvider().id),
   );
-  readonly isTitleUnsupported = computed(() =>
-    this._connectionState.titleUnsupportedProviderIds().has(this.issueProvider().id),
+  readonly isServerTooOld = computed(() =>
+    this._connectionState.serverTooOldProviderIds().has(this.issueProvider().id),
   );
 
   reconnect(): void {

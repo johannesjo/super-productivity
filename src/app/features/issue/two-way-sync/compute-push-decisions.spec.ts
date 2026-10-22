@@ -378,6 +378,23 @@ describe('computePushDecisions', () => {
     expect(dueWithTimeDecisions.length).toBe(1);
   });
 
+  it('lets a changed exclusive field push its own value instead of clearing it', () => {
+    // Day-only short syntax on a timed item: the time is cleared, the day set.
+    const decisions = computePushDecisions(
+      { dueWithTime: undefined, dueDay: '2026-04-01' },
+      [dueWithTimeMapping, dueDayMapping],
+      { dueDay: 'both', dueWithTime: 'both' },
+      { start_datetime: 1743422400000, start_date: undefined },
+      { start_datetime: 1743422400000, start_date: undefined },
+      ctx,
+    );
+
+    expect(decisions).toEqual([
+      { field: 'start_datetime', action: 'push', issueValue: undefined },
+      { field: 'start_date', action: 'push', issueValue: '2026-04-01' },
+    ]);
+  });
+
   it('should skip exclusive field clear when its direction is pullOnly', () => {
     const syncConfig: FieldSyncConfig = { dueWithTime: 'both', dueDay: 'pullOnly' };
     const decisions = computePushDecisions(
@@ -425,7 +442,7 @@ describe('computePushDecisions', () => {
     const freshLabels = ['bug', 'feature'];
     const lastLabels = ['bug', 'feature'];
     const decisions = computePushDecisions(
-      { tagIds: ['feature', 'bug'] },
+      { tagIds: ['feature', 'bug', 'urgent'] },
       [tagIdsMapping],
       syncConfig,
       { labels: freshLabels },
@@ -435,7 +452,42 @@ describe('computePushDecisions', () => {
 
     const labelDecision = decisions.find((d) => d.field === 'labels');
     expect(labelDecision?.action).toBe('push');
-    expect(labelDecision?.issueValue).toEqual(['bug', 'feature']);
+    expect(labelDecision?.issueValue).toEqual(['bug', 'feature', 'urgent']);
+  });
+
+  it('should skip a field the provider already has', () => {
+    const decisions = computePushDecisions(
+      { title: 'Same' },
+      [titleMapping],
+      { title: 'both' },
+      { title: 'Same' },
+      { title: 'Same' },
+      ctx,
+    );
+    expect(decisions).toEqual([
+      jasmine.objectContaining({
+        field: 'title',
+        action: 'skip',
+        reasonCode: 'unchanged',
+      }),
+    ]);
+  });
+
+  it('reaches "unchanged" only while the remote is at the baseline', () => {
+    // So the baseline already is the shared value: nothing stays pending. A
+    // remote that moved to the local value is "provider-changed", and the next
+    // poll's pull rewrites the baseline.
+    const decisions = computePushDecisions(
+      { title: 'Same' },
+      [titleMapping],
+      { title: 'both' },
+      { title: 'Same' },
+      { title: 'Old' },
+      ctx,
+    );
+    expect(decisions).toEqual([
+      jasmine.objectContaining({ action: 'skip', reasonCode: 'provider-changed' }),
+    ]);
   });
 
   it('should skip tagIds when fresh and last synced arrays have different contents', () => {

@@ -421,14 +421,17 @@ interface SPTaskResponse {
 export interface PlainspaceTaskPatch {
   done?: boolean;
   title?: string;
+  /** ISO instant, or null for "no time". */
+  scheduledAt?: string | null;
 }
 
 /**
- * What a PATCH answer echoes; `title` and `updatedAt` are absent when the
- * answer omits them.
+ * What a PATCH answer echoes; `title`, `scheduledAt` and `updatedAt` are absent
+ * when the answer omits them.
  */
 export type PlainspacePatchConfirmation = Pick<PlainspaceIssue, 'id' | 'isDone'> & {
   title?: string;
+  scheduledAt?: string | null;
   updatedAt?: string;
 };
 
@@ -477,6 +480,9 @@ const parsePlainspacePatchConfirmation = (
     id: task['id'],
     isDone: task['done'],
     ...(typeof task['title'] === 'string' ? { title: task['title'] } : {}),
+    ...(typeof task['scheduledAt'] === 'string' || task['scheduledAt'] === null
+      ? { scheduledAt: task['scheduledAt'] }
+      : {}),
     ...(typeof task['updatedAt'] === 'string' ? { updatedAt: task['updatedAt'] } : {}),
   };
 };

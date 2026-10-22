@@ -228,6 +228,7 @@ describe('IssueTwoWaySyncEffects', () => {
         issueId: 'issue-1',
         issueProviderId: 'provider-1',
         issueLastSyncedValues: { status: 'NEEDS-ACTION' },
+        isDone: true,
       });
 
       taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
