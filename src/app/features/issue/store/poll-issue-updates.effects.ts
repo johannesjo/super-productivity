@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { createEffect, ofType } from '@ngrx/effects';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { EMPTY, from, merge, Observable, timer } from 'rxjs';
@@ -18,6 +19,7 @@ import {
   selectAllTasks,
 } from '../../tasks/store/task.selectors';
 import { IssueLog } from '../../../core/log';
+import { getRefreshOnLook$ } from './refresh-on-look';
 
 @Injectable()
 export class PollIssueUpdatesEffects {
@@ -97,9 +99,12 @@ export class PollIssueUpdatesEffects {
   );
 
   private _createUpdatePollTimer(provider: IssueProvider): Observable<unknown> {
-    return timer(
-      DELAY_BEFORE_ISSUE_POLLING,
-      this._issueService.getPollInterval(provider.issueProviderKey),
+    return merge(
+      timer(
+        DELAY_BEFORE_ISSUE_POLLING,
+        this._issueService.getPollInterval(provider.issueProviderKey),
+      ),
+      getRefreshOnLook$(provider),
     ).pipe(
       switchMap(() => this._getTasksForProvider(provider)),
       switchMap((issueTasks: Task[]) => {
@@ -108,7 +113,11 @@ export class PollIssueUpdatesEffects {
         }
         return from(this._issueService.refreshIssueTasks(issueTasks, provider)).pipe(
           catchError((err) => {
-            IssueLog.error('Error polling issue updates for ' + provider.id, err);
+            // The error response carries the provider's URL: log its status only.
+            IssueLog.error(
+              'Error polling issue updates for ' + provider.id,
+              err instanceof HttpErrorResponse ? { status: err.status } : err,
+            );
             return EMPTY;
           }),
         );

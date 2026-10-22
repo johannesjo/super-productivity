@@ -554,6 +554,10 @@
         "TWO_WAY_SYNC_PUSH_FAILED": "Two-way sync push failed: {{errorMsg}}",
         "POST_TIME_SUCCESS": "{{providerName}}: Successfully created time entry for {{issueTitle}}"
       },
+      "SYNC_STATE": {
+        "COULD_NOT_SYNC": "Couldn't sync: {{reason}}",
+        "RETRY": "Retry"
+      },
       "TWO_WAY_SYNC": {
         "AUTO_CREATE_ISSUES": "Auto-create issues for new tasks",
         "AUTO_CREATE_ISSUES_DESCRIPTION": "Automatically creates an issue when you add a new top-level task to the default project. Requires a default project to be set.",
@@ -3254,6 +3258,7 @@
       "INTRO": "Collaborate on projects with others. Tasks assigned to you import automatically and stay in sync.",
       "INVALID": "Plainspace rejected that token. It may be expired or revoked — create a new one and paste it again.",
       "OPEN_LINK": "Open Plainspace",
+      "OTHER_ACCOUNT": "That token's account isn't a member of this project's Space. Paste a token from the account you shared it with.",
       "TITLE": "Connect to Plainspace",
       "TOKEN_HELP": "Create an API token on Plainspace, then paste it below.",
       "TOKEN_LABEL": "API token",
@@ -3261,7 +3266,7 @@
       "UNREACHABLE": "Couldn't reach Plainspace. Check your internet connection and the host, then try again."
     },
     "COPY_INVITE_LINK": "Copy invite link",
-    "COPY_INVITE_LINK_FAILED": "Couldn't get the invite link — check your connection and try again.",
+    "COPY_INVITE_LINK_FAILED": "Couldn't copy the invite link. Open the Space in Plainspace and copy its address there.",
     "FORM": {
       "HOST": "Plainspace host",
       "SPACE_ID": "Space ID",
@@ -3291,7 +3296,7 @@
     "SHARE_SUCCESS": "Project shared on Plainspace. Tasks assigned to you will import automatically.",
     "SPACE_PICKER": {
       "CREATE_NEW": "Create new space",
-      "DATA_NOTICE": "Task titles, done state and scheduled times of shared tasks are stored on {{host}}. Notes, subtasks and tracked time stay in Super Productivity.",
+      "DATA_NOTICE": "Task titles and done state of shared tasks are stored on {{host}}, along with times set there. Notes, subtasks and tracked time stay in Super Productivity.",
       "DISCONNECT": "Disconnect account",
       "DISCONNECT_HINT": "Disconnecting removes the saved account from this device. Existing project integrations keep syncing. To stop them, open each relevant Plainspace integration in the issue provider panel and choose its gear icon → Delete.",
       "ERROR": "Couldn't reach Plainspace. Check your connection and that your token is still valid, then try again.",
@@ -3302,6 +3307,12 @@
       "RECONNECT": "Use a different token",
       "SELECT_LABEL": "Existing space",
       "TITLE": "Choose a Plainspace space"
+    },
+    "SYNC": {
+      "ERR_TITLE_EMPTY": "Plainspace needs a title.",
+      "ERR_TITLE_TOO_LONG": "Plainspace takes titles up to 500 characters.",
+      "NOT_IN_LIST": "No longer in your Plainspace list: it was reassigned or deleted, or you lost access to the space. It stays here, but no longer syncs.",
+      "SERVER_TOO_OLD": "This Plainspace server is too old for title sync. Done state keeps syncing; titles sync once the server is updated."
     }
   },
   "PLUGINS": {

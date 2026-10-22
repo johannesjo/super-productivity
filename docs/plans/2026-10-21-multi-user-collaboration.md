@@ -104,12 +104,13 @@ privacy-first"), same-device multi-login (#5189 part 1; OS accounts cover it).
 
 The integration API (`packages/server/src/routes/integration.ts`, PAT auth)
 lists my tasks, creates (assigned to the caller, `:305`), patches **only**
-`{done}` and answers 422 to anything else (`:381-383`), deletes (soft,
-restorable in the web app for 30 days: `routes/items.ts:457`,
-`services/retention.ts:16`), lists and claims unassigned tasks, and creates
-Spaces. Items have `text` varchar(500), single `assignedTo`, `remindAt`
-(always an instant), `repeat`, and a row-level `updated_at` only; no notes,
-subtasks or comments. Plainspace's own web app edits items with a plain
+`{done}` and answers 422 to anything else (`:381-383`), deletes (soft, kept
+30 days: `services/retention.ts:16`; the web app restores an item only from
+the Undo toast after its own delete, `routes/items.ts:457`, so an
+integration delete has no restore path for Space members), lists and claims
+unassigned tasks, and creates Spaces. Items have `text` varchar(500), single
+`assignedTo`, `remindAt` (always an instant), `repeat`, and a row-level
+`updated_at` only; no notes, subtasks or comments. Plainspace's own web app edits items with a plain
 read-merge-write `PATCH`, no precondition (`routes/items.ts:273-362`). Spaces
 default to `sharingMode: 'open'`, so anyone with the link can join without an
 account.
@@ -248,10 +249,23 @@ A task in a shared project that failed to share (offline, server error) is
 picked up by "Share N unshared tasks" (Release 3), which is safe to repeat
 because it only looks at unlinked tasks.
 
-**Older servers.** A server that rejects a new field (422) or doesn't echo it
-back is remembered per provider, in memory, for the session: SP stops pushing
-that field and shows "Plainspace server too old for title/time sync" once in
-the provider panel. Done keeps syncing as today. No capability negotiation.
+**Echoes are compared exactly.** The server stores the title verbatim and
+answers a PATCH with the updated task; a pushed field counts as synced only
+when the echo equals what was sent, character for character.
+
+**Older servers.** Old-server detection is a 422 on a request carrying a new
+field (`title`, `scheduledAt`); SP checks the title is 1–500 characters and not
+blank before sending, so a 422 there means "too old", not "invalid". A server
+from before the widened PATCH answers `{title}` alone with a 422 and
+`{done, title}` with a 200 that ignores the title; the missing echo counts the
+same. It is remembered per provider, in memory, for the session: SP stops
+pushing that field and shows "Plainspace server too old for title/time sync"
+once in the provider panel. Done keeps syncing as today. No capability
+negotiation.
+
+**409 means "couldn't sync" for that task**, never "too old": the server
+refuses a change for this item's state (`repeat_requires_remind_at`: clearing
+the time of a recurring item). The task shows _couldn't sync_ with the reason.
 
 **Visible state.** In-memory, rebuilt on each poll, shown in the task detail
 panel's Plainspace section (never in the task row template, a hot path):
@@ -264,14 +278,15 @@ stays. No pending-changes indicator, no header count.
 Needs to be fixed before anything creates links automatically, because move-in
 and bulk sharing raise the blast radius of today's delete-for-everyone.
 
-| Event                                                   | Plainspace                                                                                                                           | Local                                                                                                |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
-| Delete a linked task assigned to me                     | Deleted for everyone after the undo window (exists; confirm text says so and adds that it can be restored in Plainspace for 30 days) | Deleted; in Recently deleted                                                                         |
-| Delete a task no longer assigned to me                  | Untouched (server refuses: not assigned to me)                                                                                       | Deleted; normal confirm, no "for everyone" warning                                                   |
-| Delete the project                                      | Untouched (not a delete trigger, verified)                                                                                           | Tasks deleted locally                                                                                |
-| Remove the provider                                     | Untouched                                                                                                                            | Tasks unlinked, notes and time kept (exists)                                                         |
-| Handed off, deleted, unassigned or lost access remotely | —                                                                                                                                    | Never deleted. Task, notes and time kept; state _no longer in your Plainspace list_; no further sync |
-| Move the task out of the shared project                 | Untouched, stays linked                                                                                                              | —                                                                                                    |
+| Event                                                   | Plainspace                                                                | Local                                                                                                |
+| ------------------------------------------------------- | ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| Delete a linked task assigned to me                     | Deleted for everyone after the undo window (exists; confirm text says so) | Deleted locally; not kept in Recently deleted                                                        |
+| Delete a task no longer assigned to me                  | Untouched (server refuses: not assigned to me)                            | Deleted; normal confirm, no "for everyone" warning                                                   |
+| Delete the project                                      | Untouched (not a delete trigger, verified)                                | Tasks deleted locally                                                                                |
+| Remove the provider                                     | Untouched                                                                 | Tasks unlinked, notes and time kept (exists)                                                         |
+| Handed off, deleted, unassigned or lost access remotely | —                                                                         | Never deleted. Task, notes and time kept; state _no longer in your Plainspace list_; no further sync |
+| Move the task out of the shared project                 | Untouched, stays linked                                                   | —                                                                                                    |
+| "Only keep the latest" removes an older repeat copy     | Deleted for everyone at once: no confirm, no undo (#11016, chosen)        | Deleted locally                                                                                      |
 
 A missing item is never read as a deletion: the server returns the same 404
 for deleted, reassigned and lost-membership, by design, and "missing" is only
@@ -317,7 +332,8 @@ SP:
 3. **Title both ways**: `title: 'both'`; `pushChanges` sends it and checks the
    echoed value; older servers per § Sync protocol.
 4. **Moving in shares** (#8790): add `moveToOtherProject` into a bound project
-   next to `addTask` in `autoCreateIssueOnTaskAdd$`. Moving out keeps the link.
+   (and `applyShortSyntax` with a `+Project` move) next to `addTask` in
+   `autoCreateIssueOnTaskAdd$`. Moving out keeps the link.
 5. **Visible state** per § Sync protocol.
 6. **Refresh when I look**: a throttled full poll on window focus and app
    resume. No delta polling.
@@ -373,11 +389,22 @@ gets a fix only when it is reported.
 - **Lost create response, or a crash between create and link.** One visible
   duplicate SP task (auto-imported), no data loss. Fix: `clientRef`.
 - **Old self-hosted servers** keep done-only sync until they upgrade.
+- **Titles that were local-only before Release 1** (a local rename, or a title
+  short syntax stripped at import) are pushed on the first successful poll
+  after the update; the baseline can't tell them from an offline edit.
+  Accepted by the maintainer for the beta, with a release note.
 - **Clearing the time skips the remote-changed check** (Scheduled time,
   decided cost).
 - **No cross-repo real-server E2E.** Contract drift is caught by Plainspace's
   integration tests and the shared `SPTask` type.
 - **Delegated tasks** don't show their live title, done state or assignee in SP.
+- **Moving many tasks in at once** (bulk move, multi-drag, all instances of a
+  repeating task) shares each one: one create per task, and offline or rate
+  limited one error message per task. Release 3's bulk share stops on the
+  first 422/429.
+- **Two devices moving the same task in** before either's link op syncs both
+  create it: one visible duplicate item in the Space, no data loss. Fix:
+  `clientRef`, like a lost create response.
 
 ## Sync and long-term cost
 

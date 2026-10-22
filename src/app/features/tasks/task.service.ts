@@ -434,8 +434,9 @@ export class TaskService {
     additional: Partial<Task> = {},
     due: number,
     remindCfg?: TaskReminderOptionId,
+    isIgnoreShortSyntax = false,
   ): Promise<string> {
-    const id = this.add(title, undefined, additional, undefined);
+    const id = this.add(title, undefined, additional, undefined, isIgnoreShortSyntax);
     const task = await this.getByIdOnce$(id).toPromise();
     this.scheduleTask(
       task,
@@ -702,7 +703,6 @@ export class TaskService {
       const workContextType = this._workContextService
         .activeWorkContextType as WorkContextType;
 
-      // this.
       if (isBacklog) {
         const undoneBacklogTaskIds = await this._workContextService.undoneBacklogTaskIds$
           .pipe(take(1))

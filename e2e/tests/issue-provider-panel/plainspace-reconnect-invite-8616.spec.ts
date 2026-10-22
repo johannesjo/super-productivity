@@ -124,6 +124,18 @@ const lastTaskRequest = (server: FakePlainspace, host: string): TaskRequest | un
 const readClipboard = (page: Page): Promise<string> =>
   page.evaluate(() => navigator.clipboard.readText());
 
+// The dialog's input is in the DOM before its first change detection binds
+// ngModel (zoneless), and that binding writes '' over anything filled earlier.
+// The Connect label renders in the same pass, so wait for it before filling.
+const connectWithToken = async (page: Page, token: string): Promise<void> => {
+  const connectDialog = page.locator('plainspace-connect-dialog');
+  const connectBtn = connectDialog.getByRole('button', { name: 'Connect', exact: true });
+  await expect(connectBtn).toBeVisible();
+  await connectDialog.locator('input[type="password"]').fill(token);
+  await expect(connectBtn).toBeEnabled();
+  await connectBtn.click();
+};
+
 test.describe('Plainspace Release 0', () => {
   test('offline stays quiet, a revoked token asks to reconnect, reconnect replaces only that token, invite link copies', async ({
     page,
@@ -144,12 +156,11 @@ test.describe('Plainspace Release 0', () => {
     await projectPage.openProjectContextMenu('Shared');
     await page.getByRole('menuitem', { name: /Collaborate on Plainspace/ }).click();
     const connectDialog = page.locator('plainspace-connect-dialog');
-    await connectDialog.locator('input[type="password"]').fill('pat_old');
-    await connectDialog.getByRole('button', { name: 'Connect', exact: true }).click();
+    await connectWithToken(page, 'pat_old');
     const picker = page.locator('plainspace-space-picker-dialog');
     // Item 4: the share dialog says what is stored on the Plainspace host.
     await expect(picker).toContainText(
-      'Task titles, done state and scheduled times of shared tasks are stored on plainspace.org',
+      'Task titles and done state of shared tasks are stored on plainspace.org, along with times set there.',
     );
     await picker.getByRole('button', { name: 'Link space' }).click();
     await expect(picker).toBeHidden();
@@ -216,8 +227,7 @@ test.describe('Plainspace Release 0', () => {
 
     // Item 1: reconnect with the new token.
     await reconnectNotice.getByRole('button', { name: 'Reconnect' }).click();
-    await connectDialog.locator('input[type="password"]').fill('pat_new');
-    await connectDialog.getByRole('button', { name: 'Connect', exact: true }).click();
+    await connectWithToken(page, 'pat_new');
     await expect(connectDialog).toBeHidden();
     await expect(reconnectNotice).toHaveCount(0);
     // The token change restarts polling: the shared project's provider now
@@ -294,8 +304,7 @@ test.describe('Plainspace Release 0', () => {
     await projectPage.openProjectContextMenu('Shared');
     await page.getByRole('menuitem', { name: /Collaborate on Plainspace/ }).click();
     const connectDialog = page.locator('plainspace-connect-dialog');
-    await connectDialog.locator('input[type="password"]').fill('pat_mid');
-    await connectDialog.getByRole('button', { name: 'Connect', exact: true }).click();
+    await connectWithToken(page, 'pat_mid');
     const picker = page.locator('plainspace-space-picker-dialog');
     await picker.getByRole('button', { name: 'Link space' }).click();
     await expect(picker).toBeHidden();
@@ -319,8 +328,7 @@ test.describe('Plainspace Release 0', () => {
     server.tokens.delete(`${HOST} pat_mid`);
     server.tokens.set(`${HOST} pat_new`, 'me@e2e.test');
     await reconnectNotice.getByRole('button', { name: 'Reconnect' }).click();
-    await connectDialog.locator('input[type="password"]').fill('pat_new');
-    await connectDialog.getByRole('button', { name: 'Connect', exact: true }).click();
+    await connectWithToken(page, 'pat_new');
     await expect(connectDialog).toBeHidden();
 
     // Both integrations now poll with the new token and nothing is rejected.

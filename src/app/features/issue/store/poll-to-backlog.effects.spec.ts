@@ -1,4 +1,6 @@
-import { TestBed, fakeAsync, tick } from '@angular/core/testing';
+import { TestBed, discardPeriodicTasks, fakeAsync, tick } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
+import { IssueLog } from '../../../core/log';
 import { provideMockActions } from '@ngrx/effects/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
@@ -489,6 +491,30 @@ describe('PollToBacklogEffects', () => {
       expect(
         issueServiceSpy.checkAndImportNewIssuesToBacklogForProject,
       ).toHaveBeenCalledTimes(2);
+    }));
+
+    // Log history is exportable: an HTTP error carries the provider's URL.
+    it('logs only the status of a failed request', fakeAsync(() => {
+      store.overrideSelector(selectEnabledIssueProviders, [
+        createMockIssueProvider({
+          id: 'jira-1',
+          defaultProjectId: 'project-2',
+          isAutoAddToBacklog: true,
+          pollingMode: 'always',
+        }),
+      ]);
+      store.refreshState();
+      issueServiceSpy.checkAndImportNewIssuesToBacklogForProject.and.rejectWith(
+        new HttpErrorResponse({ status: 500, url: 'https://private.example/api' }),
+      );
+      const logSpy = spyOn(IssueLog, 'err');
+      actions$ = new Subject<any>().asObservable();
+      effects.pollNewIssuesToBacklogAlways$.subscribe();
+
+      tick(10001);
+
+      expect(logSpy).toHaveBeenCalledOnceWith(jasmine.any(String), { status: 500 });
+      discardPeriodicTasks();
     }));
 
     it('should NOT poll on a tick that falls inside the sync window, but poll on the next tick', fakeAsync(() => {
