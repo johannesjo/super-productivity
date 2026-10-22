@@ -3284,7 +3284,9 @@
       "ASSIGNED": "Assigned to {{name}} in Plainspace.",
       "FAILED": "Couldn't hand off this task. Check your connection and try again.",
       "LOADING": "Loading members…",
+      "MEMBER_LEFT": "That person is no longer in the Space. Pick someone else.",
       "NO_MEMBERS": "No one else is in this Space yet.",
+      "NOT_YOURS": "This task is no longer assigned to you in Plainspace.",
       "RELEASE": "Release to Space",
       "RELEASED": "Released to the Space in Plainspace.",
       "SERVER_TOO_OLD": "Plainspace server too old to assign."

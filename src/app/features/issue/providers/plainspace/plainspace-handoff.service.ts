@@ -18,7 +18,9 @@ import { PlainspaceCfg } from './plainspace.model';
  * again. Nothing local changes, so a handoff writes no op.
  *
  * Older servers answer the members request with 404 and an `assigneeId`-only
- * PATCH with 422; both show "server too old" (no capability negotiation).
+ * PATCH with 422; both show "server too old" (no capability negotiation). The
+ * PATCH carries `assigneeId` alone: an older server would apply the other
+ * fields of a combined request and silently drop the assignee.
  */
 @Injectable({ providedIn: 'root' })
 export class PlainspaceHandoffService {
@@ -50,7 +52,20 @@ export class PlainspaceHandoffService {
         ),
       );
     } catch (err) {
-      this._snackError(err, 422);
+      // A 404 says why in its body: the task is no longer mine (mark it as a
+      // poll would), or the member left the space (the list reloads on open).
+      const reason =
+        err instanceof HttpErrorResponse && err.status === 404
+          ? (err.error as { error?: unknown } | null)?.error
+          : undefined;
+      if (reason === 'Task not found') {
+        this._syncState.setMissing([task.id], [task.id]);
+        this._snackService.open({ type: 'ERROR', msg: T.PLAINSPACE.HANDOFF.NOT_YOURS });
+      } else if (reason === 'Member not found') {
+        this._snackService.open({ type: 'ERROR', msg: T.PLAINSPACE.HANDOFF.MEMBER_LEFT });
+      } else {
+        this._snackError(err, 422);
+      }
       return;
     }
     this._syncState.setMissing([task.id], [task.id]);

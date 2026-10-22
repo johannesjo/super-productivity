@@ -121,6 +121,49 @@ describe('PlainspaceHandoffService', () => {
       });
     });
 
+    it('marks the task no longer mine when the server says it is not', async () => {
+      api.patchTask$.and.returnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({ status: 404, error: { error: 'Task not found' } }),
+        ),
+      );
+      await service.handOff(task, bob);
+
+      expect(syncState.isMissing('t1')).toBeTrue();
+      expect(snack.open).toHaveBeenCalledWith({
+        type: 'ERROR',
+        msg: T.PLAINSPACE.HANDOFF.NOT_YOURS,
+      });
+    });
+
+    it('says the member left and keeps the task mine', async () => {
+      api.patchTask$.and.returnValue(
+        throwError(
+          () =>
+            new HttpErrorResponse({ status: 404, error: { error: 'Member not found' } }),
+        ),
+      );
+      await service.handOff(task, bob);
+
+      expect(syncState.isMissing('t1')).toBeFalse();
+      expect(snack.open).toHaveBeenCalledWith({
+        type: 'ERROR',
+        msg: T.PLAINSPACE.HANDOFF.MEMBER_LEFT,
+      });
+    });
+
+    it('says the server is too old on a plain-text 404 from the members endpoint', async () => {
+      api.getSpaceMembers$.and.returnValue(
+        throwError(() => new HttpErrorResponse({ status: 404, error: '404 Not Found' })),
+      );
+      expect(await service.getMembers(task)).toBeNull();
+      expect(snack.open).toHaveBeenCalledWith({
+        type: 'ERROR',
+        msg: T.PLAINSPACE.HANDOFF.SERVER_TOO_OLD,
+      });
+    });
+
     it('keeps the task mine when the request fails otherwise', async () => {
       api.patchTask$.and.returnValue(throwError(() => httpError(500)));
       await service.handOff(task, bob);
