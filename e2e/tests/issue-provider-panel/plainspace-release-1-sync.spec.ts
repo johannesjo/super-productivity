@@ -38,8 +38,16 @@ const setUp = async (
 const taskRow = (page: Page, title: string): ReturnType<Page['locator']> =>
   page.locator('task').filter({ hasText: title });
 
-/** Renames a task in place (the row's text moves into a textarea meanwhile). */
-const renameTask = async (page: Page, title: string, newTitle: string): Promise<void> => {
+/**
+ * Renames a task in place (the row's text moves into a textarea meanwhile).
+ * `shownTitle`: the title once short syntax in `newTitle` is applied.
+ */
+const renameTask = async (
+  page: Page,
+  title: string,
+  newTitle: string,
+  shownTitle = newTitle,
+): Promise<void> => {
   const row = taskRow(page, title);
   const taskId = await row.getAttribute('data-task-id');
   await row.locator('task-title').click();
@@ -47,7 +55,7 @@ const renameTask = async (page: Page, title: string, newTitle: string): Promise<
   await expect(textarea).toBeVisible();
   await textarea.fill(newTitle);
   await page.keyboard.press('Tab');
-  await expect(taskRow(page, newTitle)).toBeVisible();
+  await expect(taskRow(page, shownTitle)).toBeVisible();
 };
 
 /** Opens the task's detail panel unless it is already open. */
@@ -177,6 +185,29 @@ test.describe('Plainspace Release 1 sync', () => {
     await expect(taskRow(page, 'Buy tent and pegs')).toBeVisible();
     // Pulling it is not an edit: nothing is pushed back.
     expect(server.patches.length).toBe(1);
+  });
+
+  test('a title edited with short syntax is sent once, cleaned', async ({
+    page,
+    workViewPage,
+    projectPage,
+  }) => {
+    await workViewPage.waitForTaskList();
+    const server = await setUp(page, projectPage);
+
+    await renameTask(
+      page,
+      'Buy tent',
+      'Buy tent and pegs @tomorrow',
+      'Buy tent and pegs',
+    );
+    await expect
+      .poll(() => server.tasks.get(TASK_ID)!.title, { timeout: 15000 })
+      .toBe('Buy tent and pegs');
+    // Deliberate: a second write would show up meanwhile.
+    await page.waitForTimeout(2000);
+    // The raw tokens never reach the space.
+    expect(server.patches.map((p) => p.body)).toEqual([{ title: 'Buy tent and pegs' }]);
   });
 
   // Found by the test above on the production build: a collaborator's rename

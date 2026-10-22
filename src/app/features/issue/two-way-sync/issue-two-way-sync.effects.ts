@@ -198,7 +198,7 @@ export class IssueTwoWaySyncEffects {
             PlannerActions.planTaskForDay,
             PlannerActions.transferTask,
           ),
-          map((action) => ACTION_EXTRACTORS[action.type](action)),
+          map((action) => ({ action, ...ACTION_EXTRACTORS[action.type](action) })),
           filter(({ taskId, changes }) => {
             if (this._syncOriginatedTaskIds.delete(taskId)) {
               return false;
@@ -209,6 +209,19 @@ export class IssueTwoWaySyncEffects {
             }
             return Object.keys(changes).some((key) => SYNCABLE_TASK_FIELDS.has(key));
           }),
+          // Short syntax typed into a title is applied right after this update,
+          // and the applyShortSyntax that follows pushes the cleaned title.
+          // Pushing this raw one first would show the tokens in the provider.
+          // After the filter above: its sync-originated check must stay in step
+          // with dispatch, which an async step ahead of it would break.
+          concatMap((x) =>
+            // A parse that fails (e.g. the date parser chunk can't load) pushes
+            // the title as typed rather than stopping the push stream.
+            from(this._isTitleAboutToBeRewritten(x.action).catch(() => false)).pipe(
+              filter((isRewritten) => !isRewritten),
+              map(() => x),
+            ),
+          ),
           map(({ taskId, changes }) => ({
             taskId,
             changes: changes as Partial<Task> | null,
@@ -594,6 +607,28 @@ export class IssueTwoWaySyncEffects {
           current && current.projectId === moveInProjectId ? current : undefined,
         ),
       );
+  }
+
+  /**
+   * Whether the short-syntax effect is about to rewrite the title of this
+   * update: it parses an update that changes only the title, like this does.
+   */
+  private async _isTitleAboutToBeRewritten(action: { type: string }): Promise<boolean> {
+    if (action.type !== TaskSharedActions.updateTask.type) {
+      return false;
+    }
+    const { task, isIgnoreShortSyntax } = action as ReturnType<
+      typeof TaskSharedActions.updateTask
+    >;
+    const changedKeys = Object.keys(task.changes);
+    if (isIgnoreShortSyntax || changedKeys.length !== 1 || changedKeys[0] !== 'title') {
+      return false;
+    }
+    const current = await firstValueFrom(this._taskService.getByIdOnce$(String(task.id)));
+    if (!current?.issueId) {
+      return false;
+    }
+    return (await this._parseShortSyntax(current)).title !== current.title;
   }
 
   /**
