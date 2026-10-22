@@ -76,6 +76,9 @@ export enum LS {
   // added, so a reload after that does not start onboarding over.
   ONBOARDING_PRESET_DONE = 'SUP_ONBOARDING_PRESET_DONE',
   ONBOARDING_HINTS_DONE = 'SUP_ONBOARDING_HINTS_DONE',
+  // Quick tour (device-local, never synced): the running step and its task, so
+  // a reload resumes it. Removed once the tour ends.
+  QUICK_TOUR_STATE = 'SUP_QUICK_TOUR_STATE',
 
   LAST_FULLSCREEN_EDIT_VIEW_MODE = 'SUP_LAST_FULLSCREEN_EDIT_VIEW_MODE',
 
@@ -102,11 +105,17 @@ export enum LS {
   PLAINSPACE_CLAIM_POOL_HIDDEN = 'PLAINSPACE_CLAIM_POOL_HIDDEN',
   // Plainspace account/identity — local-only, never synced (device identity).
   PLAINSPACE_ACCOUNT = 'SUP_PLAINSPACE_ACCOUNT',
+  // Recently deleted trash — device-local, never synced.
+  RECENTLY_DELETED_EMPTIED_AT = 'SUP_RECENTLY_DELETED_EMPTIED_AT',
 
   // Magic side nav
   NAV_SIDEBAR_EXPANDED = 'SUP_NAV_SIDEBAR_EXPANDED',
   NAV_SIDEBAR_WIDTH = 'SUP_NAV_SIDEBAR_WIDTH',
   RIGHT_PANEL_WIDTH = 'SUP_RIGHT_PANEL_WIDTH',
+
+  // Destination of the phone bottom nav's second slot. Device-local, never
+  // synced: the bar only exists on narrow screens.
+  BOTTOM_NAV_SLOT = 'SUP_BOTTOM_NAV_SLOT',
 
   // Task view customizer
   TASK_VIEW_CUSTOMIZER_BY_CONTEXT = 'SUP_TASK_VIEW_CUSTOMIZER_BY_CONTEXT',

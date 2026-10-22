@@ -1,7 +1,7 @@
 import { Injectable, InjectionToken, inject } from '@angular/core';
 import { HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { Capacitor, CapacitorHttp, HttpOptions, HttpResponse } from '@capacitor/core';
-import { Observable, defer, of } from 'rxjs';
+import { Observable, defer, of, throwError } from 'rxjs';
 import { catchError, map, retry } from 'rxjs/operators';
 import { SearchResultItem } from '../../issue.model';
 import { PlainspaceCfg } from './plainspace.model';
@@ -42,8 +42,9 @@ export const PLAINSPACE_NATIVE_HTTP = new InjectionToken<PlainspaceNativeHttp | 
  * here, keeping the real contract isolated to this file — the DTO interfaces
  * below are the endpoint contract.
  *
- * Reads fail soft (empty list / null) so a Plainspace outage never blocks the SP
- * UI; `createSpace$` lets errors propagate so the share flow can report them.
+ * `getMyTasks$` and `getById$` let errors propagate (offline, 401, 5xx) so no
+ * caller can mistake a failed request for "no tasks"; the poll decides what to
+ * show. The token check, claim pool and completion push fail soft (see each).
  */
 @Injectable({ providedIn: 'root' })
 export class PlainspaceApiService {
@@ -127,7 +128,10 @@ export class PlainspaceApiService {
     );
   }
 
-  /** Tasks assigned to me in this provider's space — imported as SP tasks. */
+  /**
+   * Tasks assigned to me in this provider's space — imported as SP tasks. Errors
+   * propagate: an empty list must only ever mean "nothing is assigned to me".
+   */
   getMyTasks$(cfg: PlainspaceCfg): Observable<PlainspaceIssue[]> {
     return this._http
       .get<SPTasksResponse>(`${this._base(cfg)}/tasks`, { headers: this._headers(cfg) })
@@ -138,7 +142,6 @@ export class PlainspaceApiService {
             .filter((t) => matchesSpace(t, cfg.spaceId))
             .map(mapSPTaskToIssue),
         ),
-        catchError(() => of([])),
       );
   }
 
@@ -161,6 +164,11 @@ export class PlainspaceApiService {
       );
   }
 
+  /**
+   * One task, or null when the server answers 404 (deleted, unassigned or no
+   * longer a member — the server does not say which). Every other error
+   * propagates, so an offline fetch is never read as a missing task.
+   */
   getById$(id: string, cfg: PlainspaceCfg): Observable<PlainspaceIssue | null> {
     return this._http
       .get<SPTaskResponse>(`${this._base(cfg)}/tasks/${encodeURIComponent(id)}`, {
@@ -168,7 +176,11 @@ export class PlainspaceApiService {
       })
       .pipe(
         map((res) => mapSPTaskToIssue(res.task)),
-        catchError(() => of(null)),
+        catchError((err: unknown) =>
+          err instanceof HttpErrorResponse && err.status === 404
+            ? of(null)
+            : throwError(() => err),
+        ),
       );
   }
 

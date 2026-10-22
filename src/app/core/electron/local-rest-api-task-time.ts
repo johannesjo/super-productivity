@@ -1,6 +1,7 @@
 import { isValidDBDateStr } from '../../util/get-db-date-str';
 import { isRecord } from './local-rest-api-body';
 
+/** One day cannot hold more tracked time than this. */
 export const MAX_TIME_SPENT_PER_DAY_MS = 24 * 60 * 60 * 1000;
 
 /** Shared validation for adding time (POST) and setting a day's total (PUT). */
@@ -26,6 +27,7 @@ export const parseTimeSpentBody = (
   if (typeof date !== 'string' || !isValidDBDateStr(date)) {
     return { code: 'INVALID_INPUT', error: 'date must be a valid YYYY-MM-DD date' };
   }
+  // YYYY-MM-DD strings compare in calendar order.
   if (date > todayStr) {
     return { code: 'INVALID_INPUT', error: 'date must not be after today' };
   }

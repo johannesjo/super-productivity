@@ -990,6 +990,7 @@ const expandIcalToSearchResults = (
       // Skip exception events here; they're handled together with their master.
       if (icalTimeToMs(ve.getFirstPropertyValue('recurrence-id')) !== null) continue;
       if (isCancelledStatus(ve.getFirstPropertyValue('status'))) continue;
+      if (isSpManagedUid(ve.getFirstPropertyValue('uid'))) continue;
 
       const dtstart = ve.getFirstPropertyValue('dtstart');
       const startMs = icalTimeToMs(dtstart);
@@ -1198,6 +1199,17 @@ const buildNewEventUrl = (
 /** Derive a deterministic CalDAV UID from a task ID.
  * CalDAV UIDs are opaque strings with no charset restriction (unlike Google Calendar). */
 const taskIdToCaldavUid = (taskId: string): string => `sp-${taskId}@super-productivity`;
+
+/**
+ * True for events SuperProductivity itself wrote as auto-time-block mirrors of a
+ * local task (see `taskIdToCaldavUid`). When a read calendar overlaps the
+ * time-block calendar, the mirror is fetched back and would render next to the
+ * very task that created it — a duplicate (#9830, the CalDAV twin of the Google
+ * plugin's #8171). The local task is the source of truth, so the mirror is
+ * excluded from all read paths (schedule/agenda and search-to-add).
+ */
+const isSpManagedUid = (uid: unknown): boolean =>
+  typeof uid === 'string' && uid.startsWith('sp-') && uid.endsWith('@super-productivity');
 
 const isHttpStatus = (err: unknown, status: number): boolean =>
   typeof err === 'object' &&

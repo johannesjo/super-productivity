@@ -12,6 +12,8 @@ export type AppFeaturesConfig = Readonly<{
   isSchedulerEnabled: boolean;
   isPlannerEnabled: boolean;
   isBoardsEnabled: boolean;
+  // No longer read: the day panel follows isSchedulerEnabled. Kept because
+  // persisted and synced data (and released clients) still carry it.
   isScheduleDayPanelEnabled: boolean;
   isIssuesPanelEnabled: boolean;
   isProjectNotesEnabled: boolean;
@@ -94,6 +96,8 @@ export type ShortSyntaxConfig = Readonly<{
   isEnableProject: boolean;
   isEnableDue: boolean;
   isEnableDeadline?: boolean;
+  // Optional for on-disk configs that predate it; absent means on
+  isEnablePriority?: boolean;
   isEnableTag: boolean;
   urlBehavior?: 'keep' | 'extract' | 'keep-and-attach';
 }>;

@@ -41,8 +41,12 @@ export class TaskDuplicateService {
       const subTaskObj = this._taskService.createNewTaskWithDefaults({
         title: subTask.title,
         additional: {
+          parentId: taskId,
           isDone: subTask.isDone,
-          ...(isWontDoTask(subTask) && { isWontDo: true }),
+          ...(isWontDoTask(subTask) && {
+            doneOn: subTask.doneOn,
+            wontDoOn: subTask.wontDoOn,
+          }),
           projectId: subTask.projectId,
           ...(subTask.dueDay && { dueDay: subTask.dueDay }),
           ...(subTask.dueWithTime && { dueWithTime: subTask.dueWithTime }),

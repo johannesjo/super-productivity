@@ -80,6 +80,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
     isEnableProject: true,
     isEnableDue: true,
     isEnableDeadline: false,
+    isEnablePriority: true,
     isEnableTag: true,
     urlBehavior: 'keep',
   },
@@ -88,7 +89,7 @@ export const DEFAULT_GLOBAL_CONFIG: GlobalConfigState = {
   },
   idle: {
     isOnlyOpenIdleWhenCurrentTask: false,
-    isSuppressIdleDuringFocusMode: false,
+    isSuppressIdleDuringFocusMode: true,
     isEnableIdleTimeTracking: true,
     minIdleTime: 5 * minute,
   },

@@ -120,6 +120,8 @@ import { countTransientRejections } from '../../../sync/upload-outcome.util';
 import { SyncProviderManager } from '../../../sync-providers/provider-manager.service';
 import { CLIENT_ID_PROVIDER } from '../../../util/client-id.provider';
 import { RepairOperationService } from '../../../validation/repair-operation.service';
+import { REMOTE_APPLY_LISTENER } from '../../../apply/remote-apply-listener.token';
+import { RecentlyDeletedService } from '../../../../features/tasks/recently-deleted/recently-deleted.service';
 import { RepairSyncContextService } from '../../../validation/repair-sync-context.service';
 import {
   FakeSuperSyncClient,
@@ -252,6 +254,9 @@ const SYNC_WINDOW =
 const APPLY_WINDOW =
   'the remote-apply window, which _settle checks is closed at every step boundary';
 const CONSTANT = 'a constant';
+const TRASH = 'the write-only device-local Recently deleted trash';
+const STORE_SIGNAL =
+  'a selector signal over the one Store, whose state is swapped per device';
 
 /**
  * In-memory service state that devices share on purpose, by class name and
@@ -262,6 +267,15 @@ const CONSTANT = 'a constant';
 const SHARED_FIELDS: Readonly<Record<string, Readonly<Record<string, string>>>> = {
   OperationLogStoreService: { _adapter: ROUTED, _db: ROUTED, _initPromise: ROUTED },
   ArchiveStoreService: { _adapter: ROUTED, _db: ROUTED, _initPromise: ROUTED },
+  // The Recently deleted trash is device-local and write-only here: no reducer,
+  // sync path or oracle reads it, so devices sharing it changes nothing compared.
+  RecentlyDeletedService: {
+    _queue: TRASH,
+    _isPurgedThisSession: TRASH,
+    _taskEntities: STORE_SIGNAL,
+    _projectState: STORE_SIGNAL,
+  },
+  RecentlyDeletedStoreService: { _dbPromise: TRASH },
   OperationLogEffects: {
     isHandlingQuotaExceeded:
       'set only on a storage-quota error, which the fuzz never hits',
@@ -269,6 +283,10 @@ const SHARED_FIELDS: Readonly<Record<string, Readonly<Record<string, string>>>> 
       'set only on a storage-quota error, which the fuzz never hits',
     STORAGE_QUOTA_SNACK_DEDUPE_MS: CONSTANT,
     _deferredProcessingChain: 'settled at every step boundary: _settle drains it',
+  },
+  ArchiveOperationHandler: {
+    _localQueue:
+      'settled at every step boundary: _settle waits for every queued local operation',
   },
   OperationCaptureService: { PENDING_WARNING_THRESHOLD: CONSTANT },
   OperationLogMigrationService: { completionDisplayMs: CONSTANT },
@@ -645,6 +663,8 @@ export class SyncFuzzHarness {
       providers: [
         { provide: OP_LOG_DB_ADAPTER_FACTORY, useValue: () => routingAdapter },
         { provide: CLIENT_ID_PROVIDER, useValue: clientIds },
+        // As in main.ts, so remote applies also run the trash's hook.
+        { provide: REMOTE_APPLY_LISTENER, useExisting: RecentlyDeletedService },
         { provide: ClientIdService, useValue: clientIds },
         { provide: ImmediateUploadService, useValue: { trigger: () => undefined } },
         {
@@ -693,6 +713,9 @@ export class SyncFuzzHarness {
     // not end, and the device swap out, before they wrote to this device's
     // database.
     this._trackInFlight(TestBed.inject(ArchiveOperationHandler), 'handleOperation');
+    // A queued local archive write is in flight from the moment it is queued,
+    // not only once it starts.
+    this._trackInFlight(TestBed.inject(ArchiveOperationHandler), 'enqueueLocalOperation');
     this._trackInFlight(TestBed.inject(OperationLogCompactionService), 'compact');
     this._trackInFlight(
       TestBed.inject(OperationLogCompactionService),

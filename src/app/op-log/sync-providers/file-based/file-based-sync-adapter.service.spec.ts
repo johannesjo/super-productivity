@@ -2818,38 +2818,45 @@ describe('FileBasedSyncAdapterService', () => {
       expect(result.gapDetected).toBeFalsy();
     });
 
-    it('should NOT detect gap at the boundary sinceSeq === oldestOpSyncVersion - 1 (SPAP-9 off-by-one)', async () => {
-      // Boundary: the oldest surviving op has sv = sinceSeq + 1. The client
-      // already has everything up to sinceSeq, and the very next op it needs
-      // (sinceSeq + 1) is present — nothing was trimmed out from under it, so
-      // this must NOT be treated as a gap. The old `> sinceSeq` test flagged it.
-      const maxOps = FILE_BASED_SYNC_CONSTANTS.MAX_RECENT_OPS;
-      const fullOps = Array.from({ length: maxOps }, (_, i) => ({
-        id: `op-${i}`,
-        c: 'other-client',
-        a: 'HA',
-        o: 'ADD',
-        e: 'TASK',
-        d: `task-${i}`,
-        v: { otherClient: i + 1 },
-        t: Date.now() + i,
-        s: 1,
-        p: {},
-        sv: 6 + Math.floor(i / 10), // oldest sv=6
-      }));
+    for (const { oldestBatchComplete, isGap } of [
+      { oldestBatchComplete: true, isGap: false },
+      { oldestBatchComplete: undefined, isGap: true },
+    ]) {
+      it(`full buffer at sinceSeq + 1: gap=${isGap}, certified=${oldestBatchComplete} (SPAP-9, #10973)`, async () => {
+        // Boundary: the oldest surviving op has sv = sinceSeq + 1. When the writer
+        // certifies that batch complete, nothing the client needs was trimmed, so
+        // this must NOT be a gap (the old `> sinceSeq` test flagged it, SPAP-9).
+        // #10973: without the marker, a released writer may have cut INSIDE batch
+        // sinceSeq + 1 of this full buffer, so the client needs the snapshot.
+        const maxOps = FILE_BASED_SYNC_CONSTANTS.MAX_RECENT_OPS;
+        const fullOps = Array.from({ length: maxOps }, (_, i) => ({
+          id: `op-${i}`,
+          c: 'other-client',
+          a: 'HA',
+          o: 'ADD',
+          e: 'TASK',
+          d: `task-${i}`,
+          v: { otherClient: i + 1 },
+          t: Date.now() + i,
+          s: 1,
+          p: {},
+          sv: 6 + Math.floor(i / 10), // oldest sv=6
+        }));
 
-      const data = createMockSyncData({
-        syncVersion: 60,
-        recentOps: fullOps,
-        oldestOpSyncVersion: 6,
+        const data = createMockSyncData({
+          syncVersion: 60,
+          recentOps: fullOps,
+          oldestOpSyncVersion: 6,
+          oldestBatchComplete,
+        });
+        mockProvider.downloadFile.and.returnValue(
+          Promise.resolve({ dataStr: addPrefix(data), rev: 'rev-1' }),
+        );
+
+        const result = await adapter.downloadOps(5); // sinceSeq=5, oldest=6
+        expect(!!result.gapDetected).toBe(isGap);
       });
-      mockProvider.downloadFile.and.returnValue(
-        Promise.resolve({ dataStr: addPrefix(data), rev: 'rev-1' }),
-      );
-
-      const result = await adapter.downloadOps(5); // sinceSeq=5, oldest=6 → contiguous
-      expect(result.gapDetected).toBeFalsy();
-    });
+    }
 
     it('should still detect gap when oldestOpSyncVersion > sinceSeq + 1 (ops actually trimmed)', async () => {
       const maxOps = FILE_BASED_SYNC_CONSTANTS.MAX_RECENT_OPS;
@@ -3030,6 +3037,8 @@ describe('FileBasedSyncAdapterService', () => {
       expect(uploadedData.recentOps[1].sv).toBe(1);
       // oldestOpSyncVersion should be sv of first op = 1
       expect(uploadedData.oldestOpSyncVersion).toBe(1);
+      // #10973: a buffer that starts with this batch holds all of it.
+      expect(uploadedData.oldestBatchComplete).toBeTrue();
     });
   });
 
@@ -4953,6 +4962,36 @@ describe('FileBasedSyncAdapterService', () => {
       expect(
         (await adapter.uploadOps([createMockSyncOp()], 'client1')).results[0].accepted,
       ).toBe(true);
+    });
+
+    // #10973: migration copies recentOps unchanged, so it must carry the v2
+    // certification; dropping it would flag every migrated reader at oldest-1.
+    it('#10973 carries oldestBatchComplete from legacy v2 into the migrated ops file', async () => {
+      const recentOps = [makeCompactOp({ id: 'op-6', sv: 6 })];
+      const legacy = createMockSyncData({
+        syncVersion: 7,
+        vectorClock: { client1: 7 },
+        recentOps,
+        oldestOpSyncVersion: 6,
+        oldestBatchComplete: true,
+        state: { tasks: ['legacy'] },
+      });
+      routeDownloads({ [C.SYNC_FILE]: addPrefix(legacy, 2) });
+
+      await expectAsync(
+        adapter.uploadOps([createMockSyncOp()], 'client1'),
+      ).toBeRejectedWithError(UploadRevToMatchMismatchAPIError);
+
+      const opsWrites = mockProvider.uploadFile.calls
+        .allArgs()
+        .filter(([path]) => path === C.OPS_FILE)
+        .map(([, encoded]) => parseWithPrefix(encoded as string));
+      // Pending marker and finalized commit point both carry it.
+      expect(opsWrites.length).toBe(2);
+      for (const ops of opsWrites) {
+        expect(ops.recentOps).toEqual(recentOps);
+        expect(ops.oldestBatchComplete).toBe(true);
+      }
     });
 
     it('(e2) resumes a pending migration marker after restart before appending ops', async () => {

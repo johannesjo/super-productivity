@@ -631,6 +631,50 @@ END:VCALENDAR</cal:calendar-data>
       }
     });
 
+    it('skips time-block events Super Productivity wrote itself (#9830)', async () => {
+      // When the time-block calendar is also a read calendar, the REPORT returns
+      // the mirror of each scheduled task; it must not show up as a second entry.
+      const withOwnTimeBlock = NEXTCLOUD_REPORT_RESPONSE.replace(
+        '</d:multistatus>',
+        `  <d:response>
+    <d:href>/remote.php/dav/calendars/admin/personal/sp-task1%40super-productivity.ics</d:href>
+    <d:propstat>
+      <d:prop>
+        <d:getetag>"def456"</d:getetag>
+        <cal:calendar-data>BEGIN:VCALENDAR
+VERSION:2.0
+BEGIN:VEVENT
+UID:sp-task1@super-productivity
+DTSTART:20260320T120000Z
+DTEND:20260320T130000Z
+SUMMARY:Scheduled task
+END:VEVENT
+END:VCALENDAR</cal:calendar-data>
+      </d:prop>
+      <d:status>HTTP/1.1 200 OK</d:status>
+    </d:propstat>
+  </d:response>
+</d:multistatus>`,
+      );
+      vi.useFakeTimers();
+      vi.setSystemTime(new Date('2026-03-15T00:00:00Z'));
+      try {
+        const mockHttp = { request: vi.fn().mockResolvedValue(withOwnTimeBlock) };
+        const cfg = {
+          serverUrl: 'https://example.com/dav',
+          readCalendarIds: ['/remote.php/dav/calendars/admin/personal/'],
+        } as any;
+
+        const events = await definition.getNewIssuesForBacklog!(cfg, mockHttp as any);
+        expect(events.map((e) => e.title)).toEqual(['Test Meeting']);
+
+        const found = await definition.searchIssues('task', cfg, mockHttp as any);
+        expect(found).toEqual([]);
+      } finally {
+        vi.useRealTimers();
+      }
+    });
+
     it('returns successful calendar events when another selected calendar fails', async () => {
       vi.useFakeTimers();
       vi.setSystemTime(new Date('2026-03-15T00:00:00Z'));

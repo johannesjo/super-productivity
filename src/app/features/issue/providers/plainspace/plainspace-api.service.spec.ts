@@ -353,12 +353,33 @@ describe('PlainspaceApiService', () => {
     expect(res[0].issueType).toBe('PLAINSPACE');
   });
 
-  it('reads fail soft to [] on a network error', async () => {
-    const p = firstValueFrom(service.getMyTasks$(cfg));
-    httpMock
-      .expectOne(`${BASE}/tasks`)
-      .flush('boom', { status: 500, statusText: 'Server Error' });
-    expect(await p).toEqual([]);
+  // Gap 3: a failed poll must never read as "no tasks" / "task missing".
+  [0, 401, 500].forEach((status) => {
+    it(`getMyTasks$ propagates a ${status} instead of returning []`, async () => {
+      const p = firstValueFrom(service.getMyTasks$(cfg));
+      const req = httpMock.expectOne(`${BASE}/tasks`);
+      if (status === 0) {
+        req.error(new ProgressEvent('error'), { status: 0 });
+      } else {
+        req.flush('boom', { status, statusText: 'Error' });
+      }
+      await expectAsync(p).toBeRejectedWith(
+        jasmine.objectContaining({ status }) as unknown as Error,
+      );
+    });
+
+    it(`getById$ propagates a ${status} instead of returning null`, async () => {
+      const p = firstValueFrom(service.getById$('a', cfg));
+      const req = httpMock.expectOne(`${BASE}/tasks/a`);
+      if (status === 0) {
+        req.error(new ProgressEvent('error'), { status: 0 });
+      } else {
+        req.flush('boom', { status, statusText: 'Error' });
+      }
+      await expectAsync(p).toBeRejectedWith(
+        jasmine.objectContaining({ status }) as unknown as Error,
+      );
+    });
   });
 });
 

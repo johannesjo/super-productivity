@@ -609,6 +609,18 @@ describe('TaskRepeatCfgService', () => {
   });
 
   describe('getActionsForTaskRepeatCfg', () => {
+    it('creates nothing for a paused config, even when a copy is completed', async () => {
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+
+      const actions = await service._getActionsForTaskRepeatCfg(
+        { ...mockTaskRepeatCfg, isPaused: true, waitForCompletion: true },
+        Date.now(),
+      );
+
+      expect(actions).toEqual([]);
+      expect(taskService.createNewTaskWithDefaults).not.toHaveBeenCalled();
+    });
+
     it('should return updateTaskRepeatCfg (not addTask) when task already exists for day (#7923)', async () => {
       const today = new Date();
       const targetDayDate = today.getTime();

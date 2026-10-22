@@ -51,7 +51,7 @@ import COMMUNITY_PLUGINS_DATA from '../../../../assets/community-plugins.json';
 import { PluginApiAccess, PluginSecurityService } from '../../plugin-security';
 import { DEV_ONLY_BUNDLED_PLUGIN_IDS } from '../../bundled-plugins.const';
 import { environment } from '../../../../environments/environment';
-import { IS_NATIVE_PLATFORM } from '../../../util/is-native-platform';
+import { Capacitor } from '@capacitor/core';
 import {
   CommunityPlugin,
   CommunityPluginDownloadError,
@@ -203,9 +203,10 @@ export class PluginManagementComponent {
   /**
    * The web app cannot download from release hosts that send no CORS headers
    * (GitHub, Codeberg), so it links to the ZIP for a manual install instead.
-   * Electron adds the header itself; Capacitor fetches natively.
+   * Electron adds the header itself; Capacitor fetches natively. The legacy
+   * Android WebView (no Capacitor bridge) has no CORS bypass, so it links too.
    */
-  readonly isInAppInstall = IS_ELECTRON || IS_NATIVE_PLATFORM;
+  readonly isInAppInstall = IS_ELECTRON || Capacitor.isNativePlatform();
 
   // Plugin size limits for display
   readonly maxPluginSizeMB = (MAX_PLUGIN_ZIP_SIZE / 1024 / 1024).toFixed(1);
@@ -493,7 +494,7 @@ export class PluginManagementComponent {
       !(await this._confirmInDialog(
         T.PLUGINS.CONFIRM_CLEAR_CACHE,
         { count: uploadedCount },
-        T.PLUGINS.CLEAR_PLUGIN_CACHE,
+        T.PLUGINS.REMOVE_ALL_UPLOADED_PLUGINS,
       ))
     ) {
       return;
@@ -508,13 +509,13 @@ export class PluginManagementComponent {
       // plugin before the method returns (issue #8512 Phase 2 — see the service method).
       await this._pluginService.clearUploadedPluginsFromMemory();
 
-      PluginLog.log('Plugin cache cleared successfully');
+      PluginLog.log('Uploaded plugins removed');
     } catch (error) {
-      PluginLog.err('Failed to clear plugin cache:', error);
+      PluginLog.err('Failed to remove uploaded plugins:', error);
       this.uploadError.set(
         error instanceof Error
           ? error.message
-          : this._translateService.instant(T.PLUGINS.FAILED_TO_CLEAR_CACHE),
+          : this._translateService.instant(T.PLUGINS.FAILED_TO_REMOVE_UPLOADED_PLUGINS),
       );
     } finally {
       this.isUploading.set(false);

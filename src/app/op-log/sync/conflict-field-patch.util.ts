@@ -188,9 +188,8 @@ export const isFieldPatchEligible = (sides: FieldPatchSides): boolean => {
  * One side's fields, op by op in order. A task done toggle also carries the
  * `doneOn` its reducer derives, as the op converter does for replay
  * (`addReplaySafeDoneFields`): the op's timestamp when it sets `isDone`
- * without one, a clear when it unsets it. Unsetting it also clears `isWontDo`
- * (`updateWontDoForTask`). A patch applies fields, not reducers, so without
- * this the resolving device and a restart would differ.
+ * without one, a clear when it unsets it. A patch applies fields, not
+ * reducers, so without this the resolving device and a restart would differ.
  */
 const sideChanges = (
   ops: Operation[],
@@ -200,16 +199,15 @@ const sideChanges = (
   const changes: Record<string, unknown> = {};
   for (const op of fieldOps(ops)) {
     const opChanges = mergeChangedFields([op], payloadKey, entityId);
-    if (op.actionType === ActionType.TASK_SHARED_UPDATE && 'isDone' in opChanges) {
-      if (!('doneOn' in opChanges)) {
-        opChanges['doneOn'] =
-          opChanges['isDone'] === true && Number.isFinite(op.timestamp)
-            ? op.timestamp
-            : undefined;
-      }
-      if (opChanges['isDone'] === false) {
-        opChanges['isWontDo'] = undefined;
-      }
+    if (
+      op.actionType === ActionType.TASK_SHARED_UPDATE &&
+      'isDone' in opChanges &&
+      !('doneOn' in opChanges)
+    ) {
+      opChanges['doneOn'] =
+        opChanges['isDone'] === true && Number.isFinite(op.timestamp)
+          ? op.timestamp
+          : undefined;
     }
     Object.assign(changes, opChanges);
   }
@@ -296,6 +294,50 @@ export const fieldPatchGroups = (
   if (!isFieldPatchEligible(sides)) return undefined;
   const groups = localWinningFieldGroups(sides);
   return groups.length > 0 || sides.localOps.some(isSyncTimeSpentOp) ? groups : undefined;
+};
+
+/**
+ * Types without a RECREATE_FALLBACK whose per-field resolution re-sends ONE
+ * full `'replace'` snapshot of the merged entity instead of `'patch'` rows
+ * (#10958). Every released client (v18.15.0 on) already receives whole-entity
+ * replace snapshots for these types and applies them with `setOne`, or
+ * `addOne` when it applied a concurrent delete, so the entity it recreates is
+ * whole: a partial patch would be added raw, invalid, with no repair rule.
+ *
+ * Admission needs a user-reported loss (fix intake), an adapter entity, and
+ * no derived upkeep on LWW apply: NOTE stays out (#10393 decision 4).
+ */
+export const MERGED_SNAPSHOT_TYPES: ReadonlySet<EntityType> = new Set<EntityType>([
+  'TASK_REPEAT_CFG',
+]);
+
+/**
+ * The entity a `MERGED_SNAPSHOT_TYPES` resolution re-sends, or undefined for
+ * whole-entity LWW: the state on the resolving device after the remote ops
+ * apply and the local fields that won are patched on top, without cleared
+ * fields (a replace drops them).
+ *
+ * The remote side must be readable ops only: an LWW row's values are never
+ * read (#10393 decision 5), so the snapshot could not carry them and would
+ * overwrite them on every device.
+ */
+export const mergedSnapshotState = (
+  current: Record<string, unknown>,
+  sides: FieldPatchSides,
+  groups: ReturnType<typeof localWinningFieldGroups>,
+): Record<string, unknown> | undefined => {
+  const { remoteOps, payloadKey, entityId } = sides;
+  if (groups.length === 0 || remoteOps.some((op) => isLwwUpdatePayload(op.payload))) {
+    return undefined;
+  }
+  const merged: Record<string, unknown> = {
+    ...current,
+    ...mergeChangedFields(fieldOps(remoteOps), payloadKey, entityId),
+    ...Object.assign({}, ...groups.map(({ changes }) => changes)),
+  };
+  return Object.fromEntries(
+    Object.entries(merged).filter(([, value]) => value !== undefined),
+  );
 };
 
 /**
@@ -494,14 +536,12 @@ export const supersededPatchFields = (
   const written = mergeChangedFields(ops, payloadKey, entityId);
   // As on the conflict path: a reminder clear keeps the whole-entity snapshot
   // (v18.15.0–v18.21.x ignore `clearedFields`, decision 3), and a done toggle
-  // carries the fields its reducer derived (`sideChanges`).
+  // carries the `doneOn` its reducer derived (`sideChanges`).
   if (REMINDER_FIELDS.some((field) => field in written && written[field] === undefined)) {
     return undefined;
   }
   const fields = Object.keys(written);
-  if (!('isDone' in written)) return fields;
-  const derived = written['isDone'] === false ? ['doneOn', 'isWontDo'] : ['doneOn'];
-  return [...fields, ...derived.filter((field) => !(field in written))];
+  return 'isDone' in written && !('doneOn' in written) ? [...fields, 'doneOn'] : fields;
 };
 
 /**
@@ -536,10 +576,8 @@ export const survivingLocalFields = (
     (field) => !NOISE_FIELDS.has(field) && deepEqual(entityState[field], written[field]),
   );
   if (surviving.length === 0) return undefined;
-  // A surviving done toggle carries its derived `doneOn` and `isWontDo` (`sideChanges`).
-  const fields = surviving.includes('isDone')
-    ? [...new Set([...surviving, 'doneOn', 'isWontDo'])]
-    : surviving;
+  // A surviving done toggle carries its derived `doneOn` (`sideChanges`).
+  const fields = surviving.includes('isDone') ? [...surviving, 'doneOn'] : surviving;
   return Object.fromEntries(fields.map((field) => [field, entityState[field]]));
 };
 

@@ -4,6 +4,7 @@ import {
   isFieldPatchEligible,
   keptLocalTimeDeltas,
   localWinningFieldGroups,
+  mergedSnapshotState,
   supersededPatchFields,
   survivingLocalFields,
   timeDeltasSurvivingLww,
@@ -70,6 +71,127 @@ const sides = (
 });
 
 describe('conflict-field-patch.util', () => {
+  // #10958: a repeat-config crossing goes out as ONE full replace snapshot.
+  describe('mergedSnapshotState (#10958)', () => {
+    const base = {
+      id: 'cfg-1',
+      title: 'Daily',
+      skipOverdue: false,
+      lastTaskCreationDay: '2026-06-15',
+      tagIds: ['t0'],
+      startTime: '09:00',
+    };
+    const cfgEdit = (
+      changes: Record<string, unknown>,
+      clientId: string,
+      timestamp: number,
+      clearedFields?: string[],
+    ): Operation =>
+      op({
+        id: `${clientId}${timestamp}`,
+        clientId,
+        timestamp,
+        actionType: '[TaskRepeatCfg] Update TaskRepeatCfg' as ActionType,
+        entityType: 'TASK_REPEAT_CFG' as EntityType,
+        entityId: 'cfg-1',
+        payload: {
+          actionPayload: {
+            taskRepeatCfg: { id: 'cfg-1', changes },
+            ...(clearedFields ? { clearedFields } : {}),
+          },
+          entityChanges: [],
+        },
+      });
+    const cfgSides = (
+      localOps: Operation[],
+      remoteOps: Operation[],
+    ): ReturnType<typeof sides> => ({
+      localOps,
+      remoteOps,
+      payloadKey: 'taskRepeatCfg',
+      entityId: 'cfg-1',
+    });
+    const resolve = (
+      current: Record<string, unknown>,
+      localOps: Operation[],
+      remoteOps: Operation[],
+    ): Record<string, unknown> | undefined => {
+      const s = cfgSides(localOps, remoteOps);
+      return mergedSnapshotState(current, s, localWinningFieldGroups(s));
+    };
+
+    const skip = cfgEdit({ skipOverdue: true }, 'A', 1000);
+    const generation = cfgEdit({ lastTaskCreationDay: '2026-06-16' }, 'B', 2000);
+
+    it('builds the same merged config on whichever device resolves', () => {
+      const onA = resolve({ ...base, skipOverdue: true }, [skip], [generation]);
+      const onB = resolve(
+        { ...base, lastTaskCreationDay: '2026-06-16' },
+        [generation],
+        [skip],
+      );
+      const expected = { ...base, skipOverdue: true, lastTaskCreationDay: '2026-06-16' };
+      expect(onA).toEqual(expected);
+      expect(onB).toEqual(expected);
+    });
+
+    it('gives a field both sides wrote, arrays included, to its newer write', () => {
+      const local = cfgEdit({ skipOverdue: true, tagIds: ['local'] }, 'A', 1000);
+      const remote = cfgEdit({ tagIds: ['remote'] }, 'B', 2000);
+      expect(
+        resolve({ ...base, skipOverdue: true, tagIds: ['local'] }, [local], [remote]),
+      ).toEqual({ ...base, skipOverdue: true, tagIds: ['remote'] });
+      // Reverse timestamps: the local array wins whole.
+      const newerLocal = cfgEdit({ tagIds: ['local'] }, 'A', 3000);
+      expect(
+        resolve({ ...base, tagIds: ['local'] }, [newerLocal], [remote])?.['tagIds'],
+      ).toEqual(['local']);
+    });
+
+    it('leaves a field out that either side cleared, on the wire or not', () => {
+      const remoteClear = cfgEdit({}, 'B', 2000, ['startTime']);
+      const merged = resolve({ ...base, skipOverdue: true }, [skip], [remoteClear]);
+      expect(merged).toEqual({
+        id: 'cfg-1',
+        title: 'Daily',
+        skipOverdue: true,
+        lastTaskCreationDay: '2026-06-15',
+        tagIds: ['t0'],
+      });
+      expect('startTime' in merged!).toBe(false);
+      const localClear = cfgEdit({ startTime: undefined }, 'A', 3000);
+      const rest: Record<string, unknown> = { ...base };
+      delete rest['startTime'];
+      expect(resolve(rest, [localClear], [generation])).toEqual({
+        ...rest,
+        lastTaskCreationDay: '2026-06-16',
+      });
+    });
+
+    it('refuses a remote LWW row, whose values it may not read (decision 5)', () => {
+      const row = op({
+        id: 'row',
+        clientId: 'B',
+        timestamp: 500,
+        actionType: '[TASK_REPEAT_CFG] LWW Update' as ActionType,
+        entityType: 'TASK_REPEAT_CFG' as EntityType,
+        entityId: 'cfg-1',
+        payload: {
+          actionPayload: { ...base, title: 'Renamed' },
+          entityChanges: [],
+          lwwUpdateMode: 'replace',
+        },
+      });
+      expect(resolve({ ...base, skipOverdue: true }, [skip], [row])).toBeUndefined();
+    });
+
+    it('refuses when no local field won', () => {
+      const s = cfgSides([skip], [cfgEdit({ skipOverdue: false }, 'B', 2000)]);
+      expect(localWinningFieldGroups(s)).toEqual([]);
+      expect(mergedSnapshotState(base, s, [])).toBeUndefined();
+    });
+  });
+
   describe('isFieldPatchEligible', () => {
     it('admits disjoint and overlapping readable edits', () => {
       expect(
@@ -516,34 +638,6 @@ describe('conflict-field-patch.util', () => {
       expect(changes['doneOn']).toBeUndefined();
     });
 
-    // An undone task can't stay won't do (`updateWontDoForTask`).
-    it('clears isWontDo beside an undone toggle', () => {
-      const [{ changes }] = localWinningFieldGroups(
-        sides([edit({ isDone: false })], [edit({ title: 'b' }, { timestamp: 500 })]),
-      );
-      expect('isWontDo' in changes).toBeTrue();
-      expect(changes['isWontDo']).toBeUndefined();
-    });
-
-    // Marking a task done again keeps its won't do, which depends on state.
-    it('leaves isWontDo out beside a done toggle', () => {
-      const [{ changes }] = localWinningFieldGroups(
-        sides([edit({ isDone: true })], [edit({ title: 'b' }, { timestamp: 500 })]),
-      );
-      expect('isWontDo' in changes).toBeFalse();
-    });
-
-    it('lists isWontDo among the fields an undone toggle supersedes', () => {
-      expect(
-        supersededPatchFields(
-          [edit({ isDone: false })],
-          'TASK' as EntityType,
-          'task',
-          'task-1',
-        ),
-      ).toEqual(['isDone', 'doneOn', 'isWontDo']);
-    });
-
     it('keeps a doneOn the op carried', () => {
       expect(
         localWinningFieldGroups(
@@ -553,6 +647,36 @@ describe('conflict-field-patch.util', () => {
           ),
         )[0].changes['doneOn'],
       ).toBe(7);
+    });
+
+    // Won't do is a `wontDoOn` equal to `doneOn` (`isWontDoTask`), written by
+    // one op, so the newer edit's `doneOn` decides: a `wontDoOn` left beside
+    // another `doneOn` no longer counts.
+    describe("won't do against a concurrent completion", () => {
+      const wontDoAt = (t: number): Operation =>
+        edit({ isDone: true, doneOn: t, wontDoOn: t }, { id: 'w', timestamp: t });
+      const completionAt = (t: number): Operation =>
+        edit({ isDone: true, doneOn: t }, { id: 'c', timestamp: t, clientId: 'B' });
+
+      it('gives a newer completion its doneOn on both sides', () => {
+        expect(localWinningFieldGroups(sides([wontDoAt(1000)], [completionAt(2000)])))
+          .withContext("won't-do side")
+          .toEqual([{ timestamp: 1000, changes: { wontDoOn: 1000 } }]);
+        expect(localWinningFieldGroups(sides([completionAt(2000)], [wontDoAt(1000)])))
+          .withContext('completion side')
+          .toEqual([{ timestamp: 2000, changes: { isDone: true, doneOn: 2000 } }]);
+      });
+
+      it("gives a newer won't do its matching pair on both sides", () => {
+        expect(localWinningFieldGroups(sides([wontDoAt(2000)], [completionAt(1000)])))
+          .withContext("won't-do side")
+          .toEqual([
+            { timestamp: 2000, changes: { isDone: true, doneOn: 2000, wontDoOn: 2000 } },
+          ]);
+        expect(localWinningFieldGroups(sides([completionAt(1000)], [wontDoAt(2000)])))
+          .withContext('completion side')
+          .toEqual([]);
+      });
     });
   });
 
@@ -585,18 +709,7 @@ describe('conflict-field-patch.util', () => {
           { id: 'task-1', title: 'row', isDone: true, doneOn: 5 },
           'task',
         ),
-      ).toEqual({ isDone: true, doneOn: 5, isWontDo: undefined });
-    });
-
-    it('re-emits the stored isWontDo beside a surviving done toggle', () => {
-      const local = edit({ isDone: true }, { id: 'l' });
-      expect(
-        survivingLocalFields(
-          conflictOf([local], [lwwRow]),
-          { id: 'task-1', title: 'row', isDone: true, doneOn: 5, isWontDo: true },
-          'task',
-        ),
-      ).toEqual({ isDone: true, doneOn: 5, isWontDo: true });
+      ).toEqual({ isDone: true, doneOn: 5 });
     });
 
     it('re-emits nothing when the row overwrote every local field', () => {
@@ -646,7 +759,6 @@ describe('conflict-field-patch.util', () => {
       expect(createPatch).toHaveBeenCalledWith(conflict, {
         isDone: true,
         doneOn: undefined,
-        isWontDo: undefined,
       });
       expect(
         await buildSurvivingFieldPatches(

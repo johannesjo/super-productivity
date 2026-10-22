@@ -17,6 +17,7 @@ import {
   selectEnabledIssueProviders,
 } from '../../issue/store/issue-provider.selectors';
 import { HiddenCalendarProvidersService } from '../../calendar-integration/hidden-calendar-providers.service';
+import { selectUndoneDeadlineTasksByDay } from '../../planner/store/planner.selectors';
 import {
   getIssueProviderTooltip,
   sanitizeIcalUrlForDisplay,
@@ -356,6 +357,11 @@ export class ScheduleComponent {
     return mapScheduleDaysToScheduleEvents(days, FH);
   });
 
+  deadlineTasksByDay = toSignal(
+    this._store.pipe(select(selectUndoneDeadlineTasksByDay)),
+    { initialValue: {} },
+  );
+
   private _workStartEndHours = toSignal(
     this._store.pipe(select(selectTimelineWorkStartEndHours)),
   );
@@ -578,7 +584,10 @@ export class ScheduleComponent {
     const preservedView = localStorage.getItem(LS.SELECTED_TIME_VIEW);
     if (preservedView === 'month') return 'month';
     if (preservedView === 'day') return 'day';
-    return 'week';
+    if (preservedView === 'week') return 'week';
+    // No saved choice yet: a phone fits under three of the week's seven columns,
+    // so it starts on one readable day instead.
+    return this.layoutService.isXs() ? 'day' : 'week';
   }
 
   constructor() {

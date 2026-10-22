@@ -140,7 +140,10 @@ describe('PluginHooksEffects', () => {
       store.refreshState();
       actions$ = of(
         TaskSharedActions.updateTask({
-          task: { id: task.id, changes: { isDone: true, isWontDo: task.isWontDo } },
+          task: {
+            id: task.id,
+            changes: { isDone: true, doneOn: task.doneOn, wontDoOn: task.wontDoOn },
+          },
         }),
       );
       effects.taskComplete$.subscribe();
@@ -158,7 +161,7 @@ describe('PluginHooksEffects', () => {
     });
 
     it("should not dispatch TASK_COMPLETE for a task finished as won't do", () => {
-      completeTask(createMockTask({ isDone: true, isWontDo: true }));
+      completeTask(createMockTask({ isDone: true, doneOn: 5, wontDoOn: 5 }));
 
       expect(pluginServiceMock.dispatchHook).not.toHaveBeenCalledWith(
         PluginHooks.TASK_COMPLETE,

@@ -1,0 +1,14 @@
+@if (isRejected()) {
+  <div class="callout callout--danger">
+    <mat-icon aria-hidden="true">link_off</mat-icon>
+    <div>
+      <p>{{ T.PLAINSPACE.RECONNECT.MSG | translate }}</p>
+      <button
+        mat-stroked-button
+        (click)="reconnect()"
+      >
+        {{ T.PLAINSPACE.RECONNECT.ACTION | translate }}
+      </button>
+    </div>
+  </div>
+}

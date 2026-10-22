@@ -1,4 +1,5 @@
 import { ComponentFixture, fakeAsync, flush, TestBed, tick } from '@angular/core/testing';
+import { DEFAULT_DATE_INPUT_LOCALE } from 'src/app/core/date-time-format/date-input-locale';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { MatDialog } from '@angular/material/dialog';
@@ -20,7 +21,7 @@ import { NoopAnimationsModule } from '@angular/platform-browser/animations';
 import { signal, Signal } from '@angular/core';
 import { AddTaskSuggestion } from './add-task-suggestions.model';
 import { PlannerActions } from '../../planner/store/planner.actions';
-import { TaskCopy, TaskReminderOptionId, TaskWithSubTasks } from '../task.model';
+import { TaskCopy, TaskReminderOptionId } from '../task.model';
 import { DateTimeFormatService } from 'src/app/core/date-time-format/date-time-format.service';
 import { DEFAULT_LOCALE } from 'src/app/core/locale.constants';
 import { DateService } from '../../../core/date/date.service';
@@ -168,8 +169,10 @@ describe('AddTaskBarComponent', () => {
     'textLocale',
     // Reached by the actions bar's date chip as soon as a state has a time on it
     'formatTime',
+    'dateInputLocale',
   ]);
   mockDateTimeFormatService.currentLocale.and.returnValue('en-US');
+  mockDateTimeFormatService.dateInputLocale.and.returnValue(DEFAULT_DATE_INPUT_LOCALE);
   mockDateTimeFormatService.textLocale.and.returnValue('en-US');
   mockDateTimeFormatService.formatTime.and.callFake((timestamp: number) =>
     new Date(timestamp).toLocaleTimeString('en-US', {
@@ -189,7 +192,6 @@ describe('AddTaskBarComponent', () => {
     mockTaskService = jasmine.createSpyObj('TaskService', [
       'add',
       'getByIdOnce$',
-      'getByIdWithSubTaskData$',
       'scheduleTask',
       'moveToCurrentWorkContext',
     ]);
@@ -198,7 +200,7 @@ describe('AddTaskBarComponent', () => {
     });
     mockProjectService = jasmine.createSpyObj(
       'ProjectService',
-      [],
+      ['moveTaskToTodayList'],
       createProjectSignals(mockProjects),
     );
     mockTagService = jasmine.createSpyObj(
@@ -493,28 +495,20 @@ describe('AddTaskBarComponent', () => {
       expect(mockTaskService.moveToCurrentWorkContext).not.toHaveBeenCalled();
     });
 
-    it('moves an existing task to the current context with its sub task data (#10838)', async () => {
-      const task = {
-        id: 'task-1',
-        title: 'Existing task',
-        subTaskIds: [],
-      } as Partial<TaskCopy> as TaskCopy;
-      const taskWithSubTasks = { ...task, subTasks: [] } as TaskWithSubTasks;
-      // Unused by the fix: if the code goes back to getByIdOnce$, the test
-      // fails on the assertion below instead of a TypeError.
-      mockTaskService.getByIdOnce$.and.returnValue(of(task));
-      mockTaskService.getByIdWithSubTaskData$.and.returnValue(of(taskWithSubTasks));
+    it('moves a backlog task picked in a project to its regular list (#10838)', async () => {
       const suggestion = {
-        title: task.title,
-        taskId: task.id,
+        title: 'Existing task',
+        taskId: 'task-1',
         projectId: 'project-2',
       } as AddTaskSuggestion;
 
       await component.onTaskSuggestionSelected(suggestion);
 
-      expect(mockTaskService.moveToCurrentWorkContext).toHaveBeenCalledOnceWith(
-        taskWithSubTasks,
+      expect(mockProjectService.moveTaskToTodayList).toHaveBeenCalledOnceWith(
+        'task-1',
+        'project-2',
       );
+      expect(mockTaskService.moveToCurrentWorkContext).not.toHaveBeenCalled();
     });
   });
 
@@ -554,6 +548,24 @@ describe('AddTaskBarComponent', () => {
       const secondCall = mockTaskService.add.calls.mostRecent();
       const secondTaskData = secondCall.args[2] as Partial<TaskCopy>;
       expect(secondTaskData.tagIds).toEqual(['tag-1']);
+    });
+
+    it('should pass a syntax-parsed priority to the new task and reset it after', async () => {
+      mockTaskService.add.and.returnValue('task-1');
+
+      component.stateService.updateInputTxt('Fix login bug p1');
+      component.stateService.updateCleanText('Fix login bug');
+      component.stateService.updatePriority(3);
+      await component.addTask();
+
+      const [title, , taskData] = mockTaskService.add.calls.mostRecent().args as [
+        string,
+        boolean,
+        Partial<TaskCopy>,
+      ];
+      expect(title).toBe('Fix login bug');
+      expect(taskData.priority).toBe(3);
+      expect(component.stateService.state().priority).toBeNull();
     });
 
     // #5461: a repeat-preset task with no explicit date must default to the
@@ -680,6 +692,31 @@ describe('AddTaskBarComponent', () => {
       expect(addRepeatCfgSpy.calls.mostRecent().args[2].startDate).toBe('2026-03-30');
     });
 
+    // The schedule pick offers day/week lead times; a repeat config persists the
+    // option id, which released clients before v19.2.0 cannot convert.
+    it('should not persist a long lead time into a picked repeat config', async () => {
+      mockTaskService.add.and.returnValue('task-1');
+      const addRepeatCfgSpy = spyOn(
+        TestBed.inject(TaskRepeatCfgService),
+        'addTaskRepeatCfgToTask',
+      );
+
+      component.stateService.updateInputTxt('Standup');
+      component.stateService.updateCleanText('Standup');
+      component.stateService.updateDate('2026-03-30', '09:30');
+      component.stateService.updateRemindOption(TaskReminderOptionId.d1);
+      component.stateService.updateRepeatSetting({
+        type: 'PRESET',
+        quickSetting: 'DAILY',
+      });
+
+      await component.addTask();
+
+      expect(addRepeatCfgSpy.calls.mostRecent().args[2].remindAt).toBe(
+        TaskReminderOptionId.h1,
+      );
+    });
+
     // Nothing rolls the fallback to today on the way in — a recurrence with no
     // date never passes a date through the parser — so the config would keep a
     // weekend start date the user cannot see while the task itself is created
@@ -771,6 +808,26 @@ describe('AddTaskBarComponent', () => {
 
       const repeatCfg = addRepeatCfgSpy.calls.mostRecent().args[2];
       expect(repeatCfg.notes).toBe('Join from the meeting room');
+    });
+
+    it('should copy a syntax-parsed priority to an inline repeat config', async () => {
+      mockTaskService.add.and.returnValue('task-1');
+      const addRepeatCfgSpy = spyOn(
+        TestBed.inject(TaskRepeatCfgService),
+        'addTaskRepeatCfgToTask',
+      );
+
+      component.stateService.updateInputTxt('Daily standup p1');
+      component.stateService.updateCleanText('Daily standup');
+      component.stateService.updatePriority(3);
+      component.stateService.updateRepeatSetting({
+        type: 'PRESET',
+        quickSetting: 'DAILY',
+      });
+
+      await component.addTask();
+
+      expect(addRepeatCfgSpy.calls.mostRecent().args[2].priority).toBe(3);
     });
 
     it('seeds skipOverdue ON for an inline Daily repeat (#8644)', async () => {
