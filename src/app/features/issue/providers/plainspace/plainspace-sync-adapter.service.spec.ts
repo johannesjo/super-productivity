@@ -1,16 +1,25 @@
 import { TestBed } from '@angular/core/testing';
+import { HttpErrorResponse } from '@angular/common/http';
 import { of, throwError } from 'rxjs';
 import { PlainspaceSyncAdapterService } from './plainspace-sync-adapter.service';
 import { PlainspaceApiService } from './plainspace-api.service';
 import { PlainspaceCfg } from './plainspace.model';
 import { DEFAULT_PLAINSPACE_CFG } from './plainspace-cfg-form.const';
+import { PlainspaceConnectionStateService } from './plainspace-connection-state.service';
+import { IssueSyncPushError } from '../../two-way-sync/issue-sync.model';
+import { T } from '../../../../t.const';
+
+const httpError = (status: number, error: unknown = {}): HttpErrorResponse =>
+  new HttpErrorResponse({ status, error });
 
 describe('PlainspaceSyncAdapterService', () => {
   let adapter: PlainspaceSyncAdapterService;
   let api: jasmine.SpyObj<PlainspaceApiService>;
+  let connectionState: PlainspaceConnectionStateService;
 
-  const cfg: PlainspaceCfg = {
+  const cfg: PlainspaceCfg & { id: string } = {
     ...DEFAULT_PLAINSPACE_CFG,
+    id: 'provider-1',
     host: 'https://plainspace.org',
     spaceId: 'space-1',
     token: 'pat_x',
@@ -34,12 +43,13 @@ describe('PlainspaceSyncAdapterService', () => {
       ],
     });
     adapter = TestBed.inject(PlainspaceSyncAdapterService);
+    connectionState = TestBed.inject(PlainspaceConnectionStateService);
   });
 
-  it('pushes completion but only pulls title and schedule', () => {
+  it('syncs completion and title both ways and only pulls the schedule', () => {
     expect(adapter.getSyncConfig(cfg)).toEqual({
-      isDone: 'pushOnly',
-      title: 'pullOnly',
+      isDone: 'both',
+      title: 'both',
       dueWithTime: 'pullOnly',
     });
     const mappings = adapter.getFieldMappings();
@@ -48,11 +58,14 @@ describe('PlainspaceSyncAdapterService', () => {
       ['title', 'title'],
       ['dueWithTime', 'scheduledAt'],
     ]);
-    expect(mappings.map((m) => m.defaultDirection)).toEqual([
-      'pushOnly',
-      'pullOnly',
-      'pullOnly',
-    ]);
+    expect(mappings.map((m) => m.defaultDirection)).toEqual(['both', 'both', 'pullOnly']);
+  });
+
+  it('keeps the title pull-only for a provider whose server is too old', () => {
+    connectionState.reportTitleUnsupported('provider-1');
+    expect(adapter.getSyncConfig(cfg).title).toBe('pullOnly');
+    const otherCfg: PlainspaceCfg & { id: string } = { ...cfg, id: 'provider-2' };
+    expect(adapter.getSyncConfig(otherCfg).title).toBe('both');
   });
 
   it('dueWithTime <-> scheduledAt maps epoch-ms to ISO and back', () => {
@@ -76,28 +89,86 @@ describe('PlainspaceSyncAdapterService', () => {
     expect(api.patchTask$).toHaveBeenCalledWith('t1', { done: false }, cfg);
   });
 
-  it('pushChanges ignores local title and schedule changes', async () => {
+  it('pushChanges sends the title verbatim and never the schedule', async () => {
+    api.patchTask$.and.returnValue(of({ ...patchedIssue, title: ' New name ' }));
     await adapter.pushChanges(
       't1',
-      { title: 'New name', scheduledAt: '2026-01-02T09:00:00.000Z' },
+      { isDone: true, title: ' New name ', scheduledAt: '2026-01-02T09:00:00.000Z' },
       cfg,
     );
-    expect(api.patchTask$).not.toHaveBeenCalled();
+    expect(api.patchTask$).toHaveBeenCalledOnceWith(
+      't1',
+      { done: true, title: ' New name ' },
+      cfg,
+    );
   });
 
-  it('pushChanges omits pull-only fields when completion changes too', async () => {
-    api.patchTask$.and.returnValue(of(patchedIssue));
-    await adapter.pushChanges(
-      't1',
-      {
-        isDone: true,
-        title: 'New name',
-        scheduledAt: '2026-01-02T09:00:00.000Z',
-      },
-      cfg,
+  it('pushChanges rejects an echoed title that differs even by whitespace', async () => {
+    api.patchTask$.and.returnValue(of({ ...patchedIssue, title: 'New name' }));
+    await expectAsync(
+      adapter.pushChanges('t1', { title: 'New name ' }, cfg),
+    ).toBeRejected();
+  });
+
+  it('pushChanges refuses a blank or over-long title without a request', async () => {
+    await expectAsync(adapter.pushChanges('t1', { title: '   ' }, cfg)).toBeRejectedWith(
+      new IssueSyncPushError(T.PLAINSPACE.SYNC.ERR_TITLE_EMPTY),
     );
+    await expectAsync(
+      adapter.pushChanges('t1', { title: 'x'.repeat(501) }, cfg),
+    ).toBeRejectedWith(new IssueSyncPushError(T.PLAINSPACE.SYNC.ERR_TITLE_TOO_LONG));
+    expect(api.patchTask$).not.toHaveBeenCalled();
+
+    api.patchTask$.and.returnValue(of({ ...patchedIssue, title: 'x'.repeat(500) }));
+    await adapter.pushChanges('t1', { title: 'x'.repeat(500) }, cfg);
     expect(api.patchTask$).toHaveBeenCalledTimes(1);
-    expect(api.patchTask$).toHaveBeenCalledWith('t1', { done: true }, cfg);
+  });
+
+  it('a 422 on a title marks the server too old, sends done alone and skips quietly', async () => {
+    api.patchTask$.and.returnValues(
+      throwError(() => httpError(422)),
+      of(patchedIssue),
+    );
+    await expectAsync(
+      adapter.pushChanges('t1', { isDone: true, title: 'New name' }, cfg),
+    ).toBeRejectedWith(jasmine.objectContaining({ isExpectedSyncSkip: true }));
+    expect(api.patchTask$.calls.allArgs()).toEqual([
+      ['t1', { done: true, title: 'New name' }, cfg],
+      ['t1', { done: true }, cfg],
+    ]);
+    expect(connectionState.isTitleUnsupported('provider-1')).toBeTrue();
+  });
+
+  it('a title the server ignores marks it too old without a second request', async () => {
+    api.patchTask$.and.returnValue(of({ ...patchedIssue, title: 'Old name' }));
+    await expectAsync(
+      adapter.pushChanges('t1', { isDone: true, title: 'New name' }, cfg),
+    ).toBeRejectedWith(jasmine.objectContaining({ isExpectedSyncSkip: true }));
+    expect(api.patchTask$).toHaveBeenCalledTimes(1);
+    expect(connectionState.isTitleUnsupported('provider-1')).toBeTrue();
+  });
+
+  it('a 422 on done alone is an ordinary failure', async () => {
+    api.patchTask$.and.returnValue(throwError(() => httpError(422)));
+    await expectAsync(adapter.pushChanges('t1', { isDone: true }, cfg)).toBeRejectedWith(
+      jasmine.objectContaining({ status: 422 }),
+    );
+    expect(connectionState.isTitleUnsupported('provider-1')).toBeFalse();
+  });
+
+  it('a 409 is a per-task refusal, never "too old"', async () => {
+    api.patchTask$.and.returnValue(
+      throwError(() => httpError(409, { error: 'repeat_requires_remind_at' })),
+    );
+    await expectAsync(
+      adapter.pushChanges('t1', { title: 'New name' }, cfg),
+    ).toBeRejectedWith(new IssueSyncPushError(T.PLAINSPACE.SYNC.ERR_REPEAT_NEEDS_TIME));
+
+    api.patchTask$.and.returnValue(throwError(() => httpError(409, { error: 'other' })));
+    await expectAsync(
+      adapter.pushChanges('t1', { title: 'New name' }, cfg),
+    ).toBeRejectedWith(new IssueSyncPushError(T.PLAINSPACE.SYNC.ERR_REFUSED));
+    expect(connectionState.isTitleUnsupported('provider-1')).toBeFalse();
   });
 
   it('pushChanges rejects a failed completion PATCH', async () => {
@@ -118,8 +189,8 @@ describe('PlainspaceSyncAdapterService', () => {
     await expectAsync(adapter.pushChanges('t1', { isDone: true }, cfg)).toBeRejected();
   });
 
-  it('pushChanges does nothing when no mapped field is in the changes', async () => {
-    await adapter.pushChanges('t1', { notes: 'x' }, cfg);
+  it('pushChanges does nothing when no pushed field is in the changes', async () => {
+    await adapter.pushChanges('t1', { notes: 'x', scheduledAt: null }, cfg);
     expect(api.patchTask$).not.toHaveBeenCalled();
   });
 

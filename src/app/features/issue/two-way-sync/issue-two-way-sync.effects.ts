@@ -1,8 +1,16 @@
 import { Injectable, inject } from '@angular/core';
 import { Store } from '@ngrx/store';
 import { createEffect, ofType } from '@ngrx/effects';
-import { EMPTY, Observable, first, firstValueFrom, from, timer } from 'rxjs';
-import { catchError, concatMap, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
+import { EMPTY, Observable, first, firstValueFrom, from, merge, timer } from 'rxjs';
+import {
+  catchError,
+  concatMap,
+  filter,
+  map,
+  mergeMap,
+  takeUntil,
+  tap,
+} from 'rxjs/operators';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { REMOTE_ISSUE_DELETE_DEFER_MS } from '../../../app.constants';
 import { TaskService } from '../../tasks/task.service';
@@ -13,7 +21,9 @@ import { IssueProviderService } from '../issue-provider.service';
 import { TaskSharedActions } from '../../../root-store/meta/task-shared.actions';
 import { IssueSyncAdapterRegistryService } from './issue-sync-adapter-registry.service';
 import { computePushDecisions, issueValuesEqual } from './compute-push-decisions';
-import { FieldMapping, FieldSyncConfig } from './issue-sync.model';
+import { FieldMapping, FieldSyncConfig, IssueSyncPushError } from './issue-sync.model';
+import { computePendingLocalChanges } from './compute-field-pull';
+import { IssueSyncFailure, IssueSyncStateService } from './issue-sync-state.service';
 import { IssueSyncAdapter } from './issue-sync-adapter.interface';
 import { IssueProvider, IssueProviderCaldav, IssueProviderKey } from '../issue.model';
 import { IssueLog } from '../../../core/log';
@@ -140,6 +150,7 @@ export class IssueTwoWaySyncEffects {
   private readonly _deletedTagTitlesSidecar = inject(DeletedTagTitlesSidecarService);
   private readonly _adapterResolver = inject(IssueSyncAdapterResolverService);
   private readonly _pluginRegistry = inject(PluginIssueProviderRegistryService);
+  private readonly _syncState = inject(IssueSyncStateService);
   private _syncOriginatedTaskIds = new Set<string>();
   private static readonly _MAX_SYNC_ORIGINATED_IDS = 1000;
 
@@ -150,35 +161,57 @@ export class IssueTwoWaySyncEffects {
     this._adapterRegistry.register('PLAINSPACE', plainspaceAdapter);
   }
 
+  /**
+   * Pushes a task's synced fields: on a local edit, and on request for the
+   * edits still pending against the baseline — found by a successful poll
+   * (quiet) or asked for by Retry. One stream, so pushes of a task stay in
+   * order. A task its provider no longer lists for me is not pushed.
+   */
   pushFieldsOnTaskUpdate$: Observable<unknown> = createEffect(
     () =>
-      this._actions$.pipe(
-        ofType(
-          TaskSharedActions.updateTask,
-          TaskSharedActions.applyShortSyntax,
-          TaskSharedActions.scheduleTaskWithTime,
-          TaskSharedActions.reScheduleTaskWithTime,
-          TaskSharedActions.unscheduleTask,
-          TaskSharedActions.addTagToTask,
-          PlannerActions.planTaskForDay,
-          PlannerActions.transferTask,
+      merge(
+        this._actions$.pipe(
+          ofType(
+            TaskSharedActions.updateTask,
+            TaskSharedActions.applyShortSyntax,
+            TaskSharedActions.scheduleTaskWithTime,
+            TaskSharedActions.reScheduleTaskWithTime,
+            TaskSharedActions.unscheduleTask,
+            TaskSharedActions.addTagToTask,
+            PlannerActions.planTaskForDay,
+            PlannerActions.transferTask,
+          ),
+          map((action) => ACTION_EXTRACTORS[action.type](action)),
+          filter(({ taskId, changes }) => {
+            if (this._syncOriginatedTaskIds.delete(taskId)) {
+              return false;
+            }
+            // Skip poll-originated updates that include sync bookkeeping fields
+            if ('issueLastSyncedValues' in changes || 'issueWasUpdated' in changes) {
+              return false;
+            }
+            return Object.keys(changes).some((key) => SYNCABLE_TASK_FIELDS.has(key));
+          }),
+          map(({ taskId, changes }) => ({
+            taskId,
+            changes: changes as Partial<Task> | null,
+            isSilent: false,
+          })),
         ),
-        map((action) => ACTION_EXTRACTORS[action.type](action)),
-        filter(({ taskId, changes }) => {
-          if (this._syncOriginatedTaskIds.delete(taskId)) {
-            return false;
-          }
-          // Skip poll-originated updates that include sync bookkeeping fields
-          if ('issueLastSyncedValues' in changes || 'issueWasUpdated' in changes) {
-            return false;
-          }
-          return Object.keys(changes).some((key) => SYNCABLE_TASK_FIELDS.has(key));
-        }),
-        concatMap(({ taskId, changes }) =>
+        this._syncState.pushRequests$.pipe(
+          map(({ taskId, isSilent }) => ({
+            taskId,
+            changes: null as Partial<Task> | null,
+            isSilent,
+          })),
+        ),
+      ).pipe(
+        concatMap(({ taskId, changes, isSilent }) =>
           this._taskService.getByIdOnce$(taskId).pipe(
             map((fullTask) => ({
               fullTask,
               changes,
+              isSilent,
             })),
           ),
         ),
@@ -191,22 +224,39 @@ export class IssueTwoWaySyncEffects {
           ) {
             return false;
           }
-          return !!this._getAdapter(fullTask.issueType);
+          return (
+            !!this._getAdapter(fullTask.issueType) &&
+            !this._syncState.isMissing(fullTask.id)
+          );
         }),
-        concatMap(({ fullTask, changes }) =>
-          this._pushChanges$(fullTask, changes).pipe(
+        concatMap(({ fullTask, changes, isSilent }) =>
+          (changes
+            ? this._pushChanges$(fullTask, changes)
+            : this._pushPendingChanges$(fullTask)
+          ).pipe(
+            tap({ complete: () => this._syncState.clearFailure(fullTask.id) }),
             catchError((err) => {
               // Expected provider limitation (e.g. a single recurring occurrence,
               // #7492) — the local task edit stands; don't alarm the user.
               if (isExpectedSyncSkipError(err)) {
+                this._syncState.clearFailure(fullTask.id);
                 return EMPTY;
               }
               IssueLog.err('Two-way sync push failed', err);
-              this._snackService.open({
-                type: 'ERROR',
-                msg: T.F.ISSUE.S.TWO_WAY_SYNC_PUSH_FAILED,
-                translateParams: { errorMsg: getErrorTxt(err) },
-              });
+              const failure = this._toSyncFailure(err);
+              this._syncState.reportFailure(fullTask.id, failure);
+              // A poll retries every few minutes; its failure shows on the task.
+              if (!isSilent) {
+                this._snackService.open(
+                  'msgKey' in failure
+                    ? { type: 'ERROR', msg: failure.msgKey }
+                    : {
+                        type: 'ERROR',
+                        msg: T.F.ISSUE.S.TWO_WAY_SYNC_PUSH_FAILED,
+                        translateParams: { errorMsg: failure.text },
+                      },
+                );
+              }
               return EMPTY;
             }),
           ),
@@ -797,6 +847,33 @@ export class IssueTwoWaySyncEffects {
         }
       }),
     );
+  }
+
+  /** Pushes the task's fields that differ from their baseline, if any. */
+  private _pushPendingChanges$(task: Task): Observable<unknown> {
+    const adapter = this._getAdapter(task.issueType!);
+    if (!adapter) {
+      return EMPTY;
+    }
+    return this._issueProviderService
+      .getCfgOnce$(task.issueProviderId!, task.issueType as IssueProviderKey)
+      .pipe(
+        concatMap((cfg) => {
+          const pending = computePendingLocalChanges(
+            task,
+            adapter.getFieldMappings(),
+            adapter.getSyncConfig(cfg),
+            { issueId: task.issueId! },
+          );
+          return Object.keys(pending).length ? this._pushChanges$(task, pending) : EMPTY;
+        }),
+      );
+  }
+
+  private _toSyncFailure(err: unknown): IssueSyncFailure {
+    return err instanceof IssueSyncPushError
+      ? { msgKey: err.msgKey }
+      : { text: getErrorTxt(err) };
   }
 
   private _trackSyncOriginatedTask(taskId: string): void {

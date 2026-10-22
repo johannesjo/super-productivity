@@ -219,6 +219,7 @@
         <issue-header [task]="task()"></issue-header>
       </ng-container>
       <ng-container panel-content>
+        <issue-sync-state [task]="task()"></issue-sync-state>
         @if (!isIssueDataLoadedForCurrentType()) {
           <mat-progress-bar [mode]="'indeterminate'"></mat-progress-bar>
         }

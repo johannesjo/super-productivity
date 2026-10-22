@@ -44,7 +44,7 @@ export const PLAINSPACE_NATIVE_HTTP = new InjectionToken<PlainspaceNativeHttp | 
  *
  * `getMyTasks$` and `getById$` let errors propagate (offline, 401, 5xx) so no
  * caller can mistake a failed request for "no tasks"; the poll decides what to
- * show. The token check, claim pool and completion push fail soft (see each).
+ * show. The token check and claim pool fail soft (see each).
  */
 @Injectable({ providedIn: 'root' })
 export class PlainspaceApiService {
@@ -202,21 +202,21 @@ export class PlainspaceApiService {
   }
 
   /**
-   * Pushes a completion change back to Plainspace; null on failure.
+   * Pushes completion and/or title back to Plainspace. Resolves to the echoed
+   * task, or null when the answer is not a task. HTTP errors propagate: the
+   * sync adapter tells a server too old for a field (422) and a per-task
+   * refusal (409) apart from offline and server errors.
    */
   patchTask$(
     id: string,
-    fields: { done: boolean },
+    fields: PlainspaceTaskPatch,
     cfg: PlainspaceCfg,
-  ): Observable<PlainspaceCompletionConfirmation | null> {
+  ): Observable<PlainspacePatchConfirmation | null> {
     return this._http
       .patch<unknown>(`${this._base(cfg)}/tasks/${encodeURIComponent(id)}`, fields, {
         headers: this._headers(cfg),
       })
-      .pipe(
-        map(parsePlainspaceCompletionConfirmation),
-        catchError(() => of(null)),
-      );
+      .pipe(map(parsePlainspacePatchConfirmation));
   }
 
   /**
@@ -406,7 +406,16 @@ interface SPTaskResponse {
   task: SPTask;
 }
 
-type PlainspaceCompletionConfirmation = Pick<PlainspaceIssue, 'id' | 'isDone'>;
+/** Fields the integration PATCH takes; at least one is sent. */
+export interface PlainspaceTaskPatch {
+  done?: boolean;
+  title?: string;
+}
+
+/** What a PATCH answer echoes; `title` is absent when the answer omits it. */
+export type PlainspacePatchConfirmation = Pick<PlainspaceIssue, 'id' | 'isDone'> & {
+  title?: string;
+};
 
 interface SPTasksResponse {
   tasks: SPTask[];
@@ -435,9 +444,9 @@ const matchesSpace = (t: SPTask, spaceId: string | null | undefined): boolean =>
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
 
-const parsePlainspaceCompletionConfirmation = (
+const parsePlainspacePatchConfirmation = (
   value: unknown,
-): PlainspaceCompletionConfirmation | null => {
+): PlainspacePatchConfirmation | null => {
   if (!isRecord(value) || !isRecord(value['task'])) {
     return null;
   }
@@ -449,7 +458,11 @@ const parsePlainspaceCompletionConfirmation = (
   ) {
     return null;
   }
-  return { id: task['id'], isDone: task['done'] };
+  return {
+    id: task['id'],
+    isDone: task['done'],
+    ...(typeof task['title'] === 'string' ? { title: task['title'] } : {}),
+  };
 };
 
 const mapSPTaskToIssue = (t: SPTask): PlainspaceIssue => ({

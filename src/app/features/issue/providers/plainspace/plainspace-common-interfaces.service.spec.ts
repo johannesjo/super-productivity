@@ -7,6 +7,7 @@ import { PlainspaceIssue } from './plainspace-issue.model';
 import { IssueProviderService } from '../../issue-provider.service';
 import { Task } from '../../../tasks/task.model';
 import { PlainspaceConnectionStateService } from './plainspace-connection-state.service';
+import { IssueSyncStateService } from '../../two-way-sync/issue-sync-state.service';
 
 describe('PlainspaceCommonInterfacesService', () => {
   let service: PlainspaceCommonInterfacesService;
@@ -182,6 +183,113 @@ describe('PlainspaceCommonInterfacesService', () => {
       ] as Task[];
       const updates = await service.getFreshDataForIssueTasks(tasks);
       expect(updates[0]?.taskChanges.isDone).toBe(true);
+    });
+  });
+
+  // Release 1, Gap 1 + 2: per-field pull against the baseline, and a quiet
+  // push of local edits the remote has not changed.
+  describe('per-field pull and pending pushes (bulk poll)', () => {
+    const UPDATED_AT = '2026-01-02T00:00:00.000Z';
+    const baseline = { isDone: false, title: 'Buy milk', scheduledAt: null };
+    let syncState: IssueSyncStateService;
+
+    beforeEach(() => {
+      syncState = TestBed.inject(IssueSyncStateService);
+      spyOn(
+        service as unknown as { _getCfgOnce$: (id: string) => unknown },
+        '_getCfgOnce$',
+      ).and.returnValue(of({ id: 'p1' }));
+      spyOn(syncState, 'requestPush');
+    });
+    const remote = (changes: Partial<PlainspaceIssue>): void => {
+      (api as unknown as { getMyTasks$: unknown }).getMyTasks$ = () =>
+        of([{ ...issue(null), ...changes }]);
+    };
+    const localTask = (changes: Partial<Task> = {}): Task =>
+      ({
+        id: 'sp-1',
+        issueProviderId: 'p1',
+        issueId: 't1',
+        title: 'Buy milk',
+        isDone: false,
+        issueLastUpdated: new Date(UPDATED_AT).getTime(),
+        issueLastSyncedValues: baseline,
+        ...changes,
+      }) as Task;
+
+    it('keeps a local rename when only completion changed remotely, and queues its push', async () => {
+      remote({ isDone: true, updatedAt: '2026-01-03T00:00:00.000Z' });
+      const updates = await service.getFreshDataForIssueTasks([
+        localTask({ title: 'Buy oat milk' }),
+      ]);
+      expect(updates[0].taskChanges.isDone).toBeTrue();
+      expect('title' in updates[0].taskChanges).toBeFalse();
+      expect(updates[0].taskChanges.issueLastSyncedValues).toEqual({
+        ...baseline,
+        isDone: true,
+      });
+      expect(syncState.requestPush).toHaveBeenCalledOnceWith('sp-1', true);
+    });
+
+    it('pulls a remote rename when the local title is unchanged', async () => {
+      remote({ title: 'Buy almond milk', updatedAt: '2026-01-03T00:00:00.000Z' });
+      const updates = await service.getFreshDataForIssueTasks([localTask()]);
+      expect(updates[0].taskChanges.title).toBe('Buy almond milk');
+      expect(syncState.requestPush).not.toHaveBeenCalled();
+    });
+
+    it('lets the remote win when both sides renamed, without pushing', async () => {
+      remote({ title: 'Remote name', updatedAt: '2026-01-03T00:00:00.000Z' });
+      const updates = await service.getFreshDataForIssueTasks([
+        localTask({ title: 'Local name' }),
+      ]);
+      expect(updates[0].taskChanges.title).toBe('Remote name');
+      expect(syncState.requestPush).not.toHaveBeenCalled();
+    });
+
+    it('keeps a local reschedule until the remote time changes', async () => {
+      remote({ title: 'Renamed', updatedAt: '2026-01-03T00:00:00.000Z' });
+      const local = Date.UTC(2026, 0, 5, 9);
+      const updates = await service.getFreshDataForIssueTasks([
+        localTask({ dueWithTime: local }),
+      ]);
+      expect('dueWithTime' in updates[0].taskChanges).toBeFalse();
+      // The schedule is pull-only: never queued for a push.
+      expect(syncState.requestPush).not.toHaveBeenCalled();
+    });
+
+    it('queues a pending push even when the remote is unchanged', async () => {
+      remote({});
+      const updates = await service.getFreshDataForIssueTasks([
+        localTask({ isDone: true }),
+      ]);
+      expect(updates).toEqual([]);
+      expect(syncState.requestPush).toHaveBeenCalledOnceWith('sp-1', true);
+    });
+
+    it('marks a task the response lacks as no longer in my list, and clears it when it is back', async () => {
+      remote({ id: 'other' });
+      await service.getFreshDataForIssueTasks([localTask({ isDone: true })]);
+      expect(syncState.isMissing('sp-1')).toBeTrue();
+      expect(syncState.requestPush).not.toHaveBeenCalled();
+
+      remote({});
+      await service.getFreshDataForIssueTasks([localTask()]);
+      expect(syncState.isMissing('sp-1')).toBeFalse();
+    });
+
+    it('never marks tasks missing from a failed poll', async () => {
+      (api as unknown as { getMyTasks$: unknown }).getMyTasks$ = () =>
+        throwError(() => new HttpErrorResponse({ status: 0 }));
+      await expectAsync(service.getFreshDataForIssueTasks([localTask()])).toBeRejected();
+      expect(syncState.missingTaskIds().size).toBe(0);
+    });
+
+    it('clears an old failure once nothing is pending', async () => {
+      syncState.reportFailure('sp-1', { text: 'offline' });
+      remote({});
+      await service.getFreshDataForIssueTasks([localTask()]);
+      expect(syncState.failures().has('sp-1')).toBeFalse();
     });
   });
 

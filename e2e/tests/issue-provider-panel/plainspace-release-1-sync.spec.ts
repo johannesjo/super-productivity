@@ -1,0 +1,247 @@
+import { Page } from '@playwright/test';
+import { expect, test } from '../../fixtures/test.fixture';
+import { ProjectPage } from '../../pages/project.page';
+import {
+  addPlainspaceProvider,
+  FakePlainspace,
+  installFakePlainspace,
+  successfulPolls,
+  waitForPollAfter,
+} from '../../utils/plainspace-fake';
+
+// Release 1 of the multi-user collaboration plan
+// (docs/plans/2026-10-21-multi-user-collaboration.md): per-field pull,
+// poll-time push of offline edits, title both ways, visible per-task state.
+// Plainspace has no E2E harness here, so the integration API is a stateful
+// `page.route` fake (see plainspace-fake.ts).
+
+const TASK_ID = 'task-1';
+
+/**
+ * Shares a project with one task assigned to me and waits until it is imported.
+ * The stub stays installed across reloads, so a reload is a restart.
+ */
+const setUp = async (
+  page: Page,
+  projectPage: ProjectPage,
+  title = 'Buy tent',
+): Promise<FakePlainspace> => {
+  const server = await installFakePlainspace(page);
+  server.addAssignedTask(TASK_ID, title);
+  await projectPage.createProject('Camping');
+  await addPlainspaceProvider(page, /Camping/);
+  await projectPage.navigateToProjectByName('Camping');
+  await expect(taskRow(page, title)).toBeVisible({ timeout: 30000 });
+  return server;
+};
+
+const taskRow = (page: Page, title: string): ReturnType<Page['locator']> =>
+  page.locator('task').filter({ hasText: title });
+
+/** Renames a task in place (the row's text moves into a textarea meanwhile). */
+const renameTask = async (page: Page, title: string, newTitle: string): Promise<void> => {
+  const row = taskRow(page, title);
+  const taskId = await row.getAttribute('data-task-id');
+  await row.locator('task-title').click();
+  const textarea = page.locator(`task[data-task-id="${taskId}"] textarea`).first();
+  await expect(textarea).toBeVisible();
+  await textarea.fill(newTitle);
+  await page.keyboard.press('Tab');
+  await expect(taskRow(page, newTitle)).toBeVisible();
+};
+
+/** Opens the task's detail panel unless it is already open. */
+const openDetail = async (page: Page, title: string): Promise<void> => {
+  const panel = page.locator('task-detail-panel');
+  if (!(await panel.isVisible())) {
+    const row = taskRow(page, title);
+    await row.hover();
+    await row.getByRole('button', { name: 'Show/hide task panel' }).click();
+  }
+  await expect(panel).toBeVisible();
+};
+
+/** Restarts the app; the update and import polls run 8 s after load. */
+const restart = async (page: Page, server: FakePlainspace): Promise<void> => {
+  const before = successfulPolls(server);
+  await page.reload();
+  await waitForPollAfter(page, server, before);
+};
+
+test.describe('Plainspace Release 1 sync', () => {
+  test.setTimeout(180000);
+
+  test('a remote change no longer overwrites an unrelated local rename; the offline rename is pushed on the next poll', async ({
+    page,
+    workViewPage,
+    projectPage,
+  }) => {
+    await workViewPage.waitForTaskList();
+    const server = await setUp(page, projectPage);
+
+    // Renamed while Plainspace can't be reached: the push fails.
+    server.isPatchOffline = true;
+    await renameTask(page, 'Buy tent', 'Buy a bigger tent');
+
+    // Meanwhile someone ticks the task off in Plainspace.
+    server.remoteEdit(TASK_ID, { done: true });
+    server.isPatchOffline = false;
+
+    // Restart and poll: the remote completion lands, the local title stays,
+    // and the title is pushed because Plainspace still has the old one.
+    await restart(page, server);
+    const row = taskRow(page, 'Buy a bigger tent');
+    await expect(row).toBeVisible();
+    await expect(row).toHaveClass(/isDone/);
+    await expect
+      .poll(() => server.tasks.get(TASK_ID)!.title, { timeout: 15000 })
+      .toBe('Buy a bigger tent');
+    expect(server.tasks.get(TASK_ID)!.done).toBe(true);
+  });
+
+  test('title round-trips both ways and is sent verbatim', async ({
+    page,
+    workViewPage,
+    projectPage,
+  }) => {
+    await workViewPage.waitForTaskList();
+    const server = await setUp(page, projectPage);
+
+    await renameTask(page, 'Buy tent', 'Buy tent  (2 people)');
+    await expect
+      .poll(() => server.tasks.get(TASK_ID)!.title, { timeout: 15000 })
+      .toBe('Buy tent  (2 people)');
+    expect(server.patches.at(-1)).toEqual({
+      id: TASK_ID,
+      body: { title: 'Buy tent  (2 people)' },
+      status: 200,
+    });
+
+    server.remoteEdit(TASK_ID, { title: 'Buy tent and pegs' });
+    await restart(page, server);
+    await expect(taskRow(page, 'Buy tent and pegs')).toBeVisible();
+    // Pulling it is not an edit: nothing is pushed back.
+    expect(server.patches.length).toBe(1);
+  });
+
+  test('two devices pushing the same edit converge without a second write', async ({
+    page,
+    workViewPage,
+    projectPage,
+  }) => {
+    await workViewPage.waitForTaskList();
+    const server = await setUp(page, projectPage);
+
+    // This device renames offline; another device already sent the same name.
+    server.isPatchOffline = true;
+    await renameTask(page, 'Buy tent', 'Buy two tents');
+    server.isPatchOffline = false;
+    server.remoteEdit(TASK_ID, { title: 'Buy two tents' });
+    const patchesBefore = server.patches.length;
+
+    await restart(page, server);
+    await expect(taskRow(page, 'Buy two tents')).toBeVisible();
+    // Give a queued push time to show up if there were one.
+    await page.waitForTimeout(2000);
+    expect(server.patches.slice(patchesBefore)).toEqual([]);
+  });
+
+  test('an older server keeps done syncing and says once that it is too old for titles', async ({
+    page,
+    workViewPage,
+    projectPage,
+    taskPage,
+  }) => {
+    await workViewPage.waitForTaskList();
+    const server = await setUp(page, projectPage);
+    server.isOldServer = true;
+
+    await renameTask(page, 'Buy tent', 'Buy a tent');
+    await expect
+      .poll(() => server.patches.map((p) => p.status), { timeout: 15000 })
+      .toEqual([422]);
+    // An expected limitation, not an error.
+    await expect(
+      page.locator('mat-snack-bar-container', { hasText: /push failed/i }),
+    ).toHaveCount(0);
+
+    await taskPage.markTaskAsDone(taskRow(page, 'Buy a tent'));
+    await expect
+      .poll(() => server.tasks.get(TASK_ID)!.done, { timeout: 15000 })
+      .toBe(true);
+    // Titles are no longer sent to this server.
+    expect(server.patches.slice(1).map((p) => p.body)).toEqual([{ done: true }]);
+    expect(server.tasks.get(TASK_ID)!.title).toBe('Buy tent');
+
+    await page.locator('.e2e-toggle-issue-provider-panel').click();
+    const tooOld = page.locator('plainspace-reconnect-notice .callout', {
+      hasText: 'too old for title sync',
+    });
+    await expect(tooOld).toHaveCount(1);
+    await expect(tooOld).toBeVisible();
+  });
+
+  test('offline never marks a task "no longer in your list"; a successful poll does', async ({
+    page,
+    workViewPage,
+    projectPage,
+  }) => {
+    await workViewPage.waitForTaskList();
+    const server = await setUp(page, projectPage);
+    const notInList = page.locator('issue-sync-state .callout', {
+      hasText: 'No longer in your Plainspace list',
+    });
+
+    // Offline polls say nothing about membership.
+    server.isTasksOffline = true;
+    const failedBefore = server.taskListRequests.length;
+    await page.reload();
+    await expect
+      .poll(() => server.taskListRequests.length, { timeout: 30000 })
+      .toBeGreaterThanOrEqual(failedBefore + 2);
+    // A notice would open the issue section by itself.
+    await openDetail(page, 'Buy tent');
+    await expect(page.locator('issue-header')).toBeVisible();
+    await expect(notInList).toHaveCount(0);
+
+    // Reassigned in Plainspace: the next successful poll no longer lists it.
+    server.isTasksOffline = false;
+    server.assignedIds.delete(TASK_ID);
+    await restart(page, server);
+    await openDetail(page, 'Buy tent');
+    await expect(notInList).toBeVisible();
+
+    // The task stays and no longer pushes.
+    await renameTask(page, 'Buy tent', 'Buy tent (mine)');
+    await page.waitForTimeout(2000);
+    expect(server.patches).toEqual([]);
+  });
+
+  test('a failed push shows "couldn\'t sync" on the task and Retry pushes it', async ({
+    page,
+    workViewPage,
+    projectPage,
+  }) => {
+    await workViewPage.waitForTaskList();
+    const server = await setUp(page, projectPage);
+    server.isPatchServerError = true;
+
+    await renameTask(page, 'Buy tent', 'Buy a tent');
+    // The existing failure snack stays.
+    await expect(
+      page.locator('mat-snack-bar-container', { hasText: /push failed/i }),
+    ).toBeVisible();
+    await openDetail(page, 'Buy a tent');
+    const couldNotSync = page.locator('issue-sync-state .callout', {
+      hasText: "Couldn't sync",
+    });
+    await expect(couldNotSync).toBeVisible();
+
+    server.isPatchServerError = false;
+    await couldNotSync.getByRole('button', { name: 'Retry' }).click();
+    await expect
+      .poll(() => server.tasks.get(TASK_ID)!.title, { timeout: 15000 })
+      .toBe('Buy a tent');
+    await expect(couldNotSync).toHaveCount(0);
+  });
+});

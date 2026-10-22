@@ -117,12 +117,25 @@ describe('PlainspaceApiService', () => {
     expect(issue?.isDone).toBe(true);
   });
 
-  it('patchTask$ reports a failed completion update as null', async () => {
-    const p = firstValueFrom(service.patchTask$('a', { done: true }, cfg));
+  it('patchTask$ sends the title and maps the echoed title', async () => {
+    const p = firstValueFrom(
+      service.patchTask$('a', { done: true, title: '  Exact title ' }, cfg),
+    );
+    const req = httpMock.expectOne(`${BASE}/tasks/a`);
+    expect(req.request.body).toEqual({ done: true, title: '  Exact title ' });
+    req.flush({ task: { ...spTask('a', 'space-1', true), title: '  Exact title ' } });
+    expect((await p)?.title).toBe('  Exact title ');
+  });
+
+  it('patchTask$ lets HTTP errors through so the adapter can read the status', async () => {
+    const p = firstValueFrom(service.patchTask$('a', { title: 'x' }, cfg));
     httpMock
       .expectOne(`${BASE}/tasks/a`)
-      .flush('boom', { status: 500, statusText: 'Server Error' });
-    expect(await p).toBeNull();
+      .flush(
+        { error: 'Validation failed' },
+        { status: 422, statusText: 'Unprocessable' },
+      );
+    await expectAsync(p).toBeRejectedWith(jasmine.objectContaining({ status: 422 }));
   });
 
   it('patchTask$ accepts a minimal completion confirmation', async () => {

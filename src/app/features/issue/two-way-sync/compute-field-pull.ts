@@ -1,0 +1,134 @@
+import { Task } from '../../tasks/task.model';
+import { issueValuesEqual } from './compute-push-decisions';
+import { FieldMapping, FieldMappingContext, FieldSyncConfig } from './issue-sync.model';
+
+const canPull = (direction: string): boolean =>
+  direction === 'pullOnly' || direction === 'both';
+
+const canPush = (direction: string): boolean =>
+  direction === 'pushOnly' || direction === 'both';
+
+export interface FieldPullInput {
+  task: Task;
+  /** The fresh remote item, keyed by issue field. */
+  issueValues: Record<string, unknown>;
+  /** The provider's row-level marker (ETag, `updatedAt`) moved since the last pull. */
+  wasUpdated: boolean;
+  /**
+   * The provider's full import data for the item (`getAddTaskData`), used as the
+   * base when `wasUpdated`; it carries the new baseline and marker. Mapped fields
+   * in it are replaced by the per-field decisions below.
+   */
+  addTaskData: Partial<Task>;
+  fieldMappings: FieldMapping[];
+  syncConfig: FieldSyncConfig;
+  ctx: FieldMappingContext;
+  /**
+   * `true` (CalDAV): a `pullOnly` field always takes the remote value when the
+   * marker moved, and a mismatch is healed even when it did not. `false`
+   * (Plainspace): every pullable field is pulled only when its remote value
+   * differs from its baseline, so a local edit survives an unrelated remote
+   * change.
+   */
+  isPullOnlyAuthoritative: boolean;
+}
+
+/**
+ * The task changes one poll pulls for one item, or null when there is nothing
+ * to apply. A row-level marker (CalDAV's ETag, Plainspace's `updatedAt`) moves
+ * for any field, so a field is pulled only when its own remote value differs
+ * from its baseline in `issueLastSyncedValues`: a local edit still waiting to
+ * be pushed is not overwritten by an unrelated remote change. A field without
+ * a baseline is pulled.
+ */
+export const computeFieldPullChanges = ({
+  task,
+  issueValues,
+  wasUpdated,
+  addTaskData,
+  fieldMappings,
+  syncConfig,
+  ctx,
+  isPullOnlyAuthoritative,
+}: FieldPullInput): Partial<Task> | null => {
+  const taskChanges: Record<PropertyKey, unknown> = wasUpdated ? { ...addTaskData } : {};
+  const lastSyncedValues = task.issueLastSyncedValues ?? {};
+  let hasPullOnlyMismatch = false;
+
+  for (const mapping of fieldMappings) {
+    const direction = syncConfig[mapping.taskField] ?? mapping.defaultDirection;
+
+    if (!canPull(direction)) {
+      delete taskChanges[mapping.taskField];
+      continue;
+    }
+
+    const remoteTaskValue = mapping.toTaskValue(issueValues[mapping.issueField], ctx);
+    const isRemoteChanged =
+      !Object.prototype.hasOwnProperty.call(lastSyncedValues, mapping.issueField) ||
+      !issueValuesEqual(
+        issueValues[mapping.issueField],
+        lastSyncedValues[mapping.issueField],
+      );
+    const shouldPullAfterMarkerChange =
+      (isPullOnlyAuthoritative && direction === 'pullOnly') || isRemoteChanged;
+    if (wasUpdated) {
+      if (shouldPullAfterMarkerChange) {
+        taskChanges[mapping.taskField] = remoteTaskValue;
+      } else {
+        delete taskChanges[mapping.taskField];
+      }
+    } else if (
+      // Older refreshes could advance the marker without applying mapped values.
+      // Heal provider-owned fields, but preserve possible unpushed edits in "both".
+      isPullOnlyAuthoritative &&
+      direction === 'pullOnly' &&
+      remoteTaskValue !== task[mapping.taskField]
+    ) {
+      taskChanges[mapping.taskField] = remoteTaskValue;
+      hasPullOnlyMismatch = true;
+    }
+  }
+
+  return wasUpdated || hasPullOnlyMismatch ? (taskChanges as Partial<Task>) : null;
+};
+
+/**
+ * Local edits still waiting to be pushed, as task changes (task field → current
+ * value): pushable fields whose local value differs from their baseline. With
+ * `issueValues` (a fresh remote item) only fields whose remote value still
+ * equals the baseline count; a field changed on both sides is the remote's
+ * (it is pulled instead). The stored baseline is the queue, so this survives
+ * restarts without an outbox.
+ */
+export const computePendingLocalChanges = (
+  task: Task,
+  fieldMappings: FieldMapping[],
+  syncConfig: FieldSyncConfig,
+  ctx: FieldMappingContext,
+  issueValues?: Record<string, unknown>,
+): Partial<Task> => {
+  const lastSyncedValues = task.issueLastSyncedValues;
+  const pending: Record<PropertyKey, unknown> = {};
+  if (!lastSyncedValues) {
+    return pending;
+  }
+  for (const mapping of fieldMappings) {
+    const direction = syncConfig[mapping.taskField] ?? mapping.defaultDirection;
+    if (
+      !canPush(direction) ||
+      !Object.prototype.hasOwnProperty.call(lastSyncedValues, mapping.issueField)
+    ) {
+      continue;
+    }
+    const baseline = lastSyncedValues[mapping.issueField];
+    if (issueValues && !issueValuesEqual(issueValues[mapping.issueField], baseline)) {
+      continue;
+    }
+    const localValue = task[mapping.taskField];
+    if (!issueValuesEqual(mapping.toIssueValue(localValue, ctx), baseline)) {
+      pending[mapping.taskField] = localValue;
+    }
+  }
+  return pending as Partial<Task>;
+};

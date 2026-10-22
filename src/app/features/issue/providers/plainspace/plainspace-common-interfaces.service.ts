@@ -13,6 +13,11 @@ import {
   isPlainspaceQuietPollError,
   PlainspaceConnectionStateService,
 } from './plainspace-connection-state.service';
+import {
+  computeFieldPullChanges,
+  computePendingLocalChanges,
+} from '../../two-way-sync/compute-field-pull';
+import { IssueSyncStateService } from '../../two-way-sync/issue-sync-state.service';
 
 @Injectable({
   providedIn: 'root',
@@ -21,6 +26,7 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
   private readonly _plainspaceApiService = inject(PlainspaceApiService);
   private readonly _syncAdapter = inject(PlainspaceSyncAdapterService);
   private readonly _connectionState = inject(PlainspaceConnectionStateService);
+  private readonly _syncState = inject(IssueSyncStateService);
 
   readonly providerKey = 'PLAINSPACE' as const;
   readonly pollInterval: number = PLAINSPACE_POLL_INTERVAL;
@@ -66,8 +72,8 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
       issueWasUpdated: false,
       issueLastUpdated: new Date(issue.updatedAt).getTime(),
       ...(dueWithTime ? { dueWithTime } : {}),
-      // Seed the last trustworthy remote values. Completion needs the baseline
-      // for write-back; title and schedule remain provider-owned pull baselines.
+      // Seed the last trustworthy remote values: the per-field pull and push
+      // compare against them.
       issueLastSyncedValues: this._syncAdapter.extractSyncValues(
         issue as unknown as Record<string, unknown>,
       ),
@@ -77,10 +83,9 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
   /**
    * Plainspace owns the schedule for shared tasks, so — unlike the base, which
    * drops `dueWithTime` on poll to protect user-set schedules — we pull
-   * `scheduledAt` into `dueWithTime` here. This schedules already-imported tasks
-   * once they next change remotely and keeps recurring items in sync as the
-   * server advances `scheduledAt` to the next occurrence.
-   * Mirrors the CalDAV provider's date-on-poll override.
+   * `scheduledAt` into `dueWithTime` here once it changes remotely, which keeps
+   * recurring items in sync as the server advances it to the next occurrence.
+   * Like CalDAV, each field is pulled only when its remote value changed.
    */
   override async getFreshDataForIssueTask(task: Task): Promise<{
     taskChanges: Partial<Task>;
@@ -95,7 +100,7 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
       task.issueProviderId,
       firstValueFrom(this._plainspaceApiService.getById$(task.issueId, cfg)),
     );
-    return this._toFreshData(task, issue);
+    return this._toFreshData(task, issue, cfg);
   }
 
   /**
@@ -103,9 +108,14 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
    * every task assigned to me in one call, so we fetch it once per provider and
    * diff locally — instead of the base's one `getById` HTTP request per task
    * (which is N redundant calls of the same data). A task that is no longer
-   * assigned to me simply isn't in the response and is left untouched this cycle.
+   * assigned to me isn't in the response: it is kept untouched and shown as "no
+   * longer in your Plainspace list", and stops pushing.
    * A failed request throws (the poll effect logs it quietly) instead of
    * yielding an empty list, so nothing here is ever computed from a failed poll.
+   *
+   * After a successful response, local edits still waiting to be pushed (a field
+   * whose local value differs from its baseline while the remote still equals
+   * it, e.g. made offline) are queued for a quiet push.
    */
   override async getFreshDataForIssueTasks(
     tasks: Task[],
@@ -128,12 +138,41 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
         firstValueFrom(this._plainspaceApiService.getMyTasks$(cfg)),
       );
       const issuesById = new Map(myTasks.map((issue) => [issue.id, issue] as const));
+      this._syncState.setMissing(
+        providerTasks.map((task) => task.id),
+        providerTasks.filter((task) => !issuesById.has(task.issueId!)).map((t) => t.id),
+      );
+      const fieldMappings = this._syncAdapter.getFieldMappings();
+      const syncConfig = this._syncAdapter.getSyncConfig(cfg);
+      const toPush: string[] = [];
       for (const task of providerTasks) {
-        const fresh = this._toFreshData(task, issuesById.get(task.issueId!) ?? null);
+        const issue = issuesById.get(task.issueId!);
+        if (!issue) {
+          continue;
+        }
+        const fresh = this._toFreshData(task, issue, cfg);
         if (fresh) {
           updates.push({ task, taskChanges: fresh.taskChanges, issue: fresh.issue });
         }
+        const pending = computePendingLocalChanges(
+          task,
+          fieldMappings,
+          syncConfig,
+          { issueId: issue.id },
+          this._syncAdapter.extractSyncValues(
+            issue as unknown as Record<string, unknown>,
+          ),
+        );
+        if (Object.keys(pending).length) {
+          toPush.push(task.id);
+        } else {
+          // Nothing left to push: an earlier failure no longer applies.
+          this._syncState.clearFailure(task.id);
+        }
       }
+      // The push re-reads the task and fetches the item before deciding, so it
+      // works on the state after the pulls above are applied.
+      toPush.forEach((taskId) => this._syncState.requestPush(taskId, true));
     }
     return updates;
   }
@@ -141,19 +180,29 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
   private _toFreshData(
     task: Task,
     issue: PlainspaceIssue | null,
+    cfg: PlainspaceCfg,
   ): { taskChanges: Partial<Task>; issue: IssueData; issueTitle: string } | null {
-    if (!issue || new Date(issue.updatedAt).getTime() === task.issueLastUpdated) {
+    if (!issue) {
+      return null;
+    }
+    const wasUpdated = new Date(issue.updatedAt).getTime() !== task.issueLastUpdated;
+    const taskChanges = computeFieldPullChanges({
+      task,
+      issueValues: this._syncAdapter.extractSyncValues(
+        issue as unknown as Record<string, unknown>,
+      ),
+      wasUpdated,
+      addTaskData: wasUpdated ? this.getAddTaskData(issue) : {},
+      fieldMappings: this._syncAdapter.getFieldMappings(),
+      syncConfig: this._syncAdapter.getSyncConfig(cfg),
+      ctx: { issueId: issue.id },
+      isPullOnlyAuthoritative: false,
+    });
+    if (!taskChanges) {
       return null;
     }
     return {
-      taskChanges: {
-        ...this.getAddTaskData(issue),
-        // Explicit (incl. undefined to unschedule) — the base deletes this.
-        dueWithTime: issue.scheduledAt
-          ? new Date(issue.scheduledAt).getTime()
-          : undefined,
-        issueWasUpdated: true,
-      },
+      taskChanges: { ...taskChanges, issueWasUpdated: true },
       issue: issue as unknown as IssueData,
       issueTitle: issue.title,
     };
