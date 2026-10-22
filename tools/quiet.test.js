@@ -19,7 +19,9 @@ const makePackage = () => {
   write(
     'fail.js',
     'for (let i = 1; i <= 100; i++) console.log(`line ${i}`);\n' +
-      "console.error('boom');\nprocess.exit(3);\n",
+      "console.error('boom');\n" +
+      "for (let i = 0; i < 80; i++) console.log('[WebServer] warn');\n" +
+      'process.exit(3);\n',
   );
   write('args.js', "console.log('ARGS:' + process.argv.slice(2).join(' '));\n");
   write(
@@ -62,6 +64,7 @@ test('quiet keeps the exit code and prints the end of the log on failure', () =>
     assert.match(result.stderr, /❌ fail failed \(exit 3\)/);
     assert.match(result.stderr, /line 100\nboom/);
     assert.doesNotMatch(result.stderr, /line 1\n/);
+    assert.doesNotMatch(result.stderr, /\[WebServer\]/);
   } finally {
     fs.rmSync(log, { force: true });
     fs.rmSync(dir, { recursive: true, force: true });

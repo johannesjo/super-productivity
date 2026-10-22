@@ -7,8 +7,9 @@
  *   npm run quiet -- test:file src/app/util/is-today.util.spec.ts
  *   npm run quiet -- e2e:file e2e/tests/task-basic/task-crud.spec.ts --retries=0
  *
- * Pass: one line, the test-count lines (to tell "passed" from "nothing ran") and
- * the log path. Fail: the log's last lines and its path. The exit code is kept.
+ * Pass: one line, the test counts where the runner prints them (to tell "passed"
+ * from "nothing ran") and the log path. Fail: the log's last lines and its path.
+ * The exit code is kept.
  */
 const { spawnSync } = require('node:child_process');
 const fs = require('node:fs');
@@ -19,6 +20,9 @@ const TAIL_LINES = 60;
 const SUMMARY_PATTERN =
   /^\s*(TOTAL: \d+|\d+ (passed|failed|flaky|skipped|did not run|interrupted)\b|(Test Files|Tests)\s+\d+)/;
 const ANSI_PATTERN = /\u001b\[[0-9;]*m/g;
+// Dev-server output Playwright interleaves with test results; in the failure
+// excerpt it pushes earlier failure blocks out of the tail. It stays in the log.
+const WEB_SERVER_LINE = /^\[WebServer\]/;
 
 const [script, ...rawArgs] = process.argv.slice(2);
 if (!script) {
@@ -35,7 +39,6 @@ const logDir = path.join(repoRoot, '.tmp', 'logs');
 // commands get their own pid namespace, so the pid alone repeats across runs.
 const runId = `${Date.now()}-${process.pid}`;
 const logFile = path.join(logDir, `${script.replace(/\W+/g, '-')}.${runId}.log`);
-const relLog = path.relative(process.cwd(), logFile);
 
 /** Runs `npm run <script> -- <args>` with stdout and stderr in the log file. */
 const runScript = () => {
@@ -45,7 +48,7 @@ const runScript = () => {
   // npm_execpath is npm-cli.js when started via `npm run`; spawning it through
   // node avoids the Windows .cmd shim, which Node won't spawn without a shell.
   const npmCli = process.env.npm_execpath;
-  const [cmd, cmdArgs] = npmCli?.endsWith('.js')
+  const [cmd, cmdArgs] = /\.[cm]?js$/.test(npmCli ?? '')
     ? [process.execPath, [npmCli, ...npmArgs]]
     : ['npm', npmArgs];
   try {
@@ -75,13 +78,14 @@ const main = () => {
     const summary = [...new Set(lines.filter((l) => SUMMARY_PATTERN.test(l)))];
     console.log(`✅ ${script} passed in ${seconds}s`);
     summary.forEach((line) => console.log(`   ${line.trim()}`));
-    console.log(`   log: ${relLog}`);
+    console.log(`   log: ${logFile}`);
     return 0;
   }
   const exit = result.status ?? result.signal;
   console.error(`❌ ${script} failed (exit ${exit}) after ${seconds}s`);
-  console.error(`--- last ${TAIL_LINES} lines of ${relLog} ---`);
-  console.error(lines.slice(-TAIL_LINES).join('\n').trimEnd());
+  console.error(`--- last ${TAIL_LINES} lines of ${logFile} ---`);
+  const excerpt = lines.filter((l) => !WEB_SERVER_LINE.test(l)).slice(-TAIL_LINES);
+  console.error(excerpt.join('\n').trimEnd());
   return result.status || 1;
 };
 

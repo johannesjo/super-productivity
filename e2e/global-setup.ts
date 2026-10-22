@@ -75,11 +75,9 @@ const globalSetup = async (config: FullConfig): Promise<void> => {
       });
       console.log('Bundled plugins built successfully');
     } catch (error) {
-      const { stdout, stderr, message } = error as Error & {
-        stdout?: Buffer;
-        stderr?: Buffer;
-      };
-      console.error(`${stdout ?? ''}${stderr ?? ''}`);
+      // execSync's error message already ends with the child's stderr
+      const { stdout, message } = error as Error & { stdout?: Buffer };
+      console.error(`${stdout ?? ''}`);
       console.error('Failed to build plugins:', message);
       throw error; // Fail fast if plugin build fails
     }
