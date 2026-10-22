@@ -122,9 +122,10 @@ export const computePushDecisions = (
 
 /**
  * Task fields a baseline write may carry at their unchanged value. Writing one
- * again changes nothing and runs no side effect; `isDone` (completion effects),
- * `tagIds` (tag lists) and the due fields (planner, reminders) do, so they are
- * left out.
+ * again changes no state; at most, time-block sync re-writes a scheduled task's
+ * calendar event at the same values (it reacts to `title` and `timeEstimate`).
+ * `isDone` (completion effects), `tagIds` (tag lists) and the due fields
+ * (planner, reminders) have real side effects, so they are left out.
  */
 const VALUE_CARRY_SAFE_FIELDS: ReadonlySet<string> = new Set([
   'title',
