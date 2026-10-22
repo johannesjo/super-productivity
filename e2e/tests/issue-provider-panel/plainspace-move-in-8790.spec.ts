@@ -6,6 +6,7 @@ import {
   successfulPolls,
   waitForPollAfter,
 } from '../../utils/plainspace-fake';
+import { waitForMenuSettled } from '../../utils/waits';
 
 // #8790, Release 1 of the multi-user collaboration plan: moving a task into a
 // Plainspace-bound project shares it (create, then link), like adding one
@@ -23,12 +24,17 @@ const moveToProject = async (
   projectName: RegExp,
 ): Promise<void> => {
   await taskRow(page, title).first().click({ button: 'right' });
+  // A click during the open animation leaves the pointer over the item above
+  // once the panel settles, which swaps in its submenu (see waitForMenuSettled).
+  await waitForMenuSettled(page);
   const menu = page.locator('.mat-mdc-menu-panel').first();
   await menu
     .locator('button[mat-menu-item]')
     .filter({ has: page.locator('mat-icon:has-text("forward")') })
     .first()
     .click();
+  await page.locator('.mat-mdc-menu-panel').nth(1).waitFor({ state: 'visible' });
+  await waitForMenuSettled(page);
   await page
     .locator('.mat-mdc-menu-panel')
     .last()
