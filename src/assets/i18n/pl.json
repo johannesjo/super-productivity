@@ -3086,7 +3086,7 @@
     "EML_PARSE_ERROR": "Nie udało się odczytać tego pliku wiadomości e-mail. Może być uszkodzony lub nieobsługiwany.",
     "EML_TOO_LARGE": "Ten plik wiadomości e-mail jest zbyt duży, aby go zaimportować.",
     "ENTER_FOCUS_MODE": "Tryb skupienia",
-    "FEATURE_DISABLED_SNACK": "Wyłączono „{{featureName}}”. Włącz ponownie w ustawieniach Funkcji aplikacji.",
+    "FEATURE_DISABLED_SNACK": "Wyłączono „{{featureName}}”. Włącz ponownie w sekcji ustawień „Funkcje aplikacji”.",
     "GO_TO_TASK_LIST": "Przejdź do listy zadań",
     "HABITS": "Nawyki",
     "HELP": "Pomoc",
