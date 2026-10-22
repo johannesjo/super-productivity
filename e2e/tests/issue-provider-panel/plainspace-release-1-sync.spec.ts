@@ -38,8 +38,10 @@ const setUp = async (
 const taskRow = (page: Page, title: string): ReturnType<Page['locator']> =>
   page.locator('task').filter({ hasText: title });
 
-/** Renames a task in place (the row's text moves into a textarea meanwhile). */
-/** `shownTitle`: the title once short syntax in `newTitle` is applied. */
+/**
+ * Renames a task in place (the row's text moves into a textarea meanwhile).
+ * `shownTitle`: the title once short syntax in `newTitle` is applied.
+ */
 const renameTask = async (
   page: Page,
   title: string,

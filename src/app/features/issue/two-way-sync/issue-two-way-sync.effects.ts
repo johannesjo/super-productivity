@@ -169,8 +169,6 @@ export class IssueTwoWaySyncEffects {
   private readonly _pluginRegistry = inject(PluginIssueProviderRegistryService);
   private readonly _syncState = inject(IssueSyncStateService);
   private _syncOriginatedTaskIds = new Set<string>();
-  /** Tasks whose raw title push was skipped until short syntax cleans it. */
-  private _titleRewriteTaskIds = new Set<string>();
   private static readonly _MAX_SYNC_ORIGINATED_IDS = 1000;
 
   constructor() {
@@ -217,7 +215,9 @@ export class IssueTwoWaySyncEffects {
           // After the filter above: its sync-originated check must stay in step
           // with dispatch, which an async step ahead of it would break.
           concatMap((x) =>
-            from(this._isTitleAboutToBeRewritten(x.action, x.taskId)).pipe(
+            // A parse that fails (e.g. the date parser chunk can't load) pushes
+            // the title as typed rather than stopping the push stream.
+            from(this._isTitleAboutToBeRewritten(x.action).catch(() => false)).pipe(
               filter((isRewritten) => !isRewritten),
               map(() => x),
             ),
@@ -612,14 +612,8 @@ export class IssueTwoWaySyncEffects {
   /**
    * Whether the short-syntax effect is about to rewrite the title of this
    * update: it parses an update that changes only the title, like this does.
-   * Marks the task until its next pushed action (the applyShortSyntax), so a
-   * pending push meanwhile leaves the raw title out too.
    */
-  private async _isTitleAboutToBeRewritten(
-    action: { type: string },
-    taskId: string,
-  ): Promise<boolean> {
-    this._titleRewriteTaskIds.delete(taskId);
+  private async _isTitleAboutToBeRewritten(action: { type: string }): Promise<boolean> {
     if (action.type !== TaskSharedActions.updateTask.type) {
       return false;
     }
@@ -634,11 +628,7 @@ export class IssueTwoWaySyncEffects {
     if (!current?.issueId) {
       return false;
     }
-    const isRewritten = (await this._parseShortSyntax(current)).title !== current.title;
-    if (isRewritten) {
-      this._titleRewriteTaskIds.add(taskId);
-    }
-    return isRewritten;
+    return (await this._parseShortSyntax(current)).title !== current.title;
   }
 
   /**
@@ -1034,17 +1024,12 @@ export class IssueTwoWaySyncEffects {
               if (!current) {
                 return EMPTY;
               }
-              const all = computePendingLocalChanges(
+              const pending = computePendingLocalChanges(
                 current,
                 adapter.getFieldMappings(),
                 adapter.getSyncConfig(cfg),
                 { issueId: current.issueId! },
               );
-              // A title short syntax is still about to clean (the request came
-              // in between the edit and the parse) is pushed by that update.
-              // eslint-disable-next-line @typescript-eslint/no-unused-vars
-              const { title, ...rest } = all;
-              const pending = this._titleRewriteTaskIds.has(current.id) ? rest : all;
               return Object.keys(pending).length
                 ? this._pushChanges$(current, pending)
                 : EMPTY;

@@ -291,6 +291,47 @@ describe('IssueTwoWaySyncEffects', () => {
         expect(adapter.pushChanges).not.toHaveBeenCalled();
       }));
 
+      it('is pushed once, cleaned, by the short-syntax update that follows', fakeAsync(() => {
+        rename('Write report #work');
+        tick();
+        const cleaned = createMockTask({
+          id: 'task-1',
+          title: 'Write report',
+          issueType: 'TEST_PROVIDER' as any,
+          issueId: 'issue-1',
+          issueProviderId: 'provider-1',
+          issueLastSyncedValues: { summary: 'Old' },
+        });
+        taskServiceSpy.getByIdOnce$.and.returnValue(of(cleaned));
+        actions$.next(
+          TaskSharedActions.applyShortSyntax({
+            task: cleaned,
+            taskChanges: { title: 'Write report' },
+          }),
+        );
+        tick();
+        expect(adapter.pushChanges).toHaveBeenCalledOnceWith(
+          'issue-1',
+          { summary: 'Write report' },
+          jasmine.anything(),
+        );
+      }));
+
+      it('is pushed as typed when the parse fails', fakeAsync(() => {
+        // e.g. the date parser chunk can't load: the stream must keep pushing.
+        spyOn(
+          effects as unknown as { _parseShortSyntax: () => Promise<unknown> },
+          '_parseShortSyntax',
+        ).and.rejectWith(new Error('chunk load failed'));
+        rename('Write report @tomorrow');
+        tick();
+        expect(adapter.pushChanges).toHaveBeenCalledOnceWith(
+          'issue-1',
+          { summary: 'Write report @tomorrow' },
+          jasmine.anything(),
+        );
+      }));
+
       it('is pushed when short syntax leaves it as it is', fakeAsync(() => {
         rename('Write report');
         tick();
@@ -1375,30 +1416,6 @@ describe('IssueTwoWaySyncEffects', () => {
       expect(adapter.pushChanges).toHaveBeenCalledOnceWith(
         'issue-1',
         { summary: 'New' },
-        jasmine.anything(),
-      );
-    }));
-
-    it('leaves out a title short syntax is still about to clean', fakeAsync(() => {
-      // A poll can come in between the edit and the parse: the short-syntax
-      // update pushes the cleaned title.
-      taskServiceSpy.getByIdOnce$.and.returnValue(
-        of(linkedTask({ title: 'New #work', isDone: true })),
-      );
-      effects.pushFieldsOnTaskUpdate$.subscribe();
-
-      actions$.next(
-        TaskSharedActions.updateTask({
-          task: { id: 'task-1', changes: { title: 'New #work' } },
-        }),
-      );
-      tick();
-      syncState.requestPush('task-1', true);
-      tick();
-
-      expect(adapter.pushChanges).toHaveBeenCalledOnceWith(
-        'issue-1',
-        { status: 'COMPLETED' },
         jasmine.anything(),
       );
     }));
