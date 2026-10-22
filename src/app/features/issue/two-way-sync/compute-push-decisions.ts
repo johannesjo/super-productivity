@@ -121,16 +121,17 @@ export const computePushDecisions = (
 };
 
 /**
- * Task fields a baseline write may carry at their unchanged value. Writing one
- * again changes no state; at most, time-block sync re-writes a scheduled task's
- * calendar event at the same values (it reacts to `title` and `timeEstimate`).
- * `isDone` (completion effects), `tagIds` (tag lists) and the due fields
- * (planner, reminders) have real side effects, so they are left out.
+ * Task fields the baseline write may carry. It is an `updateTaskUi`: a plain
+ * field update that no effect and no task meta-reducer reacts to, so writing
+ * one again (`isDone` too) completes, schedules or notifies nothing. `tagIds`
+ * and the due fields are left out: their lists (tag task ids, planner days,
+ * Today's order) are kept by the meta-reducers this write skips.
  */
-const VALUE_CARRY_SAFE_FIELDS: ReadonlySet<string> = new Set([
+const VALUE_CARRY_FIELDS: ReadonlySet<string> = new Set([
   'title',
   'notes',
   'timeEstimate',
+  'isDone',
 ]);
 
 /**
@@ -142,6 +143,7 @@ const VALUE_CARRY_SAFE_FIELDS: ReadonlySet<string> = new Set([
  * reverting the provider. Written together, field and baseline win or lose
  * together. A field whose value no longer maps to what was pushed (edited
  * again meanwhile) is left out, so a newer local edit is never overwritten.
+ * Write the result with the baseline in one `updateTaskUi`.
  */
 export const pushedValuesToCarry = (
   task: Task | undefined,
@@ -155,7 +157,7 @@ export const pushedValuesToCarry = (
   }
   for (const mapping of fieldMappings) {
     if (
-      !VALUE_CARRY_SAFE_FIELDS.has(mapping.taskField) ||
+      !VALUE_CARRY_FIELDS.has(mapping.taskField) ||
       !Object.prototype.hasOwnProperty.call(pushedIssueValues, mapping.issueField)
     ) {
       continue;
@@ -168,6 +170,10 @@ export const pushedValuesToCarry = (
       )
     ) {
       carried[mapping.taskField] = localValue;
+      if (mapping.taskField === 'isDone') {
+        // The completion date belongs to the done state (cleared on a reopen).
+        carried['doneOn'] = task.doneOn;
+      }
     }
   }
   return carried as Partial<Task>;

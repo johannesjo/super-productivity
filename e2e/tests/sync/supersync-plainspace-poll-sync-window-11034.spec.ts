@@ -76,6 +76,9 @@ interface LinkedTask {
   id: string;
   title: string;
   baselineTitle: unknown;
+  isDone: boolean;
+  doneOn: number | undefined;
+  baselineDone: unknown;
   issueLastUpdated: unknown;
 }
 
@@ -94,7 +97,9 @@ const readLinkedTask = (page: Page): Promise<LinkedTask | null> =>
       id: string;
       title: string;
       issueId?: string;
-      issueLastSyncedValues?: { title?: unknown };
+      isDone: boolean;
+      doneOn?: number;
+      issueLastSyncedValues?: { title?: unknown; isDone?: unknown };
       issueLastUpdated?: unknown;
     }
     type TaskSlice = { entities?: Record<string, TaskLike | undefined> };
@@ -113,6 +118,9 @@ const readLinkedTask = (page: Page): Promise<LinkedTask | null> =>
           id: task.id,
           title: task.title,
           baselineTitle: task.issueLastSyncedValues?.title,
+          isDone: task.isDone,
+          doneOn: task.doneOn,
+          baselineDone: task.issueLastSyncedValues?.isDone,
           issueLastUpdated: task.issueLastUpdated,
         }
       : null;
@@ -322,6 +330,20 @@ const snapshot = async (label: string, s: Setup): Promise<void> => {
   );
 };
 
+/** `done` values of the PATCHes Plainspace answered with 200, in order. */
+const donePatches = (server: FakePlainspace): unknown[] =>
+  server.patches
+    .filter((p) => p.status === 200 && p.body['done'] !== undefined)
+    .map((p) => p.body['done']);
+
+/** Ticks the task's done toggle and waits until the store shows `isDone`. */
+const toggleDone = async (page: Page, title: string, isDone: boolean): Promise<void> => {
+  const row = page.locator('task').filter({ hasText: title }).first();
+  await row.hover();
+  await row.locator('done-toggle').click();
+  await expect.poll(async () => (await readLinkedTask(page))?.isDone).toBe(isDone);
+};
+
 /** Title PATCHes Plainspace answered with 200, in order. */
 const titlePatches = (server: FakePlainspace): unknown[] =>
   server.patches
@@ -498,6 +520,106 @@ test.describe('@supersync Plainspace poll vs the sync window (#11034)', () => {
         expect(titlePatches(server)).toEqual([MINE]);
         expect((await readLinkedTask(a.c.page))?.title).toBe(MINE);
         expect((await readLinkedTask(b.c.page))?.title).toBe(MINE);
+      } finally {
+        if (s) {
+          await closeClient(s.a.c);
+          await closeClient(s.b.c);
+        }
+      }
+    });
+  }
+
+  // The same split for `isDone`: a collaborator flips it, A pulls that, the
+  // user flips it back on A while A's pushes fail, B pulls the collaborator's
+  // value before it has A's ops, then A's push lands. 'reopen': the user's
+  // reopen of a task completed in Plainspace; 'completion': the user's
+  // completion of a task reopened in Plainspace.
+  const staleDoneCases = [
+    { lost: 'reopen', firstToSync: 'A' },
+    { lost: 'completion', firstToSync: 'A' },
+    { lost: 'reopen', firstToSync: 'B' },
+  ] as const;
+  for (const { lost, firstToSync } of staleDoneCases) {
+    test(`B pulls a stale done between A's offline ${lost} and its push (first to sync: ${firstToSync})`, async ({
+      browser,
+      baseURL,
+      testRunId,
+    }) => {
+      let s: Setup | null = null;
+      try {
+        s = await setUp(browser, baseURL!, testRunId);
+        const { a, b, server } = s;
+        const usersDone = lost === 'completion';
+
+        if (lost === 'completion') {
+          // Start from a task done everywhere.
+          server.remoteEdit(TASK_ID, { done: true });
+          await restart(a);
+          await a.c.sync.syncAndWait();
+          await b.c.sync.syncAndWait();
+          await expect
+            .poll(async () => (await readLinkedTask(b.c.page))?.baselineDone)
+            .toBe(true);
+        }
+
+        // A collaborator flips done; A pulls it, B doesn't yet.
+        server.remoteEdit(TASK_ID, { done: !usersDone });
+        await focusUpdatePoll(a);
+        expect((await readLinkedTask(a.c.page))?.isDone).toBe(!usersDone);
+
+        // The user flips it back on A while A can't reach Plainspace.
+        const patchA = await routePatchOffline(a.c.page);
+        patchA.setOffline(true);
+        await toggleDone(a.c.page, T0, usersDone);
+        await expect.poll(patchA.dropped, { timeout: 15000 }).toBe(1);
+        await a.c.sync.syncAndWait();
+
+        // B polls before it has A's ops, and pulls the collaborator's value.
+        await focusUpdatePoll(b);
+        await snapshot('B pulled', s);
+        expect((await readLinkedTask(b.c.page))?.isDone).toBe(!usersDone);
+
+        // A gets back online; its next poll pushes the user's value.
+        patchA.setOffline(false);
+        await restart(a);
+        await expect
+          .poll(() => server.tasks.get(TASK_ID)!.done, { timeout: 15000 })
+          .toBe(usersDone);
+        await expect
+          .poll(async () => (await readLinkedTask(a.c.page))?.baselineDone, {
+            timeout: 15000,
+          })
+          .toBe(usersDone);
+        if (firstToSync === 'B') {
+          await b.c.sync.syncAndWait();
+        }
+        await a.c.sync.syncAndWait();
+        await b.c.sync.syncAndWait();
+        await a.c.sync.syncAndWait();
+        await snapshot('after both synced', s);
+
+        // The next poll on each device.
+        await restart(b);
+        await restart(a);
+        await b.c.sync.syncAndWait();
+        await a.c.sync.syncAndWait();
+        await b.c.sync.syncAndWait();
+        await snapshot('after next polls and sync', s);
+
+        expect(server.tasks.get(TASK_ID)!.done).toBe(usersDone);
+        expect(donePatches(server)).toEqual([usersDone]);
+        expect((await readLinkedTask(a.c.page))?.isDone).toBe(usersDone);
+        expect((await readLinkedTask(b.c.page))?.isDone).toBe(usersDone);
+        // The completion date travels with the done state: cleared on a reopen,
+        // kept on a completion, on both devices.
+        for (const page of [a.c.page, b.c.page]) {
+          const doneOn = (await readLinkedTask(page))?.doneOn;
+          if (usersDone) {
+            expect(typeof doneOn).toBe('number');
+          } else {
+            expect(doneOn).toBeUndefined();
+          }
+        }
       } finally {
         if (s) {
           await closeClient(s.a.c);

@@ -386,6 +386,17 @@ gets a fix only when it is reported.
   round trip: last writer wins, as in Plainspace's web app.
 - **Both sides change one field between polls.** Plainspace's value wins with
   no conflict message.
+- **Two of my devices edit one field offline.** If device B edits a field
+  while offline from both SuperSync and Plainspace before device A's push of
+  the same field completes, A's post-push write (field plus baseline, #11034)
+  is newer and wins: SP converges on Plainspace's value, as above.
+- **An unpushed edit meets my other device's stale pull first.** I edit a
+  field Plainspace just changed (e.g. reopen a task a collaborator completed)
+  while my device can't reach Plainspace, and my other device, not yet synced,
+  pulls the old remote value. If that pull reaches my device before my push
+  does, it is newer and wins: the edit is dropped and every device converges
+  on Plainspace's value, as above. If my push runs first, the edit is kept
+  (#11034).
 - **Lost create response, or a crash between create and link.** One visible
   duplicate SP task (auto-imported), no data loss. Fix: `clientRef`.
 - **Old self-hosted servers** keep done-only sync until they upgrade.

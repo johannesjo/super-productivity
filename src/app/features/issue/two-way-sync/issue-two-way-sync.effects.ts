@@ -767,8 +767,8 @@ export class IssueTwoWaySyncEffects {
                 IssueLog.err('Reading the issue back after the initial push failed', err);
                 return Date.now();
               });
-      this._trackSyncOriginatedTask(task.id);
-      this._taskService.update(task.id, {
+      // One updateTaskUi with the pushed values, as in _pushChanges$.
+      this._taskService.updateUi(task.id, {
         ...pushedValuesToCarry(this._taskEntities()[task.id], toPush, fieldMappings, ctx),
         issueLastSyncedValues: updatedSyncValues,
         issueLastUpdated,
@@ -1033,23 +1033,22 @@ export class IssueTwoWaySyncEffects {
         // treating our own push as an external update. If any changed field was
         // provider-owned, or the remote has an un-pulled change in another mapped
         // field, keep the old issueLastUpdated so polling can pull it.
-        this._trackSyncOriginatedTask(task.id);
-        try {
-          this._taskService.update(task.id, {
-            // Read at dispatch: an edit made during the push is not overwritten.
-            ...pushedValuesToCarry(
-              this._taskEntities()[task.id],
-              toPush,
-              fieldMappings,
-              ctx,
-            ),
-            issueLastSyncedValues: updatedSyncValues,
-            ...(keepIssueLastUpdatedStale ? {} : { issueLastUpdated }),
-          });
-        } catch (e) {
-          this._syncOriginatedTaskIds.delete(task.id);
-          throw e;
-        }
+        //
+        // One op with the pushed fields' own values, read at dispatch so an
+        // edit made during the push is not overwritten: a field and its
+        // baseline then win or lose together under field-level LWW (#11034).
+        // An updateTaskUi, so no effect (this push, completion, time blocks)
+        // and no task meta-reducer runs again for values that did not change.
+        this._taskService.updateUi(task.id, {
+          ...pushedValuesToCarry(
+            this._taskEntities()[task.id],
+            toPush,
+            fieldMappings,
+            ctx,
+          ),
+          issueLastSyncedValues: updatedSyncValues,
+          ...(keepIssueLastUpdatedStale ? {} : { issueLastUpdated }),
+        });
       }),
     );
   }
