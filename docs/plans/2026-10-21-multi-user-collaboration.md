@@ -249,10 +249,23 @@ A task in a shared project that failed to share (offline, server error) is
 picked up by "Share N unshared tasks" (Release 3), which is safe to repeat
 because it only looks at unlinked tasks.
 
-**Older servers.** A server that rejects a new field (422) or doesn't echo it
-back is remembered per provider, in memory, for the session: SP stops pushing
-that field and shows "Plainspace server too old for title/time sync" once in
-the provider panel. Done keeps syncing as today. No capability negotiation.
+**Echoes are compared exactly.** The server stores the title verbatim and
+answers a PATCH with the updated task; a pushed field counts as synced only
+when the echo equals what was sent, character for character.
+
+**Older servers.** Old-server detection is a 422 on a request carrying a new
+field (`title`, `scheduledAt`); SP checks the title is 1–500 characters and not
+blank before sending, so a 422 there means "too old", not "invalid". A server
+from before the widened PATCH answers `{title}` alone with a 422 and
+`{done, title}` with a 200 that ignores the title; the missing echo counts the
+same. It is remembered per provider, in memory, for the session: SP stops
+pushing that field and shows "Plainspace server too old for title/time sync"
+once in the provider panel. Done keeps syncing as today. No capability
+negotiation.
+
+**409 means "couldn't sync" for that task**, never "too old": the server
+refuses a change for this item's state (`repeat_requires_remind_at`: clearing
+the time of a recurring item). The task shows _couldn't sync_ with the reason.
 
 **Visible state.** In-memory, rebuilt on each poll, shown in the task detail
 panel's Plainspace section (never in the task row template, a hot path):
@@ -375,6 +388,10 @@ gets a fix only when it is reported.
 - **Lost create response, or a crash between create and link.** One visible
   duplicate SP task (auto-imported), no data loss. Fix: `clientRef`.
 - **Old self-hosted servers** keep done-only sync until they upgrade.
+- **Titles that were local-only before Release 1** (a local rename, or a title
+  short syntax stripped at import) are pushed on the first successful poll
+  after the update; the baseline can't tell them from an offline edit.
+  Accepted by the maintainer for the beta, with a release note.
 - **Clearing the time skips the remote-changed check** (Scheduled time,
   decided cost).
 - **No cross-repo real-server E2E.** Contract drift is caught by Plainspace's

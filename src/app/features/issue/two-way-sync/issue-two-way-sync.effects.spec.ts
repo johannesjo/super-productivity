@@ -17,7 +17,8 @@ import { PlannerActions } from '../../planner/store/planner.actions';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { Task, TaskWithSubTasks } from '../../tasks/task.model';
 import { selectEnabledIssueProviders } from '../store/issue-provider.selectors';
-import { FieldMapping } from './issue-sync.model';
+import { FieldMapping, IssueSyncPushError } from './issue-sync.model';
+import { IssueSyncStateService } from './issue-sync-state.service';
 import { IssueSyncAdapter } from './issue-sync-adapter.interface';
 import { IssueProvider } from '../issue.model';
 import { WorkContextType } from '../../work-context/work-context.model';
@@ -1241,6 +1242,209 @@ describe('IssueTwoWaySyncEffects', () => {
       expect(snackServiceSpy.open).not.toHaveBeenCalled();
 
       adapterRegistry.unregister('TEST_PROVIDER');
+    }));
+  });
+
+  // Release 1: pushes asked for by a poll (quiet) or Retry, and per-task state.
+  describe('pending pushes and sync state', () => {
+    let syncState: IssueSyncStateService;
+    let adapter: IssueSyncAdapter<unknown>;
+    const baseline = { status: 'NEEDS-ACTION', summary: 'Old' };
+    const linkedTask = (overrides: Partial<Task> = {}): Task =>
+      createMockTask({
+        id: 'task-1',
+        title: 'New',
+        issueType: 'TEST_PROVIDER' as any,
+        issueId: 'issue-1',
+        issueProviderId: 'provider-1',
+        issueLastSyncedValues: baseline,
+        ...overrides,
+      });
+
+    beforeEach(() => {
+      syncState = TestBed.inject(IssueSyncStateService);
+      adapter = createMockAdapter({
+        getFieldMappings: jasmine
+          .createSpy('getFieldMappings')
+          .and.returnValue([isDoneFieldMapping, titleFieldMapping]),
+        fetchIssue: jasmine.createSpy('fetchIssue').and.resolveTo(baseline),
+        extractSyncValues: jasmine
+          .createSpy('extractSyncValues')
+          .and.returnValue(baseline),
+      });
+      adapterRegistry.register('TEST_PROVIDER', adapter);
+      issueProviderServiceSpy.getCfgOnce$.and.returnValue(of(createMockIssueProvider()));
+    });
+
+    afterEach(() => adapterRegistry.unregister('TEST_PROVIDER'));
+
+    it('pushes the fields that differ from their baseline on request', fakeAsync(() => {
+      taskServiceSpy.getByIdOnce$.and.returnValue(of(linkedTask()));
+      effects.pushFieldsOnTaskUpdate$.subscribe();
+
+      syncState.requestPush('task-1', true);
+      tick();
+
+      expect(adapter.pushChanges).toHaveBeenCalledOnceWith(
+        'issue-1',
+        { summary: 'New' },
+        jasmine.anything(),
+      );
+    }));
+
+    it('sends a field once when two requests for it are queued', fakeAsync(() => {
+      // Timer and focus polls can overlap, or Retry follows a poll: the second
+      // request must see the baseline the first push stored.
+      let current = linkedTask();
+      let remote: Record<string, unknown> = { ...baseline };
+      taskServiceSpy.getByIdOnce$.and.callFake(() => of(current));
+      taskServiceSpy.update.and.callFake((_id: string, changes: Partial<Task>) => {
+        current = { ...current, ...changes } as Task;
+      });
+      (adapter.fetchIssue as jasmine.Spy).and.callFake(async () => remote);
+      (adapter.extractSyncValues as jasmine.Spy).and.callFake(
+        (issue: Record<string, unknown>) => issue,
+      );
+      (adapter.pushChanges as jasmine.Spy).and.callFake(
+        async (_id: string, changes: Record<string, unknown>) => {
+          remote = { ...remote, ...changes };
+        },
+      );
+      effects.pushFieldsOnTaskUpdate$.subscribe();
+
+      syncState.requestPush('task-1', true);
+      syncState.requestPush('task-1', false);
+      tick();
+
+      expect(adapter.pushChanges).toHaveBeenCalledTimes(1);
+      expect(current.issueLastSyncedValues).toEqual({ ...baseline, summary: 'New' });
+    }));
+
+    it('a second device whose edit already reached the provider sends nothing', fakeAsync(() => {
+      // Both devices have the rename pending; the other one pushed first. The
+      // fetch sees the provider already holds the value: provider-changed skip,
+      // no write, baseline and marker untouched, so the next poll pulls the
+      // same value and both converge.
+      (adapter.fetchIssue as jasmine.Spy).and.resolveTo({ ...baseline, summary: 'New' });
+      (adapter.extractSyncValues as jasmine.Spy).and.callFake(
+        (issue: Record<string, unknown>) => issue,
+      );
+      taskServiceSpy.getByIdOnce$.and.returnValue(of(linkedTask()));
+      effects.pushFieldsOnTaskUpdate$.subscribe();
+
+      syncState.requestPush('task-1', true);
+      tick();
+
+      expect(adapter.pushChanges).not.toHaveBeenCalled();
+      expect(taskServiceSpy.update).not.toHaveBeenCalled();
+      expect(syncState.failures().has('task-1')).toBeFalse();
+    }));
+
+    it('requests nothing when no field is pending, and clears an old failure', fakeAsync(() => {
+      taskServiceSpy.getByIdOnce$.and.returnValue(of(linkedTask({ title: 'Old' })));
+      syncState.reportFailure('task-1', { text: 'offline' });
+      effects.pushFieldsOnTaskUpdate$.subscribe();
+
+      syncState.requestPush('task-1', false);
+      tick();
+
+      expect(adapter.fetchIssue).not.toHaveBeenCalled();
+      expect(syncState.failures().has('task-1')).toBeFalse();
+    }));
+
+    it('a quiet push records its failure on the task without a snack', fakeAsync(() => {
+      taskServiceSpy.getByIdOnce$.and.returnValue(of(linkedTask()));
+      (adapter.pushChanges as jasmine.Spy).and.rejectWith(new Error('offline'));
+      effects.pushFieldsOnTaskUpdate$.subscribe();
+
+      syncState.requestPush('task-1', true);
+      tick();
+
+      expect(syncState.failures().get('task-1')).toEqual({ text: 'offline' });
+      expect(snackServiceSpy.open).not.toHaveBeenCalled();
+    }));
+
+    it('Retry snacks a failure; a provider reason shows as its own message', fakeAsync(() => {
+      taskServiceSpy.getByIdOnce$.and.returnValue(of(linkedTask()));
+      (adapter.pushChanges as jasmine.Spy).and.rejectWith(
+        new IssueSyncPushError('REASON_KEY'),
+      );
+      effects.pushFieldsOnTaskUpdate$.subscribe();
+
+      syncState.requestPush('task-1', false);
+      tick();
+
+      expect(syncState.failures().get('task-1')).toEqual({ msgKey: 'REASON_KEY' });
+      expect(snackServiceSpy.open).toHaveBeenCalledOnceWith({
+        type: 'ERROR',
+        msg: 'REASON_KEY',
+      });
+    }));
+
+    it('a successful push clears the failure', fakeAsync(() => {
+      taskServiceSpy.getByIdOnce$.and.returnValue(of(linkedTask()));
+      syncState.reportFailure('task-1', { text: 'offline' });
+      effects.pushFieldsOnTaskUpdate$.subscribe();
+
+      actions$.next(
+        TaskSharedActions.updateTask({
+          task: { id: 'task-1', changes: { title: 'New' } },
+        }),
+      );
+      tick();
+
+      expect(adapter.pushChanges).toHaveBeenCalled();
+      expect(syncState.failures().has('task-1')).toBeFalse();
+    }));
+
+    it('an expected skip stays quiet and leaves no failure', fakeAsync(() => {
+      taskServiceSpy.getByIdOnce$.and.returnValue(of(linkedTask()));
+      (adapter.pushChanges as jasmine.Spy).and.rejectWith({ isExpectedSyncSkip: true });
+      syncState.reportFailure('task-1', { text: 'offline' });
+      effects.pushFieldsOnTaskUpdate$.subscribe();
+
+      syncState.requestPush('task-1', false);
+      tick();
+
+      expect(syncState.failures().has('task-1')).toBeFalse();
+      expect(snackServiceSpy.open).not.toHaveBeenCalled();
+    }));
+
+    it("takes the new marker from the write's own answer instead of a re-fetch", fakeAsync(() => {
+      // A re-fetch could already carry a collaborator's later change and mark
+      // it as seen without pulling it.
+      (adapter.pushChanges as jasmine.Spy).and.resolveTo({ marker: 42 });
+      (adapter as { getIssueLastUpdated?: unknown }).getIssueLastUpdated = (
+        issue: Record<string, unknown>,
+      ) => (issue['marker'] as number) ?? 7;
+      taskServiceSpy.getByIdOnce$.and.returnValue(of(linkedTask()));
+      effects.pushFieldsOnTaskUpdate$.subscribe();
+
+      syncState.requestPush('task-1', false);
+      tick();
+
+      expect(adapter.fetchIssue).toHaveBeenCalledTimes(1);
+      expect(taskServiceSpy.update).toHaveBeenCalledWith(
+        'task-1',
+        jasmine.objectContaining({ issueLastUpdated: 42 }),
+      );
+    }));
+
+    it('never pushes a task its provider no longer lists for me', fakeAsync(() => {
+      taskServiceSpy.getByIdOnce$.and.returnValue(of(linkedTask()));
+      syncState.setMissing(['task-1'], ['task-1']);
+      effects.pushFieldsOnTaskUpdate$.subscribe();
+
+      actions$.next(
+        TaskSharedActions.updateTask({
+          task: { id: 'task-1', changes: { title: 'New' } },
+        }),
+      );
+      syncState.requestPush('task-1', false);
+      tick();
+
+      expect(adapter.fetchIssue).not.toHaveBeenCalled();
+      expect(adapter.pushChanges).not.toHaveBeenCalled();
     }));
   });
 

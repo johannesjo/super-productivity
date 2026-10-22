@@ -4,11 +4,17 @@ export interface IssueSyncAdapter<TCfg> {
   getFieldMappings(): FieldMapping[];
   getSyncConfig(cfg: TCfg): FieldSyncConfig;
   fetchIssue(issueId: string, cfg: TCfg): Promise<Record<string, unknown>>;
+  /**
+   * May resolve to the item as the write left it (the write's own answer).
+   * The engine then reads the new marker from it instead of fetching the item
+   * again: a re-fetch could already include someone else's later change and
+   * mark it as seen without pulling it.
+   */
   pushChanges(
     issueId: string,
     changes: Record<string, unknown>,
     cfg: TCfg,
-  ): Promise<void>;
+  ): Promise<void | Record<string, unknown>>;
   extractSyncValues(issue: Record<string, unknown>): Record<string, unknown>;
   /** Extract the provider-specific last-updated marker (e.g. timestamp or etag hash) */
   getIssueLastUpdated?(issue: Record<string, unknown>): number;
