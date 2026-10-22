@@ -8,6 +8,7 @@ import {
   DialogResult,
   NotifyCfg,
   PluginManifest,
+  Task,
 } from '@super-productivity/plugin-api';
 
 describe('PluginAPI', () => {
@@ -270,6 +271,20 @@ describe('PluginAPI', () => {
         globalConfig: { theme: 'light' },
       });
       expect(mockBridge.getAppState).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('getTasks()', () => {
+    it('should return a copy so a plugin cannot reorder the store array in place', async () => {
+      const storeTasks = [{ id: 'a' }] as Task[];
+      Object.assign(mockBridge, {
+        getTasks: jasmine.createSpy('getTasks').and.resolveTo(storeTasks),
+      });
+
+      const tasks = await pluginAPI.getTasks();
+
+      expect(tasks).toEqual(storeTasks);
+      expect(tasks).not.toBe(storeTasks);
     });
   });
 
