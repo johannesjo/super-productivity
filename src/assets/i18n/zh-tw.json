@@ -1170,9 +1170,6 @@
         "PREV_WEEK": "上週",
         "TODAY": "今天"
       },
-      "N": {
-        "COUNTDOWN_COMPLETE": "倒數已結束！"
-      },
       "S": {
         "GOAL_REACHED_1": "您已達成今日目標！",
         "GOAL_REACHED_2": "目前連續次數："

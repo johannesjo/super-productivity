@@ -130,17 +130,19 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
 
   ngOnInit(): void {
     if (this.simpleCounter()?.type === SimpleCounterType.RepeatedCountdownReminder) {
+      let prevCountdownTime: number | null = null;
       this._subs.add(
         this.countdownTime$.subscribe((countdownTime) => {
           if (countdownTime === 0) {
             this.isTimeUp.set(true);
             const counterTitle =
               this.simpleCounter()?.title || 'Simple Counter Countdown';
-            this._notifyService.notify({
-              title: counterTitle,
-              body: T.F.SIMPLE_COUNTER.N.COUNTDOWN_COMPLETE,
-              translateParams: { title: counterTitle },
-            });
+            if (prevCountdownTime !== null && prevCountdownTime > 0) {
+              this._notifyService.notify({
+                title: counterTitle,
+                body: T.F.SIMPLE_COUNTER.N.COUNTDOWN_COMPLETE,
+              });
+            }
             this._bannerService.open({
               id: BannerId.SimpleCounterCountdownComplete,
               isHideDismissBtn: true,
@@ -153,6 +155,7 @@ export class SimpleCounterButtonComponent implements OnDestroy, OnInit {
               },
             });
           }
+          prevCountdownTime = countdownTime;
         }),
       );
     }

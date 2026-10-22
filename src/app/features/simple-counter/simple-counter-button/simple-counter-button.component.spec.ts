@@ -154,8 +154,15 @@ describe('SimpleCounterButtonComponent', () => {
     expect(notifyService.notify).toHaveBeenCalledWith({
       title: 'Stretch',
       body: T.F.SIMPLE_COUNTER.N.COUNTDOWN_COMPLETE,
-      translateParams: { title: 'Stretch' },
     });
+  });
+
+  it('does not trigger a desktop notification when initialized with remaining time at 0', () => {
+    countdownRemaining.set('counter1', 0);
+    startedCountdowns.add('counter1');
+    setSimpleCounterInput({ isOn: true });
+
+    expect(notifyService.notify).not.toHaveBeenCalled();
   });
 
   const emitTick = (duration = 0): void => {
