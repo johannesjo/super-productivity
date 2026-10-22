@@ -2511,6 +2511,240 @@ describe('IssueTwoWaySyncEffects', () => {
       );
     }));
 
+    // #8790: moving a root task into a Plainspace-bound project shares it.
+    describe('move-in (#8790)', () => {
+      let createIssueSpy: jasmine.Spy;
+      const plainspaceProvider = (): IssueProvider =>
+        createMockIssueProvider({
+          id: 'provider-1',
+          issueProviderKey: 'PLAINSPACE',
+          defaultProjectId: 'project-1',
+          spaceId: 'space-1',
+          token: 'pat_x',
+        } as Partial<IssueProvider>);
+      const movedTask = (overrides: Partial<Task> = {}): Task =>
+        createMockTask({
+          id: 'task-moved',
+          title: 'Pack stove',
+          projectId: 'project-1',
+          issueId: undefined,
+          ...overrides,
+        });
+      const move = (task: Task): void =>
+        actions$.next(
+          TaskSharedActions.moveToOtherProject({
+            task: { ...task, projectId: 'inbox', subTasks: [] } as TaskWithSubTasks,
+            targetProjectId: 'project-1',
+          }),
+        );
+
+      beforeEach(() => {
+        createIssueSpy = jasmine.createSpy('createIssue').and.resolveTo({
+          issueId: 'ps-issue-1',
+          issueData: { isDone: false, title: 'Pack stove', scheduledAt: null },
+        });
+        adapterRegistry.register(
+          'PLAINSPACE',
+          createMockAdapter({ createIssue: createIssueSpy }),
+        );
+        store.overrideSelector(selectEnabledIssueProviders, [plainspaceProvider()]);
+        store.refreshState();
+        issueProviderServiceSpy.getCfgOnce$.and.returnValue(of(plainspaceProvider()));
+      });
+
+      afterEach(() => adapterRegistry.unregister('PLAINSPACE'));
+
+      it('creates and links the issue for a task moved into the bound project', fakeAsync(() => {
+        const task = movedTask();
+        taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+        effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+        move(task);
+        tick();
+
+        // The title is not parsed again: it was typed before the move.
+        expect(createIssueSpy).toHaveBeenCalledOnceWith(
+          'Pack stove',
+          jasmine.anything(),
+          {
+            taskId: 'task-moved',
+          },
+        );
+        expect(taskServiceSpy.update).toHaveBeenCalledWith(
+          'task-moved',
+          jasmine.objectContaining({
+            issueId: 'ps-issue-1',
+            issueType: 'PLAINSPACE',
+            issueProviderId: 'provider-1',
+          }),
+        );
+      }));
+
+      it('shares a task moved in by +Project short syntax', fakeAsync(() => {
+        const task = movedTask({ title: 'Pack stove' });
+        taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+        effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+        actions$.next(
+          TaskSharedActions.applyShortSyntax({
+            task: { ...task, title: 'Pack stove +Camping', projectId: 'inbox' },
+            taskChanges: { title: 'Pack stove' },
+            targetProjectId: 'project-1',
+          }),
+        );
+        tick();
+
+        expect(createIssueSpy).toHaveBeenCalledOnceWith(
+          'Pack stove',
+          jasmine.anything(),
+          {
+            taskId: 'task-moved',
+          },
+        );
+      }));
+
+      it('ignores a move to the project the task is already in', fakeAsync(() => {
+        const task = movedTask();
+        taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+        effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+        actions$.next(
+          TaskSharedActions.moveToOtherProject({
+            task: { ...task, subTasks: [] } as TaskWithSubTasks,
+            targetProjectId: 'project-1',
+          }),
+        );
+        tick();
+
+        expect(createIssueSpy).not.toHaveBeenCalled();
+      }));
+
+      it('ignores short syntax that moves nothing', fakeAsync(() => {
+        const task = movedTask();
+        taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+        effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+        actions$.next(
+          TaskSharedActions.applyShortSyntax({ task, taskChanges: { title: 'x' } }),
+        );
+        tick();
+
+        expect(createIssueSpy).not.toHaveBeenCalled();
+      }));
+
+      it('keeps the link of a task that is already linked', fakeAsync(() => {
+        const task = movedTask({ issueId: 'other', issueType: 'PLAINSPACE' });
+        taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+        effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+        move(task);
+        tick();
+
+        expect(createIssueSpy).not.toHaveBeenCalled();
+      }));
+
+      it('skips a task that left the project again before its turn', fakeAsync(() => {
+        const task = movedTask();
+        taskServiceSpy.getByIdOnce$.and.returnValue(of({ ...task, projectId: 'inbox' }));
+        effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+        move(task);
+        tick();
+
+        expect(createIssueSpy).not.toHaveBeenCalled();
+      }));
+
+      it('creates only once when a move follows an add whose create is in flight', fakeAsync(() => {
+        const task = movedTask();
+        let current: Task = task;
+        taskServiceSpy.getByIdOnce$.and.callFake(() => of(current));
+        taskServiceSpy.update.and.callFake((_id: string, changes: Partial<Task>) => {
+          current = { ...current, ...changes };
+        });
+        effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+        actions$.next(
+          TaskSharedActions.addTask({
+            task,
+            workContextId: 'project-1',
+            workContextType: WorkContextType.PROJECT,
+            isAddToBacklog: false,
+            isAddToBottom: false,
+            isIgnoreShortSyntax: true,
+          }),
+        );
+        move(task);
+        tick();
+
+        expect(createIssueSpy).toHaveBeenCalledTimes(1);
+      }));
+
+      it('creates only once for a move and a +Project short syntax of the same task', fakeAsync(() => {
+        const task = movedTask();
+        let current: Task = task;
+        taskServiceSpy.getByIdOnce$.and.callFake(() => of(current));
+        taskServiceSpy.update.and.callFake((_id: string, changes: Partial<Task>) => {
+          current = { ...current, ...changes };
+        });
+        effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+        move(task);
+        actions$.next(
+          TaskSharedActions.applyShortSyntax({
+            task: { ...task, title: 'Pack stove +Camping', projectId: 'inbox' },
+            taskChanges: { title: 'Pack stove' },
+            targetProjectId: 'project-1',
+          }),
+        );
+        tick();
+
+        expect(createIssueSpy).toHaveBeenCalledTimes(1);
+      }));
+
+      it('does not move-in for providers other than Plainspace', fakeAsync(() => {
+        const caldavCreate = jasmine.createSpy('createIssue').and.resolveTo({
+          issueId: 'c-1',
+          issueData: {},
+        });
+        adapterRegistry.register(
+          'CALDAV',
+          createMockAdapter({ createIssue: caldavCreate }),
+        );
+        const caldav = createMockIssueProvider({
+          issueProviderKey: 'CALDAV',
+          defaultProjectId: 'project-1',
+          twoWaySync: { createOnServer: true },
+        } as Partial<IssueProvider>);
+        store.overrideSelector(selectEnabledIssueProviders, [caldav]);
+        store.refreshState();
+        const task = movedTask();
+        taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+        effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+        move(task);
+        tick();
+
+        expect(caldavCreate).not.toHaveBeenCalled();
+        adapterRegistry.unregister('CALDAV');
+      }));
+
+      it('snacks a failed create and does not retry it', fakeAsync(() => {
+        createIssueSpy.and.rejectWith(new Error('offline'));
+        const task = movedTask();
+        taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+        effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+        move(task);
+        tick();
+
+        expect(createIssueSpy).toHaveBeenCalledTimes(1);
+        expect(snackServiceSpy.open).toHaveBeenCalledWith(
+          jasmine.objectContaining({ type: 'ERROR' }),
+        );
+        expect(taskServiceSpy.update).not.toHaveBeenCalled();
+      }));
+    });
+
     it('should NOT create issue for a PLAINSPACE provider that is enabled but not yet configured (no spaceId/token)', fakeAsync(() => {
       // selectEnabledIssueProviders filters on the isEnabled flag only, so a
       // mid-connect provider (enabled, bound to the project, but spaceId/token

@@ -35,6 +35,7 @@ import { computePendingLocalChanges } from './compute-field-pull';
 import { IssueSyncFailure, IssueSyncStateService } from './issue-sync-state.service';
 import { IssueSyncAdapter } from './issue-sync-adapter.interface';
 import { IssueProvider, IssueProviderCaldav, IssueProviderKey } from '../issue.model';
+import { PLAINSPACE_TYPE } from '../issue.const';
 import { IssueLog } from '../../../core/log';
 import { HttpErrorResponse } from '@angular/common/http';
 import { CaldavSyncAdapterService } from '../providers/caldav/caldav-sync-adapter.service';
@@ -145,6 +146,13 @@ const omitIsDone = (changes: Partial<Task>): Partial<Task> => {
   delete rest.isDone;
   return rest;
 };
+
+interface AutoCreateTrigger {
+  task: Task;
+  isIgnoreShortSyntax?: boolean;
+  /** Set for a move-in (#8790): the project the task was moved into. */
+  moveInProjectId: string | undefined;
+}
 
 @Injectable()
 export class IssueTwoWaySyncEffects {
@@ -382,133 +390,211 @@ export class IssueTwoWaySyncEffects {
     { dispatch: false },
   );
 
+  /**
+   * Creates and links the remote issue for a new root task in a project bound
+   * to a provider with auto-create, and (Plainspace only, #8790) for a root
+   * task moved into a Plainspace-bound project: by the move action or by
+   * `+Project` short syntax on an existing task. A move-in reads the task from
+   * the store when its turn comes, so a task whose create is still in flight
+   * (one serial stream) is linked by then and not created twice. Moving a
+   * linked task out keeps its link. A failed create snacks and leaves the task
+   * unlinked; creates are never retried automatically.
+   */
   autoCreateIssueOnTaskAdd$: Observable<unknown> = createEffect(
     () =>
       this._actions$.pipe(
-        ofType(TaskSharedActions.addTask),
-        filter(({ task, issue }) => !task.issueId && !issue),
-        filter(({ task }) => !task.parentId),
-        filter(({ task }) => !!task.projectId),
-        concatMap(({ task, isIgnoreShortSyntax }) =>
-          this._store.select(selectEnabledIssueProviders).pipe(
-            first(),
-            map((providers) =>
-              providers.find(
-                (p) =>
-                  p.defaultProjectId === task.projectId &&
-                  this._hasAutoCreateEnabled(p, task),
-              ),
-            ),
-            filter((provider): provider is IssueProvider => !!provider),
-            concatMap((provider) => {
-              const adapter = this._getAdapter(provider.issueProviderKey);
-              if (!adapter?.createIssue) {
-                return EMPTY;
-              }
-              return this._issueProviderService
-                .getCfgOnce$(provider.id, provider.issueProviderKey)
-                .pipe(
-                  concatMap((cfg) =>
-                    from(this._parseShortSyntax(task, isIgnoreShortSyntax)).pipe(
-                      // `+OtherProject` moves the task out of the bound project
-                      // right after this add; its issue would land in the wrong
-                      // tracker.
-                      filter(
-                        ({ projectId }) => !projectId || projectId === task.projectId,
-                      ),
-                      concatMap(({ title }) =>
-                        // Check the task as it is now, not the add's snapshot: the
-                        // add-task bar attaches a repeat right after the add, and
-                        // the task can be deleted or linked while the title parses.
-                        this._taskService.getByIdOnce$(task.id).pipe(
+        ofType(
+          TaskSharedActions.addTask,
+          TaskSharedActions.moveToOtherProject,
+          TaskSharedActions.applyShortSyntax,
+        ),
+        map((action) => this._toAutoCreateTrigger(action)),
+        filter((trigger): trigger is AutoCreateTrigger => !!trigger),
+        concatMap(({ task: triggerTask, isIgnoreShortSyntax, moveInProjectId }) =>
+          // Resolved inside the serial stage, after earlier creates linked.
+          this._resolveAutoCreateTask$(triggerTask, moveInProjectId).pipe(
+            filter((task): task is Task => !!task && !task.parentId && !!task.projectId),
+            concatMap((task) =>
+              this._store.select(selectEnabledIssueProviders).pipe(
+                first(),
+                map((providers) =>
+                  providers.find(
+                    (p) =>
+                      p.defaultProjectId === task.projectId &&
+                      (!moveInProjectId || p.issueProviderKey === PLAINSPACE_TYPE) &&
+                      this._hasAutoCreateEnabled(p, task),
+                  ),
+                ),
+                filter((provider): provider is IssueProvider => !!provider),
+                concatMap((provider) => {
+                  const adapter = this._getAdapter(provider.issueProviderKey);
+                  if (!adapter?.createIssue) {
+                    return EMPTY;
+                  }
+                  return this._issueProviderService
+                    .getCfgOnce$(provider.id, provider.issueProviderKey)
+                    .pipe(
+                      concatMap((cfg) =>
+                        from(this._parseShortSyntax(task, isIgnoreShortSyntax)).pipe(
+                          // `+OtherProject` moves the task out of the bound project
+                          // right after this add; its issue would land in the wrong
+                          // tracker.
                           filter(
-                            (current) =>
-                              !!current &&
-                              !current.issueId &&
-                              this._hasAutoCreateEnabled(provider, current),
+                            ({ projectId }) => !projectId || projectId === task.projectId,
                           ),
-                          concatMap(() =>
-                            from(adapter.createIssue!(title, cfg, { taskId: task.id })),
+                          concatMap(({ title }) =>
+                            // Check the task as it is now, not the add's snapshot:
+                            // the add-task bar attaches a repeat right after the
+                            // add, and the task can be deleted or linked while the
+                            // title parses.
+                            this._taskService.getByIdOnce$(task.id).pipe(
+                              filter(
+                                (current) =>
+                                  !!current &&
+                                  !current.issueId &&
+                                  this._hasAutoCreateEnabled(provider, current),
+                              ),
+                              concatMap(() =>
+                                from(
+                                  adapter.createIssue!(title, cfg, { taskId: task.id }),
+                                ),
+                              ),
+                              map((created) => ({ ...created, title })),
+                            ),
                           ),
-                          map((created) => ({ ...created, title })),
+                          concatMap(
+                            async ({ issueId, issueNumber, issueData, title }) => {
+                              // Keep a title that changed since the add (short syntax
+                              // landed, or the user renamed it during the round-trip);
+                              // never write the action's raw snapshot back.
+                              const currentTask = await firstValueFrom(
+                                this._taskService.getByIdOnce$(task.id),
+                              );
+                              if (!currentTask) {
+                                // Deleted while the issue was created: nothing is
+                                // left to link, so treat the new issue like the
+                                // task's own (the provider's delete setting decides).
+                                await lastValueFrom(
+                                  this._deleteRemoteIssue$({
+                                    issueId,
+                                    issueType: provider.issueProviderKey,
+                                    issueProviderId: provider.id,
+                                  }),
+                                  { defaultValue: undefined },
+                                );
+                                return;
+                              }
+                              this._trackSyncOriginatedTask(task.id);
+                              try {
+                                const titlePrefix =
+                                  issueNumber != null ? `#${issueNumber} ` : '';
+                                const syncValues = adapter.extractSyncValues(issueData);
+                                const localTitle =
+                                  currentTask.title !== task.title
+                                    ? currentTask.title
+                                    : title;
+                                this._taskService.update(task.id, {
+                                  issueId,
+                                  issueType: provider.issueProviderKey,
+                                  issueProviderId: provider.id,
+                                  // The provider's own freshness marker (CalDAV: an ETag
+                                  // hash), or the first poll reads the new issue as
+                                  // remotely updated.
+                                  issueLastUpdated:
+                                    adapter.getIssueLastUpdated?.(issueData) ??
+                                    Date.now(),
+                                  issueWasUpdated: false,
+                                  issueLastSyncedValues: syncValues,
+                                  title: titlePrefix
+                                    ? `${titlePrefix}${localTitle}`
+                                    : localTitle,
+                                });
+
+                                // Push initial task values (e.g. dueWithTime from short syntax)
+                                // that were set before the issue was linked
+                                await this._pushInitialValues(
+                                  task,
+                                  issueId,
+                                  adapter,
+                                  cfg,
+                                  syncValues,
+                                );
+                              } catch (e) {
+                                this._syncOriginatedTaskIds.delete(task.id);
+                                throw e;
+                              }
+                            },
+                          ),
                         ),
                       ),
-                      concatMap(async ({ issueId, issueNumber, issueData, title }) => {
-                        // Keep a title that changed since the add (short syntax
-                        // landed, or the user renamed it during the round-trip);
-                        // never write the action's raw snapshot back.
-                        const currentTask = await firstValueFrom(
-                          this._taskService.getByIdOnce$(task.id),
-                        );
-                        if (!currentTask) {
-                          // Deleted while the issue was created: nothing is left
-                          // to link, so treat the new issue like the task's own
-                          // (the provider's delete setting decides).
-                          await lastValueFrom(
-                            this._deleteRemoteIssue$({
-                              issueId,
-                              issueType: provider.issueProviderKey,
-                              issueProviderId: provider.id,
-                            }),
-                            { defaultValue: undefined },
-                          );
-                          return;
-                        }
-                        this._trackSyncOriginatedTask(task.id);
-                        try {
-                          const titlePrefix =
-                            issueNumber != null ? `#${issueNumber} ` : '';
-                          const syncValues = adapter.extractSyncValues(issueData);
-                          const localTitle =
-                            currentTask.title !== task.title ? currentTask.title : title;
-                          this._taskService.update(task.id, {
-                            issueId,
-                            issueType: provider.issueProviderKey,
-                            issueProviderId: provider.id,
-                            // The provider's own freshness marker (CalDAV: an ETag
-                            // hash), or the first poll reads the new issue as
-                            // remotely updated.
-                            issueLastUpdated:
-                              adapter.getIssueLastUpdated?.(issueData) ?? Date.now(),
-                            issueWasUpdated: false,
-                            issueLastSyncedValues: syncValues,
-                            title: titlePrefix
-                              ? `${titlePrefix}${localTitle}`
-                              : localTitle,
-                          });
-
-                          // Push initial task values (e.g. dueWithTime from short syntax)
-                          // that were set before the issue was linked
-                          await this._pushInitialValues(
-                            task,
-                            issueId,
-                            adapter,
-                            cfg,
-                            syncValues,
-                          );
-                        } catch (e) {
-                          this._syncOriginatedTaskIds.delete(task.id);
-                          throw e;
-                        }
-                      }),
-                    ),
-                  ),
-                );
-            }),
-            catchError((err) => {
-              IssueLog.err('Auto-create issue failed', err);
-              this._snackService.open({
-                type: 'ERROR',
-                msg: T.F.ISSUE.S.AUTO_CREATE_FAILED,
-                translateParams: { errorMsg: getErrorTxt(err) },
-              });
-              return EMPTY;
-            }),
+                    );
+                }),
+                catchError((err) => {
+                  IssueLog.err('Auto-create issue failed', err);
+                  this._snackService.open({
+                    type: 'ERROR',
+                    msg: T.F.ISSUE.S.AUTO_CREATE_FAILED,
+                    translateParams: { errorMsg: getErrorTxt(err) },
+                  });
+                  return EMPTY;
+                }),
+              ),
+            ),
           ),
         ),
       ),
     { dispatch: false },
   );
+
+  /** What an action asks the create stage to do, or null for nothing. */
+  private _toAutoCreateTrigger(
+    action: ReturnType<
+      | typeof TaskSharedActions.addTask
+      | typeof TaskSharedActions.moveToOtherProject
+      | typeof TaskSharedActions.applyShortSyntax
+    >,
+  ): AutoCreateTrigger | null {
+    if (action.type === TaskSharedActions.addTask.type) {
+      return !action.task.issueId && !action.issue
+        ? {
+            task: action.task,
+            isIgnoreShortSyntax: action.isIgnoreShortSyntax,
+            moveInProjectId: undefined,
+          }
+        : null;
+    }
+    // moveToOtherProject, or applyShortSyntax with a `+Project` move. A "move"
+    // to the project the task is already in is no move-in.
+    return action.targetProjectId && action.targetProjectId !== action.task.projectId
+      ? {
+          task: action.task,
+          // The title was typed earlier; a move never parses it again.
+          isIgnoreShortSyntax: true,
+          moveInProjectId: action.targetProjectId,
+        }
+      : null;
+  }
+
+  /**
+   * The task to create an issue for: the added task as dispatched, or for a
+   * move-in the task as it is now, if it still sits in the target project.
+   * Linked or deleted tasks are skipped by the re-read right before the create.
+   */
+  private _resolveAutoCreateTask$(
+    task: Task,
+    moveInProjectId: string | undefined,
+  ): Observable<Task | undefined> {
+    if (!moveInProjectId) {
+      return from([task]);
+    }
+    return this._taskService
+      .getByIdOnce$(task.id)
+      .pipe(
+        map((current) =>
+          current && current.projectId === moveInProjectId ? current : undefined,
+        ),
+      );
+  }
 
   /**
    * The short-syntax effect cleans the title on the same addTask, but its parse
