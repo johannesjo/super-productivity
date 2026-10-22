@@ -77,6 +77,7 @@ interface LinkedTask {
   title: string;
   baselineTitle: unknown;
   isDone: boolean;
+  doneOn: number | undefined;
   baselineDone: unknown;
   issueLastUpdated: unknown;
 }
@@ -97,6 +98,7 @@ const readLinkedTask = (page: Page): Promise<LinkedTask | null> =>
       title: string;
       issueId?: string;
       isDone: boolean;
+      doneOn?: number;
       issueLastSyncedValues?: { title?: unknown; isDone?: unknown };
       issueLastUpdated?: unknown;
     }
@@ -117,6 +119,7 @@ const readLinkedTask = (page: Page): Promise<LinkedTask | null> =>
           title: task.title,
           baselineTitle: task.issueLastSyncedValues?.title,
           isDone: task.isDone,
+          doneOn: task.doneOn,
           baselineDone: task.issueLastSyncedValues?.isDone,
           issueLastUpdated: task.issueLastUpdated,
         }
@@ -607,6 +610,16 @@ test.describe('@supersync Plainspace poll vs the sync window (#11034)', () => {
         expect(donePatches(server)).toEqual([usersDone]);
         expect((await readLinkedTask(a.c.page))?.isDone).toBe(usersDone);
         expect((await readLinkedTask(b.c.page))?.isDone).toBe(usersDone);
+        // The completion date travels with the done state: cleared on a reopen,
+        // kept on a completion, on both devices.
+        for (const page of [a.c.page, b.c.page]) {
+          const doneOn = (await readLinkedTask(page))?.doneOn;
+          if (usersDone) {
+            expect(typeof doneOn).toBe('number');
+          } else {
+            expect(doneOn).toBeUndefined();
+          }
+        }
       } finally {
         if (s) {
           await closeClient(s.a.c);
