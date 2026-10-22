@@ -3,15 +3,33 @@ import { HttpErrorResponse } from '@angular/common/http';
 
 /**
  * Which Plainspace providers had their token rejected (401) on the last
- * request, so the issue panel can ask the user to reconnect. In memory only —
- * never persisted or synced: the next successful poll clears it, and a restart
- * starts clean.
+ * request, so the issue panel can ask the user to reconnect, and which run on a
+ * server too old to take a title. In memory only — never persisted or synced:
+ * the next successful poll clears a rejection, and a restart starts clean.
  */
 @Injectable({ providedIn: 'root' })
 export class PlainspaceConnectionStateService {
   private readonly _rejectedProviderIds = signal<ReadonlySet<string>>(new Set());
+  private readonly _titleUnsupportedProviderIds = signal<ReadonlySet<string>>(new Set());
 
   readonly rejectedProviderIds = this._rejectedProviderIds.asReadonly();
+  readonly titleUnsupportedProviderIds = this._titleUnsupportedProviderIds.asReadonly();
+
+  /**
+   * The provider's server refused or ignored a title (a server from before the
+   * integration PATCH took one). Titles stop being pushed to it for this
+   * session; done keeps syncing. An upgraded server is picked up after a
+   * restart.
+   */
+  reportTitleUnsupported(providerId: string): void {
+    if (!this._titleUnsupportedProviderIds().has(providerId)) {
+      this._titleUnsupportedProviderIds.update((ids) => new Set(ids).add(providerId));
+    }
+  }
+
+  isTitleUnsupported(providerId: string): boolean {
+    return this._titleUnsupportedProviderIds().has(providerId);
+  }
 
   /** A request for this provider succeeded: its token works. */
   reportSuccess(providerId: string): void {

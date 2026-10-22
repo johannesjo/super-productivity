@@ -18,6 +18,7 @@ import {
   selectAllTasks,
 } from '../../tasks/store/task.selectors';
 import { IssueLog } from '../../../core/log';
+import { getRefreshOnLook$ } from './refresh-on-look';
 
 @Injectable()
 export class PollIssueUpdatesEffects {
@@ -97,9 +98,12 @@ export class PollIssueUpdatesEffects {
   );
 
   private _createUpdatePollTimer(provider: IssueProvider): Observable<unknown> {
-    return timer(
-      DELAY_BEFORE_ISSUE_POLLING,
-      this._issueService.getPollInterval(provider.issueProviderKey),
+    return merge(
+      timer(
+        DELAY_BEFORE_ISSUE_POLLING,
+        this._issueService.getPollInterval(provider.issueProviderKey),
+      ),
+      getRefreshOnLook$(provider),
     ).pipe(
       switchMap(() => this._getTasksForProvider(provider)),
       switchMap((issueTasks: Task[]) => {

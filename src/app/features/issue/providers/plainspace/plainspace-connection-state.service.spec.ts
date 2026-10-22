@@ -39,4 +39,11 @@ describe('PlainspaceConnectionStateService', () => {
     state.clear(['p1']);
     expect([...state.rejectedProviderIds()]).toEqual(['p2']);
   });
+
+  it('remembers a server too old for titles per provider, and a success keeps it', () => {
+    state.reportTitleUnsupported('p1');
+    state.reportSuccess('p1');
+    expect(state.isTitleUnsupported('p1')).toBe(true);
+    expect(state.isTitleUnsupported('p2')).toBe(false);
+  });
 });
