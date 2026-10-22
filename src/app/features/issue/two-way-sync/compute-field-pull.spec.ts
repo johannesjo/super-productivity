@@ -200,6 +200,44 @@ describe('computePendingLocalChanges', () => {
   it('is empty when the local values equal the baseline', () => {
     expect(pending(task(), BASELINE)).toEqual({});
   });
+
+  it('decides a remote field once, by its first mapping', () => {
+    // A time and a day-only plan map onto one remote field (Plainspace's
+    // scheduledAt); the day mapping always means "no time".
+    const timeMappings: FieldMapping[] = [
+      {
+        taskField: 'dueWithTime',
+        issueField: 'scheduledAt',
+        defaultDirection: 'both',
+        toIssueValue: (v) => (typeof v === 'number' ? new Date(v).toISOString() : null),
+        toTaskValue: identity,
+      },
+      {
+        taskField: 'dueDay',
+        issueField: 'scheduledAt',
+        defaultDirection: 'pushOnly',
+        toIssueValue: () => null,
+        toTaskValue: () => undefined,
+      },
+    ];
+    const at = Date.UTC(2026, 0, 2, 9);
+    const timed = task({
+      dueWithTime: at,
+      dueDay: undefined,
+      issueLastSyncedValues: { scheduledAt: new Date(at).toISOString() },
+    });
+    expect(
+      computePendingLocalChanges(timed, timeMappings, {}, { issueId: 'i-1' }),
+    ).toEqual({});
+    const planned = task({
+      dueWithTime: undefined,
+      dueDay: '2026-01-03',
+      issueLastSyncedValues: { scheduledAt: new Date(at).toISOString() },
+    });
+    expect(
+      computePendingLocalChanges(planned, timeMappings, {}, { issueId: 'i-1' }),
+    ).toEqual({ dueWithTime: undefined });
+  });
 });
 
 describe('hasRemoteFieldChange', () => {

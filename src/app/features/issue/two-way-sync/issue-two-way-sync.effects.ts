@@ -419,18 +419,18 @@ export class IssueTwoWaySyncEffects {
           return from(issueInfos).pipe(
             concatMap((info) =>
               this._deleteRemoteIssue$(info).pipe(
+                // The provider can be removed meanwhile (getCfgOnce$ throws): an
+                // escaped error would skip the rest and end this effect.
+                catchError((err) => {
+                  IssueLog.err('Bulk remote issue delete failed', err);
+                  return EMPTY;
+                }),
                 finalize(() =>
                   this._pendingRemoteIssueDelete.remove(
                     info.issueProviderId,
                     info.issueId,
                   ),
                 ),
-              ),
-            ),
-            // An error ends the sequence: release the ones not reached.
-            finalize(() =>
-              issueInfos.forEach((info) =>
-                this._pendingRemoteIssueDelete.remove(info.issueProviderId, info.issueId),
               ),
             ),
           );
@@ -579,6 +579,12 @@ export class IssueTwoWaySyncEffects {
                     );
                 }),
                 catchError((err) => {
+                  // The create and link succeeded; the provider declined an
+                  // initial value it can't take (an older Plainspace server and
+                  // a time), and says so itself.
+                  if (isExpectedSyncSkipError(err)) {
+                    return EMPTY;
+                  }
                   IssueLog.err('Auto-create issue failed', err);
                   this._snackService.open({
                     type: 'ERROR',
@@ -922,6 +928,8 @@ export class IssueTwoWaySyncEffects {
 
         const freshIssue = await adapter.fetchIssue(issueId, cfg);
         const freshValues = adapter.extractSyncValues(freshIssue);
+        // Decide on the item as it is now (e.g. it became repeating).
+        const issueSyncConfig = adapter.getSyncConfig(cfg, freshIssue);
         // Re-fetch task to get post-meta-reducer values (e.g. short syntax parsed title)
         const currentTask = await firstValueFrom(this._taskService.getByIdOnce$(task.id));
         // the snapshot predates pushes queued before it; their baseline is newer
@@ -930,10 +938,12 @@ export class IssueTwoWaySyncEffects {
         const taskFieldChanges: Record<string, unknown> = {};
         for (const mapping of fieldMappings) {
           if (mapping.taskField in changes) {
-            // Use current task value (post-parsing) not raw action value
-            taskFieldChanges[mapping.taskField] =
-              currentTask?.[mapping.taskField as keyof Task] ??
-              changes[mapping.taskField];
+            // Use the current task value (post-parsing), not the raw action
+            // value, also when it is cleared: a day-only plan leaves no time,
+            // while its short-syntax action still carries the parser's time.
+            taskFieldChanges[mapping.taskField] = currentTask
+              ? currentTask[mapping.taskField as keyof Task]
+              : changes[mapping.taskField];
           }
         }
 
@@ -944,7 +954,7 @@ export class IssueTwoWaySyncEffects {
         const decisions = computePushDecisions(
           taskFieldChanges,
           fieldMappings,
-          syncConfig,
+          issueSyncConfig,
           freshValues,
           // A task with no baseline at all was linked before two-way sync (e.g.
           // a migrated built-in provider, whose effects always pushed). If the

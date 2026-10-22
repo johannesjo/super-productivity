@@ -3297,7 +3297,7 @@
     "SHARE_SUCCESS": "Project shared on Plainspace. Tasks assigned to you will import automatically.",
     "SPACE_PICKER": {
       "CREATE_NEW": "Create new space",
-      "DATA_NOTICE": "Task titles and done state of shared tasks are stored on {{host}}, along with times set there. Notes, subtasks and tracked time stay in Super Productivity.",
+      "DATA_NOTICE": "Task titles, done state and scheduled times of shared tasks are stored on {{host}}. Notes, subtasks and tracked time stay in Super Productivity.",
       "DISCONNECT": "Disconnect account",
       "DISCONNECT_HINT": "Disconnecting removes the saved account from this device. Existing project integrations keep syncing. To stop them, open each relevant Plainspace integration in the issue provider panel and choose its gear icon → Delete.",
       "ERROR": "Couldn't reach Plainspace. Check your connection and that your token is still valid, then try again.",
@@ -3310,10 +3310,12 @@
       "TITLE": "Choose a Plainspace space"
     },
     "SYNC": {
+      "ERR_REFUSED": "Plainspace refused this change.",
+      "ERR_REPEAT_NEEDS_TIME": "A repeating task needs its time in Plainspace.",
       "ERR_TITLE_EMPTY": "Plainspace needs a title.",
       "ERR_TITLE_TOO_LONG": "Plainspace takes titles up to 500 characters.",
       "NOT_IN_LIST": "No longer in your Plainspace list: it was reassigned or deleted, or you lost access to the space. It stays here, but no longer syncs.",
-      "SERVER_TOO_OLD": "This Plainspace server is too old for title sync. Done state keeps syncing; titles sync once the server is updated."
+      "SERVER_TOO_OLD": "This Plainspace server is too old to sync titles and times. Done state keeps syncing; titles and times sync once the server is updated."
     }
   },
   "PLUGINS": {

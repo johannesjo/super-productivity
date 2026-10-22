@@ -269,14 +269,24 @@ describe('PlainspaceCommonInterfacesService', () => {
       expect(syncState.requestPush).not.toHaveBeenCalled();
     });
 
-    it('keeps a local reschedule until the remote time changes', async () => {
+    it('keeps a local reschedule while the remote time is unchanged, and queues its push', async () => {
       remote({ title: 'Renamed', updatedAt: '2026-01-03T00:00:00.000Z' });
       const local = Date.UTC(2026, 0, 5, 9);
       const updates = await service.getFreshDataForIssueTasks([
         localTask({ dueWithTime: local }),
       ]);
       expect('dueWithTime' in updates[0].taskChanges).toBeFalse();
-      // The schedule is pull-only: never queued for a push.
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(syncState.requestPush).toHaveBeenCalledOnceWith('sp-1', true);
+    });
+
+    it("keeps a repeating item's local reschedule without queueing a push", async () => {
+      remote({ isRecurring: true });
+      const updates = await service.getFreshDataForIssueTasks([
+        localTask({ dueWithTime: Date.UTC(2026, 0, 5, 9) }),
+      ]);
+      expect(updates).toEqual([]);
+      // Its time is set in Plainspace: the next occurrence moves it.
       await new Promise((resolve) => setTimeout(resolve));
       expect(syncState.requestPush).not.toHaveBeenCalled();
     });

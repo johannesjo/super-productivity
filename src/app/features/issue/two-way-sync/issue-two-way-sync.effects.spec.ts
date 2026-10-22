@@ -228,6 +228,7 @@ describe('IssueTwoWaySyncEffects', () => {
         issueId: 'issue-1',
         issueProviderId: 'provider-1',
         issueLastSyncedValues: { status: 'NEEDS-ACTION' },
+        isDone: true,
       });
 
       taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
@@ -2340,6 +2341,45 @@ describe('IssueTwoWaySyncEffects', () => {
       adapterRegistry.unregister('TEST_PROVIDER');
     }));
 
+    it('keeps handling bulk deletes after a provider removed mid-sequence', fakeAsync(() => {
+      const deleteIssueSpy = jasmine.createSpy('deleteIssue').and.resolveTo(undefined);
+      adapterRegistry.register(
+        'TEST_PROVIDER',
+        createMockAdapter({ deleteIssue: deleteIssueSpy }),
+      );
+      const cfg = createMockIssueProvider();
+      issueProviderServiceSpy.getCfgOnce$.and.callFake(((issueProviderId: string) =>
+        issueProviderId === 'removed-provider'
+          ? throwError(() => new Error('No issueProvider found'))
+          : of(cfg)) as any);
+      const pending = TestBed.inject(PendingRemoteIssueDeleteService);
+      effects.deleteIssueOnBulkTaskDelete$.subscribe();
+
+      deletedTaskIssueSidecar.set([
+        {
+          issueId: 'issue-1',
+          issueType: 'TEST_PROVIDER',
+          issueProviderId: 'removed-provider',
+        },
+        { issueId: 'issue-2', issueType: 'TEST_PROVIDER', issueProviderId: 'provider-1' },
+      ]);
+      actions$.next(TaskSharedActions.deleteTasks({ taskIds: ['task-1', 'task-2'] }));
+      tick();
+      // The rest of the sequence still runs.
+      expect(deleteIssueSpy).toHaveBeenCalledOnceWith('issue-2', cfg);
+      expect(pending.issueIds('provider-1').size).toBe(0);
+      expect(pending.issueIds('removed-provider').size).toBe(0);
+
+      deletedTaskIssueSidecar.set([
+        { issueId: 'issue-3', issueType: 'TEST_PROVIDER', issueProviderId: 'provider-1' },
+      ]);
+      actions$.next(TaskSharedActions.deleteTasks({ taskIds: ['task-3'] }));
+      tick();
+      expect(deleteIssueSpy).toHaveBeenCalledWith('issue-3', cfg);
+
+      adapterRegistry.unregister('TEST_PROVIDER');
+    }));
+
     it('should skip tasks without issue linkage in bulk delete', fakeAsync(() => {
       const deleteIssueSpy = jasmine.createSpy('deleteIssue').and.resolveTo(undefined);
       const adapter = createMockAdapter({ deleteIssue: deleteIssueSpy });
@@ -3029,6 +3069,34 @@ describe('IssueTwoWaySyncEffects', () => {
           expect(pushSpy).not.toHaveBeenCalled();
         }));
       });
+      // Review finding (R2-2): an older server declines the initial time;
+      // the task was created and linked, so that is no failure.
+      it('does not report an initial value the provider declines as a failed create', fakeAsync(() => {
+        adapterRegistry.register(
+          'PLAINSPACE',
+          createMockAdapter({
+            createIssue: createIssueSpy,
+            getFieldMappings: jasmine
+              .createSpy('getFieldMappings')
+              .and.returnValue([dueWithTimeFieldMapping]),
+            pushChanges: jasmine
+              .createSpy('pushChanges')
+              .and.rejectWith({ isExpectedSyncSkip: true }),
+          }),
+        );
+        const task = movedTask({ dueWithTime: 1743508800000 });
+        taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+        effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+        move(task);
+        tick();
+
+        expect(taskServiceSpy.update).toHaveBeenCalledWith(
+          'task-moved',
+          jasmine.objectContaining({ issueId: 'ps-issue-1' }),
+        );
+        expect(snackServiceSpy.open).not.toHaveBeenCalled();
+      }));
 
       it('ignores a move to the project the task is already in', fakeAsync(() => {
         const task = movedTask();
