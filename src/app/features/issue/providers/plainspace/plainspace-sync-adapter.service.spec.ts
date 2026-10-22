@@ -75,7 +75,7 @@ describe('PlainspaceSyncAdapterService', () => {
     expect(m.toTaskValue('2026-01-02T09:00:00.000Z', { issueId: 't1' })).toBe(ms);
     // unschedule / absent -> null / undefined
     expect(m.toIssueValue(undefined, { issueId: 't1' })).toBeNull();
-    expect(m.toTaskValue(null, { issueId: 't1' })).toBeUndefined();
+    expect(m.toTaskValue(null, { issueId: 't1' })).toBeNull();
   });
 
   it('pushChanges PATCHes only the completion state for complete and reopen', async () => {

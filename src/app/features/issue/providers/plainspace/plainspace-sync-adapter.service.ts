@@ -50,8 +50,10 @@ const PLAINSPACE_FIELD_MAPPINGS: FieldMapping[] = [
     defaultDirection: 'pullOnly',
     toIssueValue: (taskValue: unknown): string | null =>
       typeof taskValue === 'number' ? new Date(taskValue).toISOString() : null,
-    toTaskValue: (issueValue: unknown): number | undefined =>
-      typeof issueValue === 'string' ? new Date(issueValue).getTime() : undefined,
+    // "No time" is null, not undefined: JSON keeps a null in the op, so the
+    // clear reaches my other devices, released ones too (#9776).
+    toTaskValue: (issueValue: unknown): number | null =>
+      typeof issueValue === 'string' ? new Date(issueValue).getTime() : null,
   },
 ];
 

@@ -97,7 +97,10 @@ describe('PlainspaceCommonInterfacesService', () => {
       stubCfg();
       const task = { issueProviderId: 'p1', issueId: 't1', issueLastUpdated: 0 } as Task;
       const res = await service.getFreshDataForIssueTask(task);
-      expect(res?.taskChanges.dueWithTime).toBeUndefined();
+      expect(res?.taskChanges.dueWithTime).toBeNull();
+      // The op's JSON keeps the clear, so my other devices apply it (#9776);
+      // an undefined was dropped and they kept the old time for good.
+      expect(JSON.parse(JSON.stringify(res!.taskChanges)).dueWithTime).toBeNull();
     });
 
     // Plainspace → SP completion sync: when a task is completed in Plainspace, the
