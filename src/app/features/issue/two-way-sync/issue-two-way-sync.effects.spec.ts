@@ -2343,6 +2343,22 @@ describe('IssueTwoWaySyncEffects', () => {
         );
       }));
 
+      it('ignores a move to the project the task is already in', fakeAsync(() => {
+        const task = movedTask();
+        taskServiceSpy.getByIdOnce$.and.returnValue(of(task));
+        effects.autoCreateIssueOnTaskAdd$.subscribe();
+
+        actions$.next(
+          TaskSharedActions.moveToOtherProject({
+            task: { ...task, subTasks: [] } as TaskWithSubTasks,
+            targetProjectId: 'project-1',
+          }),
+        );
+        tick();
+
+        expect(createIssueSpy).not.toHaveBeenCalled();
+      }));
+
       it('ignores short syntax that moves nothing', fakeAsync(() => {
         const task = movedTask();
         taskServiceSpy.getByIdOnce$.and.returnValue(of(task));

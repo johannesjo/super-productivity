@@ -475,8 +475,9 @@ export class IssueTwoWaySyncEffects {
           }
         : null;
     }
-    // moveToOtherProject, or applyShortSyntax with a `+Project` move.
-    return action.targetProjectId
+    // moveToOtherProject, or applyShortSyntax with a `+Project` move. A "move"
+    // to the project the task is already in is no move-in.
+    return action.targetProjectId && action.targetProjectId !== action.task.projectId
       ? {
           task: action.task,
           // The title was typed earlier; a move never parses it again.
