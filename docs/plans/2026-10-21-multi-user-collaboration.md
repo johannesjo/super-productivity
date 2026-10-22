@@ -433,6 +433,13 @@ gets a fix only when it is reported.
 - **Two devices moving the same task in** before either's link op syncs both
   create it: one visible duplicate item in the Space, no data loss. Fix:
   `clientRef`, like a lost create response.
+- **A time removed in Plainspace, pulled by a released client.** v19.x pulls
+  "no time" as `undefined`, which the op's JSON drops (#9776), so my other
+  devices keep the old time while taking the new baseline. A Release 2 device
+  that gets that op before its own poll then pushes the old time back to the
+  Space. Transitional (needs a v19.x device in the fleet; #11039 pulls `null`
+  from then on), and every guard found (e.g. no poll-time push of a time over
+  a "no time" baseline) also blocks a legitimate offline time edit for good.
 
 ## Sync and long-term cost
 
