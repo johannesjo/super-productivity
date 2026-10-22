@@ -252,6 +252,20 @@ describe('PlainspaceCommonInterfacesService', () => {
       expect(syncState.requestPush).not.toHaveBeenCalled();
     });
 
+    it('converges when another device already sent the same rename', async () => {
+      remote({ title: 'Buy oat milk', updatedAt: '2026-01-03T00:00:00.000Z' });
+      const updates = await service.getFreshDataForIssueTasks([
+        localTask({ title: 'Buy oat milk' }),
+      ]);
+      expect(updates[0].taskChanges.title).toBe('Buy oat milk');
+      expect(updates[0].taskChanges.issueLastSyncedValues).toEqual({
+        ...baseline,
+        title: 'Buy oat milk',
+      });
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(syncState.requestPush).not.toHaveBeenCalled();
+    });
+
     it('keeps a local reschedule until the remote time changes', async () => {
       remote({ title: 'Renamed', updatedAt: '2026-01-03T00:00:00.000Z' });
       const local = Date.UTC(2026, 0, 5, 9);
@@ -274,6 +288,44 @@ describe('PlainspaceCommonInterfacesService', () => {
       expect(syncState.requestPush).toHaveBeenCalledOnceWith('sp-1', true);
     });
 
+    // The marker can be "seen" while a field still differs from its baseline:
+    // our own PATCH's answer carries the server's side effects (completing a
+    // recurring item moves scheduledAt to the next occurrence) and any
+    // collaborator change that landed before it.
+    it('pulls a field that left its baseline even when the marker is unchanged (recurring completion)', async () => {
+      const next = '2026-01-03T09:00:00.000Z';
+      remote({ isDone: true, scheduledAt: next, isRecurring: true });
+      const updates = await service.getFreshDataForIssueTasks([
+        localTask({
+          isDone: true,
+          dueWithTime: Date.UTC(2026, 0, 2, 9),
+          issueLastSyncedValues: {
+            ...baseline,
+            isDone: true,
+            scheduledAt: '2026-01-02T09:00:00.000Z',
+          },
+        }),
+      ]);
+      expect(updates[0]?.taskChanges.dueWithTime).toBe(new Date(next).getTime());
+    });
+
+    it('pulls a collaborator rename carried by our own PATCH answer', async () => {
+      remote({ isDone: true, title: 'Renamed by Ann' });
+      const updates = await service.getFreshDataForIssueTasks([
+        localTask({
+          isDone: true,
+          issueLastSyncedValues: { ...baseline, isDone: true },
+        }),
+      ]);
+      expect(updates[0]?.taskChanges.title).toBe('Renamed by Ann');
+      expect(syncState.requestPush).not.toHaveBeenCalled();
+    });
+
+    it('stays quiet when the marker and every field match the baseline', async () => {
+      remote({});
+      expect(await service.getFreshDataForIssueTasks([localTask()])).toEqual([]);
+    });
+
     it('marks a task the response lacks as no longer in my list, and clears it when it is back', async () => {
       remote({ id: 'other' });
       await service.getFreshDataForIssueTasks([localTask({ isDone: true })]);
@@ -286,11 +338,17 @@ describe('PlainspaceCommonInterfacesService', () => {
       expect(syncState.isMissing('sp-1')).toBeFalse();
     });
 
-    it('never marks tasks missing from a failed poll', async () => {
+    it('never marks tasks missing or pushes from a failed poll', async () => {
       (api as unknown as { getMyTasks$: unknown }).getMyTasks$ = () =>
         throwError(() => new HttpErrorResponse({ status: 0 }));
-      await expectAsync(service.getFreshDataForIssueTasks([localTask()])).toBeRejected();
+      spyOn(syncState, 'setMissing');
+      await expectAsync(
+        service.getFreshDataForIssueTasks([localTask({ title: 'Pending rename' })]),
+      ).toBeRejected();
+      await new Promise((resolve) => setTimeout(resolve));
+      expect(syncState.setMissing).not.toHaveBeenCalled();
       expect(syncState.missingTaskIds().size).toBe(0);
+      expect(syncState.requestPush).not.toHaveBeenCalled();
     });
 
     it('clears an old failure once nothing is pending', async () => {

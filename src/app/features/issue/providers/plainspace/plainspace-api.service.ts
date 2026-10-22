@@ -136,12 +136,23 @@ export class PlainspaceApiService {
     return this._http
       .get<SPTasksResponse>(`${this._base(cfg)}/tasks`, { headers: this._headers(cfg) })
       .pipe(
-        // /tasks spans all my spaces; keep only this provider's space.
-        map((res) =>
-          (Array.isArray(res?.tasks) ? res.tasks : [])
+        map((res) => {
+          // A 200 without a task list (HttpClient gives null for an empty body:
+          // a proxy or captive portal answering for the host) is no answer at
+          // all, like a token check's empty body (#9988). Read as "no tasks", it
+          // would mark every linked task as no longer in my list.
+          if (!Array.isArray(res?.tasks)) {
+            throw new HttpErrorResponse({
+              status: 0,
+              statusText: 'No task list in the response',
+              url: `${this._base(cfg)}/tasks`,
+            });
+          }
+          // /tasks spans all my spaces; keep only this provider's space.
+          return res.tasks
             .filter((t) => matchesSpace(t, cfg.spaceId))
-            .map(mapSPTaskToIssue),
-        ),
+            .map(mapSPTaskToIssue);
+        }),
       );
   }
 
@@ -204,8 +215,8 @@ export class PlainspaceApiService {
   /**
    * Pushes completion and/or title back to Plainspace. Resolves to the echoed
    * task, or null when the answer is not a task. HTTP errors propagate: the
-   * sync adapter tells a server too old for a field (422) and a per-task
-   * refusal (409) apart from offline and server errors.
+   * sync adapter tells a server too old for a field (422) apart from offline
+   * and server errors.
    */
   patchTask$(
     id: string,

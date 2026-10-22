@@ -115,11 +115,15 @@ describe('PlainspaceSyncAdapterService', () => {
     expect(await adapter.pushChanges('t1', { isDone: true }, cfg)).toBeUndefined();
   });
 
-  it('pushChanges rejects an echoed title that differs even by whitespace', async () => {
+  it('pushChanges compares the echo exactly: a title that differs even by whitespace counts as not taken', async () => {
+    // The server stores titles verbatim, so a different echo means it ignored
+    // the field: an older server. Titles stop for this provider's session.
     api.patchTask$.and.returnValue(of({ ...patchedIssue, title: 'New name' }));
     await expectAsync(
       adapter.pushChanges('t1', { title: 'New name ' }, cfg),
-    ).toBeRejected();
+    ).toBeRejectedWith(jasmine.objectContaining({ isExpectedSyncSkip: true }));
+    expect(connectionState.isTitleUnsupported('provider-1')).toBeTrue();
+    expect(adapter.getSyncConfig(cfg).title).toBe('pullOnly');
   });
 
   it('pushChanges refuses a blank or over-long title without a request', async () => {
@@ -174,21 +178,6 @@ describe('PlainspaceSyncAdapterService', () => {
     await expectAsync(adapter.pushChanges('t1', { isDone: true }, cfg)).toBeRejectedWith(
       jasmine.objectContaining({ status: 422 }),
     );
-    expect(connectionState.isTitleUnsupported('provider-1')).toBeFalse();
-  });
-
-  it('a 409 is a per-task refusal, never "too old"', async () => {
-    api.patchTask$.and.returnValue(
-      throwError(() => httpError(409, { error: 'repeat_requires_remind_at' })),
-    );
-    await expectAsync(
-      adapter.pushChanges('t1', { title: 'New name' }, cfg),
-    ).toBeRejectedWith(new IssueSyncPushError(T.PLAINSPACE.SYNC.ERR_REPEAT_NEEDS_TIME));
-
-    api.patchTask$.and.returnValue(throwError(() => httpError(409, { error: 'other' })));
-    await expectAsync(
-      adapter.pushChanges('t1', { title: 'New name' }, cfg),
-    ).toBeRejectedWith(new IssueSyncPushError(T.PLAINSPACE.SYNC.ERR_REFUSED));
     expect(connectionState.isTitleUnsupported('provider-1')).toBeFalse();
   });
 

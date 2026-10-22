@@ -99,6 +99,43 @@ test.describe('Plainspace Release 1 sync', () => {
     expect(server.tasks.get(TASK_ID)!.done).toBe(true);
   });
 
+  test('an edit made offline is not pushed while polls fail, then once after a successful poll', async ({
+    page,
+    workViewPage,
+    projectPage,
+  }) => {
+    await workViewPage.waitForTaskList();
+    const server = await setUp(page, projectPage);
+
+    // Offline: the rename's own push fails.
+    server.isPatchOffline = true;
+    server.isTasksOffline = true;
+    await renameTask(page, 'Buy tent', 'Buy a tent');
+    await expect.poll(() => server.patches.length, { timeout: 15000 }).toBe(1);
+    // A PATCH would now go through, but /tasks still fails: nothing is pushed
+    // from a failed poll.
+    server.isPatchOffline = false;
+    const failedBefore = server.taskListRequests.length;
+    await page.reload();
+    await expect
+      .poll(() => server.taskListRequests.length, { timeout: 30000 })
+      .toBeGreaterThanOrEqual(failedBefore + 2);
+    // Deliberate: a push queued by a failed poll would show up meanwhile.
+    await page.waitForTimeout(2000);
+    expect(server.patches.length).toBe(1);
+
+    // Back online: the next successful poll pushes it, once.
+    server.isTasksOffline = false;
+    await restart(page, server);
+    await expect
+      .poll(() => server.tasks.get(TASK_ID)!.title, { timeout: 15000 })
+      .toBe('Buy a tent');
+    await page.waitForTimeout(2000);
+    expect(server.patches.slice(1)).toEqual([
+      { id: TASK_ID, body: { title: 'Buy a tent' }, status: 200 },
+    ]);
+  });
+
   test('title round-trips both ways and is sent verbatim', async ({
     page,
     workViewPage,
@@ -143,6 +180,34 @@ test.describe('Plainspace Release 1 sync', () => {
     await expect
       .poll(() => server.tasks.get(TASK_ID)!.title, { timeout: 15000 })
       .toBe('Buy tent and stakes');
+    // Let the push finish storing its baseline before the restart.
+    await page.waitForTimeout(2000);
+
+    await restart(page, server);
+    await expect(taskRow(page, 'Buy tent and stakes')).toBeVisible();
+  });
+
+  // Review finding: the PATCH answer marks everything in it as seen, including
+  // a collaborator's change that landed between our fetch and our write. It
+  // was never pulled until some later remote change.
+  test('a remote rename that lands just before our push is still pulled', async ({
+    page,
+    workViewPage,
+    projectPage,
+    taskPage,
+  }) => {
+    await workViewPage.waitForTaskList();
+    const server = await setUp(page, projectPage);
+    server.beforePatch = () => {
+      server.beforePatch = null;
+      server.remoteEdit(TASK_ID, { title: 'Buy tent and stakes' });
+    };
+
+    await taskPage.markTaskAsDone(taskRow(page, 'Buy tent'));
+    await expect
+      .poll(() => server.tasks.get(TASK_ID)!.done, { timeout: 15000 })
+      .toBe(true);
+    expect(server.tasks.get(TASK_ID)!.title).toBe('Buy tent and stakes');
     // Let the push finish storing its baseline before the restart.
     await page.waitForTimeout(2000);
 

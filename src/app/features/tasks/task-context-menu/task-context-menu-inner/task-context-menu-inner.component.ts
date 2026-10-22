@@ -98,6 +98,7 @@ import {
 } from '../../../../plugins/plugin-task-context-menu-registry.service';
 import { PluginTaskContextMenuTarget } from '@super-productivity/plugin-api';
 import { getWontDoChanges } from '../../util/is-wont-do-task';
+import { IssueSyncStateService } from '../../../issue/two-way-sync/issue-sync-state.service';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -130,6 +131,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   private readonly _snackService = inject(SnackService);
   private readonly _projectService = inject(ProjectService);
   private readonly _globalConfigService = inject(GlobalConfigService);
+  private readonly _issueSyncState = inject(IssueSyncStateService);
   private readonly _store = inject(Store);
   private readonly _dateAdapter = inject(DateAdapter);
   private readonly _tagService = inject(TagService);
@@ -514,10 +516,11 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
     const isConfirmBeforeDelete =
       this._globalConfigService.cfg()?.tasks?.isConfirmBeforeDelete ?? true;
 
-    if (isTaskDeleteConfirmRequired(this.task, isConfirmBeforeDelete)) {
+    const isNoLongerListed = this._issueSyncState.isMissing(this.task.id);
+    if (isTaskDeleteConfirmRequired(this.task, isConfirmBeforeDelete, isNoLongerListed)) {
       this._matDialog
         .open(DialogConfirmComponent, {
-          data: getTaskDeleteConfirmData(this.task),
+          data: getTaskDeleteConfirmData(this.task, undefined, isNoLongerListed),
         })
         .afterClosed()
         .subscribe(async (isConfirm) => {

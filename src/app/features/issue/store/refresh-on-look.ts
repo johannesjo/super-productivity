@@ -1,6 +1,5 @@
 import { EMPTY, fromEvent, merge, Observable } from 'rxjs';
 import { filter, throttleTime } from 'rxjs/operators';
-import { IS_ELECTRON } from '../../../app.constants';
 import { ipcResume$ } from '../../../core/ipc-events';
 import { IssueProvider } from '../issue.model';
 import { PLAINSPACE_TYPE } from '../issue.const';
@@ -22,6 +21,7 @@ export const getRefreshOnLook$ = (provider: IssueProvider): Observable<unknown> 
         fromEvent(document, 'visibilitychange').pipe(
           filter(() => document.visibilityState === 'visible'),
         ),
-        IS_ELECTRON ? ipcResume$ : EMPTY,
+        // EMPTY outside Electron.
+        ipcResume$,
       ).pipe(throttleTime(REFRESH_ON_LOOK_THROTTLE_MS))
     : EMPTY;

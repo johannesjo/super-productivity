@@ -3,6 +3,7 @@ import {
   computeFieldPullChanges,
   computePendingLocalChanges,
   FieldPullInput,
+  hasRemoteFieldChange,
 } from './compute-field-pull';
 import { FieldMapping, FieldSyncConfig } from './issue-sync.model';
 
@@ -198,5 +199,33 @@ describe('computePendingLocalChanges', () => {
 
   it('is empty when the local values equal the baseline', () => {
     expect(pending(task(), BASELINE)).toEqual({});
+  });
+});
+
+describe('hasRemoteFieldChange', () => {
+  const changed = (t: Task, issueValues: Record<string, unknown>): boolean =>
+    hasRemoteFieldChange(t, issueValues, MAPPINGS, {});
+
+  it('is false while every pullable field equals its baseline', () => {
+    expect(changed(task({ title: 'Local edit' }), BASELINE)).toBeFalse();
+  });
+
+  it('is true when a pullable field left its baseline', () => {
+    expect(changed(task(), { ...BASELINE, summary: 'Remote' })).toBeTrue();
+    expect(changed(task(), { ...BASELINE, description: 'Remote' })).toBeTrue();
+  });
+
+  it('leaves a task without any baseline to the marker', () => {
+    expect(changed(task({ issueLastSyncedValues: undefined }), BASELINE)).toBeFalse();
+  });
+
+  it('ignores push-only fields', () => {
+    expect(changed(task(), { ...BASELINE, estimate: 9 })).toBeFalse();
+  });
+
+  it('counts a field without a baseline only when the remote has a value', () => {
+    const t = task({ issueLastSyncedValues: { done: false, summary: 'Old' } });
+    expect(changed(t, { done: false, summary: 'Old' })).toBeFalse();
+    expect(changed(t, { done: false, summary: 'Old', description: 'D' })).toBeTrue();
   });
 });

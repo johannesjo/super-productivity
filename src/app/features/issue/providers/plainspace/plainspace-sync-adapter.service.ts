@@ -152,13 +152,6 @@ export class PlainspaceSyncAdapterService implements IssueSyncAdapter<Plainspace
       if (patch.title !== undefined && httpStatus(err) === 422) {
         return this._onTitleUnsupported(issueId, patch, cfg);
       }
-      if (httpStatus(err) === 409) {
-        throw new IssueSyncPushError(
-          httpErrorCode(err) === 'repeat_requires_remind_at'
-            ? T.PLAINSPACE.SYNC.ERR_REPEAT_NEEDS_TIME
-            : T.PLAINSPACE.SYNC.ERR_REFUSED,
-        );
-      }
       throw err;
     }
     assertEchoed(issueId, patch.done, updated);
@@ -215,11 +208,6 @@ const getProviderId = (cfg: PlainspaceCfg): string | undefined =>
 
 const httpStatus = (err: unknown): number | undefined =>
   err instanceof HttpErrorResponse ? err.status : undefined;
-
-const httpErrorCode = (err: unknown): unknown =>
-  err instanceof HttpErrorResponse
-    ? (err.error as { error?: unknown })?.error
-    : undefined;
 
 /**
  * Why Plainspace would refuse this title, or null: it takes 1–500 characters

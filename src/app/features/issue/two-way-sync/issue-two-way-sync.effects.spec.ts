@@ -1292,6 +1292,54 @@ describe('IssueTwoWaySyncEffects', () => {
       );
     }));
 
+    it('sends a field once when two requests for it are queued', fakeAsync(() => {
+      // Timer and focus polls can overlap, or Retry follows a poll: the second
+      // request must see the baseline the first push stored.
+      let current = linkedTask();
+      let remote: Record<string, unknown> = { ...baseline };
+      taskServiceSpy.getByIdOnce$.and.callFake(() => of(current));
+      taskServiceSpy.update.and.callFake((_id: string, changes: Partial<Task>) => {
+        current = { ...current, ...changes } as Task;
+      });
+      (adapter.fetchIssue as jasmine.Spy).and.callFake(async () => remote);
+      (adapter.extractSyncValues as jasmine.Spy).and.callFake(
+        (issue: Record<string, unknown>) => issue,
+      );
+      (adapter.pushChanges as jasmine.Spy).and.callFake(
+        async (_id: string, changes: Record<string, unknown>) => {
+          remote = { ...remote, ...changes };
+        },
+      );
+      effects.pushFieldsOnTaskUpdate$.subscribe();
+
+      syncState.requestPush('task-1', true);
+      syncState.requestPush('task-1', false);
+      tick();
+
+      expect(adapter.pushChanges).toHaveBeenCalledTimes(1);
+      expect(current.issueLastSyncedValues).toEqual({ ...baseline, summary: 'New' });
+    }));
+
+    it('a second device whose edit already reached the provider sends nothing', fakeAsync(() => {
+      // Both devices have the rename pending; the other one pushed first. The
+      // fetch sees the provider already holds the value: provider-changed skip,
+      // no write, baseline and marker untouched, so the next poll pulls the
+      // same value and both converge.
+      (adapter.fetchIssue as jasmine.Spy).and.resolveTo({ ...baseline, summary: 'New' });
+      (adapter.extractSyncValues as jasmine.Spy).and.callFake(
+        (issue: Record<string, unknown>) => issue,
+      );
+      taskServiceSpy.getByIdOnce$.and.returnValue(of(linkedTask()));
+      effects.pushFieldsOnTaskUpdate$.subscribe();
+
+      syncState.requestPush('task-1', true);
+      tick();
+
+      expect(adapter.pushChanges).not.toHaveBeenCalled();
+      expect(taskServiceSpy.update).not.toHaveBeenCalled();
+      expect(syncState.failures().has('task-1')).toBeFalse();
+    }));
+
     it('requests nothing when no field is pending, and clears an old failure', fakeAsync(() => {
       taskServiceSpy.getByIdOnce$.and.returnValue(of(linkedTask({ title: 'Old' })));
       syncState.reportFailure('task-1', { text: 'offline' });

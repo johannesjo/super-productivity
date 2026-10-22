@@ -16,6 +16,7 @@ import {
 import {
   computeFieldPullChanges,
   computePendingLocalChanges,
+  hasRemoteFieldChange,
 } from '../../two-way-sync/compute-field-pull';
 import { IssueSyncStateService } from '../../two-way-sync/issue-sync-state.service';
 
@@ -191,16 +192,25 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
     if (!issue) {
       return null;
     }
-    const wasUpdated = new Date(issue.updatedAt).getTime() !== task.issueLastUpdated;
+    const issueValues = this._syncAdapter.extractSyncValues(
+      issue as unknown as Record<string, unknown>,
+    );
+    const fieldMappings = this._syncAdapter.getFieldMappings();
+    const syncConfig = this._syncAdapter.getSyncConfig(cfg);
+    // `/tasks` returns full values, so a field that left its baseline is pulled
+    // even when the marker says "seen": the marker of our own PATCH also covers
+    // that answer's other changes. This also heals tasks whose marker an older
+    // client advanced the same way.
+    const wasUpdated =
+      new Date(issue.updatedAt).getTime() !== task.issueLastUpdated ||
+      hasRemoteFieldChange(task, issueValues, fieldMappings, syncConfig);
     const taskChanges = computeFieldPullChanges({
       task,
-      issueValues: this._syncAdapter.extractSyncValues(
-        issue as unknown as Record<string, unknown>,
-      ),
+      issueValues,
       wasUpdated,
       addTaskData: wasUpdated ? this.getAddTaskData(issue) : {},
-      fieldMappings: this._syncAdapter.getFieldMappings(),
-      syncConfig: this._syncAdapter.getSyncConfig(cfg),
+      fieldMappings,
+      syncConfig,
       ctx: { issueId: issue.id },
       isPullOnlyAuthoritative: false,
     });

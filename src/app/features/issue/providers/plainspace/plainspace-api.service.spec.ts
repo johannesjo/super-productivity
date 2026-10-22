@@ -78,6 +78,14 @@ describe('PlainspaceApiService', () => {
     expect((await p).map((t) => t.id)).toEqual(['u1']);
   });
 
+  for (const body of [null, {}, { tasks: null }]) {
+    it(`getMyTasks$ rejects a 200 without a task list (${JSON.stringify(body)}) as no answer`, async () => {
+      const p = firstValueFrom(service.getMyTasks$(cfg));
+      httpMock.expectOne(`${BASE}/tasks`).flush(body);
+      await expectAsync(p).toBeRejectedWith(jasmine.objectContaining({ status: 0 }));
+    });
+  }
+
   it('getMyTasks$ matches the bound space by slug, not just the id', async () => {
     const slugCfg: PlainspaceCfg = { ...cfg, spaceId: 'my-slug' };
     const p = firstValueFrom(service.getMyTasks$(slugCfg));

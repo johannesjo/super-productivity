@@ -553,23 +553,26 @@ export class IssueTwoWaySyncEffects {
     }
 
     if (Object.keys(toPush).length > 0) {
-      await adapter.pushChanges(issueId, toPush, cfg);
+      const writtenIssue = await adapter.pushChanges(issueId, toPush, cfg);
       // Update sync baseline and issueLastUpdated to prevent poll from
       // treating our own push as an external update
       const updatedSyncValues = { ...syncValues, ...toPush };
-      // The push changed the provider's marker (CalDAV: a new ETag); read it
-      // back so the next poll compares against our own write.
+      // The push changed the provider's marker (CalDAV: a new ETag); take it
+      // from the write's own answer when the adapter returns one, else read it
+      // back, so the next poll compares against our own write.
       // A failed read-back must not turn a done create into a failed one; the
       // poll then sees a changed marker and only pulls fields that changed.
-      const issueLastUpdated = adapter.getIssueLastUpdated
-        ? await adapter
-            .fetchIssue(issueId, cfg)
-            .then((issue) => adapter.getIssueLastUpdated!(issue))
-            .catch((err) => {
-              IssueLog.err('Reading the issue back after the initial push failed', err);
-              return Date.now();
-            })
-        : Date.now();
+      const issueLastUpdated = !adapter.getIssueLastUpdated
+        ? Date.now()
+        : writtenIssue && typeof writtenIssue === 'object'
+          ? adapter.getIssueLastUpdated(writtenIssue as Record<string, unknown>)
+          : await adapter
+              .fetchIssue(issueId, cfg)
+              .then((issue) => adapter.getIssueLastUpdated!(issue))
+              .catch((err) => {
+                IssueLog.err('Reading the issue back after the initial push failed', err);
+                return Date.now();
+              });
       this._trackSyncOriginatedTask(task.id);
       this._taskService.update(task.id, {
         issueLastSyncedValues: updatedSyncValues,
@@ -858,15 +861,27 @@ export class IssueTwoWaySyncEffects {
     return this._issueProviderService
       .getCfgOnce$(task.issueProviderId!, task.issueType as IssueProviderKey)
       .pipe(
-        concatMap((cfg) => {
-          const pending = computePendingLocalChanges(
-            task,
-            adapter.getFieldMappings(),
-            adapter.getSyncConfig(cfg),
-            { issueId: task.issueId! },
-          );
-          return Object.keys(pending).length ? this._pushChanges$(task, pending) : EMPTY;
-        }),
+        // The request was read when it arrived; an earlier push in the queue
+        // may have moved the baseline since. Decide on the task as it is now,
+        // or a field pushed meanwhile is sent again.
+        concatMap((cfg) =>
+          this._taskService.getByIdOnce$(task.id).pipe(
+            concatMap((current) => {
+              if (!current) {
+                return EMPTY;
+              }
+              const pending = computePendingLocalChanges(
+                current,
+                adapter.getFieldMappings(),
+                adapter.getSyncConfig(cfg),
+                { issueId: current.issueId! },
+              );
+              return Object.keys(pending).length
+                ? this._pushChanges$(current, pending)
+                : EMPTY;
+            }),
+          ),
+        ),
       );
   }
 

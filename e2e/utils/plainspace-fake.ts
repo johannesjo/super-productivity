@@ -57,6 +57,11 @@ export interface FakePlainspace {
   patches: FakePatch[];
   /** Runs right after a PATCH was answered, e.g. a collaborator's edit. */
   afterPatch: (() => void) | null;
+  /**
+   * Runs when a PATCH arrives, before it is applied: a collaborator's edit
+   * that lands between our fetch and our write, so our PATCH answer carries it.
+   */
+  beforePatch: (() => void) | null;
   /** Titles of every create request, failed ones included. */
   creates: string[];
   taskListRequests: { status: number }[];
@@ -102,6 +107,7 @@ export const installFakePlainspace = async (page: Page): Promise<FakePlainspace>
     isOldServer: false,
     patches: [],
     afterPatch: null,
+    beforePatch: null,
     creates: [],
     taskListRequests: [],
     remoteEdit: (id, changes) => {
@@ -166,6 +172,7 @@ export const installFakePlainspace = async (page: Page): Promise<FakePlainspace>
           server.afterPatch?.();
         }
       };
+      server.beforePatch?.();
       if (server.isPatchOffline) {
         server.patches.push({ id, body, status: 0 });
         await route.abort('internetdisconnected');
@@ -192,10 +199,6 @@ export const installFakePlainspace = async (page: Page): Promise<FakePlainspace>
       const title = body['title'];
       if (title !== undefined && (typeof title !== 'string' || !title.trim())) {
         await answer(422, { error: 'Validation failed' });
-        return;
-      }
-      if (body['scheduledAt'] === null && task.isRecurring) {
-        await answer(409, { error: 'repeat_requires_remind_at' });
         return;
       }
       server.remoteEdit(id, {

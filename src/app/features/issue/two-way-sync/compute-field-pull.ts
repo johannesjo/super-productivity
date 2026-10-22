@@ -94,6 +94,36 @@ export const computeFieldPullChanges = ({
 };
 
 /**
+ * Whether any pullable field's remote value differs from its baseline (or a
+ * field has none while the task has a baseline). For a provider whose marker can be advanced past changes that were
+ * never pulled: a marker taken from our own write's answer counts that
+ * answer's other changes as seen (server side effects such as a recurring
+ * item's next occurrence, or a collaborator's edit that landed just before).
+ */
+export const hasRemoteFieldChange = (
+  task: Task,
+  issueValues: Record<string, unknown>,
+  fieldMappings: FieldMapping[],
+  syncConfig: FieldSyncConfig,
+): boolean => {
+  const lastSyncedValues = task.issueLastSyncedValues;
+  // Without any baseline there is nothing to compare; the marker decides.
+  if (!lastSyncedValues) {
+    return false;
+  }
+  return fieldMappings.some((mapping) => {
+    const direction = syncConfig[mapping.taskField] ?? mapping.defaultDirection;
+    if (!canPull(direction)) {
+      return false;
+    }
+    const remoteValue = issueValues[mapping.issueField];
+    return Object.prototype.hasOwnProperty.call(lastSyncedValues, mapping.issueField)
+      ? !issueValuesEqual(remoteValue, lastSyncedValues[mapping.issueField])
+      : remoteValue !== undefined;
+  });
+};
+
+/**
  * Local edits still waiting to be pushed, as task changes (task field → current
  * value): pushable fields whose local value differs from their baseline. With
  * `issueValues` (a fresh remote item) only fields whose remote value still
