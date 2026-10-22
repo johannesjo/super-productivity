@@ -280,12 +280,17 @@ export class IssueService {
 
     const allExistingIssueIds: string[] | number[] =
       await this._taskService.getAllIssueIdsForProviderEverywhere(issueProviderId);
-    // A task deleted inside its undo window is no longer among them, but its
-    // item is about to be deleted remotely: not new.
+    // A task whose remote delete is still to come is no longer among them, but
+    // its item is about to be deleted remotely: not new. Pending before the
+    // request too, as a delete that completes while it is in flight leaves the
+    // item in a list read before it.
+    const pendingBefore = this._pendingRemoteIssueDelete.issueIds(issueProviderId);
     const potentialIssuesToAdd = (
       await service.getNewIssuesToAddToBacklog!(issueProviderId, allExistingIssueIds)
     ).filter(
-      (issue) => !this._pendingRemoteIssueDelete.has(issueProviderId, String(issue.id)),
+      (issue) =>
+        !pendingBefore.has(String(issue.id)) &&
+        !this._pendingRemoteIssueDelete.has(issueProviderId, String(issue.id)),
     );
 
     const issuesToAdd: IssueDataReduced[] = potentialIssuesToAdd.filter(

@@ -2152,6 +2152,40 @@ describe('IssueTwoWaySyncEffects', () => {
       adapterRegistry.unregister('TEST_PROVIDER');
     }));
 
+    // Re-review finding: a poll between the bulk's deletes imported the items
+    // still to come, as a delete inside the undo window did.
+    it('keeps the issues still to delete pending, one by one', fakeAsync(() => {
+      const resolvers: (() => void)[] = [];
+      const deleteIssueSpy = jasmine
+        .createSpy('deleteIssue')
+        .and.callFake(() => new Promise<void>((res) => resolvers.push(res)));
+      adapterRegistry.register(
+        'TEST_PROVIDER',
+        createMockAdapter({ deleteIssue: deleteIssueSpy }),
+      );
+      issueProviderServiceSpy.getCfgOnce$.and.returnValue(of(createMockIssueProvider()));
+      const pending = TestBed.inject(PendingRemoteIssueDeleteService);
+      effects.deleteIssueOnBulkTaskDelete$.subscribe();
+
+      deletedTaskIssueSidecar.set([
+        { issueId: 'issue-1', issueType: 'TEST_PROVIDER', issueProviderId: 'provider-1' },
+        { issueId: 'issue-2', issueType: 'TEST_PROVIDER', issueProviderId: 'provider-1' },
+      ]);
+      actions$.next(TaskSharedActions.deleteTasks({ taskIds: ['task-1', 'task-2'] }));
+      tick();
+      expect([...pending.issueIds('provider-1')]).toEqual(['issue-1', 'issue-2']);
+
+      resolvers[0]();
+      tick();
+      expect([...pending.issueIds('provider-1')]).toEqual(['issue-2']);
+
+      resolvers[1]();
+      tick();
+      expect(pending.issueIds('provider-1').size).toBe(0);
+
+      adapterRegistry.unregister('TEST_PROVIDER');
+    }));
+
     it('should skip tasks without issue linkage in bulk delete', fakeAsync(() => {
       const deleteIssueSpy = jasmine.createSpy('deleteIssue').and.resolveTo(undefined);
       const adapter = createMockAdapter({ deleteIssue: deleteIssueSpy });

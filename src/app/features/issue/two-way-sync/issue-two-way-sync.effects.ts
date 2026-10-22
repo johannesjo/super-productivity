@@ -400,13 +400,34 @@ export class IssueTwoWaySyncEffects {
       this._actions$.pipe(
         ofType(TaskSharedActions.deleteTasks),
         concatMap(() => {
-          const issueInfos = this._deletedTaskIssueSidecar.consume();
+          const issueInfos = this._deletedTaskIssueSidecar
+            .consume()
+            .filter((info) => !!this._getAdapter(info.issueType));
           if (!issueInfos.length) {
             return EMPTY;
           }
+          // The items are deleted one by one: a poll meanwhile must not import
+          // the ones still to come.
+          issueInfos.forEach((info) =>
+            this._pendingRemoteIssueDelete.add(info.issueProviderId, info.issueId),
+          );
           return from(issueInfos).pipe(
-            filter((info) => !!this._getAdapter(info.issueType)),
-            concatMap((info) => this._deleteRemoteIssue$(info)),
+            concatMap((info) =>
+              this._deleteRemoteIssue$(info).pipe(
+                finalize(() =>
+                  this._pendingRemoteIssueDelete.remove(
+                    info.issueProviderId,
+                    info.issueId,
+                  ),
+                ),
+              ),
+            ),
+            // An error ends the sequence: release the ones not reached.
+            finalize(() =>
+              issueInfos.forEach((info) =>
+                this._pendingRemoteIssueDelete.remove(info.issueProviderId, info.issueId),
+              ),
+            ),
           );
         }),
       ),

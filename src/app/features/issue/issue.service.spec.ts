@@ -1440,5 +1440,28 @@ describe('IssueService', () => {
       await poll();
       expect(addSpy).toHaveBeenCalledTimes(1);
     });
+
+    // Re-review finding: the remote delete completed while the list request
+    // was in flight, so the list still had the item and nothing was pending.
+    it('does not import an issue whose remote delete ends during the request', async () => {
+      const pending = TestBed.inject(PendingRemoteIssueDeleteService);
+      const addSpy = spyOn(service, 'addTaskFromIssue').and.resolveTo(undefined);
+      (plainspaceService.getNewIssuesToAddToBacklog as jasmine.Spy).and.callFake(
+        async () => {
+          pending.remove(PROVIDER_ID, ISSUE_ID);
+          return [createPlainspaceIssue({ isRecurring: false })];
+        },
+      );
+      taskServiceSpy.getAllIssueIdsForProviderEverywhere.and.resolveTo([]);
+
+      pending.add(PROVIDER_ID, ISSUE_ID);
+      await service.checkAndImportNewIssuesToBacklogForProject(
+        'PLAINSPACE',
+        PROVIDER_ID,
+        true,
+      );
+
+      expect(addSpy).not.toHaveBeenCalled();
+    });
   });
 });

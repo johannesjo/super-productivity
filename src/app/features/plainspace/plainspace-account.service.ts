@@ -58,8 +58,9 @@ export class PlainspaceAccountService {
    * on the token itself scopes it to the same host and account; a provider
    * holding any other token keeps it. A token's account must be a member of
    * a provider's space to replace its token: a provider's reconnect with
-   * another account's token is refused (`other-account`), or every task of
-   * that space would read as no longer assigned to me.
+   * another account's token (a member of none of the Spaces that held the
+   * replaced token) is refused (`other-account`), or every task of those
+   * Spaces would read as no longer assigned to me.
    */
   async connect(
     token: string,
@@ -85,11 +86,13 @@ export class PlainspaceAccountService {
     const providers = (
       await firstValueFrom(this._store.select(selectAllIssueProviders))
     ).filter((ip): ip is IssueProviderPlainspace => ip.issueProviderKey === 'PLAINSPACE');
-    if (
-      providers.some(
-        (ip) => !!replacedToken && ip.token === replacedToken && !isMember(ip),
-      )
-    ) {
+    // Refused only when none of the providers holding it is a member: one
+    // account may share several Spaces on one token and have left one of
+    // them; only the member ones are updated below.
+    const reconnected = providers.filter(
+      (ip) => !!replacedToken && ip.token === replacedToken,
+    );
+    if (reconnected.length && !reconnected.some(isMember)) {
       return 'other-account';
     }
     const account: PlainspaceAccount = { host, token, email: res.me.email };

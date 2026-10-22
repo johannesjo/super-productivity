@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { createEffect, ofType } from '@ngrx/effects';
 import { LOCAL_ACTIONS } from '../../../util/local-actions.token';
 import { combineLatest, EMPTY, from, merge, Observable, timer } from 'rxjs';
@@ -166,7 +167,11 @@ export class PollToBacklogEffects {
           ),
         ).pipe(
           catchError((e) => {
-            IssueLog.err(e);
+            // The error response carries the provider's URL: log its status only.
+            IssueLog.err(
+              'Backlog import poll failed for ' + provider.id,
+              e instanceof HttpErrorResponse ? { status: e.status } : e,
+            );
             this._snackService.open({
               type: 'ERROR',
               // TODO translate

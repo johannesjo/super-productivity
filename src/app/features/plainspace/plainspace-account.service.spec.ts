@@ -33,6 +33,14 @@ describe('PlainspaceAccountService', () => {
       token: 'pat_b',
       spaceId: 'space-b',
     },
+    // One account sharing two Spaces on one token; it later left one of them.
+    { id: 'ps-in', issueProviderKey: 'PLAINSPACE', token: 'pat_t', spaceId: 'space-in' },
+    {
+      id: 'ps-left',
+      issueProviderKey: 'PLAINSPACE',
+      token: 'pat_t',
+      spaceId: 'space-left',
+    },
     { id: 'gh', issueProviderKey: 'GITHUB', token: 'pat_old' },
   ] as unknown as IssueProvider[];
 
@@ -307,6 +315,19 @@ describe('PlainspaceAccountService', () => {
         expect(await reconnectSpaceB([{ id: 'uuid-b', slug: 'space-b' }])).toBe('ok');
         expect(store.dispatch).toHaveBeenCalledOnceWith(
           tokenUpdate('ps-space-b', 'pat_fresh') as never,
+        );
+      });
+
+      // Re-review finding: reconnecting the Space I'm still in was refused
+      // because another Space on the same token had been left.
+      it('reconnects the member Space of a token whose other Space was left', async () => {
+        const p = service.connect('pat_fresh', undefined, 'pat_t');
+        httpMock
+          .expectOne(ME_URL)
+          .flush({ email: 'me@example.com', projects: [{ id: 'space-in', slug: 'in' }] });
+        expect(await p).toBe('ok');
+        expect(store.dispatch).toHaveBeenCalledOnceWith(
+          tokenUpdate('ps-in', 'pat_fresh') as never,
         );
       });
 
