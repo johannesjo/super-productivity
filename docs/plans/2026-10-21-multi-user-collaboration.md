@@ -386,6 +386,10 @@ gets a fix only when it is reported.
 - **Lost create response, or a crash between create and link.** One visible
   duplicate SP task (auto-imported), no data loss. Fix: `clientRef`.
 - **Old self-hosted servers** keep done-only sync until they upgrade.
+- **Titles that were local-only before Release 1** (a local rename, or a title
+  short syntax stripped at import) are pushed on the first successful poll
+  after the update; the baseline can't tell them from an offline edit.
+  Accepted by the maintainer for the beta, with a release note.
 - **Clearing the time skips the remote-changed check** (Scheduled time,
   decided cost).
 - **No cross-repo real-server E2E.** Contract drift is caught by Plainspace's
