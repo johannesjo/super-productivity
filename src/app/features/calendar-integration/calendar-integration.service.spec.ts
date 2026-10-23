@@ -25,7 +25,7 @@ import {
 } from '../issue/providers/calendar/calendar.const';
 import { SnackService } from '../../core/snack/snack.service';
 import { take } from 'rxjs/operators';
-import { Subscription } from 'rxjs';
+import { BehaviorSubject, Subscription } from 'rxjs';
 import { getDbDateStr } from '../../util/get-db-date-str';
 import { PluginIssueProviderRegistryService } from '../../plugins/issue-provider/plugin-issue-provider-registry.service';
 import { PluginHttpService } from '../../plugins/issue-provider/plugin-http.service';
@@ -37,12 +37,14 @@ import { CalendarIntegrationEvent } from './calendar-integration.model';
 import { HiddenCalendarEventsService } from './hidden-calendar-events.service';
 import { ScheduleCalendarMapEntry } from '../schedule/schedule.model';
 import { TaskArchiveService } from '../archive/task-archive.service';
+import { IS_ONLINE$ } from '../../util/is-online.token';
 
 describe('CalendarIntegrationService', () => {
   let service: CalendarIntegrationService;
   let store: MockStore;
   let httpMock: HttpTestingController;
   let subscriptions: Subscription[] = [];
+  let isOnline$: BehaviorSubject<boolean>;
 
   const mockSnackService = {
     open: jasmine.createSpy('open'),
@@ -97,6 +99,7 @@ END:VCALENDAR`;
     // Clear localStorage before each test
     localStorage.clear();
     subscriptions = [];
+    isOnline$ = new BehaviorSubject<boolean>(true);
     mockTaskArchiveService.load.and.callFake(emptyArchive);
 
     TestBed.configureTestingModule({
@@ -112,6 +115,7 @@ END:VCALENDAR`;
         }),
         { provide: SnackService, useValue: mockSnackService },
         { provide: TaskArchiveService, useValue: mockTaskArchiveService },
+        { provide: IS_ONLINE$, useValue: isOnline$ },
       ],
     });
 
@@ -388,6 +392,7 @@ END:VCALENDAR`;
             }),
             { provide: SnackService, useValue: mockSnackService },
             { provide: TaskArchiveService, useValue: mockTaskArchiveService },
+            { provide: IS_ONLINE$, useValue: isOnline$ },
           ],
         });
 
@@ -470,6 +475,7 @@ END:VCALENDAR`;
             }),
             { provide: SnackService, useValue: mockSnackService },
             { provide: TaskArchiveService, useValue: mockTaskArchiveService },
+            { provide: IS_ONLINE$, useValue: isOnline$ },
           ],
         });
 
@@ -539,6 +545,7 @@ END:VCALENDAR`;
             }),
             { provide: SnackService, useValue: mockSnackService },
             { provide: TaskArchiveService, useValue: mockTaskArchiveService },
+            { provide: IS_ONLINE$, useValue: isOnline$ },
           ],
         });
 
@@ -617,6 +624,7 @@ END:VCALENDAR`;
             }),
             { provide: SnackService, useValue: mockSnackService },
             { provide: TaskArchiveService, useValue: mockTaskArchiveService },
+            { provide: IS_ONLINE$, useValue: isOnline$ },
           ],
         });
 
@@ -772,6 +780,97 @@ END:VCALENDAR`;
       }));
     });
 
+    describe('offline', () => {
+      const ONE_HOUR_MS = 60 * 60 * 1000;
+      it('should not request while offline and keep the cached emission', fakeAsync(() => {
+        const mockProvider = createMockProvider();
+        localStorage.setItem(
+          'SUP_CAL_EVENTS_CACHE',
+          JSON.stringify([
+            {
+              items: [
+                {
+                  id: 'cached-ev',
+                  calProviderId: mockProvider.id,
+                  title: 'Cached',
+                  start: Date.now() + ONE_HOUR_MS,
+                  duration: 30 * 60 * 1000,
+                  issueProviderKey: 'ICAL',
+                },
+              ],
+            },
+          ]),
+        );
+        isOnline$.next(false);
+        store.overrideSelector(selectCalendarProviders, [mockProvider]);
+        store.refreshState();
+
+        let lastValue: ScheduleCalendarMapEntry[] | undefined;
+        subscriptions.push(
+          service.calendarEvents$.subscribe((val) => {
+            lastValue = val;
+          }),
+        );
+        tick(0);
+
+        httpMock.expectNone(mockProvider.icalUrl);
+        expect(lastValue?.flatMap((e) => e.items).map((i) => i.id)).toEqual([
+          'cached-ev',
+        ]);
+
+        isOnline$.next(true);
+        tick(0);
+        httpMock.expectOne(mockProvider.icalUrl).flush(MOCK_ICAL_DATA);
+        discardPeriodicTasks();
+      }));
+
+      it('should skip refresh triggers while offline', fakeAsync(() => {
+        const mockProvider = createMockProvider();
+        store.overrideSelector(selectCalendarProviders, [mockProvider]);
+        store.refreshState();
+        subscriptions.push(service.calendarEvents$.subscribe(() => {}));
+        tick(0);
+        httpMock.expectOne(mockProvider.icalUrl).flush(MOCK_ICAL_DATA);
+
+        isOnline$.next(false);
+        service.triggerRefresh();
+        tick(0);
+        httpMock.expectNone(mockProvider.icalUrl);
+        discardPeriodicTasks();
+      }));
+    });
+
+    describe('getCachedEvents', () => {
+      const TEN_MINUTES_MS = 10 * 60 * 1000;
+      it('should return cached events of the provider within the range', () => {
+        const now = Date.now();
+        const ev = (id: string, calProviderId: string, start: number): object => ({
+          id,
+          calProviderId,
+          title: id,
+          start,
+          duration: 60 * 1000,
+          issueProviderKey: 'ICAL',
+        });
+        localStorage.setItem(
+          'SUP_CAL_EVENTS_CACHE',
+          JSON.stringify([
+            {
+              items: [
+                ev('in-range', 'p1', now),
+                ev('other-provider', 'p2', now),
+                ev('too-late', 'p1', now + TEN_MINUTES_MS),
+              ],
+            },
+          ]),
+        );
+
+        expect(
+          service.getCachedEvents('p1', now - 1000, now + 1000).map((e) => e.id),
+        ).toEqual(['in-range']);
+      });
+    });
+
     describe('error handling', () => {
       it('should handle HTTP errors gracefully', fakeAsync(() => {
         const mockProvider = createMockProvider();
@@ -890,6 +989,7 @@ END:VCALENDAR`;
             }),
             { provide: SnackService, useValue: mockSnackService },
             { provide: TaskArchiveService, useValue: mockTaskArchiveService },
+            { provide: IS_ONLINE$, useValue: isOnline$ },
           ],
         });
 
@@ -1389,6 +1489,7 @@ END:VCALENDAR`;
           }),
           { provide: SnackService, useValue: mockSnackService },
           { provide: TaskArchiveService, useValue: mockTaskArchiveService },
+          { provide: IS_ONLINE$, useValue: isOnline$ },
         ],
       });
 
@@ -1421,6 +1522,7 @@ END:VCALENDAR`;
           }),
           { provide: SnackService, useValue: mockSnackService },
           { provide: TaskArchiveService, useValue: mockTaskArchiveService },
+          { provide: IS_ONLINE$, useValue: isOnline$ },
         ],
       });
 
@@ -1449,6 +1551,7 @@ END:VCALENDAR`;
           }),
           { provide: SnackService, useValue: mockSnackService },
           { provide: TaskArchiveService, useValue: mockTaskArchiveService },
+          { provide: IS_ONLINE$, useValue: isOnline$ },
         ],
       });
 
@@ -1474,6 +1577,7 @@ END:VCALENDAR`;
           }),
           { provide: SnackService, useValue: mockSnackService },
           { provide: TaskArchiveService, useValue: mockTaskArchiveService },
+          { provide: IS_ONLINE$, useValue: isOnline$ },
         ],
       });
 
@@ -1616,6 +1720,7 @@ END:VCALENDAR`;
           }),
           { provide: SnackService, useValue: mockSnackService },
           { provide: TaskArchiveService, useValue: mockTaskArchiveService },
+          { provide: IS_ONLINE$, useValue: isOnline$ },
         ],
       });
 
@@ -1692,6 +1797,7 @@ END:VCALENDAR`;
           }),
           { provide: SnackService, useValue: mockSnackService },
           { provide: TaskArchiveService, useValue: mockTaskArchiveService },
+          { provide: IS_ONLINE$, useValue: isOnline$ },
         ],
       });
 
@@ -1794,6 +1900,7 @@ END:VCALENDAR`;
           }),
           { provide: SnackService, useValue: mockSnackService },
           { provide: TaskArchiveService, useValue: mockTaskArchiveService },
+          { provide: IS_ONLINE$, useValue: isOnline$ },
         ],
       });
 
@@ -1990,6 +2097,7 @@ END:VCALENDAR`;
           }),
           { provide: SnackService, useValue: mockSnackService },
           { provide: TaskArchiveService, useValue: mockTaskArchiveService },
+          { provide: IS_ONLINE$, useValue: isOnline$ },
         ],
       });
 
@@ -2014,6 +2122,7 @@ END:VCALENDAR`;
           }),
           { provide: SnackService, useValue: mockSnackService },
           { provide: TaskArchiveService, useValue: mockTaskArchiveService },
+          { provide: IS_ONLINE$, useValue: isOnline$ },
         ],
       });
 
@@ -2047,6 +2156,7 @@ END:VCALENDAR`;
           }),
           { provide: SnackService, useValue: mockSnackService },
           { provide: TaskArchiveService, useValue: mockTaskArchiveService },
+          { provide: IS_ONLINE$, useValue: isOnline$ },
         ],
       });
 
@@ -2204,6 +2314,7 @@ END:VCALENDAR`;
           }),
           { provide: SnackService, useValue: mockSnackService },
           { provide: TaskArchiveService, useValue: mockTaskArchiveService },
+          { provide: IS_ONLINE$, useValue: isOnline$ },
         ],
       });
 
@@ -2348,6 +2459,7 @@ END:VCALENDAR`;
           { provide: PluginIssueProviderRegistryService, useValue: mockRegistry },
           { provide: PluginHttpService, useValue: mockPluginHttp },
           { provide: TaskArchiveService, useValue: mockTaskArchiveService },
+          { provide: IS_ONLINE$, useValue: isOnline$ },
         ],
       });
 
@@ -2423,6 +2535,7 @@ END:VCALENDAR`;
           { provide: SnackService, useValue: mockSnackService },
           { provide: PluginHttpService, useValue: mockPluginHttp },
           { provide: TaskArchiveService, useValue: mockTaskArchiveService },
+          { provide: IS_ONLINE$, useValue: isOnline$ },
         ],
       });
 
