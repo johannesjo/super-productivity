@@ -156,7 +156,14 @@ describe('TaskContextMenuInnerComponent', () => {
           },
         },
         { provide: LocaleDatePipe, useValue: {} },
-        { provide: DateAdapter, useValue: { getFirstDayOfWeek: () => 0 } },
+        {
+          provide: DateAdapter,
+          useValue: {
+            getFirstDayOfWeek: () => 1,
+            getDayOfWeek: (d: Date) => d.getDay(),
+            getDayOfWeekNames: () => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
+          },
+        },
       ],
     }).compileComponents();
 
@@ -436,8 +443,9 @@ describe('TaskContextMenuInnerComponent', () => {
       ).map((btn) => btn.querySelector('.quick-access-label')?.textContent?.trim());
       expect(labels).toEqual([
         T.G.TODAY,
-        T.G.TOMORROW,
-        T.G.NEXT_WEEK,
+        // weekday names keep every label on one line in the narrow row
+        ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][(new Date().getDay() + 1) % 7],
+        'Mon',
         T.F.TASK.D_SCHEDULE_TASK.QA_LABEL_PICK_DATE,
       ]);
       closeMenus();

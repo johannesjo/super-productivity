@@ -8,6 +8,7 @@
 
 <mat-menu
   #contextMenu="matMenu"
+  class="mat-menu-wide"
   yPosition="below"
   xPosition="after"
   [backdropClass]="
@@ -39,7 +40,7 @@
       [matTooltip]="T.F.TASK.D_SCHEDULE_TASK.QA_TOMORROW | translate"
     >
       <mat-icon aria-hidden="true">wb_twilight</mat-icon>
-      <span class="quick-access-label">{{ T.G.TOMORROW | translate }}</span>
+      <span class="quick-access-label">{{ tomorrowLabel }}</span>
     </button>
     <button
       type="button"
@@ -47,7 +48,7 @@
       [matTooltip]="T.F.TASK.D_SCHEDULE_TASK.QA_NEXT_WEEK | translate"
     >
       <mat-icon aria-hidden="true">next_week</mat-icon>
-      <span class="quick-access-label">{{ T.G.NEXT_WEEK | translate }}</span>
+      <span class="quick-access-label">{{ nextWeekLabel }}</span>
     </button>
     <button
       type="button"
