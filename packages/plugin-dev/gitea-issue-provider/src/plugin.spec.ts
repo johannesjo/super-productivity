@@ -13,6 +13,7 @@ beforeAll(async () => {
       definition = def;
     }),
     translate: (key: string) => key,
+    log: { err: vi.fn() },
   };
   await import('./plugin');
 });
@@ -46,6 +47,15 @@ const makeHttp = (pages: GiteaIssueFixture[][]): { http: PluginHttp; urls: strin
       urls.push(full);
       if (full.includes('/user')) {
         return { id: 1, login: 'me', username: 'me', full_name: '', avatar_url: '' };
+      }
+      if (/\/issues\/\d+$/.test(url)) {
+        return {
+          ...makeIssue(7),
+          comments: 0,
+          created_at: '',
+          updated_at: '',
+          user: null,
+        };
       }
       const match = /[?&]page=(\d+)/.exec(full);
       return match ? (pages[Number(match[1]) - 1] ?? []) : (pages[0] ?? []);
@@ -81,5 +91,42 @@ describe('Gitea Plugin - getNewIssuesForBacklog', () => {
 
     expect(urls.every((u) => !u.includes('/user'))).toBe(true);
     expect(urls.every((u) => u.includes('type=issues'))).toBe(true);
+  });
+});
+
+describe('Gitea Plugin - reverse proxy with HTTP Basic auth', () => {
+  const base = { host: 'https://gitea.example', repoFullname: 'org/repo', token: 'tok' };
+  const proxied = { ...base, proxyUser: 'toto', proxyPassword: 'secret' };
+
+  it('sends the token as an Authorization header and never in the URL by default', async () => {
+    const { http, urls } = makeHttp([[makeIssue(1)], []]);
+
+    const headers = await definition.getHeaders({ ...base, scope: 'all' });
+    await definition.searchIssues('x', { ...base, scope: 'all' }, http);
+
+    expect(headers['Authorization']).toBe('token tok');
+    expect(urls.every((u) => !u.includes('token='))).toBe(true);
+  });
+
+  it('with proxy credentials, uses Basic for the header and moves the token to the query', async () => {
+    const { http, urls } = makeHttp([[makeIssue(1)], []]);
+
+    const headers = await definition.getHeaders({ ...proxied, scope: 'created-by-me' });
+    await definition.searchIssues('x', { ...proxied, scope: 'all' }, http);
+    await definition.getById('7', proxied, http);
+    await definition.testConnection!(proxied, http);
+    await definition.getNewIssuesForBacklog!(
+      { ...proxied, scope: 'created-by-me' },
+      http,
+    );
+
+    expect(headers['Authorization']).toBe(`Basic ${btoa('toto:secret')}`);
+    expect(urls.length).toBeGreaterThanOrEqual(5);
+    expect(urls.every((u) => u.includes('token=tok'))).toBe(true);
+  });
+
+  it('ignores a proxy user without a password', async () => {
+    const headers = await definition.getHeaders({ ...base, proxyUser: 'toto' });
+    expect(headers['Authorization']).toBe('token tok');
   });
 });

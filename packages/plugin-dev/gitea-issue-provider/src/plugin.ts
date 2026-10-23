@@ -6,6 +6,7 @@ import type {
 } from '@super-productivity/plugin-api';
 import {
   asConfig,
+  basicAuth,
   canConnect,
   COMMENTS_CONFIG,
   isDoneMapping,
@@ -36,6 +37,8 @@ interface GiteaConfig {
   scope?: string;
   filterLabels?: string;
   excludeLabels?: string;
+  proxyUser?: string;
+  proxyPassword?: string;
 }
 
 interface GiteaUser {
@@ -91,12 +94,27 @@ const baseUrl = (cfg: GiteaConfig): string => {
   return `${host}/${API_SUFFIX}/${API_VERSION}`;
 };
 
+// A reverse proxy in front of Gitea/Forgejo that demands HTTP Basic auth
+// claims the single Authorization header. In that case the proxy credentials
+// go in the header and the Gitea token travels as the `token` query parameter,
+// which Gitea/Forgejo check alongside the header (the proxy's Basic pair is
+// rejected by Gitea itself but does not stop the token check).
+const hasProxyAuth = (cfg: GiteaConfig): boolean =>
+  !!cfg.proxyUser && !!cfg.proxyPassword;
+
 // Auth is sent as `Authorization: token <token>` (a Gitea-supported scheme),
-// which keeps the token out of request URLs / logs.
+// which keeps the token out of request URLs / logs — except in proxy mode,
+// where the URL is the only place left for it and may end up in proxy logs.
 const giteaHeaders = (cfg: GiteaConfig): Record<string, string> => ({
   accept: 'application/json',
-  ...tokenAuth(cfg.token),
+  ...(hasProxyAuth(cfg)
+    ? { Authorization: basicAuth(cfg.proxyUser!, cfg.proxyPassword!) }
+    : tokenAuth(cfg.token)),
 });
+
+/** Query params carrying the token in proxy mode; empty otherwise. */
+const authParams = (cfg: GiteaConfig): Record<string, string> =>
+  hasProxyAuth(cfg) && cfg.token ? { token: cfg.token } : {};
 
 const parseLabelList = (raw: string | undefined): string[] =>
   (raw ?? '')
@@ -190,6 +208,19 @@ registerIssueProvider({
       label: t('CFG.EXCLUDE_LABELS'),
       advanced: true,
     },
+    {
+      key: 'proxyUser',
+      type: 'input',
+      label: t('CFG.PROXY_USER'),
+      description: t('CFG.PROXY_HINT'),
+      advanced: true,
+    },
+    {
+      key: 'proxyPassword',
+      type: 'password',
+      label: t('CFG.PROXY_PASSWORD'),
+      advanced: true,
+    },
   ],
 
   getHeaders: (config) => giteaHeaders(asConfig<GiteaConfig>(config)),
@@ -205,6 +236,7 @@ registerIssueProvider({
     const excludedLabels = parseLabelList(cfg.excludeLabels);
 
     const params: Record<string, string> = {
+      ...authParams(cfg),
       limit: '100',
       state: 'open',
       type: 'issues',
@@ -236,7 +268,8 @@ registerIssueProvider({
     const cfg = asConfig<GiteaConfig>(config);
     const base = baseUrl(cfg);
     const issueUrl = `${base}/repos/${cfg.repoFullname}/issues/${issueId}`;
-    const issue = await http.get<GiteaIssue>(issueUrl);
+    const opts: PluginHttpOptions = { params: authParams(cfg) };
+    const issue = await http.get<GiteaIssue>(issueUrl, opts);
 
     const result: PluginIssue = {
       id: String(issue.number),
@@ -260,7 +293,7 @@ registerIssueProvider({
     };
 
     if (issue.comments > 0) {
-      const commentsData = await http.get<GiteaComment[]>(`${issueUrl}/comments`);
+      const commentsData = await http.get<GiteaComment[]>(`${issueUrl}/comments`, opts);
       result.comments = (commentsData || []).map((c) => ({
         author: c.user?.login || c.user?.username || 'unknown',
         body: c.body || '',
@@ -283,7 +316,9 @@ registerIssueProvider({
     http: PluginHttp,
   ): Promise<boolean> {
     const cfg = asConfig<GiteaConfig>(config);
-    return canConnect(() => http.get(`${baseUrl(cfg)}/repos/${cfg.repoFullname}`));
+    return canConnect(() =>
+      http.get(`${baseUrl(cfg)}/repos/${cfg.repoFullname}`, { params: authParams(cfg) }),
+    );
   },
 
   async getNewIssuesForBacklog(
@@ -306,13 +341,16 @@ registerIssueProvider({
     // The server can restrict the issues per page to less than requested
     while ((page === 1 || issues.length !== 0) && page <= MAX_PAGES) {
       const params: Record<string, string> = {
+        ...authParams(cfg),
         limit: '100',
         state: 'open',
         type: 'issues',
         page: page.toString(),
       };
       if (cfg.scope === SCOPE_CREATED_BY_ME || cfg.scope === SCOPE_ASSIGNED_TO_ME) {
-        user = user || (await http.get<GiteaUser>(`${base}/user`));
+        user =
+          user ||
+          (await http.get<GiteaUser>(`${base}/user`, { params: authParams(cfg) }));
         if (cfg.scope === SCOPE_CREATED_BY_ME) {
           params['created_by'] = user.username;
         } else {
