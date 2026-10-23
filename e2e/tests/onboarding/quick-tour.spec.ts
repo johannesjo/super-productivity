@@ -276,6 +276,8 @@ test.describe('Quick tour', () => {
       // Part 1 on phones often ends with the task done: no task steps follow.
       await page.locator('task').first().locator('done-toggle').tap();
       await expect(hint).toContainText('under ☰');
+      // The chip slides after the done task; a tap mid-slide can miss (run 39889225439).
+      await expect(hint.locator('.hint-container')).not.toHaveClass(/is-sliding/);
       await hint.getByRole('button', { name: 'Show me more ›' }).tap();
       await expect(hint).toContainText('Projects and tags live under ☰');
       await expect(hint).toContainText('1 of 3');
