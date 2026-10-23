@@ -59,7 +59,8 @@ import { T } from '../../../t.const';
 import { PlannerActions } from '../../planner/store/planner.actions';
 import { deleteTag, deleteTags } from '../../tag/store/tag.actions';
 import { IssueSyncAdapterResolverService } from './issue-sync-adapter-resolver.service';
-import { shortSyntax } from '../../tasks/short-syntax';
+import { shortSyntaxForNewWords } from '../../tasks/util/short-syntax-for-new-words';
+import { IssueSharedTitleService } from './issue-shared-title.service';
 import { selectShortSyntaxConfig } from '../../config/store/global-config.reducer';
 import { DEFAULT_GLOBAL_CONFIG } from '../../config/default-global-config.const';
 import { selectAllTagsWithoutMyDay } from '../../tag/store/tag.reducer';
@@ -175,6 +176,7 @@ export class IssueTwoWaySyncEffects {
   private readonly _adapterResolver = inject(IssueSyncAdapterResolverService);
   private readonly _pluginRegistry = inject(PluginIssueProviderRegistryService);
   private readonly _syncState = inject(IssueSyncStateService);
+  private readonly _issueSharedTitleService = inject(IssueSharedTitleService);
   private readonly _taskEntities = this._store.selectSignal(selectTaskEntities);
   private _syncOriginatedTaskIds = new Set<string>();
   private static readonly _MAX_SYNC_ORIGINATED_IDS = 1000;
@@ -670,7 +672,10 @@ export class IssueTwoWaySyncEffects {
     if (!current?.issueId) {
       return false;
     }
-    return (await this._parseShortSyntax(current)).title !== current.title;
+    const sharedTitle = await this._issueSharedTitleService.getSharedTitle(current);
+    return (
+      (await this._parseShortSyntax(current, false, sharedTitle)).title !== current.title
+    );
   }
 
   /**
@@ -682,6 +687,8 @@ export class IssueTwoWaySyncEffects {
   private async _parseShortSyntax(
     task: Task,
     isIgnoreShortSyntax?: boolean,
+    // A shared title whose words stay text (see IssueSharedTitleService).
+    keptTitle?: string,
   ): Promise<{ title: string; projectId?: string }> {
     if (isIgnoreShortSyntax) {
       return { title: task.title };
@@ -691,7 +698,8 @@ export class IssueTwoWaySyncEffects {
       firstValueFrom(this._store.select(selectAllTagsWithoutMyDay)),
       firstValueFrom(this._store.select(selectUnarchivedProjects)),
     ]);
-    const r = await shortSyntax(
+    const r = await shortSyntaxForNewWords(
+      keptTitle,
       task,
       cfg || DEFAULT_GLOBAL_CONFIG.shortSyntax,
       tags,
