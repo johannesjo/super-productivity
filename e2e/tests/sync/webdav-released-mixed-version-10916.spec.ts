@@ -209,4 +209,44 @@ test.describe('@webdav released mixed-version Today tasks (#10916)', () => {
       await phone.close();
     }
   });
+
+  // The report says the desktop is *opened* after the phone syncs, so its first
+  // sync is the startup sync of a freshly booted v19.1.0 app, repeated each round.
+  test('v19.1.0 desktop reopened after each phone sync keeps the phone Today tasks', async ({
+    browser,
+    request,
+  }) => {
+    test.slow();
+    const config = await newFolder(request, 'e2e-10916-reopen');
+    const desktop = await openClient(browser, v191.url, entry191);
+    const phone = await openClient(browser, v192.url, entry192);
+    try {
+      await desktop.sync.setupWebdavSync(config);
+      await addToday(desktop, 'Desk-Base');
+      await syncNow(desktop);
+      await phone.sync.setupWebdavSync(config);
+      await syncNow(phone);
+
+      const expected = ['Desk-Base'];
+      for (const round of [1, 2, 3]) {
+        await addToday(phone, `Phone-${round}`);
+        await syncNow(phone);
+        expected.push(`Phone-${round}`);
+
+        await desktop.page.reload();
+        expect(await loadedEntryScript(desktop.page)).toBe(entry191);
+        // The startup sync is not armed by the page object; let it finish first.
+        await desktop.work.waitForTaskList();
+        await expect(desktop.sync.syncSpinner).toBeHidden({ timeout: 30000 });
+        await syncNow(desktop);
+        await syncNow(phone);
+
+        expect(await todayTitles(desktop)).toEqual([...expected].sort());
+        expect(await todayTitles(phone)).toEqual([...expected].sort());
+      }
+    } finally {
+      await desktop.close();
+      await phone.close();
+    }
+  });
 });
