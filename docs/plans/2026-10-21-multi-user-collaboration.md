@@ -435,13 +435,17 @@ gets a fix only when it is reported.
 - **Lost create response, or a crash between create and link.** One visible
   duplicate SP task (auto-imported), no data loss. Fix: `clientRef`.
 - **Old self-hosted servers** keep done-only sync until they upgrade.
-- **Titles and times that were local-only before Release 1** (a local rename,
-  a title short syntax stripped at import, a local reschedule, or a day-only
-  plan or Add to Today on a task with a Plainspace time) are pushed on the
-  first successful poll after the update; the baseline can't tell them from an
-  offline edit. A day-only plan sends "no time", so a time a collaborator set
-  is removed for everyone. Accepted by the maintainer for the beta (titles),
-  with a release note; the note must name times too.
+- **Titles and times that were local-only before this release** (a local
+  rename, a title short syntax stripped at import, a local reschedule, or a
+  day-only plan or Add to Today on a task with a Plainspace time) are pushed on
+  the first successful poll after the update; the baseline can't tell them
+  from an offline edit. The commonest trigger is the reminder dialog's "Add to
+  today" (`dialog-view-task-reminders`, `isClearScheduledTime: true`), which
+  always clears `dueWithTime` locally; plain Add to Today does the same for a
+  timed task on another day (`shouldClearDueTimeForToday`). The first poll
+  after the update then sends "no time", which removes the Space's time for
+  everyone. **Decided (Oct 23):** accepted with a release note naming times and
+  "Add to today". Revisit if users report lost times.
 - **No cross-repo real-server E2E.** Contract drift is caught by Plainspace's
   integration tests and the shared `SPTask` type.
 - **Delegated tasks** don't show their live title, done state or assignee in SP.
