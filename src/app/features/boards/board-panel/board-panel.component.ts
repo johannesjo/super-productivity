@@ -75,6 +75,8 @@ import { checkKeyCombo } from '../../../util/check-key-combo';
 import { ADD_TASK_INLINE_BTN_SELECTOR } from '../../planner/add-task-inline/add-task-inline.const';
 import { getScheduledDateColor } from '../../tasks/util/get-scheduled-date-color';
 import type { ScheduledDateColor } from '../../tasks/util/get-scheduled-date-color';
+import { isDeadlineOverdue } from '../../tasks/util/is-deadline-overdue';
+import { DialogDeadlineComponent } from '../../tasks/dialog-deadline/dialog-deadline.component';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { DateService } from '../../../core/date/date.service';
 
@@ -554,6 +556,22 @@ export class BoardPanelComponent implements TaskCardList {
       this._dateService.getStartOfNextDayDiffMs(),
       task.dueWithTime ? this._trackingInterval.clockTimestamp() : 0,
     );
+  }
+
+  deadlineColor(task: TaskCopy): ScheduledDateColor {
+    return isDeadlineOverdue(task, this._trackingInterval.todayDateStr())
+      ? 'overdue'
+      : '';
+  }
+
+  editDeadline(task: TaskCopy, ev: MouseEvent): void {
+    ev.preventDefault();
+    ev.stopPropagation();
+    this._matDialog.open(DialogDeadlineComponent, {
+      autoFocus: false,
+      restoreFocus: true,
+      data: { task },
+    });
   }
 
   scheduleTask(task: TaskCopy, ev?: MouseEvent): void {
