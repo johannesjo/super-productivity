@@ -62,9 +62,9 @@ describe('PlainspaceConnectionStateService', () => {
   });
 
   it('remembers a server too old for titles per provider, and a success keeps it', () => {
-    state.reportTitleUnsupported('p1');
+    state.reportServerTooOld('p1');
     state.reportSuccess('p1');
-    expect(state.isTitleUnsupported('p1')).toBe(true);
-    expect(state.isTitleUnsupported('p2')).toBe(false);
+    expect(state.isServerTooOld('p1')).toBe(true);
+    expect(state.isServerTooOld('p2')).toBe(false);
   });
 });

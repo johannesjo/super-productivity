@@ -347,7 +347,7 @@ test.describe('Plainspace Release 1 sync', () => {
 
     await page.locator('.e2e-toggle-issue-provider-panel').click();
     const tooOld = page.locator('plainspace-reconnect-notice .callout', {
-      hasText: 'too old for title sync',
+      hasText: 'too old to sync titles and times',
     });
     await expect(tooOld).toHaveCount(1);
     await expect(tooOld).toBeVisible();

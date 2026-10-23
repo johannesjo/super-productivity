@@ -20,6 +20,7 @@ import {
 } from '../../tasks/store/task.selectors';
 import { IssueLog } from '../../../core/log';
 import { getRefreshOnLook$ } from './refresh-on-look';
+import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
 
 @Injectable()
 export class PollIssueUpdatesEffects {
@@ -27,6 +28,7 @@ export class PollIssueUpdatesEffects {
   private _actions$ = inject(LOCAL_ACTIONS);
   private readonly _issueService = inject(IssueService);
   private readonly _workContextService = inject(WorkContextService);
+  private readonly _syncTriggerService = inject(SyncTriggerService);
 
   pollIssueTaskUpdatesActions$: Observable<unknown> = this._actions$.pipe(
     ofType(setActiveWorkContext, loadAllData),
@@ -64,13 +66,15 @@ export class PollIssueUpdatesEffects {
 
   /**
    * Polls issue updates for providers with pollingMode 'always'.
-   * Starts once on the first trigger and runs continuously, reacting
-   * only to provider configuration changes -- not to context switches.
+   * Starts once, after the initial sync and the initial data load, and runs
+   * continuously, reacting only to provider configuration changes -- not to
+   * context switches. A session may never switch context or load data
+   * locally (a boot that replays the op log while staying on Today), so it
+   * must not wait for those actions.
    */
   pollIssueChangesAlways$: Observable<unknown> = createEffect(
     () =>
-      this.pollIssueTaskUpdatesActions$.pipe(
-        first(),
+      this._syncTriggerService.afterInitialSyncDoneStrict$.pipe(
         switchMap(() =>
           this._store.select(selectEnabledIssueProviders).pipe(
             switchMap((enabledProviders: IssueProvider[]) => {

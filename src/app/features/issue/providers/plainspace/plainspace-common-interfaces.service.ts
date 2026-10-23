@@ -146,7 +146,6 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
         providerTasks.filter((task) => !issuesById.has(task.issueId!)).map((t) => t.id),
       );
       const fieldMappings = this._syncAdapter.getFieldMappings();
-      const syncConfig = this._syncAdapter.getSyncConfig(cfg);
       const toPush: string[] = [];
       for (const task of providerTasks) {
         const issue = issuesById.get(task.issueId!);
@@ -157,14 +156,14 @@ export class PlainspaceCommonInterfacesService extends BaseIssueProviderService<
         if (fresh) {
           updates.push({ task, taskChanges: fresh.taskChanges, issue: fresh.issue });
         }
+        const issueRecord = issue as unknown as Record<string, unknown>;
         const pending = computePendingLocalChanges(
           task,
           fieldMappings,
-          syncConfig,
+          // Per item: a repeating item's time is never pending.
+          this._syncAdapter.getSyncConfig(cfg, issueRecord),
           { issueId: issue.id },
-          this._syncAdapter.extractSyncValues(
-            issue as unknown as Record<string, unknown>,
-          ),
+          this._syncAdapter.extractSyncValues(issueRecord),
         );
         if (Object.keys(pending).length) {
           toPush.push(task.id);

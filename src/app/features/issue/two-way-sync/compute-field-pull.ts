@@ -144,14 +144,26 @@ export const computePendingLocalChanges = (
   if (!lastSyncedValues) {
     return pending;
   }
+  // Like the push decisions, the first mapping of a remote field decides it
+  // (e.g. a time, before a day-only plan that maps onto the same field).
+  const decidedIssueFields = new Set<string>();
   for (const mapping of fieldMappings) {
+    if (decidedIssueFields.has(mapping.issueField)) {
+      continue;
+    }
     const direction = syncConfig[mapping.taskField] ?? mapping.defaultDirection;
+    // Unlike `computePushDecisions`, a key missing from the baseline (an
+    // `undefined` JSON dropped on its way here) is not pending. Read as
+    // undefined, CalDAV's empty note ('' locally, undefined remotely) would
+    // count as pending and a Retry would write an empty description. So an
+    // offline edit of such a field isn't queued; its next direct edit pushes it.
     if (
       !canPush(direction) ||
       !Object.prototype.hasOwnProperty.call(lastSyncedValues, mapping.issueField)
     ) {
       continue;
     }
+    decidedIssueFields.add(mapping.issueField);
     const baseline = lastSyncedValues[mapping.issueField];
     if (issueValues && !issueValuesEqual(issueValues[mapping.issueField], baseline)) {
       continue;

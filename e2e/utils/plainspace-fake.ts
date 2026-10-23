@@ -51,12 +51,17 @@ export interface FakePlainspace {
   isPatchServerError: boolean;
   /** POST /tasks (create) answers 500. */
   isCreateServerError: boolean;
+  /** PATCH answers 409 with this error (any conflict other than the repeat rule). */
+  patchConflictError: string | null;
   /**
    * A server from before `title`/`scheduledAt` were accepted: a PATCH without
-   * `done` is a 422, and any other field next to `done` is ignored.
+   * `done` is a 422, and any other field next to `done` is ignored. It has no
+   * members endpoint either (404).
    */
   isOldServer: boolean;
   patches: FakePatch[];
+  /** The other members of the space, as `GET /spaces/:id/members` lists them. */
+  members: { id: string; displayName: string }[];
   /** Runs right after a PATCH was answered, e.g. a collaborator's edit. */
   afterPatch: (() => void) | null;
   /**
@@ -78,7 +83,14 @@ const nextUpdatedAt = (): string => {
   return new Date(clock).toISOString();
 };
 
-export const installFakePlainspace = async (page: Page): Promise<FakePlainspace> => {
+/**
+ * `shared`: route this page to an existing fake instead of a new one, so two
+ * clients (two SP devices) talk to the same Plainspace space.
+ */
+export const installFakePlainspace = async (
+  page: Page,
+  shared?: FakePlainspace,
+): Promise<FakePlainspace> => {
   const cors = {
     ['access-control-allow-origin']: '*',
     ['access-control-allow-headers']: 'authorization, content-type',
@@ -99,7 +111,7 @@ export const installFakePlainspace = async (page: Page): Promise<FakePlainspace>
     isRecurring: false,
   });
 
-  const server: FakePlainspace = {
+  const server: FakePlainspace = shared ?? {
     tasks: new Map(),
     assignedIds: new Set(),
     isTasksOffline: false,
@@ -107,8 +119,10 @@ export const installFakePlainspace = async (page: Page): Promise<FakePlainspace>
     offlineRequests: [],
     isPatchServerError: false,
     isCreateServerError: false,
+    patchConflictError: null,
     isOldServer: false,
     patches: [],
+    members: [{ id: 'member-bob', displayName: 'Bob' }],
     afterPatch: null,
     beforePatch: null,
     creates: [],
@@ -172,6 +186,8 @@ export const installFakePlainspace = async (page: Page): Promise<FakePlainspace>
       }
       const task = server.addAssignedTask(`created-${server.creates.length}`, body.title);
       await json(201, { task });
+    } else if (path === `/spaces/${PLAINSPACE_SPACE.id}/members` && !server.isOldServer) {
+      await json(200, { members: server.members });
     } else if (path === '/claimable-tasks') {
       await json(200, { tasks: [] });
     } else if (taskMatch && req.method() === 'GET') {
@@ -190,6 +206,10 @@ export const installFakePlainspace = async (page: Page): Promise<FakePlainspace>
       server.beforePatch?.();
       if (server.isPatchServerError) {
         await answer(500, { error: 'Internal error' });
+        return;
+      }
+      if (server.patchConflictError) {
+        await answer(409, { error: server.patchConflictError });
         return;
       }
       const task = assignedTask(id);
@@ -211,11 +231,27 @@ export const installFakePlainspace = async (page: Page): Promise<FakePlainspace>
         await answer(422, { error: 'Validation failed' });
         return;
       }
+      const scheduledAt = body['scheduledAt'] as string | null | undefined;
+      // Unscheduling a repeating task would drop its rule for the whole space.
+      if (scheduledAt === null && task.isRecurring) {
+        await answer(409, { error: 'repeat_requires_remind_at' });
+        return;
+      }
+      const assigneeId = body['assigneeId'];
+      if (assigneeId !== undefined) {
+        if (assigneeId !== null && !server.members.some((m) => m.id === assigneeId)) {
+          await answer(404, { error: 'Member not found' });
+          return;
+        }
+        // Handed to someone else or released: no longer listed for me.
+        server.assignedIds.delete(id);
+      }
       server.remoteEdit(id, {
         ...(typeof body['done'] === 'boolean' ? { done: body['done'] } : {}),
         ...(typeof title === 'string' ? { title } : {}),
-        ...(body['scheduledAt'] !== undefined
-          ? { scheduledAt: body['scheduledAt'] as string | null }
+        // Stored as a timestamp and answered as UTC ISO, whatever offset came in.
+        ...(scheduledAt !== undefined
+          ? { scheduledAt: scheduledAt && new Date(scheduledAt).toISOString() }
           : {}),
       });
       await answer(200, { task: server.tasks.get(id) });

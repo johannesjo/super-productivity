@@ -21,13 +21,15 @@ export const PLAINSPACE_MAX_TITLE_LENGTH = 500;
  * - `title` → `title`
  * - `dueWithTime` → `scheduledAt`
  *
- * Completion and title sync both ways. The schedule is pulled from Plainspace
- * by issue-update polling only.
+ * - `dueDay` → `scheduledAt` (push only: a plan without a time)
  *
- * `dueDay` (date-only scheduling, no time) is intentionally NOT mapped: Plainspace
- * `scheduledAt` always carries a time, so mapping a day-only task would fabricate
- * a time-of-day. There is no separate day field on Plainspace to clear, so no
- * `mutuallyExclusive` entry is needed.
+ * All sync both ways. Plainspace has one schedule field, a time, so the value
+ * sent is the task's `dueWithTime`, or "no time" when it has none: a day-only
+ * plan, adding to Today without a time and unscheduling all clear it (plan
+ * § Scheduled time). `dueDay` maps onto the same remote field and always sends
+ * "no time"; it only decides when a change reports the day alone (planning a
+ * day), since `dueWithTime` comes first and the engine decides a remote field
+ * once.
  */
 const PLAINSPACE_FIELD_MAPPINGS: FieldMapping[] = [
   {
@@ -47,7 +49,7 @@ const PLAINSPACE_FIELD_MAPPINGS: FieldMapping[] = [
   {
     taskField: 'dueWithTime',
     issueField: 'scheduledAt',
-    defaultDirection: 'pullOnly',
+    defaultDirection: 'both',
     toIssueValue: (taskValue: unknown): string | null =>
       typeof taskValue === 'number' ? new Date(taskValue).toISOString() : null,
     // "No time" is null, not undefined: JSON drops an undefined from the op, so
@@ -56,11 +58,18 @@ const PLAINSPACE_FIELD_MAPPINGS: FieldMapping[] = [
     toTaskValue: (issueValue: unknown): number | null =>
       typeof issueValue === 'string' ? new Date(issueValue).getTime() : null,
   },
+  {
+    taskField: 'dueDay',
+    issueField: 'scheduledAt',
+    defaultDirection: 'pushOnly',
+    toIssueValue: (): null => null,
+    toTaskValue: (): undefined => undefined,
+  },
 ];
 
 /**
- * Two-way sync adapter for Plainspace: writes completion and title back and
- * leaves the Plainspace-owned schedule to the polling path.
+ * Two-way sync adapter for Plainspace: writes completion, title and the
+ * scheduled time back. A repeating item's time is Plainspace's (pull only).
  */
 @Injectable({ providedIn: 'root' })
 export class PlainspaceSyncAdapterService implements IssueSyncAdapter<PlainspaceCfg> {
@@ -71,15 +80,19 @@ export class PlainspaceSyncAdapterService implements IssueSyncAdapter<Plainspace
     return PLAINSPACE_FIELD_MAPPINGS;
   }
 
-  getSyncConfig(cfg: PlainspaceCfg): FieldSyncConfig {
-    // A server too old for titles keeps the title pull-only for the session.
+  getSyncConfig(cfg: PlainspaceCfg, issue?: Record<string, unknown>): FieldSyncConfig {
+    // A server too old for titles and times keeps both pull-only for the
+    // session. A repeating item's time is set in Plainspace: local edits stay
+    // until the next occurrence moves it.
     const providerId = getProviderId(cfg);
-    const isTitleUnsupported =
-      !!providerId && this._connectionState.isTitleUnsupported(providerId);
+    const isServerTooOld =
+      !!providerId && this._connectionState.isServerTooOld(providerId);
+    const isTimePullOnly = isServerTooOld || issue?.['isRecurring'] === true;
     return {
       isDone: 'both',
-      title: isTitleUnsupported ? 'pullOnly' : 'both',
-      dueWithTime: 'pullOnly',
+      title: isServerTooOld ? 'pullOnly' : 'both',
+      dueWithTime: isTimePullOnly ? 'pullOnly' : 'both',
+      dueDay: isTimePullOnly ? 'off' : 'pushOnly',
     };
   }
 
@@ -124,12 +137,14 @@ export class PlainspaceSyncAdapterService implements IssueSyncAdapter<Plainspace
   }
 
   /**
-   * PATCHes completion and title. The server stores the title verbatim, so the
-   * echo must match exactly. A server from before titles were accepted answers
-   * a request carrying one with a 422 (no `done` next to it) or ignores it (200
-   * with the old title): titles then stop being pushed to that provider for the
-   * session, done is sent on its own, and the rejection is an expected skip, so
-   * baselines stay put and the next poll reconciles.
+   * PATCHes completion, title and scheduled time. The server stores the title
+   * verbatim and the time as an instant, so the echo must match exactly. A
+   * server from before titles and times were accepted answers a request
+   * carrying one with a 422 (no `done` next to it) or ignores it (200 with the
+   * old value): neither is pushed to that provider again this session, done is
+   * sent on its own, and the rejection is an expected skip, so baselines stay
+   * put and the next poll reconciles. A 409 is a refusal of this change (e.g.
+   * the item became repeating), never an old server.
    */
   async pushChanges(
     issueId: string,
@@ -140,13 +155,20 @@ export class PlainspaceSyncAdapterService implements IssueSyncAdapter<Plainspace
     if ('isDone' in changes) {
       patch.done = !!changes['isDone'];
     }
-    // A title Plainspace can't take is not sent; done still is, then the task
-    // shows why its title didn't sync.
+    // A title Plainspace can't take is not sent; the rest still is, then the
+    // task shows why its title didn't sync.
     const titleErrorKey = 'title' in changes ? invalidTitleKey(changes['title']) : null;
     if ('title' in changes && !titleErrorKey) {
       patch.title = changes['title'] as string;
     }
-    if (patch.done === undefined && patch.title === undefined) {
+    if ('scheduledAt' in changes) {
+      patch.scheduledAt = (changes['scheduledAt'] as string | null) ?? null;
+    }
+    if (
+      patch.done === undefined &&
+      patch.title === undefined &&
+      patch.scheduledAt === undefined
+    ) {
       if (titleErrorKey) {
         throw new IssueSyncPushError(titleErrorKey);
       }
@@ -157,18 +179,30 @@ export class PlainspaceSyncAdapterService implements IssueSyncAdapter<Plainspace
     try {
       updated = await firstValueFrom(this._api.patchTask$(issueId, patch, cfg));
     } catch (err) {
-      if (patch.title !== undefined && httpStatus(err) === 422) {
-        return this._onTitleUnsupported(issueId, patch, cfg);
+      const status = httpStatus(err);
+      if (status === 422 && hasNewField(patch)) {
+        return this._onServerTooOld(issueId, patch, cfg);
+      }
+      if (status === 409) {
+        throw new IssueSyncPushError(
+          conflictError(err) === 'repeat_requires_remind_at'
+            ? T.PLAINSPACE.SYNC.ERR_REPEAT_NEEDS_TIME
+            : T.PLAINSPACE.SYNC.ERR_REFUSED,
+        );
       }
       this._reportError(cfg, err);
       throw err;
     }
     assertEchoed(issueId, patch.done, updated);
-    if (patch.title !== undefined && updated?.title !== patch.title) {
-      return this._onTitleUnsupported(issueId, { done: patch.done }, cfg, true);
+    if (
+      (patch.title !== undefined && updated?.title !== patch.title) ||
+      (patch.scheduledAt !== undefined &&
+        !isSameInstant(updated?.scheduledAt, patch.scheduledAt))
+    ) {
+      return this._onServerTooOld(issueId, { done: patch.done }, cfg, true);
     }
     if (titleErrorKey) {
-      // Done was written, but its baseline only moves with a full success:
+      // The rest was written, but baselines only move with a full success:
       // the next poll sees the remote change and pulls the same value.
       throw new IssueSyncPushError(titleErrorKey);
     }
@@ -185,7 +219,7 @@ export class PlainspaceSyncAdapterService implements IssueSyncAdapter<Plainspace
     }
   }
 
-  private async _onTitleUnsupported(
+  private async _onServerTooOld(
     issueId: string,
     patch: PlainspaceTaskPatch,
     cfg: PlainspaceCfg,
@@ -193,7 +227,7 @@ export class PlainspaceSyncAdapterService implements IssueSyncAdapter<Plainspace
   ): Promise<never> {
     const providerId = getProviderId(cfg);
     if (providerId) {
-      this._connectionState.reportTitleUnsupported(providerId);
+      this._connectionState.reportServerTooOld(providerId);
     }
     if (patch.done !== undefined && !isDoneApplied) {
       const updated = await firstValueFrom(
@@ -201,7 +235,7 @@ export class PlainspaceSyncAdapterService implements IssueSyncAdapter<Plainspace
       );
       assertEchoed(issueId, patch.done, updated);
     }
-    throw { isExpectedSyncSkip: true, reason: 'plainspace-title-unsupported' };
+    throw { isExpectedSyncSkip: true, reason: 'plainspace-server-too-old' };
   }
 
   extractSyncValues(issue: Record<string, unknown>): Record<string, unknown> {
@@ -225,6 +259,20 @@ const getProviderId = (cfg: PlainspaceCfg): string | undefined =>
 
 const httpStatus = (err: unknown): number | undefined =>
   err instanceof HttpErrorResponse ? err.status : undefined;
+
+/** The `error` code of a 409 answer, e.g. `repeat_requires_remind_at`. */
+const conflictError = (err: unknown): unknown =>
+  err instanceof HttpErrorResponse
+    ? (err.error as { error?: unknown })?.error
+    : undefined;
+
+/** Fields an older server neither takes nor reports back. */
+const hasNewField = (patch: PlainspaceTaskPatch): boolean =>
+  patch.title !== undefined || patch.scheduledAt !== undefined;
+
+/** The server answers times as UTC ISO, whatever offset was sent. */
+const isSameInstant = (a: unknown, b: string | null): boolean =>
+  b === null ? a === null : typeof a === 'string' && Date.parse(a) === Date.parse(b);
 
 /**
  * Why Plainspace would refuse this title, or null: it takes 1–500 characters

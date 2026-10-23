@@ -211,7 +211,8 @@ unscheduling it sends "no time". Rejected: leaving Plainspace's time in place.
   repeating tasks are pull only and unaffected.
 
 Cost: "Add to Today" on a task someone gave a time removes that time for
-everyone, without the engine's "remote changed" check. A hard time
+everyone (unless Plainspace's time changed since my last poll: then it
+wins, as for any field). A hard time
 ("campsite closes Fri 18:00") belongs in the title for now; Plainspace has no
 deadline field. Revisit trigger: users report losing times others set. The
 fix then is a confirm on that action, not a second sync rule.
@@ -343,6 +344,25 @@ SP:
 `dueWithTime: 'both'`, plus the `dueDay` mapping with
 `mutuallyExclusive: ['dueWithTime']`; recurring items pull only. Closes #9833.
 
+**Delivered** as planned, and **ships with Release 1** in the same tag
+(maintainer decision, Oct 22). Three deviations:
+
+- The `dueDay` mapping targets `scheduledAt` itself and always sends "no
+  time", instead of clearing it through `mutuallyExclusive`: that hook only
+  fires after a push of the day field, which Plainspace doesn't have. The time
+  mapping comes first, and the engine decides a remote field once (now also in
+  the poll's pending check), so a change with a time sends the time and a
+  day-only plan sends "no time". Same rule, no separate baseline, and a clear
+  now keeps the remote-changed check the `mutuallyExclusive` path skipped.
+- "Pull only" for recurring items is decided per item: `getSyncConfig` gets
+  the item as fetched, so a task that became recurring in Plainspace stops
+  pushing its time without a restart.
+- Older servers: titles and times arrived together (plainspace#41), so one
+  "server too old" state covers both: a 422 on, or an ignored, title or
+  `scheduledAt` turns both pull-only for the session. A 409 is per task:
+  `repeat_requires_remind_at` shows "A repeating task needs its time in
+  Plainspace", any other "Plainspace refused this change".
+
 ### Release 3: share existing tasks (S, SP only)
 
 "Share N unshared tasks": a sequential loop over the same create-and-link path
@@ -369,6 +389,21 @@ SP:
 3. **Not shared yet?** The menu entry offers to share the project first, then
    assign.
 
+**Delivered** (plainspace#42, this repo's Phase 2 PR), with these deviations:
+
+- **Not unscheduled locally.** A remote reassignment keeps the task
+  untouched, so a handoff does too: it is only marked _no longer in your
+  Plainspace list_ (the in-memory Release 1 state), and writes no op. An
+  unschedule would also be a local edit that the poll-time push (Gap 2) sends
+  as "no time" once the task is assigned back, clearing the Space's time.
+- **Not shared yet** (item 3) is not built: the entries appear only on linked
+  tasks still assigned to me. No assignee display, no further endpoints.
+- **Members list leaves out the caller** and takes the Space id or slug, since
+  SP knows neither its member id nor always the Space's UUID.
+- **Older servers:** a 404 on the members list or a 422 on an
+  `assigneeId`-only PATCH shows "Plainspace server too old to assign" once
+  per attempt. No capability negotiation.
+
 ### Phase 3: only on evidence
 
 Device-code connect (needs two endpoints, a code store and a consent screen;
@@ -386,15 +421,31 @@ gets a fix only when it is reported.
   round trip: last writer wins, as in Plainspace's web app.
 - **Both sides change one field between polls.** Plainspace's value wins with
   no conflict message.
+- **Two of my devices edit one field offline.** If device B edits a field
+  while offline from both SuperSync and Plainspace before device A's push of
+  the same field completes, A's post-push write (field plus baseline, #11034)
+  is newer and wins: SP converges on Plainspace's value, as above.
+- **An unpushed edit meets my other device's stale pull first.** I edit a
+  field Plainspace just changed (e.g. reopen a task a collaborator completed)
+  while my device can't reach Plainspace, and my other device, not yet synced,
+  pulls the old remote value. If that pull reaches my device before my push
+  does, it is newer and wins: the edit is dropped and every device converges
+  on Plainspace's value, as above. If my push runs first, the edit is kept
+  (#11034).
 - **Lost create response, or a crash between create and link.** One visible
   duplicate SP task (auto-imported), no data loss. Fix: `clientRef`.
 - **Old self-hosted servers** keep done-only sync until they upgrade.
-- **Titles that were local-only before Release 1** (a local rename, or a title
-  short syntax stripped at import) are pushed on the first successful poll
-  after the update; the baseline can't tell them from an offline edit.
-  Accepted by the maintainer for the beta, with a release note.
-- **Clearing the time skips the remote-changed check** (Scheduled time,
-  decided cost).
+- **Titles and times that were local-only before this release** (a local
+  rename, a title short syntax stripped at import, a local reschedule, or a
+  day-only plan or Add to Today on a task with a Plainspace time) are pushed on
+  the first successful poll after the update; the baseline can't tell them
+  from an offline edit. The commonest trigger is the reminder dialog's "Add to
+  today" (`dialog-view-task-reminders`, `isClearScheduledTime: true`), which
+  always clears `dueWithTime` locally; plain Add to Today does the same for a
+  timed task on another day (`shouldClearDueTimeForToday`). The first poll
+  after the update then sends "no time", which removes the Space's time for
+  everyone. **Decided (Oct 23):** accepted with a release note naming times and
+  "Add to today". Revisit if users report lost times.
 - **No cross-repo real-server E2E.** Contract drift is caught by Plainspace's
   integration tests and the shared `SPTask` type.
 - **Delegated tasks** don't show their live title, done state or assignee in SP.
@@ -405,6 +456,22 @@ gets a fix only when it is reported.
 - **Two devices moving the same task in** before either's link op syncs both
   create it: one visible duplicate item in the Space, no data loss. Fix:
   `clientRef`, like a lost create response.
+- **A time removed in Plainspace, pulled by a released client.** v19.x pulls
+  "no time" as `undefined`, which the op's JSON drops (#9776), so my other
+  devices keep the old time while taking the new baseline. A Release 2 device
+  that gets that op before its own poll then pushes the old time back to the
+  Space. Transitional (needs a v19.x device in the fleet; #11039 pulls `null`
+  from then on), and every guard found (e.g. no poll-time push of a time over
+  a "no time" baseline) also blocks a legitimate offline time edit for good.
+- **A stale time pushed back after a two-device split.** The two-device
+  stale-pull case that #11042/#11046 fix for title and done (another device
+  pulls an old value between an offline edit and its push) still applies to
+  the time: the pulled old time wins over my edit while the baseline takes my
+  pushed time, so the next poll pushes the old time back for everyone. The
+  time is not carried with its baseline: carrying a due field through
+  `updateTaskUi` would skip the planner and TODAY meta-reducer bookkeeping and
+  needs its own design. My time edit is lost, visibly (a wrong time, no lost
+  text). Revisit on a user report.
 
 ## Sync and long-term cost
 

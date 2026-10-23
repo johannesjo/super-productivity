@@ -2,7 +2,11 @@ import { FieldMapping, FieldSyncConfig } from './issue-sync.model';
 
 export interface IssueSyncAdapter<TCfg> {
   getFieldMappings(): FieldMapping[];
-  getSyncConfig(cfg: TCfg): FieldSyncConfig;
+  /**
+   * Per-field directions. With the issue as fetched, a provider can narrow
+   * them for that item (e.g. a repeating item's time is pull only).
+   */
+  getSyncConfig(cfg: TCfg, issue?: Record<string, unknown>): FieldSyncConfig;
   fetchIssue(issueId: string, cfg: TCfg): Promise<Record<string, unknown>>;
   /**
    * May resolve to the item as the write left it (the write's own answer).
