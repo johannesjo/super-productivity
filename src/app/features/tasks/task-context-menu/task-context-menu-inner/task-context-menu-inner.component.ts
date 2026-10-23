@@ -65,7 +65,6 @@ import { T } from 'src/app/t.const';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Store } from '@ngrx/store';
 import { selectTaskByIdWithSubTaskData } from '../../store/task.selectors';
-import { MatIconButton } from '@angular/material/button';
 import { MatTooltip } from '@angular/material/tooltip';
 import { getDbDateStr } from '../../../../util/get-db-date-str';
 import { PlannerActions } from '../../../planner/store/planner.actions';
@@ -75,6 +74,7 @@ import { DateAdapter } from '@angular/material/core';
 import { ICAL_TYPE } from '../../../issue/issue.const';
 import { IssueIconPipe } from '../../../issue/issue-icon/issue-icon.pipe';
 import { showFocusOverlay } from '../../../focus-mode/store/focus-mode.actions';
+import { FocusModeService } from '../../../focus-mode/focus-mode.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { TagService } from '../../../tag/tag.service';
 import { DialogPromptComponent } from '../../../../ui/dialog-prompt/dialog-prompt.component';
@@ -97,6 +97,8 @@ import {
   PluginTaskContextMenuRegistryService,
 } from '../../../../plugins/plugin-task-context-menu-registry.service';
 import { PluginTaskContextMenuTarget } from '@super-productivity/plugin-api';
+import { getWontDoChanges } from '../../util/is-wont-do-task';
+import { IssueSyncStateService } from '../../../issue/two-way-sync/issue-sync-state.service';
 
 @Component({
   selector: 'task-context-menu-inner',
@@ -109,7 +111,6 @@ import { PluginTaskContextMenuTarget } from '@super-productivity/plugin-api';
     MatDivider,
     TranslateModule,
     MatMenuTrigger,
-    MatIconButton,
     MatTooltip,
     IssueIconPipe,
     MenuTouchFixDirective,
@@ -130,6 +131,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   private readonly _snackService = inject(SnackService);
   private readonly _projectService = inject(ProjectService);
   private readonly _globalConfigService = inject(GlobalConfigService);
+  private readonly _issueSyncState = inject(IssueSyncStateService);
   private readonly _store = inject(Store);
   private readonly _dateAdapter = inject(DateAdapter);
   private readonly _tagService = inject(TagService);
@@ -142,6 +144,7 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   private readonly _taskDuplicateService = inject(TaskDuplicateService);
   private readonly _taskMoveToProjectService = inject(TaskMoveToProjectService);
   private readonly _taskMultiSelectService = inject(TaskMultiSelectService);
+  private readonly _focusModeService = inject(FocusModeService);
   private readonly _pluginTaskContextMenuRegistry = inject(
     PluginTaskContextMenuRegistryService,
   );
@@ -459,6 +462,9 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
   }
 
   goToFocusMode(): void {
+    if (this._focusModeService.tryStartSessionForTask(this.task)) {
+      return;
+    }
     this._taskService.setCurrentId(this.task.id);
     this._store.dispatch(showFocusOverlay());
   }
@@ -510,10 +516,11 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
     const isConfirmBeforeDelete =
       this._globalConfigService.cfg()?.tasks?.isConfirmBeforeDelete ?? true;
 
-    if (isTaskDeleteConfirmRequired(this.task, isConfirmBeforeDelete)) {
+    const isNoLongerListed = this._issueSyncState.isMissing(this.task.id);
+    if (isTaskDeleteConfirmRequired(this.task, isConfirmBeforeDelete, isNoLongerListed)) {
       this._matDialog
         .open(DialogConfirmComponent, {
-          data: getTaskDeleteConfirmData(this.task),
+          data: getTaskDeleteConfirmData(this.task, undefined, isNoLongerListed),
         })
         .afterClosed()
         .subscribe(async (isConfirm) => {
@@ -599,6 +606,11 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
     } else {
       this._taskService.setDone(this.task.id);
     }
+  }
+
+  // Finishing as won't do still marks the task done; only the reason differs.
+  setWontDo(): void {
+    this._taskService.update(this.task.id, getWontDoChanges(Date.now()));
   }
 
   addToMyDay(): void {

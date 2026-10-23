@@ -19,6 +19,9 @@ import { T } from '../../t.const';
 import { OperationLogStoreService } from '../../op-log/persistence/operation-log-store.service';
 import { OperationLogSyncService } from '../../op-log/sync/operation-log-sync.service';
 import { LegacyPfDbService } from '../persistence/legacy-pf-db.service';
+import { LegacySupDbService } from '../persistence/legacy-sup-db.service';
+import { confirmDialog } from '../../util/native-dialogs';
+import { download } from '../../util/download';
 import { BannerId } from '../banner/banner.model';
 import { isOnline$ } from '../../util/is-online';
 import { LS } from '../persistence/storage-keys.const';
@@ -80,6 +83,7 @@ export class StartupService {
   private _updateCheckService = inject(UpdateCheckService);
   private _opLogStore = inject(OperationLogStoreService);
   private _legacyPfDb = inject(LegacyPfDbService);
+  private _legacySupDb = inject(LegacySupDbService);
   private _store = inject(Store);
   private _platformService = inject(CapacitorPlatformService);
   private _dataInitStateService = inject(DataInitStateService);
@@ -237,48 +241,86 @@ export class StartupService {
   }
 
   private async _initBackups(): Promise<void> {
-    // if completely fresh instance check for local backups
     // Local backups are available on Electron and native mobile (iOS/Android)
-    if (IS_ELECTRON || this._platformService.isNative) {
-      const stateCache = await this._opLogStore.loadStateCache();
+    const hasLocalBackups = IS_ELECTRON || this._platformService.isNative;
+    // #7901: only consider a restore on a genuinely blank store (fresh install /
+    // evicted storage): an empty op-log AND no state cache. A null state cache
+    // alone just means "no snapshot saved yet" — the op-log may still hold real
+    // operations the hydrator is concurrently replaying. Restoring then would be
+    // unnecessary (the hydrator loads that data) and would race the hydrator's
+    // replay against importCompleteBackup's destructive op-log replacement.
+    // The cheap one-row op-log probe runs first, so a store with data (every
+    // normal boot, now on the web too) never reads the full state snapshot here.
+    const lastSeq = await this._opLogStore.getLastSeq();
+    if (lastSeq === 0) {
       // If no state cache exists, check if this is truly a fresh instance
       // or if there's legacy v16 data waiting to be migrated
+      const stateCache = await this._opLogStore.loadStateCache();
       if (!stateCache) {
-        // #7901: only consider a backup restore when the op-log is ALSO empty. A
-        // null state cache alone just means "no snapshot saved yet" — the op-log
-        // may still hold real operations the hydrator is concurrently replaying.
-        // Restoring then would be unnecessary (the hydrator loads that data) and
-        // would race the hydrator's replay against importCompleteBackup's
-        // destructive op-log replacement. Gating on an empty op-log restricts
-        // restore to a genuinely blank store (fresh install / evicted storage),
-        // where the hydrator has nothing to replay.
-        const lastSeq = await this._opLogStore.getLastSeq();
-        if (lastSeq === 0) {
-          // Check for legacy data - if it exists, don't show restore dialog
-          // The migration service will handle the legacy data
-          let hasLegacyData = false;
-          try {
-            hasLegacyData = await this._legacyPfDb.hasUsableEntityData();
-          } catch (e) {
-            // If legacy check fails, it means the database exists but can't be read
-            // The migration service will handle this error properly
-            Log.warn(
-              'StartupService: Legacy data check failed, skipping backup prompt',
-              e,
-            );
-            hasLegacyData = true; // Assume there might be data, don't show backup dialog
-          }
+        // Check for legacy data - if it exists, don't show restore dialog
+        // The migration service will handle the legacy data
+        let hasLegacyData = false;
+        try {
+          hasLegacyData = await this._legacyPfDb.hasUsableEntityData();
+        } catch (e) {
+          // If legacy check fails, it means the database exists but can't be read
+          // The migration service will handle this error properly
+          Log.warn('StartupService: Legacy data check failed, skipping backup prompt', e);
+          hasLegacyData = true; // Assume there might be data, don't show backup dialog
+        }
 
-          // Only offer to restore from backup if this is truly a fresh install
-          // (no state cache, no op-log, and no legacy data)
-          if (!hasLegacyData) {
+        // Only offer to restore if this is truly a fresh install
+        // (no state cache, no op-log, and no legacy data)
+        if (!hasLegacyData) {
+          const didImportPreV13Data = await this._offerPreV13DataImport();
+          if (!didImportPreV13Data && hasLocalBackups) {
             await this._localBackupService.askForFileStoreBackupIfAvailable();
           }
         }
       }
+    }
+    if (hasLocalBackups) {
       // trigger backup init after
       this._localBackupService.init();
     }
+  }
+
+  /**
+   * #7345: a profile that jumps from v12 or older straight to v17+ boots blank,
+   * because the `SUP` → `pf` migration that v13–v16 ran is gone. Its data is
+   * still on disk; offer it through the regular backup import, after saving a
+   * copy. Same blank-store precondition as the backup restore above.
+   */
+  private async _offerPreV13DataImport(): Promise<boolean> {
+    let legacyData: Record<string, unknown> | null;
+    try {
+      legacyData = await this._legacySupDb.loadUnmigratedData();
+    } catch (e) {
+      Log.err('StartupService: pre-v13 data check failed', e);
+      return false;
+    }
+    if (!legacyData) {
+      return false;
+    }
+    const idCount = (slice: unknown): number => {
+      const ids = (slice as { ids?: unknown } | undefined)?.ids;
+      return Array.isArray(ids) ? ids.length : 0;
+    };
+    const msg = this._translateService.instant(T.MIGRATE.C_IMPORT_PRE_V13_DATA, {
+      tasks: idCount(legacyData.task) + idCount(legacyData.taskArchive),
+      projects: idCount(legacyData.project),
+    });
+    if (!confirmDialog(msg)) {
+      Log.log('StartupService: pre-v13 data import declined');
+      return false;
+    }
+    const legacyDataStr = JSON.stringify(legacyData);
+    try {
+      await download('sp-pre-v13-data.json', legacyDataStr);
+    } catch (e) {
+      Log.err('StartupService: pre-v13 data download failed', e);
+    }
+    return this._localBackupService.restoreBackupStr(legacyDataStr);
   }
 
   /**

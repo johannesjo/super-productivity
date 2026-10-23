@@ -9,6 +9,7 @@ import { TaskService } from '../../features/tasks/task.service';
 import { Task, TaskWithSubTasks } from '../../features/tasks/task.model';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports -- grandfathered layer-boundary debt
 import { TaskArchiveService } from '../../features/archive/task-archive.service';
+import { ArchiveOperationHandler } from '../../op-log/apply/archive-operation-handler.service';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports -- grandfathered layer-boundary debt
 import { ProjectService } from '../../features/project/project.service';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports -- grandfathered layer-boundary debt
@@ -23,6 +24,10 @@ import { IssueLog } from '../log';
 import { LOCAL_REST_API_FEATURE_BRIDGE } from './local-rest-api-feature-bridge';
 import { LOCAL_REST_API_FEATURE_ROUTES } from './local-rest-api-feature-routes';
 import { createErrorResponse, createSuccessResponse } from './local-rest-api-response';
+import {
+  MAX_TIME_SPENT_PER_DAY_MS,
+  parseTimeSpentBody,
+} from './local-rest-api-task-time';
 
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports -- grandfathered layer-boundary debt
@@ -369,6 +374,7 @@ const isTaskInToday = (
 export class LocalRestApiHandlerService {
   private readonly _taskService = inject(TaskService);
   private readonly _taskArchiveService = inject(TaskArchiveService);
+  private readonly _archiveOperationHandler = inject(ArchiveOperationHandler);
   private readonly _projectService = inject(ProjectService);
   private readonly _tagService = inject(TagService);
   private readonly _dateService = inject(DateService);
@@ -891,6 +897,12 @@ export class LocalRestApiHandlerService {
         if (!task) {
           return createErrorResponse(requestId, 404, 'TASK_NOT_FOUND', 'Task not found');
         }
+        // An echoed `isDone: true` (GET→PATCH round trip) would only stamp a
+        // new `doneOn`: it moves the completion date and turns a won't-do task
+        // into a completed one.
+        if (changes.isDone === true && task.isDone) {
+          delete (changes as Record<string, unknown>).isDone;
+        }
 
         const deadlineFields = Object.fromEntries(
           DEADLINE_FIELDS.filter((field) => hasOwn(changes, field)).map((field) => [
@@ -911,6 +923,7 @@ export class LocalRestApiHandlerService {
           delete changes[field];
         }
 
+        let isMoveOnly = false;
         if (hasOwn(changes, 'projectId')) {
           const targetProjectId = changes.projectId;
           if (typeof targetProjectId !== 'string' || !targetProjectId.trim()) {
@@ -948,10 +961,15 @@ export class LocalRestApiHandlerService {
                 'Destination project not found or archived',
               );
             }
+            // Move it like the UI does, so a recurring task's config and other
+            // instances follow (#10675). A combined update below keeps projectId,
+            // now unchanged, so its change set and short syntax stay as sent.
+            await this._featureBridge.moveTaskToProject(taskId, targetProjectId);
+            isMoveOnly = Object.keys(changes).length === 1;
           }
         }
 
-        if (Object.keys(changes).length > 0) {
+        if (!isMoveOnly && Object.keys(changes).length > 0) {
           // Short syntax only parses a title-only change set, so that is the
           // only shape the flag changes; everything else keeps going through
           // update() and whatever bookkeeping it does.
@@ -993,6 +1011,49 @@ export class LocalRestApiHandlerService {
 
       this._taskService.setCurrentId(taskId);
       return createSuccessResponse(requestId, 200, { currentTaskId: taskId });
+    }
+
+    if (
+      segments.length === 3 &&
+      segments[2] === 'time' &&
+      (method === 'POST' || method === 'PUT')
+    ) {
+      const parsed = parseTimeSpentBody(body, this._dateService.todayStr(), method);
+      if ('error' in parsed) {
+        return createErrorResponse(requestId, 400, parsed.code, parsed.error);
+      }
+      const task = await this._getTaskById(taskId);
+      if (!task) {
+        return createErrorResponse(requestId, 404, 'TASK_NOT_FOUND', 'Task not found');
+      }
+      // A parent's time is recomputed from its subtasks, so time logged on it is lost.
+      if (task.subTaskIds?.length) {
+        const msg = 'Task has subtasks and its time is their sum; log time on a subtask';
+        return createErrorResponse(requestId, 400, 'INVALID_INPUT', msg);
+      }
+      if (method === 'PUT') {
+        const { date, duration } = parsed;
+        const previous = task.timeSpentOnDay?.[date];
+        if (duration !== (previous ?? 0) || (duration === 0 && previous !== undefined)) {
+          const timeSpentOnDay = { ...task.timeSpentOnDay };
+          if (duration === 0) {
+            delete timeSpentOnDay[date];
+          } else {
+            timeSpentOnDay[date] = duration;
+          }
+          // Same path as the time dialog: flush tracked time, then update totals.
+          this._taskService.update(taskId, { timeSpentOnDay });
+        }
+        return createSuccessResponse(requestId, 200, await this._getTaskById(taskId));
+      }
+      const dayTotal = (task.timeSpentOnDay?.[parsed.date] || 0) + parsed.duration;
+      if (dayTotal > MAX_TIME_SPENT_PER_DAY_MS) {
+        const msg = 'Time spent on one day cannot exceed 24h';
+        return createErrorResponse(requestId, 400, 'INVALID_INPUT', msg);
+      }
+
+      this._featureBridge.addTimeSpentOnDay(task, parsed.duration, parsed.date);
+      return createSuccessResponse(requestId, 200, await this._getTaskById(taskId));
     }
 
     if (segments.length === 3 && segments[2] === 'archive' && method === 'POST') {
@@ -1046,6 +1107,11 @@ export class LocalRestApiHandlerService {
     }
 
     this._taskService.restoreTask(archivedTask, subTasks);
+    // The dispatch adds the task to the store; removing it from the archive
+    // runs afterwards as a queued side effect. Wait for it, so a 200 means the
+    // task has left the archive, the same as archive's 200 means it has
+    // entered it (#9952).
+    await this._archiveOperationHandler.whenLocalOperationsSettled();
     const restoredTask = await this._getTaskById(taskId);
     return createSuccessResponse(requestId, 200, restoredTask);
   }

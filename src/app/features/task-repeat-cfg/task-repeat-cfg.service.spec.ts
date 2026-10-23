@@ -334,6 +334,29 @@ describe('TaskRepeatCfgService', () => {
   });
 
   describe('createRepeatableTask', () => {
+    for (const [priority, expected] of [
+      [3, 3],
+      ['high', 3],
+      [null, null],
+      [undefined, null],
+    ] as const) {
+      it(`creates occurrences with priority ${String(priority)}`, async () => {
+        taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+        taskService.createNewTaskWithDefaults.and.returnValue(mockTask);
+
+        await service.createRepeatableTask(
+          { ...mockTaskRepeatCfg, priority },
+          Date.now(),
+        );
+
+        expect(taskService.createNewTaskWithDefaults).toHaveBeenCalledWith(
+          jasmine.objectContaining({
+            additional: jasmine.objectContaining({ priority: expected }),
+          }),
+        );
+      });
+    }
+
     it('should create actions for a new repeatable task', async () => {
       const today = new Date();
       const targetDayDate = today.getTime();
@@ -586,6 +609,18 @@ describe('TaskRepeatCfgService', () => {
   });
 
   describe('getActionsForTaskRepeatCfg', () => {
+    it('creates nothing for a paused config, even when a copy is completed', async () => {
+      taskService.getTasksWithSubTasksByRepeatCfgId$.and.returnValue(of([]));
+
+      const actions = await service._getActionsForTaskRepeatCfg(
+        { ...mockTaskRepeatCfg, isPaused: true, waitForCompletion: true },
+        Date.now(),
+      );
+
+      expect(actions).toEqual([]);
+      expect(taskService.createNewTaskWithDefaults).not.toHaveBeenCalled();
+    });
+
     it('should return updateTaskRepeatCfg (not addTask) when task already exists for day (#7923)', async () => {
       const today = new Date();
       const targetDayDate = today.getTime();

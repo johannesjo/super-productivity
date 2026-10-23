@@ -51,6 +51,9 @@ if [ "$status" -ne 0 ]; then
   capture_diagnostics
   exit $status
 fi
+# On green, keep what the IME inset test measured in the job log (geometry and
+# versions only) — the next logcat -c below would otherwise discard it.
+adb logcat -d -s SUPKeyboardTest | tail -n 12 || true
 
 # --- Minified launch smoke ---------------------------------------------------
 # The instrumented suite above runs on debug and says nothing about R8. This is

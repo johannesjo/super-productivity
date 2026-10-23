@@ -174,6 +174,7 @@ describe('LocalRestApiTaskRepeatCfgRoutesService', () => {
           provide: DateService,
           useValue: {
             todayStr: (): string => TODAY,
+            getLogicalTodayDate: (): Date => new Date(2026, 9, 4),
             getStartOfNextDayDiffMs: (): number => startOfNextDayDiffMs,
           },
         },
@@ -246,6 +247,12 @@ describe('LocalRestApiTaskRepeatCfgRoutesService', () => {
   });
 
   describe('POST /task-repeat-cfgs', () => {
+    it('copies the task priority when making it recurring', async () => {
+      tasks['t1'] = { ...tasks['t1'], priority: 'high' };
+      await handle(request('POST', '/task-repeat-cfgs', { taskId: 't1' }));
+      expect(createdCfg().priority).toBe(3);
+    });
+
     it('makes a task repeat daily by default, like the repeat dialog', async () => {
       const response = await handle(
         request('POST', '/task-repeat-cfgs', { taskId: 't1' }),
@@ -525,6 +532,26 @@ describe('LocalRestApiTaskRepeatCfgRoutesService', () => {
         false,
       );
       expect(data<TaskRepeatCfg>(response).isPaused).toBe(true);
+    });
+
+    // As in the dialog: the next creation would otherwise add the newest date
+    // missed while paused as an overdue copy
+    it('moves the creation cursor to yesterday when resuming', async () => {
+      cfgs$.next([
+        createCfg('paused', { isPaused: true, lastTaskCreationDay: '2026-09-20' }),
+      ]);
+
+      await handle(request('PATCH', '/task-repeat-cfgs/paused', { isPaused: false }));
+
+      expect(repeatCfgServiceMock.updateTaskRepeatCfg).toHaveBeenCalledOnceWith(
+        'paused',
+        {
+          isPaused: false,
+          lastTaskCreationDay: '2026-10-03',
+          lastTaskCreation: new Date(2026, 9, 3, 12).getTime(),
+        },
+        false,
+      );
     });
 
     it('sends only the schedule fields that change', async () => {

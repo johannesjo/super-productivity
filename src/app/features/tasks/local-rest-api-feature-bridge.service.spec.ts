@@ -1,28 +1,39 @@
 import { TestBed } from '@angular/core/testing';
 import { MockStore, provideMockStore } from '@ngrx/store/testing';
+import { of } from 'rxjs';
 import { IssueService } from '../issue/issue.service';
 import { LocalRestApiFeatureBridgeService } from './local-rest-api-feature-bridge.service';
 import { addSubTask } from './store/task.actions';
-import { Task } from './task.model';
+import { Task, TaskWithSubTasks } from './task.model';
+import { TaskMoveToProjectService } from './task-move-to-project.service';
 import { TaskService } from './task.service';
 
 describe('LocalRestApiFeatureBridgeService', () => {
   let service: LocalRestApiFeatureBridgeService;
   let taskServiceMock: jasmine.SpyObj<TaskService>;
   let issueServiceMock: jasmine.SpyObj<IssueService>;
+  let taskMoveToProjectServiceMock: jasmine.SpyObj<TaskMoveToProjectService>;
   let dispatchSpy: jasmine.Spy;
 
   beforeEach(() => {
     taskServiceMock = jasmine.createSpyObj<TaskService>('TaskService', [
       'createNewTaskWithDefaults',
+      'addTimeSpentAndSync',
+      'getByIdWithSubTaskData$',
     ]);
     issueServiceMock = jasmine.createSpyObj<IssueService>('IssueService', ['issueLink']);
+    taskMoveToProjectServiceMock = jasmine.createSpyObj<TaskMoveToProjectService>(
+      'TaskMoveToProjectService',
+      ['moveToProject'],
+    );
+    taskMoveToProjectServiceMock.moveToProject.and.resolveTo(true);
 
     TestBed.configureTestingModule({
       providers: [
         LocalRestApiFeatureBridgeService,
         { provide: TaskService, useValue: taskServiceMock },
         { provide: IssueService, useValue: issueServiceMock },
+        { provide: TaskMoveToProjectService, useValue: taskMoveToProjectServiceMock },
         provideMockStore(),
       ],
     });
@@ -67,5 +78,40 @@ describe('LocalRestApiFeatureBridgeService', () => {
     expect(action.task.id).toBe('literal-sub');
     expect(action.parentId).toBe('parent-1');
     expect(action.isIgnoreShortSyntax).toBe(true);
+  });
+
+  it('should add time spent on a given day through addTimeSpentAndSync', () => {
+    const task = { id: 'task-1' } as Task;
+
+    service.addTimeSpentOnDay(task, 3600000, '2026-05-10');
+
+    expect(taskServiceMock.addTimeSpentAndSync).toHaveBeenCalledOnceWith(
+      task,
+      3600000,
+      '2026-05-10',
+    );
+    expect(dispatchSpy).not.toHaveBeenCalled();
+  });
+
+  it('should move a task with its subtasks without asking', async () => {
+    const task = { id: 'task-1', subTasks: [] } as unknown as TaskWithSubTasks;
+    taskServiceMock.getByIdWithSubTaskData$.and.returnValue(of(task));
+
+    await service.moveTaskToProject('task-1', 'project-2');
+
+    expect(taskServiceMock.getByIdWithSubTaskData$).toHaveBeenCalledOnceWith('task-1');
+    expect(taskMoveToProjectServiceMock.moveToProject).toHaveBeenCalledOnceWith(
+      task,
+      'project-2',
+      { isSkipConfirm: true },
+    );
+  });
+
+  it('should not move a task that no longer exists', async () => {
+    taskServiceMock.getByIdWithSubTaskData$.and.returnValue(of(undefined));
+
+    await service.moveTaskToProject('task-1', 'project-2');
+
+    expect(taskMoveToProjectServiceMock.moveToProject).not.toHaveBeenCalled();
   });
 });

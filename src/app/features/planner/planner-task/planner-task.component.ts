@@ -47,6 +47,7 @@ import { getNextWeekDayOffset } from '../../../util/get-next-week-day-offset';
 import { getDbDateStr } from '../../../util/get-db-date-str';
 import { combineDateAndTime } from '../../../util/combine-date-and-time';
 import { millisecondsDiffToRemindOption } from '../../tasks/util/remind-option-to-milliseconds';
+import { isWontDoTask } from '../../tasks/util/is-wont-do-task';
 import { PlannerActions } from '../store/planner.actions';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import {
@@ -67,6 +68,7 @@ import { WorkContextType } from '../../work-context/work-context.model';
 import { TODAY_TAG } from '../../tag/tag.const';
 import { ADD_TASK_INLINE_BTN_SELECTOR } from '../add-task-inline/add-task-inline.const';
 import { getNextPlannerAddButton } from '../get-next-planner-add-button';
+import { IssueSyncStateService } from '../../issue/two-way-sync/issue-sync-state.service';
 
 @Component({
   selector: 'planner-task',
@@ -88,7 +90,7 @@ import { getNextPlannerAddButton } from '../get-next-planner-add-button';
   ],
   /* eslint-disable @typescript-eslint/naming-convention */
   host: {
-    // Planner and Boards opt in; scheduled-list cards keep their existing behavior.
+    // Planner and Boards opt in; other hosts keep their existing behavior.
     '[attr.data-task-id]': 'focusable() ? task().id : null',
     '[attr.data-task-selectable]': 'focusable() ? "true" : null',
     '[attr.tabindex]': 'focusable() ? "0" : null',
@@ -107,6 +109,7 @@ export class PlannerTaskComponent implements OnInit, OnDestroy, AfterViewInit {
   private _multiSelect = inject(TaskMultiSelectService);
   private _cardList = inject(TASK_CARD_LIST, { optional: true });
   private _configService = inject(GlobalConfigService);
+  private readonly _issueSyncState = inject(IssueSyncStateService);
   private _matDialog = inject(MatDialog);
   private _store = inject(Store);
   private _dateService = inject(DateService);
@@ -130,6 +133,8 @@ export class PlannerTaskComponent implements OnInit, OnDestroy, AfterViewInit {
   readonly tagsToHide = input<string[]>();
   // Containers opt in explicitly; TASK_CARD_LIST supplies board-specific movement.
   readonly focusable = input<boolean>(false);
+  readonly isWontDo = computed<boolean>(() => isWontDoTask(this.task()));
+
   readonly isMultiSelected = computed(() =>
     this.focusable() ? this._multiSelect.selectedIds().has(this.task().id) : false,
   );
@@ -578,15 +583,17 @@ export class PlannerTaskComponent implements OnInit, OnDestroy, AfterViewInit {
     if (this._isTaskDeleteTriggered) {
       return;
     }
+    const isNoLongerListed = this._issueSyncState.isMissing(this.task().id);
     if (
       isTaskDeleteConfirmRequired(
         this.task(),
         this._configService.cfg()?.tasks?.isConfirmBeforeDelete ?? true,
+        isNoLongerListed,
       )
     ) {
       this._matDialog
         .open(DialogConfirmComponent, {
-          data: getTaskDeleteConfirmData(this.task()),
+          data: getTaskDeleteConfirmData(this.task(), undefined, isNoLongerListed),
         })
         .afterClosed()
         .pipe(takeUntilDestroyed(this._destroyRef))

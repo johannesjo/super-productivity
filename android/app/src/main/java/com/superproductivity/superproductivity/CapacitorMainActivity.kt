@@ -34,7 +34,6 @@ import com.superproductivity.superproductivity.webview.WebViewBlockActivity
 import com.superproductivity.superproductivity.webview.WebViewCompatibilityChecker
 import com.superproductivity.superproductivity.webview.WebViewRecovery
 import com.superproductivity.superproductivity.widget.ShareIntentQueue
-import com.superproductivity.superproductivity.widget.StartupOverlayManager
 import com.superproductivity.superproductivity.widget.TaskListWidgetProvider
 import com.superproductivity.plugins.webdavhttp.WebDavHttpPlugin
 import org.json.JSONObject
@@ -49,7 +48,6 @@ class CapacitorMainActivity : BridgeActivity() {
     private var webViewRecoveryScheduled = false
     private var pendingShareIntent: JSONObject? = null
     private var isFrontendReady = false
-    private var startupOverlayManager: StartupOverlayManager? = null
 
     // Soft-keyboard workaround: the WebView's resting layout height
     // (e.g. MATCH_PARENT), captured so it can be restored when the keyboard hides.
@@ -263,13 +261,6 @@ class CapacitorMainActivity : BridgeActivity() {
         )
         isWidgetDoneDrainReceiverRegistered = true
 
-        // Show startup overlay for quick task entry while Angular loads.
-        // Only on fresh cold start — not on config-change recreation.
-        if (savedInstanceState == null) {
-            startupOverlayManager = StartupOverlayManager(this)
-            startupOverlayManager?.show()
-        }
-
         // Schedule background sync worker if credentials are configured
         if (BackgroundSyncCredentialStore.get(this) != null) {
             SyncReminderScheduler.ensureScheduled(this)
@@ -345,22 +336,6 @@ class CapacitorMainActivity : BridgeActivity() {
         }
         super.onNewIntent(intent)
         handleIntent(intent)
-    }
-
-    fun getStartupOverlayPartialText(): String? {
-        return startupOverlayManager?.getPartialTextAndPrepare()
-    }
-
-    fun hideStartupOverlay() {
-        if (startupOverlayManager != null) {
-            startupOverlayManager?.hide()
-            startupOverlayManager = null
-        }
-    }
-
-    fun dismissStartupOverlay() {
-        startupOverlayManager?.dismiss()
-        startupOverlayManager = null
     }
 
     fun flushPendingShareIntent() {
@@ -587,12 +562,15 @@ class CapacitorMainActivity : BridgeActivity() {
      *
      * Context: Android edge-to-edge inset handling is owned by Capacitor's
      * built-in SystemBars now (the `@capawesome` edge-to-edge plugin was removed).
-     * SystemBars only pads the WebView for the IME on **WebView >= 140**
-     * (passthrough) or **API >= 35**; outside that it applies nothing, the window
-     * does NOT resize for the IME, and the `position: fixed` add-task bar sits
+     * Up to Capacitor 8.5.1 SystemBars only padded for the IME on **WebView >= 140**
+     * (passthrough) or **API >= 35**; outside that it applied nothing, the window
+     * does NOT resize for the IME, and the `position: fixed` add-task bar sat
      * behind the keyboard. This shim covers exactly that gap — see
      * [NativeInsetShimGate] for why the gate is the complement of SystemBars'
-     * two ownership branches, so the two never double-count.
+     * two ownership branches. From 8.5.2 SystemBars pads the DecorView for the IME
+     * on every API level, so in the gated band this now measures a WebView that is
+     * already at the keyboard top and writes the height it already has (kept as a
+     * fallback; see [NativeInsetShimGate]).
      *
      * We must NOT correct this via `bottomMargin` or `padding` (a margin writer
      * fights whatever owns the insets, and WebView padding does not move the web
@@ -646,13 +624,14 @@ class CapacitorMainActivity : BridgeActivity() {
      * reads 0 and self-disables where the WebView is already inset).
      *
      * Edge-to-edge insets are owned by Capacitor's built-in SystemBars now. On
-     * **API >= 35** it injects the real `--safe-area-inset-*` px, and on
-     * **WebView >= 140** the WebView's own `env(safe-area-inset-*)` is correct
-     * (passthrough). But on the **WebView < 140** tail under enforced edge-to-edge
-     * the WebView extends under the status bar while `env(safe-area-inset-top)`
-     * resolves to 0 (old WebViews map only display cutouts into safe-area insets,
-     * not the status bar) — so the web side has no top inset and content overlaps
-     * the status bar.
+     * **WebView >= 140** the WebView's own `env(safe-area-inset-*)` is correct and
+     * SystemBars mirrors it into `--safe-area-inset-*` (passthrough). Up to
+     * Capacitor 8.5.1, on the **WebView < 140 / API < 35** tail nothing inset the
+     * WebView: it extended under the status bar while `env(safe-area-inset-top)`
+     * resolved to 0 (old WebViews map only display cutouts into safe-area insets,
+     * not the status bar) — so the web side had no top inset and content
+     * overlapped the status bar. From 8.5.2 SystemBars pads the DecorView for the
+     * status bar there too, so this measures 0 (see below) and stays inert.
      *
      * We measure the overlap natively and publish it as the `--android-status-bar-
      * overlap` CSS var, which the web side folds into `--safe-area-top` via
@@ -709,8 +688,6 @@ class CapacitorMainActivity : BridgeActivity() {
 
 
     override fun onDestroy() {
-        startupOverlayManager?.dismiss()
-        startupOverlayManager = null
         if (isTimerCompleteReceiverRegistered) {
             LocalBroadcastManager.getInstance(this).unregisterReceiver(timerCompleteReceiver)
             isTimerCompleteReceiverRegistered = false

@@ -57,6 +57,7 @@ import { WorkContextService } from '../work-context/work-context.service';
 import { ProjectService } from '../project/project.service';
 import { _MISSING_PROJECT_ } from '../project/project.const';
 import { IssueProviderService } from './issue-provider.service';
+import { PendingRemoteIssueDeleteService } from './two-way-sync/pending-remote-issue-delete.service';
 import { CalendarIntegrationService } from '../calendar-integration/calendar-integration.service';
 import { getCalendarEventIdCandidates } from '../calendar-integration/get-calendar-event-id-candidates';
 import { Store } from '@ngrx/store';
@@ -91,6 +92,7 @@ const isIssueAwaitingNextOccurrence = (
 })
 export class IssueService {
   private _taskService = inject(TaskService);
+  private _pendingRemoteIssueDelete = inject(PendingRemoteIssueDeleteService);
   private _jiraCommonInterfacesService = inject(JiraCommonInterfacesService);
   private _gitlabCommonInterfacesService = inject(GitlabCommonInterfacesService);
   private _caldavCommonInterfaceService = inject(CaldavCommonInterfacesService);
@@ -278,9 +280,17 @@ export class IssueService {
 
     const allExistingIssueIds: string[] | number[] =
       await this._taskService.getAllIssueIdsForProviderEverywhere(issueProviderId);
-    const potentialIssuesToAdd = await service.getNewIssuesToAddToBacklog!(
-      issueProviderId,
-      allExistingIssueIds,
+    // A task whose remote delete is still to come is no longer among them, but
+    // its item is about to be deleted remotely: not new. Pending before the
+    // request too, as a delete that completes while it is in flight leaves the
+    // item in a list read before it.
+    const pendingBefore = this._pendingRemoteIssueDelete.issueIds(issueProviderId);
+    const potentialIssuesToAdd = (
+      await service.getNewIssuesToAddToBacklog!(issueProviderId, allExistingIssueIds)
+    ).filter(
+      (issue) =>
+        !pendingBefore.has(String(issue.id)) &&
+        !this._pendingRemoteIssueDelete.has(issueProviderId, String(issue.id)),
     );
 
     const issuesToAdd: IssueDataReduced[] = potentialIssuesToAdd.filter(
@@ -667,9 +677,25 @@ export class IssueService {
 
     // add new task (also fallback when parent id of subtask is not found)
     if (!taskId) {
+      // A Plainspace title is shared and syncs both ways: short syntax would
+      // strip "#tag", "1h" or "@tomorrow" from it, and that edit would be
+      // pushed to everyone in the Space. Other providers keep parsing.
+      const isIgnoreShortSyntax = issueProviderKey === PLAINSPACE_TYPE;
       taskId = taskData.dueWithTime
-        ? await this._taskService.addAndSchedule(title, taskData, taskData.dueWithTime)
-        : this._taskService.add(title, isAddToBacklog, taskData);
+        ? await this._taskService.addAndSchedule(
+            title,
+            taskData,
+            taskData.dueWithTime,
+            undefined,
+            isIgnoreShortSyntax,
+          )
+        : this._taskService.add(
+            title,
+            isAddToBacklog,
+            taskData,
+            false,
+            isIgnoreShortSyntax,
+          );
 
       // TODO more elegant solution for skipped calendar events
       if (issueProviderKey === ICAL_TYPE) {
@@ -947,7 +973,12 @@ export class IssueService {
    * devices (#9776), so the clear goes through `dismissReminderOnly`, whose
    * reducer sets it deterministically. Rare enough that the extra op is fine.
    */
-  private _updateTaskFromPoll(task: Task, taskChanges: Partial<Task>): void {
+  private _updateTaskFromPoll(task: Task, taskChangesIn: Partial<Task>): void {
+    // A done write to a task that is already done would only stamp a new
+    // `doneOn`: it moves the completion date and turns a won't-do task into a
+    // completed one (`isWontDoTask`).
+    const { isDone, ...rest } = taskChangesIn;
+    const taskChanges = isDone === true && task.isDone ? rest : taskChangesIn;
     const { changes, isClearRemindAt } = withRemindAtForDueChange(
       task,
       taskChanges,

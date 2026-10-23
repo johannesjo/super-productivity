@@ -21,6 +21,13 @@ import { ShortPlannedAtPipe } from '../../../ui/pipes/short-planned-at.pipe';
   templateUrl: './planner-calendar-event.component.html',
   styleUrl: './planner-calendar-event.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  /* eslint-disable @typescript-eslint/naming-convention */
+  host: {
+    // Same per-calendar color the schedule view uses, so events from different
+    // calendars can be told apart in the planner too.
+    '[style.--cal-event-color]': 'calendarEvent().color || null',
+  },
+  /* eslint-enable @typescript-eslint/naming-convention */
   imports: [
     MatIcon,
     MsToStringPipe,

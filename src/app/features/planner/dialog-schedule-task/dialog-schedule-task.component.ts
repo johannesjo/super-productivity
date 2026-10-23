@@ -83,6 +83,8 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
     showQuickAccess?: boolean;
     minDate?: Date | null;
     isSubmitOnQuickAccess?: boolean;
+    /** Defaults to every task option; repeat configs pass a narrower list. */
+    reminderOptions?: TaskReminderOption[];
   }>(MAT_DIALOG_DATA);
   private _matDialogRef = inject<MatDialogRef<DialogScheduleTaskComponent>>(MatDialogRef);
   private _matDialog = inject(MatDialog);
@@ -112,7 +114,8 @@ export class DialogScheduleTaskComponent implements AfterViewInit {
   readonly DO_NOT_REMIND = TaskReminderOptionId.DoNotRemind;
   minDate = this.data.minDate === undefined ? new Date() : this.data.minDate;
 
-  remindAvailableOptions: TaskReminderOption[] = TASK_REMINDER_OPTIONS;
+  remindAvailableOptions: TaskReminderOption[] =
+    this.data.reminderOptions ?? TASK_REMINDER_OPTIONS;
   task: TaskCopy | undefined = this.data.task;
 
   // Recurrence only applies to top-level, non-issue tasks (mirrors the panel's

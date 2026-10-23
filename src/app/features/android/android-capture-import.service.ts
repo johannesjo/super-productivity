@@ -45,7 +45,10 @@ const parseCaptures = (json: string): AndroidCapture[] => {
   );
 };
 
-/** Imports tasks captured by the startup quick-add overlay (CaptureInbox.kt). */
+/**
+ * Imports tasks left in CaptureInbox.kt by the removed startup quick-add overlay
+ * of an older app version.
+ */
 @Injectable({ providedIn: 'root' })
 export class AndroidCaptureImportService {
   private _inbox = inject(ANDROID_CAPTURE_INBOX);

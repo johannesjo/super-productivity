@@ -10,19 +10,33 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { fromEvent } from 'rxjs';
+import { combineLatest, fromEvent } from 'rxjs';
 import { select, Store } from '@ngrx/store';
-import { selectCalendarProviders } from '../../issue/store/issue-provider.selectors';
+import {
+  selectCalendarProviders,
+  selectEnabledIssueProviders,
+} from '../../issue/store/issue-provider.selectors';
 import { HiddenCalendarProvidersService } from '../../calendar-integration/hidden-calendar-providers.service';
-import { getIssueProviderTooltip } from '../../issue/mapping-helper/get-issue-provider-tooltip';
-import { IssueProvider } from '../../issue/issue.model';
+import { selectUndoneDeadlineTasksByDay } from '../../planner/store/planner.selectors';
+import {
+  getIssueProviderTooltip,
+  sanitizeIcalUrlForDisplay,
+} from '../../issue/mapping-helper/get-issue-provider-tooltip';
+import { getCalendarProviderColor } from '../../issue/mapping-helper/get-calendar-provider-color';
+import {
+  IssueProvider,
+  IssueProviderPluginType,
+  isPluginIssueProvider,
+} from '../../issue/issue.model';
+import { PluginIssueProviderRegistryService } from '../../../plugins/issue-provider/plugin-issue-provider-registry.service';
 import {
   MatMenu,
   MatMenuContent,
   MatMenuItem,
   MatMenuTrigger,
 } from '@angular/material/menu';
-import { debounceTime, map, startWith } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, map, startWith } from 'rxjs/operators';
+import { fastArrayCompare } from '../../../util/fast-array-compare';
 import { safeFormatDate } from '../../../util/safe-format-date';
 import { TaskService } from '../../tasks/task.service';
 import { LayoutService } from '../../../core-ui/layout/layout.service';
@@ -97,13 +111,29 @@ export class ScheduleComponent {
   private _translate = inject(TranslateService);
   private _hiddenCalendarProviders = inject(HiddenCalendarProvidersService);
   private _elRef = inject<ElementRef<HTMLElement>>(ElementRef);
+  private _pluginIssueProviderRegistry = inject(PluginIssueProviderRegistryService);
 
   readonly hiddenCalendarProviderIds = this._hiddenCalendarProviders.hiddenProviderIds;
   readonly enabledCalendarProviders = toSignal(
-    this._store
-      .select(selectCalendarProviders)
-      .pipe(map((ps) => ps.filter((p) => p.isEnabled))),
-    { initialValue: [] },
+    combineLatest([
+      this._store
+        .select(selectCalendarProviders)
+        .pipe(distinctUntilChanged(fastArrayCompare)),
+      combineLatest([
+        this._store.select(selectEnabledIssueProviders),
+        this._pluginIssueProviderRegistry.registrationChanges$,
+      ]).pipe(
+        map(([providers]) =>
+          providers.filter(
+            (p): p is IssueProviderPluginType =>
+              isPluginIssueProvider(p.issueProviderKey) &&
+              this._pluginIssueProviderRegistry.getUseAgendaView(p.issueProviderKey),
+          ),
+        ),
+        distinctUntilChanged(fastArrayCompare),
+      ),
+    ]).pipe(map(([ical, plugin]): IssueProvider[] => [...ical, ...plugin])),
+    { initialValue: [] as IssueProvider[] },
   );
   // Show the button with multiple providers, OR with a single provider that
   // is currently hidden — otherwise the user has no UI to re-enable the only
@@ -114,7 +144,26 @@ export class ScheduleComponent {
     const hidden = this.hiddenCalendarProviderIds();
     return providers.some((p) => hidden.includes(p.id));
   });
-  readonly calProviderLabel = (p: IssueProvider): string => getIssueProviderTooltip(p);
+  // Plugin labels come from the first non-secret config string, which may be a
+  // URL (credentials in the path) or an opaque scheme; reuse the iCal sanitizer
+  // so neither is rendered verbatim.
+  readonly calProviderLabel = (p: IssueProvider): string => {
+    const raw = getIssueProviderTooltip(p);
+    if (!/^[a-z][a-z0-9+.-]*:\S/i.test(raw)) return raw;
+    const sanitized = sanitizeIcalUrlForDisplay(raw);
+    return sanitized === 'iCal' && p.issueProviderKey !== 'ICAL'
+      ? p.issueProviderKey
+      : sanitized;
+  };
+  // Materialized once per provider-list change; method calls inside the menu
+  // @for would re-run the hash and URL parsing on every change detection.
+  readonly calProviderRows = computed(() =>
+    this.enabledCalendarProviders().map((p) => ({
+      id: p.id,
+      color: getCalendarProviderColor(p),
+      label: this.calProviderLabel(p),
+    })),
+  );
 
   toggleCalProvider(providerId: string): void {
     this._hiddenCalendarProviders.toggle(providerId);
@@ -307,6 +356,11 @@ export class ScheduleComponent {
     const days = this.scheduleDays();
     return mapScheduleDaysToScheduleEvents(days, FH);
   });
+
+  deadlineTasksByDay = toSignal(
+    this._store.pipe(select(selectUndoneDeadlineTasksByDay)),
+    { initialValue: {} },
+  );
 
   private _workStartEndHours = toSignal(
     this._store.pipe(select(selectTimelineWorkStartEndHours)),
@@ -530,7 +584,10 @@ export class ScheduleComponent {
     const preservedView = localStorage.getItem(LS.SELECTED_TIME_VIEW);
     if (preservedView === 'month') return 'month';
     if (preservedView === 'day') return 'day';
-    return 'week';
+    if (preservedView === 'week') return 'week';
+    // No saved choice yet: a phone fits under three of the week's seven columns,
+    // so it starts on one readable day instead.
+    return this.layoutService.isXs() ? 'day' : 'week';
   }
 
   constructor() {

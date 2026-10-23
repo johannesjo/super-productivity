@@ -12,6 +12,8 @@ owners are:
 - `src/app/op-log/sync/superseded-operation-resolver.service.ts`
 - `src/app/op-log/sync/superseded-operation-resolver.service.spec.ts`
 - `e2e/tests/sync/supersync-section-convergence.spec.ts`
+- `e2e/tests/sync/supersync-section-move-vs-section-edit.spec.ts`
+- `src/app/op-log/testing/integration/section-move-conflict-stop.integration.spec.ts`
 - `src/app/op-log/testing/integration/reorder-conflict-wedge.integration.spec.ts`
 - `e2e/tests/sync/supersync-reorder-conflict-wedge.spec.ts`
 - `e2e/tests/sync/supersync-issue-provider-reorder-conflict.spec.ts`
@@ -66,7 +68,17 @@ The recognized crossings are:
 - a section-order update crossing a placement/removal that touches one of the
   ordered sections;
 - a content reorder crossing a single-entity patch of an entity it lists, under
-  the structural rule below; and
+  the structural rule below;
+- a section placement or removal crossing a `SECTION_UPDATE` patch of a section
+  it declares, under the same rule: a placement writes only the declared
+  sections' `taskIds` (a removal also the work context's task order, which no
+  section patch writes), so a collapse or rename of either section of a
+  cross-section move commutes with it (#10969). Another task's placement or
+  removal in the same lists, and a section delete, still stop: two placements
+  of different tasks in one list do not commute by order. So does a move
+  beside a pending edit of the same section that the remote edit conflicts
+  with (an expand, also the work view's auto-expand on focus, crossing a
+  collapse): section ops beside a conflict keep the stop; and
 - two note orders or two habit orders, or a note order and the delete of a
   note it lists (#10377, below).
 
@@ -265,15 +277,19 @@ the replacement payload must be checked against the released-fleet rules in
 Content reorder recovery reuses existing action payloads without a schema or
 persisted-model change. Its E2E covers both note and dated-habit resolution
 histories consumed by unmodified v19.1.0. Older clients that resolve first retain
-their original safety gate; see the [S2 validation report](../plans/2026-09-26-sync-S2-result.md)
-and [dated-habit result](../plans/2026-09-26-sync-habit-date-reorder-result.md)
+their original safety gate; see [#10275](https://github.com/super-productivity/super-productivity/pull/10275)
+and [#10295](https://github.com/super-productivity/super-productivity/pull/10295)
 for released-asset provenance and the tested limits.
 
 The provider suite checks both GitLab and Jira replacement histories against
 unmodified v19.1.0 assets, including restart and the rendered tab order. If that
 released client encounters the conflict first, it still stops with pending work intact;
-the new resolver cannot change old-client behavior. See the
-[provider fix validation](../plans/2026-09-26-sync-issue-provider-reorder-reproduction.md#provider-independent-recovery).
+the new resolver cannot change old-client behavior. Admission is
+provider-independent: any `ISSUE_PROVIDER_UPDATE` with a nonempty `changes`
+object whose `id` is absent or equals the declared provider qualifies, because
+`updateOne` leaves the ordered IDs unchanged unless the identity changes.
+Deletions, competing reorders, malformed changes and identity changes stay
+unsupported ([#10294](https://github.com/super-productivity/super-productivity/pull/10294)).
 
 The structural rule's E2E checks, against unmodified v19.1.0 assets, that a
 released receiver renders a reissued pin once, that it consumes a project order

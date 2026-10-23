@@ -21,6 +21,7 @@ import {
   getDistChannel,
   LOGIN_ITEM_CHANNELS,
 } from '../shared-with-frontend/get-dist-channel';
+import { setDueTaskBadge } from '../due-task-badge';
 
 // On Linux, packaged builds ship a shell wrapper (`superproductivity`) next
 // to the Electron ELF (`superproductivity-bin`) that injects
@@ -67,6 +68,19 @@ const getOpenAtLogin = async (): Promise<boolean> => {
 };
 
 export const initAppControlIpc = (): void => {
+  ipcMain.on(IPC.SET_DUE_TASK_BADGE, (_ev, count: unknown, iconDataUrl: unknown) => {
+    if (typeof count === 'number' && Number.isSafeInteger(count) && count >= 0) {
+      if (
+        iconDataUrl !== undefined &&
+        (typeof iconDataUrl !== 'string' ||
+          iconDataUrl.length > 8192 ||
+          !/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(iconDataUrl))
+      ) {
+        return;
+      }
+      setDueTaskBadge(count, iconDataUrl as string | undefined);
+    }
+  });
   ipcMain.on(IPC.SHUTDOWN_NOW, quitApp);
   ipcMain.on(IPC.EXIT, (ev, exitCode: number) => app.exit(exitCode));
   ipcMain.on(IPC.RELAUNCH, () => {

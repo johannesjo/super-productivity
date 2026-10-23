@@ -16,6 +16,9 @@ import {
 import { ICAL_TYPE, GITHUB_TYPE, JIRA_TYPE } from '../issue.const';
 import { Task, TaskWithSubTasks } from '../../tasks/task.model';
 import { IssueProvider } from '../issue.model';
+import { HttpErrorResponse } from '@angular/common/http';
+import { IssueLog } from '../../../core/log';
+import { SyncTriggerService } from '../../../imex/sync/sync-trigger.service';
 
 describe('PollIssueUpdatesEffects', () => {
   let effects: PollIssueUpdatesEffects;
@@ -23,6 +26,7 @@ describe('PollIssueUpdatesEffects', () => {
   let store: MockStore;
   let issueServiceSpy: jasmine.SpyObj<IssueService>;
   let workContextServiceSpy: jasmine.SpyObj<WorkContextService>;
+  let initialSyncDone$: Subject<boolean>;
 
   const createMockTask = (overrides: Partial<Task> = {}): Task =>
     ({
@@ -56,6 +60,7 @@ describe('PollIssueUpdatesEffects', () => {
     }) as IssueProvider;
 
   beforeEach(() => {
+    initialSyncDone$ = new Subject<boolean>();
     issueServiceSpy = jasmine.createSpyObj('IssueService', [
       'getPollInterval',
       'refreshIssueTasks',
@@ -85,6 +90,10 @@ describe('PollIssueUpdatesEffects', () => {
         }),
         { provide: IssueService, useValue: issueServiceSpy },
         { provide: WorkContextService, useValue: workContextServiceSpy },
+        {
+          provide: SyncTriggerService,
+          useValue: { afterInitialSyncDoneStrict$: initialSyncDone$ },
+        },
       ],
     });
 
@@ -531,6 +540,40 @@ describe('PollIssueUpdatesEffects', () => {
       expect(issueServiceSpy.refreshIssueTasks).toHaveBeenCalledTimes(2);
     }));
 
+    // Log history is exportable: an HTTP error carries the provider's URL.
+    it('logs only the status of a failed request', fakeAsync(() => {
+      const calendarProvider = createMockIssueProvider({
+        id: 'cal-provider-1',
+        issueProviderKey: ICAL_TYPE,
+      });
+      store.overrideSelector(selectEnabledIssueProviders, [calendarProvider]);
+      store.overrideSelector(selectAllCalendarIssueTasks, [
+        createMockTask({
+          issueId: 'cal-event-123',
+          issueType: ICAL_TYPE,
+          issueProviderId: 'cal-provider-1',
+        }),
+      ]);
+      store.refreshState();
+      issueServiceSpy.refreshIssueTasks.and.rejectWith(
+        new HttpErrorResponse({ status: 0, url: 'https://private.example/cal.ics' }),
+      );
+      const logSpy = spyOn(IssueLog, 'error');
+      const actionsSubject = new Subject<any>();
+      actions$ = actionsSubject.asObservable();
+      effects.pollIssueChangesForCurrentContext$.subscribe();
+
+      actionsSubject.next(
+        setActiveWorkContext({
+          activeType: WorkContextType.PROJECT,
+          activeId: 'project-1',
+        }),
+      );
+      tick(10001);
+
+      expect(logSpy).toHaveBeenCalledOnceWith(jasmine.any(String), { status: 0 });
+    }));
+
     it('should NOT poll providers with pollingMode always (handled by separate effect)', fakeAsync(() => {
       const jiraProvider = createMockIssueProvider({
         id: 'jira-provider-1',
@@ -763,13 +806,8 @@ describe('PollIssueUpdatesEffects', () => {
 
       effects.pollIssueChangesAlways$.subscribe();
 
-      // First trigger action starts the always-polling
-      actionsSubject.next(
-        setActiveWorkContext({
-          activeType: WorkContextType.PROJECT,
-          activeId: 'project-1',
-        }),
-      );
+      // The initial sync (and data load) starts the always-polling
+      initialSyncDone$.next(true);
 
       tick(10001);
 
@@ -800,12 +838,7 @@ describe('PollIssueUpdatesEffects', () => {
 
       effects.pollIssueChangesAlways$.subscribe();
 
-      actionsSubject.next(
-        setActiveWorkContext({
-          activeType: WorkContextType.PROJECT,
-          activeId: 'project-1',
-        }),
-      );
+      initialSyncDone$.next(true);
 
       tick(10001);
 
@@ -841,18 +874,12 @@ describe('PollIssueUpdatesEffects', () => {
 
       effects.pollIssueChangesAlways$.subscribe();
 
-      // First action triggers the always effect
-      actionsSubject.next(
-        setActiveWorkContext({
-          activeType: WorkContextType.PROJECT,
-          activeId: 'project-1',
-        }),
-      );
+      initialSyncDone$.next(true);
 
       tick(10001);
       expect(issueServiceSpy.refreshIssueTasks).toHaveBeenCalledTimes(1);
 
-      // Second context switch should NOT restart the timer (first() was used)
+      // A context switch does not restart the timer
       actionsSubject.next(
         setActiveWorkContext({
           activeType: WorkContextType.PROJECT,
@@ -866,5 +893,71 @@ describe('PollIssueUpdatesEffects', () => {
       // Should still be 1 — no restart happened
       expect(issueServiceSpy.refreshIssueTasks).toHaveBeenCalledTimes(1);
     }));
+
+    describe('start', () => {
+      const setUpAlwaysProvider = (): void => {
+        const jiraProvider = createMockIssueProvider({
+          id: 'jira-provider-1',
+          issueProviderKey: JIRA_TYPE,
+          pollingMode: 'always',
+        });
+        issueServiceSpy.getPollInterval.and.returnValue(300000);
+        store.overrideSelector(selectEnabledIssueProviders, [jiraProvider]);
+        store.overrideSelector(selectAllTasks, [
+          createMockTask({
+            id: 'jira-task-1',
+            issueId: 'JIRA-1',
+            issueType: JIRA_TYPE,
+            issueProviderId: 'jira-provider-1',
+          }),
+        ]);
+        store.refreshState();
+      };
+
+      it('polls without any context switch or loadAllData', fakeAsync(() => {
+        setUpAlwaysProvider();
+        actions$ = new Subject<any>().asObservable();
+        effects.pollIssueChangesAlways$.subscribe();
+
+        initialSyncDone$.next(true);
+        tick(10001);
+
+        expect(issueServiceSpy.refreshIssueTasks).toHaveBeenCalledTimes(1);
+      }));
+
+      it('does not poll before the initial sync is done, whatever is dispatched', fakeAsync(() => {
+        setUpAlwaysProvider();
+        const actionsSubject = new Subject<any>();
+        actions$ = actionsSubject.asObservable();
+        effects.pollIssueChangesAlways$.subscribe();
+
+        actionsSubject.next(
+          setActiveWorkContext({
+            activeType: WorkContextType.PROJECT,
+            activeId: 'project-1',
+          }),
+        );
+        actionsSubject.next(loadAllData({ appDataComplete: {} as any }));
+        tick(10001);
+        expect(issueServiceSpy.refreshIssueTasks).not.toHaveBeenCalled();
+
+        initialSyncDone$.next(true);
+        tick(10001);
+        expect(issueServiceSpy.refreshIssueTasks).toHaveBeenCalledTimes(1);
+      }));
+
+      it('runs one timer for a later loadAllData', fakeAsync(() => {
+        setUpAlwaysProvider();
+        const actionsSubject = new Subject<any>();
+        actions$ = actionsSubject.asObservable();
+        effects.pollIssueChangesAlways$.subscribe();
+
+        initialSyncDone$.next(true);
+        actionsSubject.next(loadAllData({ appDataComplete: {} as any }));
+        tick(10001);
+
+        expect(issueServiceSpy.refreshIssueTasks).toHaveBeenCalledTimes(1);
+      }));
+    });
   });
 });

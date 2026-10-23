@@ -38,6 +38,7 @@ import { RootState } from '../../root-store/root-state';
 import { TASK_FEATURE_NAME } from '../tasks/store/task.reducer';
 import { selectAllTasksWithReminder } from '../tasks/store/task.selectors';
 import { createCombinedTaskSharedMetaReducer } from '../../root-store/meta/task-shared-meta-reducers/test-helpers';
+import { PendingRemoteIssueDeleteService } from './two-way-sync/pending-remote-issue-delete.service';
 import {
   createBaseState,
   createMockTask as createReducerTask,
@@ -736,6 +737,47 @@ describe('IssueService', () => {
     });
   });
 
+  describe('addTaskFromIssue - short syntax', () => {
+    const setupForNewTask = (key: 'JIRA' | 'PLAINSPACE'): void => {
+      taskServiceSpy.checkForTaskWithIssueEverywhere.and.resolveTo(null);
+      taskServiceSpy.add.and.returnValue('new-task-id');
+      (service.ISSUE_SERVICE_MAP[key] as any).getAddTaskData = () => ({
+        title: 'Fix login #bug 1h',
+      });
+      issueProviderServiceSpy.getCfgOnce$.and.returnValue(
+        of({ defaultProjectId: 'proj-1', defaultTagIds: [] } as any),
+      );
+      Object.defineProperty(workContextServiceSpy, 'activeWorkContextType', {
+        get: () => WorkContextType.PROJECT,
+      });
+      Object.defineProperty(workContextServiceSpy, 'activeWorkContextId', {
+        get: () => 'proj-1',
+      });
+    };
+
+    // The title is shared and pushed back: a parsed title would strip
+    // "#bug 1h" for everyone in the Space.
+    it('is not parsed from a Plainspace title', async () => {
+      setupForNewTask('PLAINSPACE');
+      await service.addTaskFromIssue({
+        issueDataReduced: { id: 'ps-1', title: 'Fix login #bug 1h' } as any,
+        issueProviderId: 'ps-provider-1',
+        issueProviderKey: 'PLAINSPACE',
+      });
+      expect(taskServiceSpy.add.calls.mostRecent().args[4]).toBe(true);
+    });
+
+    it("is still parsed from other providers' titles", async () => {
+      setupForNewTask('JIRA');
+      await service.addTaskFromIssue({
+        issueDataReduced: { id: 'JIRA-1', title: 'Fix login #bug 1h' } as any,
+        issueProviderId: 'jira-provider-1',
+        issueProviderKey: 'JIRA',
+      });
+      expect(taskServiceSpy.add.calls.mostRecent().args[4]).toBe(false);
+    });
+  });
+
   describe('addTaskFromIssue - existing task already in project backlog', () => {
     const githubIssue = { id: 'github-issue-123', title: 'GitHub Issue' };
 
@@ -957,6 +999,38 @@ describe('IssueService', () => {
       await service.refreshIssueTask(task, false, false);
 
       expect(changesOfLastUpdate().remindAt).toBe(newDue);
+    });
+
+    // Re-stamping `doneOn` would turn a won't-do task into a completed one.
+    it('single refresh: does not write isDone again to a task that is already done', async () => {
+      const task = createCaldavTask({ isDone: true, doneOn: 5, wontDoOn: 5 });
+      commonInterfaceServiceSpy.getFreshDataForIssueTask.and.returnValue(
+        Promise.resolve({
+          taskChanges: { isDone: true, title: 'renamed', issueWasUpdated: true },
+          issue: {},
+          issueTitle: 'x',
+        }),
+      );
+
+      await service.refreshIssueTask(task, false, false);
+
+      expect('isDone' in changesOfLastUpdate()).toBeFalse();
+      expect(changesOfLastUpdate().title).toBe('renamed');
+    });
+
+    it('single refresh: still writes isDone to an open task', async () => {
+      const task = createCaldavTask({ isDone: false });
+      commonInterfaceServiceSpy.getFreshDataForIssueTask.and.returnValue(
+        Promise.resolve({
+          taskChanges: { isDone: true, issueWasUpdated: true },
+          issue: {},
+          issueTitle: 'x',
+        }),
+      );
+
+      await service.refreshIssueTask(task, false, false);
+
+      expect(changesOfLastUpdate().isDone).toBeTrue();
     });
 
     describe('remote unschedule clears the reminder on every device (#9776 shape)', () => {
@@ -1340,6 +1414,54 @@ describe('IssueService', () => {
 
       expect(taskServiceSpy.checkForTaskWithIssueEverywhere).not.toHaveBeenCalled();
       expect(taskServiceSpy.restoreTask).not.toHaveBeenCalled();
+    });
+
+    // Review finding: a poll inside a delete's undo window found the item
+    // still assigned and its task gone, and imported it again.
+    it('does not import an issue whose remote delete is pending', async () => {
+      const pending = TestBed.inject(PendingRemoteIssueDeleteService);
+      const addSpy = spyOn(service, 'addTaskFromIssue').and.resolveTo(undefined);
+      (plainspaceService.getNewIssuesToAddToBacklog as jasmine.Spy).and.resolveTo([
+        createPlainspaceIssue({ isRecurring: false }),
+      ]);
+      taskServiceSpy.getAllIssueIdsForProviderEverywhere.and.resolveTo([]);
+      const poll = (): Promise<void> =>
+        service.checkAndImportNewIssuesToBacklogForProject(
+          'PLAINSPACE',
+          PROVIDER_ID,
+          true,
+        );
+
+      pending.add(PROVIDER_ID, ISSUE_ID);
+      await poll();
+      expect(addSpy).not.toHaveBeenCalled();
+
+      pending.remove(PROVIDER_ID, ISSUE_ID);
+      await poll();
+      expect(addSpy).toHaveBeenCalledTimes(1);
+    });
+
+    // Re-review finding: the remote delete completed while the list request
+    // was in flight, so the list still had the item and nothing was pending.
+    it('does not import an issue whose remote delete ends during the request', async () => {
+      const pending = TestBed.inject(PendingRemoteIssueDeleteService);
+      const addSpy = spyOn(service, 'addTaskFromIssue').and.resolveTo(undefined);
+      (plainspaceService.getNewIssuesToAddToBacklog as jasmine.Spy).and.callFake(
+        async () => {
+          pending.remove(PROVIDER_ID, ISSUE_ID);
+          return [createPlainspaceIssue({ isRecurring: false })];
+        },
+      );
+      taskServiceSpy.getAllIssueIdsForProviderEverywhere.and.resolveTo([]);
+
+      pending.add(PROVIDER_ID, ISSUE_ID);
+      await service.checkAndImportNewIssuesToBacklogForProject(
+        'PLAINSPACE',
+        PROVIDER_ID,
+        true,
+      );
+
+      expect(addSpy).not.toHaveBeenCalled();
     });
   });
 });

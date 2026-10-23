@@ -44,6 +44,7 @@ import {
   getRepeatableTaskId,
 } from './get-repeatable-task-id.util';
 import { getDeadlineAutoPlanFields } from '../tasks/util/get-deadline-auto-plan-fields';
+import { getTaskPriority } from '../tasks/task-priority.const';
 
 @Injectable({
   providedIn: 'root',
@@ -182,6 +183,13 @@ export class TaskRepeatCfgService {
       | ReturnType<typeof addSubTask>
     )[]
   > {
+    // A paused series creates nothing. The day-change selectors already skip
+    // it, but completing a copy of a paused wait-for-completion config calls
+    // this directly (updateStartDateOnComplete$).
+    if (taskRepeatCfg.isPaused) {
+      return [];
+    }
+
     // NOTE: there might be multiple configs in case something went wrong
     // we want to move all of them to the archive
     const existingTaskInstances: Task[] = await this._taskService
@@ -398,6 +406,7 @@ export class TaskRepeatCfgService {
         additional: {
           repeatCfgId: taskRepeatCfg.id,
           timeEstimate: taskRepeatCfg.defaultEstimate || 0,
+          priority: getTaskPriority(taskRepeatCfg.priority),
           projectId: taskRepeatCfg.projectId || undefined,
           notes: taskRepeatCfg.notes || '',
           dueDay,

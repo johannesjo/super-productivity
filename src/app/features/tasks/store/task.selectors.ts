@@ -275,7 +275,7 @@ const createSchedulingSnapshotProjector = (): ((
 
 // Snapshot over active-project tasks — matches selectAllTasksInActiveProjects'
 // archived-project filtering AND ordering exactly (it IS its source). Drives the
-// overdue / due-time / deadline / due-day / later-today / today decisions.
+// overdue / due-time / deadline / due-day / later-today / today / done-ids decisions.
 export const selectTaskSchedulingSnapshot = createSelector(
   selectAllTasksInActiveProjects,
   createSchedulingSnapshotProjector(),
@@ -725,8 +725,8 @@ export const selectLaterTodayTasksWithSubTasks = createSelector(
 );
 
 export const selectAllDoneIds = createSelector(
-  selectAllTasksInActiveProjects,
-  (tasks: Task[]): string[] => tasks.filter((t) => t?.isDone).map((t) => t.id),
+  selectTaskSchedulingSnapshot,
+  (snapshot): string[] => snapshot.filter((s) => s.isDone).map((s) => s.id),
 );
 
 // DYNAMIC SELECTORS

@@ -24,6 +24,7 @@ import {
 import { CollapsibleComponent } from '../../../ui/collapsible/collapsible.component';
 import { DialogConfirmComponent } from '../../../ui/dialog-confirm/dialog-confirm.component';
 import { DateTimeFormatService } from '../../../core/date-time-format/date-time-format.service';
+import { SyncLocalStateService } from '../../../op-log/sync/sync-local-state.service';
 
 @Component({
   selector: 'dialog-sync-conflict',
@@ -48,6 +49,7 @@ export class DialogSyncConflictComponent {
   private _matDialog = inject(MatDialog);
   private _translateService = inject(TranslateService);
   private _dateTimeFormatService = inject(DateTimeFormatService);
+  private _syncLocalStateService = inject(SyncLocalStateService);
   data = inject<ConflictData>(MAT_DIALOG_DATA);
 
   // Exposed so the template can pass the reactive locale to the now-pure
@@ -81,6 +83,14 @@ export class DialogSyncConflictComponent {
   }
 
   close(res?: DialogConflictResolutionResult): void {
+    // #9256: Keep local force-uploads with a clean slate, which deletes remote
+    // ops this device could not decrypt.
+    if (
+      res === 'USE_LOCAL' &&
+      !this._syncLocalStateService.confirmOverwriteOfUndecryptableRemoteOps()
+    ) {
+      return;
+    }
     if (res && this.shouldConfirmOverwrite(res)) {
       const confirmMessage = this.getConfirmationMessage(res);
 

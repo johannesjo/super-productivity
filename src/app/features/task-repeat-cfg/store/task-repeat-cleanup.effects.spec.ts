@@ -730,6 +730,97 @@ describe('TaskRepeatCleanupEffects', () => {
       sub.unsubscribe();
     }));
 
+    for (const [cfgPriority, taskPriority, shouldDelete] of [
+      [3, 3, true],
+      ['high', 3, true],
+      [3, null, false],
+      [undefined, 3, false],
+    ] as const) {
+      it(`compares template priority ${cfgPriority} with occurrence priority ${taskPriority} before cleanup`, fakeAsync(() => {
+        repeatCfgs$.next([
+          skipOverdueCfg('cfg-priority', '', {
+            title: 'Water plants',
+            priority: cfgPriority,
+          }),
+        ]);
+        const task: Task = {
+          ...DEFAULT_TASK,
+          projectId: 'p1',
+          title: 'Water plants',
+          id: 'priority-yesterday',
+          repeatCfgId: 'cfg-priority',
+          created: yesterdayMs,
+          dueDay: getDbDateStr(yesterdayMs),
+          priority: taskPriority,
+        };
+        repeatableTasks$.next([
+          wrapWithSubTasks(task),
+          wrapWithSubTasks({
+            ...task,
+            id: 'priority-today',
+            created: todayMs,
+            dueDay: getDbDateStr(todayMs),
+          }),
+        ]);
+        const sub = effects.cleanupDuplicateRepeatInstances$.subscribe();
+        tick(3001);
+        expect(getDispatchedDeleteIds()).toEqual(
+          shouldDelete ? ['priority-yesterday'] : [],
+        );
+        sub.unsubscribe();
+      }));
+    }
+
+    // Providers that push every new task (Plainspace) link each copy to its own
+    // remote item; keeping those would pile them up locally and remotely
+    it('reaps an overdue issue-linked instance and hands its issue to the remote delete', fakeAsync(() => {
+      repeatCfgs$.next([skipOverdueCfg('cfg-issue', '', { title: 'Water plants' })]);
+      const yesterdayLinked: Task = {
+        ...DEFAULT_TASK,
+        projectId: 'p1',
+        id: 'issue-yesterday',
+        title: 'Water plants',
+        repeatCfgId: 'cfg-issue',
+        created: yesterdayMs,
+        dueDay: getDbDateStr(yesterdayMs),
+        isDone: false,
+        timeSpent: 0,
+        issueId: 'ps-yesterday',
+        issueType: 'PLAINSPACE',
+        issueProviderId: 'plainspace-provider',
+      };
+      const todayInstance: Task = {
+        ...DEFAULT_TASK,
+        projectId: 'p1',
+        id: 'issue-today',
+        title: 'Water plants',
+        repeatCfgId: 'cfg-issue',
+        created: todayMs,
+        dueDay: getDbDateStr(todayMs),
+        isDone: false,
+        timeSpent: 0,
+      };
+
+      repeatableTasks$.next([
+        wrapWithSubTasks(yesterdayLinked),
+        wrapWithSubTasks(todayInstance),
+      ]);
+
+      const sub = effects.cleanupDuplicateRepeatInstances$.subscribe();
+      tick(3001);
+
+      expect(getDispatchedDeleteIds()).toEqual(['issue-yesterday']);
+      expect(TestBed.inject(DeletedTaskIssueSidecarService).set).toHaveBeenCalledWith([
+        {
+          issueId: 'ps-yesterday',
+          issueType: 'PLAINSPACE',
+          issueProviderId: 'plainspace-provider',
+        },
+      ]);
+
+      sub.unsubscribe();
+    }));
+
     it('keeps an overdue instance whose title differs from the template', fakeAsync(() => {
       repeatCfgs$.next([skipOverdueCfg('cfg-title', '', { title: 'Water plants' })]);
       const yesterdayEdited: Task = {

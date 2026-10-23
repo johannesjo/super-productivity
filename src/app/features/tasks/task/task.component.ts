@@ -39,6 +39,7 @@ import {
   ChecklistProgress,
   getChecklistProgress,
 } from '../../markdown-checklist/get-checklist-progress';
+import { getSubTaskProgress } from '../util/get-sub-task-progress';
 import { GlobalConfigService } from '../../config/global-config.service';
 import { DoneToggleComponent } from '../../../ui/done-toggle/done-toggle.component';
 import { SwipeBlockComponent } from '../../../ui/swipe-block/swipe-block.component';
@@ -129,6 +130,8 @@ import {
 import { AddSubtaskInputService } from '../add-subtask-input/add-subtask-input.service';
 import { getSubTaskTimeLeftForDisplay } from '../util/get-sub-task-time-left-for-display';
 import { getScheduledDateColor } from '../util/get-scheduled-date-color';
+import { isWontDoTask } from '../util/is-wont-do-task';
+import { IssueSyncStateService } from '../../issue/two-way-sync/issue-sync-state.service';
 
 const isInteractiveTarget = (target: EventTarget | null): boolean =>
   target instanceof Element &&
@@ -207,6 +210,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   private readonly _addSubtaskInputService = inject(AddSubtaskInputService);
   private readonly _multiSelect = inject(TaskMultiSelectService);
   private readonly _taskMoveToProjectService = inject(TaskMoveToProjectService);
+  private readonly _issueSyncState = inject(IssueSyncStateService);
 
   readonly workContextService = inject(WorkContextService);
   readonly layoutService = inject(LayoutService);
@@ -220,6 +224,7 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
 
   // Use shared signals from services to avoid creating 600+ subscriptions on initial render
   isCurrent = computed(() => this._taskService.currentTaskId() === this.task().id);
+  isWontDo = computed(() => isWontDoTask(this.task()));
   isSelected = computed(() => this._taskService.selectedTaskId() === this.task().id);
   // Part of the transient multi-selection (modifier click, Shift+Arrow, X,
   // Ctrl/Cmd+A, touch tap in selection mode).
@@ -340,6 +345,14 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   checklistProgress = computed<ChecklistProgress | null>(() =>
     getChecklistProgress(this.task().notes),
   );
+
+  // Done/total badge on the toggle while sub tasks are collapsed (null = not shown). #7057
+  subTaskProgress = computed<ChecklistProgress | null>(() => {
+    const t = this.task();
+    return t._hideSubTasksMode === HideSubTasksMode.HideAll
+      ? getSubTaskProgress(t.subTasks)
+      : null;
+  });
 
   isShowRemoveFromToday = computed(() => {
     return (
@@ -776,10 +789,17 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
     const isConfirmBeforeTaskDelete =
       this._configService.cfg()?.tasks?.isConfirmBeforeDelete ?? true;
 
-    if (isTaskDeleteConfirmRequired(this.task(), isConfirmBeforeTaskDelete)) {
+    const isNoLongerListed = this._issueSyncState.isMissing(this.task().id);
+    if (
+      isTaskDeleteConfirmRequired(
+        this.task(),
+        isConfirmBeforeTaskDelete,
+        isNoLongerListed,
+      )
+    ) {
       this._matDialog
         .open(DialogConfirmComponent, {
-          data: getTaskDeleteConfirmData(this.task()),
+          data: getTaskDeleteConfirmData(this.task(), undefined, isNoLongerListed),
         })
         .afterClosed()
         .pipe(takeUntilDestroyed(this._destroyRef))
