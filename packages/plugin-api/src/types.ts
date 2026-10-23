@@ -756,6 +756,16 @@ export interface PluginAPI {
 
   loadSyncedData(key?: string): Promise<string | null>;
 
+  /**
+   * Запрашивает обычную синхронизацию настроенного провайдера из plugin.js или iframe.
+   * Promise разрешается также при обработанных ошибках (HANDLED_ERROR) и пропуске
+   * синхронизации. Это не подтверждает успешную синхронизацию или публикацию
+   * конкретных данных плагина. Отклонения Promise моста передаются вызывающему коду.
+   * Тайм-аут iframe через 30 секунд не отменяет уже начатую синхронизацию в host.
+   * Перед вызовом в старом host проверьте наличие метода.
+   */
+  triggerSync(): Promise<void>;
+
   getConfig<T = Record<string, unknown>>(): Promise<T | null>;
 
   // i18n
