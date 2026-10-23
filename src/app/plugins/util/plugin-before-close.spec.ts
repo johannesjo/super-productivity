@@ -11,6 +11,13 @@ import {
 } from './plugin-iframe.util';
 import { PluginBeforeCloseIframe } from './plugin-before-close-iframe';
 
+const unwrapScript = (script: string): string => {
+  const wrapped = script.trim();
+  expect(wrapped.startsWith('<script>')).toBeTrue();
+  expect(wrapped.endsWith('</script>')).toBeTrue();
+  return wrapped.slice('<script>'.length, -'</script>'.length);
+};
+
 describe('generated iframe before-close callback', () => {
   const config: PluginIframeConfig = {
     pluginId: 'fixture',
@@ -41,10 +48,7 @@ describe('generated iframe before-close callback', () => {
       parent,
       addEventListener: (name, fn) => listeners.set(name, fn),
     };
-    const script = createPluginApiScript(config)
-      .trim()
-      .replace(/^<script>/, '')
-      .replace(/<\/script>$/, '');
+    const script = unwrapScript(createPluginApiScript(config));
     new Function('window', 'setTimeout', script)(frame, window.setTimeout);
     const callback = jasmine.createSpy('callback').and.resolveTo();
     const registration = frame.PluginAPI!.onBeforeAppClose!(callback);
@@ -106,10 +110,7 @@ describe('generated iframe before-close callback', () => {
         window.dispatchEvent(event);
       }
     });
-    const script = createPluginApiScript(testConfig)
-      .trim()
-      .replace(/^<script>/, '')
-      .replace(/<\/script>$/, '');
+    const script = unwrapScript(createPluginApiScript(testConfig));
     new Function('window', 'setTimeout', script)(frame, window.setTimeout);
     try {
       expect(
