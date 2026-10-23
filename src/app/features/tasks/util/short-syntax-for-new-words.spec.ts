@@ -35,10 +35,19 @@ describe('shortSyntaxForNewWords', () => {
     });
   });
 
-  it('parses a newly typed tag that the kept title has as text elsewhere', async () => {
+  it('parses a newly typed tag', async () => {
     const r = await parse('Fix bug', 'Fix bug #urgent');
 
     expect(r?.taskChanges).toEqual({ title: 'Fix bug', tagIds: ['tag-urgent'] });
+  });
+
+  it('parses a newly typed date in front of kept words without eating them', async () => {
+    const r = await parse('Call Bob 5pm about it', 'Call @tomorrow Bob 5pm about it');
+
+    // (the double space a mid-title date leaves is plain shortSyntax's)
+    expect(r?.taskChanges.title).toBe('Call  Bob 5pm about it');
+    expect(r?.taskChanges.dueWithTime).toEqual(jasmine.any(Number));
+    expect(r?.taskChanges.hasPlannedTime).toBe(false);
   });
 
   it('parses the whole title without a kept title', async () => {
