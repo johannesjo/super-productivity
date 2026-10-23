@@ -81,6 +81,25 @@ test('Сохраняет исходные байты и открывает то�
   assert.equal(opened.length, 1);
 });
 
+test('Сохраняет ровно 10 МиБ без изменения байтов', async () => {
+  const selected = path.join(root, 'предел.bin');
+  const data = new Uint8Array(10 * 1024 * 1024).fill(129);
+  dialogResult = { canceled: false, filePath: selected };
+  assert.deepEqual(
+    await savePluginBinaryFile(
+      {},
+      request({
+        filename: 'предел.bin',
+        data: data.buffer,
+        openAfterSave: false,
+      }),
+    ),
+    { kind: 'saved', path: selected, openStatus: 'not-requested' },
+  );
+  assert.deepEqual(await fs.readFile(selected), Buffer.from(data));
+  assert.deepEqual(opened, []);
+});
+
 test('Нет ассоциации или отказ shell сохраняет файл и сообщает saved/failed', async () => {
   const selected = path.join(root, 'неизвестное расширение.unknown');
   dialogResult = { canceled: false, filePath: selected };
