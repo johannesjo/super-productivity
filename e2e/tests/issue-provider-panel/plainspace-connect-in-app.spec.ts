@@ -171,6 +171,10 @@ test.describe('Plainspace: connect inside the app', () => {
     );
     await expect(dialog(page)).toContainText('needs the new one');
     expect(server.revokedTokens.has('pat_e2e')).toBe(false);
+    // Using the key this device holds is offered first; replacing is chosen.
+    await expect(
+      dialog(page).getByRole('button', { name: 'Use existing connection' }),
+    ).toBeVisible();
     await dialog(page).getByRole('button', { name: 'Replace key' }).click();
     await expect(dialog(page)).toBeHidden();
 
@@ -186,6 +190,35 @@ test.describe('Plainspace: connect inside the app', () => {
     // so neither asks to reconnect.
     await openIssuePanel(page);
     expect(await providerTokensWithoutReconnect(page)).toEqual([newToken, newToken]);
+  });
+
+  // A second device: the providers came through sync, the saved account (per
+  // device) didn't. Using the working key it holds revokes nothing.
+  test('a second device uses the working key it already holds instead of replacing it', async ({
+    page,
+    projectPage,
+  }) => {
+    test.setTimeout(120000);
+    const server = await installFakePlainspace(page);
+    server.accounts.set(ME, { activeToken: 'pat_e2e' });
+    await projectPage.createProject('Camping');
+    await addPlainspaceProvider(page, /Camping/);
+
+    await shareProject(page, projectPage, 'Shared');
+    await enterEmail(page, ME);
+    await enterCode(page, await sentCode(server, ME));
+    await dialog(page).getByRole('button', { name: 'Use existing connection' }).click();
+    await expect(dialog(page)).toBeHidden();
+
+    const picker = page.locator('plainspace-space-picker-dialog');
+    await picker.getByRole('button', { name: 'Link space' }).click();
+    await expect(picker).toBeHidden();
+    await shareSucceeded(page);
+    expect(server.revokedTokens.size).toBe(0);
+    expect(server.accounts.get(ME)!.activeToken).toBe('pat_e2e');
+    expect(server.connectRequests.some((r) => r['force'])).toBe(false);
+    await openIssuePanel(page);
+    expect(await providerTokensWithoutReconnect(page)).toEqual(['pat_e2e', 'pat_e2e']);
   });
 
   test('a host without email-code connect falls back to the browser', async ({

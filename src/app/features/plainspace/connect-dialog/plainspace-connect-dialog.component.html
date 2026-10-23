@@ -100,10 +100,16 @@
           }
         </p>
       }
+      @if (existingToken()) {
+        <p>{{ T.PLAINSPACE.CONNECT.USE_EXISTING_HINT | translate }}</p>
+      }
       <div class="callout callout--warning">
         <mat-icon aria-hidden="true">warning</mat-icon>
         <p>{{ T.PLAINSPACE.CONNECT.REPLACE_WARNING | translate }}</p>
       </div>
+    }
+    @case ('retry') {
+      <p class="intro">{{ T.PLAINSPACE.CONNECT.KEY_NOT_STORED | translate }}</p>
     }
     @case ('browser') {
       <p class="intro">
@@ -209,14 +215,51 @@
       </button>
     }
     @case ('replace') {
+      @if (existingToken()) {
+        <button
+          mat-stroked-button
+          color="warn"
+          [disabled]="isBusy()"
+          (click)="replaceKey()"
+        >
+          {{ T.PLAINSPACE.CONNECT.REPLACE | translate }}
+        </button>
+        <button
+          mat-flat-button
+          color="primary"
+          [disabled]="isBusy()"
+          (click)="useExistingKey()"
+        >
+          {{
+            (isBusy()
+              ? T.PLAINSPACE.CONNECT.CONNECTING
+              : T.PLAINSPACE.CONNECT.USE_EXISTING
+            ) | translate
+          }}
+        </button>
+      } @else {
+        <button
+          mat-flat-button
+          color="warn"
+          [disabled]="isBusy()"
+          (click)="replaceKey()"
+        >
+          {{
+            (isBusy() ? T.PLAINSPACE.CONNECT.CONNECTING : T.PLAINSPACE.CONNECT.REPLACE)
+              | translate
+          }}
+        </button>
+      }
+    }
+    @case ('retry') {
       <button
         mat-flat-button
-        color="warn"
+        color="primary"
         [disabled]="isBusy()"
-        (click)="replaceKey()"
+        (click)="retryStore()"
       >
         {{
-          (isBusy() ? T.PLAINSPACE.CONNECT.CONNECTING : T.PLAINSPACE.CONNECT.REPLACE)
+          (isBusy() ? T.PLAINSPACE.CONNECT.CONNECTING : T.PLAINSPACE.CONNECT.RETRY)
             | translate
         }}
       </button>

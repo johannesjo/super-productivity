@@ -51,6 +51,8 @@ describe('PlainspaceConnectDialogComponent', () => {
       ],
     }).compileComponents();
 
+    accountService.findAccountTokens.and.resolveTo([]);
+
     fixture = TestBed.createComponent(PlainspaceConnectDialogComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
@@ -166,6 +168,7 @@ describe('PlainspaceConnectDialogComponent', () => {
 
     it('asks before replacing it', () => {
       expect(component.step()).toBe('replace');
+      expect(component.existingToken()).toBeNull();
       expect(authApi.connect$).toHaveBeenCalledTimes(1);
       expect(accountService.connect).not.toHaveBeenCalled();
     });
@@ -208,6 +211,84 @@ describe('PlainspaceConnectDialogComponent', () => {
       await component.replaceKey();
       expect(component.step()).toBe('code');
       expect(component.errorMsg()).toBe(T.PLAINSPACE.CONNECT.INVALID_CODE);
+    });
+  });
+
+  // Another device's synced providers hold the account's working key, but this
+  // device has no saved account: using that key revokes nothing.
+  describe('a working key already on this device', () => {
+    beforeEach(async () => {
+      await setup();
+      accountService.findAccountTokens.and.resolveTo(['pat_working']);
+      await toCodeStep();
+      authApi.connect$.and.returnValue(
+        of({ status: 'already-connected' as const, createdAt: null, lastUsedAt: null }),
+      );
+      await component.submitCode();
+    });
+
+    it('offers it next to replacing', () => {
+      expect(accountService.findAccountTokens).toHaveBeenCalledWith(
+        HOST,
+        'me@example.com',
+      );
+      expect(component.step()).toBe('replace');
+      expect(component.existingToken()).toBe('pat_working');
+    });
+
+    it('connects with it without forcing a new key', async () => {
+      accountService.connect.and.resolveTo('ok');
+      await component.useExistingKey();
+      expect(accountService.connect).toHaveBeenCalledWith('pat_working', HOST, undefined);
+      expect(authApi.connect$).toHaveBeenCalledTimes(1);
+      expect(authApi.connect$.calls.mostRecent().args[3]).toBe(false);
+      expect(dialogRef.close).toHaveBeenCalledWith(true);
+    });
+  });
+
+  // Minting revoked the old key and consumed the code, so a failed check must
+  // not drop the new key.
+  describe('a minted key whose check fails', () => {
+    beforeEach(async () => {
+      await setup();
+      await toCodeStep();
+      authApi.connect$.and.returnValue(
+        of({ status: 'connected' as const, token: 'pat_new' }),
+      );
+    });
+
+    it('retries the check once on no answer', async () => {
+      accountService.connect.and.returnValues(
+        Promise.resolve('unreachable'),
+        Promise.resolve('ok'),
+      );
+      await component.submitCode();
+      expect(accountService.connect).toHaveBeenCalledTimes(2);
+      expect(dialogRef.close).toHaveBeenCalledWith(true);
+    });
+
+    it('keeps the key for Retry when the check keeps failing', async () => {
+      accountService.connect.and.returnValues(
+        Promise.resolve('unreachable'),
+        Promise.resolve('aborted'),
+        Promise.resolve('ok'),
+      );
+      await component.submitCode();
+      expect(component.step()).toBe('retry');
+      expect(component.errorMsg()).toBe(T.PLAINSPACE.CONNECT.UNREACHABLE);
+      expect(dialogRef.close).not.toHaveBeenCalled();
+
+      await component.retryStore();
+      expect(accountService.connect).toHaveBeenCalledTimes(3);
+      expect(accountService.connect.calls.mostRecent().args).toEqual([
+        'pat_new',
+        HOST,
+        undefined,
+        [],
+      ]);
+      // No new key was minted for the retry.
+      expect(authApi.connect$).toHaveBeenCalledTimes(1);
+      expect(dialogRef.close).toHaveBeenCalledWith(true);
     });
   });
 

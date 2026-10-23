@@ -52,12 +52,22 @@ export interface PlainspaceConnectDialogData {
  */
 export type PlainspaceConnectDialogResult = true | { createdSpaceId: string };
 
-type Step = 'email' | 'code' | 'name' | 'replace' | 'browser';
+type Step = 'email' | 'code' | 'name' | 'replace' | 'retry' | 'browser';
 
 interface DialogError {
   key: string;
   params?: Record<string, number>;
 }
+
+interface PendingKey {
+  token: string;
+  oldTokens: string[];
+  createdSpaceId: string | null;
+}
+
+// No answer, or a disconnect during the check: the key itself is fine.
+const isRetryable = (res: PlainspaceConnectResult): boolean =>
+  res === 'unreachable' || res === 'aborted';
 
 // Plainspace's windows (`CODE_REQUEST_WINDOW_MS`; the per-IP connect and
 // create caps): it sends no Retry-After, so the wait is named from these.
@@ -150,6 +160,12 @@ export class PlainspaceConnectDialogComponent {
     lastUsedAt: null,
   });
 
+  /**
+   * A working key this device already holds for the account (e.g. on providers
+   * synced from another device): offered before replacing the active key.
+   */
+  readonly existingToken = signal<string | null>(null);
+
   email = '';
   code = '';
   displayName = '';
@@ -160,6 +176,11 @@ export class PlainspaceConnectDialogComponent {
   readonly errorMsg = computed(() => this.error()?.key ?? null);
 
   private _resendTimer: ReturnType<typeof setInterval> | null = null;
+  /**
+   * A key minted but not yet stored: the check that stores it failed. Kept for
+   * Retry, since minting revoked the previous key and consumed the code.
+   */
+  private _pendingKey: PendingKey | null = null;
 
   constructor() {
     inject(DestroyRef).onDestroy(() => this._stopResendTimer());
@@ -218,11 +239,19 @@ export class PlainspaceConnectDialogComponent {
       case 'connected':
         await this._finish(res.token, oldTokens, null);
         return;
-      case 'already-connected':
+      case 'already-connected': {
+        // Using a key this device already holds keeps every other device and
+        // app connected; replacing it is only offered next to that.
+        const [existing] = await this._accountService.findAccountTokens(
+          this.host,
+          this.sentTo(),
+        );
         this.isBusy.set(false);
+        this.existingToken.set(existing ?? null);
         this.activeKey.set({ createdAt: res.createdAt, lastUsedAt: res.lastUsedAt });
         this.step.set('replace');
         return;
+      }
       case 'no-account':
         this.isBusy.set(false);
         this.step.set('name');
@@ -236,6 +265,38 @@ export class PlainspaceConnectDialogComponent {
   /** The other app or device holding the active key then needs the new one. */
   replaceKey(): Promise<void> {
     return this.submitCode(true);
+  }
+
+  /** Connects with the working key this device already holds; nothing is revoked. */
+  async useExistingKey(): Promise<void> {
+    const token = this.existingToken();
+    if (!token || this.isBusy()) {
+      return;
+    }
+    this.isBusy.set(true);
+    this.error.set(null);
+    const res = await this._accountService.connect(
+      token,
+      this.host,
+      this._data?.replacedToken,
+    );
+    if (res === 'ok') {
+      this._dialogRef.close(true);
+      return;
+    }
+    this.isBusy.set(false);
+    this._showConnectFailure(res);
+  }
+
+  /** Stores a minted key whose check failed before. */
+  async retryStore(): Promise<void> {
+    const key = this._pendingKey;
+    if (!key || this.isBusy()) {
+      return;
+    }
+    this.isBusy.set(true);
+    this.error.set(null);
+    await this._finish(key.token, key.oldTokens, key.createdSpaceId);
   }
 
   /** A new account: create its first Space, then mint its key. */
@@ -313,22 +374,39 @@ export class PlainspaceConnectDialogComponent {
     this._dialogRef.close(false);
   }
 
+  /**
+   * Stores a freshly minted key. Its check is retried once on no answer; if it
+   * still fails, the key stays here for Retry instead of being dropped.
+   */
   private async _finish(
     token: string,
     oldTokens: string[],
     createdSpaceId: string | null,
   ): Promise<void> {
-    const res = await this._accountService.connect(
-      token,
-      this.host,
-      this._data?.replacedToken,
-      oldTokens,
-    );
+    const store = (): Promise<PlainspaceConnectResult> =>
+      this._accountService.connect(
+        token,
+        this.host,
+        this._data?.replacedToken,
+        oldTokens,
+      );
+    let res = await store();
+    if (isRetryable(res)) {
+      res = await store();
+    }
     if (res === 'ok') {
+      this._pendingKey = null;
       this._dialogRef.close(createdSpaceId ? { createdSpaceId } : true);
       return;
     }
     this.isBusy.set(false);
+    if (isRetryable(res)) {
+      this._pendingKey = { token, oldTokens, createdSpaceId };
+      this.error.set({ key: T.PLAINSPACE.CONNECT.UNREACHABLE });
+      this.step.set('retry');
+      return;
+    }
+    this._pendingKey = null;
     this._showConnectFailure(res);
   }
 
