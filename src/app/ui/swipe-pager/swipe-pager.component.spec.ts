@@ -354,7 +354,8 @@ describe('SwipePagerComponent', () => {
     });
 
     it('finishes the settle when transitionend never fires', async () => {
-      // Registered before the pager's own listener, so it never sees the event.
+      // Registered before the pager's own listener: swallows the browser's real
+      // transitionend, so only the fallback timer can finish the settle.
       pagerEl
         .querySelector<HTMLElement>('.track')!
         .addEventListener('transitionend', (ev) => ev.stopImmediatePropagation());
