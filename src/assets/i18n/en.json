@@ -10,7 +10,7 @@
       "ALREADY_ENCRYPTED": "This account is already encrypted on another device. Enter your existing password to keep syncing.",
       "ENABLE": "Enable encryption",
       "LATER": "Later",
-      "MSG": "SuperSync is end-to-end encrypted, but this account still syncs without a password. Set one to protect your data — it stays and is re-uploaded encrypted on the next sync."
+      "MSG": "SuperSync requires an encryption password, but this account doesn't have one yet. Set one to protect your data — it stays and is re-uploaded encrypted on the next sync."
     },
     "B_RECOVERY_POINT": {
       "BROWSE": "Browse backups",
@@ -1537,7 +1537,7 @@
           "SERVER_URL_DESCRIPTION": "Leave as-is for the official server, or enter a custom server URL",
           "SETUP_DISABLE_SUPERSYNC_BTN": "Disable SuperSync",
           "SETUP_ENCRYPTION_BTN": "Set Password",
-          "SETUP_ENCRYPTION_PASSWORD_WARNING": "Use the same password on all devices. A forgotten password can be reset by overwriting remote data.",
+          "SETUP_ENCRYPTION_PASSWORD_WARNING": "Use the same password on all devices. If you forget it, you can set a new one, but the encrypted data on the server is then replaced with this device's data.",
           "SETUP_ENCRYPTION_TITLE": "SuperSync: Set Password"
         },
         "NEXTCLOUD": {
