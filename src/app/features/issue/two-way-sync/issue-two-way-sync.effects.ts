@@ -90,6 +90,11 @@ const isExpectedSyncSkipError = (err: unknown): boolean =>
   err !== null &&
   (err as { isExpectedSyncSkip?: boolean }).isExpectedSyncSkip === true;
 
+// Log history is exportable and an HTTP error carries the provider's URL and
+// the item id: log its status only.
+const toLoggableError = (err: unknown): unknown =>
+  err instanceof HttpErrorResponse ? { status: err.status } : err;
+
 const toSortedStringArray = (value: unknown): string[] =>
   Array.isArray(value)
     ? value
@@ -291,7 +296,7 @@ export class IssueTwoWaySyncEffects {
                 onDone?.(true);
                 return EMPTY;
               }
-              IssueLog.err('Two-way sync push failed', err);
+              IssueLog.err('Two-way sync push failed', toLoggableError(err));
               const failure = this._toSyncFailure(err);
               this._syncState.reportFailure(fullTask.id, failure);
               onDone?.(false);
@@ -350,7 +355,7 @@ export class IssueTwoWaySyncEffects {
               if (isExpectedSyncSkipError(err)) {
                 return EMPTY;
               }
-              IssueLog.err('Two-way sync tag delete push failed', err);
+              IssueLog.err('Two-way sync tag delete push failed', toLoggableError(err));
               this._snackService.open({
                 type: 'ERROR',
                 msg: T.F.ISSUE.S.TWO_WAY_SYNC_PUSH_FAILED,
@@ -400,7 +405,7 @@ export class IssueTwoWaySyncEffects {
             // throws, and an escaped error would tear down every other pending
             // deferred delete.
             catchError((err) => {
-              IssueLog.err('Deferred remote issue delete failed', err);
+              IssueLog.err('Deferred remote issue delete failed', toLoggableError(err));
               return EMPTY;
             }),
             finalize(() =>
@@ -434,7 +439,7 @@ export class IssueTwoWaySyncEffects {
                 // The provider can be removed meanwhile (getCfgOnce$ throws): an
                 // escaped error would skip the rest and end this effect.
                 catchError((err) => {
-                  IssueLog.err('Bulk remote issue delete failed', err);
+                  IssueLog.err('Bulk remote issue delete failed', toLoggableError(err));
                   return EMPTY;
                 }),
                 finalize(() =>
@@ -597,7 +602,7 @@ export class IssueTwoWaySyncEffects {
                   if (isExpectedSyncSkipError(err)) {
                     return EMPTY;
                   }
-                  IssueLog.err('Auto-create issue failed', err);
+                  IssueLog.err('Auto-create issue failed', toLoggableError(err));
                   this._snackService.open({
                     type: 'ERROR',
                     msg: T.F.ISSUE.S.AUTO_CREATE_FAILED,
@@ -788,7 +793,10 @@ export class IssueTwoWaySyncEffects {
               .fetchIssue(issueId, cfg)
               .then((issue) => adapter.getIssueLastUpdated!(issue))
               .catch((err) => {
-                IssueLog.err('Reading the issue back after the initial push failed', err);
+                IssueLog.err(
+                  'Reading the issue back after the initial push failed',
+                  toLoggableError(err),
+                );
                 return Date.now();
               });
       // One updateTaskUi with the pushed values, as in _pushChanges$.
@@ -901,7 +909,7 @@ export class IssueTwoWaySyncEffects {
               if (status === 404 || status === 410) {
                 return EMPTY;
               }
-              IssueLog.err('Delete remote issue failed', err);
+              IssueLog.err('Delete remote issue failed', toLoggableError(err));
               this._snackService.open({
                 type: 'ERROR',
                 msg: T.F.ISSUE.S.DELETE_REMOTE_FAILED,
