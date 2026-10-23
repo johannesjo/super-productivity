@@ -540,20 +540,12 @@ export class FileBasedSyncAdapterService {
     }
   }
 
-  /**
-   * Creates an OperationSyncCapable adapter for a file-based provider.
-   *
-   * @param provider - The underlying file provider (WebDAV, Dropbox, etc.)
-   * @param encryptAndCompressCfg - Encryption/compression settings
-   * @param encryptKey - Optional encryption key
-   * @returns Object implementing OperationSyncCapable interface
-   */
+  /** Creates the app adapter; only v2 captures claim task/archive coherence. */
   createAdapter(
     provider: FileSyncProvider<SyncProviderId>,
     encryptAndCompressCfg: EncryptAndCompressCfg,
     encryptKey: string | undefined,
   ): OperationSyncCapable<'fileSnapshotOps'> {
-    // Load persisted state before creating adapter
     this._loadPersistedState();
 
     const providerKey = this._getProviderKey(provider);
@@ -561,6 +553,14 @@ export class FileBasedSyncAdapterService {
     return {
       supportsOperationSync: true,
       providerMode: 'fileSnapshotOps',
+
+      requiresTaskArchiveSnapshot: () => {
+        const setting = this._injector
+          .get(GlobalConfigService, null)
+          ?.sync()?.isUseSplitSyncFiles;
+        // Unknown remote format stays conservative; discovery performs network I/O.
+        return !(setting ?? this._remoteFormats.get(providerKey) === 'v3');
+      },
 
       uploadOps: async (
         ops: SyncOperation[],

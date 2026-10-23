@@ -1,10 +1,18 @@
 ## Срез задач и архивов при файловой загрузке
 
-Обычная загрузка операций в WebDAV фиксирует active state и оба архива до
-первого удалённого запроса. `OperationLogUploadService` берёт блокировки в
-порядке `UPLOAD → OPERATION_LOG → TASK_ARCHIVE` и вызывает
-`getStateSnapshotWithArchiveIntegrity()`. Нельзя ждать сброса очереди записи
-операций или завершения archive effects внутри этой пары блокировок.
+Отметка `taskArchiveSnapshotVersion: 1` в опубликованном v2 envelope означает,
+что writer получил общий срез active state и обоих архивов без подмены
+повреждённых task-разделов. Она не требуется у каждой публикации и не
+добавляет такую гарантию формату split. Потребитель, которому нужно доказательство
+отсутствия владельца, должен отказаться от чтения без отметки. Отметка сама по
+себе не разрешает удаление: потребитель также проверяет форму данных и свой
+протокол владения.
+
+Для такого среза `OperationLogUploadService` берёт блокировки в порядке
+`UPLOAD → OPERATION_LOG → TASK_ARCHIVE` и вызывает
+`getStateSnapshotWithArchiveIntegrity()`. Active state и архивы фиксируются до
+удалённых запросов загрузки. Нельзя ждать сброса очереди записи операций или
+завершения archive effects внутри этой пары блокировок.
 
 Это нужно для восстановления архивной задачи во время загрузки. Если сначала
 зафиксировать active state без задачи, затем восстановить задачу и только потом
@@ -21,7 +29,7 @@
 
 Внутренний `CapturedFileState` передаёт state и архивы через существующий
 непрозрачный аргумент `uploadOps`. Адаптер использует эти архивы без повторного
-чтения IndexedDB. В режиме split тот же срез используется при compaction.
+чтения IndexedDB.
 Wrapper не попадает в файл. Архивы остаются в прежних верхних полях wire;
 повторно вкладывать их содержимое внутрь `state` не требуется. Версия файла,
 схема хранимых моделей и публичная сигнатура provider не меняются.
@@ -40,6 +48,26 @@ capture проверяет наличие строк через `hasArchiveYoung
 Старый клиент может прочитать файл с дополнительным полем; его обычный writer
 пересобирает envelope и не наследует отметку из предыдущего primary или backup.
 
+### Цена обычной split-загрузки
+
+Синхронный app-only hint `requiresTaskArchiveSnapshot()` не обнаруживает формат
+через сеть. Явная настройка v2 требует capture. Явная настройка split и уже
+обнаруженный v3 при отсутствующей настройке сохраняют прежний raw active-state
+срез под `OPERATION_LOG`. Обычное добавление split-операций не читает архивы.
+Compaction читает их через прежний fallback `resolveFileState`, без новой
+гарантии общего среза и без отметки. Этот helper не меняет публичный интерфейс
+пакета providers.
+
+Неизвестный формат и отсутствие hint требуют capture. Поэтому первое
+автообнаружение v3 может прочитать архивы лишний раз. При пустом наборе pending
+операций uploader не читает active state и архивы.
+
+Hint не закрепляет формат на время загрузки. Если настройка изменится со split
+на v2 после hint, writer может опубликовать raw v2 snapshot без отметки.
+Потребитель proof откажется от него. Следующая обычная загрузка v2 с pending
+операциями выполнит capture. Это ограничение доступности доказательства, а не
+ложное доказательство согласованности.
+
 Прямой вызов адаптера без capture и отдельный full-state upload сохраняют
 прежний путь чтения архивов. Они не получают гарантию общего среза только от
 наличия этого helper. Общий срез обычной загрузки не доказывает логическую
@@ -49,7 +77,7 @@ capture проверяет наличие строк через `hasArchiveYoung
 ### Проверка
 
 ```sh
-npm run quiet -- test:file src/app/op-log/sync/operation-log-upload.service.spec.ts --include src/app/op-log/sync-providers/file-based/file-based-sync-adapter.service.spec.ts
+npm run quiet -- test:file src/app/op-log/sync/operation-log-upload.service.spec.ts --include src/app/op-log/sync-providers/file-based/file-based-sync-adapter.service.spec.ts --include src/app/op-log/sync-providers/wrapped-provider.service.spec.ts
 npm run quiet -- e2e:webdav:file e2e/tests/sync/webdav-archive-restore-cutoff.spec.ts --retries=0
 npm run quiet -- e2e:webdav:file e2e/tests/sync/webdav-snapshot-integrity.spec.ts --retries=0
 ```

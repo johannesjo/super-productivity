@@ -245,6 +245,64 @@ describe('FileBasedSyncAdapterService', () => {
       });
     });
 
+    it('uses a conservative synchronous archive hint until the remote format is known', async () => {
+      const hint = (): boolean | undefined => adapter.requiresTaskArchiveSnapshot?.();
+      expect(hint()).toBeTrue();
+      expect(mockProvider.getFileRev).not.toHaveBeenCalled();
+      expect(mockProvider.downloadFile).not.toHaveBeenCalled();
+      splitSyncEnabled = true;
+      expect(hint()).toBeFalse();
+      await adapter.uploadOps([createMockSyncOp()], 'client1');
+      splitSyncEnabled = undefined;
+      await adapter.downloadOps(0);
+      expect(hint()).toBeFalse();
+      splitSyncEnabled = false;
+      expect(hint()).toBeTrue();
+      splitSyncEnabled = undefined;
+      service.invalidateAllTargets();
+      expect(hint()).toBeTrue();
+    });
+
+    it('does not grant proof if a split hint is followed by a raw v2 upload', async () => {
+      splitSyncEnabled = true;
+      const hint = adapter.requiresTaskArchiveSnapshot;
+      expect(hint?.()).toBeFalse();
+      const raw = mockStateSnapshotService.getStateSnapshotForOperationLog();
+      splitSyncEnabled = false;
+
+      await adapter.uploadOps([createMockSyncOp()], 'client1', 0, raw);
+
+      const published = parseWithPrefix(files.get(C.SYNC_FILE)!);
+      expect(published.archiveYoung).toEqual(mockArchiveYoung);
+      expect(Object.hasOwn(published, 'taskArchiveSnapshotVersion')).toBeFalse();
+    });
+
+    it('keeps legacy archive reads for raw split compaction and skips them for the next append', async () => {
+      splitSyncEnabled = true;
+      const raw = mockStateSnapshotService.getStateSnapshotForOperationLog();
+      await adapter.uploadOps([createMockSyncOp()], 'client1', 0, raw);
+      const state = parseWithPrefix(files.get(C.STATE_FILE)!);
+      expect(state.archiveYoung).toEqual(mockArchiveYoung);
+      expect(state.archiveOld).toEqual(mockArchiveOld);
+      expect(Object.hasOwn(state, 'taskArchiveSnapshotVersion')).toBeFalse();
+      expect(mockArchiveDbAdapter.loadArchiveYoung).toHaveBeenCalledTimes(1);
+      expect(mockArchiveDbAdapter.loadArchiveOld).toHaveBeenCalledTimes(1);
+      const downloaded = await adapter.downloadOps(0);
+      await adapter.setLastServerSeq(downloaded.latestSeq);
+      mockArchiveDbAdapter.loadArchiveYoung.calls.reset();
+      mockArchiveDbAdapter.loadArchiveOld.calls.reset();
+
+      await adapter.uploadOps(
+        [createMockSyncOp({ id: 'next-op' })],
+        'client1',
+        downloaded.latestSeq,
+        raw,
+      );
+
+      expect(mockArchiveDbAdapter.loadArchiveYoung).not.toHaveBeenCalled();
+      expect(mockArchiveDbAdapter.loadArchiveOld).not.toHaveBeenCalled();
+    });
+
     it('creates v2 from an absent setting and reuses discovery for later polls', async () => {
       expect(DEFAULT_GLOBAL_CONFIG.sync.isUseSplitSyncFiles).toBeUndefined();
       await adapter.downloadOps(0);

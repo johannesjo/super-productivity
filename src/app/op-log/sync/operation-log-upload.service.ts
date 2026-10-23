@@ -166,9 +166,9 @@ export class OperationLogUploadService {
         await options.preUploadCallback();
       }
 
-      // Fix the pending-op set and the file snapshot under the same operation-log
-      // boundary. A task-time action applied by reducers while waiting for this
-      // lock remains visible to snapshot projection as an in-flight delta.
+      // Fix pending ops and the active-state cutoff under one operation-log
+      // boundary. V2 proof also captures archives here; known split uploads keep
+      // their legacy raw-state path and read archives only during compaction.
       const { pendingOps, localStateSnapshot } = await this.lockService.request(
         LOCK_NAMES.OPERATION_LOG,
         async () => {
@@ -188,12 +188,15 @@ export class OperationLogUploadService {
           return {
             pendingOps: capturedPendingOps,
             localStateSnapshot:
+              capturedPendingOps.length > 0 &&
               syncProvider.providerMode === 'fileSnapshotOps'
-                ? await this.lockService.request(LOCK_NAMES.TASK_ARCHIVE, async () => {
-                    const { snapshot, taskDataUnmodified } =
-                      await this.stateSnapshotService.getStateSnapshotWithArchiveIntegrity();
-                    return captureFileState(snapshot, taskDataUnmodified);
-                  })
+                ? syncProvider.requiresTaskArchiveSnapshot?.() === false
+                  ? this.stateSnapshotService.getStateSnapshotForOperationLog()
+                  : await this.lockService.request(LOCK_NAMES.TASK_ARCHIVE, async () => {
+                      const { snapshot, taskDataUnmodified } =
+                        await this.stateSnapshotService.getStateSnapshotWithArchiveIntegrity();
+                      return captureFileState(snapshot, taskDataUnmodified);
+                    })
                 : undefined,
           };
         },

@@ -524,6 +524,66 @@ describe('OperationLogUploadService', () => {
         });
       });
 
+      it('skips file state and archive capture when there are no pending ops', async () => {
+        mockApiProvider.providerMode = 'fileSnapshotOps';
+
+        await service.uploadPendingOps(mockApiProvider);
+
+        expect(
+          mockStateSnapshotService.getStateSnapshotForOperationLog,
+        ).not.toHaveBeenCalled();
+        expect(
+          mockStateSnapshotService.getStateSnapshotWithArchiveIntegrity,
+        ).not.toHaveBeenCalled();
+        expect(
+          mockLockService.request.calls.allArgs().map(([name]) => name),
+        ).not.toContain('sp_task_archive');
+      });
+
+      it('keeps the raw active cutoff without reading archives for a split upload hint', async () => {
+        mockApiProvider.providerMode = 'fileSnapshotOps';
+        Object.assign(mockApiProvider, { requiresTaskArchiveSnapshot: () => false });
+        mockOpLogStore.getUnsynced.and.resolveTo([
+          createMockEntry(1, 'op-1', 'client-1'),
+        ]);
+        const raw = mockStateSnapshotService.getStateSnapshotForOperationLog();
+        mockStateSnapshotService.getStateSnapshotForOperationLog.calls.reset();
+        mockStateSnapshotService.getStateSnapshotForOperationLog.and.callFake(() => {
+          expect(mockLockService.request.calls.mostRecent().args[0]).toBe('sp_op_log');
+          return raw;
+        });
+
+        await service.uploadPendingOps(mockApiProvider);
+
+        expect(
+          mockStateSnapshotService.getStateSnapshotWithArchiveIntegrity,
+        ).not.toHaveBeenCalled();
+        expect(
+          mockStateSnapshotService.getStateSnapshotForOperationLog,
+        ).toHaveBeenCalledTimes(1);
+        expect(mockApiProvider.uploadOps.calls.mostRecent().args[3]).toBe(raw);
+      });
+
+      it('keeps coherent capture when the file upload hint explicitly requires it', async () => {
+        mockApiProvider.providerMode = 'fileSnapshotOps';
+        Object.assign(mockApiProvider, { requiresTaskArchiveSnapshot: () => true });
+        mockOpLogStore.getUnsynced.and.resolveTo([
+          createMockEntry(1, 'op-1', 'client-1'),
+        ]);
+
+        await service.uploadPendingOps(mockApiProvider);
+
+        expect(
+          mockStateSnapshotService.getStateSnapshotWithArchiveIntegrity,
+        ).toHaveBeenCalledTimes(1);
+        expect(mockApiProvider.uploadOps.calls.mostRecent().args[3]).toEqual(
+          jasmine.objectContaining({
+            kind: 'capturedFileState',
+            taskArchiveSnapshotVersion: 1,
+          }),
+        );
+      });
+
       it('should return empty result when no pending ops', async () => {
         mockOpLogStore.getUnsynced.and.returnValue(Promise.resolve([]));
 
