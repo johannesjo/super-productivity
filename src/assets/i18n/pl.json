@@ -97,7 +97,7 @@
   "EXAMPLE_TASKS": {
     "GETTING_STARTED": {
       "TITLE": "Opcjonalne wskazówki na początek",
-      "NOTES": "Nic z tych wskazówek nie jest obowiązkowe. Możesz usunąć to zadanie w dowolnym momencie.\n\n- **Dzisiaj i Skrzynka odbiorcza**: widok Dzisiaj pokazuje zadania zaplanowane na dziś. Zadania, które nie należą do żadnego projektu, trafiają do sekcji Skrzynka odbiorcza. To samo zadanie może się pojawiać na obu listach.\n- **Projekty**: grupuj zadania tematycznie. Kliknij **+** obok sekcji **Projekty** na pasku bocznym.\n- **Synchronizacja**: korzystaj z danych na wielu urządzeniach. Skonfiguruj ją w **Ustawienia → Synchronizacja i kopia zapasowa**.\n- **Todoist lub TickTick?** Zaimportuj swoje zadania w sekcji **Ustawienia → Synchronizacja i kopia zapasowa → Import/Eksport**.\n- **Samouczki**: w menu bocznym wybierz **Pomoc → Poradnik**, aby poznać składnię i nawigację za pomocą klawiatury. Możesz zamknąć samouczek w dowolnym momencie.\n- **Dostosuj aplikację do siebie**: wybierz motyw lub tryb ciemny. W sekcji **Ustawienia → Ogólne** możesz też włączać i wyłączać funkcje, takie jak tablice, harmonogram, nawyki, tryb skupienia i integracje. Więcej możliwości dają wtyczki."
+      "NOTES": "Nic z tych wskazówek nie jest obowiązkowe. Możesz usunąć to zadanie w dowolnym momencie.\n\n- **Dzisiaj i Skrzynka odbiorcza**: widok Dzisiaj pokazuje zadania zaplanowane na dziś. Zadania, które nie należą do żadnego projektu, trafiają do sekcji Skrzynka odbiorcza. To samo zadanie może się pojawiać na obu listach.\n- **Projekty**: grupuj zadania tematycznie. Kliknij **+** obok sekcji **Projekty** na pasku bocznym.\n- **Synchronizacja**: korzystaj z danych na wielu urządzeniach. Skonfiguruj ją w **Ustawienia → Synchronizacja i kopia zapasowa**.\n- **Todoist lub TickTick?** Zaimportuj swoje zadania w sekcji **Ustawienia → Synchronizacja i kopia zapasowa → Import/Eksport**.\n- **Samouczki**: **Pomoc → Szybki przewodnik** w menu bocznym przeprowadzi Cię przez podstawy obsługi zadań, a **Pomoc → Poradnik** nauczy cię składni i nawigacji za pomocą klawiatury. Możesz zamknąć samouczek w dowolnym momencie.\n- **Dostosuj aplikację do siebie**: wybierz motyw lub tryb ciemny. W sekcji **Ustawienia → Ogólne** możesz też włączać i wyłączać funkcje, takie jak tablice, harmonogram, nawyki, tryb skupienia i integracje. Więcej możliwości dają wtyczki."
     }
   },
   "F": {
@@ -3194,16 +3194,16 @@
       "DONE": "Gotowe",
       "FINISH_DAY": "<b>Zakończ dzień</b> · przejrzyj i podsumuj swój dzień",
       "FOCUS_MODE": "<b>Tryb skupienia</b> · pomodoro i praca bez rozpraszaczy",
-      "FOOTER": "Znajdziesz to ponownie w menu Pomoc → Szybki przewodnik.",
+      "FOOTER": "Ten samouczek znajdziesz ponownie w menu Pomoc → Szybki przewodnik.",
       "HABITS": "<b>Nawyki</b> · śledź rutyny dzień po dniu",
-      "INTRO": "Super Productivity zaczyna spokojnie. Więcej jest pod ręką, gdy tego potrzebujesz:",
+      "INTRO": "Super Productivity stawia na prostotę, ale oferuje znacznie więcej. Odkryj dodatkowe funkcje:",
       "OPEN_SETTINGS": "Otwórz ustawienia ›",
       "PLUGINS": "<b>Wtyczki i integracje</b> · Jira, GitHub, CalDAV i więcej",
       "SCHEDULE": "<b>Harmonogram</b> · twój dzień na osi czasu",
       "SEARCH": "Przeszukuj wszystko za pomocą <kbd>{{key}}</kbd>.",
       "SEARCH_PHONE": "Przeszukuj wszystko z poziomu ☰.",
       "SHORT_SYNTAX": "Wpisz <code>#tag</code>, <code>+project</code> lub <code>@tomorrow</code> podczas dodawania zadania. Więcej znajdziesz w menu Pomoc → Poradnik: tworzenie zadań.",
-      "SYNC": "Twoje dane zostają na tym urządzeniu. Synchronizacja i kopie zapasowe są w ustawieniach.",
+      "SYNC": "Twoje dane zostają na tym urządzeniu. Synchronizację i kopię zapasową znajdziesz w ustawieniach.",
       "TITLE": "Chcesz więcej?"
     }
   },
