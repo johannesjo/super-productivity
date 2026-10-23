@@ -177,6 +177,9 @@ Before opening a pull request, read [CONTRIBUTING.md](CONTRIBUTING.md) and follo
 A big thank you to all our sponsors!
 
 - **[SignPath.io](https://signpath.io?utm_source=foundation&utm_medium=github&utm_campaign=super-productivity)**: free code signing for our Windows binaries, with a certificate by [SignPath Foundation](https://signpath.org?utm_source=foundation&utm_medium=github&utm_campaign=super-productivity).
+- **[Blacksmith](https://www.blacksmith.sh)**: covers all our CI runner minutes for GitHub Actions.
+
+  <a href="https://www.blacksmith.sh"><img alt="CI powered by Blacksmith" src="docs/screens/blacksmith-powered-wob.png" height="60"/></a>
 
 _(If you are, intend to or have been a sponsor and want to be shown here, [please let me know](mailto:contact@super-productivity.com)!)_
 
