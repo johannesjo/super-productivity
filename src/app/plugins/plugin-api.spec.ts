@@ -16,6 +16,7 @@ describe('PluginAPI', () => {
   let reInitDataSpy: jasmine.Spy;
   let dispatchActionSpy: jasmine.Spy;
   let requestSpy: jasmine.Spy;
+  let listSyncedDataKeysSpy: jasmine.Spy;
   let getSelectedTaskSpy: jasmine.Spy;
   let getFocusedTaskSpy: jasmine.Spy;
   let registerTaskContextMenuEntrySpy: jasmine.Spy;
@@ -40,6 +41,9 @@ describe('PluginAPI', () => {
     reInitDataSpy = jasmine.createSpy('reInitData').and.resolveTo();
     dispatchActionSpy = jasmine.createSpy('dispatchAction');
     requestSpy = jasmine.createSpy('request').and.resolveTo({ ok: true });
+    listSyncedDataKeysSpy = jasmine
+      .createSpy('listSyncedDataKeys')
+      .and.resolveTo(['a:b']);
     getSelectedTaskSpy = jasmine
       .createSpy('getSelectedTask')
       .and.resolveTo({ id: 'selected-task', title: 'Selected Task' });
@@ -61,6 +65,7 @@ describe('PluginAPI', () => {
       showIndexHtmlAsView: showIndexHtmlAsViewSpy,
       dispatchAction: dispatchActionSpy,
       request: requestSpy,
+      listSyncedDataKeys: listSyncedDataKeysSpy,
       getSelectedTask: getSelectedTaskSpy,
       getFocusedTask: getFocusedTaskSpy,
       persistDataSynced: jasmine.createSpy('persistDataSynced'),
@@ -110,6 +115,15 @@ describe('PluginAPI', () => {
     );
   });
 
+  it('forwards the key prefix to the bound API', async () => {
+    expect(await pluginAPI.listSyncedDataKeys('a:')).toEqual(['a:b']);
+    expect(listSyncedDataKeysSpy).toHaveBeenCalledOnceWith('a:');
+  });
+
+  it('lists all keys when the prefix is omitted', async () => {
+    expect(await pluginAPI.listSyncedDataKeys()).toEqual(['a:b']);
+    expect(listSyncedDataKeysSpy).toHaveBeenCalledOnceWith(undefined);
+  });
   describe('showIndexHtmlAsView()', () => {
     it('should delegate to the bridge method', () => {
       pluginAPI.showIndexHtmlAsView();

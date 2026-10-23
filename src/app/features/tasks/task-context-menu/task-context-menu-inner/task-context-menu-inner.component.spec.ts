@@ -32,6 +32,8 @@ import { FocusModeService } from '../../../focus-mode/focus-mode.service';
 import { showFocusOverlay } from '../../../focus-mode/store/focus-mode.actions';
 import { T } from '../../../../t.const';
 import { PluginTaskContextMenuRegistryService } from '../../../../plugins/plugin-task-context-menu-registry.service';
+import { IssueSyncStateService } from '../../../issue/two-way-sync/issue-sync-state.service';
+import { PlainspaceHandoffService } from '../../../issue/providers/plainspace/plainspace-handoff.service';
 
 const projectInTreeOrder = (id: string, title: string): Project =>
   ({
@@ -537,6 +539,48 @@ describe('TaskContextMenuInnerComponent', () => {
 
   // A `wontDoOn` equal to `doneOn` marks won't do; both travel in the op, so
   // every client, released ones included, stores the same pair.
+  describe('Plainspace handoff (#8648)', () => {
+    const linked = {
+      ...DEFAULT_TASK,
+      id: 'ps-1',
+      projectId: 'P1',
+      issueType: 'PLAINSPACE',
+      issueId: 'item-1',
+      issueProviderId: 'prov-1',
+    } as Task;
+
+    it('is offered on a linked Plainspace task still assigned to me', () => {
+      fixture.componentRef.setInput('task', linked);
+      expect(component.isPlainspaceHandoff).toBeTrue();
+    });
+
+    it('is not offered once the task is no longer in my Plainspace list', () => {
+      TestBed.inject(IssueSyncStateService).setMissing(['ps-1'], ['ps-1']);
+      fixture.componentRef.setInput('task', linked);
+      expect(component.isPlainspaceHandoff).toBeFalse();
+    });
+
+    it('is not offered on other issue types', () => {
+      fixture.componentRef.setInput('task', { ...linked, issueType: 'GITHUB' });
+      expect(component.isPlainspaceHandoff).toBeFalse();
+    });
+
+    it('closes the menu when the members cannot be loaded', async () => {
+      const handoff = TestBed.inject(PlainspaceHandoffService);
+      spyOn(handoff, 'getMembers').and.resolveTo(null);
+      const closeSpy = spyOn(
+        component as unknown as { _closeContextMenu: () => void },
+        '_closeContextMenu',
+      );
+      component.task = linked;
+
+      await component.loadPlainspaceMembers();
+
+      expect(component.plainspaceMembers()).toBeNull();
+      expect(closeSpy).toHaveBeenCalled();
+    });
+  });
+
   describe('setWontDo()', () => {
     it('finishes the task with a matching doneOn and wontDoOn', () => {
       jasmine.clock().install();

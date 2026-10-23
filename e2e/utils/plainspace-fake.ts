@@ -87,10 +87,13 @@ export interface FakePlainspace {
   patchConflictError: string | null;
   /**
    * A server from before `title`/`scheduledAt` were accepted: a PATCH without
-   * `done` is a 422, and any other field next to `done` is ignored.
+   * `done` is a 422, and any other field next to `done` is ignored. It has no
+   * members endpoint either (404).
    */
   isOldServer: boolean;
   patches: FakePatch[];
+  /** The other members of the space, as `GET /spaces/:id/members` lists them. */
+  members: { id: string; displayName: string }[];
   /** Runs right after a PATCH was answered, e.g. a collaborator's edit. */
   afterPatch: (() => void) | null;
   /**
@@ -159,6 +162,7 @@ export const installFakePlainspace = async (
     patchConflictError: null,
     isOldServer: false,
     patches: [],
+    members: [{ id: 'member-bob', displayName: 'Bob' }],
     afterPatch: null,
     beforePatch: null,
     creates: [],
@@ -232,6 +236,8 @@ export const installFakePlainspace = async (
       }
       const task = server.addAssignedTask(`created-${server.creates.length}`, body.title);
       await json(201, { task });
+    } else if (path === `/spaces/${PLAINSPACE_SPACE.id}/members` && !server.isOldServer) {
+      await json(200, { members: server.members });
     } else if (path === '/claimable-tasks') {
       await json(200, { tasks: [] });
     } else if (taskMatch && req.method() === 'GET') {
@@ -280,6 +286,15 @@ export const installFakePlainspace = async (
       if (scheduledAt === null && task.isRecurring) {
         await answer(409, { error: 'repeat_requires_remind_at' });
         return;
+      }
+      const assigneeId = body['assigneeId'];
+      if (assigneeId !== undefined) {
+        if (assigneeId !== null && !server.members.some((m) => m.id === assigneeId)) {
+          await answer(404, { error: 'Member not found' });
+          return;
+        }
+        // Handed to someone else or released: no longer listed for me.
+        server.assignedIds.delete(id);
       }
       server.remoteEdit(id, {
         ...(typeof body['done'] === 'boolean' ? { done: body['done'] } : {}),
