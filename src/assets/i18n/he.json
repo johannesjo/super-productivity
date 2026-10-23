@@ -985,7 +985,7 @@
         "ERROR": "לא ניתן היה להשלים את הפרויקט. אנא נסה שוב.",
         "RESOLVE": {
           "MSG": "עדיין יש לו {{nr}} משימות שלא הושלמו. מה צריך לקרות איתן?",
-          "MSG_ONE": "עדיין יש לו משימה שלא הושלמה 1. מה צריך לקרות איתה?",
+          "MSG_ONE": "עדיין יש לו משימה שלא הושלמה {{nr}}. מה צריך לקרות איתה?",
           "MOVE_TO_INBOX": "העבר לדואר הנכנס (Inbox)",
           "MARK_DONE": "סמן כבוצע"
         },
@@ -1566,7 +1566,7 @@
           "S_DETECT_USER_ID_NEED_LOGIN": "הזן כתובת שרת, שם התחברות וסיסמת אפליקציה תחילה.",
           "S_DETECT_USER_ID_SUCCESS": "נמצא מזהה משתמש Nextcloud: {{userId}}.",
           "S_DETECT_USER_ID_FAIL": "לא ניתן היה לזהות מזהה משתמש: {{error}}",
-          "S_TEST_FAIL_USER_NOT_FOUND": "בדיקת החיבור נכשלה: תיקיית משתמש לא נמצאה (404)."
+          "S_TEST_FAIL_USER_NOT_FOUND": ""
         },
         "ONEDRIVE": {
           "CLIENT_ID_DESCRIPTION": "מזהה אפליקציה (לקוח) מרישום האפליקציה ב-Microsoft Entra",
@@ -1638,13 +1638,13 @@
         "IMPORTING": "מייבא נתונים",
         "INCOMPLETE_CFG": "אישורי סנכרון חסרים.",
         "INCOMPLETE_OP_SYNC": "הסנכרון אינו שלם: {{count}} קבצי פעולה נכשלו בהורדה",
-        "INCOMPLETE_REMOTE_OPERATIONS": "שינויים שהורדו לא יכלו להסתיים בהחלה.",
+        "INCOMPLETE_REMOTE_OPERATIONS": "",
         "INITIAL_SYNC_ERROR": "סנכרון ראשוני נכשל",
         "INTEGRITY_CHECK_FAILED": "זוהתה בעיית תקינות נתונים.",
         "INTEGRITY_TAMPER_DETECTED": "הסנכרון הופסק: השרת החזיר נתונים שנכשלו בבדיקת אבטחה.",
         "INVALID_AUTH_CODE": "קוד האימות נדחה.",
         "INVALID_OPERATION_PAYLOAD": "זוהתה פעולה לא תקינה.",
-        "LEGACY_FORMAT_DETECTED": "אי-תאימות בפורמט הסנכרון.",
+        "LEGACY_FORMAT_DETECTED": "",
         "LOCAL_CHANGES_DISCARDED": "{{count}} שינוי(ים) מקומיים נזנחו - פריט(ים) שנמחקו במכשיר אחר",
         "LOCAL_CHANGES_DISCARDED_SNAPSHOT": "{{count}} שינוי(ים) מקומיים שלא נשמרו נזנחו",
         "LOCAL_DATA_REPLACE_CANCELLED": "הסנכרון בוטל.",
@@ -1666,8 +1666,8 @@
         "RESTORE_ERROR": "נכשל בשחזור נתונים",
         "RESTORE_SUCCESS": "הנתונים שוחזרו בהצלחה",
         "SERVER_MIGRATION_VALIDATION_FAILED": "לא ניתן היה להעביר נתונים לשרת.",
-        "SPLIT_FORMAT_ENABLE_SETTING": "תיקיית סנכרון זו שודרגה לפורמט קבצים מפוצל.",
-        "STORAGE_QUOTA_EXCEEDED": "אחסון שרת הסנכרון מלא.",
+        "SPLIT_FORMAT_ENABLE_SETTING": "",
+        "STORAGE_QUOTA_EXCEEDED": "",
         "STORAGE_RECOVERED_AFTER_COMPACTION": "שטח האחסון היה נמוך. נתונים ישנים נוקו בהצלחה.",
         "SUCCESS_DOWNLOAD": "סונכרנו נתונים מהמרוחק",
         "SUCCESS_VIA_BUTTON": "הנתונים סונכרנו בהצלחה",
@@ -1680,8 +1680,8 @@
         "UPLOAD_OPS_REJECTED": "{{count}} פעולה(ות) נדחו לצמיתות על ידי השרת.",
         "VECTOR_CLOCK_LIMIT_REACHED": "הסנכרון ניקה רישומי מכשיר ישנים ({{originalSize}} ← {{maxSize}}).",
         "VERSION_TOO_OLD": "גרסת האפליקציה שלך ישנה מדי עבור הנתונים המסונכרנים.",
-        "VERSION_UNSUPPORTED": "לא ניתן לסנכרן: חלק מהנתונים מגיעים מגרסה שאינה נתמכת עוד.",
-        "WEB_CRYPTO_NOT_AVAILABLE": "הצפנה אינה זמינה במכשיר זה."
+        "VERSION_UNSUPPORTED": "",
+        "WEB_CRYPTO_NOT_AVAILABLE": ""
       },
       "SAFETY_BACKUP": {
         "BTN_CLEAR_ALL": "נקה הכל",
@@ -2547,7 +2547,7 @@
       "ZOOM_OUT": "הקטן זום (שולחן עבודה בלבד)"
     },
     "LANG": {
-      "AR": "עברית / ערבית",
+      "AR": "ערבית",
       "CS": "צ'כית",
       "DE": "גרמנית",
       "EN": "אנגלית",
@@ -2910,7 +2910,7 @@
   "PDS": {
     "ADD_TASKS_FROM_TODAY": "הוסף משימות מהיום",
     "ARCHIVED_TASKS": {
-      "ONE": "משימת אב הושלמה 1 הועברה לארכיון",
+      "ONE": "משימת אב הושלמה {{count}} הועברה לארכיון",
       "OTHER": "{{count}} משימות אב שהושלמו הועברו לארכיון"
     },
     "BREAK_LABEL": "הפסקות (מספר / זמן)",
@@ -3078,7 +3078,7 @@
     "UNABLE_TO_PERSIST_DATA": "לא ניתן לשמור נתונים באחסון התוסף",
     "UNKNOWN_ERROR": "אירעה שגיאה לא ידועה",
     "UPLOAD_PLUGIN_INSTRUCTION": "העלה קובץ ZIP של תוסף כדי להתקין אותו:",
-    "VALIDATION_FAILED": "האימות נכשל",
+    "VALIDATION_FAILED": "האימות נכשל: {{errors}}",
     "NODE_EXECUTION_BRIDGE_UNAVAILABLE": "לא ניתן היה להתחבר לגשר הרצת Node.js. אנא נסה לבטל ולהפעיל מחדש את התוסף.",
     "PLUGIN_LOAD_FAILED": "התוסף \"{{pluginName}}\" נכשל בטעינה: {{error}}"
   },
