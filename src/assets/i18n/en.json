@@ -1955,7 +1955,7 @@
         "DOES_NOT_REPEAT": "Does not repeat",
         "INFO_OUTSIDE_WORK_HOURS": "Falls outside your configured work hours.",
         "INFO_OVERLAP": "Overlaps with another scheduled task.",
-        "QA_LABEL_PICK_DATE": "Pick date",
+        "QA_LABEL_PICK_DATE": "Date",
         "QA_NEXT_MONTH": "Schedule next month",
         "QA_NEXT_WEEK": "Schedule next week",
         "QA_TODAY": "Schedule today",
