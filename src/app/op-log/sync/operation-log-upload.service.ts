@@ -56,6 +56,7 @@ import { isLwwUpdateActionType } from '../core/lww-update-action-types';
 import { StateSnapshotService } from '../backup/state-snapshot.service';
 import { isRebasedTimeDeltaReceipt } from '../persistence/acknowledge-operations.util';
 import { isSyncTimeSpentOp } from './fold-sync-time-spent.util';
+import { captureFileState } from '../sync-providers/file-based/captured-file-state';
 
 // Re-export for consumers that import from this service
 export type {
@@ -188,7 +189,11 @@ export class OperationLogUploadService {
             pendingOps: capturedPendingOps,
             localStateSnapshot:
               syncProvider.providerMode === 'fileSnapshotOps'
-                ? this.stateSnapshotService.getStateSnapshotForOperationLog()
+                ? await this.lockService.request(LOCK_NAMES.TASK_ARCHIVE, async () => {
+                    const { snapshot, taskDataUnmodified } =
+                      await this.stateSnapshotService.getStateSnapshotWithArchiveIntegrity();
+                    return captureFileState(snapshot, taskDataUnmodified);
+                  })
                 : undefined,
           };
         },
