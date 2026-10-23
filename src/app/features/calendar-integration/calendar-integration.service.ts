@@ -41,6 +41,7 @@ import {
 import { getDbDateStr } from '../../util/get-db-date-str';
 import { selectCalendarProviders } from '../issue/store/issue-provider.selectors';
 import {
+  IssueProvider,
   IssueProviderCalendar,
   IssueProviderPluginType,
   isPluginIssueProvider,
@@ -266,10 +267,9 @@ export class CalendarIntegrationService {
     pluginCalProviders: IssueProviderPluginType[],
   ): Observable<ScheduleCalendarMapEntry[]> {
     const icalProviderMap = new Map(icalProviders.map((p) => [p.id, p]));
-    const activeProviderIds = new Set([
-      ...icalProviders.map((p) => p.id),
-      ...pluginCalProviders.map((p) => p.id),
-    ]);
+    const activeProviderMap = new Map<string, IssueProvider>(
+      [...icalProviders, ...pluginCalProviders].map((p) => [p.id, p]),
+    );
 
     return combineLatest([
       this._allLinkedCalendarEventIds$,
@@ -281,7 +281,7 @@ export class CalendarIntegrationService {
       map(([allCalendarTaskEventIds, skippedEventIds, hiddenEventIds]) =>
         this._filterCalendarEntriesForView(
           entries,
-          activeProviderIds,
+          activeProviderMap,
           icalProviderMap,
           allCalendarTaskEventIds,
           skippedEventIds,
@@ -293,7 +293,7 @@ export class CalendarIntegrationService {
 
   private _filterCalendarEntriesForView(
     entries: ScheduleCalendarMapEntry[],
-    activeProviderIds: Set<string>,
+    activeProviderMap: Map<string, IssueProvider>,
     icalProviderMap: Map<string, IssueProviderCalendar>,
     allCalendarTaskEventIds: string[],
     skippedEventIds: string[],
@@ -301,22 +301,32 @@ export class CalendarIntegrationService {
   ): ScheduleCalendarMapEntry[] {
     return entries.map((entry) => ({
       ...entry,
-      items: entry.items.filter((calEv) => {
-        if (!activeProviderIds.has(calEv.calProviderId)) {
-          return false;
-        }
-        const cfg = icalProviderMap.get(calEv.calProviderId);
-        return (
-          passesCalendarEventRegexFilter(
-            calEv,
-            cfg?.filterIncludeRegex,
-            cfg?.filterExcludeRegex,
-          ) &&
-          !matchesAnyCalendarEventId(calEv, allCalendarTaskEventIds) &&
-          !matchesAnyCalendarEventId(calEv, skippedEventIds) &&
-          !matchesAnyCalendarEventId(calEv, hiddenEventIds)
-        );
-      }),
+      items: entry.items
+        .filter((calEv) => {
+          if (!activeProviderMap.has(calEv.calProviderId)) {
+            return false;
+          }
+          const cfg = icalProviderMap.get(calEv.calProviderId);
+          return (
+            passesCalendarEventRegexFilter(
+              calEv,
+              cfg?.filterIncludeRegex,
+              cfg?.filterExcludeRegex,
+            ) &&
+            !matchesAnyCalendarEventId(calEv, allCalendarTaskEventIds) &&
+            !matchesAnyCalendarEventId(calEv, skippedEventIds) &&
+            !matchesAnyCalendarEventId(calEv, hiddenEventIds)
+          );
+        })
+        // Events keep the color they were fetched with, also in the cache, so
+        // re-derive it to reflect color changes and events cached before colors.
+        .map((calEv) => {
+          const provider = activeProviderMap.get(calEv.calProviderId);
+          const color = provider
+            ? getCalendarProviderColor(provider, calEv.calendarColor)
+            : calEv.color;
+          return calEv.color === color ? calEv : { ...calEv, color };
+        }),
     }));
   }
 
@@ -340,7 +350,6 @@ export class CalendarIntegrationService {
     const results: PluginSearchResult[] =
       await provider.definition.getNewIssuesForBacklog(pluginConfig, http);
 
-    const color = getCalendarProviderColor(pluginProvider);
     return results
       .filter((r) => r.start != null)
       .map((r) => ({
@@ -353,7 +362,8 @@ export class CalendarIntegrationService {
         isAllDay: r.isAllDay,
         issueProviderKey: pluginProvider.issueProviderKey,
         dueWithTime: r.dueWithTime,
-        color,
+        color: getCalendarProviderColor(pluginProvider, r.color),
+        ...(typeof r.color === 'string' ? { calendarColor: r.color } : {}),
       }));
   }
 
