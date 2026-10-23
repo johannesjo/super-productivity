@@ -500,6 +500,32 @@ describe('Google Calendar Plugin', () => {
       expect(results[0].color).toBeUndefined();
     });
 
+    it('keeps calendar colors apart per connected account', async () => {
+      const makeHttp = (backgroundColor: string): any => ({
+        get: vi
+          .fn()
+          .mockImplementation((url: string) =>
+            Promise.resolve(
+              url.endsWith('/users/me/calendarList')
+                ? { items: [{ id: 'me@example.com', primary: true, backgroundColor }] }
+                : { items: [makeEvent({})] },
+            ),
+          ),
+        post: vi.fn(),
+        put: vi.fn(),
+        patch: vi.fn(),
+        delete: vi.fn(),
+      });
+      const poll = (tokenKey: string, http: unknown) =>
+        definition.getNewIssuesForBacklog!(
+          { readCalendarIds: ['primary'], __spOAuthTokenKey: tokenKey } as any,
+          http as any,
+        );
+
+      expect((await poll('provider-a', makeHttp('#fbe983')))[0].color).toBe('#fbe983');
+      expect((await poll('provider-b', makeHttp('#9fc6e7')))[0].color).toBe('#9fc6e7');
+    });
+
     it('reuses calendar colors across polls and keeps them when a lookup fails', async () => {
       let isListFailing = false;
       const mockHttp = {

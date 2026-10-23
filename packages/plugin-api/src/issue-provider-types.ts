@@ -83,7 +83,13 @@ export interface PluginFieldMapping {
    * - `toTaskValue` must return a string[] of tag titles/labels to match or create locally.
    */
   taskField:
-    'isDone' | 'title' | 'notes' | 'dueDay' | 'dueWithTime' | 'timeEstimate' | 'tagIds';
+    | 'isDone'
+    | 'title'
+    | 'notes'
+    | 'dueDay'
+    | 'dueWithTime'
+    | 'timeEstimate'
+    | 'tagIds';
   issueField: string;
   defaultDirection: PluginSyncDirection;
   /** Task fields to clear when this field is set (e.g. dueWithTime and dueDay are mutually exclusive) */

@@ -306,7 +306,12 @@ const fetchEventsForCalendar = async (
 
 /** Calendar colors rarely change; reuse them across agenda polls. */
 const CALENDAR_COLORS_TTL_MS = 60 * 60 * 1000;
-let calendarColorsCache: { colors: Map<string, string>; fetchedAt: number } | undefined;
+// Per provider instance (each has its own OAuth token key), so two connected
+// Google accounts never share colors.
+const calendarColorsCache = new Map<
+  string,
+  { colors: Map<string, string>; fetchedAt: number }
+>();
 
 /**
  * Each calendar's color as set in Google Calendar, keyed by calendar id ('primary'
@@ -314,12 +319,14 @@ let calendarColorsCache: { colors: Map<string, string>; fetchedAt: number } | un
  * (`colorId`) are not used. Colors are cosmetic: a failed lookup keeps the last
  * known colors, or none, and the host falls back to its own color.
  */
-const fetchCalendarColors = async (http: PluginHttp): Promise<Map<string, string>> => {
-  if (
-    calendarColorsCache &&
-    Date.now() - calendarColorsCache.fetchedAt < CALENDAR_COLORS_TTL_MS
-  ) {
-    return calendarColorsCache.colors;
+const fetchCalendarColors = async (
+  http: PluginHttp,
+  cfg: GoogleCalendarConfig,
+): Promise<Map<string, string>> => {
+  const cacheKey = cfg[SP_OAUTH_TOKEN_KEY_CFG_KEY] ?? '';
+  const cached = calendarColorsCache.get(cacheKey);
+  if (cached && Date.now() - cached.fetchedAt < CALENDAR_COLORS_TTL_MS) {
+    return cached.colors;
   }
   try {
     const res = await http.get<{
@@ -333,16 +340,16 @@ const fetchCalendarColors = async (http: PluginHttp): Promise<Map<string, string
       colors.set(cal.id, cal.backgroundColor);
       if (cal.primary) colors.set('primary', cal.backgroundColor);
     }
-    calendarColorsCache = { colors, fetchedAt: Date.now() };
+    calendarColorsCache.set(cacheKey, { colors, fetchedAt: Date.now() });
     return colors;
   } catch {
-    return calendarColorsCache?.colors ?? new Map();
+    return cached?.colors ?? new Map();
   }
 };
 
 /** Test-only: forget cached calendar colors. */
 export const _resetCalendarColorsCache = (): void => {
-  calendarColorsCache = undefined;
+  calendarColorsCache.clear();
 };
 
 /** Fetch events from all read calendars, merged and sorted by start time. */
@@ -356,7 +363,7 @@ const fetchEvents = async (
     Promise.all(
       calendarIds.map((calId) => fetchEventsForCalendar(http, calId, cfg, opts)),
     ),
-    opts?.withColors ? fetchCalendarColors(http) : undefined,
+    opts?.withColors ? fetchCalendarColors(http, cfg) : undefined,
   ]);
   return results
     .flatMap((events, i) => {

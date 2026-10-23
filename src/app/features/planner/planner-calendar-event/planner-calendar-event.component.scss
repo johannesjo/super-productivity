@@ -53,6 +53,8 @@
   height: 21.5%;
   border-radius: 50%;
   background: var(--cal-event-color);
+  // as subtle as the glyph it covers
+  opacity: 0.8;
 }
 
 .event-content {
