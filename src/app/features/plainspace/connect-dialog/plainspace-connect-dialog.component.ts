@@ -396,12 +396,16 @@ export class PlainspaceConnectDialogComponent {
     }
     if (res === 'ok') {
       this._pendingKey = null;
+      this._dialogRef.disableClose = false;
       this._dialogRef.close(createdSpaceId ? { createdSpaceId } : true);
       return;
     }
     this.isBusy.set(false);
     if (isRetryable(res)) {
       this._pendingKey = { token, oldTokens, createdSpaceId };
+      // Closing now would drop the only working key (Escape, backdrop and
+      // Android back all respect this); Cancel is hidden on this step.
+      this._dialogRef.disableClose = true;
       this.error.set({ key: T.PLAINSPACE.CONNECT.UNREACHABLE });
       this.step.set('retry');
       return;

@@ -170,13 +170,15 @@
 </mat-dialog-content>
 
 <mat-dialog-actions align="end">
-  <button
-    mat-button
-    [disabled]="isBusy()"
-    (click)="step() === 'replace' ? changeEmail() : cancel()"
-  >
-    {{ (step() === 'replace' ? T.PLAINSPACE.CONNECT.BACK : T.G.CANCEL) | translate }}
-  </button>
+  @if (step() !== 'retry') {
+    <button
+      mat-button
+      [disabled]="isBusy()"
+      (click)="step() === 'replace' ? changeEmail() : cancel()"
+    >
+      {{ (step() === 'replace' ? T.PLAINSPACE.CONNECT.BACK : T.G.CANCEL) | translate }}
+    </button>
+  }
   @switch (step()) {
     @case ('email') {
       <button

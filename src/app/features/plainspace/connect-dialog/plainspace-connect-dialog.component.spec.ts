@@ -277,6 +277,13 @@ describe('PlainspaceConnectDialogComponent', () => {
       expect(component.step()).toBe('retry');
       expect(component.errorMsg()).toBe(T.PLAINSPACE.CONNECT.UNREACHABLE);
       expect(dialogRef.close).not.toHaveBeenCalled();
+      // Escape, backdrop and Android back can't drop the key meanwhile, and
+      // there is no Cancel button.
+      expect(dialogRef.disableClose).toBe(true);
+      fixture.detectChanges();
+      const actions: HTMLElement =
+        fixture.nativeElement.querySelector('mat-dialog-actions');
+      expect(actions.querySelectorAll('button').length).toBe(1);
 
       await component.retryStore();
       expect(accountService.connect).toHaveBeenCalledTimes(3);
@@ -289,6 +296,7 @@ describe('PlainspaceConnectDialogComponent', () => {
       // No new key was minted for the retry.
       expect(authApi.connect$).toHaveBeenCalledTimes(1);
       expect(dialogRef.close).toHaveBeenCalledWith(true);
+      expect(dialogRef.disableClose).toBe(false);
     });
   });
 
