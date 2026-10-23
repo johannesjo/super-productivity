@@ -444,6 +444,58 @@ describe('Google Calendar Plugin', () => {
       expect(results).toHaveLength(1);
     });
 
+    it('colors events with their Google calendar color', async () => {
+      const mockHttp = {
+        get: vi.fn().mockImplementation((url: string) =>
+          Promise.resolve(
+            url.endsWith('/users/me/calendarList')
+              ? {
+                  items: [
+                    { id: 'me@example.com', primary: true, backgroundColor: '#fbe983' },
+                    { id: 'work@example.com', backgroundColor: '#9fc6e7' },
+                  ],
+                }
+              : { items: [makeEvent({})] },
+          ),
+        ),
+        post: vi.fn(),
+        put: vi.fn(),
+        patch: vi.fn(),
+        delete: vi.fn(),
+      };
+
+      const results = await definition.getNewIssuesForBacklog!(
+        { readCalendarIds: ['primary', 'work@example.com'] } as any,
+        mockHttp as any,
+      );
+
+      expect(results.map((r) => r.color)).toEqual(['#fbe983', '#9fc6e7']);
+    });
+
+    it('still returns events when the calendar colors cannot be loaded', async () => {
+      const mockHttp = {
+        get: vi
+          .fn()
+          .mockImplementation((url: string) =>
+            url.endsWith('/users/me/calendarList')
+              ? Promise.reject(new Error('forbidden'))
+              : Promise.resolve({ items: [makeEvent({})] }),
+          ),
+        post: vi.fn(),
+        put: vi.fn(),
+        patch: vi.fn(),
+        delete: vi.fn(),
+      };
+
+      const results = await definition.getNewIssuesForBacklog!(
+        { readCalendarIds: ['primary'] } as any,
+        mockHttp as any,
+      );
+
+      expect(results).toHaveLength(1);
+      expect(results[0].color).toBeUndefined();
+    });
+
     // #10190: Google applies `timeMin` (exclusive) to an event's END time. With
     // `timeMin = now`, an event dropped out of the schedule/agenda on the first
     // poll after it ended. The window must start at the user's LOCAL start of

@@ -304,17 +304,49 @@ const fetchEventsForCalendar = async (
     .map((e) => mapEventToSearchResult(e, calendarId));
 };
 
+/**
+ * Each calendar's color as set in Google Calendar, keyed by calendar id ('primary'
+ * included). Colors are cosmetic, so a failed lookup yields an empty map and the
+ * host falls back to its own color.
+ */
+const fetchCalendarColors = async (http: PluginHttp): Promise<Map<string, string>> => {
+  const colors = new Map<string, string>();
+  try {
+    const res = await http.get<{
+      items?: { id: string; primary?: boolean; backgroundColor?: string }[];
+    }>(`${GOOGLE_CALENDAR_API}/users/me/calendarList`, {
+      params: { fields: 'items(id,primary,backgroundColor)' },
+    });
+    for (const cal of res.items || []) {
+      if (!cal.backgroundColor) continue;
+      colors.set(cal.id, cal.backgroundColor);
+      if (cal.primary) colors.set('primary', cal.backgroundColor);
+    }
+  } catch {
+    // ignore, see above
+  }
+  return colors;
+};
+
 /** Fetch events from all read calendars, merged and sorted by start time. */
 const fetchEvents = async (
   http: PluginHttp,
   cfg: GoogleCalendarConfig,
-  opts?: { query?: string; maxResults?: string },
+  opts?: { query?: string; maxResults?: string; withColors?: boolean },
 ): Promise<PluginSearchResult[]> => {
   const calendarIds = getReadCalendarIds(cfg);
-  const results = await Promise.all(
-    calendarIds.map((calId) => fetchEventsForCalendar(http, calId, cfg, opts)),
-  );
-  return results.flat().sort((a, b) => (a.start ?? 0) - (b.start ?? 0));
+  const [results, colors] = await Promise.all([
+    Promise.all(
+      calendarIds.map((calId) => fetchEventsForCalendar(http, calId, cfg, opts)),
+    ),
+    opts?.withColors ? fetchCalendarColors(http) : undefined,
+  ]);
+  return results
+    .flatMap((events, i) => {
+      const color = colors?.get(calendarIds[i]);
+      return color ? events.map((e) => ({ ...e, color })) : events;
+    })
+    .sort((a, b) => (a.start ?? 0) - (b.start ?? 0));
 };
 
 // --- Load calendar list helpers ---
@@ -489,7 +521,10 @@ PluginAPI.registerIssueProvider({
     config: Record<string, unknown>,
     http: PluginHttp,
   ): Promise<PluginSearchResult[]> {
-    return fetchEvents(http, migrateConfig(config), { maxResults: '100' });
+    return fetchEvents(http, migrateConfig(config), {
+      maxResults: '100',
+      withColors: true,
+    });
   },
 
   issueDisplay: [

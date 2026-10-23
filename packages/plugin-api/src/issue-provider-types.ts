@@ -21,6 +21,9 @@ export interface PluginSearchResult {
   isAllDay?: boolean;
   /** Event description / body text */
   description?: string;
+  /** CSS color of the event's calendar (e.g. '#fbe983'), used to tell calendars
+   *  apart in agenda views. A color the user set on the provider takes precedence. */
+  color?: string;
   /** Provider-specific fields used by issue display and field mappings */
   [key: string]: unknown;
 }

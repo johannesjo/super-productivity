@@ -25,19 +25,34 @@
     color: var(--c-accent);
   }
 
-  // Per-calendar color only on the icon: a colored left bar would read as the
-  // selected-row edge (--task-selected-edge) and be loud in a long list.
   mat-icon {
-    margin-left: var(--s);
-    margin-right: var(--s);
     opacity: 0.8;
-    color: var(--cal-event-color, inherit);
     font-size: var(--planner-item-ico-size);
     height: var(--planner-item-ico-size);
     width: var(--planner-item-ico-size);
     min-width: var(--planner-item-ico-size);
     max-width: var(--planner-item-ico-size);
   }
+}
+
+// The calendar color only fills the dot of the `event` glyph: a colored bar
+// would read as the selected-row edge and clashes with boxed themes.
+.icon {
+  position: relative;
+  display: flex;
+  margin-left: var(--s);
+  margin-right: var(--s);
+}
+
+// Positioned over the glyph's dot (Material Symbols Outlined `event`).
+.color-dot {
+  position: absolute;
+  left: 51.5%;
+  top: 56.5%;
+  width: 21.5%;
+  height: 21.5%;
+  border-radius: 50%;
+  background: var(--cal-event-color);
 }
 
 .event-content {
