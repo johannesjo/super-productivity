@@ -8,6 +8,7 @@ import {
   DialogResult,
   NotifyCfg,
   PluginManifest,
+  PluginAPI as PublicPluginAPI,
 } from '@super-productivity/plugin-api';
 
 describe('PluginAPI', () => {
@@ -16,6 +17,7 @@ describe('PluginAPI', () => {
   let reInitDataSpy: jasmine.Spy;
   let dispatchActionSpy: jasmine.Spy;
   let requestSpy: jasmine.Spy;
+  let triggerSyncSpy: jasmine.Spy;
   let getSelectedTaskSpy: jasmine.Spy;
   let getFocusedTaskSpy: jasmine.Spy;
   let registerTaskContextMenuEntrySpy: jasmine.Spy;
@@ -40,6 +42,7 @@ describe('PluginAPI', () => {
     reInitDataSpy = jasmine.createSpy('reInitData').and.resolveTo();
     dispatchActionSpy = jasmine.createSpy('dispatchAction');
     requestSpy = jasmine.createSpy('request').and.resolveTo({ ok: true });
+    triggerSyncSpy = jasmine.createSpy('triggerSync').and.resolveTo();
     getSelectedTaskSpy = jasmine
       .createSpy('getSelectedTask')
       .and.resolveTo({ id: 'selected-task', title: 'Selected Task' });
@@ -61,6 +64,7 @@ describe('PluginAPI', () => {
       showIndexHtmlAsView: showIndexHtmlAsViewSpy,
       dispatchAction: dispatchActionSpy,
       request: requestSpy,
+      triggerSync: triggerSyncSpy,
       getSelectedTask: getSelectedTaskSpy,
       getFocusedTask: getFocusedTaskSpy,
       persistDataSynced: jasmine.createSpy('persistDataSynced'),
@@ -108,6 +112,27 @@ describe('PluginAPI', () => {
       } as PluginManifest,
       undefined,
     );
+  });
+
+  it('exposes a public sync request that waits for the bound operation', async () => {
+    let finish!: () => void;
+    triggerSyncSpy.and.returnValue(new Promise<void>((resolve) => (finish = resolve)));
+    const publicAPI: Pick<PublicPluginAPI, 'triggerSync'> = pluginAPI;
+    const pending: Promise<void> = publicAPI.triggerSync();
+    let settled = false;
+    pending.then(() => (settled = true));
+    await Promise.resolve();
+    expect(settled).toBeFalse();
+    expect(triggerSyncSpy).toHaveBeenCalledOnceWith();
+    finish();
+    expect(await pending).toBeUndefined();
+  });
+
+  it('forwards sync errors through the public API without retrying', async () => {
+    triggerSyncSpy.and.rejectWith(new Error('sync unavailable'));
+    const publicAPI: Pick<PublicPluginAPI, 'triggerSync'> = pluginAPI;
+    await expectAsync(publicAPI.triggerSync()).toBeRejectedWithError('sync unavailable');
+    expect(triggerSyncSpy).toHaveBeenCalledOnceWith();
   });
 
   describe('showIndexHtmlAsView()', () => {
