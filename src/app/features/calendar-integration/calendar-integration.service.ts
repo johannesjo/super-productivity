@@ -266,10 +266,15 @@ export class CalendarIntegrationService {
     pluginCalProviders: IssueProviderPluginType[],
   ): Observable<ScheduleCalendarMapEntry[]> {
     const icalProviderMap = new Map(icalProviders.map((p) => [p.id, p]));
-    const activeProviderIds = new Set([
-      ...icalProviders.map((p) => p.id),
-      ...pluginCalProviders.map((p) => p.id),
-    ]);
+    // Keyed by every active provider; the value is its current color. Events keep
+    // the color they were fetched with (also in the cache), so re-derive it here
+    // to reflect color changes and events cached before colors existed.
+    const colorByProviderId = new Map<string, string>(
+      [...icalProviders, ...pluginCalProviders].map((p) => [
+        p.id,
+        getCalendarProviderColor(p),
+      ]),
+    );
 
     return combineLatest([
       this._allLinkedCalendarEventIds$,
@@ -281,7 +286,7 @@ export class CalendarIntegrationService {
       map(([allCalendarTaskEventIds, skippedEventIds, hiddenEventIds]) =>
         this._filterCalendarEntriesForView(
           entries,
-          activeProviderIds,
+          colorByProviderId,
           icalProviderMap,
           allCalendarTaskEventIds,
           skippedEventIds,
@@ -293,7 +298,7 @@ export class CalendarIntegrationService {
 
   private _filterCalendarEntriesForView(
     entries: ScheduleCalendarMapEntry[],
-    activeProviderIds: Set<string>,
+    colorByProviderId: Map<string, string>,
     icalProviderMap: Map<string, IssueProviderCalendar>,
     allCalendarTaskEventIds: string[],
     skippedEventIds: string[],
@@ -301,22 +306,27 @@ export class CalendarIntegrationService {
   ): ScheduleCalendarMapEntry[] {
     return entries.map((entry) => ({
       ...entry,
-      items: entry.items.filter((calEv) => {
-        if (!activeProviderIds.has(calEv.calProviderId)) {
-          return false;
-        }
-        const cfg = icalProviderMap.get(calEv.calProviderId);
-        return (
-          passesCalendarEventRegexFilter(
-            calEv,
-            cfg?.filterIncludeRegex,
-            cfg?.filterExcludeRegex,
-          ) &&
-          !matchesAnyCalendarEventId(calEv, allCalendarTaskEventIds) &&
-          !matchesAnyCalendarEventId(calEv, skippedEventIds) &&
-          !matchesAnyCalendarEventId(calEv, hiddenEventIds)
-        );
-      }),
+      items: entry.items
+        .filter((calEv) => {
+          if (!colorByProviderId.has(calEv.calProviderId)) {
+            return false;
+          }
+          const cfg = icalProviderMap.get(calEv.calProviderId);
+          return (
+            passesCalendarEventRegexFilter(
+              calEv,
+              cfg?.filterIncludeRegex,
+              cfg?.filterExcludeRegex,
+            ) &&
+            !matchesAnyCalendarEventId(calEv, allCalendarTaskEventIds) &&
+            !matchesAnyCalendarEventId(calEv, skippedEventIds) &&
+            !matchesAnyCalendarEventId(calEv, hiddenEventIds)
+          );
+        })
+        .map((calEv) => {
+          const color = colorByProviderId.get(calEv.calProviderId);
+          return calEv.color === color ? calEv : { ...calEv, color };
+        }),
     }));
   }
 
