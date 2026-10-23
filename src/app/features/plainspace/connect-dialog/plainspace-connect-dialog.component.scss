@@ -25,7 +25,7 @@
 }
 
 .legal {
-  margin-top: 16px;
+  margin-top: var(--s2);
 }
 
 .full-width {
@@ -35,12 +35,15 @@
 .secondary-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 8px;
+  gap: var(--s);
+  margin-top: var(--s);
 }
 
-.error,
-.warn {
-  margin: 4px 0 0;
+.callout {
+  margin-bottom: var(--s);
+}
+
+.error {
+  margin: var(--s-half) 0 0;
   color: var(--c-warn);
 }

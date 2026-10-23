@@ -98,6 +98,9 @@ export class PlainspaceAccountService {
       (ip) => !!replacedToken && ip.token === replacedToken,
     );
     if (reconnected.length && !reconnected.some(isMember)) {
+      // Replacing the key already revoked these tokens of the new token's own
+      // account: their providers still get it, or they would break too.
+      this._replaceProviderTokens(providers.filter(isMember), sameAccountTokens, token);
       return 'other-account';
     }
     const account: PlainspaceAccount = { host, token, email: res.me.email };
@@ -166,7 +169,7 @@ export class PlainspaceAccountService {
   /** One `updateIssueProvider` op per provider that held a replaced token. */
   private _replaceProviderTokens(
     providers: IssueProviderPlainspace[],
-    replacedTokens: (string | null | undefined)[],
+    replacedTokens: readonly (string | null | undefined)[],
     newToken: string,
   ): void {
     const oldTokens = replacedTokens.filter((t): t is string => !!t && t !== newToken);

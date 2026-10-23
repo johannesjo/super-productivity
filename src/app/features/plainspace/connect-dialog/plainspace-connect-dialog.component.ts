@@ -66,7 +66,7 @@ const CODE_REQUEST_WAIT_MS = CODE_REQUEST_WAIT_MIN * 60_000;
 const ATTEMPT_WAIT_MIN = 15;
 // Plainspace's `MAX_PROJECT_NAME_LENGTH` and `MAX_DISPLAY_NAME_LENGTH`.
 const MAX_SPACE_NAME_LENGTH = 100;
-export const MAX_DISPLAY_NAME_LENGTH = 40;
+const MAX_DISPLAY_NAME_LENGTH = 40;
 
 /**
  * "Connect to Plainspace": signs in or signs up with an emailed 6-digit code,

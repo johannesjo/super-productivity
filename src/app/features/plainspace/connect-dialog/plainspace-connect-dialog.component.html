@@ -100,7 +100,10 @@
           }
         </p>
       }
-      <p class="warn">{{ T.PLAINSPACE.CONNECT.REPLACE_WARNING | translate }}</p>
+      <div class="callout callout--warning">
+        <mat-icon aria-hidden="true">warning</mat-icon>
+        <p>{{ T.PLAINSPACE.CONNECT.REPLACE_WARNING | translate }}</p>
+      </div>
     }
     @case ('browser') {
       <p class="intro">

@@ -406,5 +406,33 @@ describe('PlainspaceAccountService', () => {
         );
       }
     });
+
+    // Review finding: a replace refused for another account's provider
+    // reconnect had already revoked the found key, so its providers broke.
+    it("still hands the new key to the found token's providers when the reconnect is refused", async () => {
+      store.overrideSelector(selectAllIssueProviders, [
+        ...hosted,
+        {
+          id: 'not-member',
+          issueProviderKey: 'PLAINSPACE',
+          host: HOST,
+          token: 'pat_rejected',
+          spaceId: 'space-x',
+        },
+      ] as unknown as IssueProvider[]);
+      store.refreshState();
+      const p = service.connect('pat_new', HOST, 'pat_rejected', ['pat_mine']);
+      httpMock.expectOne(ME_URL).flush({ email: 'me@example.com', projects: [] });
+      expect(await p).toBe('other-account');
+      expect(store.dispatch).toHaveBeenCalledTimes(2);
+      for (const id of ['mine', 'mine-2']) {
+        expect(store.dispatch).toHaveBeenCalledWith(
+          IssueProviderActions.updateIssueProvider({
+            issueProvider: { id, changes: { token: 'pat_new' } },
+          }) as never,
+        );
+      }
+      expect(service.account()).toBeNull();
+    });
   });
 });
