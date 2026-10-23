@@ -3,8 +3,8 @@ import { shortSyntax } from '../short-syntax';
 // Private-use characters: no short syntax matches them.
 const MASK_FIRST = 0xe000;
 const MASK_LAST = 0xf8ff;
-const MASK_CHAR_REG_EX = /[-]/g;
-const HAS_MASK_CHAR_REG_EX = /[-]/;
+const MASK_CHAR_REG_EX = /[\uE000-\uF8FF]/g;
+const HAS_MASK_CHAR_REG_EX = /[\uE000-\uF8FF]/;
 
 type ShortSyntaxArgs = Parameters<typeof shortSyntax>;
 type ShortSyntaxRestArgs = ShortSyntaxArgs extends [unknown, ...infer Rest]
