@@ -804,6 +804,26 @@ export interface PluginAPI {
   // download file
   downloadFile(filename: string, data: string): Promise<void>;
 
+  /**
+   * Выполняет фоновую операцию с общим бюджетом WebDAV HTTP-запросов хоста и
+   * переданного fetch: два запроса сразу, затем один токен за шесть секунд.
+   * origin задаёт разрешённый адрес файлов; хост временно ограничивает также
+   * запросы обычной WebDAV-синхронизации к её собственному origin.
+   * Нужны permission http и allowedHosts. Переданный fetch возвращает Response,
+   * принимает только этот origin и запрещает редиректы. Доступен только в
+   * plugin.js; iframe не поддерживает передачу action. Проверьте наличие API.
+   * Завершение action снимает ограничение. Выгрузка отзывает его raw fetch, но
+   * не завершает уже выполняемую синхронизацию хоста и не освобождает бюджет раньше action.
+   * 429/503 передаётся без повтора; последующие запросы отклоняются до Retry-After
+   * или минуты при отсутствии корректного заголовка, в том числе после action.
+   * Бюджет локален этому клиенту. CORS OPTIONS, другие клиенты и приложения
+   * не входят в очередь; общий лимит сервера не гарантируется.
+   */
+  withWebDavRequestBudget?<T>(
+    origin: string,
+    action: (budgetFetch: typeof fetch) => Promise<T>,
+  ): Promise<T>;
+
   // node execution (Electron desktop only; requires the nodeExecution permission and
   // main-process user consent)
   executeNodeScript?(request: PluginNodeScriptRequest): Promise<PluginNodeScriptResult>;

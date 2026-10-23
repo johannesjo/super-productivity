@@ -79,6 +79,80 @@ describe('PluginRunner', () => {
     service = TestBed.inject(PluginRunner);
   });
 
+  it('revokes raw budget fetch and stale scope calls on unload without releasing the running action early', async () => {
+    const manifest = {
+      ...mockManifest,
+      permissions: ['http'],
+      allowedHosts: ['files.example'],
+    };
+    await service.loadPlugin(manifest, '', mockBaseCfg);
+    const state = service as unknown as {
+      _pluginApis: Map<string, PluginAPI>;
+      _networkLifetimes: Map<string, AbortController>;
+    };
+    const api = state._pluginApis.get(manifest.id)!;
+    const fetchSpy = spyOn(globalThis, 'fetch').and.resolveTo(
+      new Response(null, { status: 204 }),
+    );
+    let finishAction!: () => void;
+    let budgetFetch!: typeof fetch;
+    const action = new Promise<void>((resolve) => (finishAction = resolve));
+    let settled = false;
+    const pending = api
+      .withWebDavRequestBudget('https://files.example', async (scopedFetch) => {
+        budgetFetch = scopedFetch;
+        await action;
+        return 'finished';
+      })
+      .finally(() => (settled = true));
+    const lifetime = state._networkLifetimes.get(manifest.id)!;
+    service.triggerUnload(manifest.id);
+    expect(lifetime.signal.aborted).toBeTrue();
+    expect(state._networkLifetimes.has(manifest.id)).toBeFalse();
+    await expectAsync(budgetFetch('https://files.example/late')).toBeRejected();
+    await expectAsync(
+      api.withWebDavRequestBudget('https://files.example', async () => {}),
+    ).toBeRejectedWithError(/unloaded/);
+    expect(fetchSpy).not.toHaveBeenCalled();
+    expect(settled).toBeFalse();
+    finishAction();
+    expect(await pending).toBe('finished');
+  });
+
+  it('revokes a captured budget API when initialization fails', async () => {
+    const manifest = {
+      ...mockManifest,
+      permissions: ['http'],
+      allowedHosts: ['files.example'],
+    };
+    let captured!: PluginAPI;
+    mockSecurityService.analyzePluginCode.and.callFake(() => {
+      captured = (
+        service as unknown as { _pluginApis: Map<string, PluginAPI> }
+      )._pluginApis.get(manifest.id)!;
+      return { warnings: [], info: [] };
+    });
+    const fetchSpy = spyOn(globalThis, 'fetch').and.resolveTo(
+      new Response(null, { status: 204 }),
+    );
+    const instance = await service.loadPlugin(
+      manifest,
+      "throw new Error('fixture init failed');",
+      mockBaseCfg,
+    );
+    expect(instance.loaded).toBeFalse();
+    await expectAsync(
+      captured.withWebDavRequestBudget('https://files.example', async (budgetFetch) =>
+        budgetFetch('https://files.example/late'),
+      ),
+    ).toBeRejected();
+    expect(fetchSpy).not.toHaveBeenCalled();
+    const state = service as unknown as {
+      _networkLifetimes: Map<string, AbortController>;
+    };
+    expect(state._networkLifetimes.has(mockManifest.id)).toBeFalse();
+  });
+
   describe('Plugin variable injection', () => {
     it('should make "plugin" variable available to plugin code', async () => {
       // Plugin code that checks for 'plugin' variable existence

@@ -7,7 +7,7 @@ import { SyncProviderId } from '../../provider.const';
 import { SyncCredentialStore } from '../../credential-store.service';
 import { OP_LOG_SYNC_LOGGER } from '../../../core/sync-logger.adapter';
 import { APP_PROVIDER_PLATFORM_INFO } from '../../platform/app-provider-platform-info';
-import { APP_WEB_FETCH } from '../../platform/app-web-fetch';
+import { APP_WEBDAV_FETCH } from '../../platform/app-webdav-fetch';
 import { APP_WEBDAV_NATIVE_HTTP } from './capacitor-webdav-http/app-webdav-native-http';
 
 // Type-level bridge — fails to compile if the enum's runtime value drifts
@@ -28,7 +28,7 @@ export const createWebdavProvider = (extraPath?: string): PackageWebdav => {
   const deps: WebdavDeps = {
     logger: OP_LOG_SYNC_LOGGER,
     platformInfo: APP_PROVIDER_PLATFORM_INFO,
-    webFetch: APP_WEB_FETCH,
+    webFetch: APP_WEBDAV_FETCH,
     nativeHttp: APP_WEBDAV_NATIVE_HTTP,
     credentialStore: new SyncCredentialStore(
       SyncProviderId.WebDAV,
