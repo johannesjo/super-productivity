@@ -1566,7 +1566,7 @@
           "S_DETECT_USER_ID_NEED_LOGIN": "הזן כתובת שרת, שם התחברות וסיסמת אפליקציה תחילה.",
           "S_DETECT_USER_ID_SUCCESS": "נמצא מזהה משתמש Nextcloud: {{userId}}.",
           "S_DETECT_USER_ID_FAIL": "לא ניתן היה לזהות מזהה משתמש: {{error}}",
-          "S_TEST_FAIL_USER_NOT_FOUND": ""
+          "S_TEST_FAIL_USER_NOT_FOUND": "בדיקת החיבור נכשלה: תיקיית המשתמש לא נמצאה (404). פרטי ההתחברות תקינים, אך השדה \"שם משתמש\" חייב להכיל את מזהה המשתמש שלך ב-Nextcloud — לא את כתובת הדוא״ל או את שם התצוגה. כדי למצוא את המזהה, פתח את Files ב-Nextcloud, לחץ על סמל גלגל השיניים (למטה משמאל), והעתק את <user-id> מכתובת ה-WebDAV שמוצגת שם (.../remote.php/dav/files/<user-id>/). כתובת היעד: {{url}}"
         },
         "ONEDRIVE": {
           "CLIENT_ID_DESCRIPTION": "מזהה אפליקציה (לקוח) מרישום האפליקציה ב-Microsoft Entra",
