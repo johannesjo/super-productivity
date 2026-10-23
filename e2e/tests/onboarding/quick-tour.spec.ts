@@ -17,6 +17,10 @@ const openFreshApp = async (page: Page): Promise<void> => {
     localStorage.setItem('SUP_EXAMPLE_TASKS_CREATED', 'true');
   });
   await page.goto('/');
+  // The + works before the data has loaded. A task added then misses Today
+  // and the onboarding hints, which only start listening once loaded; the
+  // first tip shows that they are.
+  await expect(page.locator('onboarding-hint')).toContainText('to add your first task');
 };
 
 const addTaskViaComposer = async (page: Page, title: string): Promise<void> => {
