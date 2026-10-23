@@ -115,6 +115,7 @@ export class PollIssueUpdatesEffects {
         ),
         getRefreshOnLook$(provider),
       ],
+      // Same head start as at boot: the sync that reconnecting starts lands first.
       DELAY_BEFORE_ISSUE_POLLING,
     ).pipe(
       switchMap(() => this._getTasksForProvider(provider)),
