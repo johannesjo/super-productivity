@@ -571,6 +571,38 @@ const data = await PluginAPI.loadSyncedData();
 console.log(data); // '{ count: 42 }'
 ```
 
+### Listing synced data keys
+
+`listSyncedDataKeys(prefix?)` returns a sorted snapshot of the calling plugin's
+non-empty keys. It excludes the legacy unkeyed entry. The optional prefix is a
+literal string, not a pattern or path. Colons and Unicode are preserved without
+normalization. Sorting uses JavaScript's default string order, not locale order.
+
+```javascript
+if (typeof PluginAPI.listSyncedDataKeys === 'function') {
+  const keys = await PluginAPI.listSyncedDataKeys('attachment:task-id:');
+  for (const key of keys) {
+    const data = await PluginAPI.loadSyncedData(key);
+    // A record can disappear between listing and loading it.
+    if (data !== null) renderAttachment(JSON.parse(data));
+  }
+}
+```
+
+This works in both `plugin.js` and plugin iframes. It only reads applied
+application state, including previously unknown keys received by normal sync.
+It does not flush queued writes, wait for compression, trigger sync, or confirm
+disk persistence or delivery to another client. `loadSyncedData` can return a
+pending local value before a new key appears in this list. An existing key stays
+listed while its replacement is pending. Re-read after `persistedDataChanged`.
+Feature-detect the method when supporting older hosts.
+
+For example, an attachment plugin can store each attachment's metadata under an
+independent key. After sync, a second client needs to discover keys containing
+UUIDs it has never seen. `loadSyncedData(key)` requires a known key, and
+`persistedDataChanged` does not enumerate keys. Listing the existing records
+avoids a shared index blob that concurrent additions could overwrite.
+
 ### Secret Storage
 
 For credentials — IMAP/SMTP passwords, API tokens, app passwords — use
