@@ -3290,7 +3290,8 @@
       "NOT_YOURS": "This task is no longer assigned to you in Plainspace.",
       "RELEASE": "Release to Space",
       "RELEASED": "Released to the Space in Plainspace.",
-      "SERVER_TOO_OLD": "Plainspace server too old to assign."
+      "SERVER_TOO_OLD": "Plainspace server too old to assign.",
+      "UNSYNCED_EDITS": "Not handed off: your latest changes to this task haven't reached Plainspace yet. Try again once it syncs."
     },
     "INVITE_LINK_COPIED": "Invite link copied. Share it with the people you want in this space.",
     "LOGIN_REQUIRED": "A Plainspace API token is required to share a project.",

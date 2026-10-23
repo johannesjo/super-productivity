@@ -189,8 +189,9 @@ export class IssueTwoWaySyncEffects {
   /**
    * Pushes a task's synced fields: on a local edit, and on request for the
    * edits still pending against the baseline — found by a successful poll
-   * (quiet) or asked for by Retry. One stream, so pushes of a task stay in
-   * order. A task its provider no longer lists for me is not pushed.
+   * (quiet), asked for by Retry, or ahead of a handoff, which waits for the
+   * outcome (`onDone`). One stream, so pushes of a task stay in order. A task
+   * its provider no longer lists for me is not pushed.
    */
   pushFieldsOnTaskUpdate$: Observable<unknown> = createEffect(
     () =>
@@ -234,55 +235,64 @@ export class IssueTwoWaySyncEffects {
             taskId,
             changes: changes as Partial<Task> | null,
             isSilent: false,
+            onDone: undefined as ((isPushed: boolean) => void) | undefined,
           })),
         ),
         this._syncState.pushRequests$.pipe(
-          map(({ taskId, isSilent }) => ({
+          map(({ taskId, isSilent, onDone }) => ({
             taskId,
             changes: null as Partial<Task> | null,
             isSilent,
+            onDone,
           })),
         ),
       ).pipe(
-        concatMap(({ taskId, changes, isSilent }) =>
+        concatMap(({ taskId, changes, isSilent, onDone }) =>
           this._taskService.getByIdOnce$(taskId).pipe(
             map((fullTask) => ({
               fullTask,
               changes,
               isSilent,
+              onDone,
             })),
           ),
         ),
-        filter(({ fullTask }) => {
-          if (
-            !fullTask ||
-            !fullTask.issueType ||
-            !fullTask.issueProviderId ||
-            !fullTask.issueId
-          ) {
-            return false;
-          }
-          return (
+        filter(({ fullTask, onDone }) => {
+          const isPushable =
+            !!fullTask?.issueType &&
+            !!fullTask.issueProviderId &&
+            !!fullTask.issueId &&
             !!this._getAdapter(fullTask.issueType) &&
-            !this._syncState.isMissing(fullTask.id)
-          );
+            !this._syncState.isMissing(fullTask.id);
+          if (!isPushable) {
+            // Nothing this effect would push.
+            onDone?.(true);
+          }
+          return isPushable;
         }),
-        concatMap(({ fullTask, changes, isSilent }) =>
+        concatMap(({ fullTask, changes, isSilent, onDone }) =>
           (changes
             ? this._pushChanges$(fullTask, changes)
             : this._pushPendingChanges$(fullTask)
           ).pipe(
-            tap({ complete: () => this._syncState.clearFailure(fullTask.id) }),
+            tap({
+              complete: () => {
+                this._syncState.clearFailure(fullTask.id);
+                onDone?.(true);
+              },
+            }),
             catchError((err) => {
               // Expected provider limitation (e.g. a single recurring occurrence,
               // #7492) — the local task edit stands; don't alarm the user.
               if (isExpectedSyncSkipError(err)) {
                 this._syncState.clearFailure(fullTask.id);
+                onDone?.(true);
                 return EMPTY;
               }
               IssueLog.err('Two-way sync push failed', err);
               const failure = this._toSyncFailure(err);
               this._syncState.reportFailure(fullTask.id, failure);
+              onDone?.(false);
               // A poll retries every few minutes; its failure shows on the task.
               if (!isSilent) {
                 this._snackService.open(
