@@ -161,8 +161,13 @@ test.describe('Plainspace handoff (#8648)', () => {
     // No members endpoint: 404.
     await openContextMenu(page, 'Buy tent');
     await menuItem(page, 'Assign to…').click();
-    await expect(snack(page, 'Plainspace server too old to assign.')).toBeVisible();
+    const membersSnack = snack(page, 'Plainspace server too old to assign.');
+    await expect(membersSnack).toBeVisible();
     expect(server.patches).toEqual([]);
+    // Error snacks stay 10s. Close this one, so only the 422's own snack can
+    // pass the check below (and two containers never match during the swap).
+    await membersSnack.locator('button.close').click();
+    await expect(membersSnack).toHaveCount(0);
 
     // A PATCH with only assigneeId: 422.
     await page.keyboard.press('Escape');
