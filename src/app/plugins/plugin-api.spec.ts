@@ -8,6 +8,7 @@ import {
   DialogResult,
   NotifyCfg,
   PluginManifest,
+  PluginAPI as PublicPluginAPI,
 } from '@super-productivity/plugin-api';
 
 describe('PluginAPI', () => {
@@ -16,6 +17,7 @@ describe('PluginAPI', () => {
   let reInitDataSpy: jasmine.Spy;
   let dispatchActionSpy: jasmine.Spy;
   let requestSpy: jasmine.Spy;
+  let readPublishedSnapshotSpy: jasmine.Spy;
   let getSelectedTaskSpy: jasmine.Spy;
   let getFocusedTaskSpy: jasmine.Spy;
   let registerTaskContextMenuEntrySpy: jasmine.Spy;
@@ -40,6 +42,13 @@ describe('PluginAPI', () => {
     reInitDataSpy = jasmine.createSpy('reInitData').and.resolveTo();
     dispatchActionSpy = jasmine.createSpy('dispatchAction');
     requestSpy = jasmine.createSpy('request').and.resolveTo({ ok: true });
+    readPublishedSnapshotSpy = jasmine.createSpy('readPublishedSnapshot').and.resolveTo({
+      format: 'file-v2',
+      revision: 'r1',
+      clock: { fixture: 1 },
+      tasks: [],
+      pluginData: [],
+    });
     getSelectedTaskSpy = jasmine
       .createSpy('getSelectedTask')
       .and.resolveTo({ id: 'selected-task', title: 'Selected Task' });
@@ -61,6 +70,7 @@ describe('PluginAPI', () => {
       showIndexHtmlAsView: showIndexHtmlAsViewSpy,
       dispatchAction: dispatchActionSpy,
       request: requestSpy,
+      readPublishedSnapshot: readPublishedSnapshotSpy,
       getSelectedTask: getSelectedTaskSpy,
       getFocusedTask: getFocusedTaskSpy,
       persistDataSynced: jasmine.createSpy('persistDataSynced'),
@@ -108,6 +118,18 @@ describe('PluginAPI', () => {
       } as PluginManifest,
       undefined,
     );
+  });
+
+  it('reads the published snapshot without accepting a different plugin namespace', async () => {
+    const publicAPI: Pick<PublicPluginAPI, 'readPublishedSnapshot'> = pluginAPI;
+    expect(await publicAPI.readPublishedSnapshot()).toEqual({
+      format: 'file-v2',
+      revision: 'r1',
+      clock: { fixture: 1 },
+      tasks: [],
+      pluginData: [],
+    });
+    expect(readPublishedSnapshotSpy).toHaveBeenCalledOnceWith();
   });
 
   describe('showIndexHtmlAsView()', () => {
