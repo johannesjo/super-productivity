@@ -138,7 +138,14 @@ const withTestGitRepository = (
       'export const value = 1;\n',
     );
     runGit(repositoryRoot, ['add', 'released-source.ts']);
-    runGit(repositoryRoot, ['commit', '--quiet', '-m', 'released source']);
+    runGit(repositoryRoot, [
+      '-c',
+      'commit.gpgsign=false',
+      'commit',
+      '--quiet',
+      '-m',
+      'released source',
+    ]);
     runGit(repositoryRoot, ['tag', '-a', 'v1.2.3', '-m', 'v1.2.3']);
 
     const commitSha = runGit(repositoryRoot, ['rev-parse', 'HEAD']);
