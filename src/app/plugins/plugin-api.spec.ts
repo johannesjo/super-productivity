@@ -8,6 +8,7 @@ import {
   DialogResult,
   NotifyCfg,
   PluginManifest,
+  PluginAPI as PublicPluginAPI,
 } from '@super-productivity/plugin-api';
 
 describe('PluginAPI', () => {
@@ -110,6 +111,118 @@ describe('PluginAPI', () => {
     );
   });
 
+  describe('withWebDavRequestBudget()', () => {
+    const manifest: PluginManifest = {
+      id: 'budget-fixture',
+      name: 'Budget fixture',
+      manifestVersion: 1,
+      version: '1.0.0',
+      minSupVersion: '1.0.0',
+      hooks: [],
+      permissions: ['http'],
+      allowedHosts: ['FILES.EXAMPLE.'],
+    };
+
+    const createAPI = (
+      cfg: PluginManifest,
+      executor?: <T>(
+        origin: string,
+        action: (budgetFetch: typeof fetch) => Promise<T>,
+      ) => Promise<T>,
+    ): PluginAPI =>
+      new PluginAPI(
+        baseCfg,
+        cfg.id,
+        mockBridge as unknown as PluginBridgeService,
+        jasmine.createSpyObj('PluginI18nService', ['translate', 'getCurrentLanguage']),
+        cfg,
+        { withWebDavRequestBudget: executor },
+      );
+
+    it('forwards a background action and its result through the registered executor', async () => {
+      let receivedOrigin: string | undefined;
+      const fetchImpl = jasmine.createSpy<typeof fetch>('budget fetch');
+      const api = createAPI(manifest, async (origin, action) => {
+        receivedOrigin = origin;
+        return action(fetchImpl);
+      });
+      const publicAPI: Pick<PublicPluginAPI, 'withWebDavRequestBudget'> = api;
+      const result = await publicAPI.withWebDavRequestBudget!(
+        'https://files.example',
+        async (budgetFetch) => {
+          expect(budgetFetch).toBe(fetchImpl);
+          return 42;
+        },
+      );
+      expect(result).toBe(42);
+      expect(receivedOrigin).toBe('https://files.example');
+    });
+
+    it('requires http permission and a declared host before invoking the executor', async () => {
+      let calls = 0;
+      const executor = async <T>(
+        _origin: string,
+        action: (budgetFetch: typeof fetch) => Promise<T>,
+      ): Promise<T> => {
+        calls++;
+        return action(fetch);
+      };
+      await expectAsync(
+        createAPI({ ...manifest, permissions: [] }, executor).withWebDavRequestBudget(
+          'https://files.example',
+          async () => {},
+        ),
+      ).toBeRejected();
+      await expectAsync(
+        createAPI({ ...manifest, allowedHosts: [] }, executor).withWebDavRequestBudget(
+          'https://files.example',
+          async () => {},
+        ),
+      ).toBeRejected();
+      await expectAsync(
+        createAPI(manifest, executor).withWebDavRequestBudget(
+          'https://files.example.evil',
+          async () => {},
+        ),
+      ).toBeRejected();
+      expect(calls).toBe(0);
+    });
+
+    it('does not let a declared private or metadata host bypass the HTTP egress policy', async () => {
+      let calls = 0;
+      const executor = async <T>(
+        _origin: string,
+        action: (budgetFetch: typeof fetch) => Promise<T>,
+      ): Promise<T> => {
+        calls++;
+        return action(fetch);
+      };
+      for (const host of [
+        'localhost',
+        '127.0.0.1',
+        '192.168.0.9',
+        '10.0.0.1',
+        '172.16.0.1',
+        '169.254.169.254',
+        'metadata.google.internal',
+      ]) {
+        const api = createAPI({ ...manifest, allowedHosts: [host] }, executor);
+        await expectAsync(
+          api.withWebDavRequestBudget(`https://${host}`, async () => {}),
+        ).toBeRejected();
+      }
+      expect(calls).toBe(0);
+    });
+
+    it('rejects an API constructed without a current background executor', async () => {
+      await expectAsync(
+        createAPI(manifest).withWebDavRequestBudget(
+          'https://files.example',
+          async () => {},
+        ),
+      ).toBeRejectedWithError(/unavailable/);
+    });
+  });
   describe('showIndexHtmlAsView()', () => {
     it('should delegate to the bridge method', () => {
       pluginAPI.showIndexHtmlAsView();

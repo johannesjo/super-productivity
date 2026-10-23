@@ -7,6 +7,7 @@ import { PluginI18nService } from './plugin-i18n.service';
 import { SnackService } from '../core/snack/snack.service';
 import { PluginCleanupService } from './plugin-cleanup.service';
 import { PluginLog } from '../core/log';
+import { runWithWebDavRequestBudget } from '../op-log/sync-providers/platform/app-webdav-fetch';
 
 /**
  * Simplified plugin runner following KISS principles.
@@ -26,6 +27,7 @@ export class PluginRunner {
   private _pluginApis = new Map<string, PluginAPI>();
   private _readyCallbacks = new Map<string, () => void | Promise<void>>();
   private _unloadCallbacks = new Map<string, () => void | Promise<void>>();
+  private _networkLifetimes = new Map<string, AbortController>();
 
   /**
    * Load and execute a plugin
@@ -37,6 +39,7 @@ export class PluginRunner {
     isEnabled: boolean = true,
   ): Promise<PluginInstance> {
     try {
+      const networkLifetime = new AbortController();
       // Create plugin API
       const pluginAPI = new PluginAPI(
         baseCfg,
@@ -59,6 +62,12 @@ export class PluginRunner {
               this._unloadCallbacks.set(manifest.id, fn);
             }
           },
+          withWebDavRequestBudget: (origin, action) => {
+            if (this._pluginApis.get(manifest.id) !== pluginAPI) {
+              return Promise.reject(new Error('Plugin instance has been unloaded'));
+            }
+            return runWithWebDavRequestBudget(origin, action, networkLifetime.signal);
+          },
         },
       );
 
@@ -66,6 +75,7 @@ export class PluginRunner {
 
       // Store API reference
       this._pluginApis.set(manifest.id, pluginAPI);
+      this._networkLifetimes.set(manifest.id, networkLifetime);
 
       // Create plugin instance
       const pluginInstance: PluginInstance = {
@@ -125,6 +135,8 @@ export class PluginRunner {
           });
         }
       } catch (error) {
+        this._networkLifetimes.get(manifest.id)?.abort();
+        this._networkLifetimes.delete(manifest.id);
         this._pluginBridge.unregisterPluginHooks(manifest.id);
         pluginInstance.error =
           error instanceof Error ? error.message : 'Failed to load plugin';
@@ -251,6 +263,8 @@ export class PluginRunner {
     // drop the API reference first so re-registration from inside the callback
     // (or any later stale call) is ignored by the registration guard
     this._pluginApis.delete(pluginId);
+    this._networkLifetimes.get(pluginId)?.abort();
+    this._networkLifetimes.delete(pluginId);
     if (unloadFn) {
       void (async () => unloadFn())().catch((e) =>
         PluginLog.err(`Plugin ${pluginId} onUnload callback failed:`, e),

@@ -55,6 +55,10 @@ export class PluginAPI implements PluginAPIInterface {
   #manifest?: PluginManifest;
   #onReadyRegister?: (fn: () => void | Promise<void>) => void;
   #onUnloadRegister?: (fn: () => void | Promise<void>) => void;
+  #withWebDavRequestBudget?: <T>(
+    origin: string,
+    action: (budgetFetch: typeof fetch) => Promise<T>,
+  ) => Promise<T>;
   #hookHandlers = new Map<string, Map<Hooks, Array<PluginHookHandler<Hooks>>>>();
   #messageHandler?: (message: unknown) => Promise<unknown>;
   #boundMethods: ReturnType<typeof PluginBridgeService.prototype.createBoundMethods>;
@@ -78,6 +82,10 @@ export class PluginAPI implements PluginAPIInterface {
     lifecycleRegisters?: {
       onReady?: (fn: () => void | Promise<void>) => void;
       onUnload?: (fn: () => void | Promise<void>) => void;
+      withWebDavRequestBudget?: <T>(
+        origin: string,
+        action: (budgetFetch: typeof fetch) => Promise<T>,
+      ) => Promise<T>;
     },
   ) {
     this.#pluginId = pluginId;
@@ -86,6 +94,7 @@ export class PluginAPI implements PluginAPIInterface {
     this.#manifest = manifest;
     this.#onReadyRegister = lifecycleRegisters?.onReady;
     this.#onUnloadRegister = lifecycleRegisters?.onUnload;
+    this.#withWebDavRequestBudget = lifecycleRegisters?.withWebDavRequestBudget;
 
     // Get bound methods for this plugin
     this.#boundMethods = this.#pluginBridge.createBoundMethods(
@@ -350,6 +359,33 @@ export class PluginAPI implements PluginAPIInterface {
   async getConfig(): Promise<any> {
     PluginLog.log(`Plugin ${this.#pluginId} requested configuration`);
     return this.#boundMethods.getConfig();
+  }
+
+  /** Background-only: iframe messages cannot carry the action callback. */
+  async withWebDavRequestBudget<T>(
+    origin: string,
+    action: (budgetFetch: typeof fetch) => Promise<T>,
+  ): Promise<T> {
+    if (!this.#manifest?.permissions?.includes('http')) {
+      throw new Error('WebDAV request budget requires the http permission');
+    }
+    const url = new URL(origin);
+    const hostname = url.hostname.toLowerCase().replace(/\.$/, '');
+    const allowed = (this.#manifest.allowedHosts ?? []).some(
+      (host) => host.trim().toLowerCase().replace(/\.$/, '') === hostname,
+    );
+    // Same egress boundary as PluginAPI.request: no private/metadata endpoints.
+    if (
+      !allowed ||
+      ['localhost', 'metadata.google.internal', '0.0.0.0', '::1'].includes(hostname) ||
+      /^(127\.|10\.|192\.168\.|169\.254\.|172\.(1[6-9]|2\d|3[01])\.)/.test(hostname) ||
+      hostname.includes(':')
+    )
+      throw new Error('WebDAV request budget host is not allowed');
+    if (typeof action !== 'function' || !this.#withWebDavRequestBudget) {
+      throw new Error('WebDAV request budget is unavailable for this plugin instance');
+    }
+    return this.#withWebDavRequestBudget(origin, action);
   }
 
   async downloadFile(filename: string, data: string): Promise<void> {
