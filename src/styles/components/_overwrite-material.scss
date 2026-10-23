@@ -507,6 +507,14 @@ body .mat-mdc-button-base .mat-icon {
   overflow-x: hidden !important;
 }
 
+// Opt-in via `<mat-menu class="mat-menu-wide">`: Material caps panels at 280px,
+// which leaves a five-button quick-access row ~56px per label ("Tomorrow"
+// wraps). Fixed width so the row's equal shares don't depend on the items.
+.mat-mdc-menu-panel.mat-menu-wide {
+  width: min(320px, calc(100vw - var(--s2)));
+  max-width: none;
+}
+
 .mat-mdc-menu-content {
   padding: 0 !important;
 }

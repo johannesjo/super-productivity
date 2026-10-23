@@ -156,6 +156,14 @@ export class TaskContextMenuInnerComponent implements AfterViewInit, OnDestroy {
 
   protected readonly isTouchActive = isTouchActive;
   protected readonly T = T;
+  // Weekday names instead of "Tomorrow"/"Next week" keep every label on one
+  // line in the narrow menu row; the tooltips keep the full wording. Matches
+  // the dates quickAccessBtnClick schedules: tomorrow and the week's first day.
+  private readonly _weekdayNames = this._dateAdapter.getDayOfWeekNames('short');
+  protected readonly tomorrowLabel =
+    this._weekdayNames[(this._dateAdapter.getDayOfWeek(new Date()) + 1) % 7];
+  protected readonly nextWeekLabel =
+    this._weekdayNames[this._dateAdapter.getFirstDayOfWeek()];
   protected readonly PRIORITY_LEVELS = TASK_PRIORITY_LEVELS;
   protected readonly PRIORITY_LABEL_KEY = TASK_PRIORITY_LABEL_KEY;
   readonly ESTIMATE_OPTIONS = ESTIMATE_OPTIONS;

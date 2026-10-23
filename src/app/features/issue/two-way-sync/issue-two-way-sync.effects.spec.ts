@@ -1730,6 +1730,91 @@ describe('IssueTwoWaySyncEffects', () => {
       );
     }));
 
+    // A handoff waits for this before handing the task off (#8648).
+    describe('pushPending outcome', () => {
+      const outcome = (): { value?: boolean } => {
+        const result: { value?: boolean } = {};
+        syncState.pushPending('task-1').then((isPushed) => (result.value = isPushed));
+        return result;
+      };
+
+      it('resolves true once the pending fields are pushed', fakeAsync(() => {
+        taskServiceSpy.getByIdOnce$.and.returnValue(of(linkedTask()));
+        effects.pushFieldsOnTaskUpdate$.subscribe();
+
+        const result = outcome();
+        tick();
+
+        expect(adapter.pushChanges).toHaveBeenCalledOnceWith(
+          'issue-1',
+          { summary: 'New' },
+          jasmine.anything(),
+        );
+        expect(result.value).toBeTrue();
+        // Quiet: the caller says why it stops.
+        expect(snackServiceSpy.open).not.toHaveBeenCalled();
+      }));
+
+      it('resolves true when nothing is pending', fakeAsync(() => {
+        taskServiceSpy.getByIdOnce$.and.returnValue(of(linkedTask({ title: 'Old' })));
+        effects.pushFieldsOnTaskUpdate$.subscribe();
+
+        const result = outcome();
+        tick();
+
+        expect(adapter.fetchIssue).not.toHaveBeenCalled();
+        expect(result.value).toBeTrue();
+      }));
+
+      it('resolves false and records the failure when the push fails', fakeAsync(() => {
+        taskServiceSpy.getByIdOnce$.and.returnValue(of(linkedTask()));
+        (adapter.fetchIssue as jasmine.Spy).and.rejectWith(new Error('offline'));
+        effects.pushFieldsOnTaskUpdate$.subscribe();
+
+        const result = outcome();
+        tick();
+
+        expect(result.value).toBeFalse();
+        expect(syncState.failures().get('task-1')).toEqual({ text: 'offline' });
+        expect(snackServiceSpy.open).not.toHaveBeenCalled();
+      }));
+
+      it('resolves true for a task it would not push', fakeAsync(() => {
+        taskServiceSpy.getByIdOnce$.and.returnValue(of(linkedTask()));
+        syncState.setMissing(['task-1'], ['task-1']);
+        effects.pushFieldsOnTaskUpdate$.subscribe();
+
+        const result = outcome();
+        tick();
+
+        expect(adapter.fetchIssue).not.toHaveBeenCalled();
+        expect(result.value).toBeTrue();
+      }));
+
+      it('waits for a push queued before it', fakeAsync(() => {
+        let resolveFirst!: () => void;
+        taskServiceSpy.getByIdOnce$.and.returnValue(of(linkedTask()));
+        (adapter.fetchIssue as jasmine.Spy).and.returnValues(
+          new Promise((resolve) => (resolveFirst = () => resolve(baseline))),
+          Promise.resolve(baseline),
+        );
+        effects.pushFieldsOnTaskUpdate$.subscribe();
+
+        actions$.next(
+          TaskSharedActions.updateTask({
+            task: { id: 'task-1', changes: { isDone: true } },
+          }),
+        );
+        const result = outcome();
+        tick();
+        expect(result.value).toBeUndefined();
+
+        resolveFirst();
+        tick();
+        expect(result.value).toBeTrue();
+      }));
+    });
+
     it('never pushes a task its provider no longer lists for me', fakeAsync(() => {
       taskServiceSpy.getByIdOnce$.and.returnValue(of(linkedTask()));
       syncState.setMissing(['task-1'], ['task-1']);
