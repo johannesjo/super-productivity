@@ -94,6 +94,7 @@ import { PluginI18nService } from './plugin-i18n.service';
 import { pluginAssert } from './plugin-bridge-asserts';
 import { PluginTaskContextMenuRegistryService } from './plugin-task-context-menu-registry.service';
 import { formatDateForPlugin } from './plugin-i18n-date.util';
+import { downloadPluginTextFile, savePluginBinaryFile } from './plugin-file-download';
 
 // Relational fields corrupt parent<->child links when applied as plain values (mirrors
 // `REJECTED_TASK_FIELDS` in the local REST API); `wontDoOn` isn't in the plugin API yet.
@@ -243,6 +244,7 @@ export class PluginBridgeService implements OnDestroy {
     loadPersistedData: (key?: string) => Promise<string | null>;
     getConfig: () => Promise<unknown>;
     downloadFile: (filename: string, data: string) => Promise<void>;
+    saveBinaryFile: typeof savePluginBinaryFile;
     registerHeaderButton: (cfg: PluginHeaderBtnCfg) => void;
     registerMenuEntry: (cfg: Omit<PluginMenuEntryCfg, 'pluginId'>) => void;
     registerTaskContextMenuEntry: (cfg: PluginTaskContextMenuEntryCfg) => void;
@@ -302,8 +304,8 @@ export class PluginBridgeService implements OnDestroy {
         this._persistDataSynced(pluginId, dataStr, key),
       loadPersistedData: (key?: string) => this._loadPersistedData(pluginId, key),
       getConfig: () => this._getConfig(pluginId),
-      downloadFile: (filename: string, data: string) =>
-        this._downloadFile(filename, data),
+      downloadFile: downloadPluginTextFile,
+      saveBinaryFile: savePluginBinaryFile,
 
       // UI registration
       registerHeaderButton: (cfg: PluginHeaderBtnCfg) =>
@@ -630,14 +632,6 @@ export class PluginBridgeService implements OnDestroy {
     return this._pluginIssueProviderRegistry
       .getConfigFields(registeredKey)
       .find((f) => f.type === 'oauthButton' && f.oauthConfig)?.oauthConfig;
-  }
-
-  private async _downloadFile(filename: string, data: string): Promise<void> {
-    pluginAssert.string(filename);
-    pluginAssert.string(data);
-
-    const { download } = await import('../util/download');
-    await download(filename, data);
   }
 
   /**
