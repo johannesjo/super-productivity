@@ -16,6 +16,7 @@ describe('PluginAPI', () => {
   let reInitDataSpy: jasmine.Spy;
   let dispatchActionSpy: jasmine.Spy;
   let requestSpy: jasmine.Spy;
+  let saveBinaryFileSpy: jasmine.Spy;
   let getSelectedTaskSpy: jasmine.Spy;
   let getFocusedTaskSpy: jasmine.Spy;
   let registerTaskContextMenuEntrySpy: jasmine.Spy;
@@ -40,6 +41,9 @@ describe('PluginAPI', () => {
     reInitDataSpy = jasmine.createSpy('reInitData').and.resolveTo();
     dispatchActionSpy = jasmine.createSpy('dispatchAction');
     requestSpy = jasmine.createSpy('request').and.resolveTo({ ok: true });
+    saveBinaryFileSpy = jasmine
+      .createSpy('saveBinaryFile')
+      .and.resolveTo({ kind: 'saved', path: 'chosen.pdf', openStatus: 'failed' });
     getSelectedTaskSpy = jasmine
       .createSpy('getSelectedTask')
       .and.resolveTo({ id: 'selected-task', title: 'Selected Task' });
@@ -61,6 +65,7 @@ describe('PluginAPI', () => {
       showIndexHtmlAsView: showIndexHtmlAsViewSpy,
       dispatchAction: dispatchActionSpy,
       request: requestSpy,
+      saveBinaryFile: saveBinaryFileSpy,
       getSelectedTask: getSelectedTaskSpy,
       getFocusedTask: getFocusedTaskSpy,
       persistDataSynced: jasmine.createSpy('persistDataSynced'),
@@ -108,6 +113,20 @@ describe('PluginAPI', () => {
       } as PluginManifest,
       undefined,
     );
+  });
+
+  it('forwards binary bytes and the separate saved/open result without a text conversion', async () => {
+    const request = {
+      filename: 'Смета.pdf',
+      data: new Uint8Array([0, 255]).buffer,
+      openAfterSave: true,
+    };
+    expect(await pluginAPI.saveBinaryFile(request)).toEqual({
+      kind: 'saved',
+      path: 'chosen.pdf',
+      openStatus: 'failed',
+    });
+    expect(saveBinaryFileSpy).toHaveBeenCalledOnceWith(request);
   });
 
   describe('showIndexHtmlAsView()', () => {
