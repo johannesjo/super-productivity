@@ -208,10 +208,16 @@ describe('SwipePagerComponent', () => {
     const start = performance.now();
     fireTouch(pagerEl, 'touchstart', { x: 200 }, start);
     await fixture.whenStable();
-    fireTouch(pagerEl, 'touchmove', { x: 50 }, start + MAX_CLAIM_DELAY_MS + 50);
+    const move = fireTouch(
+      pagerEl,
+      'touchmove',
+      { x: 50 },
+      start + MAX_CLAIM_DELAY_MS + 50,
+    );
     fireTouch(pagerEl, 'touchend', { x: 50 }, start + MAX_CLAIM_DELAY_MS + 60);
     await fixture.whenStable();
 
+    expect(move.defaultPrevented).toBeFalse();
     expect(trackTransform()).toBe('');
     expect(host.navigations).toEqual([]);
   });
@@ -317,6 +323,19 @@ describe('SwipePagerComponent', () => {
   });
 
   describe('with animations', () => {
+    /**
+     * Ends the running settle as the browser does. Waiting out the transition
+     * in real time instead made a slow runner hit the 2s spec timeout.
+     */
+    const endTransition = async (): Promise<void> => {
+      pagerEl
+        .querySelector<HTMLElement>('.track')!
+        .dispatchEvent(
+          new TransitionEvent('transitionend', { propertyName: 'transform' }),
+        );
+      await fixture.whenStable();
+    };
+
     beforeEach(async () => {
       isReducedMotion = false;
       host.isWarm.set(true);
@@ -327,6 +346,19 @@ describe('SwipePagerComponent', () => {
       host.pager().go(1);
       expect(trackTransform()).toContain('-400px');
       expect(host.navigations).toEqual([]);
+
+      await endTransition();
+
+      expect(host.navigations).toEqual([6]);
+      expect(trackTransform()).toBe('');
+    });
+
+    it('finishes the settle when transitionend never fires', async () => {
+      // Registered before the pager's own listener, so it never sees the event.
+      pagerEl
+        .querySelector<HTMLElement>('.track')!
+        .addEventListener('transitionend', (ev) => ev.stopImmediatePropagation());
+      host.pager().go(1);
 
       await wait(400);
       await fixture.whenStable();
@@ -341,8 +373,7 @@ describe('SwipePagerComponent', () => {
       host.pager().go(1);
 
       for (let i = 0; i < 3; i++) {
-        await wait(400);
-        await fixture.whenStable();
+        await endTransition();
       }
 
       expect(host.navigations).toEqual([6, 7, 8]);
@@ -352,8 +383,7 @@ describe('SwipePagerComponent', () => {
       host.pager().go(1);
       host.current.set(9);
       await fixture.whenStable();
-      await wait(400);
-      await fixture.whenStable();
+      await endTransition();
 
       expect(host.navigations).toEqual([]);
       expect(currentPage()).toBe('9');
@@ -367,8 +397,7 @@ describe('SwipePagerComponent', () => {
       await pan(-150);
       fireTouch(pagerEl, 'touchend', { x: 50 });
 
-      await wait(400);
-      await fixture.whenStable();
+      await endTransition();
 
       expect(host.navigations).toEqual([6]);
       expect(trackTransform()).toBe('');
