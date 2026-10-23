@@ -1,10 +1,11 @@
 import { merge, Observable } from 'rxjs';
-import { delay, filter, map, skip, withLatestFrom } from 'rxjs/operators';
+import { debounceTime, filter, map, skip, withLatestFrom } from 'rxjs/operators';
 
 /**
  * Merges poll `triggers`, drops ticks that fire while offline, and adds one
- * tick when the connection comes back (after `backOnlineDelayMs`), so a poll
- * missed while offline is caught up right away instead of on the next interval.
+ * tick when the connection comes back (after `backOnlineDelayMs`; reconnects
+ * within that delay collapse into one tick), so a poll missed while offline is
+ * caught up right away instead of on the next interval.
  *
  * Offline requests would only fail and surface an error snack per tick.
  */
@@ -17,7 +18,9 @@ export const pollWhileOnline = (
   const backOnline$ = isOnline$.pipe(skip(1), filter(Boolean));
   return merge(
     ...triggers,
-    backOnlineDelayMs > 0 ? backOnline$.pipe(delay(backOnlineDelayMs)) : backOnline$,
+    backOnlineDelayMs > 0
+      ? backOnline$.pipe(debounceTime(backOnlineDelayMs))
+      : backOnline$,
   ).pipe(
     withLatestFrom(isOnline$),
     filter(([, isOnline]) => isOnline),

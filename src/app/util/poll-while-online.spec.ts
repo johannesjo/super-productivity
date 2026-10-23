@@ -60,4 +60,16 @@ describe('pollWhileOnline', () => {
     expect(count).toBe(1);
     sub.unsubscribe();
   }));
+
+  it('collapses reconnects within the delay into one tick', fakeAsync(() => {
+    const sub = pollWhileOnline(isOnline$, [trigger$], 1000).subscribe(() => count++);
+    isOnline$.next(false);
+    isOnline$.next(true);
+    tick(500);
+    isOnline$.next(false);
+    isOnline$.next(true);
+    tick(1000);
+    expect(count).toBe(1);
+    sub.unsubscribe();
+  }));
 });
