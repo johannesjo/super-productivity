@@ -59,12 +59,12 @@ describe('handlePluginMessage()', () => {
         getTasks: () => Promise<unknown>;
       };
     } = { parent, addEventListener: (name, listener) => listeners.set(name, listener) };
-    const code = createPluginApiScript(
+    const wrapped = createPluginApiScript(
       createConfig({ createBoundMethods: () => ({}) } as unknown as PluginBridgeService),
-    )
-      .trim()
-      .replace(/^<script>/, '')
-      .replace(/<\/script>$/, '');
+    ).trim();
+    expect(wrapped.startsWith('<script>')).toBeTrue();
+    expect(wrapped.endsWith('</script>')).toBeTrue();
+    const code = wrapped.slice('<script>'.length, -'</script>'.length);
     jasmine.clock().install();
     try {
       // Выполняем только скрипт из репозитория с управляемым parent.
