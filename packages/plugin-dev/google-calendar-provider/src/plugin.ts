@@ -304,28 +304,45 @@ const fetchEventsForCalendar = async (
     .map((e) => mapEventToSearchResult(e, calendarId));
 };
 
+/** Calendar colors rarely change; reuse them across agenda polls. */
+const CALENDAR_COLORS_TTL_MS = 60 * 60 * 1000;
+let calendarColorsCache: { colors: Map<string, string>; fetchedAt: number } | undefined;
+
 /**
  * Each calendar's color as set in Google Calendar, keyed by calendar id ('primary'
- * included). Colors are cosmetic, so a failed lookup yields an empty map and the
- * host falls back to its own color.
+ * included). Only the first calendarList page is read, and per-event colors
+ * (`colorId`) are not used. Colors are cosmetic: a failed lookup keeps the last
+ * known colors, or none, and the host falls back to its own color.
  */
 const fetchCalendarColors = async (http: PluginHttp): Promise<Map<string, string>> => {
-  const colors = new Map<string, string>();
+  if (
+    calendarColorsCache &&
+    Date.now() - calendarColorsCache.fetchedAt < CALENDAR_COLORS_TTL_MS
+  ) {
+    return calendarColorsCache.colors;
+  }
   try {
     const res = await http.get<{
       items?: { id: string; primary?: boolean; backgroundColor?: string }[];
     }>(`${GOOGLE_CALENDAR_API}/users/me/calendarList`, {
       params: { fields: 'items(id,primary,backgroundColor)' },
     });
+    const colors = new Map<string, string>();
     for (const cal of res.items || []) {
       if (!cal.backgroundColor) continue;
       colors.set(cal.id, cal.backgroundColor);
       if (cal.primary) colors.set('primary', cal.backgroundColor);
     }
+    calendarColorsCache = { colors, fetchedAt: Date.now() };
+    return colors;
   } catch {
-    // ignore, see above
+    return calendarColorsCache?.colors ?? new Map();
   }
-  return colors;
+};
+
+/** Test-only: forget cached calendar colors. */
+export const _resetCalendarColorsCache = (): void => {
+  calendarColorsCache = undefined;
 };
 
 /** Fetch events from all read calendars, merged and sorted by start time. */

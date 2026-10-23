@@ -1,6 +1,8 @@
 import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from 'vitest';
 import type { IssueProviderPluginDefinition } from '@super-productivity/plugin-api';
 
+let _resetCalendarColorsCache: () => void;
+
 let definition: IssueProviderPluginDefinition;
 
 beforeAll(async () => {
@@ -12,7 +14,7 @@ beforeAll(async () => {
     clearOAuthToken: vi.fn().mockResolvedValue(undefined),
     log: { info: vi.fn(), warn: vi.fn(), error: vi.fn() },
   };
-  await import('./plugin');
+  ({ _resetCalendarColorsCache } = await import('./plugin'));
 });
 
 describe('Google Calendar Plugin', () => {
@@ -381,6 +383,8 @@ describe('Google Calendar Plugin', () => {
   });
 
   describe('getNewIssuesForBacklog', () => {
+    beforeEach(() => _resetCalendarColorsCache());
+
     const makeEvent = (over: Record<string, unknown>): Record<string, unknown> => ({
       id: 'real-1',
       summary: 'Real meeting',
@@ -494,6 +498,45 @@ describe('Google Calendar Plugin', () => {
 
       expect(results).toHaveLength(1);
       expect(results[0].color).toBeUndefined();
+    });
+
+    it('reuses calendar colors across polls and keeps them when a lookup fails', async () => {
+      let isListFailing = false;
+      const mockHttp = {
+        get: vi.fn().mockImplementation((url: string) => {
+          if (!url.endsWith('/users/me/calendarList')) {
+            return Promise.resolve({ items: [makeEvent({})] });
+          }
+          return isListFailing
+            ? Promise.reject(new Error('offline'))
+            : Promise.resolve({
+                items: [
+                  { id: 'me@example.com', primary: true, backgroundColor: '#fbe983' },
+                ],
+              });
+        }),
+        post: vi.fn(),
+        put: vi.fn(),
+        patch: vi.fn(),
+        delete: vi.fn(),
+      };
+      const poll = () =>
+        definition.getNewIssuesForBacklog!(
+          { readCalendarIds: ['primary'] } as any,
+          mockHttp as any,
+        );
+      const listCalls = (): number =>
+        mockHttp.get.mock.calls.filter(([url]) => url.endsWith('/calendarList')).length;
+
+      expect((await poll())[0].color).toBe('#fbe983');
+      expect((await poll())[0].color).toBe('#fbe983');
+      expect(listCalls()).toBe(1);
+
+      vi.useFakeTimers({ toFake: ['Date'] });
+      vi.setSystemTime(Date.now() + 2 * 60 * 60 * 1000);
+      isListFailing = true;
+      expect((await poll())[0].color).toBe('#fbe983');
+      expect(listCalls()).toBe(2);
     });
 
     // #10190: Google applies `timeMin` (exclusive) to an event's END time. With

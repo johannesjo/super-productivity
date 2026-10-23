@@ -21,8 +21,9 @@ export interface PluginSearchResult {
   isAllDay?: boolean;
   /** Event description / body text */
   description?: string;
-  /** CSS color of the event's calendar (e.g. '#fbe983'), used to tell calendars
-   *  apart in agenda views. A color the user set on the provider takes precedence. */
+  /** Color of the event's calendar, used to tell calendars apart in agenda views:
+   *  hex, rgb(a), hsl(a) or a color name (e.g. '#fbe983'); other values are
+   *  ignored. A color the user set on the provider takes precedence. */
   color?: string;
   /** Provider-specific fields used by issue display and field mappings */
   [key: string]: unknown;
@@ -82,13 +83,7 @@ export interface PluginFieldMapping {
    * - `toTaskValue` must return a string[] of tag titles/labels to match or create locally.
    */
   taskField:
-    | 'isDone'
-    | 'title'
-    | 'notes'
-    | 'dueDay'
-    | 'dueWithTime'
-    | 'timeEstimate'
-    | 'tagIds';
+    'isDone' | 'title' | 'notes' | 'dueDay' | 'dueWithTime' | 'timeEstimate' | 'tagIds';
   issueField: string;
   defaultDirection: PluginSyncDirection;
   /** Task fields to clear when this field is set (e.g. dueWithTime and dueDay are mutually exclusive) */

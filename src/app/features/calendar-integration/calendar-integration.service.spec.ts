@@ -291,6 +291,41 @@ END:VCALENDAR`;
         ]);
         discardPeriodicTasks();
       }));
+
+      it('should keep the calendar source color when the provider has none', fakeAsync(() => {
+        const cachedProvider = createMockProvider({ id: 'provider-1', color: undefined });
+        const cachedData = [
+          {
+            items: [
+              {
+                id: 'google-event',
+                calProviderId: 'provider-1',
+                issueProviderKey: 'ICAL',
+                title: 'Google Event',
+                start: Date.now() + 60000,
+                duration: 3600000,
+                color: 'hsl(1, 60%, 55%)',
+                calendarColor: '#fbe983',
+              },
+            ],
+          },
+        ];
+        localStorage.setItem('SUP_CAL_EVENTS_CACHE', JSON.stringify(cachedData));
+        store.overrideSelector(selectCalendarProviders, [cachedProvider]);
+        store.refreshState();
+
+        const newService = TestBed.inject(CalendarIntegrationService);
+
+        let emittedValue: unknown;
+        const sub = newService.calendarEvents$.pipe(take(1)).subscribe((val) => {
+          emittedValue = val;
+        });
+        subscriptions.push(sub);
+
+        tick(0);
+        expect((emittedValue as any[])[0].items[0].color).toBe('#fbe983');
+        discardPeriodicTasks();
+      }));
     });
 
     describe('regex filter in initial cached emission', () => {
@@ -2266,6 +2301,7 @@ END:VCALENDAR`;
           start: 1701700000000,
           dueWithTime: 1701700000000,
           duration: 3600000,
+          color: '#fbe983',
         },
         {
           id: 'evt-without-time',
@@ -2328,6 +2364,10 @@ END:VCALENDAR`;
       );
       expect(allDay).toEqual(jasmine.objectContaining({ id: 'evt-without-time' }));
       expect(allDay.dueWithTime).toBeUndefined();
+      expect(timed).toEqual(
+        jasmine.objectContaining({ color: '#fbe983', calendarColor: '#fbe983' }),
+      );
+      expect(allDay.calendarColor).toBeUndefined();
     });
   });
 
