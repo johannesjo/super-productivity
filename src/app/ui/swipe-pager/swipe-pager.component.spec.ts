@@ -53,11 +53,18 @@ interface TouchPoint {
   id?: number;
 }
 
+/**
+ * Event time of touches fired without an explicit `timeStamp`. The pager reads
+ * gesture timing (long-press delay, velocity) from event timestamps, so a
+ * real clock lets a slow runner turn a pan into a long press.
+ */
+let eventTime = 0;
+
 const fireTouch = (
   el: HTMLElement,
   type: 'touchstart' | 'touchmove' | 'touchend',
   points: TouchPoint | TouchPoint[],
-  timeStamp?: number,
+  timeStamp = eventTime,
 ): TouchEvent => {
   const touches = (Array.isArray(points) ? points : [points]).map(
     (p) =>
@@ -74,9 +81,7 @@ const fireTouch = (
     touches: type === 'touchend' ? [] : touches,
     changedTouches: touches,
   });
-  if (timeStamp !== undefined) {
-    Object.defineProperty(ev, 'timeStamp', { value: timeStamp });
-  }
+  Object.defineProperty(ev, 'timeStamp', { value: timeStamp });
   el.dispatchEvent(ev);
   return ev;
 };
@@ -106,11 +111,14 @@ describe('SwipePagerComponent', () => {
     await fixture.whenStable();
     // Past the claim threshold first, so the pan follows from there.
     const claimX = Math.sign(deltaX) * 20;
+    eventTime += 16;
     fireTouch(pagerEl, 'touchmove', { x: 200 + claimX, y: 100 + deltaY });
+    eventTime += 16;
     fireTouch(pagerEl, 'touchmove', { x: 200 + deltaX, y: 100 + deltaY });
   };
 
   beforeEach(async () => {
+    eventTime = 1000;
     isReducedMotion = true;
     // Reduced motion: the pager settles synchronously unless a test opts out.
     spyOn(window, 'matchMedia').and.callFake(
@@ -163,7 +171,7 @@ describe('SwipePagerComponent', () => {
   it('snaps back after a short, slow pan', async () => {
     await pan(-60);
     // Hold still past the velocity window, so the release is not a fling.
-    await wait(150);
+    eventTime += 150;
     fireTouch(pagerEl, 'touchmove', { x: 140 });
     fireTouch(pagerEl, 'touchend', { x: 140 });
     await fixture.whenStable();
