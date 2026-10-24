@@ -4,11 +4,12 @@ import {
   flushMicrotasks,
   TestBed,
 } from '@angular/core/testing';
-import { EMPTY } from 'rxjs';
+import { EMPTY, of } from 'rxjs';
 import { ConfigSectionComponent } from './config-section.component';
 import { ConfigFormSection, ConfigSectionAction } from '../global-config.model';
 import { WorkContextService } from '../../work-context/work-context.service';
-import { TranslateService } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
+import { ExactAlarmStatusService } from '../../reminder/exact-alarm-status.service';
 import { Log } from '../../../core/log';
 import { Component } from '@angular/core';
 import { NoopAnimationsModule } from '@angular/platform-browser/animations';
@@ -165,5 +166,44 @@ describe('ConfigSectionComponent isExpandedChange', () => {
     fixture.nativeElement.querySelector('.collapsible-header').click();
 
     expect(fixture.componentInstance.changes).toEqual([false]);
+  });
+});
+
+// Users who look for why reminders arrive late go to the reminder settings,
+// not the schedule dialog, so the inexact-alarm hint must show there too (#10424).
+describe('ConfigSectionComponent exact-alarm hint', () => {
+  let fixture: ComponentFixture<ConfigSectionHostComponent>;
+
+  const render = (key: string): HTMLElement => {
+    fixture = TestBed.createComponent(ConfigSectionHostComponent);
+    fixture.componentInstance.section = { title: '', key } as ConfigFormSection<
+      Record<string, unknown>
+    >;
+    fixture.detectChanges();
+    return fixture.nativeElement;
+  };
+
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [
+        ConfigSectionHostComponent,
+        NoopAnimationsModule,
+        TranslateModule.forRoot(),
+      ],
+      providers: [
+        { provide: WorkContextService, useValue: { onWorkContextChange$: EMPTY } },
+        { provide: ExactAlarmStatusService, useValue: { isDenied$: of(true) } },
+      ],
+    }).compileComponents();
+  });
+
+  afterEach(() => fixture?.destroy());
+
+  it('shows the hint in the reminder section when exact alarms are denied', () => {
+    expect(render('reminder').querySelector('exact-alarm-hint .callout')).not.toBeNull();
+  });
+
+  it('does not show the hint in other sections', () => {
+    expect(render('localization').querySelector('exact-alarm-hint')).toBeNull();
   });
 });
