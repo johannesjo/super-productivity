@@ -197,5 +197,18 @@
       "downloadUrl": "https://github.com/SileboxUnderfined/SuperGile/releases/download/v0.1.1/supergile-0.1.1.zip",
       "sha256": "67ebf31649f745950f38da4f58f6bf43ed73e89fb43d5b1537ff626f78fbca76"
     }
+  },
+  {
+    "name": "Trash Bin",
+    "shortDescription": "A best-effort deleted-task recovery archive. Restore captured snapshots as new tasks and remove archive entries; projects, tags and saved filters are not fully recoverable through the public plugin API.",
+    "url": "https://github.com/haritvsmurali/trash-bin-super-productivity",
+    "author": "Hariharan",
+    "authorUrl": "https://github.com/haritvsmurali",
+    "id": "trash-bin",
+    "release": {
+      "version": "1.0.1",
+      "downloadUrl": "https://github.com/haritvsmurali/trash-bin-super-productivity/releases/download/v1.0.1/plugin.zip",
+      "sha256": "96f4cf9c9c666a626f2dbdd2ebfaf679e84e8edb9cef1ec4b9ebdf958d3875e2"
+    }
   }
 ]
