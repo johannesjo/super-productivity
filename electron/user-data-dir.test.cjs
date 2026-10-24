@@ -69,7 +69,9 @@ test('applySnapUserDataDir sets userData and the logs path on snap', () => {
 // requestSingleInstanceLock(), so main.ts must move it first (#11049).
 test('main.ts moves the snap userData before requesting the single-instance lock', () => {
   const src = fs.readFileSync(path.join(__dirname, 'main.ts'), 'utf8');
-  const applyAt = src.indexOf('applySnapUserDataDir(app)');
+  // Unconditional and at top level: a call inside a platform branch would
+  // still sort before the lock in the source text.
+  const applyAt = src.search(/^applySnapUserDataDir\(app\);$/m);
   const lockAt = src.indexOf('requestSingleInstanceLock(');
   assert.ok(applyAt > -1 && lockAt > -1);
   assert.ok(applyAt < lockAt);

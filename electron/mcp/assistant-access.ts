@@ -171,7 +171,8 @@ export const initAssistantAccess = (hooks: AssistantAccessHooks): void => {
 
   // Nothing is read before userData is final: this runs from
   // initIpcInterfaces(), before start-app.ts applies --user-data-dir, and
-  // reading earlier would pick up another profile's grant and key. Until then access stays off and every key is rejected.
+  // reading earlier would pick up another profile's grant and key. Until then
+  // access stays off and every key is rejected.
   loaded = app.whenReady().then(() => {
     const stored = readSecretFile(
       getVerifierFilePath(),

@@ -146,7 +146,6 @@ export const startApp = (): void => {
 
   // On snap, main.ts already moved userData to the common dir, before the
   // single-instance lock (#11049).
-  log('Using user data directory', app.getPath('userData'));
 
   if (process.platform === 'linux') {
     // Pin the .desktop filename rather than letting Electron infer it. Since
