@@ -83,6 +83,21 @@ describe('GlobalTrackingIntervalService', () => {
     expect(service.clockTimestamp()).toBe(initial + 200);
   }));
 
+  it('changes the minute clock only when the wall-clock minute changes', fakeAsync(() => {
+    const MINUTE = 60 * 1000;
+    const service = TestBed.inject(GlobalTrackingIntervalService);
+    const initial = service.clockMinute();
+    expect(initial).toBe(Math.floor(Date.now() / MINUTE));
+    const ticksLeftInMinute = Math.floor(
+      (MINUTE - (Date.now() % MINUTE) - 1) / TRACKING_INTERVAL,
+    );
+
+    tick(ticksLeftInMinute * TRACKING_INTERVAL);
+    expect(service.clockMinute()).toBe(initial);
+    tick(TRACKING_INTERVAL);
+    expect(service.clockMinute()).toBe(initial + 1);
+  }));
+
   it('should emit elapsed wall-clock time on tick$', fakeAsync(() => {
     const service = TestBed.inject(GlobalTrackingIntervalService);
     const durations: number[] = [];

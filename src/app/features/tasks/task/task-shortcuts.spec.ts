@@ -221,6 +221,7 @@ describe('TaskComponent shortcut handling', () => {
           useValue: jasmine.createSpyObj('GlobalTrackingIntervalService', [], {
             todayDateStr: signal('2026-05-05'),
             clockTimestamp: signal(new Date(2026, 4, 5, 12).getTime()),
+            clockMinute: signal(Math.floor(new Date(2026, 4, 5, 12).getTime() / 60000)),
           }),
         },
         {
@@ -285,6 +286,7 @@ describe('TaskComponent shortcut handling', () => {
       });
       expect(component.scheduledDateColor()).toBe('');
       (clock.clockTimestamp as WritableSignal<number>).set(scheduled);
+      (clock.clockMinute as WritableSignal<number>).set(scheduled / 60000);
       expect(component.scheduledDateColor()).toBe('overdue');
     });
 
@@ -302,6 +304,7 @@ describe('TaskComponent shortcut handling', () => {
       currentId.set('top-1');
       expect(component.scheduledDateColor()).toBe('');
       (clock.clockTimestamp as WritableSignal<number>).set(scheduled + 1);
+      (clock.clockMinute as WritableSignal<number>).set(scheduled / 60000);
       expect(component.scheduledDateColor()).toBe('');
       currentId.set(null);
       expect(component.scheduledDateColor()).toBe('overdue');

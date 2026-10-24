@@ -129,7 +129,10 @@ import {
 } from '../add-subtask-input/add-subtask-input.component';
 import { AddSubtaskInputService } from '../add-subtask-input/add-subtask-input.service';
 import { getSubTaskTimeLeftForDisplay } from '../util/get-sub-task-time-left-for-display';
-import { getScheduledDateColor } from '../util/get-scheduled-date-color';
+import {
+  getScheduledDateColor,
+  readClockUntilDue,
+} from '../util/get-scheduled-date-color';
 import { isWontDoTask } from '../util/is-wont-do-task';
 import { IssueSyncStateService } from '../../issue/two-way-sync/issue-sync-state.service';
 
@@ -308,8 +311,14 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
       task,
       this.globalTrackingIntervalService.todayDateStr(),
       this._dateService.getStartOfNextDayDiffMs(),
-      // Only timed tasks depend on the clock, with no per-row subscription.
-      task.dueWithTime ? this.globalTrackingIntervalService.clockTimestamp() : 0,
+      // Only timed tasks not yet due depend on the clock, with no per-row subscription.
+      task.dueWithTime
+        ? readClockUntilDue(
+            this.globalTrackingIntervalService.clockTimestamp,
+            this.globalTrackingIntervalService.clockMinute,
+            task.dueWithTime,
+          )
+        : 0,
     );
   });
   hasTimeConflict = computed(() => {

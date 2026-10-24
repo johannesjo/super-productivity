@@ -31,6 +31,7 @@ import { IS_ANDROID_WEB_VIEW } from '../../util/is-android-web-view';
 import { androidInterface } from '../../features/android/android-interface';
 
 const MINUTE_MS = 60 * 1000;
+const toMinute = (timestamp: number): number => Math.floor(timestamp / MINUTE_MS);
 
 /**
  * Builds the shared 1s tick source. When a background-state stream is given
@@ -92,14 +93,24 @@ export class GlobalTrackingIntervalService {
   minuteTick$: Observable<unknown> = this._createMinuteTickObservable();
 
   // Reuse the shared second tick; refresh immediately after focus/resume as well.
-  clockTimestamp = toSignal(
-    merge(
-      this.globalInterval$,
-      this._createAppActiveObservable(),
-      this._wakeUpTick$,
-    ).pipe(map(() => Date.now())),
-    { initialValue: Date.now() },
+  private _clock$ = merge(
+    this.globalInterval$,
+    this._createAppActiveObservable(),
+    this._wakeUpTick$,
+  ).pipe(
+    map(() => Date.now()),
+    share(),
   );
+
+  clockTimestamp = toSignal(this._clock$, { initialValue: Date.now() });
+
+  /**
+   * The same clock in whole minutes since the epoch. It changes once a minute,
+   * so a consumer that only needs minutes doesn't re-run every second.
+   */
+  clockMinute = toSignal(this._clock$.pipe(map(toMinute)), {
+    initialValue: toMinute(Date.now()),
+  });
 
   // Shared signal to avoid creating 200+ subscriptions in task components
   todayDateStr = toSignal(this.todayDateStr$, {
