@@ -556,7 +556,11 @@ export class BoardPanelComponent implements TaskCardList {
       this._trackingInterval.todayDateStr(),
       this._dateService.getStartOfNextDayDiffMs(),
       task.dueWithTime
-        ? readClockUntilDue(this._trackingInterval.clockTimestamp, task.dueWithTime)
+        ? readClockUntilDue(
+            this._trackingInterval.clockTimestamp,
+            this._trackingInterval.clockMinute,
+            task.dueWithTime,
+          )
         : 0,
     );
   }
