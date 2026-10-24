@@ -1,3 +1,4 @@
+import { Signal, untracked } from '@angular/core';
 import { getDbDateStr, isValidDBDateStr } from '../../../util/get-db-date-str';
 import { Task } from '../task.model';
 
@@ -19,4 +20,14 @@ export const getScheduledDateColor = (
     return 'overdue';
   }
   return '';
+};
+
+/**
+ * Reads the display clock for a timed task's color, but depends on it only
+ * until the task is due: from then on the task stays overdue, so its color
+ * need not re-run every second. Thousands of overdue rows otherwise do.
+ */
+export const readClockUntilDue = (clock: Signal<number>, dueWithTime: number): number => {
+  const now = untracked(clock);
+  return dueWithTime > now ? clock() : now;
 };

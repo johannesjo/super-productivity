@@ -1,4 +1,9 @@
-import { getScheduledDateColor, ScheduledDateColor } from './get-scheduled-date-color';
+import { computed, signal } from '@angular/core';
+import {
+  getScheduledDateColor,
+  readClockUntilDue,
+  ScheduledDateColor,
+} from './get-scheduled-date-color';
 
 describe('getScheduledDateColor', () => {
   const today = '2026-10-03';
@@ -36,5 +41,33 @@ describe('getScheduledDateColor', () => {
     const startOfNextDayDiffMs = 4 * 60 * 60 * 1000;
     expect(getScheduledDateColor(task, today, startOfNextDayDiffMs, 0)).toBe('overdue');
     expect(getScheduledDateColor(task, today, 0, 0)).toBe('');
+  });
+});
+
+describe('readClockUntilDue', () => {
+  it('stops re-running a color once the task is due', () => {
+    const due = new Date(2026, 9, 3, 12).getTime();
+    const clock = signal(due - 2000);
+    let runs = 0;
+    const color = computed(() => {
+      runs++;
+      return getScheduledDateColor(
+        { isDone: false, dueWithTime: due },
+        '2026-10-03',
+        0,
+        readClockUntilDue(clock, due),
+      );
+    });
+
+    expect(color()).toBe('');
+    clock.set(due - 1000);
+    expect(color()).toBe('');
+    clock.set(due);
+    expect(color()).toBe('overdue');
+    expect(runs).toBe(3);
+
+    clock.set(due + 1000);
+    expect(color()).toBe('overdue');
+    expect(runs).toBe(3);
   });
 });
