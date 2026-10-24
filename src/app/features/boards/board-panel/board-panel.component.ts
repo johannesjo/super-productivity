@@ -75,6 +75,8 @@ import { checkKeyCombo } from '../../../util/check-key-combo';
 import { ADD_TASK_INLINE_BTN_SELECTOR } from '../../planner/add-task-inline/add-task-inline.const';
 import { getScheduledDateColor } from '../../tasks/util/get-scheduled-date-color';
 import type { ScheduledDateColor } from '../../tasks/util/get-scheduled-date-color';
+import { isDeadlineOverdue } from '../../tasks/util/is-deadline-overdue';
+import { DialogDeadlineComponent } from '../../tasks/dialog-deadline/dialog-deadline.component';
 import { GlobalTrackingIntervalService } from '../../../core/global-tracking-interval/global-tracking-interval.service';
 import { DateService } from '../../../core/date/date.service';
 
@@ -125,6 +127,7 @@ export class BoardPanelComponent implements TaskCardList {
   _matDialog = inject(MatDialog);
   readonly multiSelect = inject(TaskMultiSelectService);
   private readonly _trackingInterval = inject(GlobalTrackingIntervalService);
+  readonly todayDateStr = this._trackingInterval.todayDateStr;
   private readonly _dateService = inject(DateService);
   private _element = inject<ElementRef<HTMLElement>>(ElementRef);
   private _injector = inject(Injector);
@@ -554,6 +557,25 @@ export class BoardPanelComponent implements TaskCardList {
       this._dateService.getStartOfNextDayDiffMs(),
       task.dueWithTime ? this._trackingInterval.clockTimestamp() : 0,
     );
+  }
+
+  deadlineColor(task: TaskCopy): ScheduledDateColor {
+    if (task.isDone) return '';
+    // Timed deadlines read the shared clock so an idle OnPush board recolors at expiry.
+    const isOverdue = task.deadlineWithTime
+      ? task.deadlineWithTime < this._trackingInterval.clockTimestamp()
+      : isDeadlineOverdue(task, this._trackingInterval.todayDateStr());
+    return isOverdue ? 'overdue' : '';
+  }
+
+  editDeadline(task: TaskCopy, ev: MouseEvent): void {
+    ev.preventDefault();
+    ev.stopPropagation();
+    this._matDialog.open(DialogDeadlineComponent, {
+      autoFocus: false,
+      restoreFocus: true,
+      data: { task },
+    });
   }
 
   scheduleTask(task: TaskCopy, ev?: MouseEvent): void {
