@@ -24,10 +24,10 @@ import {
 } from './shared-with-frontend/backup-file-cleanup.util';
 
 /**
- * Resolved at use time, not import time: start-app.ts imports this module
- * before it moves userData (snap common dir, `--user-data-dir`), and an
- * import-time value sent snap backups to the per-revision dir that snapd
- * deletes with old revisions (#11049).
+ * Resolved at use time, not import time: this module is imported before
+ * userData moves (snap common dir in main.ts, `--user-data-dir` in
+ * start-app.ts), and an import-time value sent snap backups to the
+ * per-revision dir that snapd deletes with old revisions (#11049).
  */
 const getBackupDir = (): string => path.join(app.getPath('userData'), `backups`);
 
