@@ -33,6 +33,10 @@
     </help-section>
   }
   <div class="form-wrapper {{ section?.key }}">
+    @if (section?.key === 'reminder') {
+      <!-- Users look here when reminders arrive late (#10424) -->
+      <exact-alarm-hint />
+    }
     @if (section?.items && !section?.customSection) {
       <config-form
         (save)="onSave($event)"
