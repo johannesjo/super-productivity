@@ -38,6 +38,7 @@ export class FinishDayBeforeCloseEffects {
   private _matDialog = inject(MatDialog);
   private _router = inject(Router);
   private _uiHelperService = inject(UiHelperService);
+  private _isPromptOpen = false;
 
   isEnabled$: Observable<boolean> =
     this._dataInitStateService.isAllDataLoadedInitially$.pipe(
@@ -105,7 +106,17 @@ export class FinishDayBeforeCloseEffects {
     // Quitting from the tray can leave the window hidden, and the prompt must
     // be seen for the quit to go on.
     this._uiHelperService.focusApp();
-    const choice = await this._showDialog(doneCount);
+    // A repeated Quit while the prompt is open only brings it to the front.
+    if (this._isPromptOpen) {
+      return;
+    }
+    this._isPromptOpen = true;
+    let choice: FinishDayBeforeCloseChoice;
+    try {
+      choice = await this._showDialog(doneCount);
+    } finally {
+      this._isPromptOpen = false;
+    }
     if (choice === 'quit') {
       this._execBeforeCloseService.setDone(EXEC_BEFORE_CLOSE_ID);
     } else if (choice === 'finish-day') {

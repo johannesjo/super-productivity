@@ -129,6 +129,24 @@ describe('FinishDayBeforeCloseEffects._handleCloseDecision()', () => {
   });
 
   // Finish Day archives won't-do tasks as well.
+  it('a repeated quit while the prompt is open shows no second prompt', async () => {
+    let answer: (choice: 'quit') => void = () => undefined;
+    showDialogSpy.and.returnValue(new Promise((resolve) => (answer = resolve)));
+
+    const first = effects._handleCloseDecision([doneTask]);
+    await effects._handleCloseDecision([doneTask]);
+
+    expect(showDialogSpy).toHaveBeenCalledTimes(1);
+    expect(uiHelperService.focusApp).toHaveBeenCalledTimes(2);
+    expect(execBeforeCloseService.setDone).not.toHaveBeenCalled();
+
+    answer('quit');
+    await first;
+    expect(execBeforeCloseService.setDone).toHaveBeenCalledOnceWith(
+      'FINISH_DAY_BEFORE_CLOSE_EFFECT',
+    );
+  });
+
   it("counts tasks finished as won't do", async () => {
     showDialogSpy.and.returnValue(Promise.resolve('cancel'));
 

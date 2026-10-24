@@ -40,6 +40,7 @@ import { DataInitStateService } from '../../core/data-init/data-init-state.servi
 import { SyncLog } from '../../core/log';
 import { alertDialog } from '../../util/native-dialogs';
 import { vectorClockPruned$ } from '../../core/util/vector-clock';
+import { UiHelperService } from '../../features/ui-helper/ui-helper.service';
 
 @Injectable()
 export class SyncEffects {
@@ -53,6 +54,7 @@ export class SyncEffects {
   private _simpleCounterService = inject(SimpleCounterService);
   private _dataInitStateService = inject(DataInitStateService);
   private _execBeforeCloseService = inject(ExecBeforeCloseService);
+  private _uiHelperService = inject(UiHelperService);
   private readonly _initialPwaUpdateCheckService = inject(InitialPwaUpdateCheckService);
 
   syncBeforeQuit$ = createEffect(
@@ -78,7 +80,10 @@ export class SyncEffects {
               isEnabled ? this._execBeforeCloseService.onBeforeClose$ : EMPTY,
             ),
             filter((ids) => ids.includes(SYNC_BEFORE_CLOSE_ID)),
-            switchMap(() => {
+            // A repeated Quit while this runs must not start a second sync: it
+            // returns at once (one is in progress) and would mark the work done
+            // before the first sync finished.
+            exhaustMap(async () => {
               this._taskService.setCurrentId(null);
               this._simpleCounterService.flushAccumulatedTime();
               this._simpleCounterService.turnOffAll();
@@ -87,25 +92,23 @@ export class SyncEffects {
               // run before we start the sync.  A single macrotask tick is enough
               // because the op-log persistence effects schedule their writes in
               // the same tick; we just need to let them execute.
-              return new Promise<void>((resolve) => setTimeout(resolve, 0));
+              await new Promise<void>((resolve) => setTimeout(resolve, 0));
+              try {
+                await this._syncWrapperService.sync();
+              } catch (e: unknown) {
+                SyncLog.err(e);
+                this._snackService.open({
+                  msg: T.F.DROPBOX.S.SYNC_ERROR,
+                  type: 'ERROR',
+                });
+                // Quit from the tray can leave the window hidden; the alert
+                // blocks until dismissed, so it must be visible.
+                this._uiHelperService.focusApp();
+                // Inform user but always allow close - sync already failed
+                alertDialog('Sync failed. The app will close.');
+              }
+              this._execBeforeCloseService.setDone(SYNC_BEFORE_CLOSE_ID);
             }),
-            switchMap(() =>
-              this._syncWrapperService
-                .sync()
-                .then(() => {
-                  this._execBeforeCloseService.setDone(SYNC_BEFORE_CLOSE_ID);
-                })
-                .catch((e: unknown) => {
-                  SyncLog.err(e);
-                  this._snackService.open({
-                    msg: T.F.DROPBOX.S.SYNC_ERROR,
-                    type: 'ERROR',
-                  });
-                  // Inform user but always allow close - sync already failed
-                  alertDialog('Sync failed. The app will close.');
-                  this._execBeforeCloseService.setDone(SYNC_BEFORE_CLOSE_ID);
-                }),
-            ),
           ),
     { dispatch: false },
   );
