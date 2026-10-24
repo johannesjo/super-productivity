@@ -5,6 +5,9 @@ import { dateTimeFormatter } from './datetime-formatter';
 
 // Jan 5: single-digit day and month reveal whether a locale pads them
 const PADDING_PROBE_DATE = new Date(2000, 0, 5);
+// shortcut: formatters keep the time zone they were built in, so after an OS
+// time zone change dates use the old zone until reload — key the cache by
+// time zone if that matters
 const monthDayFormatters = new Map<DateTimeLocale, Intl.DateTimeFormat>();
 
 /**
@@ -25,8 +28,14 @@ const getMonthDayFormatter = (locale: DateTimeLocale): Intl.DateTimeFormat => {
   const numericParts = dateTimeFormatter(locale).formatToParts(PADDING_PROBE_DATE);
   const lengthOf = (parts: Intl.DateTimeFormatPart[], type: 'day' | 'month'): number =>
     parts.find((part) => part.type === type)?.value.length ?? 0;
+  // Year-first short dates (ja "2000/01/05", sv ISO "2000-01-05") pad for
+  // fixed-width sorting, not because month/day is written that way
+  const isYearFirst =
+    shortDateParts.find((part) => part.type !== 'literal')?.type === 'year';
   const widthOf = (type: 'day' | 'month'): '2-digit' | 'numeric' =>
-    lengthOf(shortDateParts, type) > lengthOf(numericParts, type) ? '2-digit' : 'numeric';
+    !isYearFirst && lengthOf(shortDateParts, type) > lengthOf(numericParts, type)
+      ? '2-digit'
+      : 'numeric';
 
   const formatter = dateTimeFormatter(locale, {
     month: widthOf('month'),

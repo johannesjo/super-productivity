@@ -133,7 +133,15 @@ describe('formatMonthDay', () => {
 
     it('should handle single digit months and days', () => {
       const result = formatMonthDay(singleDigitDate, DateTimeLocales.ja_jp);
-      expect(result).toBe('01/05');
+      // short date "2000/01/05" pads only because it is year-first
+      expect(result).toBe('1/5');
+    });
+  });
+
+  describe('Swedish locale (sv), the ISO 8601 option', () => {
+    it('should not take padding from the year-first ISO short date', () => {
+      const result = formatMonthDay(singleDigitDate, DateTimeLocales.sv);
+      expect(result).toBe('5/1');
     });
   });
 
