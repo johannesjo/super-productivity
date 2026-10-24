@@ -125,6 +125,15 @@ export const startApp = (): void => {
       log('Force dark mode for tray icon');
     }
 
+    if (val && val.includes('--user-data-dir=')) {
+      const customUserDir = val
+        .replace('--user-data-dir=', '')
+        .trim()
+        .replace(/[\/\\]+$/, ''); // Remove trailing slashes
+      log('Using custom directory for user data', customUserDir);
+      app.setPath('userData', customUserDir);
+    }
+
     if (val && val.includes('--custom-url=')) {
       customUrl = val.replace('--custom-url=', '').trim();
       log('Using custom url', customUrl);
@@ -135,7 +144,7 @@ export const startApp = (): void => {
     }
   });
 
-  // userData (--user-data-dir, snap common dir) was set by main.ts before the
+  // On snap, main.ts already moved userData to the common dir, before the
   // single-instance lock (#11049).
   log('Using user data directory', app.getPath('userData'));
 
