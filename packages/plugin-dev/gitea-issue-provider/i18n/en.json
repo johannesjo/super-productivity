@@ -9,7 +9,10 @@
     "SCOPE_ASSIGNED": "Assigned to me",
     "FILTER_LABELS": "Filter by labels (optional)",
     "EXCLUDE_LABELS": "Exclude labels (optional)",
-    "HOW_TO_GET_TOKEN": "How to get a token?"
+    "HOW_TO_GET_TOKEN": "How to get a token?",
+    "PROXY_USER": "Reverse proxy user (optional)",
+    "PROXY_PASSWORD": "Reverse proxy password",
+    "PROXY_HINT": "Only if a reverse proxy in front of your server requires HTTP Basic auth. The access token is then sent as a URL parameter instead of a header."
   },
   "DISPLAY": {
     "SUMMARY": "Summary",
