@@ -11,7 +11,7 @@ const TEST_PLUGIN_NAME = 'Test Upload Plugin';
 
 const openTab = async (
   page: Page,
-  name: 'Features' | 'Integrations' | 'Custom',
+  name: 'Features' | 'Integrations' | 'Community',
 ): Promise<void> => {
   const tab = page.locator('plugin-management').getByRole('tab', { name });
   await tab.click();
@@ -23,7 +23,7 @@ const pluginRow = (page: Page): Locator =>
 
 // Uploading asks for confirmation (risk warning) before the plugin is installed.
 const uploadTestPlugin = async (page: Page): Promise<void> => {
-  await openTab(page, 'Custom');
+  await openTab(page, 'Community');
   await page.locator(FILE_INPUT).setInputFiles(TEST_PLUGIN_ZIP);
   const confirmDialog = page.locator('dialog-confirm');
   await confirmDialog.locator('button[e2e="confirmBtn"]').click();
@@ -50,12 +50,12 @@ test.describe.serial('Plugin Upload', () => {
     await expect(row).toBeInViewport();
     await expect(row).not.toHaveClass(/isHighlighted/, { timeout: 5000 });
 
-    // Only the "Custom" tab lists uploaded plugins
+    // Only the "Community" tab lists uploaded plugins
     await openTab(page, 'Features');
     await expect(pluginRow(page)).toHaveCount(0);
     await openTab(page, 'Integrations');
     await expect(pluginRow(page)).toHaveCount(0);
-    await openTab(page, 'Custom');
+    await openTab(page, 'Community');
 
     // Uploaded plugins start disabled; toggle them on, off and on again
     const toggle = row.getByRole('switch');
@@ -85,20 +85,22 @@ test.describe.serial('Plugin Upload', () => {
     const uploadedRow = pluginRow(page);
     await expect(uploadedRow).toBeVisible({ timeout: 15000 });
 
-    const clearCacheBtn = page.locator('plugin-management button', {
-      hasText: 'Remove all uploaded plugins',
-    });
+    // The button sits in the menu of the Community tab's header row
+    const removeAll = async (): Promise<void> => {
+      await page.locator('plugin-management .community-menu-btn').click();
+      await page.getByRole('menuitem', { name: 'Remove all uploaded plugins' }).click();
+    };
     const confirmDialog = page.locator('dialog-confirm');
 
     // Cancel keeps the uploaded plugin
-    await clearCacheBtn.click();
+    await removeAll();
     await expect(confirmDialog).toContainText('Remove uploaded plugins (1)?');
     await confirmDialog.locator('button', { hasText: 'Cancel' }).click();
     await expect(confirmDialog).toBeHidden();
     await expect(uploadedRow).toBeVisible();
 
     // Confirm removes it
-    await clearCacheBtn.click();
+    await removeAll();
     await confirmDialog.locator('button[e2e="confirmBtn"]').click();
     await expect(confirmDialog).toBeHidden();
     await expect(uploadedRow).toHaveCount(0, { timeout: 15000 });

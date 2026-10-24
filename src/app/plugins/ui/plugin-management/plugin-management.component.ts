@@ -19,12 +19,6 @@ import { PluginMetaPersistenceService } from '../../plugin-meta-persistence.serv
 import { PluginCacheService } from '../../plugin-cache.service';
 import { PluginConfigService } from '../../plugin-config.service';
 import { MAX_PLUGIN_ZIP_SIZE } from '../../plugin.const';
-import {
-  MatCard,
-  MatCardContent,
-  MatCardHeader,
-  MatCardTitle,
-} from '@angular/material/card';
 import { MatSlideToggle, MatSlideToggleChange } from '@angular/material/slide-toggle';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
@@ -55,8 +49,8 @@ import { LayoutService } from '../../../core-ui/layout/layout.service';
 import COMMUNITY_PLUGINS_DATA from '../../../../assets/community-plugins.json';
 import { PluginApiAccess, PluginSecurityService } from '../../plugin-security';
 import {
+  BUNDLED_PLUGIN_TABS,
   DEV_ONLY_BUNDLED_PLUGIN_IDS,
-  INTEGRATION_BUNDLED_PLUGIN_IDS,
 } from '../../bundled-plugins.const';
 import { environment } from '../../../../environments/environment';
 import { Capacitor } from '@capacitor/core';
@@ -124,7 +118,7 @@ const createCollator = (locale: string): Intl.Collator => {
 };
 
 /** Tab indexes of the plugins page; "Features" opens by default. */
-export const PLUGIN_TAB_INDEX = { FEATURES: 0, INTEGRATIONS: 1, CUSTOM: 2 } as const;
+export const PLUGIN_TAB_INDEX = { FEATURES: 0, INTEGRATIONS: 1, COMMUNITY: 2 } as const;
 
 /** How long a just-installed plugin's row stays highlighted. */
 const INSTALLED_PLUGIN_HIGHLIGHT_MS = 3000;
@@ -136,10 +130,6 @@ const INSTALLED_PLUGIN_HIGHLIGHT_MS = 3000;
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     NgTemplateOutlet,
-    MatCard,
-    MatCardHeader,
-    MatCardTitle,
-    MatCardContent,
     MatSlideToggle,
     MatIcon,
     MatButton,
@@ -291,12 +281,13 @@ export class PluginManagementComponent {
     this._builtInPlugins().filter((p) => !this._isIntegrationPlugin(p)),
   );
 
-  // The "Integrations" tab: built-in issue and calendar providers, importers and sync.md.
+  // The "Integrations" tab: built-in issue and calendar providers and the plugins that
+  // BUNDLED_PLUGIN_TABS places there.
   readonly integrationPlugins = computed(() =>
     this._builtInPlugins().filter((p) => this._isIntegrationPlugin(p)),
   );
 
-  // The "Custom" tab lists these between the install card and the community catalog.
+  // The "Community" tab lists these between its install row and the community catalog.
   readonly uploadedPlugins = computed(() =>
     this._listedPluginsByName().filter((p) => this._isUploadedState(p)),
   );
@@ -410,7 +401,7 @@ export class PluginManagementComponent {
   private _isIntegrationPlugin(plugin: PluginInstance): boolean {
     return (
       this.isIssueProviderPlugin(plugin) ||
-      INTEGRATION_BUNDLED_PLUGIN_IDS.has(plugin.manifest.id)
+      BUNDLED_PLUGIN_TABS.get(plugin.manifest.id) === 'integrations'
     );
   }
 
@@ -602,11 +593,11 @@ export class PluginManagementComponent {
   }
 
   /**
-   * Shows the installed plugin's row: in the "Custom" tab, scrolled into view and
+   * Shows the installed plugin's row: in the "Community" tab, scrolled into view and
    * highlighted for a moment, so an upload never looks like nothing happened (#10477).
    */
   private _revealInstalledPlugin(pluginId: string): void {
-    this.selectedTabIndex.set(PLUGIN_TAB_INDEX.CUSTOM);
+    this.selectedTabIndex.set(PLUGIN_TAB_INDEX.COMMUNITY);
     this.highlightedPluginId.set(pluginId);
     window.clearTimeout(this._highlightTimeout);
     this._highlightTimeout = window.setTimeout(() => {
@@ -817,8 +808,8 @@ export class PluginManagementComponent {
       }
     } catch (error) {
       PluginLog.err('Failed to open config dialog:', error);
-      // A snack, not `uploadError`: that one renders in the "Install Plugin" card,
-      // far from the plugin whose settings button was clicked. The thrown messages
+      // A snack, not `uploadError`: that one renders under the install row of the
+      // "Community" tab, far from the plugin whose settings button was clicked. The thrown messages
       // are untranslated developer text, so they stay in the log above.
       this._snackService.open({ type: 'ERROR', msg: T.PLUGINS.FAILED_TO_LOAD_CONFIG });
     }

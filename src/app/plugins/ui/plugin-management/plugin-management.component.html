@@ -16,50 +16,54 @@
     ></ng-container>
   </mat-tab>
 
-  <mat-tab [label]="T.PLUGINS.TAB_CUSTOM | translate">
-    <mat-card class="install-card">
-      <mat-card-header>
-        <mat-card-title>{{ T.PLUGINS.INSTALL_PLUGIN | translate }}</mat-card-title>
-      </mat-card-header>
-      <mat-card-content>
-        <p>{{ T.PLUGINS.UPLOAD_PLUGIN_INSTRUCTION | translate }}</p>
+  <mat-tab [label]="T.PLUGINS.TAB_COMMUNITY | translate">
+    <!-- The warning takes the free width; the buttons wrap below it when it runs out. -->
+    <div class="community-header">
+      <p class="community-warning">{{ T.PLUGINS.COMMUNITY_WARNING | translate }}</p>
+      <div class="community-header-actions">
         <input
           #fileInput
           type="file"
           accept=".zip"
           (change)="onFileSelected($event)"
-          style="display: none"
+          hidden
         />
-        <div class="install-actions">
+        <button
+          mat-stroked-button
+          (click)="fileInput.click()"
+          [disabled]="isUploading()"
+        >
+          <mat-icon>upload</mat-icon>
+          {{
+            isUploading()
+              ? (T.PLUGINS.INSTALLING | translate)
+              : (T.PLUGINS.INSTALL_FROM_FILE | translate)
+          }}
+        </button>
+        <button
+          mat-icon-button
+          class="community-menu-btn"
+          [matMenuTriggerFor]="communityMenu"
+          [matTooltip]="T.G.MORE_ACTIONS | translate"
+          [attr.aria-label]="T.G.MORE_ACTIONS | translate"
+        >
+          <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #communityMenu="matMenu">
           <button
-            mat-raised-button
-            color="primary"
-            (click)="fileInput.click()"
-            [disabled]="isUploading()"
-          >
-            <mat-icon>upload</mat-icon>
-            {{
-              isUploading()
-                ? (T.PLUGINS.INSTALLING | translate)
-                : (T.PLUGINS.CHOOSE_PLUGIN_FILE | translate)
-            }}
-          </button>
-          <button
-            mat-button
+            mat-menu-item
             (click)="clearPluginCache()"
             [disabled]="isUploading()"
           >
             <mat-icon>delete_sweep</mat-icon>
-            {{ T.PLUGINS.REMOVE_ALL_UPLOADED_PLUGINS | translate }}
+            <span>{{ T.PLUGINS.REMOVE_ALL_UPLOADED_PLUGINS | translate }}</span>
           </button>
-        </div>
-        @if (uploadError()) {
-          <mat-error style="margin-top: 8px; display: block">
-            {{ uploadError() }}
-          </mat-error>
-        }
-      </mat-card-content>
-    </mat-card>
+        </mat-menu>
+      </div>
+    </div>
+    @if (uploadError()) {
+      <mat-error class="upload-error">{{ uploadError() }}</mat-error>
+    }
 
     @if (uploadedPlugins().length > 0) {
       <h3 class="group-title">{{ T.PLUGINS.GROUP_UPLOADED | translate }}</h3>
@@ -68,100 +72,87 @@
       ></ng-container>
     }
 
-    <mat-card class="community-plugins-card">
-      <mat-card-header>
-        <!-- A heading at the group level, so its items (h4) nest under it. -->
-        <mat-card-title
-          role="heading"
-          aria-level="3"
-          >{{ T.PLUGINS.COMMUNITY_PLUGINS | translate }}</mat-card-title
-        >
-      </mat-card-header>
-      <mat-card-content>
-        <p class="community-warning">{{ T.PLUGINS.COMMUNITY_WARNING | translate }}</p>
-
-        <div class="community-plugins-list">
-          @for (row of communityPluginRows(); track row.plugin.name) {
-            @let plugin = row.plugin;
-            <div class="community-plugin-item">
-              <h4 class="plugin-name">
-                <a
-                  [href]="plugin.url"
-                  target="_blank"
-                  >{{ plugin.name }}</a
-                >
-              </h4>
-              <p class="plugin-author">
-                @if (plugin.authorUrl) {
-                  <a
-                    [href]="plugin.authorUrl"
-                    target="_blank"
-                    >{{ T.PLUGINS.AUTHORED_BY | translate: { author: plugin.author } }}</a
-                  >
-                } @else {
-                  <span>{{
-                    T.PLUGINS.AUTHORED_BY | translate: { author: plugin.author }
-                  }}</span>
-                }
-              </p>
-              <p class="plugin-desc">{{ plugin.shortDescription }}</p>
-              @if (row.status === 'installed') {
-                <p class="community-plugin-action community-plugin-status">
-                  <mat-icon>check</mat-icon>
-                  {{ T.PLUGINS.COMMUNITY_INSTALLED | translate }}
-                </p>
-              } @else if (plugin.release && !isInAppInstall) {
-                <div class="community-plugin-action">
-                  <a
-                    mat-stroked-button
-                    color="primary"
-                    [href]="plugin.release.downloadUrl"
-                    target="_blank"
-                  >
-                    <mat-icon>download</mat-icon>
-                    {{
-                      T.PLUGINS.COMMUNITY_DOWNLOAD
-                        | translate: { version: plugin.release.version }
-                    }}
-                  </a>
-                </div>
-              } @else if (plugin.release) {
-                <div class="community-plugin-action">
-                  <button
-                    mat-stroked-button
-                    color="primary"
-                    (click)="installCommunityPlugin(plugin)"
-                    [disabled]="isUploading()"
-                  >
-                    <mat-icon>{{
-                      row.status === 'updateAvailable' ? 'update' : 'download'
-                    }}</mat-icon>
-                    {{
-                      (row.status === 'updateAvailable'
-                        ? T.PLUGINS.COMMUNITY_UPDATE
-                        : T.PLUGINS.COMMUNITY_INSTALL
-                      ) | translate: { version: plugin.release.version }
-                    }}
-                  </button>
-                </div>
-              }
+    <h3 class="group-title">{{ T.PLUGINS.COMMUNITY_PLUGINS | translate }}</h3>
+    <div class="community-plugins-list">
+      @for (row of communityPluginRows(); track row.plugin.name) {
+        @let plugin = row.plugin;
+        <div class="community-plugin-item">
+          <h4 class="plugin-name">
+            <a
+              [href]="plugin.url"
+              target="_blank"
+              >{{ plugin.name }}</a
+            >
+          </h4>
+          <p class="plugin-author">
+            @if (plugin.authorUrl) {
+              <a
+                [href]="plugin.authorUrl"
+                target="_blank"
+                >{{ T.PLUGINS.AUTHORED_BY | translate: { author: plugin.author } }}</a
+              >
+            } @else {
+              <span>{{
+                T.PLUGINS.AUTHORED_BY | translate: { author: plugin.author }
+              }}</span>
+            }
+          </p>
+          <p class="plugin-desc">{{ plugin.shortDescription }}</p>
+          @if (row.status === 'installed') {
+            <p class="community-plugin-action community-plugin-status">
+              <mat-icon>check</mat-icon>
+              {{ T.PLUGINS.COMMUNITY_INSTALLED | translate }}
+            </p>
+          } @else if (plugin.release && !isInAppInstall) {
+            <div class="community-plugin-action">
+              <a
+                mat-stroked-button
+                color="primary"
+                [href]="plugin.release.downloadUrl"
+                target="_blank"
+              >
+                <mat-icon>download</mat-icon>
+                {{
+                  T.PLUGINS.COMMUNITY_DOWNLOAD
+                    | translate: { version: plugin.release.version }
+                }}
+              </a>
+            </div>
+          } @else if (plugin.release) {
+            <div class="community-plugin-action">
+              <button
+                mat-stroked-button
+                color="primary"
+                (click)="installCommunityPlugin(plugin)"
+                [disabled]="isUploading()"
+              >
+                <mat-icon>{{
+                  row.status === 'updateAvailable' ? 'update' : 'download'
+                }}</mat-icon>
+                {{
+                  (row.status === 'updateAvailable'
+                    ? T.PLUGINS.COMMUNITY_UPDATE
+                    : T.PLUGINS.COMMUNITY_INSTALL
+                  ) | translate: { version: plugin.release.version }
+                }}
+              </button>
             </div>
           }
         </div>
+      }
+    </div>
 
-        <div style="margin-top: 16px; text-align: center">
-          <a
-            href="https://github.com/super-productivity/super-productivity/blob/master/docs/plugin-development.md#get-listed-in-the-app"
-            target="_blank"
-            mat-button
-            color="primary"
-          >
-            <mat-icon>add</mat-icon>
-            {{ T.PLUGINS.COMMUNITY_GET_LISTED | translate }}
-          </a>
-        </div>
-      </mat-card-content>
-    </mat-card>
+    <div class="community-get-listed">
+      <a
+        href="https://github.com/super-productivity/super-productivity/blob/master/docs/plugin-development.md#get-listed-in-the-app"
+        target="_blank"
+        mat-button
+        color="primary"
+      >
+        <mat-icon>add</mat-icon>
+        {{ T.PLUGINS.COMMUNITY_GET_LISTED | translate }}
+      </a>
+    </div>
   </mat-tab>
 </mat-tab-group>
 

@@ -291,7 +291,7 @@ describe('PluginManagementComponent', () => {
     ).toEqual(['http']);
   });
 
-  describe('community plugins card', () => {
+  describe('Community tab', () => {
     const normalize = (text: string | null | undefined): string =>
       (text ?? '').replace(/\s+/g, ' ').trim();
     const plugin = {
@@ -315,6 +315,9 @@ describe('PluginManagementComponent', () => {
           COMMUNITY_INSTALL: 'v{{version}} yükle',
           COMMUNITY_PLUGINS: 'Topluluk eklentileri',
           COMMUNITY_WARNING: 'Topluluk eklentileri incelenmez.',
+          GROUP_UPLOADED: 'Yüklenen eklentiler',
+          INSTALL_FROM_FILE: 'Dosyadan yükle…',
+          REMOVE_ALL_UPLOADED_PLUGINS: 'Yüklenen tüm eklentileri kaldır',
         },
       });
       translateService.use('tr');
@@ -322,20 +325,21 @@ describe('PluginManagementComponent', () => {
       // may lack the optional authorUrl or release.
       (component as { isInAppInstall: boolean }).isInAppInstall = true;
       component.communityPlugins.set([plugin]);
-      component.selectedTabIndex.set(PLUGIN_TAB_INDEX.CUSTOM);
+      component.selectedTabIndex.set(PLUGIN_TAB_INDEX.COMMUNITY);
       fixture.detectChanges();
     });
 
-    const card = (): HTMLElement =>
-      fixture.nativeElement.querySelector('.community-plugins-card');
+    const card = (): HTMLElement => fixture.nativeElement;
+    const headings = (): string[] =>
+      Array.from(card().querySelectorAll('h3'), (h) => normalize(h.textContent));
 
-    it('translates the title, warning and add-your-plugin link', () => {
-      expect(normalize(card().querySelector('mat-card-title')?.textContent)).toBe(
-        'Topluluk eklentileri',
-      );
-      expect(normalize(card().querySelector('.community-warning')?.textContent)).toBe(
-        'Topluluk eklentileri incelenmez.',
-      );
+    it('translates the warning, the catalog heading and add-your-plugin link', () => {
+      expect(headings()).toContain('Topluluk eklentileri');
+      expect(
+        normalize(
+          card().querySelector('.community-header .community-warning')?.textContent,
+        ),
+      ).toBe('Topluluk eklentileri incelenmez.');
       const addYoursLink = card().querySelector<HTMLAnchorElement>(
         'a[href$="#get-listed-in-the-app"]',
       );
@@ -375,6 +379,52 @@ describe('PluginManagementComponent', () => {
       fixture.detectChanges();
 
       expect(card().querySelector('.community-plugin-item button')).toBeNull();
+    });
+
+    it('opens with one header row: the warning, an install button and a menu, no cards', () => {
+      const header = card().querySelector('.community-header');
+      const installButton = header?.querySelector('.community-header-actions button');
+
+      expect(normalize(installButton?.textContent)).toBe('upload Dosyadan yükle…');
+      expect(header?.querySelector('.community-menu-btn')).not.toBeNull();
+      expect(card().querySelector('mat-card')).toBeNull();
+    });
+
+    it('offers "Remove all uploaded plugins" in the header menu', async () => {
+      const clearSpy = spyOn(component, 'clearPluginCache').and.resolveTo();
+      card().querySelector<HTMLButtonElement>('.community-menu-btn')?.click();
+      fixture.detectChanges();
+      await fixture.whenStable();
+      const item = document.querySelector<HTMLButtonElement>(
+        '.cdk-overlay-container .mat-mdc-menu-item',
+      );
+
+      expect(normalize(item?.textContent)).toContain('Yüklenen tüm eklentileri kaldır');
+      item?.click();
+      expect(clearSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('lists uploaded plugins before the catalog', () => {
+      const pluginStates = TestBed.inject(PluginService).pluginStates as WritableSignal<
+        Map<string, PluginState>
+      >;
+      pluginStates.set(
+        new Map([
+          [
+            'mine',
+            {
+              manifest: { ...baseManifest, id: 'mine', name: 'Mine' },
+              status: 'not-loaded',
+              path: 'uploaded://mine',
+              type: 'uploaded',
+              isEnabled: false,
+            },
+          ],
+        ]),
+      );
+      fixture.detectChanges();
+
+      expect(headings()).toEqual(['Yüklenen eklentiler', 'Topluluk eklentileri']);
     });
   });
 
@@ -567,7 +617,7 @@ describe('PluginManagementComponent', () => {
 
       expect(rowNames()).toEqual(['GitHub']);
 
-      component.selectedTabIndex.set(PLUGIN_TAB_INDEX.CUSTOM);
+      component.selectedTabIndex.set(PLUGIN_TAB_INDEX.COMMUNITY);
       fixture.detectChanges();
       await fixture.whenStable();
 
@@ -646,14 +696,14 @@ describe('PluginManagementComponent', () => {
         await fixture.whenStable();
       };
 
-      it('shows the plugin in the "Custom" tab, scrolled into view and highlighted', async () => {
+      it('shows the plugin in the "Community" tab, scrolled into view and highlighted', async () => {
         setStates(state('Bundled', 'built-in'));
         fixture.detectChanges();
         const scrollSpy = spyOn(HTMLElement.prototype, 'scrollIntoView');
 
         await install(state('New Plugin', 'uploaded'));
 
-        expect(component.selectedTabIndex()).toBe(PLUGIN_TAB_INDEX.CUSTOM);
+        expect(component.selectedTabIndex()).toBe(PLUGIN_TAB_INDEX.COMMUNITY);
         const highlighted = fixture.nativeElement.querySelectorAll('.isHighlighted');
         expect(highlighted.length).toBe(1);
         expect(highlighted[0].dataset.pluginId).toBe('new-plugin');
@@ -772,7 +822,7 @@ describe('PluginManagementComponent', () => {
     it('offers the update in the installed plugin row', async () => {
       (component as { isInAppInstall: boolean }).isInAppInstall = true;
       pluginStates.set(new Map([['listed', uploaded('listed', '1.1.0')]]));
-      component.selectedTabIndex.set(PLUGIN_TAB_INDEX.CUSTOM);
+      component.selectedTabIndex.set(PLUGIN_TAB_INDEX.COMMUNITY);
       fixture.detectChanges();
       await fixture.whenStable();
       const installSpy = spyOn(component, 'installCommunityPlugin').and.resolveTo();
@@ -822,7 +872,7 @@ describe('PluginManagementComponent', () => {
       expect(component.isUploading()).toBe(false);
     });
 
-    it('shows the installed plugin in the "Custom" tab, highlighted, like a ZIP upload', async () => {
+    it('shows the installed plugin in the "Community" tab, highlighted, like a ZIP upload', async () => {
       stubConfirmDialog(true);
       loadPluginFromZipSpy.and.returnValue(
         Promise.resolve({ manifest: { id: 'listed', name: 'Listed' } }),
@@ -830,7 +880,7 @@ describe('PluginManagementComponent', () => {
 
       await component.installCommunityPlugin(listed);
 
-      expect(component.selectedTabIndex()).toBe(PLUGIN_TAB_INDEX.CUSTOM);
+      expect(component.selectedTabIndex()).toBe(PLUGIN_TAB_INDEX.COMMUNITY);
       expect(component.highlightedPluginId()).toBe('listed');
     });
 
@@ -1191,7 +1241,7 @@ describe('PluginManagementComponent', () => {
       { label: 'an Error', thrown: new Error('No config schema found') },
       { label: 'a non-Error value', thrown: 'boom' },
     ].forEach(({ label, thrown }) => {
-      it(`shows a translated error snack, not the Install Plugin card, for ${label}`, async () => {
+      it(`shows a translated error snack, not the install row error, for ${label}`, async () => {
         loadSchemaSpy.and.rejectWith(thrown);
 
         await component.openConfigDialog(plugin);

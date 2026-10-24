@@ -1,6 +1,6 @@
 @use '../../../../styles/_globals.scss' as *;
 
-// The bottom is one step short: the last row or card adds the other `--s`.
+// The bottom is one step short: the last row or the "get listed" link adds the other `--s`.
 :host {
   display: block;
   padding: var(--s2) var(--s2) var(--s);
@@ -16,14 +16,6 @@ th {
 
 td {
   padding-right: 0;
-}
-
-mat-card {
-  margin: var(--s2) 0;
-
-  &:last-child {
-    margin-bottom: var(--s);
-  }
 }
 
 .group-title {
@@ -47,10 +39,23 @@ mat-card {
   }
 }
 
-.install-actions {
+.community-header {
   display: flex;
   flex-wrap: wrap;
-  gap: var(--s);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s) var(--s2);
+}
+
+.community-header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--s-half);
+}
+
+.community-get-listed {
+  margin: var(--s2) 0 var(--s);
+  text-align: center;
 }
 
 .plugin-list {
@@ -272,6 +277,8 @@ mat-error {
 }
 
 .community-warning {
+  flex: 1 1 240px;
+  margin: 0;
   color: var(--text-color-muted);
 }
 
@@ -279,7 +286,7 @@ mat-error {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: var(--s2);
-  margin-top: var(--s2);
+  margin-top: var(--s);
 }
 
 .community-plugin-item {
