@@ -1,5 +1,13 @@
 [
   {
+    "name": "Markdown Notes",
+    "shortDescription": "Read-only viewer for Markdown and Obsidian notes from a local folder, grouped by directory and rendered in a side panel.",
+    "url": "https://github.com/Zoriot/sp-markdown-notes",
+    "author": "Zoriot",
+    "authorUrl": "https://github.com/Zoriot",
+    "id": "markdown-notes"
+  },
+  {
     "name": "Date Range Reporter Plugin",
     "shortDescription": "Generates reports of completed tasks and tasks with work logs within a specified date range.",
     "url": "https://github.com/dougcooper/sp-reporter",
