@@ -28,6 +28,7 @@ import {
   MAX_TIME_SPENT_PER_DAY_MS,
   parseTimeSpentBody,
 } from './local-rest-api-task-time';
+import { mapLegacyPlannedAt } from './local-rest-api-legacy-fields';
 
 import { TaskSharedActions } from '../../root-store/meta/task-shared.actions';
 // eslint-disable-next-line @typescript-eslint/no-restricted-imports -- grandfathered layer-boundary debt
@@ -85,14 +86,16 @@ const REJECTED_TASK_FIELDS = ['parentId', 'subTaskIds'] as const;
  */
 const SUBTASK_INHERITED_FIELDS = ['projectId', 'tagIds'] as const;
 
-const pickAllowedFields = (body: Record<string, unknown>): Partial<Task> => {
+const pickAllowedFields = (
+  body: Record<string, unknown>,
+): Partial<WritableTaskFields> => {
   const result: Record<string, unknown> = {};
   for (const key of Object.keys(body)) {
     if (ALLOWED_TASK_FIELDS.has(key)) {
       result[key] = body[key];
     }
   }
-  return result as Partial<Task>;
+  return result as Partial<WritableTaskFields>;
 };
 
 /**
@@ -113,7 +116,7 @@ interface WritableTaskFields {
   tagIds?: string[];
   dueDay?: string | null;
   dueWithTime?: number | null;
-  plannedAt?: number;
+  plannedAt?: number | null;
   deadlineDay?: string | null;
   deadlineWithTime?: number | null;
   deadlineRemindAt?: number | null;
@@ -128,7 +131,7 @@ type FieldTypeError = { path: string; expected: string };
  * reject bad input with a clean 400 before anything is dispatched.
  */
 const validateWritableFields = (
-  fields: Partial<Task>,
+  fields: Partial<WritableTaskFields>,
 ): { ok: true } | { ok: false; errors: FieldTypeError[] } => {
   const result = typia.validate<WritableTaskFields>(fields);
   if (result.success) {
@@ -699,9 +702,9 @@ export class LocalRestApiHandlerService {
     const isIgnoreShortSyntax = shortSyntaxFlag.value;
 
     const title = body.title.trim();
-    const additionalFields = pickAllowedFields(body);
+    const writableFields = pickAllowedFields(body);
 
-    const validation = validateWritableFields(additionalFields);
+    const validation = validateWritableFields(writableFields);
     if (!validation.ok) {
       return createErrorResponse(
         requestId,
@@ -712,7 +715,7 @@ export class LocalRestApiHandlerService {
       );
     }
 
-    const deadlineValidationError = validateDeadlineFields(additionalFields);
+    const deadlineValidationError = validateDeadlineFields(writableFields);
     if (deadlineValidationError) {
       return createErrorResponse(
         requestId,
@@ -723,9 +726,9 @@ export class LocalRestApiHandlerService {
     }
 
     const deadlineFields = Object.fromEntries(
-      DEADLINE_FIELDS.filter((field) => hasOwn(additionalFields, field)).map((field) => [
+      DEADLINE_FIELDS.filter((field) => hasOwn(writableFields, field)).map((field) => [
         field,
-        additionalFields[field],
+        writableFields[field],
       ]),
     ) as Partial<WritableTaskFields>;
     const deadlineResolution = resolveDeadlineChange(deadlineFields);
@@ -738,8 +741,9 @@ export class LocalRestApiHandlerService {
       );
     }
     for (const field of DEADLINE_FIELDS) {
-      delete additionalFields[field];
+      delete writableFields[field];
     }
+    const additionalFields = mapLegacyPlannedAt(writableFields);
 
     if ('parentId' in body) {
       if (typeof body.parentId !== 'string' || !body.parentId) {
@@ -871,8 +875,8 @@ export class LocalRestApiHandlerService {
           );
         }
 
-        const changes = pickAllowedFields(body);
-        const validation = validateWritableFields(changes);
+        const writableFields = pickAllowedFields(body);
+        const validation = validateWritableFields(writableFields);
         if (!validation.ok) {
           return createErrorResponse(
             requestId,
@@ -883,7 +887,7 @@ export class LocalRestApiHandlerService {
           );
         }
 
-        const deadlineValidationError = validateDeadlineFields(changes);
+        const deadlineValidationError = validateDeadlineFields(writableFields);
         if (deadlineValidationError) {
           return createErrorResponse(
             requestId,
@@ -900,15 +904,14 @@ export class LocalRestApiHandlerService {
         // An echoed `isDone: true` (GET→PATCH round trip) would only stamp a
         // new `doneOn`: it moves the completion date and turns a won't-do task
         // into a completed one.
-        if (changes.isDone === true && task.isDone) {
-          delete (changes as Record<string, unknown>).isDone;
+        if (writableFields.isDone === true && task.isDone) {
+          delete writableFields.isDone;
         }
 
         const deadlineFields = Object.fromEntries(
-          DEADLINE_FIELDS.filter((field) => hasOwn(changes, field)).map((field) => [
-            field,
-            changes[field],
-          ]),
+          DEADLINE_FIELDS.filter((field) => hasOwn(writableFields, field)).map(
+            (field) => [field, writableFields[field]],
+          ),
         ) as Partial<WritableTaskFields>;
         const deadlineResolution = resolveDeadlineChange(deadlineFields, task);
         if (!deadlineResolution.ok) {
@@ -920,8 +923,9 @@ export class LocalRestApiHandlerService {
           );
         }
         for (const field of DEADLINE_FIELDS) {
-          delete changes[field];
+          delete writableFields[field];
         }
+        const changes = mapLegacyPlannedAt(writableFields);
 
         let isMoveOnly = false;
         if (hasOwn(changes, 'projectId')) {
