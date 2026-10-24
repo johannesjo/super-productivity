@@ -672,6 +672,9 @@ export class TaskComponent implements OnDestroy, AfterViewInit {
   }
 
   ngOnDestroy(): void {
+    if (this._taskFocusService.lastFocusedTaskComponent() === this) {
+      this._taskFocusService.lastFocusedTaskComponent.set(null);
+    }
     // Possibly no longer rendered (checked after the DOM settles, since rows
     // re-mount when they change lists and the detail panel renders copies).
     this._multiSelect.removeWhenUnrendered(
