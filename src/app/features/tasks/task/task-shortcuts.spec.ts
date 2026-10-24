@@ -257,6 +257,31 @@ describe('TaskComponent shortcut handling', () => {
     fixture.componentRef.setInput('isBacklog', false);
   });
 
+  describe('focused component lifetime', () => {
+    it('releases a focused component when its row is destroyed', () => {
+      const focus = TestBed.inject(TaskFocusService);
+      focus.lastFocusedTaskComponent.set(component);
+
+      fixture.destroy();
+
+      expect(focus.lastFocusedTaskComponent()).toBeNull();
+    });
+
+    it('keeps a newer focused copy of the same task when the old row is destroyed', () => {
+      const newer = TestBed.createComponent(TaskComponent);
+      newer.componentRef.setInput('task', createSubTask(''));
+      newer.componentRef.setInput('isInSubTaskList', true);
+      newer.componentRef.setInput('isBacklog', false);
+      const focus = TestBed.inject(TaskFocusService);
+      focus.lastFocusedTaskComponent.set(newer.componentInstance);
+
+      fixture.destroy();
+
+      expect(focus.lastFocusedTaskComponent()).toBe(newer.componentInstance);
+      newer.destroy();
+    });
+  });
+
   describe('scheduled-date badge colors', () => {
     beforeEach(() => {
       const dateService = TestBed.inject(DateService) as jasmine.SpyObj<DateService>;
