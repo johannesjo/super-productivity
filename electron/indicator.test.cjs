@@ -23,6 +23,7 @@ let templateImages = [];
 let beforeQuitHandler = () => {};
 let mockIsTrayShowCurrentTask = false;
 let mockIsTrayShowCurrentCountdown = false;
+let taskMenuMessages = [];
 
 const resetModule = () => {
   delete require.cache[indicatorModulePath];
@@ -150,7 +151,9 @@ const installMocks = () => {
 
     if (request === './main-window') {
       return {
-        getWin: () => undefined,
+        getWin: () => ({
+          webContents: { send: (...args) => taskMenuMessages.push(args) },
+        }),
       };
     }
 
@@ -183,6 +186,7 @@ test.beforeEach(() => {
   beforeQuitHandler = () => {};
   mockIsTrayShowCurrentTask = false;
   mockIsTrayShowCurrentCountdown = false;
+  taskMenuMessages = [];
 
   Object.defineProperty(process, 'platform', {
     configurable: true,
@@ -509,7 +513,8 @@ test('tray icon follows SET_PROGRESS_BAR while the focus overlay is shown', () =
   );
 });
 
-const initIndicatorOnLinux = () => {
+const initIndicatorForMenu = (platform = 'linux') => {
+  Object.defineProperty(process, 'platform', { configurable: true, value: platform });
   const { initIndicator } = loadIndicatorModule();
   initIndicator({
     showApp: () => {},
@@ -534,7 +539,7 @@ const menuTaskLabels = (menu) =>
 // The menu is rebuilt each minute while tracking and every item costs native
 // work, so a long Today list must not end up in it whole.
 test('tray menu lists the first Today tasks and keeps the running one', () => {
-  initIndicatorOnLinux();
+  initIndicatorForMenu();
   const todayTasks = makeTodayTasks(50);
 
   ipcHandlers.get('TODAY_TASKS_UPDATED')({}, todayTasks);
@@ -551,10 +556,13 @@ test('tray menu lists the first Today tasks and keeps the running one', () => {
   assert.equal(radios.length, 21);
   assert.equal(radios.at(-1).label, 'Task 42');
   assert.equal(radios.at(-1).checked, true);
+  radios[7].click();
+  radios.at(-1).click();
+  assert.deepEqual(taskMenuMessages, [['SWITCH_TASK', 'T7'], ['TASK_TOGGLE_START']]);
 });
 
-test('tray menu is rebuilt when a listed title changes, not when the list is resent', () => {
-  initIndicatorOnLinux();
+test('tray menu rebuilds on a received title change, not an identical list', () => {
+  initIndicatorForMenu();
   const todayTasks = makeTodayTasks(3);
 
   ipcHandlers.get('TODAY_TASKS_UPDATED')({}, todayTasks);
@@ -579,3 +587,102 @@ test('tray menu is rebuilt when a listed title changes, not when the list is res
     false,
   );
 });
+
+test('tray cap follows list order, removals, and the running-task boundary', () => {
+  initIndicatorForMenu();
+  const todayTasks = makeTodayTasks(21);
+  const updateList = ipcHandlers.get('TODAY_TASKS_UPDATED');
+  const updateCurrent = ipcHandlers.get('CURRENT_TASK_UPDATED');
+  const menu = () => traySetContextMenuCalls.at(-1);
+  const radios = () => menu().template.filter((item) => item.type === 'radio');
+  const hasEllipsis = () => menu().template.some((item) => item.label === '…');
+
+  updateList({}, todayTasks.slice(0, 20));
+  assert.equal(radios().length, 20);
+  assert.equal(hasEllipsis(), false);
+  updateList({}, todayTasks);
+  assert.equal(radios().length, 20);
+  assert.equal(hasEllipsis(), true);
+  updateCurrent({}, todayTasks[19], false, 0, false, 0);
+  assert.equal(radios().length, 20);
+  assert.equal(radios()[19].checked, true);
+  updateCurrent({}, todayTasks[20], false, 0, false, 0);
+  assert.equal(radios().length, 21);
+  assert.equal(hasEllipsis(), false); // The appended task leaves none hidden.
+
+  updateCurrent({}, null, false, 0, false, 0);
+  assert.equal(radios().length, 20);
+  assert.ok(radios().every((item) => !item.checked));
+  assert.equal(hasEllipsis(), true);
+
+  // The renderer omits completed tasks; the receiver uses the supplied order.
+  const remaining = todayTasks.slice(1).reverse();
+  updateList({}, remaining);
+  assert.deepEqual(
+    menuTaskLabels(menu()),
+    remaining.map((task) => task.title),
+  );
+  assert.equal(hasEllipsis(), false);
+  radios()[0].click();
+  assert.deepEqual(taskMenuMessages, [['SWITCH_TASK', 'T20']]);
+  updateList({}, []);
+  assert.equal(radios().length, 0);
+  assert.equal(hasEllipsis(), false);
+  assert.deepEqual(
+    menu().template.map((item) => item.label),
+    ['Show App', 'Quit'],
+  );
+});
+
+for (const platform of ['linux', 'win32', 'darwin']) {
+  test(`${platform}: tray menu rebuilds at minute changes and keeps the current title`, () => {
+    mockIsTrayShowCurrentTask = true;
+    initIndicatorForMenu(platform);
+    const todayTasks = makeTodayTasks(50);
+    const updateCurrent = ipcHandlers.get('CURRENT_TASK_UPDATED');
+    const updateProgress = ipcHandlers.get('SET_PROGRESS_BAR');
+    ipcHandlers.get('TODAY_TASKS_UPDATED')({}, todayTasks);
+    const tick = (seconds) => {
+      updateCurrent(
+        {},
+        { ...todayTasks[42], timeSpent: seconds * 1000 },
+        false,
+        0,
+        false,
+        0,
+      );
+      updateProgress({}, { progress: seconds / 120 });
+    };
+    tick(1);
+    const rebuilds = traySetContextMenuCalls.length;
+    for (let seconds = 2; seconds < 60; seconds++) tick(seconds);
+    assert.equal(traySetContextMenuCalls.length, rebuilds);
+    tick(60);
+    assert.equal(traySetContextMenuCalls.length, rebuilds + 1);
+    const menu = traySetContextMenuCalls.at(-1);
+    assert.equal(menu.template[0].label, '1m');
+    assert.equal(menuTaskLabels(menu).length, 21);
+    const ellipsisIndex = menu.template.findIndex((item) => item.label === '…');
+    assert.equal(menu.template[ellipsisIndex].enabled, false);
+    assert.equal(menu.template[ellipsisIndex + 1].type, 'separator');
+    assert.equal(traySetTitleCalls.at(-1), 'Task 42');
+    if (platform === 'darwin') assert.deepEqual(traySetToolTipCalls, []);
+
+    // A current-task rename can change the macOS title without rebuilding the menu.
+    updateCurrent(
+      {},
+      { ...todayTasks[42], title: 'Renamed', timeSpent: 60000 },
+      false,
+      0,
+      false,
+      0,
+    );
+    assert.equal(traySetTitleCalls.at(-1), 'Renamed');
+    assert.equal(traySetContextMenuCalls.length, rebuilds + 1);
+    const renamed = todayTasks.map((task) =>
+      task.id === 'T42' ? { ...task, title: 'Renamed' } : task,
+    );
+    ipcHandlers.get('TODAY_TASKS_UPDATED')({}, renamed);
+    assert.equal(menuTaskLabels(traySetContextMenuCalls.at(-1)).at(-1), 'Renamed');
+  });
+}
