@@ -1,9 +1,9 @@
-import { startBreakEndAlarm, stopBreakEndAlarm } from './break-end-alarm';
+import { startLoopingAlarm, stopLoopingAlarm } from './looping-alarm';
 import { closeAudioContext } from './audio-context';
 
 const SOUND = 'positive.mp3';
 
-describe('break-end-alarm', () => {
+describe('looping-alarm', () => {
   let originalAudioContext: typeof AudioContext;
   let originalFetch: typeof window.fetch;
   let mockContext: any;
@@ -58,13 +58,13 @@ describe('break-end-alarm', () => {
   });
 
   afterEach(() => {
-    stopBreakEndAlarm();
+    stopLoopingAlarm();
     (window as any).AudioContext = originalAudioContext;
     (window as any).fetch = originalFetch;
   });
 
   it('starts a looping source at the given volume', async () => {
-    await startBreakEndAlarm(SOUND, 50);
+    await startLoopingAlarm(SOUND, 50);
 
     expect(createdSources.length).toBe(1);
     const source = createdSources[0];
@@ -74,20 +74,20 @@ describe('break-end-alarm', () => {
   });
 
   it('stops and disconnects the active source on stop', async () => {
-    await startBreakEndAlarm(SOUND, 100);
+    await startLoopingAlarm(SOUND, 100);
     const source = createdSources[0];
 
-    stopBreakEndAlarm();
+    stopLoopingAlarm();
 
     expect(source.stop).toHaveBeenCalled();
     expect(source.disconnect).toHaveBeenCalled();
   });
 
   it('stops the previous source when restarted, so no loop can leak', async () => {
-    await startBreakEndAlarm(SOUND, 100);
+    await startLoopingAlarm(SOUND, 100);
     const first = createdSources[0];
 
-    await startBreakEndAlarm(SOUND, 100);
+    await startLoopingAlarm(SOUND, 100);
 
     expect(first.stop).toHaveBeenCalled();
     expect(createdSources.length).toBe(2);
@@ -97,7 +97,7 @@ describe('break-end-alarm', () => {
     const TEN_MINUTES_MS = 10 * 60 * 1000;
     jasmine.clock().install();
     try {
-      await startBreakEndAlarm(SOUND, 100);
+      await startLoopingAlarm(SOUND, 100);
       const source = createdSources[0];
       expect(source.stop).not.toHaveBeenCalled();
 
@@ -110,6 +110,6 @@ describe('break-end-alarm', () => {
   });
 
   it('does not throw when stop is called with no active alarm', () => {
-    expect(() => stopBreakEndAlarm()).not.toThrow();
+    expect(() => stopLoopingAlarm()).not.toThrow();
   });
 });
