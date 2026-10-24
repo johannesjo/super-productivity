@@ -149,6 +149,14 @@ describe('formatMonthDay', () => {
     });
   });
 
+  describe('Persian locale (fa), non-Gregorian calendar', () => {
+    it('should not pad single digits its short date leaves unpadded', () => {
+      // Jan 21, 2000 = 1 Bahman 1378; fa short date is "۱۳۷۸/۱۱/۱"
+      const result = formatMonthDay(new Date(2000, 0, 21), DateTimeLocales.fa);
+      expect(result).toBe('۱۱/۱');
+    });
+  });
+
   describe('Error handling', () => {
     it('should return empty string for invalid dates', () => {
       const result = formatMonthDay(new Date('invalid'), DateTimeLocales.en_us);

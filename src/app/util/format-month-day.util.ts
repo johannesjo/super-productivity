@@ -10,7 +10,8 @@ const monthDayFormatters = new Map<DateTimeLocale, Intl.DateTimeFormat>();
 /**
  * Month/day formatter that pads exactly where the locale's own short date does
  * ("05.01." for de, "1/5" for en-US). Intl's numeric month/day skeleton alone
- * drops the zeros some locales use (#11081). Cached: runs once per task row.
+ * drops the zeros some locales use (#11081). Cached per locale: formatting
+ * runs once per task row, the probe only once per locale.
  */
 const getMonthDayFormatter = (locale: DateTimeLocale): Intl.DateTimeFormat => {
   const cached = monthDayFormatters.get(locale);
@@ -19,10 +20,13 @@ const getMonthDayFormatter = (locale: DateTimeLocale): Intl.DateTimeFormat => {
   const shortDateParts = new Intl.DateTimeFormat([locale, DEFAULT_LOCALE], {
     dateStyle: 'short',
   }).formatToParts(PADDING_PROBE_DATE);
+  // Compare against unpadded output: in non-Gregorian calendars (fa) the probe
+  // date has two-digit parts anyway, which says nothing about padding
+  const numericParts = dateTimeFormatter(locale).formatToParts(PADDING_PROBE_DATE);
+  const lengthOf = (parts: Intl.DateTimeFormatPart[], type: 'day' | 'month'): number =>
+    parts.find((part) => part.type === type)?.value.length ?? 0;
   const widthOf = (type: 'day' | 'month'): '2-digit' | 'numeric' =>
-    shortDateParts.find((part) => part.type === type)?.value.length === 2
-      ? '2-digit'
-      : 'numeric';
+    lengthOf(shortDateParts, type) > lengthOf(numericParts, type) ? '2-digit' : 'numeric';
 
   const formatter = dateTimeFormatter(locale, {
     month: widthOf('month'),
