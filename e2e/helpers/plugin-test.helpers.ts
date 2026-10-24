@@ -145,6 +145,42 @@ export const waitForPluginManagementInit = async (
 };
 
 /**
+ * Settings → Plugins renders only the selected tab (Features, Integrations or
+ * Community), so a plugin's row exists only while its tab is open. Opens the
+ * tabs in turn until the row shows up or the timeout runs out; plugins load one
+ * by one, so a tab may need a second look.
+ */
+const openTabWithPlugin = async (
+  page: Page,
+  pluginName: string,
+  timeout: number,
+): Promise<void> => {
+  const name = page.locator('plugin-management .plugin-row-name', {
+    hasText: pluginName,
+  });
+  const tabs = page.locator('plugin-management [role="tab"]');
+  const deadline = Date.now() + timeout;
+  if ((await name.count()) > 0 || (await tabs.count()) === 0) {
+    return;
+  }
+  while (Date.now() < deadline) {
+    for (const tab of await tabs.all()) {
+      await tab.click();
+      const isShown = await name
+        .first()
+        .waitFor({ state: 'attached', timeout: 500 })
+        .then(
+          () => true,
+          () => false,
+        );
+      if (isShown) {
+        return;
+      }
+    }
+  }
+};
+
+/**
  * Enable a plugin with robust verification
  */
 export const enablePluginWithVerification = async (
@@ -153,6 +189,7 @@ export const enablePluginWithVerification = async (
   timeout: number = 8000, // Reduced from 10s to 8s // Reduced from 15s to 10s
 ): Promise<boolean> => {
   const startTime = Date.now();
+  await openTabWithPlugin(page, pluginName, timeout / 2);
 
   // First, verify the plugin card exists
   const pluginCardResult = await page
@@ -300,6 +337,7 @@ export const disablePluginWithVerification = async (
   timeout: number = 10000,
 ): Promise<boolean> => {
   const startTime = Date.now();
+  await openTabWithPlugin(page, pluginName, timeout / 2);
 
   // First, verify the plugin card exists and is enabled
   const pluginCardResult = await page
