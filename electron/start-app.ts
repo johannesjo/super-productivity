@@ -546,7 +546,10 @@ export const startApp = (): void => {
     initIndicator({
       app,
       showApp,
-      quitApp,
+      // Same path as the app menu's Quit: run the before-close work (sync,
+      // finish-day) first. Calling quitApp() directly set isQuiting, so the
+      // close handler skipped the pending before-close ids (#11049).
+      quitApp: () => closeWinAndQuit(quitApp),
       ICONS_FOLDER,
       forceDarkTray,
     });
