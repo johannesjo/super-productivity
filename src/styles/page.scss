@@ -85,8 +85,17 @@ html {
   // safe areas instead of painting Default-theme strips around custom themes.
   background: transparent;
 
-  button,
-  a {
+  // app-region is inherited, so the no-drag of .route-wrapper made every
+  // element of a page a region of its own, and Electron collects them all after
+  // each layout: about 100 ms per layout with 5,000 Today tasks, 7 ms without
+  // (measured 2026-10). The wrapper's own region covers the content it clips,
+  // so pages, buttons and links included, need none. `initial`, because `none`
+  // keeps the inherited value.
+  .route-wrapper > * {
+    -webkit-app-region: initial;
+  }
+
+  :is(button, a):not(.route-wrapper *) {
     -webkit-app-region: no-drag !important;
   }
 
