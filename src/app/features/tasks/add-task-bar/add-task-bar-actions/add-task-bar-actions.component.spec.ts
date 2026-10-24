@@ -167,6 +167,7 @@ describe('AddTaskBarActionsComponent', () => {
       list$: of([mockProject]),
       listSortedForUI: mockProjectsSignal,
       listInTreeOrderForUI: mockProjectsSignal,
+      listInTreeOrder: mockProjectsSignal,
       listSorted: mockProjectsSignal,
     });
 
