@@ -16,6 +16,7 @@ let createdFromPath = [];
 let traySetImageCalls = [];
 let traySetTitleCalls = [];
 let traySetToolTipCalls = [];
+let traySetContextMenuCalls = [];
 let ipcHandlers = new Map();
 let nextNativeImageIsEmpty = false;
 let templateImages = [];
@@ -64,7 +65,9 @@ const installMocks = () => {
           createdTrayArgs.push([image, guid]);
         }
 
-        setContextMenu() {}
+        setContextMenu(menu) {
+          traySetContextMenuCalls.push(menu);
+        }
 
         on(eventName, handler) {
           if (eventName === 'click') {
@@ -173,6 +176,7 @@ test.beforeEach(() => {
   traySetImageCalls = [];
   traySetTitleCalls = [];
   traySetToolTipCalls = [];
+  traySetContextMenuCalls = [];
   ipcHandlers = new Map();
   nextNativeImageIsEmpty = false;
   templateImages = [];
@@ -502,5 +506,76 @@ test('tray icon follows SET_PROGRESS_BAR while the focus overlay is shown', () =
   assert.match(
     traySetImageCalls.at(-1).iconPath,
     /\/icons\/indicator\/running-anim-l\/8\.png$/,
+  );
+});
+
+const initIndicatorOnLinux = () => {
+  const { initIndicator } = loadIndicatorModule();
+  initIndicator({
+    showApp: () => {},
+    quitApp: () => {},
+    ICONS_FOLDER: '/icons/',
+    forceDarkTray: false,
+    app: { on: () => {} },
+  });
+};
+
+const makeTodayTasks = (count) =>
+  Array.from({ length: count }, (_, i) => ({
+    id: `T${i}`,
+    title: `Task ${i}`,
+    timeEstimate: 0,
+    timeSpent: 0,
+  }));
+
+const menuTaskLabels = (menu) =>
+  menu.template.filter((item) => item.type === 'radio').map((item) => item.label);
+
+// The menu is rebuilt each minute while tracking and every item costs native
+// work, so a long Today list must not end up in it whole.
+test('tray menu lists the first Today tasks and keeps the running one', () => {
+  initIndicatorOnLinux();
+  const todayTasks = makeTodayTasks(50);
+
+  ipcHandlers.get('TODAY_TASKS_UPDATED')({}, todayTasks);
+  const listMenu = traySetContextMenuCalls.at(-1);
+  assert.deepEqual(
+    menuTaskLabels(listMenu),
+    todayTasks.slice(0, 20).map((t) => t.title),
+  );
+  assert.ok(listMenu.template.some((item) => item.label === '…' && !item.enabled));
+
+  ipcHandlers.get('CURRENT_TASK_UPDATED')({}, todayTasks[42], false, 0, false, 0);
+  const trackingMenu = traySetContextMenuCalls.at(-1);
+  const radios = trackingMenu.template.filter((item) => item.type === 'radio');
+  assert.equal(radios.length, 21);
+  assert.equal(radios.at(-1).label, 'Task 42');
+  assert.equal(radios.at(-1).checked, true);
+});
+
+test('tray menu is rebuilt when a listed title changes, not when the list is resent', () => {
+  initIndicatorOnLinux();
+  const todayTasks = makeTodayTasks(3);
+
+  ipcHandlers.get('TODAY_TASKS_UPDATED')({}, todayTasks);
+  ipcHandlers.get('CURRENT_TASK_UPDATED')({}, todayTasks[0], false, 0, false, 0);
+  const rebuilds = traySetContextMenuCalls.length;
+
+  ipcHandlers.get('TODAY_TASKS_UPDATED')({}, makeTodayTasks(3));
+  ipcHandlers.get('CURRENT_TASK_UPDATED')({}, todayTasks[0], false, 0, false, 0);
+  assert.equal(traySetContextMenuCalls.length, rebuilds);
+
+  const renamed = makeTodayTasks(3);
+  renamed[1].title = 'Renamed';
+  ipcHandlers.get('TODAY_TASKS_UPDATED')({}, renamed);
+  assert.equal(traySetContextMenuCalls.length, rebuilds + 1);
+  assert.deepEqual(menuTaskLabels(traySetContextMenuCalls.at(-1)), [
+    'Task 0',
+    'Renamed',
+    'Task 2',
+  ]);
+  assert.equal(
+    traySetContextMenuCalls.at(-1).template.some((item) => item.label === '…'),
+    false,
   );
 });
