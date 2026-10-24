@@ -29,7 +29,6 @@ import {
   processPendingProtocolUrls,
 } from './protocol-handler';
 import { getIsQuiting, setIsLocked } from './shared-state';
-import { clearStaleLevelDbLocks } from './clear-stale-idb-locks';
 import { evaluateGpuStartupGuard } from './gpu-startup-guard';
 import * as fs from 'fs';
 
@@ -51,7 +50,6 @@ let isShowDevTools: boolean = IS_DEV;
 let customUrl: string;
 let isDisableTray = false;
 let forceDarkTray = false;
-let wasUserDataDirSet = false;
 
 if (IS_DEV) {
   log('Starting in DEV Mode!!!');
@@ -134,7 +132,6 @@ export const startApp = (): void => {
         .replace(/[\/\\]+$/, ''); // Remove trailing slashes
       log('Using custom directory for user data', customUserDir);
       app.setPath('userData', customUserDir);
-      wasUserDataDirSet = true;
     }
 
     if (val && val.includes('--custom-url=')) {
@@ -147,26 +144,8 @@ export const startApp = (): void => {
     }
   });
 
-  // TODO remove at one point in the future and only leave the directory setting part
-  // Special handling for snaps, since default user folder will cause problems when updating
-  if (
-    !wasUserDataDirSet &&
-    process.platform === 'linux' &&
-    process.env.SNAP &&
-    process.env.SNAP_USER_COMMON
-  ) {
-    // COPY LEGACY SNAP DATA TO COMMON DIRECTORY
-    // -----------------------------------------
-    const appName = app.getName();
-    const commonDir = process.env.SNAP_USER_COMMON;
-    const newPath = join(commonDir, '.config', appName);
-
-    // SET COMMON DIRECTORY AS USER DATA DIRECTORY
-    // -------------------------------------------
-    // set userDa dir to common data to avoid the data being accessed by the update process
-    app.setPath('userData', newPath);
-    app.setAppLogsPath();
-  }
+  // On snap, main.ts already moved userData to the common dir, before the
+  // single-instance lock (#11049).
 
   if (process.platform === 'linux') {
     // Pin the .desktop filename rather than letting Electron infer it. Since
@@ -546,7 +525,10 @@ export const startApp = (): void => {
     initIndicator({
       app,
       showApp,
-      quitApp,
+      // Same path as the app menu's Quit: run the before-close work (sync,
+      // finish-day) first. Calling quitApp() directly set isQuiting, so the
+      // close handler skipped the pending before-close ids (#11049).
+      quitApp: () => closeWinAndQuit(quitApp),
       ICONS_FOLDER,
       forceDarkTray,
     });
@@ -554,10 +536,6 @@ export const startApp = (): void => {
 
   // eslint-disable-next-line prefer-arrow/prefer-arrow-functions
   async function createMainWin(): Promise<void> {
-    // Remove stale LevelDB LOCK files before the renderer opens IndexedDB.
-    // Orphaned locks from unclean session shutdowns block the backing store open.
-    await clearStaleLevelDbLocks(app.getPath('userData'));
-
     mainWin = await createWindow({
       app,
       IS_DEV,

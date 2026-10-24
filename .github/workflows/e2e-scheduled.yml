@@ -157,7 +157,7 @@ jobs:
     # for schedule/push, so gate on the event first.
     if: ${{ github.event_name != 'workflow_dispatch' || inputs.run_webdav }}
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     env:
       UNSPLASH_KEY: ${{ secrets.UNSPLASH_KEY }}
       UNSPLASH_CLIENT_ID: ${{ secrets.UNSPLASH_CLIENT_ID }}
@@ -320,16 +320,12 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
         with:
           persist-credentials: false
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v6
-        with:
-          node-version: 22
-          cache: 'npm'
       - name: Reconfigure git to use HTTP authentication
         run: >
           git config --global url."https://github.com/".insteadOf
           ssh://git@github.com/
-      - name: Install npm Packages
-        run: npm i
+      - name: Setup Node Dependencies
+        uses: ./.github/actions/setup-deps
       - name: Run SuperSync Server Tests
         run: cd packages/super-sync-server && npm test
 

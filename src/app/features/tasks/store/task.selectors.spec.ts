@@ -260,6 +260,7 @@ describe('Task Selectors', () => {
     fromSelectors.selectAllTasksInActiveProjects.release();
     fromSelectors.selectOverdueTasks.release();
     fromSelectors.selectAllTasksWithDueTimeSorted.release();
+    fromSelectors.selectAllDoneIds.release();
     selectTodayStr.release();
     selectStartOfNextDayDiffMs.release();
     selectProjectFeatureState.release();
@@ -1475,6 +1476,11 @@ describe('Task Selectors', () => {
           r1,
         );
       });
+
+      it('selectAllDoneIds is referentially stable', () => {
+        const r1 = fromSelectors.selectAllDoneIds(mockState);
+        expect(fromSelectors.selectAllDoneIds(bumpTimeSpent('task3'))).toBe(r1);
+      });
     });
 
     describe('selectAllTasksWithSubTasks (per-id live re-map)', () => {
@@ -1511,6 +1517,16 @@ describe('Task Selectors', () => {
         expect(r2.map((t) => t.id)).toContain('task4');
       });
 
+      it('selectAllDoneIds recomputes when a task is marked done or undone', () => {
+        const r1 = fromSelectors.selectAllDoneIds(mockState);
+        const r2 = fromSelectors.selectAllDoneIds(patchTask('task3', { isDone: true }));
+        expect(r2).not.toBe(r1);
+        expect(r2).toContain('task3');
+        expect(
+          fromSelectors.selectAllDoneIds(patchTask('task2', { isDone: false })),
+        ).not.toContain('task2');
+      });
+
       it('a member task with a non-scheduling change is served with its LIVE ref', () => {
         // task6 is overdue. Change its title only (not a scheduling field): the
         // decision (ids) is unchanged, but the public selector re-maps live so the
@@ -1533,6 +1549,10 @@ describe('Task Selectors', () => {
       it('selectOverdueTasks returns exactly the overdue members', () => {
         const result = fromSelectors.selectOverdueTasks(mockState);
         expect(result.map((t) => t.id)).toEqual(['task6']);
+      });
+
+      it('selectAllDoneIds returns exactly the done tasks', () => {
+        expect(fromSelectors.selectAllDoneIds(mockState)).toEqual(['task2', 'subtask2']);
       });
     });
   });

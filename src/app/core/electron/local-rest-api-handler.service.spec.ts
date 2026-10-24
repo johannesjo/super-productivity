@@ -37,12 +37,14 @@ import {
   focusModeReducer,
   initialState as initialFocusModeState,
 } from '../../features/focus-mode/store/focus-mode.reducer';
+import { ArchiveOperationHandler } from '../../op-log/apply/archive-operation-handler.service';
 
 describe('LocalRestApiHandlerService', () => {
   let isDataLoaded$: BehaviorSubject<boolean>;
   let service: LocalRestApiHandlerService;
   let taskServiceMock: jasmine.SpyObj<TaskService>;
   let taskArchiveServiceMock: jasmine.SpyObj<TaskArchiveService>;
+  let archiveOperationHandlerMock: jasmine.SpyObj<ArchiveOperationHandler>;
   let projectServiceMock: jasmine.SpyObj<ProjectService>;
   let tagServiceMock: jasmine.SpyObj<TagService>;
   let dateServiceMock: jasmine.SpyObj<DateService>;
@@ -198,6 +200,14 @@ describe('LocalRestApiHandlerService', () => {
     );
     (taskArchiveServiceMock as any).hasTask.and.returnValue(Promise.resolve(false));
 
+    archiveOperationHandlerMock = jasmine.createSpyObj<ArchiveOperationHandler>(
+      'ArchiveOperationHandler',
+      ['whenLocalOperationsSettled'],
+    );
+    archiveOperationHandlerMock.whenLocalOperationsSettled.and.returnValue(
+      Promise.resolve(),
+    );
+
     projectServiceMock = jasmine.createSpyObj(
       'ProjectService',
       ['add', 'update', 'remove', 'archive'],
@@ -228,7 +238,7 @@ describe('LocalRestApiHandlerService', () => {
 
     featureBridgeMock = jasmine.createSpyObj<LocalRestApiFeatureBridge>(
       'LocalRestApiFeatureBridge',
-      ['issueLink', 'addLiteralSubTask', 'addTimeSpentOnDay'],
+      ['issueLink', 'addLiteralSubTask', 'addTimeSpentOnDay', 'moveTaskToProject'],
     );
     featureBridgeMock.issueLink.and.returnValue(Promise.resolve(''));
 
@@ -241,6 +251,7 @@ describe('LocalRestApiHandlerService', () => {
         LocalRestApiHandlerService,
         { provide: TaskService, useValue: taskServiceMock },
         { provide: TaskArchiveService, useValue: taskArchiveServiceMock },
+        { provide: ArchiveOperationHandler, useValue: archiveOperationHandlerMock },
         { provide: ProjectService, useValue: projectServiceMock },
         { provide: TagService, useValue: tagServiceMock },
         { provide: DateService, useValue: dateServiceMock },
@@ -2195,7 +2206,7 @@ describe('LocalRestApiHandlerService', () => {
         });
       });
 
-      it('should update projectId together with other fields in one dispatch', async () => {
+      it('should move the task and then apply the other fields', async () => {
         let mockTask = createMockTask('task-1', { projectId: 'project-1' });
         Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
           get: () => (_id: string) => of(mockTask),
@@ -2214,6 +2225,13 @@ describe('LocalRestApiHandlerService', () => {
         );
 
         expect(response.body.ok).toBe(true);
+        expect(featureBridgeMock.moveTaskToProject).toHaveBeenCalledOnceWith(
+          'task-1',
+          'project-2',
+        );
+        expect(featureBridgeMock.moveTaskToProject).toHaveBeenCalledBefore(
+          taskServiceMock.update,
+        );
         expect(taskServiceMock.update).toHaveBeenCalledOnceWith('task-1', {
           projectId: 'project-2',
           title: 'Moved task',
@@ -2226,6 +2244,37 @@ describe('LocalRestApiHandlerService', () => {
             projectId: 'project-2',
             title: 'Moved task',
           }),
+        );
+      });
+
+      it('should only move the task when projectId is the only change', async () => {
+        let mockTask = createMockTask('task-1', { projectId: 'project-1' });
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(mockTask),
+        });
+        featureBridgeMock.moveTaskToProject.and.callFake(async (_id, projectId) => {
+          mockTask = { ...mockTask, projectId };
+        });
+        activeProjects = [{ id: 'project-2' } as Project];
+
+        const response = await sendRequestAndWait(
+          createRequest('PATCH', '/tasks/task-1', {
+            body: { projectId: 'project-2' },
+          }),
+        );
+
+        expect(response.body.ok).toBe(true);
+        expect(featureBridgeMock.moveTaskToProject).toHaveBeenCalledOnceWith(
+          'task-1',
+          'project-2',
+        );
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+        expect(dispatchSpy).not.toHaveBeenCalled();
+        if (!response.body.ok) {
+          throw new Error('Expected a success response');
+        }
+        expect(response.body.data).toEqual(
+          jasmine.objectContaining({ projectId: 'project-2' }),
         );
       });
 
@@ -2251,6 +2300,7 @@ describe('LocalRestApiHandlerService', () => {
         }
         expect(response.body.error.code).toBe('UNSUPPORTED_FIELD');
         expect(taskServiceMock.update).not.toHaveBeenCalled();
+        expect(featureBridgeMock.moveTaskToProject).not.toHaveBeenCalled();
       });
 
       it('should allow an unchanged inherited projectId on subtasks', async () => {
@@ -2275,6 +2325,7 @@ describe('LocalRestApiHandlerService', () => {
         );
 
         expect(response.body.ok).toBe(true);
+        expect(featureBridgeMock.moveTaskToProject).not.toHaveBeenCalled();
         expect(taskServiceMock.update).toHaveBeenCalledOnceWith('subtask-1', {
           projectId: 'project-1',
           title: 'Round-tripped subtask',
@@ -2299,6 +2350,7 @@ describe('LocalRestApiHandlerService', () => {
         );
 
         expect(response.body.ok).toBe(true);
+        expect(featureBridgeMock.moveTaskToProject).not.toHaveBeenCalled();
         expect(taskServiceMock.update).toHaveBeenCalledOnceWith('task-1', {
           projectId: 'archived-project',
           title: 'Round-tripped task',
@@ -2323,6 +2375,7 @@ describe('LocalRestApiHandlerService', () => {
         }
         expect(response.body.error.code).toBe('PROJECT_NOT_FOUND');
         expect(taskServiceMock.update).not.toHaveBeenCalled();
+        expect(featureBridgeMock.moveTaskToProject).not.toHaveBeenCalled();
       });
 
       it('should reject an archived destination project', async () => {
@@ -2794,9 +2847,26 @@ describe('LocalRestApiHandlerService', () => {
         expect(taskServiceMock.update).not.toHaveBeenCalled();
       });
 
-      it('returns 404 for missing, archived and prototype-like task ids', async () => {
+      it('returns 404 for unknown task ids', async () => {
         provideTask(undefined);
-        for (const id of ['missing', 'archived', '__proto__', 'constructor']) {
+        const response = await putTime({ date: DATE, duration: HOUR_MS }, 'missing');
+        expect(response.status).toBe(404);
+        expect(response.body).toEqual(
+          jasmine.objectContaining({
+            error: jasmine.objectContaining({ code: 'TASK_NOT_FOUND' }),
+          }),
+        );
+        expect(taskServiceMock.update).not.toHaveBeenCalled();
+      });
+
+      it('returns 404 when a prototype-like id resolves to an inherited value', async () => {
+        // The store selector reads `entities[id]`, so these ids return
+        // Object.prototype and Object instead of undefined.
+        const entities: Record<string, Task> = {};
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (id: string) => of(entities[id]),
+        });
+        for (const id of ['__proto__', 'constructor']) {
           const response = await putTime({ date: DATE, duration: HOUR_MS }, id);
           expect(response.status).toBe(404);
           expect(response.body).toEqual(
@@ -2915,6 +2985,34 @@ describe('LocalRestApiHandlerService', () => {
 
         expect(response.body.ok).toBe(true);
         expect(taskServiceMock.restoreTask).toHaveBeenCalled();
+      });
+
+      it('should not respond before the archive removal has settled (#9952)', async () => {
+        const archivedTask = createMockTask('archivedTask1', { isDone: true });
+        (taskArchiveServiceMock as any).hasTask.and.returnValue(Promise.resolve(true));
+        (taskArchiveServiceMock as any).getById.and.returnValue(
+          Promise.resolve(archivedTask),
+        );
+        Object.defineProperty(taskServiceMock, 'getByIdOnce$', {
+          get: () => (_id: string) => of(archivedTask),
+        });
+        let settleArchive!: () => void;
+        archiveOperationHandlerMock.whenLocalOperationsSettled.and.returnValue(
+          new Promise<void>((resolve) => (settleArchive = resolve)),
+        );
+        let response: LocalRestApiResponsePayload | undefined;
+
+        const responsePromise = sendRequestAndWait(
+          createRequest('POST', '/tasks/archivedTask1/restore'),
+        ).then((r) => (response = r));
+        await new Promise((resolve) => setTimeout(resolve));
+
+        expect(taskServiceMock.restoreTask).toHaveBeenCalled();
+        expect(response).toBeUndefined();
+
+        settleArchive();
+        await responsePromise;
+        expect(response?.status).toBe(200);
       });
 
       it('should return 404 if task not in archive', async () => {

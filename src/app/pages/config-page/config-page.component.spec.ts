@@ -280,6 +280,25 @@ describe('ConfigPageComponent', () => {
     });
   });
 
+  describe('tab query parameter', () => {
+    const openWithTab = (tab: string): void => {
+      TestBed.inject(ActivatedRoute).queryParams = of({ tab });
+      component.ngOnInit();
+    };
+
+    it('opens the last tab, Sync & Backup', () => {
+      openWithTab('5');
+
+      expect(component.selectedTabIndex).toBe(5);
+    });
+
+    it('ignores an index past the last tab', () => {
+      openWithTab('6');
+
+      expect(component.selectedTabIndex).toBe(0);
+    });
+  });
+
   describe('App Features open by default', () => {
     const APP_FEATURES = { title: '', key: 'appFeatures' } as ConfigFormSection<unknown>;
     const OTHER = { title: '', key: 'localization' } as ConfigFormSection<unknown>;

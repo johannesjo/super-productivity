@@ -27,7 +27,7 @@ The server uses an **append-on-write retained operation log** backed by **Postgr
 | ------------------------------ | -------------------------------------------------------------------------------------------------- |
 | **Scoped server authority**    | Server owns per-user order and accepted upload results, not app-state semantics                    |
 | **Two-part conflict handling** | Server detects upload conflicts; clients resolve rejections and download-side concurrency          |
-| **E2E encryption support**     | Optional payload encryption leaves routing and causal metadata plaintext                           |
+| **E2E encryption support**     | Client-enforced payload encryption; routing and causal metadata stay plaintext                     |
 | **Idempotent uploads**         | Durable operation-ID uniqueness is the backstop; request IDs add a five-minute process-local cache |
 
 ## Quick Start

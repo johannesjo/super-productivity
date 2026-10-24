@@ -1651,6 +1651,29 @@ describe('SupersededOperationResolverService', () => {
         timestamp: 900,
         schemaVersion: 1,
       };
+      // #10969: a collapse or rename writes no section task list.
+      const sectionUpdateOp = (
+        id: string,
+        sectionId: string,
+        changes: Record<string, unknown>,
+        clientId: string,
+        vectorClock: VectorClock,
+        timestamp: number,
+      ): Operation => ({
+        id,
+        actionType: ActionType.SECTION_UPDATE,
+        opType: OpType.Update,
+        entityType: 'SECTION',
+        entityId: sectionId,
+        payload: {
+          actionPayload: { section: { id: sectionId, changes } },
+          entityChanges: [],
+        },
+        clientId,
+        vectorClock,
+        timestamp,
+        schemaVersion: 1,
+      });
       const asPendingEntries = (...ops: Operation[]): OperationLogEntry[] =>
         ops.map((op, index) => ({
           seq: index + 1,
@@ -1746,6 +1769,66 @@ describe('SupersededOperationResolverService', () => {
             timestamp: 4000,
           },
           remoteOp: remoteOrderOp,
+        },
+        {
+          description: 'cross-section move rejected behind a collapse of its source',
+          op: {
+            ...remoteMoveOp,
+            id: 'op-section-move-behind-source-collapse',
+            clientId: 'original-client',
+            vectorClock: { original: 3 },
+            timestamp: 5000,
+          },
+          remoteOp: sectionUpdateOp(
+            'remote-source-collapse',
+            'section-left',
+            { isExpanded: false },
+            'remote-client',
+            { remote: 4 },
+            900,
+          ),
+        },
+        {
+          description: 'cross-section move rejected behind a rename of its destination',
+          op: {
+            ...remoteMoveOp,
+            id: 'op-section-move-behind-destination-rename',
+            clientId: 'original-client',
+            vectorClock: { original: 3 },
+            timestamp: 5000,
+          },
+          remoteOp: sectionUpdateOp(
+            'remote-destination-rename',
+            'section-right',
+            { title: 'Renamed' },
+            'remote-client',
+            { remote: 4 },
+            900,
+          ),
+        },
+        {
+          description: 'source section rename rejected behind a cross-section move',
+          op: sectionUpdateOp(
+            'op-source-rename-behind-move',
+            'section-left',
+            { title: 'Left' },
+            'original-client',
+            { original: 3 },
+            6000,
+          ),
+          remoteOp: remoteMoveOp,
+        },
+        {
+          description: 'destination section rename rejected behind a cross-section move',
+          op: sectionUpdateOp(
+            'op-destination-rename-behind-move',
+            'section-right',
+            { title: 'Right' },
+            'original-client',
+            { original: 3 },
+            6000,
+          ),
+          remoteOp: remoteMoveOp,
         },
       ];
       const unrelatedPendingTaskOp = createMockOperation(
