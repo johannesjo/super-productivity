@@ -128,7 +128,6 @@ describe('FinishDayBeforeCloseEffects._handleCloseDecision()', () => {
     });
   });
 
-  // Finish Day archives won't-do tasks as well.
   it('a repeated quit while the prompt is open shows no second prompt', async () => {
     let answer: (choice: 'quit') => void = () => undefined;
     showDialogSpy.and.returnValue(new Promise((resolve) => (answer = resolve)));
@@ -147,6 +146,7 @@ describe('FinishDayBeforeCloseEffects._handleCloseDecision()', () => {
     );
   });
 
+  // Finish Day archives won't-do tasks as well.
   it("counts tasks finished as won't do", async () => {
     showDialogSpy.and.returnValue(Promise.resolve('cancel'));
 
